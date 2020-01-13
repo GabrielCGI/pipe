@@ -1,3 +1,3 @@
-# Bloom Pipepline
+# Bloom Pipeline
 
 Tools and scripts

@@ -1,0 +1,1 @@
+copy Maya.env dans C:\Users\SPRINTER-05\Documents\maya\2019
