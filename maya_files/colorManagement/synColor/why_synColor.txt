@@ -1,4 +1,0 @@
-Dans les préférences de maya il y a Transform Directory / Lut Path qui point vers:
-"C:/Users/SPRINTER-02/Documents/maya/synColor/Shared/"
-
-en chargant les préférences avec le .xlm, se chemin se fait overider. Il faut donc un emplacement résaux pour que maya puisse continuer d'y avoir accés. 

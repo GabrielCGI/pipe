@@ -1,0 +1,626 @@
+global proc shelf_Bloom () {
+    global string $gBuffStr;
+    global string $gBuffStr0;
+    global string $gBuffStr1;
+
+
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Auto-export anim as Alembic" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import abcPipelineImport as ppIm\nreload(ppIm)\nppIm.importAnim()" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "abcPipelineExport.png" 
+        -image1 "abcPipelineExport.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import abcPipelineExport as ppEx\nreload(ppEx)\nexportAnimGuiCls = ppEx.exportAnimGuiCls()\nexportAnimGuiCls.show()\nlist =  ppEx.listCharRef()\nexportAnimGuiCls.updateCharList(list)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Auto-import anim Alembic" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import abcPipelineExport as ppEx\nreload(ppEx)\nexportAnimGuiCls =..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "abcPipelineImport.png" 
+        -image1 "abcPipelineImport.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import abcPipelineImport as ppIm\nreload(ppIm)\nppIm.importAnim()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Don't use - Pipeline tools" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import abcPipelineTools as ppTools\nreload(ppTools)\nppTools.creat..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "B:/ressources/sharedMaya/icons/abcPipelineTool2.png" 
+        -image1 "B:/ressources/sharedMaya/icons/abcPipelineTool2.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import abcPipelineTools as ppTools\nreload(ppTools)\nppTools.createNewAsset()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Add arnold AOV " 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import aov as aov\naov.createGUI()" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "B:/ressources/sharedMaya/icons/aov.png" 
+        -image1 "B:/ressources/sharedMaya/icons/aov.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import aov as aov\nreload(aov)\naov.createGUI()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Camera Shake Tool" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import rsCameraUI\nreload(rsCameraUI)\nrsCameraUI.rsCameraUIBuild(..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "camShake" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "Camera.png" 
+        -image1 "Camera.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import rsCameraUI\nreload(rsCameraUI)\nrsCameraUI.rsCameraUIBuild()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Select a camera before use ! The script create a locator to set the distance camera focus." 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "# Select the camera before using the script !!!\n# This script al..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "focus.png" 
+        -image1 "focus.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import focusDistance as fD\nreload(fD)\nfD.focus()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Send a scene into the farm" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import to_Backburner" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "customBackburner.png" 
+        -image1 "customBackburner.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "##===========================================================================##\n##===========================================================================##\n## To BackBurner. 1.2                                                        ##\n## By Mariano Antico                                                         ##\n## Barraca Post                                                              ##\n## www.barraca.com.ar                                                        ##\n## www.marianoantico.blogspot.com                                            ##\n## Last Updated: January 20, 2012.                                           ##\n## All Rights Reserved .                                                     ##\n##                                                                           ##\n## Description:                                                              ##\n## Send to Backburner                                                        ##\n##                                                                           ##\n## Tutorials:                                                                ##\n## www.marianoantico.blogspot.com                                            ##\n## http://vimeo.com/34227651                                                 ##\n##                                                                           ##\n## Run:                                                                      ##\n## backBurner()                                                              ##\n##                                                                           ##\n##===========================================================================##\n##===========================================================================##\n\n#import libraries\n\nimport maya.cmds as mc\nimport os\nimport webbrowser\nimport maya.mel as mm\nimport tempfile\nimport re\n\n##---------------------------------------------------------------------------##\n#Interface save window\ndef setRenderFolder():\n\n    scenePath = mc.file(q=True, sceneName=True)\n    sceneDir = os.path.abspath(os.path.join(scenePath, os.pardir))\n    parentDir = os.path.abspath(os.path.join(sceneDir, os.pardir))\n    renderOutDir = os.path.join(parentDir,\"render_out\")\n    if not os.path.exists(renderOutDir):\n        os.makedirs(renderOutDir)\n\n    chosenFolder = mc.fileDialog2(dialogStyle=2, fileMode=2, dir=renderOutDir)\n    mc.textField('renderFolder', edit=1, text=chosenFolder[0])\n\ndef backBurner():\n\n    if mc.window(\"BburnWin\", query=True, exists= True):\n        mc.deleteUI(\"BburnWin\")\n\n    saveWindow = mc.confirmDialog( title='Save Scene', message='Before creating a Backburner job would you like to save current scene file?', button=['Yes', 'Ignore', 'No'], defaultButton='Yes', cancelButton='No', dismissString='Ignore' )\n    if (saveWindow == 'Yes'):\n        saveName = mc.file(query=True, sceneName=True)\n        if(saveName == ''):\n            mc.file( rename='untitled.mb' )\n            mc.file( save=True)\n        mc.file( save=True)\n        bburnerWindow()\n    elif (saveWindow == 'Ignore'):\n        bburnerWindow()\n    elif (saveWindow == 'No'):\n        print ('Cancelled by user')\n\n##---------------------------------------------------------------------------##\n#Interface backburner\n\ndef bburnerWindow():\n\n    #Interface\n\n    if mc.window(\"BburnWin\", query=True, exists= True):\n        mc.deleteUI(\"BburnWin\")\n\n    #create window\n    pikoWindow = mc.window( 'BburnWin', title=\"Send to BackBurner 1.2                           by Mariano Antico\", sizeable = False)\n\n    ##---------------------------------------------------------------------------##\n    #menu bar\n    menuBB = mc.menuBarLayout()\n    m1 = mc.menu(label=\"File\", enable=True)\n    m1Item = mc.menuItem( label=\"Reset values\", enable=True, command= 'defaultValuesBb()')\n    m2 = mc.menu(label=\"Window\", enable=True)\n    m2Item1 = mc.menuItem( label=\"Render View\", enable=True, command = \"renderViewWindow()\")\n    m2Item2 = mc.menuItem( label=\"Render Settings\", enable=True, command = \"renderSettingsWindow()\")\n    m3 = mc.menu(label=\"Help\", enable=True)\n    m3Item = mc.menuItem( label=\"About\", enable=True, command = \"myBlog()\")\n\n    ##---------------------------------------------------------------------------##\n    #frame job settings\n    frameJob = mc.frameLayout( label='JOB SETTINGS:', borderStyle='out', collapsable=True, marginHeight=2)\n\n    mc.rowColumnLayout( numberOfColumns = 3, columnWidth=[(1, 90), (2, 280), (3, 10)])\n\n    #Job Name\n    mc.text(font=\"plainLabelFont\",label=\"Job Name\", align='right')\n    jobName = mc.textField('jobNameTF',font=\"plainLabelFont\", text= jobNameDef())\n    mc.separator(style='none')\n\n    #Description\n    mc.text(font=\"plainLabelFont\",label=\"Description\", align='right')\n    description = mc.textField('descriptionTF', font=\"plainLabelFont\", text= \"\")\n    mc.separator(style='none')\n\n    mc.setParent('..')\n\n    mc.rowColumnLayout( numberOfColumns = 3, columnWidth=[(1, 90), (2, 280), (3, 20)])\n    #Render Out\n    mc.text(font=\"plainLabelFont\",label=\"Render folder\", align='right')\n    renderFolder = mc.textField('renderFolder', font=\"plainLabelFont\", text= \"\")\n    mc.button (label=\"...\", command='setRenderFolder()')\n    mc.separator(style='none')\n\n\n    mc.setParent('..')\n    mc.rowColumnLayout( numberOfColumns = 2, columnWidth=[(1, 90), (2, 200)], columnSpacing = (2, 5))\n\n    #Range\n    mc.text(font=\"plainLabelFont\",label=\"Range\", align='right')\n    mc.radioButtonGrp('rangeRB', numberOfRadioButtons=2, labelArray2=['Frame Range', 'Frames'], select=1, changeCommand='switchFrames()')\n\n    mc.setParent('..')\n    mc.rowColumnLayout( numberOfColumns = 4, columnWidth=[(1, 90), (2, 90), (3, 110)], columnSpacing = (3, 5))\n\n    #Start Frame\n    mc.text('startFrameTX', font=\"plainLabelFont\",label=\"Start Frame\", align='right')\n    startFrame = mc.intField('startFrameIF', value=0)\n\n    # timeline Range Btn\n    timelineBtn = mc.button('timelineBTN', label = 'Timeline Range', command='timelineRange()')\n    mc.separator(style='none')\n\n    #End Frame\n    mc.text('endFrameTX', font=\"plainLabelFont\",label=\"End Frame\", align='right')\n    endFrame = mc.intField('endFrameIF', value=100)\n\n    # Render Range Btn\n    renderBtn = mc.button('renderBTN', label = 'Render Range', command='renderRange()')\n    mc.separator(style='none')\n\n    mc.setParent('..')\n    mc.rowColumnLayout( numberOfColumns = 3, columnWidth=[(1, 90), (2, 205)])\n\n    # Frames\n    mc.text('framesTX', font=\"plainLabelFont\", enable=False, label=\"Frames\", align='right')\n    frames = mc.textField('framesTF', enable=False, font=\"plainLabelFont\", text= \"\")\n    mc.text('exampleTX', font=\"plainLabelFont\", enable=False, label=\" (e.g. 1,3,5-12)\", align='left')\n\n    mc.setParent('..')\n\n    mc.rowColumnLayout( numberOfColumns = 3, columnWidth=[(1, 90), (2, 90), (3, 200)], columnSpacing = (3, 5))\n\n    #Priority\n    mc.text(font=\"plainLabelFont\",label=\"Priority\", align='right')\n    priority = mc.intField('priorityIF', value=50)\n\n    #Critical\n    mc.checkBox('criticalCB', label='Critical', value=False )\n\n    #Task Size\n    mc.text('taskSizeTX', font=\"plainLabelFont\",label=\"Task Size\", align='right')\n    taskSize = mc.intField('taskSizeIF', value=1)\n\n    #Skip Existing Files\n    mc.checkBox('skipExistingFilesCB', label='Skip Existing Files', value=False, changeCommand='skipBtn()')\n\n    #Frame Padding\n    mc.text(font=\"plainLabelFont\",label=\"Frame Padding\", align='right')\n    framePadding = mc.intField('framePaddingIF', value=4)\n    mc.separator(style='none')\n\n    mc.setParent('..')\n\n    mc.rowColumnLayout( numberOfColumns = 4, columnWidth=[(1, 90), (2, 90), (3, 85)])\n\n    #Renderer\n    mc.text(font=\"plainLabelFont\",label=\"Renderer\", align='right')\n    mc.optionMenu('rendererOM' )\n    mc.menuItem( label='Scene Renderer' )\n    mc.menuItem( label='Mental Ray      ' )\n    mc.menuItem( label='Maya Software   ' )\n    mc.menuItem( label='Maya Hardware      ' )\n    mc.menuItem( label='Vector      ' )\n\n    #Verbosity\n    mc.text(font=\"plainLabelFont\",label=\" Verbosity \", align='right')\n    mc.optionMenu('verbosityOM')\n    mc.menuItem( label='0 - No Messages')\n    mc.menuItem( label='1 - Fatal' )\n    mc.menuItem( label='2 - Error' )\n    mc.menuItem( label='3 - Warning' )\n    mc.menuItem( label='4 - Info' )\n    mc.menuItem( label='5 - Progress' )\n    mc.menuItem( label='6 - Detailed' )\n    mc.optionMenu('verbosityOM', edit=True, select=6)\n\n    mc.setParent('..')\n    mc.rowColumnLayout( numberOfColumns = 3, columnWidth=[(1, 90), (2, 280), (3, 10)])\n\n    #Additional Options\n    mc.text(font=\"plainLabelFont\",label=\"Additional Options\", align='right')\n    mc.textField('additionalOptionsTF', font=\"plainLabelFont\", text= \"\")\n    mc.separator(style='none')\n\n    mc.setParent('..')\n    mc.rowColumnLayout( numberOfColumns = 2, columnWidth=[(1, 90), (2, 280)], columnSpacing = (2, 5))\n\n    #Render Mode\n    mc.text(font=\"plainLabelFont\",label=\"Render Mode\", align='right')\n    mc.radioButtonGrp('renderModeRB', numberOfRadioButtons=3, labelArray3=['Renderable Layers', 'Each Render Layers', 'Current'], select=2, changeCommand = 'switchRenderMode()')\n\n    mc.setParent('..')\n    mc.setParent('..')\n\n    ##---------------------------------------------------------------------------##\n    ##---------------------------------------------------------------------------##\n    ##---------------------------------------------------------------------------##\n\n    #frame backburner settings\n    frameBburn = mc.frameLayout( label='BACKBURNER SETTINGS:', borderStyle='out', collapsable=True, marginHeight=2)\n    mc.rowColumnLayout( numberOfColumns = 3, columnWidth=[(1, 90), (2, 280), (3, 10)])\n\n    #Manager Name\n    mc.text(font=\"plainLabelFont\",label=\"Manager Name\", align='right')\n    managerName = mc.textField('managerNameTF', font=\"plainLabelFont\", text= \"192.168.0.39\")\n    mc.separator(style='none')\n\n    #Server List\n    mc.text('serverListTX', font=\"plainLabelFont\",label=\"Server List\", align='right')\n    serverList = mc.textField('serverListTF', font=\"plainLabelFont\", text= \"\", changeCommand='switchServer()')\n    mc.separator(style='none')\n\n    #Server Group\n    mc.text('serverGroupTX', font=\"plainLabelFont\",label=\"Server Group\", align='right')\n    serverGroup = mc.textField('serverGroupTF', font=\"plainLabelFont\", text= \"\", changeCommand='switchServer()')\n    mc.separator(style='none')\n\n    mc.setParent('..')\n\n    mc.rowColumnLayout( numberOfColumns = 3, columnWidth=[(1, 90), (2, 60)])\n\n    #Server Count\n    mc.text(font=\"plainLabelFont\",label=\"Server Count\", align='right')\n    serverCount = mc.intField('serverCountIF', value=0)\n    mc.separator(style='none')\n\n    #Server Port\n    mc.text(font=\"plainLabelFont\",label=\"Port\", align='right')\n    portBb = mc.intField('portIF', value=3234)\n    mc.separator(style='none')\n\n    # timeout\n    mc.text(font=\"plainLabelFont\",label=\"Timeout\", align='right')\n    timeoutTF = mc.intField('timeoutIF', value=600)\n    mc.separator(style='none')\n\n    mc.setParent('..')\n\n    mc.rowColumnLayout( numberOfColumns = 3, columnWidth=[(1, 90), (2, 60)],columnSpacing = (2, 5))\n\n    #Manually Start\n    mc.text(font=\"plainLabelFont\",label=\"Manually Start Job\", align='right')\n    mc.checkBox('manualStartCB', label='' )\n    mc.separator(style='none')\n\n    mc.setParent('..')\n\n    mc.rowColumnLayout( numberOfColumns = 3, columnWidth=[(1, 90), (2, 270), (3, 25)])\n\n    # Render Path\n    mc.text(font=\"plainLabelFont\",label=\"Render Path\", align='right')\n    renderPath = mc.textField('renderPathTF', font=\"plainLabelFont\", text= \"C:/Program Files/Autodesk/Maya2019/bin/Render\")\n    renderPathBtn = mc.button( label = '...', command= 'renderPathDialog()')\n\n    # Backburner Path\n    mc.text(font=\"plainLabelFont\",label=\"Backburner Path\", align='right')\n    bburnerPath = mc.textField('bburnerPathTF', font=\"plainLabelFont\", text= \"C:/Program Files (x86)/Autodesk/Backburner/cmdjob.exe\")\n    bburnerPathBtn = mc.button( label = '...', command= 'backburnerPathDialog()')\n\n    mc.setParent('..')\n    mc.setParent('..')\n\n    ##---------------------------------------------------------------------------##\n    ##---------------------------------------------------------------------------##\n    ##---------------------------------------------------------------------------##\n\n    #frame backburner settings\n    frameHelp = mc.frameLayout( label='HELP:', borderStyle='out', collapsable=True, collapse=True, marginHeight=2)\n\n    mc.rowColumnLayout( numberOfColumns = 1)\n\n    mc.separator(style='none', height=2)\n    mc.text(font=\"boldLabelFont\",label=\"Command Line Help:\", align='left')\n    mc.separator(style='none', height=4)\n\n    helpScrollField = mc.scrollField('helpST', font=\"plainLabelFont\", wordWrap=True, editable=False, height=420)\n\n    helpText = 'Usage: render [options] filename:\\n'\n    helpText += '       where \"filename\" is a Maya ASCII or a Maya binary file.\\n\\n'\n\n    helpText += 'Common options:\\n'\n    helpText += '\\n'\n    helpText += '  -help                          Print help\\n'\n    helpText += '  -test                          Print Mel commands but do not execute them\\n'\n    helpText += '  -verb                         Print Mel commands before they are executed\\n'\n    helpText += '  -keepMel                   Keep the temporary Mel file\\n'\n    helpText += '  -listRenderers           List all available renderers\\n'\n    helpText += '  -renderer string        Use this specific renderer\\n'\n    helpText += '  -r string                    Same as -renderer\\n'\n    helpText += '  -proj string               Use this Maya project to load the file\\n'\n    helpText += '  -log string                 Save output into the given file\\n'\n\n    helpText += '\\n'\n    helpText += 'Specific options for renderer \"default\": Use the renderer stored in the Maya file\\n'\n\n    helpText += '\\n'\n    helpText += 'General purpose flags:\\n'\n    helpText += '\\n'\n    helpText += '  -rd path                    Directory in which to store image file\\n'\n    helpText += '  -of string                  Output image file format. See the Render Settings\\n'\n    helpText += '                                   window to find available formats\\n'\n    helpText += '  -im filename              Image file output name\\n'\n\n    helpText += '\\n'\n    helpText += 'Frame numbering options:\\n'\n    helpText += '\\n'\n    helpText += '  -s float                     Starting frame for an animation sequence\\n'\n    helpText += '  -e float                     End frame for an animation sequence\\n'\n    helpText += '  -b float                     By frame (or step) for an animation sequence\\n'\n    helpText += '  -pad int                    Number of digits in the output image frame file\\n'\n    helpText += '                                  name extension\\n'\n    helpText += '  -rfs int                      Renumber Frame Start: number for the first image\\n'\n    helpText += '                                  when renumbering frames\\n'\n    helpText += '  -rfb int                     Renumber Frame By (or step) used for renumbering\\n'\n    helpText += '                                  frames\\n'\n    helpText += '  -fnc int                     File Name Convention: any of name, name.ext, ... \\n'\n    helpText += '                                  See the Render Settings window to find available\\n'\n    helpText += '                                  options.Use namec and namec.ext for Multi Frame\\n'\n    helpText += '                                  Concatenated formats. As a shortcut, numbers 1,\\n'\n    helpText += '                                  2, ... can also be used\\n'\n\n    helpText += '\\n'\n    helpText += 'Camera options:\\n'\n    helpText += '\\n'\n    helpText += '  -cam name              Specify which camera to be rendered\\n'\n    helpText += '  -rgb boolean           Turn RGB output on or off\\n'\n    helpText += '  -alpha boolean        Turn Alpha output on or off\\n'\n    helpText += '  -depth boolean       Turn Depth output on or off\\n'\n    helpText += '  -iip                           Ignore Image Planes. Turn off all image planes\\n'\n    helpText += '                                  before rendering\\n'\n\n    helpText += '\\n'\n    helpText += 'Resolution options:\\n'\n    helpText += '\\n'\n    helpText += '  -x int                                 Set X resolution of the final image\\n'\n    helpText += '  -y int                                 Set Y resolution of the final image\\n'\n    helpText += '  -percentRes float             Renders the image using percent of the\\n'\n    helpText += '                                           resolution\\n'\n    helpText += '  -ard float                          Device aspect ratio for the rendered image\\n'\n    helpText += '  -par float                          Pixel aspect ratio for the rendered image\\n'\n\n    helpText += '\\n'\n    helpText += 'Render Layers and Passes:\\n'\n    helpText += '\\n'\n    helpText += '  -rl boolean|name(s)          Render each render layer separately\\n'\n    helpText += '  -rp boolean|name(s)        Render passes separately. \\'all\\' will render all\\n'\n    helpText += '                                           passes\\n'\n    helpText += '  -sel boolean|name(s)       Selects which objects, groups and/or sets to\\n'\n    helpText += '                                           render\\n'\n    helpText += '  -l boolean|name(s)           Selects which display and render layers to\\n'\n    helpText += '                                           render\\n'\n\n    helpText += '\\n'\n    helpText += 'Mel callbacks:\\n'\n    helpText += '\\n'\n    helpText += '  -preRender string             Mel code executed before rendering\\n'\n    helpText += '  -postRender string           Mel code executed after rendering\\n'\n    helpText += '  -preLayer string                Mel code executed before each render layer\\n'\n    helpText += '  -postLayer string              Mel code executed after each render layer\\n'\n    helpText += '  -preFrame string               Mel code executed before each frame\\n'\n    helpText += '  -postFrame string             Mel code executed after each frame\\n'\n    helpText += '  -pre string                         Obsolete flag\\n'\n    helpText += '  -post string                       Obsolete flag\\n'\n\n    helpText += '\\n'\n    helpText += 'Specific options for the layers who use Maya software renderer:\\n'\n\n    helpText += '\\n'\n    helpText += 'Anti-aliasing quality only for Maya software renderer:\\n'\n    helpText += '\\n'\n    helpText += '  -sw:eaa int                   The anti-aliasing quality of EAS (Abuffer). One\\n'\n    helpText += '                                       of: highest(0), high(1), medium(2), low(3)\\n'\n    helpText += '  -sw:ss int                     Global number of shading samples per surface in a\\n'\n    helpText += '                                       pixel\\n'\n    helpText += '  -sw:mss int                   Maximum number of adaptive shading samples\\n'\n    helpText += '                                       per surface in a pixel\\n'\n    helpText += '  -sw:mvs int                   Number of motion blur visibility samples\\n'\n    helpText += '  -sw:mvm int                  Maximum number of motion blur visibility samples\\n'\n    helpText += '  -sw:pss int                    Number of particle visibility samples\\n'\n    helpText += '  -sw:vs int                     Global number of volume shading samples\\n'\n    helpText += '  -sw:ufil boolean            If true, use the multi-pixel filtering; otherwise\\n'\n    helpText += '                                       use single pixel filtering\\n'\n    helpText += '  -sw:pft int                    When useFilter is true, identifies one of the\\n'\n    helpText += '                                       following filters: box(0), triangle(2), gaussian(4),\\n'\n    helpText += '                                       quadratic(5)\\n'\n    helpText += '  -sw:pfx float                 When useFilter is true, defines the X size of the\\n'\n    helpText += '                                       filter\\n'\n    helpText += '  -sw:pfy float                 When useFilter is true, defines the Y size of the\\n'\n    helpText += '                                       filter\\n'\n    helpText += '  -sw:rct float                  Red channel contrast threshold\\n'\n    helpText += '  -sw:gct float                 Green channel contrast threshold\\n'\n    helpText += '  -sw:bct float                  Blue channel contrast threshold\\n'\n    helpText += '  -sw:cct float                  Pixel coverage contrast threshold (default is\\n'\n    helpText += '                                       1.0/8.0)\\n'\n\n    helpText += '\\n'\n    helpText += 'Raytracing quality only for Maya software renderer:\\n'\n    helpText += '\\n'\n    helpText += '  -sw:ert boolean            Enable ray tracing\\n'\n    helpText += '  -sw:rfl int                      Maximum ray-tracing reflection level\\n'\n    helpText += '  -sw:rfr int                     Maximum ray-tracing refraction level\\n'\n    helpText += '  -sw:sl int                       Maximum ray-tracing shadow ray depth\\n'\n\n    helpText += '\\n'\n    helpText += 'Field Options only for Maya software renderer:\\n'\n    helpText += '\\n'\n    helpText += '  -sw:field boolean         Enable field rendering. When on, images are\\n'\n    helpText += '                                       interlaced\\n'\n    helpText += '  -sw:pal                         When field rendering is enabled, render even field\\n'\n    helpText += '                                       first (PAL)\\n'\n    helpText += '  -sw:ntsc                       When field rendering is enabled, render odd field\\n'\n    helpText += '                                       first (NTSC)\\n'\n\n    helpText += '\\n'\n    helpText += 'Motion Blur only for Maya software renderer:\\n'\n    helpText += '\\n'\n    helpText += '  -sw:mb boolean                 Motion blur on/off\\n'\n    helpText += '  -sw:mbf float                     Motion blur by frame\\n'\n    helpText += '  -sw:sa float                       Shutter angle for motion blur (1-360)\\n'\n    helpText += '  -sw:mb2d boolean             Motion blur 2D on/off\\n'\n    helpText += '  -sw:bll float                       2D motion blur blur length\\n'\n    helpText += '  -sw:bls float                      2D motion blur blur sharpness\\n'\n    helpText += '  -sw:smv int                       2D motion blur smooth value\\n'\n    helpText += '  -sw:smc boolean               2D motion blur smooth color on/off\\n'\n    helpText += '  -sw:kmv boolean               Keep motion vector for 2D motion blur on/off\\n'\n\n    helpText += '\\n'\n    helpText += 'Render Options only for Maya software renderer:\\n'\n    helpText += '\\n'\n    helpText += '  -sw:ifg boolean                Use the film gate for rendering if false\\n'\n    helpText += '  -sw:edm boolean             Enable depth map usage\\n'\n    helpText += '  -sw:g float                       Gamma value\\n'\n    helpText += '  -sw:premul boolean         Premultiply color by the alpha value\\n'\n    helpText += '  -sw:premulthr float          When premultiply is on, defines the threshold \\n'\n    helpText += '                                           used to determine whether to premultiply\\n'\n    helpText += '                                           or not\\n'\n\n    helpText += '\\n'\n    helpText += 'Memory and Performance only for Maya software renderer:\\n'\n    helpText += '\\n'\n    helpText += '  -sw:uf boolean                 Use the tessellation file cache\\n'\n    helpText += '  -sw:oi boolean                  Dynamically detects similarly tessellated\\n'\n    helpText += '                                           surfaces\\n'\n    helpText += '  -sw:rut boolean                Reuse render geometry to generate depth\\n'\n    helpText += '                                           maps\\n'\n    helpText += '  -sw:udb boolean              Use the displacement bounding box scale to\\n'\n    helpText += '                                           optimize\\n'\n    helpText += '                                           displacement-map performance\\n'\n    helpText += '  -sw:mm int                        Renderer maximum memory use\\n'\n    helpText += '                                           (in Megabytes)\\n'\n\n    helpText += '\\n'\n    helpText += 'Specific options for the layers who use Maya hardware renderer:\\n'\n    helpText += '\\n'\n    helpText += 'Quality flags only for Maya hardware renderer:\\n'\n    helpText += '\\n'\n    helpText += '  -hw:ehl boolean                Enable high quality lighting\\n'\n    helpText += '  -hw:ams boolean              Accelerated multi sampling\\n'\n    helpText += '  -hw:ns int                         Number of samples per pixel\\n'\n    helpText += '  -hw:tsc boolean               Transparent shadow maps\\n'\n    helpText += '  -hw:ctr int                        Color texture resolution\\n'\n    helpText += '  -hw:btr int                        Bump texture resolution\\n'\n    helpText += '  -hw:tc boolean                 Enable texture compression\\n'\n\n    helpText += '\\n'\n    helpText += 'Render options only for Maya hardware renderer:\\n'\n    helpText += '\\n'\n    helpText += '  -hw:c boolean                              Culling mode.\\n'\n    helpText += '                0: per object.\\n'\n    helpText += '                1: all double sided.\\n'\n    helpText += '                2: all single sided\\n'\n    helpText += '  -hw:sco boolean                           Enable small object culling\\n'\n    helpText += '  -hw:ct float                                   Small object culling threshold\\n'\n\n    helpText += '\\n'\n    helpText += 'Mel callbacks only for Maya hardware renderer:\\n'\n    helpText += '\\n'\n    helpText += '  -hw:mb boolean                 Enable motion blur\\n'\n    helpText += '  -hw:mbf float                     Motion blur by frame\\n'\n    helpText += '  -hw:ne int                          Number of exposures\\n'\n    helpText += '  -hw:egm boolean               Enable geometry mask\\n'\n\n    helpText += '\\n'\n    helpText += 'Specific options for the layers who use Mentalray renderer\\n'\n    helpText += '\\n'\n    helpText += 'Other only for Mentalray renderer:\\n'\n    helpText += '\\n'\n    helpText += '  -mr:v/mr:verbose int           Set the verbosity level.\\n'\n    helpText += '        0 - to turn off messages\\n'\n    helpText += '        1 - for fatal errors only\\n'\n    helpText += '        2 - for all errors\\n'\n    helpText += '        3 - for warnings\\n'\n    helpText += '        4 - for informational messages\\n'\n    helpText += '        5 - for progress messages\\n'\n    helpText += '        6 - for detailed debugging messages\\n'\n    helpText += '\\n'\n    helpText += '   -mr:rt/mr:renderThreads int            Specify the number of rendering.\\n'\n    helpText += '                                                            threads.\\n'\n    helpText += '   -mr:art/mr:autoRenderThreads       Automatically determine the number\\n'\n    helpText += '                                                            of rendering threads.\\n'\n    helpText += '   -mr:mem/mr:memory int                   Set the memory limit (in MB).\\n'\n    helpText += '   -mr:aml/mr:autoMemoryLimit           Compute the memory limit\\n'\n    helpText += '                                                            automatically.\\n'\n    helpText += '   -mr:ts/mr:taskSize int                       Set the pixel width/height of the\\n'\n    helpText += '                                                            render tiles.\\n'\n    helpText += '   -mr:at/mr:autoTiling                         Automatically determine optimal tile\\n'\n    helpText += '                                                            size.\\n'\n    helpText += '   -mr:fbm/mr:frameBufferMode int     Set the frame buffer mode.\\n'\n    helpText += '        0 in-memory framebuffers\\n'\n    helpText += '        1 memory mapped framebuffers\\n'\n    helpText += '        2 cached framebuffers\\n'\n    helpText += '  -mr:rnm boolean                Network rendering option. If true, mental ray\\n'\n    helpText += '                                            renders almost everything on slave machines,\\n'\n    helpText += '                                            thus reducing the workload on the\\n'\n    helpText += '        master machine\\n'\n    helpText += '  -mr:lic string                       Specify satellite licensing option. mu/unlimited\\n'\n    helpText += '                                            or mc/complete.\\n'\n    helpText += '  -mr:reg int int int int          Set sub-region pixel boundary of the final\\n'\n    helpText += '                                            image: left, right, bottom, top\\n'\n\n    helpText += '\\n'\n    helpText += '\\n'\n    helpText += ' *** Remember to place a space between option flags and their arguments. ***\\n'\n    helpText += 'Any boolean flag will take the following values as TRUE: on, yes, true, or 1.'\n    helpText += 'Any boolean flag will take the following values as FALSE: off, no, false, or 0.\\n'\n\n    helpText += '                 e.g. -s 1 -e 10 -x 512 -y 512 -cam persp -mr:v 5 file.\\n'\n    helpText += '\\n'\n    helpText += '\\n'\n\n    helpText += 'Send to Backburner 1.2 by Mariano Antico   \\n'\n    helpText += 'www.marianoantico.blogspot.com'\n\n    mc.scrollField('helpST', edit=True, text=helpText)\n\n    mc.setParent('..')\n    mc.setParent('..')\n\n    ##---------------------------------------------------------------------------##\n    #Submit buttons\n\n    mc.rowColumnLayout( numberOfColumns = 3)\n\n    submitCloseBtn = mc.button( label = 'Submit Job and Close', command='submitCloseBtn()')\n    submitBtn = mc.button( label = 'Submit', command='submitBtn()')\n    closeBtn = mc.button( label = 'Close', command='closeBtn()')\n\n    mc.showWindow( pikoWindow )\n\n##---------------------------------------------------------------------------##\n##---------------------------------------------------------------------------##\n##---------------------------------------------------------------------------##\n\n#Child def\n# my Blog\ndef myBlog():\n    url = 'http://www.marianoantico.blogspot.com/'\n    webbrowser.open_new(url)\n\n# render view window\ndef renderViewWindow():\n    mm.eval('RenderViewWindow;')\n\n# render settings window\ndef renderSettingsWindow():\n    mm.eval('unifiedRenderGlobalsWindow;')\n\n# job Name window\ndef jobNameDef():\n    fileName = mc.file(query=True, shortName=True, sceneName=True)\n    fileName = fileName.split(\".\")[0] + \".\"+ fileName.split(\".\")[-2]\n    if (fileName == '_'):\n        fileName = 'untitled'\n    return(fileName)\n\n# default window\ndef defaultValuesBb():\n    mc.textField('jobNameTF', edit=True, text= jobNameDef())\n    mc.textField('descriptionTF', edit=True, text= \"\")\n    mc.textField('renderOut', edit=True, text= \"B://test/\")\n    mc.radioButtonGrp('rangeRB', edit=True, select=1)\n    switchFramesDefault()\n    mc.intField('priorityIF', edit=True, value=50)\n    mc.checkBox('criticalCB', edit=True, value=False )\n    mc.text('taskSizeTX', edit=True, enable=True)\n    mc.intField('taskSizeIF', edit=True, value=1, enable=True)\n    mc.intField('framePaddingIF', edit=True, value=4)\n    mc.optionMenu('rendererOM', edit=True, select=1)\n    mc.optionMenu('verbosityOM', edit=True, select=6)\n    mc.textField('additionalOptionsTF', edit=True, text= \"\")\n    mc.radioButtonGrp('renderModeRB', edit=True, select= 2)\n    mc.checkBox('skipExistingFilesCB', edit=True, value=False)\n    switchRenderMode()\n\n    mc.textField('managerNameTF', edit=True, text= \"\")\n    mc.text('serverListTX', edit=True, enable=True)\n    mc.textField('serverListTF', edit=True, text= \"\", enable=True)\n    mc.text('serverGroupTX', edit=True, enable=True)\n    mc.textField('serverGroupTF', edit=True, text= \"\", enable=True)\n    mc.intField('serverCountIF', edit=True, value= 0)\n    mc.intField('portIF', edit=True, value= 0)\n    mc.intField('timeoutIF', edit=True, value= 600)\n    mc.checkBox('manualStartCB', edit=True, value=False )\n    mc.textField('renderPathTF', edit=True, text= \"C:/Program Files/Autodesk/Maya2011/bin/Render\")\n    mc.textField('bburnerPathTF', edit=True, text= \"C:/Program Files (x86)/Autodesk/Backburner/cmdjob.exe\")\n\n# error Message Text Field\ndef errorMessageTF(property=None, errorName=None):\n    if (mc.textField(property, query=True, text=True ) == ''):\n        mc.error('Please complete ' + errorName + ' field.')\n        errorReturnTF = ''\n    errorReturnTF = mc.textField(property, query=True, text=True )\n    return errorReturnTF\n\n# error Message Integer Field\ndef errorMessageIF(property=None, errorName=None):\n    if (mc.intField(property, query=True, value=True ) == ''):\n        mc.error('Please complete ' + errorName + ' field.')\n        errorReturnIF = ''\n    errorReturnIF = mc.intField(property, query=True, value=True )\n    return errorReturnIF\n\n# switchFrames Default window\ndef switchFramesDefault():\n    rangeSelected = mc.radioButtonGrp('rangeRB', query=True, select=True)\n    if (rangeSelected == 1):\n        mc.text('startFrameTX', edit=True, enable=True)\n        mc.text('endFrameTX', edit=True, enable=True)\n        mc.intField('startFrameIF', edit=True, enable=True, value=0)\n        mc.intField('endFrameIF', edit=True, enable=True, value=100)\n        mc.button('timelineBTN', edit=True, enable=True)\n        mc.button('renderBTN', edit=True, enable=True)\n\n        mc.text('framesTX', edit=True, enable=False)\n        mc.textField('framesTF', edit=True, enable=False, text= \"\")\n    else:\n        mc.text('startFrameTX', edit=True, enable=False)\n        mc.text('endFrameTX', edit=True, enable=False)\n        mc.intField('startFrameIF', edit=True, enable=False, value=0)\n        mc.intField('endFrameIF', edit=True, enable=False, value=100)\n        mc.button('timelineBTN', edit=True, enable=False)\n        mc.button('renderBTN', edit=True, enable=False)\n\n        mc.text('framesTX', edit=True, enable=True)\n        mc.textField('framesTF', edit=True, enable=True, text= \"\")\n\n# switchFrames window\ndef switchFrames():\n    rangeSelected = mc.radioButtonGrp('rangeRB', query=True, select=True)\n    if (rangeSelected == 1):\n        mc.text('startFrameTX', edit=True, enable=True)\n        mc.text('endFrameTX', edit=True, enable=True)\n        mc.intField('startFrameIF', edit=True, enable=True)\n        mc.intField('endFrameIF', edit=True, enable=True)\n        mc.button('timelineBTN', edit=True, enable=True)\n        mc.button('renderBTN', edit=True, enable=True)\n\n        mc.text('framesTX', edit=True, enable=False)\n        mc.textField('framesTF', edit=True, enable=False, text= \"\")\n    else:\n        mc.text('startFrameTX', edit=True, enable=False)\n        mc.text('endFrameTX', edit=True, enable=False)\n        mc.intField('startFrameIF', edit=True, enable=False)\n        mc.intField('endFrameIF', edit=True, enable=False)\n        mc.button('timelineBTN', edit=True, enable=False)\n        mc.button('renderBTN', edit=True, enable=False)\n\n        mc.text('framesTX', edit=True, enable=True)\n        mc.textField('framesTF', edit=True, enable=True, text= \"\")\n\n# switch server list - group toggle\ndef switchServer():\n    checkServerList = mc.textField('serverListTF', query=True, text=True)\n    checkServerGroup = mc.textField('serverGroupTF', query=True, text=True)\n\n    if (len(checkServerList) > 0 and len(checkServerGroup) == 0):\n        mc.text('serverListTX', edit=True, enable=True)\n        mc.textField('serverListTF', edit=True, enable=True)\n        mc.text('serverGroupTX', edit=True, enable=False)\n        mc.textField('serverGroupTF', edit=True, enable=False, text='')\n    elif (len(checkServerList) == 0 and len(checkServerGroup) > 0):\n        mc.text('serverListTX', edit=True, enable=False)\n        mc.textField('serverListTF', edit=True, enable=False, text='')\n        mc.text('serverGroupTX', edit=True, enable=True)\n        mc.textField('serverGroupTF', edit=True, enable=True)\n    else:\n        mc.text('serverListTX', edit=True, enable=True)\n        mc.textField('serverListTF', edit=True, enable=True, text='')\n        mc.text('serverGroupTX', edit=True, enable=True)\n        mc.textField('serverGroupTF', edit=True, enable=True, text='')\n\n# timeline Range button\ndef timelineRange():\n    minTimelineFrame = mc.playbackOptions(query=True, minTime=True)\n    maxTimelineFrame = mc.playbackOptions(query=True, maxTime=True)\n    mc.intField('startFrameIF', edit=True, enable=True, value=minTimelineFrame)\n    mc.intField('endFrameIF', edit=True, enable=True, value=maxTimelineFrame)\n\n# Render Range button\ndef renderRange():\n    minRenderFrame = mc.getAttr('defaultRenderGlobals.startFrame')\n    maxRenderFrame = mc.getAttr('defaultRenderGlobals.endFrame')\n    mc.intField('startFrameIF', edit=True, enable=True, value=minRenderFrame)\n    mc.intField('endFrameIF', edit=True, enable=True, value=maxRenderFrame)\n\n# Render Path dialog window\ndef renderPathDialog():\n    dirName = mc.workspace( q=True, rootDirectory=True )\n    openFileNameR = mc.fileDialog2(caption=\"Render Path\", fileMode=1, startingDirectory=dirName, fileFilter='*.*')\n    mc.textField('renderPathTF', edit=True, text=openFileNameR[0])\n\n# Backburner Path dialog window\ndef backburnerPathDialog():\n    dirName = mc.workspace( q=True, rootDirectory=True )\n    openFileNameB = mc.fileDialog2(caption=\"Render Path\", fileMode=1, startingDirectory=dirName, fileFilter='*.*')\n    mc.textField('bburnerPathTF', edit=True, text=openFileNameB[0])\n\n# Task List Name\ndef taskListName():\n    taskList = mc.textField('jobNameTF', query=True, text=True)\n    tempDir = tempfile.gettempdir()\n    tempDir = tempDir.replace(\"\\\\\", '/')\n    tempDir += '/' + taskList + '.txt'\n    return tempDir\n\n# Create Task List\ndef createTaskList():\n    filename = taskListName()\n    taskListFile = open(filename, 'w')\n    if (taskListFile == 0):\n        mc.error('You dont have privilages')\n\n    startFrame = mc.intField('startFrameIF', query=True, value=True)\n    endFrame = mc.intField('endFrameIF', query=True, value=True)\n    taskSize = mc.intField('taskSizeIF', query=True, value=True)\n\n    if (taskSize == 0):\n        mc.error('Task size should be greater than 0.')\n\n    numberTasks = (float(endFrame) - float(startFrame)) / float(taskSize)\n    if (numberTasks > int(numberTasks)):\n        numberTasks = int(numberTasks) + 1\n\n    startTaskFrame = startFrame\n    lastTaskFrame = startFrame + taskSize - 1\n    print range(int(int(numberTasks) + 1))\n    print range(int(numberTasks) + 1)\n    for task in range(int(numberTasks) + 1):\n        if (lastTaskFrame >= endFrame):\n            taskListFile.write(\"frameRange \" + str(startTaskFrame) + \"-\" + str(endFrame) + \"\\t\" + str(startTaskFrame) + \"\\t\" + str(endFrame) + \"\\n\")\n            break\n        taskListFile.write(\"frameRange \" + str(startTaskFrame) + \"-\" + str(lastTaskFrame) + \"\\t\" + str(startTaskFrame) + \"\\t\" + str(lastTaskFrame) + \"\\n\")\n        startTaskFrame += taskSize\n        lastTaskFrame += taskSize\n    taskListFile.close()\n    return filename\n\n# Create Frames Task List\ndef createFramesTaskList():\n    filename = taskListName()\n    taskListFile = open(filename, 'w')\n    if (taskListFile == 0):\n        mc.error('You dont have privilages')\n\n    frames = mc.textField('framesTF', query=True, text=True)\n    taskSize = mc.intField('taskSizeIF', query=True, value=True)\n    listB = frames.split(',')\n    listA = []\n\n    for each in listB:\n        listA.append(each.replace(' ', ''))\n\n\n    taskStartFrame = []\n    taskEndFrame = []\n\n    if (frames == ''):\n        mc.error('Please complete Frames field.')\n\n    if (taskSize == 0):\n        mc.error('Task size should be greater than 0.')\n\n    for task in range(len(listA)):\n        if (listA[task].isdigit()):\n            taskStartFrame.append(int(listA[task]))\n            taskEndFrame.append(int(listA[task]))\n        else:\n            taskSeq = listA[task]\n            taskSeq = taskSeq.split('-')\n            if (len(taskSeq) == 0):\n                result = re.sub(\"\\d\", \"\", taskSeq)\n                mc.error('\"' + result + '\" is not an Integer.')\n            else:\n                seqFrames = []\n                for seq in range(len(taskSeq)):\n                    if (taskSeq[seq].isdigit()):\n                        seqFrames.append(taskSeq[seq])\n                    else:\n                        result = re.sub(\"\\d\", \"\", taskSeq[seq])\n                        mc.error('\"' + result + '\" is not an Integer.')\n                if (int(seqFrames[1]) < int(seqFrames[0])):\n                    mc.error('First frame is greater than second frame in sequence. (\"' + seqFrames[0] + '\" - \"' + seqFrames[1] + '\") ')\n                taskStartFrame.append(int(seqFrames[0]))\n                taskEndFrame.append(int(seqFrames[1]))\n\n    for taskFrame in range(len(taskStartFrame)):\n        if (taskStartFrame[taskFrame] == taskEndFrame[taskFrame]):\n            taskListFile.write(\"frameRange \" + str(taskStartFrame[taskFrame]) + \"-\" + str(taskEndFrame[taskFrame]) + \"\\t\" + str(taskStartFrame[taskFrame]) + \"\\t\" + str(taskEndFrame[taskFrame]) + \"\\n\")\n        else:\n            numberTasks = (float(taskEndFrame[taskFrame]) - float(taskStartFrame[taskFrame])) / float(taskSize)\n            if (numberTasks > int(numberTasks)):\n                numberTasks = int(numberTasks) + 1\n            startTaskFrame = taskStartFrame[taskFrame]\n            lastTaskFrame = taskStartFrame[taskFrame] + taskSize - 1\n            for task in range(int(numberTasks) + 1):\n                if (lastTaskFrame >= taskEndFrame[taskFrame]):\n                    taskListFile.write(\"frameRange \" + str(startTaskFrame) + \"-\" + str(taskEndFrame[taskFrame]) + \"\\t\" + str(startTaskFrame) + \"\\t\" + str(taskEndFrame[taskFrame]) + \"\\n\")\n                    break\n                taskListFile.write(\"frameRange \" + str(startTaskFrame) + \"-\" + str(lastTaskFrame) + \"\\t\" + str(startTaskFrame) + \"\\t\" + str(lastTaskFrame) + \"\\n\")\n                startTaskFrame += taskSize\n                lastTaskFrame += taskSize\n\n    taskListFile.close()\n    return filename\n\n# Send Job\ndef sendJob(sendLayer=None):\n\n    if (mc.radioButtonGrp('rangeRB', query=True, select=True) == 1):\n        if (mc.checkBox('skipExistingFilesCB', query=True, value=True )):\n            taskList = createSkipFramesTaskList(frameList=checkExistingFrames(checkLayer=sendLayer), layer=sendLayer)\n        else:\n            taskList = createTaskList()\n    else:\n        if (mc.checkBox('skipExistingFilesCB', query=True, value=True )):\n            taskList = createSkipFramesTaskList(frameList=framesCheckExistingFrames(checkLayer=sendLayer), layer=sendLayer)\n        else:\n            taskList = createFramesTaskList()\n\n    bburnerPathBB = errorMessageTF(property='bburnerPathTF', errorName='Backburner Path')\n    jobNameBB = errorMessageTF(property='jobNameTF', errorName='Job Name')\n    descriptionBB = mc.textField('descriptionTF', query=True, text=True )\n    managerBB = errorMessageTF(property='managerNameTF', errorName='Manager Name')\n    priorityBB = errorMessageIF(property='priorityIF', errorName='Priority')\n    timeoutBB = errorMessageIF(property='timeoutIF', errorName='Timeout')\n    renderPathBB = errorMessageTF(property='renderPathTF', errorName='Render Path')\n\n    suspended = ''\n    if (mc.checkBox('manualStartCB', query=True, value=True )):\n        suspended = '-suspended '\n\n    priority = priorityBB\n    if (mc.checkBox('criticalCB', query=True, value=True )):\n        priority = '0'\n\n    rendererBB = ''\n    if ((mc.optionMenu('rendererOM', query=True, select=True)) == 1 ):\n        rendererBB = mc.getAttr(\"defaultRenderGlobals.currentRenderer\")\n        if (rendererBB == 'mayaHardware' ):rendererBB = 'hw'\n        if (rendererBB == 'mayaSoftware' ):rendererBB = 'sw'\n        if (rendererBB == 'mentalRay' ):rendererBB = 'mr'\n        if (rendererBB == 'mayaVector' ):rendererBB = 'vr'\n\n    if ((mc.optionMenu('rendererOM', query=True, select=True)) == 2 ):rendererBB = 'mr'\n    if ((mc.optionMenu('rendererOM', query=True, select=True)) == 3 ):rendererBB = 'sw'\n    if ((mc.optionMenu('rendererOM', query=True, select=True)) == 4 ):rendererBB = 'hw'\n    if ((mc.optionMenu('rendererOM', query=True, select=True)) == 5 ):rendererBB = 'vr'\n\n    projectBB = mc.workspace( q=True, rootDirectory=True )\n\n    verbosityBB = ''\n    if ((mc.optionMenu('rendererOM', query=True, select=True)) == 2 ):\n        verbosityBB = '-v ' + str(mc.optionMenu('verbosityOM', query=True, select=True) - 1)\n\n    framePaddingBB = mc.intField('framePaddingIF', query=True, value=True )\n\n    fileNameBB = mc.file(query=True, sceneName=True)\n    if(fileNameBB == ''):\n        mc.error('Save current file.')\n\n    additionalOptionsBB = mc.textField('additionalOptionsTF', query=True, text=True )\n\n    portBB = mc.intField('portIF', query=True, value=True )\n    if (portBB == 0):\n        portFlagBB = ''\n    else:\n        portFlagBB = ' -port ' + str(portBB)\n\n    serverListBB = mc.textField('serverListTF', query=True, text=True )\n    if (len(serverListBB)):\n        serverListBB = ' -servers \"' + serverListBB + '\"'\n\n    serverGroupBB = mc.textField('serverGroupTF', query=True, text=True )\n    if (len(serverGroupBB)):\n        serverGroupBB = ' -group \"' + serverGroupBB + '\"'\n\n    serverCountBB = mc.intField('serverCountIF', query=True, value=True )\n    if (serverCountBB == 0):\n        serverCountFlagBB = ''\n    else:\n        serverCountFlagBB = ' -serverCount ' + serverCountBB\n\n    renderFolderPath = mc.textField(\"renderFolder\", query=True, text=True)\n\n    renderLayerBB = ''\n    layerJobName = sendLayer\n    if (sendLayer != ''):\n        renderLayerBB = (' -rl ' + sendLayer)\n        layerJobName = ('_' + sendLayer)\n\n    sendBB = ('\"\\\\\"\\\\\"' + bburnerPathBB + '\\\\\" -jobName \\\\\"' + jobNameBB + layerJobName + '\\\\\" -description \\\\\"' + descriptionBB + '\\\\\" -manager ')\n    sendBB += (managerBB + portFlagBB + serverListBB + serverGroupBB + serverCountFlagBB +' ' + suspended + '-priority ')\n    sendBB += (str(priority) + ' -taskList \\\\\"' + taskList + '\\\\\" -taskName 1 -timeout ' + str(timeoutBB))\n    sendBB += (' \\\\\"' + renderPathBB + '\\\\\" -r ' + rendererBB + ' -s %tp2 -e %tp3 -proj \\\\\"' + projectBB + '\\\\\" -rd \\\\\"' + renderFolderPath +'\\\\\" ' + verbosityBB)\n    sendBB += (renderLayerBB + ' -pad ' + str(framePaddingBB) + ' ' + additionalOptionsBB + ' \\\\\"' + fileNameBB +'\\\\\"\"')\n    print sendBB\n    return sendBB\n\n\n#Close button\ndef closeBtn():\n    mc.deleteUI(\"BburnWin\")\n\n# Submit button\ndef submitBtn():\n    if ((mc.radioButtonGrp('renderModeRB', query=True, select=True)) == 1 ):\n        send= sendJob(sendLayer='')\n        print ('Backburner 1.0 by Mariano Antico.')\n        print ('system (' + send + ')')\n        printSend = mm.eval('system (' + send + ')')\n        print printSend\n\n    if ((mc.radioButtonGrp('renderModeRB', query=True, select=True)) == 2 ):\n        allLay = mc.ls(type='renderLayer')\n        for layer in allLay:\n            try:\n                print layer\n                if layer[0:3] != \"rs_\":\n                    mc.select(layer) #DELETE OLD RENDERLAYER FROM IMPORTED OBJECT\n                    mc.delete()\n            except:\n                pass\n        allLay = mc.ls(type='renderLayer')\n        for layer in allLay:                       \n            renderableLayer = False\n            if layer[0:3] == \"rs_\" or layer[0:3] == \"def\": #HACK TO GET ONLY RENDERLAYER FROM COLLECTION & DEFAULT RENDERLAYER\n                renderableLayer = mc.getAttr(layer + '.renderable')\n            if (renderableLayer):\n                send= sendJob(sendLayer=layer)\n                print ('Backburner 1.2 by Mariano Antico.')\n                print ('system (' + send + ')')\n                printSend = mm.eval('system (' + send + ')')\n                print printSend\n\n    if ((mc.radioButtonGrp('renderModeRB', query=True, select=True)) == 3 ):\n        currentLay = mc.editRenderLayerGlobals(query=True, currentRenderLayer=True)\n        send= sendJob(sendLayer=currentLay)\n        print ('Backburner 1.2 by Mariano Antico.')\n        print ('system (' + send + ')')\n        printSend = mm.eval('system (' + send + ')')\n        print printSend\n    print 'Done!'\n\n# Submit and Close\ndef submitCloseBtn():\n    submitBtn()\n    closeBtn()\n\n# skip button disable task size\ndef skipBtn():\n    if (mc.checkBox('skipExistingFilesCB', query=True, value=True )):\n        mc.intField('taskSizeIF', edit=True, value=1, enable=False)\n        mc.text('taskSizeTX', edit=True, enable=False)\n    else:\n        mc.intField('taskSizeIF', edit=True, enable=True)\n        mc.text('taskSizeTX', edit=True, enable=True)\n\n# Layer Task List Name\ndef taskListLayerName(Tasklayer=''):\n    taskList = mc.textField('jobNameTF', query=True, text=True)\n    tempDir = tempfile.gettempdir()\n    tempDir = tempDir.replace(\"\\\\\", '/')\n    tempDir += '/' + taskList + '_' + Tasklayer + '.txt'\n    return tempDir\n\n# replace name from File Name Prefix\ndef replaceNamePrefix(fileName=None, replaceLayer=''):\n\n    passes = listPasses(layerPass=replaceLayer)\n    if passes:\n        if not re.search('<RenderPass>', fileName):\n            fileName = 'MasterBeauty/' + fileName\n\n    cams = listRenderCameras(layerCam=replaceLayer)\n    if len(cams) > 1:\n        if not re.search('<Camera>', fileName):\n            fileName = '<Camera>/' + fileName\n\n    if not re.search('<RenderLayer>', fileName):\n        fileName = replaceLayer + '/' + fileName\n\n    directoryReplace = fileName.split('/')\n    renderCams = []\n\n    index = -1\n    for directory in directoryReplace:\n        index += 1\n        if re.search('<Scene>', directory):\n            sceneName = mc.file(query=True, shortName=True, sceneName=True)\n            sceneName = sceneName.split(\".\")\n            sceneNamePeriod = ''\n            if len(sceneName) >= 1:\n                for index in range(len(sceneName) - 1):\n                    sceneNamePeriod += sceneName[index] + '.'\n                sceneName = sceneNamePeriod\n                sceneName = sceneName[:(len(sceneName)-1)]\n            else :\n                sceneName = sceneName.split(\".\")[0]\n            if (sceneName == ''):\n                sceneName = 'untitled'\n            directoryReplace[index] = directoryReplace[index].replace('<Scene>',sceneName)\n        if re.search('<RenderLayer>', directory):\n            currentLay = replaceLayer\n            if currentLay == 'defaultRenderLayer':\n                currentLay = 'masterLayer'\n            directoryReplace[index] = directoryReplace[index].replace('<RenderLayer>',currentLay)\n        if re.search('<Camera>', directory):\n            camRender = replaceCameras(layerCam=replaceLayer)\n            if camRender:\n                directoryReplace[index] = directoryReplace[index].replace('<Camera>',camRender)\n            else :\n                cameras = mc.ls(cameras=True)\n                for cam in cameras:\n                    renderableCam = mc.getAttr(cam + '.renderable')\n                    if renderableCam:\n                        mc.select(cam, replace=True)\n                        camTransform = str(mc.pickWalk( direction='up' )[0])\n                        renderCams.append(camTransform)\n                directoryReplace[index] = directoryReplace[index].replace('<Camera>',renderCams[0])\n        if re.search('<RenderPassFileGroup>', directory):\n            directoryReplace[index] = directoryReplace[index].replace('<RenderPassFileGroup>','Beauties')\n        if re.search('<RenderPass>', directory):\n            directoryReplace[index] = directoryReplace[index].replace('<RenderPass>','MasterBeauty')\n        if re.search('<RenderPassType>', directory):\n            directoryReplace[index] = directoryReplace[index].replace('<RenderPassType>','BEAUTY')\n        if re.search('<Extension>', directory):\n            outFormat = overrideCheckParameter(layerPrefix=replaceLayer, propPrefix='defaultRenderGlobals.outFormatControl')\n            if outFormat == 2:\n                outFormatExt = overrideCheckParameter(layerPrefix=replaceLayer, propPrefix='defaultRenderGlobals.outFormatExt')\n                directoryReplace[index] = directoryReplace[index].replace('<Extension>',outFormatExt)\n            elif outFormat == 0:\n                extension = overrideCheckParameter(layerPrefix=replaceLayer, propPrefix='defaultRenderGlobals.imfPluginKey')\n                directoryReplace[index] = directoryReplace[index].replace('<Extension>',extension)\n            else :\n                directoryReplace[index] = directoryReplace[index].replace('<Extension>','')\n        if re.search('<Version>', directory):\n            version = overrideCheckParameter(layerPrefix=replaceLayer, propPrefix='defaultRenderGlobals.renderVersion')\n            directoryReplace[index] = directoryReplace[index].replace('<Version>',version)\n\n    imageDir = ''\n    for dir in range(len(directoryReplace)):\n        if dir == (len(directoryReplace) - 1):\n            imageDir += directoryReplace[dir]\n            break\n        imageDir += directoryReplace[dir] + '/'\n\n    return imageDir\n\ndef replaceCameras(layerCam=''):\n    valueExtOverride = ''\n    renderCam = ''\n    overrides = mc.listConnections(layerCam + '.adjs', destination=False, source=True, plugs=True)\n    if overrides:\n        for index in range(len(overrides)):\n            if re.search('.renderable', overrides[index]):\n                valueExtOverride = mc.getAttr(layerCam + '.adjs[' + str(index) + '].value')\n                if valueExtOverride:\n                    mc.select(overrides[index].split('.')[0], replace=True)\n                    camTransform = str(mc.pickWalk( direction='up' )[0])\n                    renderCam = camTransform\n                    return renderCam\n                    break\n    return renderCam\n\ndef listRenderCameras(layerCam=''):\n    mc.editRenderLayerGlobals(currentRenderLayer='defaultRenderLayer')\n    valueExtOverride = ''\n    renderCam = []\n    overrides = mc.listConnections(layerCam + '.adjs', destination=False, source=True, plugs=True)\n    if overrides:\n        for index in range(len(overrides)):\n            if re.search('.renderable', overrides[index]):\n                valueExtOverride = mc.getAttr(layerCam + '.adjs[' + str(index) + '].value')\n                if valueExtOverride:\n                    mc.select(overrides[index].split('.')[0], replace=True)\n                    camTransform = str(mc.pickWalk( direction='up' )[0])\n                    renderCam.append(camTransform)\n    return renderCam\n\ndef overrideCheckParameter(layerPrefix='', propPrefix=''):\n    mc.editRenderLayerGlobals(currentRenderLayer='defaultRenderLayer')\n    valueExtOverride = ''\n    overrides = mc.listConnections(layerPrefix + '.adjs', destination=False, source=True, plugs=True)\n    switch = 0\n    if overrides:\n        for index in range(len(overrides)):\n            valueExtOverride = mc.getAttr(layerPrefix + '.adjs[' + str(index) + '].value')\n            if re.search(propPrefix, overrides[index]):\n                valueExtOverride = mc.getAttr(layerPrefix + '.adjs[' + str(index) + '].value')\n                switch = 1\n                #mc.editRenderLayerGlobals(currentRenderLayer=layerPrefix)\n                break\n    if not switch:\n        valueExtOverride = mc.getAttr(propPrefix)\n        #mc.editRenderLayerGlobals(currentRenderLayer=layerPrefix)\n    return valueExtOverride\n\ndef listPasses(layerPass=''):\n    passes = mc.ls(type='renderPass')\n    hasPass = 0\n    if passes:\n        associatePass = mc.listConnections(layerPass + \".renderPass\")\n        if associatePass:\n            hasPass = 1\n    return hasPass\n\n# Cheack Existing Frames\ndef checkExistingFrames(checkLayer=''):\n\n    projectBB = mc.workspace( q=True, rootDirectory=True )\n\n    imagesWorkSpace = mc.workspace( q=True, fileRule=True )\n    imagesDir = ''\n    count = 0\n    for directory in imagesWorkSpace:\n        count += 1\n        if re.search('images', directory):\n            imagesDir = imagesWorkSpace[count] + '/'\n            break\n\n    output = replaceNamePrefix(fileName = overrideCheckParameter(layerPrefix=checkLayer, propPrefix='defaultRenderGlobals.imageFilePrefix'), replaceLayer=checkLayer)\n    outputFile = output.split('/')[-1]\n\n    outputDirSplit = output.split('/')\n    outputDir = ''\n    for dir in range(len(outputDirSplit) - 1):\n        outputDir += outputDirSplit[dir] + '/'\n\n    currentLay = checkLayer\n    extension = overrideCheckParameter(layerPrefix=checkLayer, propPrefix='defaultRenderGlobals.imfPluginKey')\n    stratFrame = mc.intField('startFrameIF', query=True, value=True)\n    endFrame = mc.intField('endFrameIF', query=True, value=True)\n\n    outFormat = overrideCheckParameter(layerPrefix=checkLayer, propPrefix='defaultRenderGlobals.outFormatControl')\n    animation = overrideCheckParameter(layerPrefix=checkLayer, propPrefix='defaultRenderGlobals.animation')\n    putFrameBefore = mc.getAttr('defaultRenderGlobals.putFrameBeforeExt')\n    periodInExt = mc.getAttr('defaultRenderGlobals.periodInExt')\n    padding = mc.intField('framePaddingIF', query=True, value=True)\n    outFormatExt = overrideCheckParameter(layerPrefix=checkLayer, propPrefix='defaultRenderGlobals.outFormatExt')\n    frameList = []\n\n    if (outFormat == 1 and animation == 0):\n        # file format ('name (single)')\n        outputFiles = outputFile\n        if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n            frameList.append('single')\n        else:\n            fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n            if fileSize < 129:\n                frameList.append('single')\n    if (outFormat == 0 and animation == 0):\n        # file format ('name.ext (single)')\n        outputFiles = outputFile + '.' + extension\n        if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n            frameList.append('single')\n        else:\n            fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n            if fileSize < 129:\n                frameList.append('single')\n    if (outFormat == 0 and animation == 1 and putFrameBefore == 1 and periodInExt == 1):\n        # file format ('name.%.ext')\n        for number in range(endFrame - stratFrame + 1):\n            frameNum = format(int(number + stratFrame), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '.' + frameNum + '.' +  extension\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number + stratFrame))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number + stratFrame))\n    if (outFormat == 0 and animation == 1 and putFrameBefore == 0 and periodInExt == 1):\n        # file format ('name.ext.%')\n        for number in range(endFrame - stratFrame + 1):\n            frameNum = format(int(number + stratFrame), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '.' + extension + '.' + frameNum\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number + stratFrame))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number + stratFrame))\n    if (outFormat == 1 and animation == 1 and putFrameBefore == 1 and periodInExt == 1):\n        # file format ('name.%')\n        for number in range(endFrame - stratFrame + 1):\n            frameNum = format(int(number + stratFrame), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '.' + frameNum\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number + stratFrame))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number + stratFrame))\n    if (outFormat == 0 and animation == 1 and putFrameBefore == 1 and periodInExt == 0):\n        # file format ('name%.ext')\n        for number in range(endFrame - stratFrame + 1):\n            frameNum = format(int(number + stratFrame), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + frameNum + '.' +  extension\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number + stratFrame))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number + stratFrame))\n    if (outFormat == 0 and animation == 1 and putFrameBefore == 1 and periodInExt == 2):\n        # file format ('name_%.ext')\n        for number in range(endFrame - stratFrame + 1):\n            frameNum = format(int(number + stratFrame), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '_' + frameNum + '.' +  extension\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number + stratFrame))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number + stratFrame))\n\n    if (outFormat == 2 and animation == 0):\n        # file format ('name.outFormatExt (single)')\n        outputFiles = outputFile + '.' + outFormatExt\n        if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n            frameList.append('single')\n        else:\n            fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n            if fileSize < 129:\n                frameList.append('single')\n    if (outFormat == 2 and animation == 1 and putFrameBefore == 1 and periodInExt == 1):\n        # file format ('name.%.outFormatExt')\n        for number in range(endFrame - stratFrame + 1):\n            frameNum = format(int(number + stratFrame), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '.' + frameNum + '.' +  outFormatExt\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number + stratFrame))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number + stratFrame))\n    if (outFormat == 2 and animation == 1 and putFrameBefore == 0 and periodInExt == 1):\n        # file format ('name.outFormatExt.%')\n        for number in range(endFrame - stratFrame + 1):\n            frameNum = format(int(number + stratFrame), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '.' + outFormatExt + '.' + frameNum\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number + stratFrame))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number + stratFrame))\n    if (outFormat == 2 and animation == 1 and putFrameBefore == 1 and periodInExt == 0):\n        # file format ('name%.outFormatExt')\n        for number in range(endFrame - stratFrame + 1):\n            frameNum = format(int(number + stratFrame), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + frameNum + '.' +  outFormatExt\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number + stratFrame))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number + stratFrame))\n    if (outFormat == 2 and animation == 1 and putFrameBefore == 1 and periodInExt == 2):\n        # file format ('name_%.outFormatExt')\n        for number in range(endFrame - stratFrame + 1):\n            frameNum = format(int(number + stratFrame), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '_' + frameNum + '.' +  outFormatExt\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number + stratFrame))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number + stratFrame))\n\n    return frameList\n\n# Create Seq Task List and skip existing frames\ndef createSkipFramesTaskList(frameList=[], layer=''):\n    if not frameList:\n        mc.error(layer + ': All frames you wanto to render. Already exists. Disable Skip Existing Frames if you wanto to overwrite.')\n    if frameList[0] == 'single':\n        mc.error('You are trying to render a sequence, but you have set to render a Single Frame not an Animation.')\n    filename = taskListLayerName(Tasklayer=layer)\n    taskListFile = open(filename, 'w')\n    if (taskListFile == 0):\n        mc.error('You dont have privilages')\n\n    startFrame = frameList[0]\n    endFrame = frameList[-1]\n    taskSize = 1\n\n    taskFrame = startFrame\n    for task in range(len(frameList)):\n        taskFrame = frameList[task]\n        taskListFile.write(\"frameRange \" + str(taskFrame) + \"-\" + str(taskFrame) + \"\\t\" + str(taskFrame) + \"\\t\" + str(taskFrame) + \"\\n\")\n    taskListFile.close()\n    return filename\n\n# Create Frames List Skip Existing Files\ndef createListFramesSkipTaskList():\n    frames = mc.textField('framesTF', query=True, text=True)\n    taskSize = 1\n    listB = frames.split(',')\n    listA = []\n    frameList = []\n\n    for each in listB:\n        listA.append(each.replace(' ', ''))\n\n    taskStartFrame = []\n    taskEndFrame = []\n\n    if (frames == ''):\n        mc.error('Please complete Frames field.')\n\n    if (taskSize == 0):\n        mc.error('Task size should be greater than 0.')\n\n    for task in range(len(listA)):\n        if (listA[task].isdigit()):\n            taskStartFrame.append(int(listA[task]))\n            taskEndFrame.append(int(listA[task]))\n        else:\n            taskSeq = listA[task]\n            taskSeq = taskSeq.split('-')\n            if (len(taskSeq) == 0):\n                result = re.sub(\"\\d\", \"\", taskSeq)\n                mc.error('\"' + result + '\" is not an Integer.')\n            else:\n                seqFrames = []\n                for seq in range(len(taskSeq)):\n                    if (taskSeq[seq].isdigit()):\n                        seqFrames.append(taskSeq[seq])\n                    else:\n                        result = re.sub(\"\\d\", \"\", taskSeq[seq])\n                        mc.error('\"' + result + '\" is not an Integer.')\n                if (int(seqFrames[1]) < int(seqFrames[0])):\n                    mc.error('First frame is greater than second frame in sequence. (\"' + seqFrames[0] + '\" - \"' + seqFrames[1] + '\") ')\n                taskStartFrame.append(int(seqFrames[0]))\n                taskEndFrame.append(int(seqFrames[1]))\n\n    for taskFrame in range(len(taskStartFrame)):\n        if (taskStartFrame[taskFrame] == taskEndFrame[taskFrame]):\n            frameList.append(taskStartFrame[taskFrame])\n        else:\n            numberTasks = (float(taskEndFrame[taskFrame]) - float(taskStartFrame[taskFrame])) / float(taskSize)\n            if (numberTasks > int(numberTasks)):\n                numberTasks = int(numberTasks) + 1\n            startTaskFrame = taskStartFrame[taskFrame]\n            lastTaskFrame = taskStartFrame[taskFrame] + taskSize - 1\n            for task in range(int(numberTasks) + 1):\n                if (lastTaskFrame >= taskEndFrame[taskFrame]):\n                    frameList.append(startTaskFrame)\n                    break\n                frameList.append(startTaskFrame)\n                startTaskFrame += taskSize\n                lastTaskFrame += taskSize\n\n    return frameList\n\n# Cheack Existing Frames for frame render mode\ndef framesCheckExistingFrames(checkLayer=''):\n    projectBB = mc.workspace( q=True, rootDirectory=True )\n\n    imagesWorkSpace = mc.workspace( q=True, fileRule=True )\n    imagesDir = ''\n    count = 0\n    for directory in imagesWorkSpace:\n        count += 1\n        if re.search('images', directory):\n            imagesDir = imagesWorkSpace[count] + '/'\n            break\n\n    output = replaceNamePrefix(fileName = overrideCheckParameter(layerPrefix=checkLayer, propPrefix='defaultRenderGlobals.imageFilePrefix'), replaceLayer=checkLayer)\n    outputFile = output.split('/')[-1]\n\n    outputDirSplit = output.split('/')\n    outputDir = ''\n    for dir in range(len(outputDirSplit) - 1):\n        outputDir += outputDirSplit[dir] + '/'\n\n    currentLay = checkLayer\n    extension = overrideCheckParameter(layerPrefix=checkLayer, propPrefix='defaultRenderGlobals.imfPluginKey')\n    frames = createListFramesSkipTaskList()\n\n    outFormat = overrideCheckParameter(layerPrefix=checkLayer, propPrefix='defaultRenderGlobals.outFormatControl')\n    animation = overrideCheckParameter(layerPrefix=checkLayer, propPrefix='defaultRenderGlobals.animation')\n    putFrameBefore = mc.getAttr('defaultRenderGlobals.putFrameBeforeExt')\n    periodInExt = mc.getAttr('defaultRenderGlobals.periodInExt')\n    padding = mc.intField('framePaddingIF', query=True, value=True)\n    outFormatExt = overrideCheckParameter(layerPrefix=checkLayer, propPrefix='defaultRenderGlobals.outFormatExt')\n    frameList = []\n\n    if (outFormat == 1 and animation == 0):\n        # file format ('name (single)')\n        outputFiles = outputFile\n        if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n            frameList.append('single')\n        else:\n            fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n            if fileSize < 129:\n                frameList.append('single')\n    if (outFormat == 0 and animation == 0):\n        # file format ('name.ext (single)')\n        outputFiles = outputFile + '.' + extension\n        if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n            frameList.append('single')\n        else:\n            fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n            if fileSize < 129:\n                frameList.append('single')\n    if (outFormat == 0 and animation == 1 and putFrameBefore == 1 and periodInExt == 1):\n        # file format ('name.%.ext')\n        for number in frames:\n            frameNum = format(int(number), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '.' + frameNum + '.' +  extension\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number))\n    if (outFormat == 0 and animation == 1 and putFrameBefore == 0 and periodInExt == 1):\n        # file format ('name.ext.%')\n        for number in frames:\n            frameNum = format(int(number), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '.' + extension + '.' + frameNum\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number))\n    if (outFormat == 1 and animation == 1 and putFrameBefore == 1 and periodInExt == 1):\n        # file format ('name.%')\n        for number in frames:\n            frameNum = format(int(number), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '.' + frameNum\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number))\n    if (outFormat == 0 and animation == 1 and putFrameBefore == 1 and periodInExt == 0):\n        # file format ('name%.ext')\n        for number in frames:\n            frameNum = format(int(number), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + frameNum + '.' +  extension\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number))\n    if (outFormat == 0 and animation == 1 and putFrameBefore == 1 and periodInExt == 2):\n        # file format ('name_%.ext')\n        for number in frames:\n            frameNum = format(int(number), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '_' + frameNum + '.' +  extension\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number))\n\n    if (outFormat == 2 and animation == 0):\n        # file format ('name.ext (single)')\n        outputFiles = outputFile + '.' + outFormatExt\n        if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n            frameList.append('single')\n        else:\n            fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n            if fileSize < 129:\n                frameList.append('single')\n    if (outFormat == 2 and animation == 1 and putFrameBefore == 1 and periodInExt == 1):\n        # file format ('name.%.ext')\n        for number in frames:\n            frameNum = format(int(number), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '.' + frameNum + '.' +  outFormatExt\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number))\n    if (outFormat == 2 and animation == 1 and putFrameBefore == 0 and periodInExt == 1):\n        # file format ('name.ext.%')\n        for number in frames:\n            frameNum = format(int(number), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '.' + outFormatExt + '.' + frameNum\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number))\n    if (outFormat == 2 and animation == 1 and putFrameBefore == 1 and periodInExt == 0):\n        # file format ('name%.ext')\n        for number in frames:\n            frameNum = format(int(number), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + frameNum + '.' +  outFormatExt\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number))\n    if (outFormat == 2 and animation == 1 and putFrameBefore == 1 and periodInExt == 2):\n        # file format ('name_%.ext')\n        for number in frames:\n            frameNum = format(int(number), ('0' + str(padding) + 'd'))\n            outputFiles = outputFile + '_' + frameNum + '.' +  outFormatExt\n            if not os.path.exists(projectBB + imagesDir + outputDir + outputFiles):\n                frameList.append(int(number))\n            else :\n                fileSize = os.path.getsize (projectBB + imagesDir + outputDir + outputFiles)\n                if fileSize < 129:\n                    frameList.append(int(number))\n\n    return frameList\n\n#switch Render Mode - Skip Existing Frames\ndef switchRenderMode():\n    if ((mc.radioButtonGrp('renderModeRB', query=True, select=True)) == 1 ):\n        mc.checkBox('skipExistingFilesCB', edit=True, value=False, enable=False)\n        mc.intField('taskSizeIF', edit=True, enable=True)\n        mc.text('taskSizeTX', edit=True, enable=True)\n    if ((mc.radioButtonGrp('renderModeRB', query=True, select=True)) == 2 ):\n        mc.checkBox('skipExistingFilesCB', edit=True, enable=True)\n    if ((mc.radioButtonGrp('renderModeRB', query=True, select=True)) == 3 ):\n        mc.checkBox('skipExistingFilesCB', edit=True, enable=True)\nbackBurner()\nsetRenderFolder()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Auto shading with textures from Substance" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import substanceAutoShading" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "B:/ressources/sharedMaya/icons/substanceImp.png" 
+        -image1 "B:/ressources/sharedMaya/icons/substanceImp.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import substanceAutoShading as AS\nAS.autoShading()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Studio on" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import maya.cmds as cmds\ncmds.file( 'B:/ressources/sharedMaya/sc..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "B:/ressources/sharedMaya/icons/on.png" 
+        -image1 "B:/ressources/sharedMaya/icons/on.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import maya.cmds as cmds\ncmds.file( 'B:/ressources/sharedMaya/scenes/studio.mb', r=True )\n#cmds.file( 'B:/ressources/sharedMaya/scenes/studio.mb', rr=True )" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Studio off" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import maya.cmds as cmds\n#cmds.file( 'B:/ressources/sharedMaya/s..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "B:/ressources/sharedMaya/icons/off.png" 
+        -image1 "B:/ressources/sharedMaya/icons/off.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import maya.cmds as cmds\n#cmds.file( 'B:/ressources/sharedMaya/scenes/studio.mb', r=True )\ncmds.file( 'B:/ressources/sharedMaya/scenes/studio.mb', rr=True )" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Publish the scene" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import libSave\nreload(libSave)\nlibSave.libSave()" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "LIB" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "B:/ressources/sharedMaya/icons/saveLib2.png" 
+        -image1 "B:/ressources/sharedMaya/icons/saveLib2.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import libSave\nreload(libSave)\nlibSave.libSave()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Incremental save" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import libSave\nreload(libSave)\nlibSave.wipSave()" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "WIP" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "B:/ressources/sharedMaya/icons/wipLib.png" 
+        -image1 "B:/ressources/sharedMaya/icons/wipLib.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import libSave\nreload(libSave)\nlibSave.wipSave()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Save a jpg preview of the scene" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import savePreview\nsavePreview.savePreview()" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "B:/ressources/sharedMaya/icons/savePreview.png" 
+        -image1 "B:/ressources/sharedMaya/icons/savePreview.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import savePreview\nsavePreview.savePreview()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import tweenMachine\ntweenMachine.start()" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import tweenMachine\ntweenMachine.start()" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "TM" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "pythonFamily.png" 
+        -image1 "pythonFamily.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import tweenMachine\ntweenMachine.start()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Tool to cleanup a scene" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import doctor\n\ndoctor.createGUI()" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "B:/ressources/sharedMaya/icons/doctor.png" 
+        -image1 "B:/ressources/sharedMaya/icons/doctor.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import doctor\n\ndoctor.createGUI()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import multiRefImport\nmultiRefImport.replaceByReferences()" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import multiRefImport\nmultiRefImport.replaceByReferences()" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "replace" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "reference.svg" 
+        -image1 "reference.svg" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import multiRefImport\nmultiRefImport.replaceByReferences()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import multiRefImport\nmultiRefImport.multiImport()" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import multiRefImport\nmultiRefImport.multiImport()" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "multi" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "reference.svg" 
+        -image1 "reference.svg" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import multiRefImport\nmultiRefImport.multiImport()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Render with the Arnold RenderView" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Render" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "RenderShelf.png" 
+        -image1 "RenderShelf.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "cmdArnoldRender" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+
+} 
