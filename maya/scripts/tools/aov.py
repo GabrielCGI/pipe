@@ -13,7 +13,7 @@ import maya.mel as mel
 import re
 
 fullDriverName = "fullDriver"
-imgFilePrefix = "<Scene>/<RenderLayer>/<RenderPass>"
+imgFilePrefix = "<RenderLayer>/<Scene>/<RenderPass>"
 
 aovDic = {
 "default":
@@ -21,23 +21,19 @@ aovDic = {
 "N":{"bits":"full","type":"default","state":1,"action":""},
 "P":{"bits":"full","type":"default","state":1,"action":""},
 "Z":{"bits":"full","type":"default","state":1,"action":""},
-"albedo":{"bits":"half","type":"default","state":1,"action":""},
-"diffuse":{"bits":"half","type":"default","state":1,"action":""},
-"diffuse_albedo":{"bits":"half","type":"default","state":1,"action":""},
-"direct":{"bits":"half","type":"default","state":1,"action":""},
+"albedo":{"bits":"half","type":"default","state":0,"action":""},
+"diffuse":{"bits":"half","type":"default","state":0,"action":""},
+"diffuse_albedo":{"bits":"half","type":"default","state":0,"action":""},
+"direct":{"bits":"half","type":"default","state":0,"action":""},
 "emission":{"bits":"half","type":"default","state":1,"action":""},
-"indirect":{"bits":"half","type":"default","state":1,"action":""},
+"indirect":{"bits":"half","type":"default","state":0,"action":""},
 "motionvector":{"bits":"full","type":"default","state":1,"action":""},
 "sheen":{"bits":"half","type":"default","state":1,"action":""},
 "specular":{"bits":"half","type":"default","state":1,"action":""},
 "transmission":{"bits":"half","type":"default","state":1,"action":""},
 "sss":{"bits":"half","type":"default","state":1,"action":""},
-"coat":{"bits":"half","type":"default","state":1,"action":""},
-"dog1":{"bits":"half","type":"default","state":1,"action":""},
-"dog2":{"bits":"half","type":"default","state":1,"action":""},
-"dog3":{"bits":"half","type":"default","state":1,"action":""},
-"dog4":{"bits":"half","type":"default","state":1,"action":""},
-"beatLeafMask":{"bits":"half","type":"default","state":1,"action":""}
+"coat":{"bits":"half","type":"default","state":0,"action":""},
+
 
 },
 "crypto":
@@ -48,7 +44,7 @@ aovDic = {
 },
 "utils":
 {
-"occlusion":{"bits":"half","type":"custom","state":1,"action":"makeOcclusion()"},
+"occlusion":{"bits":"half","type":"custom","state":0,"action":"makeOcclusion()"},
 "UV":{"bits":"full","type":"custom","state":1,"action":"makeUV()"},
 "facingRatio":{"bits":"half","type":"custom","state":False,"action":"makeRimLight()"},
 "texNoise":{"bits":"half","type":"custom","state":False,"action":"makeRGBNoise()"},
@@ -64,7 +60,6 @@ def setImgFilePrefix():
     mel.eval('setMayaSoftwareFrameExt("3", 0);')
 
 
-
 #AOV
 def getLights():
     lights = cmds.ls(type=["aiAreaLight","aiSkyDomeLight"])
@@ -74,7 +69,7 @@ def getLights():
 def makeOcclusion():
     #Create Occlusion Shader and Connect
     occShader = cmds.createNode('aiAmbientOcclusion' , name = 'occMtl')
-    cmds.setAttr(occShader + '.falloff' , 1)
+    cmds.setAttr(occShader + '.falloff' ,0)
     cmds.connectAttr(occShader + '.outColor' , "aiAOV_occlusion.defaultValue")
 
 def makeCrypto(cryptoType):
@@ -132,9 +127,8 @@ def makeRGBNoise():
     cmds.connectAttr(blendColorsRG + '.output' , blendColorsRGB + '.color1')
     cmds.connectAttr(blueFractal + '.outColor' , blendColorsRGB + '.color2')
     #Create Shader and Connect
-    noiseShader = cmds.createNode('surfaceShader', name = 'noiseMtl')
-    cmds.connectAttr(blendColorsRGB + '.output' , noiseShader + '.outColor')
-    cmds.connectAttr(noiseShader + '.outColor' ,  'aiAOV_texNoise.defaultValue')
+
+    cmds.connectAttr(blendColorsRGB + '.output' , 'aiAOV_texNoise.defaultValue')
 
 def makeWireframe():
     #Create Shader and Connect
@@ -266,30 +260,11 @@ def createGUI():
     cmds.button( label='Run', width= 224, command=lambda x:queryValues())
     cmds.columnLayout()
     cmds.button( label='Uncheck all', width= 100, command=lambda x:uncheck())
-    cmds.button( label='Fix carrot leave', width= 100, command=lambda x:fixcarrot())
+
 
     cmds.showWindow('aovWindow')
 
-def fixcarrot():
-    allObjects = cmds.ls(l=True)
-    path = "B:/nutro_1909/assets/pr_carrotLeavesB/ass/leaveB/07/carrotLeaveB.####.ass"
-    pathBushA = "B:/nutro_1909/assets/pr_carrotLeavesB/ass/bushA/04/bushA.####.ass"
-    pathBushB = "B:/nutro_1909/assets/pr_carrotLeavesB/ass/bushB/05/bushB.####.ass"
 
-    for obj in allObjects:
-       if cmds.nodeType(obj) == 'aiStandIn':
-           if "pr_carrotLeavesBVarB_prox" in obj:
-               cmds.setAttr(obj+".dso", path, type="string")
-               try:
-                   cmds.setAttr(obj+".useFrameExtension",1)
-               except:
-                   pass
-           if "bushA" in obj:
-               cmds.setAttr(obj+".dso", pathBushA, type="string")
-               cmds.setAttr(obj+".frameOffset",0)
-           if "bushB" in obj:
-               cmds.setAttr(obj+".dso", pathBushB, type="string")
-               cmds.setAttr(obj+".frameOffset",0)
 def uncheck():
     for aovKind in aovDic.keys():
         for aov in aovDic[aovKind].keys():
