@@ -1,4 +1,4 @@
-SET PIPELINE_DIR=D:\pipelinedev\pipe
+SET PIPELINE_DIR=B:\ressources\pipeline\pipe
 SET PIPELINE_DIR_MAYA=%PIPELINE_DIR%\maya
 SET SCRIPT_MAYA=%PIPELINE_DIR%\maya\scripts
 SET NETWORK_INSTALL=B:\ressources\pipeline\networkInstall
