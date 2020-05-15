@@ -19,7 +19,7 @@ SET OCIO=%NETWORK_INSTALL%\OpenColorIO-Configs\aces_1.2\config.ocio
 SET MAYA_COLOR_MANAGEMENT_POLICY_FILE=%PIPELINE_DIR_MAYA%\colorManagement\cm_aces1.2.xml
 
 REM == Bifrost Compound
-SET BIFROST_LIB_CONFIG_FILES=%BIFROST_LIB_CONFIG_FILES%;%PIPELINE_DIR_MAYA%\bifrost\bloom\bifrost_lib_config.json;%NETWORK_INSTAL%\bifrost\rebel_pack\bifrost_lib_config.json
+SET BIFROST_LIB_CONFIG_FILES=%BIFROST_LIB_CONFIG_FILES%;%PIPELINE_DIR_MAYA%\bifrost\bloom\bifrost_lib_config.json;%NETWORK_INSTALL%\bifrost\rebel_pack\bifrost_lib_config.json
 
 REM == Yeti
 REM SET peregrinel_LICENSE=5052@SPRINTER-08
