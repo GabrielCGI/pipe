@@ -346,10 +346,10 @@ class importerSetup():
                 albedo_ = [item[0] for item in self.tex_nodes if item[1] == "albedo"][0]
                 albedo_colorCorrect = mc.shadingNode("gammaCorrect", asUtility=True, name=(self.ID + "_gammaCorrect"))
 
-                mc.setAttr(albedo_+".exposure", 0.4)
-                mc.setAttr(albedo_colorCorrect+".gammaX",1.1)
-                mc.setAttr(albedo_colorCorrect+".gammaY",1.1)
-                mc.setAttr(albedo_colorCorrect+".gammaZ",1.1)
+                mc.setAttr(albedo_+".exposure", 0)
+                mc.setAttr(albedo_colorCorrect+".gammaX",1)
+                mc.setAttr(albedo_colorCorrect+".gammaY",1)
+                mc.setAttr(albedo_colorCorrect+".gammaZ",1)
                 mc.connectAttr((albedo_+".outColor"), (albedo_colorCorrect+".value"))
                 mc.connectAttr((albedo_colorCorrect+".outValue"), (arn_mat+".baseColor"))
                 mc.connectAttr((albedo_colorCorrect+".outValue"), (arn_mat+".subsurfaceColor."))
@@ -416,15 +416,17 @@ class importerSetup():
                 used_maps.append(fuzz_)
 
 
-            if "specular" in maps_:
-                print "spec!!"
-                arn_spec_range= mc.shadingNode('remapColor', asUtility=True, name=(self.ID + "_specular_remapColor"))
-                #mc.setAttr(arn_spec_range+".outputMax",0)
-                #mc.setAttr(arn_spec_range+".outputMin",1)
-                spec_= [item[0] for item in self.tex_nodes if item[1] == "specular"][0]
-                mc.connectAttr((spec_+".outColor"), (arn_spec_range+".color"))
-                mc.connectAttr((arn_spec_range+".outColor"), (arn_mat+".specularColor"))
-                used_maps.append(spec_)
+            if "specular" in maps_ :
+                if self.Type != "3dplant":
+                    arn_spec_range= mc.shadingNode('remapColor', asUtility=True, name=(self.ID + "_specular_remapColor"))
+                    #mc.setAttr(arn_spec_range+".outputMax",0)
+                    #mc.setAttr(arn_spec_range+".outputMin",1)
+                    spec_= [item[0] for item in self.tex_nodes if item[1] == "specular"][0]
+                    mc.connectAttr((spec_+".outColor"), (arn_spec_range+".color"))
+                    mc.connectAttr((arn_spec_range+".outColor"), (arn_mat+".specularColor"))
+                    used_maps.append(spec_)
+                else:
+                    mc.setAttr(arn_mat+".specular", 0.6)
 
             if "opacity" in maps_:
                 opacity_ = [item[0] for item in self.tex_nodes if item[1] == "opacity"][0]

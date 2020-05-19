@@ -12,28 +12,34 @@
             "uri": "file:///bifrost_object_i.json"
         },
         {
-            "uri": "file:///bifrost_geometry_query_types.json"
+            "uri": "file:///Math_types.json"
         },
         {
-            "uri": "file:///Math_types.json"
+            "uri": "file:///bifrost_geometry_query_types.json"
         },
         {
             "uri": "file:///geometry_types.json"
         },
         {
-            "uri": "file:///generate_sample_locations.json"
+            "uri": "file:///merge_meshes.json"
         },
         {
-            "uri": "file:///CoreArrayOps.json"
+            "uri": "file:///merge_points.json"
         },
         {
-            "uri": "file:///get_property_any.json"
+            "uri": "file:///is_a.json"
         },
         {
-            "uri": "file:///get_property.json"
+            "uri": "file:///get_geo_schema_type.json"
         },
         {
-            "uri": "file:///get_geo_property.json"
+            "uri": "file:///switch_is_a.json"
+        },
+        {
+            "uri": "file:///merge_strands.json"
+        },
+        {
+            "uri": "file:///merge_geometry.json"
         },
         {
             "uri": "file:///Math_long.json"
@@ -66,52 +72,40 @@
             "uri": "file:///Math_ushort.json"
         },
         {
-            "uri": "file:///get_indexer_element.json"
-        },
-        {
-            "uri": "file:///get_max_index.json"
-        },
-        {
-            "uri": "file:///create_object_from_schema.json"
-        },
-        {
-            "uri": "file:///is_a.json"
-        },
-        {
-            "uri": "file:///is_a_range_geo_property.json"
-        },
-        {
-            "uri": "file:///get_range_geo_property.json"
-        },
-        {
-            "uri": "file:///Core_Array_empty_array.json"
-        },
-        {
-            "uri": "file:///Math_bool.json"
-        },
-        {
-            "uri": "file:///has_property.json"
-        },
-        {
-            "uri": "file:///sample_volume_property.json"
+            "uri": "file:///Core_Constants_default_value.json"
         },
         {
             "uri": "file:///Math_conversion.json"
         },
         {
-            "uri": "file:///sample_property.json"
+            "uri": "file:///Math_bool.json"
         },
         {
-            "uri": "file:///add_points_to_points.json"
+            "uri": "file:///change_range.json"
         },
         {
-            "uri": "file:///validate_points.json"
+            "uri": "file:///CoreArrayOps.json"
         },
         {
-            "uri": "file:///construct_points.json"
+            "uri": "file:///get_property_any.json"
+        },
+        {
+            "uri": "file:///get_property.json"
+        },
+        {
+            "uri": "file:///get_geo_property.json"
+        },
+        {
+            "uri": "file:///get_point_position.json"
+        },
+        {
+            "uri": "file:///has_property.json"
         },
         {
             "uri": "file:///create_volume_geo_prop.json"
+        },
+        {
+            "uri": "file:///create_object_from_schema.json"
         },
         {
             "uri": "file:///is_a_mesh.json"
@@ -124,12 +118,6 @@
         },
         {
             "uri": "file:///is_a_volume.json"
-        },
-        {
-            "uri": "file:///get_geo_schema_type.json"
-        },
-        {
-            "uri": "file:///switch_is_a.json"
         },
         {
             "uri": "file:///get_target_component.json"
@@ -153,79 +141,109 @@
             "uri": "file:///set_geo_property.scalar.json"
         },
         {
-            "uri": "file:///Math_axis_angle_to_quaternion.json"
-        },
-        {
-            "uri": "file:///Math_length_squared.json"
-        },
-        {
-            "uri": "file:///Math_almost_equal.json"
-        },
-        {
-            "uri": "file:///Math_vector3_to_vector4.json"
-        },
-        {
-            "uri": "file:///rotation_between_vectors.json"
-        },
-        {
-            "uri": "file:///instances.json"
-        },
-        {
-            "uri": "file:///FCurve.json"
-        },
-        {
-            "uri": "file:///Math_array.json"
-        },
-        {
-            "uri": "file:///Math_multiply_quaternions.json"
-        },
-        {
-            "uri": "file:///Math_rotate_by_quaternion.json"
-        },
-        {
-            "uri": "file:///fluids_types.json"
-        },
-        {
-            "uri": "file:///fluids_nodedefs.json"
-        },
-        {
-            "uri": "file:///find_orthogonal_vectors.json"
-        },
-        {
-            "uri": "file:///Core_Constants_default_value.json"
-        },
-        {
-            "uri": "file:///change_range.json"
-        },
-        {
             "uri": "file:///simulation_types.json"
         },
         {
             "uri": "file:///simulation_nodedefs.json"
         },
         {
-            "uri": "file:///Math_degrees_to_radians.json"
+            "uri": "file:///fluids_types.json"
         },
         {
-            "uri": "file:///math_util.json"
+            "uri": "file:///FCurve.json"
         },
         {
-            "uri": "file:///randomize_vector_in_cone.json"
+            "uri": "file:///fluids_nodedefs.json"
         },
         {
             "uri": "file:///get_sub_object.json"
         },
         {
+            "uri": "file:///compute_on_frame.json"
+        },
+        {
+            "uri": "file:///point_types.json"
+        },
+        {
+            "uri": "file:///Math_constants.json"
+        },
+        {
+            "uri": "file:///Core_Array_array_bounds_impl.json"
+        },
+        {
+            "uri": "file:///Core_Array_array_bounds.json"
+        },
+        {
+            "uri": "file:///Core_Array_sum_array_impl.json"
+        },
+        {
+            "uri": "file:///Core_Array_sum_array.json"
+        },
+        {
+            "uri": "file:///point_nodedefs.json"
+        },
+        {
+            "uri": "file:///fractal_turbulence.json"
+        },
+        {
+            "uri": "file:///Math_array.json"
+        },
+        {
             "uri": "file:///get_point_count.json"
         },
         {
-            "uri": "file:///Noise.json"
+            "uri": "file:///get_indexer_element.json"
         },
         {
-            "uri": "file:///fractal_noise.json"
+            "uri": "file:///get_max_index.json"
         },
         {
-            "uri": "file:///get_point_position.json"
+            "uri": "file:///is_a_range_geo_property.json"
+        },
+        {
+            "uri": "file:///get_range_geo_property.json"
+        },
+        {
+            "uri": "file:///Core_Array_empty_array.json"
+        },
+        {
+            "uri": "file:///sample_volume_property.json"
+        },
+        {
+            "uri": "file:///sample_property.json"
+        },
+        {
+            "uri": "file:///get_point_normal.json"
+        },
+        {
+            "uri": "file:///set_geo_property_data.json"
+        },
+        {
+            "uri": "file:///half_of.json"
+        },
+        {
+            "uri": "file:///Math_multiply_quaternions.json"
+        },
+        {
+            "uri": "file:///Math_euler_to_quaternion.json"
+        },
+        {
+            "uri": "file:///Math_lerp_with_clamp.json"
+        },
+        {
+            "uri": "file:///add_points_to_points.json"
+        },
+        {
+            "uri": "file:///validate_points.json"
+        },
+        {
+            "uri": "file:///construct_points.json"
+        },
+        {
+            "uri": "file:///generate_sample_locations.json"
+        },
+        {
+            "uri": "file:///instances.json"
         },
         {
             "uri": "file:///cumulative_sum_array.json"
@@ -243,66 +261,6 @@
             "uri": "file:///materials.json"
         },
         {
-            "uri": "file:///set_sub_object_property.json"
-        },
-        {
-            "uri": "file:///validate_mesh.json"
-        },
-        {
-            "uri": "file:///construct_mesh.json"
-        },
-        {
-            "uri": "file:///Math_vector4_to_vector3.json"
-        },
-        {
-            "uri": "file:///Math_quaternion_to_matrix.json"
-        },
-        {
-            "uri": "file:///Math_compose_transform_matrix.json"
-        },
-        {
-            "uri": "file:///Core_Array_slice_array.json"
-        },
-        {
-            "uri": "file:///Core_Array_reverse_array.json"
-        },
-        {
-            "uri": "file:///Core_Array_sum_array_impl.json"
-        },
-        {
-            "uri": "file:///Core_Array_sum_array.json"
-        },
-        {
-            "uri": "file:///CoreStringOps.json"
-        },
-        {
-            "uri": "file:///string_to_array.json"
-        },
-        {
-            "uri": "file:///half_of.json"
-        },
-        {
-            "uri": "file:///access_offset_array.json"
-        },
-        {
-            "uri": "file:///point_types.json"
-        },
-        {
-            "uri": "file:///Math_constants.json"
-        },
-        {
-            "uri": "file:///Core_Array_array_bounds_impl.json"
-        },
-        {
-            "uri": "file:///Core_Array_array_bounds.json"
-        },
-        {
-            "uri": "file:///point_nodedefs.json"
-        },
-        {
-            "uri": "file:///create_mesh_cube.json"
-        },
-        {
             "uri": "file:///file_types.json"
         },
         {
@@ -310,53 +268,14 @@
         },
         {
             "uri": "file:///alembic_nodedefs.json"
-        },
-        {
-            "uri": "file:///force_pull_port.json"
-        },
-        {
-            "uri": "file:///merge_meshes.json"
-        },
-        {
-            "uri": "file:///merge_points.json"
-        },
-        {
-            "uri": "file:///merge_strands.json"
-        },
-        {
-            "uri": "file:///merge_geometry.json"
-        },
-        {
-            "uri": "file:///get_point_normal.json"
-        },
-        {
-            "uri": "file:///set_geo_property_data.json"
-        },
-        {
-            "uri": "file:///Math_euler_to_quaternion.json"
-        },
-        {
-            "uri": "file:///get_closest_locations_on_mesh.json"
-        },
-        {
-            "uri": "file:///get_closest_locations.json"
-        },
-        {
-            "uri": "file:///compute_on_frame.json"
-        },
-        {
-            "uri": "file:///fractal_turbulence.json"
-        },
-        {
-            "uri": "file:///Math_lerp_with_clamp.json"
         }
     ],
     "namespaces": [],
     "types": [],
     "compounds": [
         {
-            "name": "User::Graphs::moss",
-            "uriImported": "moss",
+            "name": "Graphs::mossScatter",
+            "uriImported": "file:///__duplicateCompoundURIHelper__",
             "metadata": [
                 {
                     "metaName": "io_nodes",
@@ -410,7 +329,7 @@
                                                 {
                                                     "metaName": "LayoutPos",
                                                     "metaType": "string",
-                                                    "metaValue": "-807.513 -44.1097"
+                                                    "metaValue": "-615.543 -15.242"
                                                 }
                                             ]
                                         }
@@ -419,14 +338,6 @@
                                 {
                                     "metaName": "pPlaneShape1",
                                     "metadata": [
-                                        {
-                                            "metaName": "io_ports",
-                                            "metadata": [
-                                                {
-                                                    "metaName": "mesh1"
-                                                }
-                                            ]
-                                        },
                                         {
                                             "metaName": "io_metadata",
                                             "metadata": [
@@ -441,12 +352,28 @@
                                                     "metaValue": "-1441 -413.478"
                                                 }
                                             ]
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "mesh1"
+                                                }
+                                            ]
                                         }
                                     ]
                                 },
                                 {
                                     "metaName": "mossAlpha",
                                     "metadata": [
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "material_reference"
+                                                }
+                                            ]
+                                        },
                                         {
                                             "metaName": "io_metadata",
                                             "metadata": [
@@ -458,15 +385,35 @@
                                                 {
                                                     "metaName": "LayoutPos",
                                                     "metaType": "string",
-                                                    "metaValue": "337.705 97.1143"
+                                                    "metaValue": "451.258 204.27"
                                                 }
                                             ]
-                                        },
+                                        }
+                                    ]
+                                },
+                                {
+                                    "metaName": "pSphereShape1",
+                                    "metadata": [
                                         {
                                             "metaName": "io_ports",
                                             "metadata": [
                                                 {
-                                                    "metaName": "material_reference"
+                                                    "metaName": "mesh"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "io_metadata",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "DisplayMode",
+                                                    "metaType": "string",
+                                                    "metaValue": "2"
+                                                },
+                                                {
+                                                    "metaName": "LayoutPos",
+                                                    "metaType": "string",
+                                                    "metaValue": "-1332.13 -266.488"
                                                 }
                                             ]
                                         }
@@ -481,14 +428,6 @@
                                     "metaName": "output",
                                     "metadata": [
                                         {
-                                            "metaName": "io_ports",
-                                            "metadata": [
-                                                {
-                                                    "metaName": "points"
-                                                }
-                                            ]
-                                        },
-                                        {
                                             "metaName": "io_metadata",
                                             "metadata": [
                                                 {
@@ -500,6 +439,14 @@
                                                     "metaName": "LayoutPos",
                                                     "metaType": "string",
                                                     "metaValue": "1420.85 -444.749"
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "io_ports",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "points"
                                                 }
                                             ]
                                         }
@@ -577,7 +524,7 @@
                 {
                     "metaName": "ViewportRect",
                     "metaType": "string",
-                    "metaValue": "-2151.22 -527.729 2616.63 1462.96"
+                    "metaValue": "-1604 -368 1692 946"
                 },
                 {
                     "metaName": "compoundIsGraph",
@@ -595,12 +542,12 @@
                 {
                     "metaName": "thumbnail",
                     "metaType": "string",
-                    "metaValue": "moss_thumb.png"
+                    "metaValue": "mossScatter_thumb.png"
                 },
                 {
                     "metaName": "mayaPublishedMaterialsFile",
                     "metaType": "string",
-                    "metaValue": "moss_Maya_materials.ma"
+                    "metaValue": "mossScatter_Maya_materials.ma"
                 },
                 {
                     "metaName": "mayaPublishedMaterials",
@@ -608,7 +555,7 @@
                         {
                             "metaName": "materialName",
                             "metaType": "string",
-                            "metaValue": ":mossAlpha"
+                            "metaValue": ":moss_materials:mossAlpha"
                         }
                     ]
                 }
@@ -737,7 +684,55 @@
                                 {
                                     "metaName": "path",
                                     "metaType": "string",
-                                    "metaValue": "mossAlpha"
+                                    "metaValue": "moss_materials:mossAlpha"
+                                },
+                                {
+                                    "metaName": "channels",
+                                    "metaType": "string",
+                                    "metaValue": "*"
+                                },
+                                {
+                                    "metaName": "setOperation",
+                                    "metaType": "string",
+                                    "metaValue": "+"
+                                },
+                                {
+                                    "metaName": "active",
+                                    "metaType": "string",
+                                    "metaValue": "true"
+                                },
+                                {
+                                    "metaName": "normalsPerPoint",
+                                    "metaType": "string",
+                                    "metaValue": "true"
+                                },
+                                {
+                                    "metaName": "normalsPerFaceVertex",
+                                    "metaType": "string",
+                                    "metaValue": "true"
+                                },
+                                {
+                                    "metaName": "normalsPerFace",
+                                    "metaType": "string",
+                                    "metaValue": "false"
+                                }
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "portName": "mesh",
+                    "portDirection": "input",
+                    "portType": "Amino::Object",
+                    "portDefault": {},
+                    "metadata": [
+                        {
+                            "metaName": "pathinfo",
+                            "metadata": [
+                                {
+                                    "metaName": "path",
+                                    "metaType": "string",
+                                    "metaValue": "/pSphere1/pSphereShape1"
                                 },
                                 {
                                     "metaName": "channels",
@@ -777,7 +772,7 @@
             "compounds": [
                 {
                     "name": "moss_generator",
-                    "uriImported": "moss",
+                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                     "metadata": [
                         {
                             "metaName": "io_nodes",
@@ -788,6 +783,21 @@
                                         {
                                             "metaName": "moss1_mossMaterial",
                                             "metadata": [
+                                                {
+                                                    "metaName": "io_metadata",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "DisplayMode",
+                                                            "metaType": "string",
+                                                            "metaValue": "2"
+                                                        },
+                                                        {
+                                                            "metaName": "LayoutPos",
+                                                            "metaType": "string",
+                                                            "metaValue": "-3819.67 -603.292"
+                                                        }
+                                                    ]
+                                                },
                                                 {
                                                     "metaName": "io_ports",
                                                     "metadata": [
@@ -826,21 +836,6 @@
                                                         },
                                                         {
                                                             "metaName": "randomization_radians"
-                                                        }
-                                                    ]
-                                                },
-                                                {
-                                                    "metaName": "io_metadata",
-                                                    "metadata": [
-                                                        {
-                                                            "metaName": "DisplayMode",
-                                                            "metaType": "string",
-                                                            "metaValue": "2"
-                                                        },
-                                                        {
-                                                            "metaName": "LayoutPos",
-                                                            "metaType": "string",
-                                                            "metaValue": "-3819.67 -603.292"
                                                         }
                                                     ]
                                                 }
@@ -926,32 +921,32 @@
                         {
                             "metaName": "_recentNode_",
                             "metaType": "string",
-                            "metaValue": "BifrostGraph,Geometry::Instances,selector_instance"
+                            "metaValue": "BifrostGraph,Core::Type_Conversion,to_float"
                         },
                         {
                             "metaName": "_recentNode_",
                             "metaType": "string",
-                            "metaValue": "BifrostGraph,Geometry::Properties,set_geo_property"
+                            "metaValue": "BifrostGraph,Core::Type_Conversion,to_double"
                         },
                         {
                             "metaName": "_recentNode_",
                             "metaType": "string",
-                            "metaValue": "BifrostGraph,Simulation::Common,compute_on_frame"
+                            "metaValue": "BifrostGraph,Core::Array,array_size"
                         },
                         {
                             "metaName": "_recentNode_",
                             "metaType": "string",
-                            "metaValue": "BifrostGraph,Rendering::Arnold,set_Arnold_points_settings"
+                            "metaValue": "BifrostGraph,Core::Array,array_dimensions"
                         },
                         {
                             "metaName": "_recentNode_",
                             "metaType": "string",
-                            "metaValue": "BifrostGraph,Geometry::Properties,get_point_position"
+                            "metaValue": "BifrostGraph,Core::Type_Conversion,to_long"
                         },
                         {
                             "metaName": "ViewportRect",
                             "metaType": "string",
-                            "metaValue": "-3794.31 -1023.54 2694.98 1506.77"
+                            "metaValue": "-3390.71 -734.209 3181.54 1778.8"
                         }
                     ],
                     "ports": [
@@ -1066,7 +1061,7 @@
                     "compounds": [
                         {
                             "name": "BuildMask",
-                            "uriImported": "moss",
+                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                             "metadata": [
                                 {
                                     "metaName": "io_nodes",
@@ -2102,7 +2097,7 @@
                         },
                         {
                             "name": "SetScale",
-                            "uriImported": "moss",
+                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                             "metadata": [
                                 {
                                     "metaName": "_recentNode_",
@@ -2175,14 +2170,6 @@
                                                     "metaName": "output",
                                                     "metadata": [
                                                         {
-                                                            "metaName": "io_ports",
-                                                            "metadata": [
-                                                                {
-                                                                    "metaName": "out_geometry"
-                                                                }
-                                                            ]
-                                                        },
-                                                        {
                                                             "metaName": "io_metadata",
                                                             "metadata": [
                                                                 {
@@ -2194,6 +2181,14 @@
                                                                     "metaName": "LayoutPos",
                                                                     "metaType": "string",
                                                                     "metaValue": "2083.41 -555.935"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "metaName": "io_ports",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "out_geometry"
                                                                 }
                                                             ]
                                                         }
@@ -2228,7 +2223,7 @@
                             "compounds": [
                                 {
                                     "name": "randomize_scales",
-                                    "uriImported": "moss",
+                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                     "metadata": [
                                         {
                                             "metaName": "_recentNode_",
@@ -2354,7 +2349,7 @@
                                     "compounds": [
                                         {
                                             "name": "increment",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "ViewportRect",
@@ -2486,7 +2481,7 @@
                                         },
                                         {
                                             "name": "increment1",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "ViewportRect",
@@ -2618,7 +2613,7 @@
                                         },
                                         {
                                             "name": "change_range",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "ViewportRect",
@@ -2759,7 +2754,7 @@
                                         },
                                         {
                                             "name": "change_range1",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "ViewportRect",
@@ -2900,7 +2895,7 @@
                                         },
                                         {
                                             "name": "change_range2",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "ViewportRect",
@@ -3716,7 +3711,7 @@
                         },
                         {
                             "name": "setOrient",
-                            "uriImported": "moss",
+                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                             "metadata": [
                                 {
                                     "metaName": "io_nodes",
@@ -3867,7 +3862,7 @@
                             "compounds": [
                                 {
                                     "name": "quaternion_from_direction_and_up_vector",
-                                    "uriImported": "moss",
+                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                     "metadata": [
                                         {
                                             "metaName": "documentation",
@@ -3969,7 +3964,7 @@
                                     "compounds": [
                                         {
                                             "name": "rotation_matrix_to_quaternion1",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "ViewportRect",
@@ -6109,7 +6104,7 @@
                                 },
                                 {
                                     "name": "sample_face_tangent",
-                                    "uriImported": "moss",
+                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                     "metadata": [
                                         {
                                             "metaName": "ViewportRect",
@@ -6307,7 +6302,7 @@
                                 },
                                 {
                                     "name": "sample_point_normal",
-                                    "uriImported": "moss",
+                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                     "metadata": [
                                         {
                                             "metaName": "ViewportRect",
@@ -6490,7 +6485,7 @@
                                 },
                                 {
                                     "name": "set_point_orientation",
-                                    "uriImported": "moss",
+                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                     "metadata": [
                                         {
                                             "metaName": "documentation",
@@ -6646,7 +6641,7 @@
                                 },
                                 {
                                     "name": "update_face_tangent",
-                                    "uriImported": "moss",
+                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                     "metadata": [
                                         {
                                             "metaName": "_recentNode_",
@@ -6747,7 +6742,7 @@
                                     "compounds": [
                                         {
                                             "name": "get_mesh_properties",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "_recentNode_",
@@ -6878,7 +6873,7 @@
                                             "compounds": [
                                                 {
                                                     "name": "get_face_vertex_uv_index",
-                                                    "uriImported": "moss",
+                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                     "metadata": [
                                                         {
                                                             "metaName": "ViewportRect",
@@ -7517,7 +7512,7 @@
                                         },
                                         {
                                             "name": "get_face_count",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "_recentNode_",
@@ -7717,7 +7712,7 @@
                                         },
                                         {
                                             "name": "compute_tangent_space_properties_using_uv",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "ViewportRect",
@@ -7831,8 +7826,13 @@
                                             "compounds": [
                                                 {
                                                     "name": "gram_schmidt_orthogonalize_tangent",
-                                                    "uriImported": "moss",
+                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                     "metadata": [
+                                                        {
+                                                            "metaName": "icon",
+                                                            "metaType": "string",
+                                                            "metaValue": "<NATIVE>../icons/LoopIterate.svg"
+                                                        },
                                                         {
                                                             "metaName": "icon",
                                                             "metaType": "string",
@@ -7995,7 +7995,7 @@
                                                     "compounds": [
                                                         {
                                                             "name": "indexer_accessor",
-                                                            "uriImported": "moss",
+                                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                             "metadata": [
                                                                 {
                                                                     "metaName": "_recentNode_",
@@ -8116,7 +8116,7 @@
                                                             "compounds": [
                                                                 {
                                                                     "name": "increment",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
                                                                         {
                                                                             "metaName": "ViewportRect",
@@ -8404,7 +8404,7 @@
                                                         },
                                                         {
                                                             "name": "index_slice",
-                                                            "uriImported": "moss",
+                                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                             "metadata": [
                                                                 {
                                                                     "metaName": "ViewportRect",
@@ -8491,8 +8491,13 @@
                                                             "compounds": [
                                                                 {
                                                                     "name": "extract_index_slice",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
+                                                                        {
+                                                                            "metaName": "icon",
+                                                                            "metaType": "string",
+                                                                            "metaValue": "<NATIVE>../icons/LoopForEach.svg"
+                                                                        },
                                                                         {
                                                                             "metaName": "icon",
                                                                             "metaType": "string",
@@ -9305,8 +9310,13 @@
                                                 },
                                                 {
                                                     "name": "iterate_faces_compute_tangent_and_bi",
-                                                    "uriImported": "moss",
+                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                     "metadata": [
+                                                        {
+                                                            "metaName": "icon",
+                                                            "metaType": "string",
+                                                            "metaValue": "<NATIVE>../icons/LoopIterate.svg"
+                                                        },
                                                         {
                                                             "metaName": "icon",
                                                             "metaType": "string",
@@ -9469,7 +9479,7 @@
                                                     "compounds": [
                                                         {
                                                             "name": "indexer_accessor",
-                                                            "uriImported": "moss",
+                                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                             "metadata": [
                                                                 {
                                                                     "metaName": "_recentNode_",
@@ -9590,7 +9600,7 @@
                                                             "compounds": [
                                                                 {
                                                                     "name": "increment",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
                                                                         {
                                                                             "metaName": "ViewportRect",
@@ -9878,7 +9888,7 @@
                                                         },
                                                         {
                                                             "name": "index_slice",
-                                                            "uriImported": "moss",
+                                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                             "metadata": [
                                                                 {
                                                                     "metaName": "ViewportRect",
@@ -9965,8 +9975,13 @@
                                                             "compounds": [
                                                                 {
                                                                     "name": "extract_index_slice",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
+                                                                        {
+                                                                            "metaName": "icon",
+                                                                            "metaType": "string",
+                                                                            "metaValue": "<NATIVE>../icons/LoopForEach.svg"
+                                                                        },
                                                                         {
                                                                             "metaName": "icon",
                                                                             "metaType": "string",
@@ -10308,7 +10323,7 @@
                                                         },
                                                         {
                                                             "name": "compute_tan_and_bitan",
-                                                            "uriImported": "moss",
+                                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                             "metadata": [
                                                                 {
                                                                     "metaName": "ViewportRect",
@@ -10405,7 +10420,7 @@
                                                             "compounds": [
                                                                 {
                                                                     "name": "get_vert1_properties",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
                                                                         {
                                                                             "metaName": "_recentNode_",
@@ -10668,7 +10683,7 @@
                                                                 },
                                                                 {
                                                                     "name": "get_vert2_properties",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
                                                                         {
                                                                             "metaName": "_recentNode_",
@@ -10931,7 +10946,7 @@
                                                                 },
                                                                 {
                                                                     "name": "get_vert3_properties",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
                                                                         {
                                                                             "metaName": "_recentNode_",
@@ -11194,7 +11209,7 @@
                                                                 },
                                                                 {
                                                                     "name": "r",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
                                                                         {
                                                                             "metaName": "ViewportRect",
@@ -11390,7 +11405,7 @@
                                                                 },
                                                                 {
                                                                     "name": "sdir_vector",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
                                                                         {
                                                                             "metaName": "_recentNode_",
@@ -11815,7 +11830,7 @@
                                                                 },
                                                                 {
                                                                     "name": "tdir_vector",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
                                                                         {
                                                                             "metaName": "_recentNode_",
@@ -13749,7 +13764,7 @@
                                         },
                                         {
                                             "name": "compute_tangent_space_properties_using_topology",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "_recentNode_",
@@ -13865,8 +13880,13 @@
                                             "compounds": [
                                                 {
                                                     "name": "for_each",
-                                                    "uriImported": "moss",
+                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                     "metadata": [
+                                                        {
+                                                            "metaName": "icon",
+                                                            "metaType": "string",
+                                                            "metaValue": "<NATIVE>../icons/LoopForEach.svg"
+                                                        },
                                                         {
                                                             "metaName": "icon",
                                                             "metaType": "string",
@@ -13970,7 +13990,7 @@
                                                     "compounds": [
                                                         {
                                                             "name": "indexer_accessor",
-                                                            "uriImported": "moss",
+                                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                             "metadata": [
                                                                 {
                                                                     "metaName": "_recentNode_",
@@ -14091,7 +14111,7 @@
                                                             "compounds": [
                                                                 {
                                                                     "name": "increment",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
                                                                         {
                                                                             "metaName": "ViewportRect",
@@ -14379,7 +14399,7 @@
                                                         },
                                                         {
                                                             "name": "index_slice",
-                                                            "uriImported": "moss",
+                                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                             "metadata": [
                                                                 {
                                                                     "metaName": "ViewportRect",
@@ -14466,8 +14486,13 @@
                                                             "compounds": [
                                                                 {
                                                                     "name": "extract_index_slice",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
+                                                                        {
+                                                                            "metaName": "icon",
+                                                                            "metaType": "string",
+                                                                            "metaValue": "<NATIVE>../icons/LoopForEach.svg"
+                                                                        },
                                                                         {
                                                                             "metaName": "icon",
                                                                             "metaType": "string",
@@ -14809,7 +14834,7 @@
                                                         },
                                                         {
                                                             "name": "compute_tangent_from_topology",
-                                                            "uriImported": "moss",
+                                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                             "metadata": [
                                                                 {
                                                                     "metaName": "_recentNode_",
@@ -14910,7 +14935,7 @@
                                                             "compounds": [
                                                                 {
                                                                     "name": "get_vert2_properties",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
                                                                         {
                                                                             "metaName": "_recentNode_",
@@ -15100,7 +15125,7 @@
                                                                 },
                                                                 {
                                                                     "name": "get_vert1_properties",
-                                                                    "uriImported": "moss",
+                                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                                     "metadata": [
                                                                         {
                                                                             "metaName": "_recentNode_",
@@ -15784,7 +15809,7 @@
                                 },
                                 {
                                     "name": "randomized_aim_and_up",
-                                    "uriImported": "moss",
+                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                     "metadata": [
                                         {
                                             "metaName": "_recentNode_",
@@ -15950,7 +15975,7 @@
                                     "compounds": [
                                         {
                                             "name": "aim_and_up_to_quat",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "_recentNode_",
@@ -16047,7 +16072,7 @@
                                             "compounds": [
                                                 {
                                                     "name": "rotation_matrix_to_quaternion1",
-                                                    "uriImported": "moss",
+                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                     "metadata": [
                                                         {
                                                             "metaName": "io_nodes",
@@ -17274,7 +17299,7 @@
                                         },
                                         {
                                             "name": "randomize_rotation",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "_recentNode_",
@@ -17393,7 +17418,7 @@
                                             "compounds": [
                                                 {
                                                     "name": "random_array_by_range",
-                                                    "uriImported": "moss",
+                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                     "metadata": [
                                                         {
                                                             "metaName": "_recentNode_",
@@ -17521,7 +17546,7 @@
                                                     "compounds": [
                                                         {
                                                             "name": "change_range2",
-                                                            "uriImported": "moss",
+                                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                             "metadata": [
                                                                 {
                                                                     "metaName": "ViewportRect",
@@ -17777,7 +17802,7 @@
                                                 },
                                                 {
                                                     "name": "random_array_by_range1",
-                                                    "uriImported": "moss",
+                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                     "metadata": [
                                                         {
                                                             "metaName": "_recentNode_",
@@ -17905,7 +17930,7 @@
                                                     "compounds": [
                                                         {
                                                             "name": "change_range2",
-                                                            "uriImported": "moss",
+                                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                             "metadata": [
                                                                 {
                                                                     "metaName": "ViewportRect",
@@ -18161,7 +18186,7 @@
                                                 },
                                                 {
                                                     "name": "random_array_by_range2",
-                                                    "uriImported": "moss",
+                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                     "metadata": [
                                                         {
                                                             "metaName": "_recentNode_",
@@ -18288,7 +18313,7 @@
                                                     "compounds": [
                                                         {
                                                             "name": "change_range2",
-                                                            "uriImported": "moss",
+                                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                             "metadata": [
                                                                 {
                                                                     "metaName": "ViewportRect",
@@ -19837,8 +19862,515 @@
                             ]
                         },
                         {
+                            "name": "amountTypeSwitch",
+                            "uriImported": "file:///__duplicateCompoundURIHelper__",
+                            "metadata": [
+                                {
+                                    "metaName": "io_nodes",
+                                    "metadata": [
+                                        {
+                                            "metaName": "io_inodes",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "input",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "io_ports",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "useDensity"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "io_onodes",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "output",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "io_ports",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "output"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                }
+                            ],
+                            "ports": [
+                                {
+                                    "portName": "output",
+                                    "portDirection": "output"
+                                },
+                                {
+                                    "portName": "useDensity",
+                                    "portDirection": "input",
+                                    "portType": "bool"
+                                }
+                            ],
+                            "compoundNodes": [
+                                {
+                                    "nodeName": "if",
+                                    "nodeType": "Core::Logic::if",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-3069.78 205.002"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nodeName": "value",
+                                    "valueType": "BifrostExp::Geometry::AmountType",
+                                    "metadata": [
+                                        {
+                                            "metaName": "valuenode_defaultvalue",
+                                            "metaType": "string",
+                                            "metaValue": "0"
+                                        },
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "valuenode_defaultvalue",
+                                            "metaType": "string",
+                                            "metaValue": "0"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-3325.49 167.142"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nodeName": "value13",
+                                    "valueType": "bool",
+                                    "metadata": [
+                                        {
+                                            "metaName": "valuenode_defaultvalue",
+                                            "metaType": "string",
+                                            "metaValue": "0"
+                                        },
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "valuenode_defaultvalue",
+                                            "metaType": "string",
+                                            "metaValue": "0"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-3324.38 336.179"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nodeName": "value14",
+                                    "valueType": "BifrostExp::Geometry::AmountType",
+                                    "metadata": [
+                                        {
+                                            "metaName": "valuenode_defaultvalue",
+                                            "metaType": "string",
+                                            "metaValue": "0"
+                                        },
+                                        {
+                                            "metaName": "valuenode_defaultvalue",
+                                            "metaType": "string",
+                                            "metaValue": "0"
+                                        },
+                                        {
+                                            "metaName": "valuenode_defaultvalue",
+                                            "metaType": "string",
+                                            "metaValue": "0"
+                                        },
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-3310.08 -20.9707"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "connections": [
+                                {
+                                    "source": "value13.output",
+                                    "target": "if.condition"
+                                },
+                                {
+                                    "source": "value.output",
+                                    "target": "if.true_case"
+                                },
+                                {
+                                    "source": "value14.output",
+                                    "target": "if.false_case"
+                                },
+                                {
+                                    "source": "if.output",
+                                    "target": ".output"
+                                },
+                                {
+                                    "source": ".useDensity",
+                                    "target": "value13.value"
+                                }
+                            ],
+                            "values": [
+                                {
+                                    "valueName": "if.condition",
+                                    "valueType": "bool",
+                                    "value": "true"
+                                },
+                                {
+                                    "valueName": "value.value",
+                                    "valueType": "BifrostExp::Geometry::AmountType",
+                                    "value": "density"
+                                },
+                                {
+                                    "valueName": "value13.value",
+                                    "valueType": "bool",
+                                    "value": "false"
+                                },
+                                {
+                                    "valueName": "value14.value",
+                                    "valueType": "BifrostExp::Geometry::AmountType",
+                                    "value": "number"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "RandomId",
+                            "uriImported": "file:///__duplicateCompoundURIHelper__",
+                            "metadata": [
+                                {
+                                    "metaName": "io_nodes",
+                                    "metadata": [
+                                        {
+                                            "metaName": "io_inodes",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "input",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "io_ports",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "instanceMesh"
+                                                                },
+                                                                {
+                                                                    "metaName": "geometry"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "metaName": "io_metadata",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "DisplayMode",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "2"
+                                                                },
+                                                                {
+                                                                    "metaName": "LayoutPos",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "-1910 -690"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        },
+                                        {
+                                            "metaName": "io_onodes",
+                                            "metadata": [
+                                                {
+                                                    "metaName": "output",
+                                                    "metadata": [
+                                                        {
+                                                            "metaName": "io_ports",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "out_geometry"
+                                                                }
+                                                            ]
+                                                        },
+                                                        {
+                                                            "metaName": "io_metadata",
+                                                            "metadata": [
+                                                                {
+                                                                    "metaName": "DisplayMode",
+                                                                    "metaType": "string",
+                                                                    "metaValue": "2"
+                                                                }
+                                                            ]
+                                                        }
+                                                    ]
+                                                }
+                                            ]
+                                        }
+                                    ]
+                                },
+                                {
+                                    "metaName": "ViewportRect",
+                                    "metaType": "string",
+                                    "metaValue": "-1224.71 -834.145 1909.46 1067.58"
+                                }
+                            ],
+                            "ports": [
+                                {
+                                    "portName": "instanceMesh",
+                                    "portDirection": "input",
+                                    "portType": "array<Amino::Object>"
+                                },
+                                {
+                                    "portName": "geometry",
+                                    "portDirection": "input",
+                                    "portType": "Amino::Object"
+                                },
+                                {
+                                    "portName": "out_geometry",
+                                    "portDirection": "output",
+                                    "portType": "Amino::Object"
+                                }
+                            ],
+                            "compoundNodes": [
+                                {
+                                    "nodeName": "array_size",
+                                    "nodeType": "Core::Array::array_size",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-993 -400"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nodeName": "get_point_count",
+                                    "nodeType": "Geometry::Properties::get_point_count",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-1095 -987"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nodeName": "multiply",
+                                    "nodeType": "Core::Math::multiply",
+                                    "multiInPortNames": [
+                                        "random_values",
+                                        "output1"
+                                    ],
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-559 -924"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nodeName": "random_value_array",
+                                    "nodeType": "Core::Randomization::random_value_array",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-865 -963"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nodeName": "set_geo_property",
+                                    "nodeType": "Geometry::Properties::set_geo_property",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-80 -758"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nodeName": "to_float",
+                                    "nodeType": "Core::Type_Conversion::to_float",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-731 -381"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nodeName": "to_long",
+                                    "nodeType": "Core::Type_Conversion::to_long",
+                                    "metadata": [
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-379 -750"
+                                        }
+                                    ]
+                                },
+                                {
+                                    "nodeName": "value",
+                                    "valueType": "float",
+                                    "metadata": [
+                                        {
+                                            "metaName": "valuenode_defaultvalue",
+                                            "metaType": "string",
+                                            "metaValue": "0"
+                                        },
+                                        {
+                                            "metaName": "valuenode_defaultvalue",
+                                            "metaType": "string",
+                                            "metaValue": "0"
+                                        },
+                                        {
+                                            "metaName": "DisplayMode",
+                                            "metaType": "string",
+                                            "metaValue": "2"
+                                        },
+                                        {
+                                            "metaName": "LayoutPos",
+                                            "metaType": "string",
+                                            "metaValue": "-650 -656"
+                                        }
+                                    ]
+                                }
+                            ],
+                            "connections": [
+                                {
+                                    "source": ".instanceMesh",
+                                    "target": "array_size.array"
+                                },
+                                {
+                                    "source": ".geometry",
+                                    "target": "get_point_count.geometry"
+                                },
+                                {
+                                    "source": "random_value_array.random_values",
+                                    "target": "multiply.first.random_values"
+                                },
+                                {
+                                    "source": "value.output",
+                                    "target": "multiply.first.output1"
+                                },
+                                {
+                                    "source": "get_point_count.count",
+                                    "target": "random_value_array.size"
+                                },
+                                {
+                                    "source": ".geometry",
+                                    "target": "set_geo_property.geometry"
+                                },
+                                {
+                                    "source": "to_long.long",
+                                    "target": "set_geo_property.data"
+                                },
+                                {
+                                    "source": "set_geo_property.out_geometry",
+                                    "target": ".out_geometry"
+                                },
+                                {
+                                    "source": "array_size.size",
+                                    "target": "to_float.from"
+                                },
+                                {
+                                    "source": "multiply.output",
+                                    "target": "to_long.from"
+                                },
+                                {
+                                    "source": "to_float.float",
+                                    "target": "value.value"
+                                }
+                            ],
+                            "values": [
+                                {
+                                    "valueName": "set_geo_property.property",
+                                    "valueType": "string",
+                                    "value": "point_instance_id"
+                                },
+                                {
+                                    "valueName": "set_geo_property.target",
+                                    "valueType": "string",
+                                    "value": "point_component"
+                                },
+                                {
+                                    "valueName": "value.value",
+                                    "valueType": "float",
+                                    "value": "3f"
+                                }
+                            ]
+                        },
+                        {
                             "name": "set_weighted_instance_selection",
-                            "uriImported": "moss",
+                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                             "metadata": [
                                 {
                                     "metaName": "_recentNode_",
@@ -19864,6 +20396,11 @@
                                     "metaName": "_recentNode_",
                                     "metaType": "string",
                                     "metaValue": "BifrostBoard,Core::Constants,float"
+                                },
+                                {
+                                    "metaName": "ViewportRect",
+                                    "metaType": "string",
+                                    "metaValue": "27.7434 -1212.73 3075.16 1719.33"
                                 },
                                 {
                                     "metaName": "io_nodes",
@@ -19917,21 +20454,6 @@
                                                                     "metaName": "selector_instance"
                                                                 }
                                                             ]
-                                                        },
-                                                        {
-                                                            "metaName": "io_metadata",
-                                                            "metadata": [
-                                                                {
-                                                                    "metaName": "DisplayMode",
-                                                                    "metaType": "string",
-                                                                    "metaValue": "2"
-                                                                },
-                                                                {
-                                                                    "metaName": "LayoutPos",
-                                                                    "metaType": "string",
-                                                                    "metaValue": "-1086 178"
-                                                                }
-                                                            ]
                                                         }
                                                     ]
                                                 }
@@ -19953,32 +20475,12 @@
                                                                     "metaName": "instance_id_values"
                                                                 }
                                                             ]
-                                                        },
-                                                        {
-                                                            "metaName": "io_metadata",
-                                                            "metadata": [
-                                                                {
-                                                                    "metaName": "DisplayMode",
-                                                                    "metaType": "string",
-                                                                    "metaValue": "2"
-                                                                },
-                                                                {
-                                                                    "metaName": "LayoutPos",
-                                                                    "metaType": "string",
-                                                                    "metaValue": "2633.52 -259.898"
-                                                                }
-                                                            ]
                                                         }
                                                     ]
                                                 }
                                             ]
                                         }
                                     ]
-                                },
-                                {
-                                    "metaName": "ViewportRect",
-                                    "metaType": "string",
-                                    "metaValue": "27.7434 -1212.73 3075.16 1719.33"
                                 }
                             ],
                             "ports": [
@@ -20057,8 +20559,23 @@
                             "compounds": [
                                 {
                                     "name": "for_each",
-                                    "uriImported": "moss",
+                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                     "metadata": [
+                                        {
+                                            "metaName": "icon",
+                                            "metaType": "string",
+                                            "metaValue": "<NATIVE>../icons/LoopForEach.svg"
+                                        },
+                                        {
+                                            "metaName": "icon",
+                                            "metaType": "string",
+                                            "metaValue": "<NATIVE>../icons/LoopForEach.svg"
+                                        },
+                                        {
+                                            "metaName": "icon",
+                                            "metaType": "string",
+                                            "metaValue": "<NATIVE>../icons/LoopForEach.svg"
+                                        },
                                         {
                                             "metaName": "icon",
                                             "metaType": "string",
@@ -20200,7 +20717,7 @@
                                     "compounds": [
                                         {
                                             "name": "compound",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "ViewportRect",
@@ -20569,7 +21086,7 @@
                                 },
                                 {
                                     "name": "prep_selection_sequence",
-                                    "uriImported": "moss",
+                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                     "metadata": [
                                         {
                                             "metaName": "_recentNode_",
@@ -20656,7 +21173,7 @@
                                     "compounds": [
                                         {
                                             "name": "find_last_valid",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "ViewportRect",
@@ -20725,8 +21242,23 @@
                                             "compounds": [
                                                 {
                                                     "name": "iterate",
-                                                    "uriImported": "moss",
+                                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                                     "metadata": [
+                                                        {
+                                                            "metaName": "icon",
+                                                            "metaType": "string",
+                                                            "metaValue": "<NATIVE>../icons/LoopIterate.svg"
+                                                        },
+                                                        {
+                                                            "metaName": "icon",
+                                                            "metaType": "string",
+                                                            "metaValue": "<NATIVE>../icons/LoopIterate.svg"
+                                                        },
+                                                        {
+                                                            "metaName": "icon",
+                                                            "metaType": "string",
+                                                            "metaValue": "<NATIVE>../icons/LoopIterate.svg"
+                                                        },
                                                         {
                                                             "metaName": "icon",
                                                             "metaType": "string",
@@ -20998,6 +21530,21 @@
                                             "valueType": "float",
                                             "metadata": [
                                                 {
+                                                    "metaName": "valuenode_defaultvalue",
+                                                    "metaType": "string",
+                                                    "metaValue": "0"
+                                                },
+                                                {
+                                                    "metaName": "valuenode_defaultvalue",
+                                                    "metaType": "string",
+                                                    "metaValue": "0"
+                                                },
+                                                {
+                                                    "metaName": "valuenode_defaultvalue",
+                                                    "metaType": "string",
+                                                    "metaValue": "0"
+                                                },
+                                                {
                                                     "metaName": "DisplayMode",
                                                     "metaType": "string",
                                                     "metaValue": "2"
@@ -21006,11 +21553,6 @@
                                                     "metaName": "LayoutPos",
                                                     "metaType": "string",
                                                     "metaValue": "10 329"
-                                                },
-                                                {
-                                                    "metaName": "valuenode_defaultvalue",
-                                                    "metaType": "string",
-                                                    "metaValue": "0"
                                                 }
                                             ]
                                         },
@@ -21165,7 +21707,7 @@
                                 },
                                 {
                                     "name": "get_geo_property_or_default",
-                                    "uriImported": "moss",
+                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                     "metadata": [
                                         {
                                             "metaName": "_recentNode_",
@@ -21276,7 +21818,7 @@
                                     "compounds": [
                                         {
                                             "name": "get_component_count",
-                                            "uriImported": "moss",
+                                            "uriImported": "file:///__duplicateCompoundURIHelper__",
                                             "metadata": [
                                                 {
                                                     "metaName": "ViewportRect",
@@ -21382,6 +21924,21 @@
                                                     "valueType": "uint",
                                                     "metadata": [
                                                         {
+                                                            "metaName": "valuenode_defaultvalue",
+                                                            "metaType": "string",
+                                                            "metaValue": "0"
+                                                        },
+                                                        {
+                                                            "metaName": "valuenode_defaultvalue",
+                                                            "metaType": "string",
+                                                            "metaValue": "0"
+                                                        },
+                                                        {
+                                                            "metaName": "valuenode_defaultvalue",
+                                                            "metaType": "string",
+                                                            "metaValue": "0"
+                                                        },
+                                                        {
                                                             "metaName": "DisplayMode",
                                                             "metaType": "string",
                                                             "metaValue": "2"
@@ -21390,11 +21947,6 @@
                                                             "metaName": "LayoutPos",
                                                             "metaType": "string",
                                                             "metaValue": "315 229"
-                                                        },
-                                                        {
-                                                            "metaName": "valuenode_defaultvalue",
-                                                            "metaType": "string",
-                                                            "metaValue": "0"
                                                         }
                                                     ]
                                                 }
@@ -21634,7 +22186,7 @@
                                 },
                                 {
                                     "name": "has_mask",
-                                    "uriImported": "moss",
+                                    "uriImported": "file:///__duplicateCompoundURIHelper__",
                                     "metadata": [
                                         {
                                             "metaName": "ViewportRect",
@@ -21921,6 +22473,21 @@
                                     "valueType": "long",
                                     "metadata": [
                                         {
+                                            "metaName": "valuenode_defaultvalue",
+                                            "metaType": "string",
+                                            "metaValue": "0"
+                                        },
+                                        {
+                                            "metaName": "valuenode_defaultvalue",
+                                            "metaType": "string",
+                                            "metaValue": "0"
+                                        },
+                                        {
+                                            "metaName": "valuenode_defaultvalue",
+                                            "metaType": "string",
+                                            "metaValue": "0"
+                                        },
+                                        {
                                             "metaName": "DisplayMode",
                                             "metaType": "string",
                                             "metaValue": "2"
@@ -21929,11 +22496,6 @@
                                             "metaName": "LayoutPos",
                                             "metaType": "string",
                                             "metaValue": "619 718"
-                                        },
-                                        {
-                                            "metaName": "valuenode_defaultvalue",
-                                            "metaType": "string",
-                                            "metaValue": "0"
                                         }
                                     ]
                                 },
@@ -22182,209 +22744,6 @@
                                     "value": "0"
                                 }
                             ]
-                        },
-                        {
-                            "name": "amountTypeSwitch",
-                            "uriImported": "moss",
-                            "metadata": [
-                                {
-                                    "metaName": "io_nodes",
-                                    "metadata": [
-                                        {
-                                            "metaName": "io_inodes",
-                                            "metadata": [
-                                                {
-                                                    "metaName": "input",
-                                                    "metadata": [
-                                                        {
-                                                            "metaName": "io_ports",
-                                                            "metadata": [
-                                                                {
-                                                                    "metaName": "useDensity"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        },
-                                        {
-                                            "metaName": "io_onodes",
-                                            "metadata": [
-                                                {
-                                                    "metaName": "output",
-                                                    "metadata": [
-                                                        {
-                                                            "metaName": "io_ports",
-                                                            "metadata": [
-                                                                {
-                                                                    "metaName": "output"
-                                                                }
-                                                            ]
-                                                        }
-                                                    ]
-                                                }
-                                            ]
-                                        }
-                                    ]
-                                }
-                            ],
-                            "ports": [
-                                {
-                                    "portName": "output",
-                                    "portDirection": "output"
-                                },
-                                {
-                                    "portName": "useDensity",
-                                    "portDirection": "input",
-                                    "portType": "bool"
-                                }
-                            ],
-                            "compoundNodes": [
-                                {
-                                    "nodeName": "if",
-                                    "nodeType": "Core::Logic::if",
-                                    "metadata": [
-                                        {
-                                            "metaName": "DisplayMode",
-                                            "metaType": "string",
-                                            "metaValue": "2"
-                                        },
-                                        {
-                                            "metaName": "LayoutPos",
-                                            "metaType": "string",
-                                            "metaValue": "-3069.78 205.002"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "nodeName": "value",
-                                    "valueType": "BifrostExp::Geometry::AmountType",
-                                    "metadata": [
-                                        {
-                                            "metaName": "valuenode_defaultvalue",
-                                            "metaType": "string",
-                                            "metaValue": "0"
-                                        },
-                                        {
-                                            "metaName": "DisplayMode",
-                                            "metaType": "string",
-                                            "metaValue": "2"
-                                        },
-                                        {
-                                            "metaName": "valuenode_defaultvalue",
-                                            "metaType": "string",
-                                            "metaValue": "0"
-                                        },
-                                        {
-                                            "metaName": "LayoutPos",
-                                            "metaType": "string",
-                                            "metaValue": "-3325.49 167.142"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "nodeName": "value13",
-                                    "valueType": "bool",
-                                    "metadata": [
-                                        {
-                                            "metaName": "valuenode_defaultvalue",
-                                            "metaType": "string",
-                                            "metaValue": "0"
-                                        },
-                                        {
-                                            "metaName": "DisplayMode",
-                                            "metaType": "string",
-                                            "metaValue": "2"
-                                        },
-                                        {
-                                            "metaName": "valuenode_defaultvalue",
-                                            "metaType": "string",
-                                            "metaValue": "0"
-                                        },
-                                        {
-                                            "metaName": "LayoutPos",
-                                            "metaType": "string",
-                                            "metaValue": "-3324.38 336.179"
-                                        }
-                                    ]
-                                },
-                                {
-                                    "nodeName": "value14",
-                                    "valueType": "BifrostExp::Geometry::AmountType",
-                                    "metadata": [
-                                        {
-                                            "metaName": "valuenode_defaultvalue",
-                                            "metaType": "string",
-                                            "metaValue": "0"
-                                        },
-                                        {
-                                            "metaName": "valuenode_defaultvalue",
-                                            "metaType": "string",
-                                            "metaValue": "0"
-                                        },
-                                        {
-                                            "metaName": "valuenode_defaultvalue",
-                                            "metaType": "string",
-                                            "metaValue": "0"
-                                        },
-                                        {
-                                            "metaName": "DisplayMode",
-                                            "metaType": "string",
-                                            "metaValue": "2"
-                                        },
-                                        {
-                                            "metaName": "LayoutPos",
-                                            "metaType": "string",
-                                            "metaValue": "-3310.08 -20.9707"
-                                        }
-                                    ]
-                                }
-                            ],
-                            "connections": [
-                                {
-                                    "source": "value13.output",
-                                    "target": "if.condition"
-                                },
-                                {
-                                    "source": "value.output",
-                                    "target": "if.true_case"
-                                },
-                                {
-                                    "source": "value14.output",
-                                    "target": "if.false_case"
-                                },
-                                {
-                                    "source": "if.output",
-                                    "target": ".output"
-                                },
-                                {
-                                    "source": ".useDensity",
-                                    "target": "value13.value"
-                                }
-                            ],
-                            "values": [
-                                {
-                                    "valueName": "if.condition",
-                                    "valueType": "bool",
-                                    "value": "true"
-                                },
-                                {
-                                    "valueName": "value.value",
-                                    "valueType": "BifrostExp::Geometry::AmountType",
-                                    "value": "density"
-                                },
-                                {
-                                    "valueName": "value13.value",
-                                    "valueType": "bool",
-                                    "value": "false"
-                                },
-                                {
-                                    "valueName": "value14.value",
-                                    "valueType": "BifrostExp::Geometry::AmountType",
-                                    "value": "number"
-                                }
-                            ]
                         }
                     ],
                     "compoundNodes": [
@@ -22416,7 +22775,7 @@
                                 {
                                     "metaName": "LayoutPos",
                                     "metaType": "string",
-                                    "metaValue": "-165 -436"
+                                    "metaValue": "-144.774 -70.3741"
                                 }
                             ]
                         },
@@ -22433,22 +22792,6 @@
                                     "metaName": "LayoutPos",
                                     "metaType": "string",
                                     "metaValue": "-1586 -655"
-                                }
-                            ]
-                        },
-                        {
-                            "nodeName": "set_weighted_instance_selection",
-                            "nodeType": "set_weighted_instance_selection",
-                            "metadata": [
-                                {
-                                    "metaName": "DisplayMode",
-                                    "metaType": "string",
-                                    "metaValue": "2"
-                                },
-                                {
-                                    "metaName": "LayoutPos",
-                                    "metaType": "string",
-                                    "metaValue": "190.097 -84.2337"
                                 }
                             ]
                         },
@@ -22746,11 +23089,6 @@
                                     "metaValue": "2"
                                 },
                                 {
-                                    "metaName": "LayoutPos",
-                                    "metaType": "string",
-                                    "metaValue": "-521.797 -110.74"
-                                },
-                                {
                                     "metaName": "PortExpandedState",
                                     "metadata": [
                                         {
@@ -22764,6 +23102,43 @@
                                             "metaValue": "1"
                                         }
                                     ]
+                                },
+                                {
+                                    "metaName": "LayoutPos",
+                                    "metaType": "string",
+                                    "metaValue": "-383.326 -367.456"
+                                }
+                            ]
+                        },
+                        {
+                            "nodeName": "RandomId",
+                            "nodeType": "RandomId",
+                            "metadata": [
+                                {
+                                    "metaName": "DisplayMode",
+                                    "metaType": "string",
+                                    "metaValue": "2"
+                                },
+                                {
+                                    "metaName": "LayoutPos",
+                                    "metaType": "string",
+                                    "metaValue": "-836.523 -524.937"
+                                }
+                            ]
+                        },
+                        {
+                            "nodeName": "set_weighted_instance_selection",
+                            "nodeType": "set_weighted_instance_selection",
+                            "metadata": [
+                                {
+                                    "metaName": "DisplayMode",
+                                    "metaType": "string",
+                                    "metaValue": "2"
+                                },
+                                {
+                                    "metaName": "LayoutPos",
+                                    "metaType": "string",
+                                    "metaValue": "444.342 118.008"
                                 }
                             ]
                         }
@@ -22894,28 +23269,36 @@
                             "target": "set_geo_ColorSetMask.geometry"
                         },
                         {
-                            "source": "SetScale.out_geometry",
-                            "target": "set_weighted_instance_selection.instances"
+                            "source": ".instanceMesh",
+                            "target": "set_instance_geometry1.instance_geometries.mesh"
+                        },
+                        {
+                            "source": ".randomization_radians",
+                            "target": "setOrient.randomization_radians"
                         },
                         {
                             "source": "set_instance_geometry1.instances",
                             "target": "SetScale.geometry"
                         },
                         {
-                            "source": ".instanceMesh",
-                            "target": "set_instance_geometry1.instance_geometries.mesh"
-                        },
-                        {
-                            "source": "set_weighted_instance_selection.out_object",
+                            "source": "SetScale.out_geometry",
                             "target": "set_Color.geometry"
                         },
                         {
+                            "source": ".instanceMesh",
+                            "target": "RandomId.instanceMesh"
+                        },
+                        {
                             "source": "set_geo_ColorSetMask.out_geometry",
+                            "target": "RandomId.geometry"
+                        },
+                        {
+                            "source": "RandomId.out_geometry",
                             "target": "set_instance_geometry1.points"
                         },
                         {
-                            "source": ".randomization_radians",
-                            "target": "setOrient.randomization_radians"
+                            "source": "SetScale.out_geometry",
+                            "target": "set_weighted_instance_selection.instances"
                         }
                     ],
                     "values": [
@@ -22952,56 +23335,6 @@
                                 "y": "0f",
                                 "z": "2f"
                             }
-                        },
-                        {
-                            "valueName": "set_weighted_instance_selection.id_property",
-                            "valueType": "string",
-                            "value": "point_instance_id"
-                        },
-                        {
-                            "valueName": "set_weighted_instance_selection.weight_0",
-                            "valueType": "float",
-                            "value": "1f"
-                        },
-                        {
-                            "valueName": "set_weighted_instance_selection.weight_1",
-                            "valueType": "float",
-                            "value": "1f"
-                        },
-                        {
-                            "valueName": "set_weighted_instance_selection.weight_2",
-                            "valueType": "float",
-                            "value": "1f"
-                        },
-                        {
-                            "valueName": "set_weighted_instance_selection.weight_3",
-                            "valueType": "float",
-                            "value": "1f"
-                        },
-                        {
-                            "valueName": "set_weighted_instance_selection.weight_4",
-                            "valueType": "float",
-                            "value": "0f"
-                        },
-                        {
-                            "valueName": "set_weighted_instance_selection.weight_5",
-                            "valueType": "float",
-                            "value": "0f"
-                        },
-                        {
-                            "valueName": "set_weighted_instance_selection.weight_6",
-                            "valueType": "float",
-                            "value": "0f"
-                        },
-                        {
-                            "valueName": "set_weighted_instance_selection.weight_7",
-                            "valueType": "float",
-                            "value": "0f"
-                        },
-                        {
-                            "valueName": "set_weighted_instance_selection.selector_instance",
-                            "valueType": "float",
-                            "value": "0f"
                         },
                         {
                             "valueName": "generate_sample_locations.amount",
@@ -23138,6 +23471,61 @@
                             "valueName": "set_instance_geometry1.wrap_out_of_range",
                             "valueType": "bool",
                             "value": "true"
+                        },
+                        {
+                            "valueName": "RandomId.geometry",
+                            "valueType": "Amino::Object",
+                            "value": {}
+                        },
+                        {
+                            "valueName": "set_weighted_instance_selection.id_property",
+                            "valueType": "string",
+                            "value": "point_instance_id"
+                        },
+                        {
+                            "valueName": "set_weighted_instance_selection.weight_0",
+                            "valueType": "float",
+                            "value": "1f"
+                        },
+                        {
+                            "valueName": "set_weighted_instance_selection.weight_1",
+                            "valueType": "float",
+                            "value": "1f"
+                        },
+                        {
+                            "valueName": "set_weighted_instance_selection.weight_2",
+                            "valueType": "float",
+                            "value": "1f"
+                        },
+                        {
+                            "valueName": "set_weighted_instance_selection.weight_3",
+                            "valueType": "float",
+                            "value": "1f"
+                        },
+                        {
+                            "valueName": "set_weighted_instance_selection.weight_4",
+                            "valueType": "float",
+                            "value": "0f"
+                        },
+                        {
+                            "valueName": "set_weighted_instance_selection.weight_5",
+                            "valueType": "float",
+                            "value": "0f"
+                        },
+                        {
+                            "valueName": "set_weighted_instance_selection.weight_6",
+                            "valueType": "float",
+                            "value": "0f"
+                        },
+                        {
+                            "valueName": "set_weighted_instance_selection.weight_7",
+                            "valueType": "float",
+                            "value": "0f"
+                        },
+                        {
+                            "valueName": "set_weighted_instance_selection.selector_instance",
+                            "valueType": "float",
+                            "value": "0f"
                         }
                     ]
                 }
@@ -23308,26 +23696,7 @@
                         {
                             "metaName": "LayoutPos",
                             "metaType": "string",
-                            "metaValue": "-575.8 238.122"
-                        }
-                    ]
-                },
-                {
-                    "nodeName": "build_array2",
-                    "nodeType": "Core::Array::build_array",
-                    "multiInPortNames": [
-                        "sphere_mesh"
-                    ],
-                    "metadata": [
-                        {
-                            "metaName": "DisplayMode",
-                            "metaType": "string",
-                            "metaValue": "2"
-                        },
-                        {
-                            "metaName": "LayoutPos",
-                            "metaType": "string",
-                            "metaValue": "-373.504 246.452"
+                            "metaValue": "-644.572 263.594"
                         }
                     ]
                 },
@@ -23341,30 +23710,14 @@
                             "metaValue": "2"
                         },
                         {
-                            "metaName": "valuenode_defaultvalue",
-                            "metaType": "string",
-                            "metaValue": "B:\\ressources\\pipeline\\pipe\\maya\\bifrost\\bloom\\graphs\\moss"
-                        },
-                        {
                             "metaName": "LayoutPos",
                             "metaType": "string",
                             "metaValue": "-1359.88 354.036"
-                        }
-                    ]
-                },
-                {
-                    "nodeName": "create_mesh_cube",
-                    "nodeType": "Modeling::Primitive::create_mesh_cube",
-                    "metadata": [
-                        {
-                            "metaName": "DisplayMode",
-                            "metaType": "string",
-                            "metaValue": "2"
                         },
                         {
-                            "metaName": "LayoutPos",
+                            "metaName": "valuenode_defaultvalue",
                             "metaType": "string",
-                            "metaValue": "-1094.04 684.525"
+                            "metaValue": "B:\\ressources\\pipeline\\pipe\\maya\\bifrost\\bloom\\graphs\\moss"
                         }
                     ]
                 }
@@ -23427,20 +23780,8 @@
                     "target": "moss_generator.offSetFractal"
                 },
                 {
-                    "source": "build_array2.array",
-                    "target": "moss_generator.instanceMesh"
-                },
-                {
-                    "source": ".mesh1",
-                    "target": "build_array.first.in_geo"
-                },
-                {
                     "source": ".Random_Orient",
                     "target": "moss_generator.randomization_radians"
-                },
-                {
-                    "source": "build_array1.array",
-                    "target": "build_array2.first.sphere_mesh"
                 },
                 {
                     "source": "value.output",
@@ -23473,6 +23814,14 @@
                 {
                     "source": "read_Alembic2.geometry",
                     "target": "build_array1.first.geometry2"
+                },
+                {
+                    "source": ".mesh",
+                    "target": "build_array.first.in_geo"
+                },
+                {
+                    "source": "build_array1.array",
+                    "target": "moss_generator.instanceMesh"
                 }
             ],
             "values": [
@@ -23594,16 +23943,6 @@
                     "valueName": "value.value",
                     "valueType": "string",
                     "value": "B:\\ressources\\pipeline\\pipe\\maya\\bifrost\\bloom\\graphs\\moss"
-                },
-                {
-                    "valueName": "create_mesh_cube.width",
-                    "valueType": "float",
-                    "value": "0.100000001f"
-                },
-                {
-                    "valueName": "create_mesh_cube.height",
-                    "valueType": "float",
-                    "value": "5f"
                 }
             ]
         }
