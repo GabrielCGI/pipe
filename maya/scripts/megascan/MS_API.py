@@ -474,6 +474,15 @@ class importerSetup():
                     mc.select(mesh_)
                     melc.eval('sets -e -forceElement '+arn_sg)
 
+            #BLOOM MODIF - MAKE PATH RELATIVE TO THE VARIABLE $megascan
+            allTex = mc.ls(et="file")
+            for tex in allTex:
+                texAbsPath = mc.getAttr("%s.fileTextureName" % tex)
+                texRelativePath = texAbsPath.replace("R:/ressources/lib/megascan","$megascan")
+                mc.setAttr(tex+".fileTextureName", texRelativePath, type="string")
+
+            #END RELATIVE PATH EDIT
+
             self.RearrangeHyperShade()
 
         else:
