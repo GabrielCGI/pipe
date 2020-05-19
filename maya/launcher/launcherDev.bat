@@ -1,7 +1,9 @@
 SET PIPELINE_DIR=D:\pipelinedev\pipe
+REM SET PIPELINE_DIR=R:\ressources\pipeline\pipe
 SET PIPELINE_DIR_MAYA=%PIPELINE_DIR%\maya
 SET SCRIPT_MAYA=%PIPELINE_DIR%\maya\scripts
-SET NETWORK_INSTALL=B:\ressources\pipeline\networkInstall
+SET NETWORK_INSTALL=R:\ressources\pipeline\networkInstall
+SET LIB_DIR=R:\ressources\lib
 
 REM == Shelf
 SET MAYA_SHELF_PATH=%PIPELINE_DIR_MAYA%\shelfs
@@ -20,11 +22,13 @@ SET MAYA_COLOR_MANAGEMENT_POLICY_FILE=%PIPELINE_DIR_MAYA%\colorManagement\cm_ace
 
 REM == Bifrost Compound
 SET BIFROST_LIB_CONFIG_FILES=%BIFROST_LIB_CONFIG_FILES%;%PIPELINE_DIR_MAYA%\bifrost\bloom\bifrost_lib_config.json;%NETWORK_INSTALL%\bifrost\rebel_pack\bifrost_lib_config.json
+SET BIFROST_DIR = %PIPELINE_DIR_MAYA%\bifrost\bloom\bifrost_lib_config.json
 
 REM == Yeti
 REM SET peregrinel_LICENSE=5052@SPRINTER-08
 
-
+REM == MEGASCAN REPO
+SET megascan=R:\ressources\lib\megascan
 
 
 REM == Start maya and launch statupSettings (FPS, Unit ect...)
