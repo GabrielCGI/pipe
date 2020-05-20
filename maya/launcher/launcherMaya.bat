@@ -1,8 +1,8 @@
-SET PIPELINE_DIR=R:\ressources\pipeline\pipe
+SET PIPELINE_DIR=R:\pipeline\pipe
 SET PIPELINE_DIR_MAYA=%PIPELINE_DIR%\maya
 SET SCRIPT_MAYA=%PIPELINE_DIR%\maya\scripts
-SET NETWORK_INSTALL=R:\ressources\pipeline\networkInstall
-SET LIB_DIR=R:\ressources\lib
+SET NETWORK_INSTALL=R:\pipeline\networkInstall
+SET LIB_DIR=R:\lib
 
 REM == Shelf
 SET MAYA_SHELF_PATH=%PIPELINE_DIR_MAYA%\shelfs
@@ -26,7 +26,7 @@ REM == Yeti
 REM SET peregrinel_LICENSE=5052@SPRINTER-08
 
 REM == MEGASCAN REPO
-SET megascan=R:\ressources\lib\megascan
+SET megascan=R:\lib\megascan
 
 
 REM == Start maya and launch statupSettings (FPS, Unit ect...)
