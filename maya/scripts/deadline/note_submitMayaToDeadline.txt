@@ -1,0 +1,4 @@
+SumitMayaToDeadline
+
+Modification du script ligne 3152.
+Ajout au job des environement variables qui viennent du .bat 

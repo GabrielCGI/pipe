@@ -14,7 +14,7 @@ SET MAYA_MODULE_PATH=%NETWORK_INSTALL%\arnold\maya2020
 SET MAYA_RENDER_DESC_PATH=%NETWORK_INSTALL%\arnold\maya2020
 
 REM == Scripts
-SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools
+SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings\nutro
 
 REM == Color
 SET OCIO=%NETWORK_INSTALL%\OpenColorIO-Configs\aces_1.2\config.ocio
@@ -28,6 +28,9 @@ REM SET peregrinel_LICENSE=5052@SPRINTER-08
 
 REM == MEGASCAN REPO
 SET megascan=R:\lib\megascan
+
+REM == DEADLINE
+SET MAYA_SCRIPT_PATH=%MAYA_SCRIPT_PATH%;R:\deadline\submission\Maya\Client
 
 
 REM == Start maya and launch statupSettings (FPS, Unit ect...)
