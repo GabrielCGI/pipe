@@ -1,8 +1,0 @@
-import maya.cmds as cmds
-
-def run():
-	#Unit
-	cmds.currentUnit( time='<lfilm' )  #film: 24 fps, pal: 25 fps, ntsc: 30 fps
-	print "FPS = 24FPS"
-	cmds.currentUnit( linear='cm' )
-	print "UNIT = cm"
