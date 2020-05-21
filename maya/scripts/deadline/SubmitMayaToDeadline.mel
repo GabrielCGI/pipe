@@ -1059,6 +1059,7 @@ global proc string GetMayaOutputPrefix( string $currCamera, string $layer )
 // Gets the image directory for Maya.
 global proc string GetImageDirectory()
 {
+/*
 	string $imageDir = "";
 
 	// The -renderType flag is obsolete in 2013 and later.
@@ -1098,6 +1099,17 @@ global proc string GetImageDirectory()
 	else
 		$path = $path + $imageDir;
 
+	return $path;
+*/
+//Bloom EDIT
+	python("import maya.cmds as mc");
+	python("import os");
+	python("scenePath = mc.file(q=True, sceneName=True)");
+	python("sceneDir = os.path.abspath(os.path.join(scenePath, os.pardir))");
+	python("parentDir = os.path.abspath(os.path.join(sceneDir, os.pardir))");
+	python("renderOutDir = os.path.join(parentDir,\"render_out\")");
+	python("if not os.path.exists(renderOutDir): os.makedirs(renderOutDir)");
+	string $path = python("renderOutDir");
 	return $path;
 }
 
@@ -3156,11 +3168,16 @@ proc string WriteJobFilesAndSubmit( string $renderer, int $showDialog, int $regi
 		string $MAYA_MODULE_PATH=getenv("MAYA_MODULE_PATH");
 		string $MAYA_RENDER_DESC_PATH=getenv("MAYA_RENDER_DESC_PATH");
 		string $BIFROST_LIB_CONFIG_FILES=getenv("BIFROST_LIB_CONFIG_FILES");
+		string $peregrinel_LICENSE=getenv("peregrinel_LICENSE");
+
+
+
 		fprint $fileId ("EnvironmentKeyValue0=OCIO="+$OCIO+"\n");
 		fprint $fileId ("EnvironmentKeyValue1=megascan="+$megascan+"\n");
 		fprint $fileId ("EnvironmentKeyValue2=MAYA_MODULE_PATH="+$MAYA_MODULE_PATH+"\n");
 		fprint $fileId ("EnvironmentKeyValue3=MAYA_RENDER_DESC_PATH="+$MAYA_RENDER_DESC_PATH+"\n");
 		fprint $fileId ("EnvironmentKeyValue4=BIFROST_LIB_CONFIG_FILES="+$BIFROST_LIB_CONFIG_FILES+"\n");
+		fprint $fileId ("EnvironmentKeyValue5=peregrinel_LICENSE="+$peregrinel_LICENSE+"\n");
 
 		if( `checkBox -q -value frw_isBlacklist` )
 		{
