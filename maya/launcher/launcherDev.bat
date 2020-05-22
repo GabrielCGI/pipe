@@ -24,7 +24,7 @@ REM == Bifrost Compound
 SET BIFROST_LIB_CONFIG_FILES=%BIFROST_LIB_CONFIG_FILES%;%PIPELINE_DIR_MAYA%\bifrost\bloom\bifrost_lib_config.json;%NETWORK_INSTALL%\bifrost\rebel_pack\bifrost_lib_config.json
 
 REM == Yeti
-REM SET peregrinel_LICENSE=5052@SPRINTER-08
+REM SET peregrinel_LICENSE=5053@BLOOM-NET
 
 REM == MEGASCAN REPO
 SET megascan=R:\lib\megascan

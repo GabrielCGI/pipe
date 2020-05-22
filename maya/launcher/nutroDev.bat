@@ -9,7 +9,7 @@ SET MAYA_SCRIPT_PATH=%SHARED_MAYA_DIR%\scripts
 SET XBMLANGPATH=%SHARED_MAYA_DIR%\icons
 SET OCIO=B:\ressources\networkInstall\openColorIo\aces_1.0.3\config.ocio
 SET MAYA_MODULE_PATH=B:\ressources\networkInstall\maya\module
-SET peregrinel_LICENSE=5052@SPRINTER-08
+SET peregrinel_LICENSE=5053@BLOOM-NET
 SET MAYA_COLOR_MANAGEMENT_POLICY_FILE=B:\ressources\sharedMaya\colorManagement\cm.xml
 
 start C:\"Program Files"\Autodesk\Maya2019\bin\maya.exe
