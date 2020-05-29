@@ -610,12 +610,12 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "C:\\Users\\ggrapperon\\Downloads\\studiolibrary-2.7.1\\src\\studiolibrary\\resource\\icons\\icon.png" 
-        -image1 "C:\\Users\\ggrapperon\\Downloads\\studiolibrary-2.7.1\\src\\studiolibrary\\resource\\icons\\icon.png" 
+        -image "R:/pipeline/networkInstall/studiolibrary-2.7.1/src/studiolibrary/resource/icons/icon.png" 
+        -image1 "R:/pipeline/networkInstall/studiolibrary-2.7.1/src/studiolibrary/resource/icons/icon.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "\n# -----------------------------------\n# Studio Library\n# www.studiolibrary.com\n# -----------------------------------\n\nimport os\nimport sys\n    \nif not os.path.exists(r'C:\\Users\\ggrapperon\\Downloads\\studiolibrary-2.7.1\\src'):\n    raise IOError(r'The source path \"R:\\pipeline\\networkInstall\\studiolibrary-2.7.1\\src\" does not exist!')\n    \nif r'R:\\pipeline\\networkInstall\\studiolibrary-2.7.1\\src' not in sys.path:\n    sys.path.insert(0, r'R:\\pipeline\\networkInstall\\studiolibrary-2.7.1\\src')\n    \nimport studiolibrary\nstudiolibrary.main()\n" 
+        -command "\n# -----------------------------------\n# Studio Library\n# www.studiolibrary.com\n# -----------------------------------\n\nimport os\nimport sys\n    \nif not os.path.exists(r'R:\\pipeline\\networkInstall\\studiolibrary-2.7.1\\src'):\n    raise IOError(r'The source path \"R:\\pipeline\\networkInstall\\studiolibrary-2.7.1\\src\" does not exist!')\n    \nif r'R:\\pipeline\\networkInstall\\studiolibrary-2.7.1\\src' not in sys.path:\n    sys.path.insert(0, r'R:\\pipeline\\networkInstall\\studiolibrary-2.7.1\\src')\n    \nimport studiolibrary\nstudiolibrary.main()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
