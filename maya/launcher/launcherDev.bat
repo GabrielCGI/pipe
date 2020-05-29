@@ -14,7 +14,7 @@ SET MAYA_MODULE_PATH=%NETWORK_INSTALL%\arnold\maya2020
 SET MAYA_RENDER_DESC_PATH=%NETWORK_INSTALL%\arnold\maya2020
 
 REM == Scripts
-SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings\paradise
+SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings\paradise;%NETWORK_INSTALL%\script
 
 REM == Color
 SET OCIO=%NETWORK_INSTALL%\OpenColorIO-Configs\aces_1.2\config.ocio
