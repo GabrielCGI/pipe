@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <ColorManagement version="1.5">
-    <Parameter name="OCIOConfigFile" value="B:/ressources/pipeline/networkInstall/OpenColorIO-Configs/aces_1.2/config.ocio" />
+    <Parameter name="OCIOConfigFile" value="R:/pipeline/networkInstall/OpenColorIO-Configs/aces_1.2/config.ocio" />
     <Parameter name="OCIORulesEnabled" value="false" />
     <Parameter name="applyPlayblastOutputTransform" value="true" />
     <Parameter name="isApplyOutputTransformEnabled" value="false" />
