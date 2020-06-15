@@ -33,4 +33,4 @@ SET MAYA_SCRIPT_PATH=%MAYA_SCRIPT_PATH%;R:\deadline\submission\Maya\Client
 
 
 REM == Start maya and launch statupSettings (FPS, Unit ect...)
-start C:\"Program Files"\Autodesk\Maya2020\bin\maya.exe -command "python(\"import startupSettings\"); python (\"startupSettings.run()\");"  %*
+start C:\"Program Files"\Autodesk\Maya2020\bin\maya.exe -file %1 -command "python(\"import startupSettings\"); python (\"startupSettings.run()\");"  %*
