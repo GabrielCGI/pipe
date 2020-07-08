@@ -29,7 +29,7 @@ def isLib(sceneName):
     Check if a maya file is a Lib (ch_assetName_lib)
     """
     try:
-        if sceneName.split("_")[-1] == "lib" and len(sceneName.split("_")) == 4 :
+        if sceneName.split("_")[-1] == "lib":
             return True
         else:
             return False
@@ -83,10 +83,17 @@ def wipSave():
     # If it a lib
     else:
         # Check if it match the pattern
+        if not sceneName.split("_")[-2] in ["shading","fur","animation","anim","mod","modeling","fx"]:
+            msg = "Something wrong. The task name in not: shading, fur, animation, anim, mod, modeling, fx "
+            mayaWarningExit(msg)
         sceneNameSplit = sceneName.split("_")
         task = sceneNameSplit[-2]
         taskDir = os.path.join(os.path.dirname(scenePath), task)
-        wipScene =  "%s_%s_%s"%(sceneNameSplit[0],sceneNameSplit[1],sceneNameSplit[2])
+        sceneNameSplit.pop(-1)
+        sep = "_"
+        wipScene  = sep.join(sceneNameSplit)
+
+
 
         # Check if the wip directory of the task lib exist ch_asset/TASK
         if not os.path.exists(taskDir):
@@ -126,8 +133,8 @@ def wipSave():
 
             s = sceneNameSplit #Visually shorter
             # Build Name #ch_newName_task.006.ma
-            newName = "%s_%s_%s."%(s[0],s[1],s[2])
-            newName += '%04d' % incrVersion + extension
+            newName = wipScene
+            newName += '.%04d' % incrVersion + extension
             #Build the path to the TASK folder
             newPath = os.path.join(taskDir,newName)
             #Check if the file already exist
@@ -153,7 +160,9 @@ def libSave():
     # Get the current scene path
     filename = os.path.basename(_sSourcePath)
     raw_name, extension = os.path.splitext(filename)
-
+    if not raw_name.split("_")[-1].split(".")[0] in ["shading","fur","animation","anim","mod","modeling","fx"]:
+        msg = "Something wrong. The task name in not shading,fur,animation,anim,mod, modeling orfx "
+        mayaWarningExit(msg)
     if not isLib(raw_name):
         #Look for a lib file.
         #Get parent directory
@@ -162,9 +171,6 @@ def libSave():
         assetName = raw_name.split(".")[0]
         libName = assetName+"_lib"+".mb"
 
-        if not len(libName.split("_"))==4:
-            msg = "Something wrong with name pattern. Must be XX_assetName_taskName.version"
-            mayaWarningExit(msg)
         libpath = os.path.join(pardir,libName)
         print libpath
         if os.path.isfile(libpath):
