@@ -160,10 +160,11 @@ def libSave():
     # Get the current scene path
     filename = os.path.basename(_sSourcePath)
     raw_name, extension = os.path.splitext(filename)
-    if not raw_name.split("_")[-1].split(".")[0] in ["shading","fur","animation","anim","mod","modeling","fx"]:
-        msg = "Something wrong. The task name in not shading,fur,animation,anim,mod, modeling orfx "
-        mayaWarningExit(msg)
+
     if not isLib(raw_name):
+        if not raw_name.split("_")[-1].split(".")[0] in ["shading","fur","animation","anim","mod","modeling","fx"]:
+            msg = "Something wrong. The task name in not shading,fur,animation,anim,mod, modeling orfx "
+            mayaWarningExit(msg)
         #Look for a lib file.
         #Get parent directory
         pardir =  os.path.abspath(os.path.join(_sSourcePath,"../.."))
@@ -191,6 +192,9 @@ def libSave():
             mayaWarningExit(msg)
 
     else:
+        if not raw_name.split("_")[-2].split(".")[0] in ["shading","fur","animation","anim","mod","modeling","fx"]:
+            msg = "Something wrong. The task name in not shading,fur,animation,anim,mod, modeling orfx "
+            mayaWarningExit(msg)
             _sTargetDir = os.path.dirname(_sSourcePath) + '\\oldLib\\'
             sTimestamp = time.strftime("%Y-%m-%d %Hh%Mm%Ss")
             sTargetPath = _sTargetDir + '[' + sTimestamp + ']'+filename
