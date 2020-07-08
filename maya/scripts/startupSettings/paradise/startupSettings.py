@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 import pymel.core as pm
- 
+"""
 def killTurtle():
     try:
         pm.lockNode( 'TurtleDefaultBakeLayer', lock=False )
@@ -24,7 +24,7 @@ def killTurtle():
         pass
     pm.unloadPlugin("Turtle.mll")
     print "Turtle Killed"
-
+"""
 
 def run():
 	#Unit
