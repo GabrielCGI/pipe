@@ -4,39 +4,17 @@ import json
 import os
 
 projectsData ={
-    "Teaser":
+    "paradise_2005":
     {
-        "path": "B:\\Teaser",
-        "assetsDir": "B:\\Teaser\\assets",
-	    "assetsDbDir": "B:\\Teaser\\assets\\database"
-    },
-    "nutro_1909":
-    {
-        "path": "B:\\nutro_1909",
-        "assetsDir": "B:\\nutro_1909\\assets",
-	    "assetsDbDir": "B:\\nutro_1909\\assets\\database"
-    },
-    "dacia_1909":
-    {
-        "path": "B:\\dacia_1909",
-        "assetsDir": "B:\\dacia_1909\\assets",
-	    "assetsDbDir": "B:\\dacia_1909\\assets\\database"
-    },
-    "badRats":
-    {
-        "path": "B:\\badRats",
-        "assetsDir": "B:\\badRats\\assets",
-	    "assetsDbDir": "B:\\badRats\\assets\\database"
+        "path": "W:\\paradise_2005",
+        "assetsDir": "W:\\paradise_2005\\assets",
+	    "assetsDbDir": "W:\\paradise_2005\\assets\\database"
     }
 }
 
 computers ={
-"default" : "nutro_1909",
-"SPRINTER-01": "nutro_1909",
-"SPRINTER-02": "nutro_1909",
-"SPRINTER-03": "nutro_1909",
-"SPRINTER-04": "nutro_1909",
-"SPRINTER-05": "nutro_1909",
+"default" : "paradise_2005",
+"SPRINTER-01": "paradise_2005",
 }
 
 def getCurrentProject():

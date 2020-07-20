@@ -33,11 +33,11 @@ def importReference(path, refNamespace):
 def nameFromAbc(abc):
     "ch_name_01.abc => ch_name"
     name = "%s_%s"%(abc.split("_")[0],abc.split("_")[1])
-    name = name.split(".abc")[0] #HACK NUTRO (because of no  _00)
+
     return name
 
 def createScriptNode(refNamespace, abcPath):
-    childRef = cmds.referenceQuery("%sRN"%(refNamespace), rfn=True, ch=True)[-1]     #HACK PROD NUTRO !!!! [-1] to get the ABC. [0] usualy
+    childRef = cmds.referenceQuery("%sRN"%(refNamespace), rfn=True, ch=True)[0]     #HACK PROD NUTRO !!!! [-1] to get the ABC. [0] usualy
 
 
     script ='cmds.file ("%s", loadReference = "%s", type="Alembic")'%(abcPath, childRef)
