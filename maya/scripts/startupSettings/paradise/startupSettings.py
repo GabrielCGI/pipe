@@ -1,5 +1,8 @@
+
 import maya.cmds as cmds
-import pymel.core as pm
+
+#import pymel.core as pm
+
 """
 def killTurtle():
     try:
@@ -27,9 +30,14 @@ def killTurtle():
 """
 
 def run():
+	cmds.file( modified=False )
+	pass
+"""
 	#Unit
 	cmds.currentUnit( time='film' )  #film: 24 fps, pal: 25 fps, ntsc: 30 fps
 	print "FPS = 24FPS"
 	cmds.currentUnit( linear='cm' )
 	print "UNIT = cm"
-	killTurtle()
+	#killTurtle()
+
+"""
