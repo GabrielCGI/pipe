@@ -39,19 +39,16 @@ def listCharRef():
         if any(name in nameFromDic for nameFromDic in assetsDic.keys()):
             if len(ref.split(":")) <= 1:            # filter through the child node of the rig reference
                 listCharRef.append(ref)
-    print "list char ref:%s"%(listCharRef)
     return listCharRef
 
 
 def listSelectedCharRef():
     "Return a list of references, parent from current selection, wich is a Character"
-    print "listSelectedCharRef"
     listSelectedRef = []
     selection = cmds.ls(selection=True)
 
     for shape in selection:
         shapeNameSpace = shape.split(":")[0]  # Delete ":" (ch_x_rig_lib1:GEO_x . . . => ch_x_rig_lib1)
-        print "shape name space: %s"%(shapeNameSpace)
         listAllRef = cmds.ls(type="reference")
         for ref in listAllRef:
             print "ref: %s" % (ref)
@@ -91,7 +88,7 @@ def buildCommand (start, end, path, geoList, attrList, subframe, frameSample):
    command += "-frameRange %s %s"%(start, end) #Frame Range
    command += " -uvWrite -writeUVSets -dataFormat ogawa "
    if subframe == True:
-       if len(frameSample.split(" ")==3):
+       if len(frameSample.split(" "))==3:
            for f in frameSample.split(" "):
                command += "-frameRelativeSample %s "%(f)
    if attrList[0]:
@@ -102,18 +99,14 @@ def buildCommand (start, end, path, geoList, attrList, subframe, frameSample):
        geoRootName = cmds.ls(geo, l=True)[0]     #Geo List
        command += " -root %s"%geoRootName
 
-   command += " -file %s"%(path)                #File Path
+   command += " -file \"%s\""%(path)                #File Path  #Drive partagée special character hack. command += " -file %s"%(path)
    return command
 
 
 def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
     "Export an Abc for a given character"
     name = nameFromCharRef(charRef)
-    print "MM_NAME:"
-    print name
     geoList = listGeoByCharRef(charRef)
-    print "GEOLIST:"
-    print geoList
     attrList = assetsDic.get(name).get("attr")
     if not charRef.split("RN")[1]:   #if list empty
         num = "00"
@@ -121,6 +114,10 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
         num = "%02d"%(int(charRef.split("RN")[1]))
     abcName = "%s_%s.abc"%(name,num)
     path = os.path.join(dirPath[0],abcName)
+    path = path.replace("/",'\\') #Drive partagée special character hack
+    path = path.replace("\\",'\\\\') #Drive partagée special character hack
+
+
     command = buildCommand(start,end,path,geoList,attrList,subframe,frameSample)
     print "------------------------\n------------ BEGGINING EXPORT %s ------------ \n %s"%(charRef, command)
     cmds.refresh(suspend=True)
@@ -166,8 +163,8 @@ class exportAnimGuiCls(object):
         cmds.setParent("..")
 
         cmds.rowLayout(numberOfColumns=2)
-        frameSample = cmds.textField(text = "-0.25 0 0.25")
-        subFrameCheckBox = cmds.checkBox(label="Subframes", value = False)
+        frameSample = cmds.textField(text = "-0.08 0 0.08")
+        subFrameCheckBox = cmds.checkBox(label="Subframes", value = True)
 
         cmds.setParent("..")
 
@@ -188,6 +185,6 @@ class exportAnimGuiCls(object):
 
     def exportClicked(self, start=0, end=100,subframe=False,frameSample="0 0 0", charList=[]):
         if charList:
-            exportAnim(start=start, end=end, subframe=subframe,frameSample="0 0 0", charList=charList)
+            exportAnim(start=start, end=end, subframe=subframe,frameSample=frameSample, charList=charList)
         else:
             cmds.confirmDialog(title="Nothing selected",message="Nothing selected !")
