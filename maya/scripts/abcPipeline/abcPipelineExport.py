@@ -99,7 +99,7 @@ def buildCommand (start, end, path, geoList, attrList, subframe, frameSample):
        geoRootName = cmds.ls(geo, l=True)[0]     #Geo List
        command += " -root %s"%geoRootName
 
-   command += " -file \"%s\""%(path)                #File Path  #Drive partagée special character hack. command += " -file %s"%(path)
+   command += " -file \"%s\""%(path)                #File Path
    return command
 
 
@@ -114,8 +114,8 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
         num = "%02d"%(int(charRef.split("RN")[1]))
     abcName = "%s_%s.abc"%(name,num)
     path = os.path.join(dirPath[0],abcName)
-    path = path.replace("/",'\\') #Drive partagée special character hack
-    path = path.replace("\\",'\\\\') #Drive partagée special character hack
+    path = path.replace("/",'\\')
+    path = path.replace("\\",'\\\\')
 
 
     command = buildCommand(start,end,path,geoList,attrList,subframe,frameSample)
