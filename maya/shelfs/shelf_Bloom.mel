@@ -370,8 +370,8 @@ global proc shelf_Bloom () {
         -imageOverlayLabel "LIB" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "B:/ressources/sharedMaya/icons/saveLib2.png" 
-        -image1 "B:/ressources/sharedMaya/icons/saveLib2.png" 
+        -image "R:/pipeline/pipe/maya/icons/saveLib2.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/saveLib2.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -650,6 +650,40 @@ global proc shelf_Bloom () {
         -marginWidth 1
         -marginHeight 1
         -command "import gui;reload(gui);gui.windowUI" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Fast viewport" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import fastVP as fastVP\nreload(fastVP)\nfastVP.fastVP()" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/fastVP.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/fastVP.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import fastVP as fastVP\nreload(fastVP)\nfastVP.fastVP()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
