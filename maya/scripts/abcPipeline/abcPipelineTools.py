@@ -1,3 +1,5 @@
+#! usr/bin/python
+# -*- coding: ISO-8859-1 -*-
 """
 ABC PIPELINE TOOLS V0.1
 
@@ -16,7 +18,7 @@ import projects as projects
 reload(projects)
 
 # Project variable initialisation
-assetsDbDir = projects.getCurrentProjectData()["assetsDbDir"] #Something like B:\Teaser\assets\database
+assetsDbDir = "W:\\paradise_2005\\assets\\database" #Something like B:\Teaser\assets\database #HACK paradise usually  projects.getCurrentProjectData()["assetsDbDir"]
 assetsDir = projects.getCurrentProjectData()["assetsDir"] #Something like B:\Teaser\assets\database
 
 def mayaWarning(msg):
@@ -84,19 +86,24 @@ def createNewAsset():
     assetNamespace = currentSelection[0].split(":")[0] #Something like Ch_assetName_rig_lib
     split = assetNamespace.split("_") #Somethinh like ["Ch","assetName","Rig","lib"]
     #Check: Does it match the pattern XX_assetName_rig_lib ?
-    if not (len(split) == 4 and split[2]=="rigging" and split[3]=="lib"):
-        msg = "Asset namespace does not match pattern: XX_assetName_rigging_lib \nCurrent name: %s"%(assetNamespace)
+    if not (len(split) >= 3 and split[-2]=="rigging" and split[-1]=="lib"):
+        msg = "Assets namespace does not match pattern: XX_assetName_rigging_lib \nCurrent name: %s"%(assetNamespace)
         mayaWarning(msg)
         sys.exit(msg)
     #Get the asset name
     try:
-        assetName = assetNamespace.split("_")[0]+"_"+assetNamespace.split("_")[1] # "ch_asset" - Raise an error if [1] list index out of range
+        if len(split)==4:  #HACK PARADISE
+            assetName = assetNamespace.split("_")[0]+"_"+assetNamespace.split("_")[1] # "ch_asset" - Raise an error if [1] list index out of range
+        if len(split)==3:
+            assetName = assetNamespace.split("_")[0]
     except:
         msg = "%s is not matching the pattern: XX_assetName_XX:geoName"%(currentSelection)
         mayaWarning(msg)
         sys.exit(msg)
-
-    assetDir = os.path.join(assetsDir,assetName)
+    if len(split)==4:
+        assetDir = os.path.join(assetsDir,assetName)
+    if len(split)==3:
+        assetDir = os.path.join(assetsDir,"animProps",assetName)
     #Check if the asset dir exists
     if not os.path.exists(assetDir):
         msg = "Asset folder not found!\n%s \nIssue can come from: \n -Naming pattern of referenced rig: %s \n -Folder tree"%(assetDir,assetNamespace)
@@ -127,6 +134,7 @@ def createNewAsset():
     num ="00" #Base number
     abcName = "%s_%s.abc"%(assetName,num)
     abcPath = os.path.join(assetAbcDir,abcName)
+    print abcPath
     if os.path.isfile(abcPath):  #Check if the abc file doesn't already exist
         msg = "File already exist! \n%s\nDelete or rename the existing file manually.\nCan't ovewrite, not safe... "%(abcPath)
         mayaWarning(msg)
@@ -137,8 +145,13 @@ def createNewAsset():
         msg = "File already exist! \n%s\nDelete or rename the existing file manually.\nCan't ovewrite, not safe... "%(assetShadingPath)
         mayaWarning(msg)
         sys.exit(msg)
+    print assetShadingPath
     #Check asset data
-    assetDataPath = os.path.join(assetsDbDir,assetName+".txt" ) #Build .txt path
+    assetTxt = assetName+'.txt'
+    print "assetDbDir"+assetsDbDir
+
+    assetDataPath = os.path.join(assetsDbDir,assetTxt) #Build .txt path 
+
     if not os.path.exists(assetsDbDir):
         msg="%s doesn't exist !\n ... "%(assetsDbDir)
         mayaWarning(msg)
