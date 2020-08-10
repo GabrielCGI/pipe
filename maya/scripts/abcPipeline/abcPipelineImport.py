@@ -32,8 +32,11 @@ def importReference(path, refNamespace):
 
 def nameFromAbc(abc):
     "ch_name_01.abc => ch_name"
-    name = "%s_%s"%(abc.split("_")[0],abc.split("_")[1])
-
+    #HacK paradise
+    if len(abc.split("_"))==3:
+        name = "%s_%s"%(abc.split("_")[0],abc.split("_")[1])
+    if len(abc.split("_"))==2:
+        name = abc.split("_")[0]
     return name
 
 def createScriptNode(refNamespace, abcPath):
