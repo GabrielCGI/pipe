@@ -64,10 +64,10 @@ def start():
         if fileName[-2] == "%03d":
             padding = "###"
         if fileName[-2] == "%04d":
-            padding = " "####"
+            padding = "####"
 
         fileName[-2]=padding
-    
+
         fileNameCompo = ""
         for file in fileName:
             fileNameCompo = fileNameCompo+"."+file
@@ -79,4 +79,3 @@ def start():
 
         startEnd = frameRange(oNewPath)
         node["file"].fromUserText(oNewPath + " "+ startEnd)
-
