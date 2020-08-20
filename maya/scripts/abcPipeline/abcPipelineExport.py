@@ -22,21 +22,16 @@ def nameFromCharRef(charRef):
     name = "not a character"                # hack to avoid an error from empty string
     charRefUnique = charRef.split("RN")[0]              # Get only the reference name without number suffix
 
-    if len(charRefUnique.split("_")) == 4:
-        name = "%s_%s"%(charRefUnique.split("_")[0],charRefUnique.split("_")[1])  #assetame = ch_x_rig_lib1.abc => ch_x
-        return name
-    print charRefUnique.split("_")
-    if len(charRefUnique.split("_")) == 3:
-        name = charRefUnique.split("_")[0]
-        return name
+    name = charRefUnique.split("_rigging_lib")[0]
+    print name
+    return name
+
 
 def listCharRef():
     "Return a list of all references wich is a Character"
     listCharRef = []
     #List all references
     listAllRef = cmds.ls(type="reference")
-    print  "list all ref"
-    print listAllRef
 
     for ref in listAllRef:
         name = nameFromCharRef(ref)  #Ch_gros
