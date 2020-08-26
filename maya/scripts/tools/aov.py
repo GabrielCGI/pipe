@@ -21,18 +21,14 @@ aovDic = {
 "N":{"bits":"full","type":"default","state":1,"action":""},
 "P":{"bits":"full","type":"default","state":1,"action":""},
 "Z":{"bits":"full","type":"default","state":1,"action":""},
-"albedo":{"bits":"half","type":"default","state":0,"action":""},
-"diffuse":{"bits":"half","type":"default","state":0,"action":""},
-"diffuse_albedo":{"bits":"half","type":"default","state":0,"action":""},
-"direct":{"bits":"half","type":"default","state":0,"action":""},
-"emission":{"bits":"half","type":"default","state":1,"action":""},
-"indirect":{"bits":"half","type":"default","state":0,"action":""},
 "motionvector":{"bits":"full","type":"default","state":1,"action":""},
 "sheen":{"bits":"half","type":"default","state":1,"action":""},
 "specular":{"bits":"half","type":"default","state":1,"action":""},
 "transmission":{"bits":"half","type":"default","state":1,"action":""},
 "sss":{"bits":"half","type":"default","state":1,"action":""},
-"coat":{"bits":"half","type":"default","state":0,"action":""},
+"coat":{"bits":"half","type":"default","state":1,"action":""},
+"volume":{"bits":"half","type":"default","state":1,"action":""},
+"emission":{"bits":"half","type":"default","state":1,"action":""}
 
 
 },
@@ -44,12 +40,11 @@ aovDic = {
 },
 "utils":
 {
-"occlusion":{"bits":"half","type":"custom","state":0,"action":"makeOcclusion()"},
+"MASKGUS":{"bits":"half","type":"custom","state":1,"action":""},
+"MASKFLIP":{"bits":"half","type":"custom","state":1,"action":""},
+"occlusion":{"bits":"half","type":"custom","state":1,"action":"makeOcclusion()"},
 "UV":{"bits":"full","type":"custom","state":1,"action":"makeUV()"},
-"facingRatio":{"bits":"half","type":"custom","state":False,"action":"makeRimLight()"},
-"texNoise":{"bits":"half","type":"custom","state":False,"action":"makeRGBNoise()"},
-"wireframe":{"bits":"half","type":"custom","state":0,"action":"makeWireframe()"},
-"edgeLength":{"bits":"half","type":"custom","state":0,"action":"makeEdgeLength()"}
+"facingRatio":{"bits":"half","type":"custom","state":1,"action":"makeRimLight()"},
 }
 }
 
@@ -85,50 +80,6 @@ def makeUV():
     #Create UV Shader
     cmds.connectAttr(uvNode + '.outColor' , 'aiAOV_UV.defaultValue')
 
-def makeRGBNoise():
-    #create red fractal texture
-    redFractal = cmds.shadingNode('fractal', name = 'redFractal', asTexture = True)
-    #connect place2Dtexture node
-    redPlace2dTextureNode = cmds.shadingNode('place2dTexture', asUtility = True)
-    cmds.connectAttr(redPlace2dTextureNode + '.outUV' , redFractal + '.uvCoord')
-    cmds.connectAttr(redPlace2dTextureNode + '.outUvFilterSize' , redFractal + '.uvFilterSize')
-    #make red and smaller
-    cmds.setAttr(redFractal + '.colorGain' , 1, 0, 0, type = 'double3')
-    cmds.setAttr(redFractal + '.alphaIsLuminance', 1)
-    cmds.setAttr(redPlace2dTextureNode + '.repeatU', 2)
-    cmds.setAttr(redPlace2dTextureNode + '.repeatV', 2)
-    #green fractal
-    greenFractal = cmds.shadingNode('fractal', name = 'greenFractal', asTexture = True)
-    #connect place2Dtexture node
-    greenPlace2dTextureNode = cmds.shadingNode('place2dTexture', asUtility = True)
-    cmds.connectAttr(greenPlace2dTextureNode + '.outUV' , greenFractal + '.uvCoord')
-    cmds.connectAttr(greenPlace2dTextureNode + '.outUvFilterSize' , greenFractal + '.uvFilterSize')
-    #make red and smaller
-    cmds.setAttr(greenFractal + '.colorGain' , 0, 1, 0, type = 'double3')
-    cmds.setAttr(greenFractal + '.alphaIsLuminance', 1)
-    cmds.setAttr(greenPlace2dTextureNode + '.repeatU', .8)
-    cmds.setAttr(greenPlace2dTextureNode + '.repeatV', .8)
-    #blue fractal
-    blueFractal = cmds.shadingNode('fractal', name = 'blueFractal', asTexture = True)
-    #connect place2Dtexture node
-    bluePlace2dTextureNode = cmds.shadingNode('place2dTexture', asUtility = True)
-    cmds.connectAttr(bluePlace2dTextureNode + '.outUV' , blueFractal + '.uvCoord')
-    cmds.connectAttr(bluePlace2dTextureNode + '.outUvFilterSize' , blueFractal + '.uvFilterSize')
-    #make red and smaller
-    cmds.setAttr(blueFractal + '.colorGain' , 0, 0, 1, type = 'double3')
-    cmds.setAttr(blueFractal + '.alphaIsLuminance', 1)
-    cmds.setAttr(bluePlace2dTextureNode + '.repeatU', 10)
-    cmds.setAttr(bluePlace2dTextureNode + '.repeatV', 10)
-    #create blendColors and connect three fractals
-    blendColorsRG = cmds.shadingNode('blendColors', name = 'blendColorsRG', asUtility = True)
-    cmds.connectAttr(redFractal + '.outColor' , blendColorsRG + '.color1')
-    cmds.connectAttr(greenFractal + '.outColor' , blendColorsRG + '.color2')
-    blendColorsRGB = cmds.shadingNode('blendColors', name = 'blendColorsRGB', asUtility = True)
-    cmds.connectAttr(blendColorsRG + '.output' , blendColorsRGB + '.color1')
-    cmds.connectAttr(blueFractal + '.outColor' , blendColorsRGB + '.color2')
-    #Create Shader and Connect
-
-    cmds.connectAttr(blendColorsRGB + '.output' , 'aiAOV_texNoise.defaultValue')
 
 def makeWireframe():
     #Create Shader and Connect
