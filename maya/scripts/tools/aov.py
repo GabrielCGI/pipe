@@ -40,8 +40,8 @@ aovDic = {
 },
 "utils":
 {
-"MASKGUS":{"bits":"half","type":"custom","state":1,"action":""},
-"MASKFLIP":{"bits":"half","type":"custom","state":1,"action":""},
+"flipMask":{"bits":"half","type":"custom","state":1,"action":""},
+"gusMask":{"bits":"half","type":"custom","state":1,"action":""},
 "occlusion":{"bits":"half","type":"custom","state":1,"action":"makeOcclusion()"},
 "UV":{"bits":"full","type":"custom","state":1,"action":"makeUV()"},
 "facingRatio":{"bits":"half","type":"custom","state":1,"action":"makeRimLight()"},
