@@ -106,7 +106,24 @@ def fixColorSpace(dict):
 
 badColorSpaceTex = getBadColorSpaceTex()
 
+def deleteUnknown():
+    print "deleting unknown node:"
+    print cmds.ls(type="unknown")
+    cmds.delete(cmds.ls(type="unknown"))
 
+def deleteXg():
+    xgenlists = []
+    xgenlists.append(cmds.ls("*:*xgm*"))
+    xgenlists.append(cmds.ls("*:*:*xgm*"))
+    xgenlists.append(cmds.ls("*xgm*"))
+    print "XGEN LIST:"
+    for xglist in xgenlists:
+        for xg in xglist:
+            try:
+                print xg
+                cmds.delete(xg)
+            except:
+                print "failed"
 
 #Create my GUI
 def createGUI():
@@ -121,7 +138,9 @@ def createGUI():
     cmds.checkBox("texColorSpace", label="Texture with different color space", value=True)
     cmds.checkBox("optimize", label="Optimize scene size", value=True)
     cmds.checkBox("cam", label="Delete extra camera", value=True)
-    cmds.checkBox("numObject", label="Objet Numbers", value=True)
+    #cmds.checkBox("numObject", label="Objet Numbers", value=True)
+    cmds.checkBox("deleteUnknown", label="Delete Unknown node", value=True)
+    cmds.checkBox("deleteXg", label="Delete Xgen expression", value=False)
     cmds.button( label='Run', width= 224, command=lambda x:doctor())
 
     cmds.showWindow(winName)
@@ -141,6 +160,12 @@ def doctor():
     if cmds.checkBox("cam", query = True, value =True):
         delCamera()
 
-    if cmds.checkBox("numObject", query = True, value =True):
-        maxNumObject()
-    mayaWarning("Test finished.")
+    #if cmds.checkBox("numObject", query = True, value =True):
+    #    maxNumObject()
+
+    if cmds.checkBox("deleteUnknown", query = True, value =True):
+        deleteUnknown()
+
+    if cmds.checkBox("deleteXg", query = True, value =True):
+        deleteUnknown()
+                    mayaWarning("Test finished.")
