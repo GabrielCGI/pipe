@@ -107,23 +107,29 @@ def fixColorSpace(dict):
 badColorSpaceTex = getBadColorSpaceTex()
 
 def deleteUnknown():
-    print "deleting unknown node:"
-    print cmds.ls(type="unknown")
-    cmds.delete(cmds.ls(type="unknown"))
+    print ".................."
+    print "DELETE UNKNOWN NODES...:"
+
+    unknown= cmds.ls(type="unknown")
+    if unknown:
+        print "Unknown node found !"
+        print unknown
+        cmds.delete(unknown)
+    else:
+        print "No unknown nodes found"
 
 def deleteXg():
-    xgenlists = []
-    xgenlists.append(cmds.ls("*:*xgm*"))
-    xgenlists.append(cmds.ls("*:*:*xgm*"))
-    xgenlists.append(cmds.ls("*xgm*"))
-    print "XGEN LIST:"
-    for xglist in xgenlists:
-        for xg in xglist:
-            try:
-                print xg
-                cmds.delete(xg)
-            except:
-                print "failed"
+    xgenlists= cmds.ls("*:*xgm*","*:*:*xgm*","*xgm*")
+    print ".................."
+    print "XGEN CLEANING..."
+
+    if len(xgenlists)>0:
+        print "Xgen found !"
+        print xgenlists
+        cmds.delete(xgenlists)
+    else:
+        print "No xgen in scene"
+
 
 #Create my GUI
 def createGUI():
@@ -167,5 +173,6 @@ def doctor():
         deleteUnknown()
 
     if cmds.checkBox("deleteXg", query = True, value =True):
-        deleteUnknown()
-                    mayaWarning("Test finished.")
+        deleteXg()
+
+    mayaWarning("Test finished.")
