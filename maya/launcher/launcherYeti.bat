@@ -43,9 +43,6 @@ REM == Shelf
 SET MAYA_SHELF_PATH=%PIPELINE_DIR_MAYA%\shelfs
 SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons
 
-REM == Arnold
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\6.0.3.1\maya2020
-SET MAYA_RENDER_DESC_PATH=%NETWORK_INSTALL%\arnold\6.0.3.1\maya2020
 
 REM == Scripts
 SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings\paradise;%NETWORK_INSTALL%\script
@@ -66,7 +63,9 @@ SET megascan=R:\lib\megascan
 REM == DEADLINE
 SET MAYA_SCRIPT_PATH=%MAYA_SCRIPT_PATH%;R:\deadline\submission\Maya\Client
 
-
+REM == YETI
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\Yeti-v3.6.4_Maya2020-windows
+SET peregrinel_LICENSE=5053@BLOOM-NET
 
 REM == Start maya and launch statupSettings (FPS, Unit ect...)
 start C:\"Program Files"\Autodesk\Maya2020\bin\maya.exe -file %1 -command "python(\"import startupSettings\"); python (\"startupSettings.run()\");"  %*
