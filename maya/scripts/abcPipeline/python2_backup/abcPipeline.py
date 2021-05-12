@@ -1,6 +1,5 @@
 import abcPipelineExport as ppEx
-import importlib
-importlib.reload(ppEx)
+reload(ppEx)
 exportAnimGuiCls = ppEx.exportAnimGuiCls()
 exportAnimGuiCls.show()
 list =  ppEx.listCharRef()
@@ -11,5 +10,5 @@ exportAnimGuiCls.updateCharList(list)
 #ppIm.importAnim()
 
 import abcPipelineTools as ppTools
-importlib.reload(ppTools)
+reload(ppTools)
 ppTools.createNewAsset()

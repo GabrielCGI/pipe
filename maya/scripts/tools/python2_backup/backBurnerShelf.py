@@ -931,7 +931,7 @@ def sendJob(sendLayer=None):
     sendBB += (str(priority) + ' -taskList \\"' + taskList + '\\" -taskName 1 -timeout ' + str(timeoutBB))
     sendBB += (' \\"' + renderPathBB + '\\" -r ' + rendererBB + ' -s %tp2 -e %tp3 -proj \\"' + projectBB + '\\" -rd \\"' + renderFolderPath +'\\" ' + verbosityBB)
     sendBB += (renderLayerBB + ' -pad ' + str(framePaddingBB) + ' ' + additionalOptionsBB + ' \\"' + fileNameBB +'\\""')
-    print(sendBB)
+    print sendBB
     return sendBB
 
 
@@ -944,15 +944,15 @@ def submitBtn():
     if ((mc.radioButtonGrp('renderModeRB', query=True, select=True)) == 1 ):
         send= sendJob(sendLayer='')
         print ('Backburner 1.0 by Mariano Antico.')
-        print(('system (' + send + ')'))
+        print ('system (' + send + ')')
         printSend = mm.eval('system (' + send + ')')
-        print(printSend)
+        print printSend
 
     if ((mc.radioButtonGrp('renderModeRB', query=True, select=True)) == 2 ):
         allLay = mc.ls(type='renderLayer')
         for layer in allLay:
             try:
-                print(layer)
+                print layer
                 if layer[0:3] != "rs_":
                     mc.select(layer) #DELETE OLD RENDERLAYER FROM IMPORTED OBJECT
                     mc.delete()
@@ -966,18 +966,18 @@ def submitBtn():
             if (renderableLayer):
                 send= sendJob(sendLayer=layer)
                 print ('Backburner 1.2 by Mariano Antico.')
-                print(('system (' + send + ')'))
+                print ('system (' + send + ')')
                 printSend = mm.eval('system (' + send + ')')
-                print(printSend)
+                print printSend
 
     if ((mc.radioButtonGrp('renderModeRB', query=True, select=True)) == 3 ):
         currentLay = mc.editRenderLayerGlobals(query=True, currentRenderLayer=True)
         send= sendJob(sendLayer=currentLay)
         print ('Backburner 1.2 by Mariano Antico.')
-        print(('system (' + send + ')'))
+        print ('system (' + send + ')')
         printSend = mm.eval('system (' + send + ')')
-        print(printSend)
-    print('Done!')
+        print printSend
+    print 'Done!'
 
 # Submit and Close
 def submitCloseBtn():
@@ -2499,7 +2499,7 @@ def sendJob(sendLayer=None):
     sendBB += (str(priority) + ' -taskList \\"' + taskList + '\\" -taskName 1 -timeout ' + str(timeoutBB))
     sendBB += (' \\"' + renderPathBB + '\\" -r ' + rendererBB + ' -s %tp2 -e %tp3 -proj \\"' + projectBB + '\\" -rd \\"' + renderFolderPath +'\\" ' + verbosityBB)
     sendBB += (renderLayerBB + ' -pad ' + str(framePaddingBB) + ' ' + additionalOptionsBB + ' \\"' + fileNameBB +'\\""')
-    print(sendBB)
+    print sendBB
     return sendBB
 
 
@@ -2512,9 +2512,9 @@ def submitBtn():
     if ((mc.radioButtonGrp('renderModeRB', query=True, select=True)) == 1 ):
         send= sendJob(sendLayer='')
         print ('Backburner 1.0 by Mariano Antico.')
-        print(('system (' + send + ')'))
+        print ('system (' + send + ')')
         printSend = mm.eval('system (' + send + ')')
-        print(printSend)
+        print printSend
 
     if ((mc.radioButtonGrp('renderModeRB', query=True, select=True)) == 2 ):
         allLay = mc.ls(type='renderLayer')
@@ -2523,18 +2523,18 @@ def submitBtn():
             if (renderableLayer):
                 send= sendJob(sendLayer=layer)
                 print ('Backburner 1.2 by Mariano Antico.')
-                print(('system (' + send + ')'))
+                print ('system (' + send + ')')
                 printSend = mm.eval('system (' + send + ')')
-                print(printSend)
+                print printSend
 
     if ((mc.radioButtonGrp('renderModeRB', query=True, select=True)) == 3 ):
         currentLay = mc.editRenderLayerGlobals(query=True, currentRenderLayer=True)
         send= sendJob(sendLayer=currentLay)
         print ('Backburner 1.2 by Mariano Antico.')
-        print(('system (' + send + ')'))
+        print ('system (' + send + ')')
         printSend = mm.eval('system (' + send + ')')
-        print(printSend)
-    print('Done!')
+        print printSend
+    print 'Done!'
 
 # Submit and Close
 def submitCloseBtn():

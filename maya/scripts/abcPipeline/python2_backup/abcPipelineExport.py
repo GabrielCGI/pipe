@@ -1,7 +1,6 @@
 import maya.cmds as cmds
 import os
 import sys
-import importlib
 #Load Abc Plugins
 cmds.loadPlugin("AbcImport.mll", quiet=True)
 cmds.loadPlugin("AbcExport.mll", quiet=True)
@@ -9,7 +8,7 @@ cmds.loadPlugin("AbcExport.mll", quiet=True)
 
 
 import projects as projects
-importlib.reload(projects)
+reload(projects)
 
 
 currentProject = projects.getCurrentProject()
@@ -24,7 +23,7 @@ def nameFromCharRef(charRef):
     charRefUnique = charRef.split("RN")[0]              # Get only the reference name without number suffix
 
     name = charRefUnique.split("_rigging_lib")[0]
-    print(name)
+    print name
     return name
 
 
@@ -36,7 +35,7 @@ def listCharRef():
 
     for ref in listAllRef:
         name = nameFromCharRef(ref)  #Ch_gros
-        if any(name in nameFromDic for nameFromDic in list(assetsDic.keys())):
+        if any(name in nameFromDic for nameFromDic in assetsDic.keys()):
             if len(ref.split(":")) <= 1:            # filter through the child node of the rig reference
                 listCharRef.append(ref)
     return listCharRef
@@ -51,7 +50,7 @@ def listSelectedCharRef():
         shapeNameSpace = shape.split(":")[0]  # Delete ":" (ch_x_rig_lib1:GEO_x . . . => ch_x_rig_lib1)
         listAllRef = cmds.ls(type="reference")
         for ref in listAllRef:
-            print("ref: %s" % (ref))
+            print "ref: %s" % (ref)
             refSplit = ref.split("RN")
             if len(refSplit) >= 2:              # make sure the list is > 2 element to avoid "list index out of range"
                 if shapeNameSpace == "%s%s" % (refSplit[0], refSplit[1]):               #(ch_xRN1 => ch_x1)
@@ -119,11 +118,11 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
 
 
     command = buildCommand(start,end,path,geoList,attrList,subframe,frameSample)
-    print("------------------------\n------------ BEGGINING EXPORT %s ------------ \n %s"%(charRef, command))
+    print "------------------------\n------------ BEGGINING EXPORT %s ------------ \n %s"%(charRef, command)
     cmds.refresh(suspend=True)
     cmds.AbcExport (j= command )
     cmds.refresh(suspend=False)
-    print("------------ SUCCESS EXPORT %s  ! ------------"%(charRef))
+    print "------------ SUCCESS EXPORT %s  ! ------------"%(charRef)
 
 
 def exportAnim(start=0, end=100, subframe=False, frameSample="0 0 0", charList=[]):
@@ -180,7 +179,7 @@ class exportAnimGuiCls(object):
         cmds.showWindow(self.window)
 
     def updateCharList(self, charList):
-        print(cmds.textScrollList(self.charList, e=True, append=charList))
+        print cmds.textScrollList(self.charList, e=True, append=charList)
 
 
     def exportClicked(self, start=0, end=100,subframe=False,frameSample="0 0 0", charList=[]):

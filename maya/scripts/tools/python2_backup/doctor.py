@@ -36,7 +36,7 @@ def delCamera():
     # non-default cameras are easy to find now.
     non_startup_cameras = list(set(cameras) - set(startup_cameras))
     # Let's get their respective transform names, just in-case
-    non_startup_cameras_transforms = [cmds.listRelatives(x, parent=True)[0] for x in non_startup_cameras]
+    non_startup_cameras_transforms = map(lambda x: cmds.listRelatives(x, parent=True)[0], non_startup_cameras)
     for c in non_startup_cameras_transforms:
         try:
             cmds.delete(c)
@@ -93,7 +93,7 @@ def getBadColorSpaceTex():
     return dictionary_DiffColorSpace
 
 def fixColorSpace(dict):
-    for key in list(dict.keys()):
+    for key in dict.keys():
         colorSpaceList = [c for c in dict[key]["colorSpace"]]
         colorSpaceList.append("Skip")
         confirm = cmds.confirmDialog( title='Color space conflict', message='%s\nTextures is referenced multiple time with different color space!\nOveride with: '%(key), button=colorSpaceList, defaultButton='Yes', cancelButton='Skip', dismissString='Skip' )
@@ -102,7 +102,7 @@ def fixColorSpace(dict):
             for file in dict[key]["files"]:
                 cmds.setAttr(file.name+".colorSpace", confirm, type="string")
         else:
-            print(("Skip %s"%(key)))
+            print ("Skip %s"%(key))
 
 badColorSpaceTex = getBadColorSpaceTex()
 

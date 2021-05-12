@@ -23,7 +23,7 @@ def multiImport():
         number = int(cmds.promptDialog(query=True, text=True))
         try:
             for ref in listRef:
-                print(ref)
+                print ref
                 multi_import_ref(ref, number)
         except:
             cmds.warning( "%s: Reference failed"%ref )

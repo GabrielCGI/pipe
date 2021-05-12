@@ -1,7 +1,6 @@
 import maya.cmds as cmds
 import os
 import sys
-import importlib
 #Load Abc Plugins
 cmds.loadPlugin("AbcImport.mll", quiet=True)
 cmds.loadPlugin("AbcExport.mll", quiet=True)
@@ -9,9 +8,9 @@ cmds.loadPlugin("AbcExport.mll", quiet=True)
 
 
 import assetsDb as assetsDb
-importlib.reload(assetsDb)
+reload(assetsDb)
 import projects as projects
-importlib.reload(projects)
+reload(projects)
 
 currentProject = projects.getCurrentProject()
 projectsData = projects.getProjectData(currentProject)
@@ -56,18 +55,18 @@ def abcLoad(abcPath):
     abc = abcPath.split("/")[-1]
     name = nameFromAbc(abc)
     refNamespace = name +"_shading_lib_"+ abc.split("_")[-1].split(".")[0]  #00 ou 01 ou 02
-    print(name)
+    print name
     shadingRefPath = assetsDic.get(name).get("shading")
-    print(shadingRefPath)
+    print shadingRefPath
     scriptNodeName = "scriptNode_" + refNamespace
 
     #Check if ABC has already been imported
     if cmds.objExists(scriptNodeName):
-        print("Updating animation for: %s \n %s"%(refNamespace, abcPath))
+        print "Updating animation for: %s \n %s"%(refNamespace, abcPath)
         cmds.delete (scriptNodeName)                #Delete old script Node
         createScriptNode(refNamespace, abcPath)             #Create new script Node
     else:
-        print("Importing animation for: %s \n %s" % (refNamespace, abcPath))
+        print "Importing animation for: %s \n %s" % (refNamespace, abcPath)
         importReference(shadingRefPath, refNamespace)               #Import Reference
         createScriptNode(refNamespace, abcPath)             #Create new script Node
 

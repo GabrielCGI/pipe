@@ -15,8 +15,7 @@ import os.path
 import json
 import sys
 import projects as projects
-import importlib
-importlib.reload(projects)
+reload(projects)
 
 # Project variable initialisation
 assetsDbDir = "W:\\paradise_2005\\assets\\database" #Something like B:\Teaser\assets\database #HACK paradise usually  projects.getCurrentProjectData()["assetsDbDir"]
@@ -50,11 +49,11 @@ def exportAbc(abcPath, currentSelection, attrList):
     geoList = currentSelection
     # Add custom attribut to export with alembic.
     command = buildCommand(abcPath,geoList,attrList)
-    print("------------------------\n------------ BEGGINING EXPORT %s ------------ \n %s"%(abcPath, command))
+    print "------------------------\n------------ BEGGINING EXPORT %s ------------ \n %s"%(abcPath, command)
     cmds.refresh(suspend=True)
     cmds.AbcExport (j= command )
     cmds.refresh(suspend=False)
-    print("------------ SUCCESS EXPORT ! ------------")
+    print "------------ SUCCESS EXPORT ! ------------"
     return abcPath
 
 def createNewAsset():
@@ -115,9 +114,9 @@ def createNewAsset():
     # Create abc Directory if don't exist
     if not os.path.exists(assetAbcDir):
         os.mkdir(assetAbcDir)
-        print(("Directory " , assetAbcDir ,  " Created "))
+        print("Directory " , assetAbcDir ,  " Created ")
     else:
-        print(("Directory " , assetAbcDir ,  " already exists"))
+        print("Directory " , assetAbcDir ,  " already exists")
 
     #Check is scene is save.
     confirm = "Yes"
@@ -135,7 +134,7 @@ def createNewAsset():
     num ="00" #Base number
     abcName = "%s_%s.abc"%(assetName,num)
     abcPath = os.path.join(assetAbcDir,abcName)
-    print(abcPath)
+    print abcPath
     if os.path.isfile(abcPath):  #Check if the abc file doesn't already exist
         msg = "File already exist! \n%s\nDelete or rename the existing file manually.\nCan't ovewrite, not safe... "%(abcPath)
         mayaWarning(msg)
@@ -146,10 +145,10 @@ def createNewAsset():
         msg = "File already exist! \n%s\nDelete or rename the existing file manually.\nCan't ovewrite, not safe... "%(assetShadingPath)
         mayaWarning(msg)
         sys.exit(msg)
-    print(assetShadingPath)
+    print assetShadingPath
     #Check asset data
     assetTxt = assetName+'.txt'
-    print("assetDbDir"+assetsDbDir)
+    print "assetDbDir"+assetsDbDir
 
     assetDataPath = os.path.join(assetsDbDir,assetTxt) #Build .txt path 
 

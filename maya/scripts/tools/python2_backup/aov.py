@@ -141,7 +141,7 @@ def addAOVDefault(aov,bits,type,action):
         if bits == "full":
             cmds.connectAttr(fullDriverName+".message", "aiAOV_"+newAov.name+".outputs[0].driver", f=True)
         if aov == "Z":
-            print("it's a z !")
+            print "it's a z !"
             cmds.connectAttr('defaultArnoldFilter.message', 'aiAOV_Z.outputs[1].filter')
             cmds.connectAttr(fullDriverName+".message", 'aiAOV_Z.outputs[1].driver')
         if action:
@@ -180,27 +180,27 @@ def createGUI():
     cmds.columnLayout()
     cmds.text( label='Default AOV',font='boldLabelFont' )
     #AOV Default
-    for aov in list(aovDic["default"].keys()):
+    for aov in aovDic["default"].keys():
         cmds.checkBox(aov, label=aov, value=aovDic["default"][aov]["state"])
     cmds.setParent('..')
     cmds.columnLayout()
     #AOV Crypto
     cmds.text( label='Crypto',font='boldLabelFont'  )
-    for aov in list(aovDic["crypto"].keys()):
+    for aov in aovDic["crypto"].keys():
         cmds.checkBox(aov, label=aov, value=aovDic["crypto"][aov]["state"])
 
     cmds.setParent('..')
     cmds.columnLayout()
     #AOV Light Groupe
     cmds.text( label="Light Group",font='boldLabelFont'  )
-    for aovLigth in list(aovLigths.keys()):
+    for aovLigth in aovLigths.keys():
         cmds.checkBox(aovLigth, label=aovLigth, value=True)
 
     cmds.setParent('..')
     cmds.columnLayout()
     cmds.text( label='Utilitaire AOV',font='boldLabelFont')
 
-    for aov in list(aovDic["utils"].keys()):
+    for aov in aovDic["utils"].keys():
         cmds.checkBox(aov, label=aov, value=aovDic["utils"][aov]["state"])
 
     cmds.setParent('..')
@@ -217,15 +217,15 @@ def createGUI():
 
 
 def uncheck():
-    for aovKind in list(aovDic.keys()):
-        for aov in list(aovDic[aovKind].keys()):
+    for aovKind in aovDic.keys():
+        for aov in aovDic[aovKind].keys():
             cmds.checkBox(aov, edit=True, value =False)
-    for aovLigth in list(aovLigths.keys()):
+    for aovLigth in aovLigths.keys():
         cmds.checkBox(aovLigth, edit=True, value =False)
 #query checkboxes
 def queryValues():
-    for aovKind in list(aovDic.keys()):
-        for aov in list(aovDic[aovKind].keys()):
+    for aovKind in aovDic.keys():
+        for aov in aovDic[aovKind].keys():
             value = cmds.checkBox(aov, query = True, value =True)
             if value == True:
                 bits = aovDic[aovKind][aov]["bits"]
@@ -233,7 +233,7 @@ def queryValues():
                 action = aovDic[aovKind][aov]["action"]
                 addAOVDefault(aov,bits,type,action)
 
-    for aovLigth in list(aovLigths.keys()):
+    for aovLigth in aovLigths.keys():
         if cmds.checkBox(aovLigth, query = True, value = True):
             addAOVDefault(aovLigth, bits="half", type="default", action="")
             aovLightExpr = aovLigth.split("RGBA_")[-1] #Delete RGBA_

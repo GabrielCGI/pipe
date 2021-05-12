@@ -30,7 +30,7 @@ def setFocusDistance(cam):
          
     #Create locator for focus
     if cmds.objExists('focus_locator_%s'%cam[0]):
-        print('focus_distance_locator_%s already exist !'%cam[0])
+        print 'focus_distance_locator_%s already exist !'%cam[0]
         cmds.delete('focus_locator_%s'%cam[0])
     focus_distance_locator = cmds.spaceLocator(n='focus_locator_%s'%cam[0])
 
@@ -55,7 +55,7 @@ def setFocusDistance(cam):
     try:
         cmds.expression( s="%s.fStop = 2*(%s.focalLength*0.1)/(%s.aiApertureSize + 0.01);"%(cam[0],cam[0],cam[0]), o = cam[0], ae =True,) 
     except:
-        print("The camera F stop as already an expression")
+        print "The camera F stop as already an expression"
        
     
 def focus():

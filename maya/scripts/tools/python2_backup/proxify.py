@@ -18,7 +18,7 @@ def proxify():
 
 	if result == proxName and proxName:
 		name = proxName
-		print(proxName)
+		print proxName
 
 	elif result == 'Rename':
 		rename = cmds.promptDialog(query=True, text=True)

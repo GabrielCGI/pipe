@@ -112,10 +112,10 @@ class SpeedTreeImporterTranslatorBase(OpenMayaMPx.MPxFileTranslator):
 				blendInTexcoord = 1
 				try:
 					if (extension == ".abc" and "Alembic" not in fileTypes):
-						print("SpeedTree ERROR: Alembic plugin is not loaded")
+						print "SpeedTree ERROR: Alembic plugin is not loaded"
 						raise
 					if (extension == ".fbx" and "FBX" not in fileTypes):
-						print("SpeedTree ERROR: FBX plugin is not loaded")
+						print "SpeedTree ERROR: FBX plugin is not loaded"
 						raise
 
 					if (extension == ".abc"):
@@ -125,7 +125,7 @@ class SpeedTreeImporterTranslatorBase(OpenMayaMPx.MPxFileTranslator):
 						OpenMaya.MFileIO.importFile(meshFile)
 
 				except:
-					print("SpeedTree ERROR: Failed to load mesh file [" + meshFile + "]")
+					print "SpeedTree ERROR: Failed to load mesh file [" + meshFile + "]"
 					#print sys.exc_info()
 					return None
 
@@ -151,9 +151,9 @@ class SpeedTreeImporterTranslatorBase(OpenMayaMPx.MPxFileTranslator):
 						maps = material.getElementsByTagName('Map')
 						for stmap in maps:
 							newmap = SpeedTreeMap()
-							if ("File" in stmap.attributes):
+							if (stmap.attributes.has_key("File")):
 								newmap.file = stmap.attributes["File"].value
-							elif ("Value" in stmap.attributes):
+							elif (stmap.attributes.has_key("Value")):
 								newmap.red = newmap.green = newmap.blue = float(stmap.attributes["Value"].value)
 							else:
 								newmap.red = float(stmap.attributes["ColorR"].value)
@@ -168,16 +168,16 @@ class SpeedTreeImporterTranslatorBase(OpenMayaMPx.MPxFileTranslator):
 						if (newset not in aBeforeSets):
 							stMaterialName = None
 							# first try shading group name (with or without SG at the end)
-							if (newset in aNewMaterials):
+							if (aNewMaterials.has_key(newset)):
 								stMaterialName = newset
-							elif (newset[:-2] in aNewMaterials):
+							elif (aNewMaterials.has_key(newset[:-2])):
 								stMaterialName = newset[:-2]
 							else:
 								# if not, try to find a similar material name
 								shaderName = newset + ".surfaceShader"
 								if (mc.objExists(shaderName)):
 									matName = mc.connectionInfo(shaderName, sfd = True).split('.')[0]
-									if (matName in aNewMaterials):
+									if (aNewMaterials.has_key(matName)):
 										stMaterialName = matName
 
 							# make new material and hook it up
@@ -194,16 +194,16 @@ class SpeedTreeImporterTranslatorBase(OpenMayaMPx.MPxFileTranslator):
 							mc.delete(aHistory)
 
 					# go back through and attempt to rename the materials
-					for mat in aNewMaterials.values():
+					for mat in aNewMaterials.itervalues():
 						if (mat.shader != None):
 							mc.rename(mat.shader, mat.name)
 
 				except:
-					print("SpeedTree ERROR: Failed to update material connections")
+					print "SpeedTree ERROR: Failed to update material connections"
 					#print sys.exc_info()
 
 		except:
-			print("SpeedTree ERROR: Failed to read SpeedTree stmat file")
+			print "SpeedTree ERROR: Failed to read SpeedTree stmat file"
 			#print sys.exc_info()
 
 
@@ -217,7 +217,7 @@ class SpeedTreeImporterTranslator(SpeedTreeImporterTranslatorBase):
 		mc.setAttr(shader + ".diffuse", 1.0)
 		mc.setAttr(shader + ".ambientColor", 0.05, 0.05, 0.05)
 
-		if ("Color" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Color")):
 			stmap = stMaterial.maps["Color"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -225,7 +225,7 @@ class SpeedTreeImporterTranslator(SpeedTreeImporterTranslatorBase):
 			else:
 				mc.setAttr(shader + ".color", stmap.red, stmap.green, stmap.blue)
 
-		if ("Normal" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Normal")):
 			stmap = stMaterial.maps["Normal"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -237,7 +237,7 @@ class SpeedTreeImporterTranslator(SpeedTreeImporterTranslatorBase):
 
 		# standard maya shader doesn't have a vertex color node! so no branch seam blending
 		opacityTexture = None
-		if ("Opacity" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Opacity")):
 			stmap = stMaterial.maps["Opacity"]
 			if (stmap.file):
 				opacityTexture = self.CreateFileTexture(stmap.file)
@@ -246,7 +246,7 @@ class SpeedTreeImporterTranslator(SpeedTreeImporterTranslatorBase):
 				mc.connectAttr(opacityTexture + ".outColor", opacityReverse + ".input")
 				mc.connectAttr(opacityReverse + ".output", shader + ".transparency")
 
-		if ("Gloss" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Gloss")):
 			stmap = stMaterial.maps["Gloss"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -286,10 +286,10 @@ class SpeedTreeImporterVRayTranslator(SpeedTreeImporterTranslatorBase):
 	def haveReadMethod(self):
 		return mc.pluginInfo("vrayformaya", q = True, l = True) # check to see if vray plugin is available
 	def CreateMaterial(self, stMaterial, aShapes, blendInTexcoord):
-		hasSSS = "SubsurfaceAmount" in stMaterial.maps
+		hasSSS = stMaterial.maps.has_key("SubsurfaceAmount")
 		shader = mc.shadingNode("VRayMtl", asShader = hasSSS==0, asUtility = hasSSS==1)
 
-		if ("Color" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Color")):
 			stmap = stMaterial.maps["Color"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -298,7 +298,7 @@ class SpeedTreeImporterVRayTranslator(SpeedTreeImporterTranslatorBase):
 				mc.setAttr(shader + ".color", stmap.red, stmap.green, stmap.blue)
 
 		normalTexture = None;
-		if ("Normal" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Normal")):
 			stmap = stMaterial.maps["Normal"]
 			if (stmap.file):
 				mc.setAttr(shader + ".bumpMapType", 1)
@@ -307,7 +307,7 @@ class SpeedTreeImporterVRayTranslator(SpeedTreeImporterTranslatorBase):
 				mc.connectAttr(normalTexture + ".outColor", shader + ".bumpMap")
 
 		mc.setAttr(shader + ".opacityMode", 2)
-		if ("Opacity" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Opacity")):
 			stmap = stMaterial.maps["Opacity"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -328,7 +328,7 @@ class SpeedTreeImporterVRayTranslator(SpeedTreeImporterTranslatorBase):
 		mc.setAttr(shader + ".reflectionColor", 0.5, 0.5, 0.5)
 		mc.setAttr(shader + ".useFresnel", 1)
 		mc.setAttr(shader + ".ggxTailFalloff", 5.0)
-		if ("Gloss" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Gloss")):
 			stmap = stMaterial.maps["Gloss"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -393,7 +393,7 @@ class SpeedTreeImporterMentalRayTranslator(SpeedTreeImporterTranslatorBase):
 	def CreateMaterial(self, stMaterial, aShapes, blendInTexcoord):
 		shader = mc.shadingNode("mia_material_x", asShader = True)
 
-		if ("Color" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Color")):
 			stmap = stMaterial.maps["Color"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -402,7 +402,7 @@ class SpeedTreeImporterMentalRayTranslator(SpeedTreeImporterTranslatorBase):
 				mc.setAttr(shader + ".diffuse", stmap.red, stmap.green, stmap.blue)
 
 		mc.setAttr(shader + ".bump_mode", 3)
-		if ("Normal" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Normal")):
 			stmap = stMaterial.maps["Normal"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -414,7 +414,7 @@ class SpeedTreeImporterMentalRayTranslator(SpeedTreeImporterTranslatorBase):
 				mc.connectAttr(bump2dNode + ".outNormal", misSetNormalNode + ".normal")
 				mc.connectAttr(misSetNormalNode + ".outValue", shader + ".overall_bump")
 
-		if ("Opacity" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Opacity")):
 			stmap = stMaterial.maps["Opacity"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -443,7 +443,7 @@ class SpeedTreeImporterMentalRayTranslator(SpeedTreeImporterTranslatorBase):
 		mc.setAttr(shader + ".brdf_fresnel", 1)
 		mc.setAttr(shader + ".refl_color", 1.0, 1.0, 1.0)
 		mc.setAttr(shader + ".reflectivity", 0.25)
-		if ("Gloss" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Gloss")):
 			stmap = stMaterial.maps["Gloss"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -458,7 +458,7 @@ class SpeedTreeImporterMentalRayTranslator(SpeedTreeImporterTranslatorBase):
 				mc.setAttr(shader + ".refl_gloss", stmap.red)
 				mc.setAttr(shader + ".refr_gloss", stmap.red)
 
-		if ("SubsurfaceAmount" in stMaterial.maps):
+		if (stMaterial.maps.has_key("SubsurfaceAmount")):
 			stmap = stMaterial.maps["SubsurfaceAmount"]
 			mc.setAttr(shader + '.thin_walled', 1)
 			mc.setAttr(shader + '.refr_translucency', 1)
@@ -492,7 +492,7 @@ class SpeedTreeImporterRedshiftTranslator(SpeedTreeImporterTranslatorBase):
 	def CreateMaterial(self, stMaterial, aShapes, blendInTexcoord):
 		shader = mc.shadingNode("RedshiftMaterial", asShader = True)
 
-		if ("Color" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Color")):
 			stmap = stMaterial.maps["Color"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -500,14 +500,14 @@ class SpeedTreeImporterRedshiftTranslator(SpeedTreeImporterTranslatorBase):
 			else:
 				mc.setAttr(shader + ".diffuse_color", stmap.red, stmap.green, stmap.blue)
 
-		if ("Normal" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Normal")):
 			stmap = stMaterial.maps["Normal"]
 			if (stmap.file):
 				normalNode = mc.shadingNode("RedshiftNormalMap", asTexture = True)
 				mc.setAttr(normalNode + ".tex0", stmap.file, type="string")
 				mc.connectAttr(normalNode + ".outDisplacementVector", shader + ".bump_input")
 
-		if ("Opacity" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Opacity")):
 			stmap = stMaterial.maps["Opacity"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -523,7 +523,7 @@ class SpeedTreeImporterRedshiftTranslator(SpeedTreeImporterTranslatorBase):
 			mc.connectAttr(vertexColor + ".outColor.outColorR", shader + ".opacity_colorB")
 
 		mc.setAttr(shader + ".refl_brdf", 1)
-		if ("Gloss" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Gloss")):
 			stmap = stMaterial.maps["Gloss"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -538,7 +538,7 @@ class SpeedTreeImporterRedshiftTranslator(SpeedTreeImporterTranslatorBase):
 				mc.setAttr(shader + ".refl_roughness", 1.0 - stmap.red)
 				mc.setAttr(shader + ".refr_roughness", 1.0 - stmap.red)
 
-		if ("SubsurfaceAmount" in stMaterial.maps):
+		if (stMaterial.maps.has_key("SubsurfaceAmount")):
 			stmap = stMaterial.maps["SubsurfaceAmount"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -565,7 +565,7 @@ class SpeedTreeImporterArnoldTranslator5(SpeedTreeImporterTranslatorBase):
 	def CreateMaterial(self, stMaterial, aShapes, blendInTexcoord):
 		shader = mc.shadingNode("aiStandardSurface", asShader = True)
 
-		if ("Color" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Color")):
 			stmap = stMaterial.maps["Color"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -573,7 +573,7 @@ class SpeedTreeImporterArnoldTranslator5(SpeedTreeImporterTranslatorBase):
 			else:
 				mc.setAttr(shader + ".baseColor", stmap.red, stmap.green, stmap.blue)
 
-		if ("Normal" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Normal")):
 			stmap = stMaterial.maps["Normal"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -586,7 +586,7 @@ class SpeedTreeImporterArnoldTranslator5(SpeedTreeImporterTranslatorBase):
 				mc.connectAttr(textureNode + ".outAlpha", bump2dNode + ".bumpValue")
 				mc.connectAttr(bump2dNode + ".outNormal", shader + ".normalCamera")
 
-		if ("Opacity" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Opacity")):
 			stmap = stMaterial.maps["Opacity"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -596,7 +596,7 @@ class SpeedTreeImporterArnoldTranslator5(SpeedTreeImporterTranslatorBase):
 					mc.setAttr(shape + ".aiOpaque", 0)
 
 		mc.setAttr(shader + ".specularIOR", 1.333)
-		if ("Gloss" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Gloss")):
 			stmap = stMaterial.maps["Gloss"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -610,7 +610,7 @@ class SpeedTreeImporterArnoldTranslator5(SpeedTreeImporterTranslatorBase):
 			else:
 				mc.setAttr(shader + ".specularRoughness", 1 - stmap.red)
 
-		if ("SubsurfaceAmount" in stMaterial.maps):
+		if (stMaterial.maps.has_key("SubsurfaceAmount")):
 			stmap = stMaterial.maps["SubsurfaceAmount"]
 			mc.setAttr(shader + '.thinWalled', 1)
 			if (stmap.file):
@@ -638,7 +638,7 @@ class SpeedTreeImporterArnoldTranslator(SpeedTreeImporterTranslatorBase):
 	def CreateMaterial(self, stMaterial, aShapes, blendInTexcoord):
 		shader = mc.shadingNode("aiStandard", asShader = True)
 
-		if ("Color" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Color")):
 			stmap = stMaterial.maps["Color"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -646,7 +646,7 @@ class SpeedTreeImporterArnoldTranslator(SpeedTreeImporterTranslatorBase):
 			else:
 				mc.setAttr(shader + ".Color", stmap.red, stmap.green, stmap.blue)
 
-		if ("Normal" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Normal")):
 			stmap = stMaterial.maps["Normal"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -659,7 +659,7 @@ class SpeedTreeImporterArnoldTranslator(SpeedTreeImporterTranslatorBase):
 				mc.connectAttr(textureNode + ".outAlpha", bump2dNode + ".bumpValue")
 				mc.connectAttr(bump2dNode + ".outNormal", shader + ".normalCamera")
 
-		if ("Opacity" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Opacity")):
 			stmap = stMaterial.maps["Opacity"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -668,7 +668,7 @@ class SpeedTreeImporterArnoldTranslator(SpeedTreeImporterTranslatorBase):
 				for shape in aShapes:
 					mc.setAttr(shape + ".aiOpaque", 0)
 
-		if ("Gloss" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Gloss")):
 			stmap = stMaterial.maps["Gloss"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -683,7 +683,7 @@ class SpeedTreeImporterArnoldTranslator(SpeedTreeImporterTranslatorBase):
 			else:
 				mc.setAttr(shader + ".specularRoughness", 1 - stmap.red)
 
-		if ("SubsurfaceAmount" in stMaterial.maps):
+		if (stMaterial.maps.has_key("SubsurfaceAmount")):
 			stmap = stMaterial.maps["SubsurfaceAmount"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -711,7 +711,7 @@ class SpeedTreeImporterRendermanTranslator(SpeedTreeImporterTranslatorBase):
 		shader = mc.shadingNode("PxrSurface", asShader = True)
 
 		mc.setAttr(shader + ".diffuseDoubleSided", 1)
-		if ("Color" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Color")):
 			stmap = stMaterial.maps["Color"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -719,7 +719,7 @@ class SpeedTreeImporterRendermanTranslator(SpeedTreeImporterTranslatorBase):
 			else:
 				mc.setAttr(shader + ".diffuseColor", stmap.red, stmap.green, stmap.blue)
 
-		if ("Normal" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Normal")):
 			stmap = stMaterial.maps["Normal"]
 			if (stmap.file):
 				normalNode = mc.shadingNode("PxrNormalMap", asUtility = True)
@@ -731,7 +731,7 @@ class SpeedTreeImporterRendermanTranslator(SpeedTreeImporterTranslatorBase):
 				mc.setAttr(normalNode + ".flipY", 1)
 				mc.connectAttr(normalNode + ".resultN", shader + ".bumpNormal")
 
-		if ("Opacity" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Opacity")):
 			stmap = stMaterial.maps["Opacity"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -743,7 +743,7 @@ class SpeedTreeImporterRendermanTranslator(SpeedTreeImporterTranslatorBase):
 		mc.setAttr(shader + ".specularEdgeColor", 1, 1, 1)
 		mc.setAttr(shader + ".specularFresnelMode", 1)
 		mc.setAttr(shader + ".specularModelType", 1)
-		if ("Gloss" in stMaterial.maps):
+		if (stMaterial.maps.has_key("Gloss")):
 			stmap = stMaterial.maps["Gloss"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)
@@ -756,7 +756,7 @@ class SpeedTreeImporterRendermanTranslator(SpeedTreeImporterTranslatorBase):
 				mc.setAttr(shader + ".diffuseRoughness", 1.0 - stmap.red)
 				mc.setAttr(shader + ".specularRoughness", 1.0 - stmap.red)
 
-		if ("SubsurfaceAmount" in stMaterial.maps):
+		if (stMaterial.maps.has_key("SubsurfaceAmount")):
 			stmap = stMaterial.maps["SubsurfaceAmount"]
 			if (stmap.file):
 				textureNode = self.CreateFileTexture(stmap.file)

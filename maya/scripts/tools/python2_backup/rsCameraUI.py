@@ -661,7 +661,7 @@ def rsCameraUIShakeRemove(currentCamera):
         try:
                 cmds.disconnectAttr((currentCamera + "_ShakeControl_" + tcl + ".output"), (currentCamera + "_ShakeControl." + tcl))
         except:
-                print(" - There is no animation on " + currentCamera + "_ShakeControl_" + tcl)
+                print " - There is no animation on " + currentCamera + "_ShakeControl_" + tcl
  
   tempChanList = ["tx","ty","tz","sx","sy","sz"]
   tcl=""
@@ -692,7 +692,7 @@ def rsCameraUIShakeRemove(currentCamera):
         try:
                 cmds.delete(currentCamera + "_ShakeControl_" + tcl)
         except:
-                print((currentCamera + "_ShakeControl_" + tcl  + " doesn't exist"))
+                print (currentCamera + "_ShakeControl_" + tcl  + " doesn't exist")
   parents1 = cmds.listRelatives(currentCamera+ "_ShakeControl", parent=True)
   if parents1 != None:
         cmds.parent(currentCamera, parents1[0]) 
@@ -763,7 +763,7 @@ def rsCameraUIShakeReAdd(currentCamera):
                         try:
                                 cmds.connectAttr((currentCamera + "_ShakeControl_" + tcl + ".output"), (currentCamera + "_ShakeControl." + tcl))
                         except:
-                                print(" - There is no animation on " + tcl)
+                                print " - There is no animation on " + tcl
  
  
 def rsCameraUIShakeAdd(currentCamera):

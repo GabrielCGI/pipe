@@ -47,14 +47,14 @@ def makeBackup(path):
     if os.path.exists(path):
         try:
             shutil.copyfile(path, sTargetPath)
-            print("Backup SUCCESS")
+            print "Backup SUCCESS"
             return True
         except IOError as io_err:
-            print("%s doesn't exist. Creation !" %path)
+            print "%s doesn't exist. Creation !" %path
             try:
                 os.makedirs(_sTargetDir)
                 shutil.copyfile(path, sTargetPath)
-                print("Backup SUCCESS")
+                print "Backup SUCCESS"
                 return True
             except:
                 cmds.error("Fail to backup %s" %(sTargetPath))
@@ -78,7 +78,7 @@ def wipSave():
     # If it is not a lib, then simply increment.
     if not isLib(sceneName):
         mel.eval('IncrementAndSave;')
-        print("// Saved !", end=' ')
+        print "// Saved !",
 
     # If it a lib
     else:
@@ -117,7 +117,7 @@ def wipSave():
             #Split name and version number  (ch_someAsset_modeling.006)
             split = file.split(wipScene+".")
             if len(split) > 0:
-                print(len(split))
+                print len(split)
                 if isInt(split[-1]):
                     increment.append(int(split[-1]))
         # Sort list ascending order
@@ -145,7 +145,7 @@ def wipSave():
             #Else, save file !
             cmds.file(rename=newPath)
             cmds.file(save=True, type="mayaBinary")
-            print("Scene saved: " + newPath)
+            print "Scene saved: " + newPath
     return
 
 
@@ -173,7 +173,7 @@ def libSave():
         libName = assetName+"_lib"+".mb"
 
         libpath = os.path.join(pardir,libName)
-        print(libpath)
+        print libpath
         if os.path.isfile(libpath):
             confirm = cmds.confirmDialog( title="Publish Lib?",
                                         message="%s \nPublish a new lib?" %libpath,
@@ -186,7 +186,7 @@ def libSave():
         if makeBackup(libpath):
             cmds.file(rename=libpath)
             cmds.file(save=True, type="mayaBinary")
-            print("// Result: %s"%(libpath), end=' ')
+            print "// Result: %s"%(libpath),
         else:
             msg = "Save failed"
             mayaWarningExit(msg)
@@ -202,12 +202,12 @@ def libSave():
                 shutil.copyfile(_sSourcePath, sTargetPath)
                 try:
                     cmds.file(save=True)
-                    print("// Saved !", end=' ')
+                    print "// Saved !",
                 except:
                     cmds.error("Scene not saved")
 
             except IOError as io_err:
-                print("%s doesn't exist. Creation !")
+                print "%s doesn't exist. Creation !"
                 try:
                     os.makedirs(os.path.dirname(sTargetPath))
                 except:
@@ -215,7 +215,7 @@ def libSave():
                 try:
                     shutil.copyfile(_sSourcePath, sTargetPath)
                     cmds.file(save=True)
-                    print("// Saved !", end=' ')
+                    print "// Saved !",
                     return True
                 except:
                     cmds.error("Scene not saved")

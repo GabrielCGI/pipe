@@ -5,9 +5,8 @@ from os.path import isfile, join, splitext
 import json
 import os
 
-the_path = "W:\paradise_2005"
-#the_path = "W:\\Drive partagés\\paradise_2005".decode('utf-8').encode('cp1252')
-
+the_path = "W:\\Drive partagés\\paradise_2005".decode('utf-8').encode('cp1252')
+print the_path
 # FIX AN ISSUE WITH ACCENT
 if os.path.exists(the_path):
 
