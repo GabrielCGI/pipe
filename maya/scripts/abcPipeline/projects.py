@@ -5,35 +5,20 @@ from os.path import isfile, join, splitext
 import json
 import os
 
-the_path = "W:\paradise_2005"
-#the_path = "W:\\Drive partagés\\paradise_2005".decode('utf-8').encode('cp1252')
 
-# FIX AN ISSUE WITH ACCENT
-if os.path.exists(the_path):
 
-    projectsData ={
-        "paradise_2005":
+projectsData ={
+    "swarovski_2106":
         {
-            "path": "W:\\paradise_2005",
-            "assetsDir": "W:\\paradise_2005\\assets",
-    	    "assetsDbDir": os.path.join(the_path, "assets\\database")
+            "path": "B:\\swarovski_2106",
+            "assetsDir": "B:\\swarovski_2106\\asset",
+            "assetsDbDir": "B:\\swarovski_2106\\asset\\database",
         }
-    }
-elif os.path.exists("W:\Shared drives\paradise_2005"):
+}
 
-    projectsData ={
-        "paradise_2005":
-        {
-            "path": "W:\\paradise_2005",
-            "assetsDir": "W:\\paradise_2005\\assets",
-    	    "assetsDbDir": "W:\\Shared Drives\\paradise_2005\\assets\\database"
-        }
-    }
-else:
-    pass
 computers ={
-"default" : "paradise_2005",
-"SPRINTER-01": "paradise_2005",
+"default" : "swarovski_2106",
+"SPRINTER-01": "swarovski_2106",
 }
 
 def getCurrentProject():

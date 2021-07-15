@@ -9,9 +9,9 @@ cmds.loadPlugin("AbcExport.mll", quiet=True)
 
 
 import assetsDb as assetsDb
-importlib.reload(assetsDb)
+
 import projects as projects
-importlib.reload(projects)
+
 
 currentProject = projects.getCurrentProject()
 projectsData = projects.getProjectData(currentProject)

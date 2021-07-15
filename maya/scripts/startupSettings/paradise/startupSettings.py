@@ -32,12 +32,9 @@ def killTurtle():
 def run():
 	cmds.file( modified=False )
 	pass
-"""
-	#Unit
-	cmds.currentUnit( time='film' )  #film: 24 fps, pal: 25 fps, ntsc: 30 fps
-	print "FPS = 24FPS"
+	cmds.currentUnit( time='pal' )  #film: 24 fps, pal: 25 fps, ntsc: 30 fps
+	print ("pal = 25FPS")
 	cmds.currentUnit( linear='cm' )
-	print "UNIT = cm"
+
 	#killTurtle()
 
-"""

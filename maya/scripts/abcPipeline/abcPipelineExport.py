@@ -9,7 +9,7 @@ cmds.loadPlugin("AbcExport.mll", quiet=True)
 
 
 import projects as projects
-importlib.reload(projects)
+
 
 
 currentProject = projects.getCurrentProject()

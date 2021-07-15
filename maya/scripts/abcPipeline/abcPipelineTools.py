@@ -16,7 +16,6 @@ import json
 import sys
 import projects as projects
 import importlib
-importlib.reload(projects)
 
 # Project variable initialisation
 assetsDbDir = "W:\\paradise_2005\\assets\\database" #Something like B:\Teaser\assets\database #HACK paradise usually  projects.getCurrentProjectData()["assetsDbDir"]
@@ -87,7 +86,7 @@ def createNewAsset():
     assetNamespace = currentSelection[0].split(":")[0] #Something like Ch_assetName_rig_lib
     split = assetNamespace.split("_") #Somethinh like ["Ch","assetName","Rig","lib"]
     #Check: Does it match the pattern XX_assetName_rig_lib ?
-    if not (len(split) >= 3 and split[-2]=="rigging" and split[-1]=="lib"):
+    if not (split[-2]=="rig" and split[-1]=="lib"):
         msg = "Assets namespace does not match pattern: XX_assetName_rigging_lib \nCurrent name: %s"%(assetNamespace)
         mayaWarning(msg)
         sys.exit(msg)
@@ -151,7 +150,7 @@ def createNewAsset():
     assetTxt = assetName+'.txt'
     print("assetDbDir"+assetsDbDir)
 
-    assetDataPath = os.path.join(assetsDbDir,assetTxt) #Build .txt path 
+    assetDataPath = os.path.join(assetsDbDir,assetTxt) #Build .txt path
 
     if not os.path.exists(assetsDbDir):
         msg="%s doesn't exist !\n ... "%(assetsDbDir)
