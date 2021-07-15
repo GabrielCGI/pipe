@@ -18,7 +18,7 @@ REM == Scripts
 SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings\paradise;%NETWORK_INSTALL%\script
 
 REM == Color
-REM == SET OCIO=%NETWORK_INSTALL%\OpenColorIO-Configs\aces_1.2\config.ocio
+REM == SET OCIO=<MAYA_RESOURCES>\OCIO-configs\Maya2022-default\config.ocio
 SET MAYA_COLOR_MANAGEMENT_POLICY_FILE=%PIPELINE_DIR_MAYA%\colorManagement\cm_aces2.0.xml
 
 

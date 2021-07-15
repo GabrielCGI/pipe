@@ -130,6 +130,45 @@ def deleteXg():
     else:
         print ("No xgen in scene")
 
+def acesConvert():
+    textures_file = cmds.ls(type="file") #List all textures
+    listFile=[]
+    colorSpaceKnown = ["Utility - Raw", "Utility - sRGB - Texture", "Utility - Linear - sRGB", "Raw", "sRGB","scene-linear Rec.709-sRGB"] #Authorized color space
+    #Create a list of FileTex object with name and colorspace
+    for tex in textures_file:
+        texFile = FileTex(tex, cmds.getAttr(tex+".fileTextureName"), cmds.getAttr(tex+".colorSpace"))
+        listFile.append(texFile)
+    count = 0
+    for f in listFile:
+        #Check if the colorspace is not authorized
+        if f.colorSpace not in colorSpaceKnown:
+            # Create list of standard colorspace to replace unknown color space
+            colorSpaceList = ["Raw","sRGB"]
+            colorSpaceList.append("Skip")
+            #Create a warning to let the user select the standard colorspace
+            confirm = cmds.confirmDialog( title='Color space unknown', message='Unknown colorspace: %s\n\n Overide with:'%(f.colorSpace), button=colorSpaceList, defaultButton='Yes', cancelButton='Skip', dismissString='Skip' )
+            if confirm is not "Skip":
+                print("Change %s from %s to %s - %s"%(f.name,f.colorSpace,confirm, f.path))
+                cmds.setAttr(f.name+".colorSpace", confirm, type="string")
+                count += 1
+            else:
+                print("Skip %s"%(f.name))
+        elif f.colorSpace == "Utility - Raw":
+            print("Convert %s : Utility - Raw to Raw - %s"%(f.name,f.path))
+            cmds.setAttr(f.name+".colorSpace", "Raw", type="string")
+            count += 1
+        elif f.colorSpace == "Utility - sRGB - Texture":
+            print("Convert %s : Utility - sRGB - Texture to sRGB - %s"%(f.name,f.path))
+            cmds.setAttr(f.name+".colorSpace", "sRGB", type="string")
+            count += 1
+        elif f.colorSpace == "Utility - Linear - sRGB":
+            print("Convert %s : Utility - Linear - sRGB to scene-linear Rec.709-sRGB - %s"%(f.name,f.path))
+            cmds.setAttr(f.name+".colorSpace", "scene-linear Rec.709-sRGB", type="string")
+            count += 1
+    cmds.warning("%s corrected !"%(count))
+
+
+
 
 #Create my GUI
 def createGUI():
@@ -142,6 +181,7 @@ def createGUI():
     cmds.columnLayout(adjustableColumn= True, rowSpacing= 10)
     cmds.text( label='Doctor',font='boldLabelFont')
     cmds.checkBox("texColorSpace", label="Texture with different color space", value=True)
+    cmds.checkBox("acesConvert", label="Aces 2.0 converter", value=True)
     cmds.checkBox("optimize", label="Optimize scene size", value=True)
     cmds.checkBox("cam", label="Delete extra camera", value=True)
     #cmds.checkBox("numObject", label="Objet Numbers", value=True)
@@ -165,7 +205,8 @@ def doctor():
 
     if cmds.checkBox("cam", query = True, value =True):
         delCamera()
-
+    if cmds.checkBox("acesConvert", query = True, value =True):
+        acesConvert()
     #if cmds.checkBox("numObject", query = True, value =True):
     #    maxNumObject()
 
