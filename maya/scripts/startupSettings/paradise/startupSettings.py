@@ -27,16 +27,7 @@ def killTurtle():
     pm.unloadPlugin("Turtle.mll")
     print "Turtle Killed"
 """
-def pAutoLoads():
 
-    pluginList=["bifmeshio.mll","bifrostGraph.mll","bifrostshellnode.mll","bifrostshellnode.mll","bifrostvisplugin.mll"]
-    print("Start plugins autoloads config")
-    for plug in pluginList:
-        if cmds.pluginInfo(plug, query=True, autoload=True ):
-            cmds.pluginInfo(plug, edit=True, autoload=False )
-            print("Killing autoload on:"+plug)
-        else:
-            print(plug + " already not Loaded")
 
 
 def run():
@@ -45,6 +36,7 @@ def run():
 	print ("pal = 25FPS")
 	cmds.currentUnit(linear='cm')
 
+# HACK TO FORCE PLUGIN PREFS AUTOLOADING
 cmds.evalDeferred('for plug in ["bifmeshio.mll","bifrostGraph.mll","bifrostshellnode.mll","bifrostshellnode.mll","bifrostvisplugin.mll"]:  cmds.pluginInfo(plug, edit=True, autoload=False ) if cmds.pluginInfo(plug, query=True, autoload=True) else print("Already no autoload: "+plug) ; cmds.pluginInfo(savePluginPrefs=True)',lp=True)
 
 
