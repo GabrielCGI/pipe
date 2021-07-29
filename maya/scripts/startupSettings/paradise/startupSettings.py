@@ -1,6 +1,5 @@
 
 import maya.cmds as cmds
-
 #import pymel.core as pm
 
 """
@@ -28,13 +27,29 @@ def killTurtle():
     pm.unloadPlugin("Turtle.mll")
     print "Turtle Killed"
 """
+def pAutoLoads():
+
+    pluginList=["bifmeshio.mll","bifrostGraph.mll","bifrostshellnode.mll","bifrostshellnode.mll","bifrostvisplugin.mll"]
+    print("Start plugins autoloads config")
+    for plug in pluginList:
+        if cmds.pluginInfo(plug, query=True, autoload=True ):
+            cmds.pluginInfo(plug, edit=True, autoload=False )
+            print("Killing autoload on:"+plug)
+        else:
+            print(plug + " already not Loaded")
+
 
 def run():
 	cmds.file( modified=False )
-	pass
 	cmds.currentUnit( time='pal' )  #film: 24 fps, pal: 25 fps, ntsc: 30 fps
 	print ("pal = 25FPS")
-	cmds.currentUnit( linear='cm' )
+	cmds.currentUnit(linear='cm')
+
+cmds.evalDeferred('for plug in ["bifmeshio.mll","bifrostGraph.mll","bifrostshellnode.mll","bifrostshellnode.mll","bifrostvisplugin.mll"]:  cmds.pluginInfo(plug, edit=True, autoload=False ) if cmds.pluginInfo(plug, query=True, autoload=True) else print("Already no autoload: "+plug) ; cmds.pluginInfo(savePluginPrefs=True)',lp=True)
+
+
+
+
+
 
 	#killTurtle()
-

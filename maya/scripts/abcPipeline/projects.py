@@ -11,8 +11,14 @@ projectsData ={
     "swarovski_2106":
         {
             "path": "B:\\swarovski_2106",
-            "assetsDir": "B:\\swarovski_2106\\asset",
-            "assetsDbDir": "B:\\swarovski_2106\\asset\\database",
+            "assetsDir": "B:\\swarovski_2106\\assets",
+            "assetsDbDir": "B:\\swarovski_2106\\assets\\database",
+        },
+    "blablanimals":
+        {
+            "path": "B:\\blablanimals",
+            "assetsDir": "B:\\blablanimals\\assets",
+            "assetsDbDir": "B:\\blablanimals\\assets\\database",
         }
 }
 

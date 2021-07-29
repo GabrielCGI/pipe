@@ -18,7 +18,7 @@ import projects as projects
 import importlib
 
 # Project variable initialisation
-assetsDbDir = "W:\\paradise_2005\\assets\\database" #Something like B:\Teaser\assets\database #HACK paradise usually  projects.getCurrentProjectData()["assetsDbDir"]
+assetsDbDir = projects.getCurrentProjectData()["assetsDbDir"] #Something like B:\Teaser\assets\database #HACK paradise usually
 assetsDir = projects.getCurrentProjectData()["assetsDir"] #Something like B:\Teaser\assets\database
 
 def mayaWarning(msg):
@@ -32,7 +32,7 @@ def buildCommand (abcPath, geoList, attrList):
    "Build Command for alembic export job"
    command = ""
    command += "-frameRange 1 1" #Frame Range
-   command += " -uvWrite -writeUVSets -dataFormat ogawa "
+   command += "-writeVisibility -uvWrite -writeUVSets -dataFormat ogawa "
    if attrList[0]:
        for attr in attrList:
            command += " -attr %s"%(attr)           #Attributs
@@ -86,7 +86,7 @@ def createNewAsset():
     assetNamespace = currentSelection[0].split(":")[0] #Something like Ch_assetName_rig_lib
     split = assetNamespace.split("_") #Somethinh like ["Ch","assetName","Rig","lib"]
     #Check: Does it match the pattern XX_assetName_rig_lib ?
-    if not (split[-2]=="rig" and split[-1]=="lib"):
+    if not (split[-2]=="rigging" and split[-1]=="lib"):
         msg = "Assets namespace does not match pattern: XX_assetName_rigging_lib \nCurrent name: %s"%(assetNamespace)
         mayaWarning(msg)
         sys.exit(msg)
