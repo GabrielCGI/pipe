@@ -5,6 +5,7 @@ import shutil
 import maya.mel as mel
 import sys
 
+tasks = ["shading","fur","animation","anim","mod","modeling","fx","rigging","rig"]
 def isInt(s):
     """
     Check if a string can be converted to int.
@@ -83,8 +84,8 @@ def wipSave():
     # If it a lib
     else:
         # Check if it match the pattern
-        if not sceneName.split("_")[-2] in ["shading","fur","animation","anim","mod","modeling","fx"]:
-            msg = "Something wrong. The task name in not: shading, fur, animation, anim, mod, modeling, fx "
+        if not sceneName.split("_")[-2] in tasks:
+            msg = "Something wrong. The task name in not:"+ str(tasks)
             mayaWarningExit(msg)
         sceneNameSplit = sceneName.split("_")
         task = sceneNameSplit[-2]
@@ -162,8 +163,8 @@ def libSave():
     raw_name, extension = os.path.splitext(filename)
 
     if not isLib(raw_name):
-        if not raw_name.split("_")[-1].split(".")[0] in ["shading","fur","animation","anim","mod","modeling","fx"]:
-            msg = "Something wrong. The task name in not shading,fur,animation,anim,mod, modeling orfx "
+        if not raw_name.split("_")[-1].split(".")[0] in tasks:
+            msg = 'Something wrong. The task name in not '+ str(tasks)
             mayaWarningExit(msg)
         #Look for a lib file.
         #Get parent directory
@@ -192,30 +193,30 @@ def libSave():
             mayaWarningExit(msg)
 
     else:
-        if not raw_name.split("_")[-2].split(".")[0] in ["shading","fur","animation","anim","mod","modeling","fx"]:
-            msg = "Something wrong. The task name in not shading,fur,animation,anim,mod, modeling orfx "
+        if not raw_name.split("_")[-2].split(".")[0] in tasks:
+            msg = "Something wrong. The task name in not "+str(tasks)
             mayaWarningExit(msg)
-            _sTargetDir = os.path.dirname(_sSourcePath) + '\\oldLib\\'
-            sTimestamp = time.strftime("%Y-%m-%d %Hh%Mm%Ss")
-            sTargetPath = _sTargetDir + '[' + sTimestamp + ']'+filename
+        _sTargetDir = os.path.dirname(_sSourcePath) + '\\oldLib\\'
+        sTimestamp = time.strftime("%Y-%m-%d %Hh%Mm%Ss")
+        sTargetPath = _sTargetDir + '[' + sTimestamp + ']'+filename
+        try:
+            shutil.copyfile(_sSourcePath, sTargetPath)
+            try:
+                cmds.file(save=True)
+                print("// Saved !", end=' ')
+            except:
+                cmds.error("Scene not saved")
+
+        except IOError as io_err:
+            print("%s doesn't exist. Creation !")
+            try:
+                os.makedirs(os.path.dirname(sTargetPath))
+            except:
+                cmds.error("Could not create director %s" %(sTargetPath))
             try:
                 shutil.copyfile(_sSourcePath, sTargetPath)
-                try:
-                    cmds.file(save=True)
-                    print("// Saved !", end=' ')
-                except:
-                    cmds.error("Scene not saved")
-
-            except IOError as io_err:
-                print("%s doesn't exist. Creation !")
-                try:
-                    os.makedirs(os.path.dirname(sTargetPath))
-                except:
-                    cmds.error("Could not create director %s" %(sTargetPath))
-                try:
-                    shutil.copyfile(_sSourcePath, sTargetPath)
-                    cmds.file(save=True)
-                    print("// Saved !", end=' ')
-                    return True
-                except:
-                    cmds.error("Scene not saved")
+                cmds.file(save=True)
+                print("// Saved !", end=' ')
+                return True
+            except:
+                cmds.error("Scene not saved")

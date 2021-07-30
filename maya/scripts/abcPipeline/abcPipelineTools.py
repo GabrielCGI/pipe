@@ -32,7 +32,7 @@ def buildCommand (abcPath, geoList, attrList):
    "Build Command for alembic export job"
    command = ""
    command += "-frameRange 1 1" #Frame Range
-   command += "-writeVisibility -uvWrite -writeUVSets -dataFormat ogawa "
+   command += " -writeVisibility -uvWrite -writeUVSets -dataFormat ogawa "
    if attrList[0]:
        for attr in attrList:
            command += " -attr %s"%(attr)           #Attributs
