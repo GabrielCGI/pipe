@@ -79,7 +79,7 @@ def wipSave():
     # If it is not a lib, then simply increment.
     if not isLib(sceneName):
         mel.eval('IncrementAndSave;')
-        print("// Saved !", end=' ')
+        print("// Saved !")
 
     # If it a lib
     else:
@@ -187,7 +187,7 @@ def libSave():
         if makeBackup(libpath):
             cmds.file(rename=libpath)
             cmds.file(save=True, type="mayaBinary")
-            print("// Result: %s"%(libpath), end=' ')
+            print("// Result: %s"%(libpath))
         else:
             msg = "Save failed"
             mayaWarningExit(msg)
@@ -203,7 +203,7 @@ def libSave():
             shutil.copyfile(_sSourcePath, sTargetPath)
             try:
                 cmds.file(save=True)
-                print("// Saved !", end=' ')
+                print("// Saved !")
             except:
                 cmds.error("Scene not saved")
 
@@ -216,7 +216,7 @@ def libSave():
             try:
                 shutil.copyfile(_sSourcePath, sTargetPath)
                 cmds.file(save=True)
-                print("// Saved !", end=' ')
+                print("// Saved !")
                 return True
             except:
                 cmds.error("Scene not saved")

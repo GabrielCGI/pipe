@@ -32,8 +32,8 @@ def killTurtle():
 
 def run():
 	cmds.file( modified=False )
-	cmds.currentUnit( time='pal' )  #film: 24 fps, pal: 25 fps, ntsc: 30 fps
-	print ("pal = 25FPS")
+	#cmds.currentUnit( time='pal' )  #film: 24 fps, pal: 25 fps, ntsc: 30 fps
+	#print ("pal = 25FPS")
 	cmds.currentUnit(linear='cm')
 
 # HACK TO FORCE PLUGIN PREFS AUTOLOADING

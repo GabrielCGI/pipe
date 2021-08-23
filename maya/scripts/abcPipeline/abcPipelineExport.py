@@ -86,7 +86,7 @@ def buildCommand (start, end, path, geoList, attrList, subframe, frameSample):
    "Build Command for abc export job"
    command = ""
    command += "-frameRange %s %s"%(start, end) #Frame Range
-   command += " -writeVisibility -uvWrite -writeUVSets -dataFormat ogawa "
+   command += " -writeVisibility -uvWrite -writeUVSets -worldSpace -dataFormat ogawa "
    if subframe == True:
        if len(frameSample.split(" "))==3:
            for f in frameSample.split(" "):
@@ -164,7 +164,7 @@ class exportAnimGuiCls(object):
 
         cmds.rowLayout(numberOfColumns=2)
         frameSample = cmds.textField(text = "-0.08 0 0.08")
-        subFrameCheckBox = cmds.checkBox(label="Subframes", value = True)
+        subFrameCheckBox = cmds.checkBox(label="Subframes", value = False)
 
         cmds.setParent("..")
 
