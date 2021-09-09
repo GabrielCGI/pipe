@@ -11,7 +11,7 @@ SET MAYA_SHELF_PATH=%PIPELINE_DIR_MAYA%\shelfs
 SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons
 
 REM == Arnold (+yeti)
-REM SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\6.2.1.0\maya2022;R:\pipeline\networkInstall\Yeti-v4.0.1_Maya2022-windows
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\6.2.1.0\maya2022;R:\pipeline\networkInstall\Yeti-v4.0.1_Maya2022-windows;R:\pipeline\networkInstall\HDRLightStudioConnectionMaya\2022
 REM SET ARNOLD_PLUGIN_PATH=R:\pipeline\networkInstall\Yeti-v4.0.1_Maya2022-windows\bin
 
 REM == Scripts
@@ -23,14 +23,15 @@ SET MAYA_COLOR_MANAGEMENT_POLICY_FILE=%PIPELINE_DIR_MAYA%\colorManagement\cm_ace
 
 
 REM == Yeti
-SET peregrinel_LICENSE=5053@BLOOM-NET
+REM == SET peregrinel_LICENSE=5053@BLOOM-NET
 
 
 REM= PATH (yeti + megascan)
-SET PATH=%PATH%;R:\megascan\support\plugins\maya\6.6\MSLiveLink;
+REM == SET PATH=%PATH%;R:\megascan\support\plugins\maya\6.6\MSLiveLink;
 
 REM == MAYA_SCRIPT_PATH (MEGASCAN,DEADLINE)
-SET MAYA_SCRIPT_PATH=%MAYA_SCRIPT_PATH%;R:\deadline\submission\Maya\Client;R:\megascan\support\plugins\maya\6.6\MSLiveLink
+SET MAYA_SCRIPT_PATH=%MAYA_SCRIPT_PATH%;R:\deadline\submission\Maya\Client;
+REM == R:\megascan\support\plugins\maya\6.6\MSLiveLink
 
 
 

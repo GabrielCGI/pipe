@@ -133,7 +133,7 @@ def deleteXg():
 def acesConvert():
     textures_file = cmds.ls(type="file") #List all textures
     listFile=[]
-    colorSpaceKnown = ["Utility - Raw", "Utility - sRGB - Texture", "Utility - Linear - sRGB", "Raw", "sRGB","scene-linear Rec.709-sRGB"] #Authorized color space
+    colorSpaceKnown = ["Utility - Raw", "Utility - sRGB - Texture", "Utility - Linear - sRGB", "Raw", "sRGB","scene-linear Rec.709-sRGB","scene-linear Rec 709/sRGB" "ACEScg", ] #Authorized color space
     #Create a list of FileTex object with name and colorspace
     for tex in textures_file:
         texFile = FileTex(tex, cmds.getAttr(tex+".fileTextureName"), cmds.getAttr(tex+".colorSpace"))
