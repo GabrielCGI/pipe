@@ -41,8 +41,11 @@ def nameFromAbc(abc):
     return name
 
 def createScriptNode(refNamespace, abcPath):
-    childRef = cmds.referenceQuery("%sRN"%(refNamespace), rfn=True, ch=True)[0]     #HACK PROD NUTRO !!!! [-1] to get the ABC. [0] usualy
-
+    # HACK SWAROVKI OLD=> childRef = cmds.referenceQuery("%sRN"%(refNamespace), rfn=True, ch=True)[0]     #HACK PROD NUTRO !!!! [-1] to get the ABC. [0] usualy
+    childRefList = cmds.referenceQuery("%sRN"%(refNamespace), rfn=True, ch=True)
+    for c in childRefList:
+        if c.split(":")[-1].split("_")[0]=="ch":
+            childRef = c
 
     script ='cmds.file ("%s", loadReference = "%s", type="Alembic")'%(abcPath, childRef)
     scriptNodeName = "scriptNode_"+refNamespace
