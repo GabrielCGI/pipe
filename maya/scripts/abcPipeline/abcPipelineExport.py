@@ -17,7 +17,6 @@ projectsData = projects.getProjectData(currentProject)
 assetsDir = projectsData.get("assetsDir")
 assetsDic = projects.buildAssetDb()   #Get dictionnary of all asset for th current project
 
-
 def nameFromCharRef(charRef):
     "Parse the references name to get the character name"
     name = "not a character"                # hack to avoid an error from empty string
@@ -27,7 +26,6 @@ def nameFromCharRef(charRef):
     print(name)
     return name
 
-
 def listCharRef():
     "Return a list of all references wich is a Character"
     listCharRef = []
@@ -36,11 +34,15 @@ def listCharRef():
 
     for ref in listAllRef:
         name = nameFromCharRef(ref)  #Ch_gros
-        if any(name in nameFromDic for nameFromDic in list(assetsDic.keys())):
-            if len(ref.split(":")) <= 1:            # filter through the child node of the rig reference
-                listCharRef.append(ref)
-    return listCharRef
 
+        try: #Obligatory try because referenceQuery raise error: sharedReferenceNode' is not associated with a reference file. #
+            if cmds.referenceQuery(ref, isLoaded=True): #Check if the reference is loaded
+                if any(name in nameFromDic for nameFromDic in list(assetsDic.keys())):
+                    if len(ref.split(":")) <= 1:            # filter through the child node of the rig reference
+                            listCharRef.append(ref)
+        except:
+            pass
+    return listCharRef
 
 def listSelectedCharRef():
     "Return a list of references, parent from current selection, wich is a Character"
@@ -59,7 +61,6 @@ def listSelectedCharRef():
                         listSelectedRef.append(ref)
     return listSelectedRef
 
-
 def listGeoByCharRef(charRef):
     "Return a list of all Geo needed to be exported in the Alembic"
     listGeo= []
@@ -73,14 +74,14 @@ def listGeoByCharRef(charRef):
     for geoDic in listGeoDic:
         if version: #Si il y a des version ['ch_rat_rig_lib', '1']
             split = geoDic.split(baseName) #["ch_rat_rig_lib",":GEO"]
-            geoVersion = baseName+version+split[1] #["ch_rat_rig_lib1:GEO"]
+            geoVersion = cmds.referenceQuery(charRef, namespace=True )+split[1] #["ch_rat_rig_lib1:GEO"] #REFERENCE QUERY ALLOW TO GET THE REALNAMESPACE IF CHANGED MANUALLY
             listGeo.append(geoVersion)
         if not version: #Si il n'y a pas de version ['ch_rat_rig_lib', '']
             listGeo.append(geoDic)
 
     #Return list
+    print(listGeo)
     return listGeo
-
 
 def buildCommand (start, end, path, geoList, attrList, subframe, frameSample):
    "Build Command for abc export job"
@@ -101,7 +102,6 @@ def buildCommand (start, end, path, geoList, attrList, subframe, frameSample):
 
    command += " -file \"%s\""%(path)                #File Path
    return command
-
 
 def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
     "Export an Abc for a given character"
@@ -131,7 +131,6 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
     cmds.refresh(suspend=False)
     print("------------ SUCCESS EXPORT %s  ! ------------"%(charRef))
 
-
 def exportAnim(start=0, end=100, subframe=False, frameSample="0 0 0", charList=[]):
     basicFilter = "*.abc"
     dirPath = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, fileMode=2,)
@@ -157,7 +156,7 @@ class exportAnimGuiCls(object):
         self.window = cmds.window(title="Export Alembic", iconName="Export Abc")
         cmds.columnLayout(columnWidth=400)
 
-        self.charList = cmds.textScrollList( numberOfRows=8, allowMultiSelection=True,
+        self.charList = cmds.textScrollList( numberOfRows=20, allowMultiSelection=True,
                         append=[],
                         showIndexedItem=4 )
 

@@ -4,38 +4,34 @@ SET SCRIPT_MAYA=%PIPELINE_DIR%\maya\scripts
 SET NETWORK_INSTALL=R:\pipeline\networkInstall
 SET LIB_DIR=R:\lib
 
+rem \---- IMPROVE MAYA STARTUP AND SHUTDOWN TIME
 SET MAYA_DISABLE_CIP=1
 SET MAYA_DISABLE_CER=1
-REM == Shelf
+
+rem \---- Shelf
 SET MAYA_SHELF_PATH=%PIPELINE_DIR_MAYA%\shelfs
 SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons
 
-REM == Arnold (+yeti)
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\6.2.1.0\maya2022;R:\pipeline\networkInstall\Yeti-v4.0.1_Maya2022-windows;R:\pipeline\networkInstall\HDRLightStudioConnectionMaya\2022
-REM SET ARNOLD_PLUGIN_PATH=R:\pipeline\networkInstall\Yeti-v4.0.1_Maya2022-windows\bin
+rem \---- ARNOLD SETUP
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\6.2.1.0\maya2022
 
-REM == Scripts
+rem \---- HDRLigthStudio
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\HDRLightStudioConnectionMaya\2022
+
+rem \---- YETI SETUP
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\Yeti-v4.0.1_Maya2022-windows;
+SET ARNOLD_PLUGIN_PATH=%ARNOLD_PLUGIN_PATH%;%NETWORK_INSTALL%\Yeti-v4.0.1_Maya2022-windows\bin
+rem \---- SET peregrinel_LICENSE=5053@BLOOM-NET
+
+rem \---- Scripts
 SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings\paradise;%NETWORK_INSTALL%\script
 
-REM == Color
-REM == SET OCIO=<MAYA_RESOURCES>\OCIO-configs\Maya2022-default\config.ocio
+rem \---- Color
+rem \---- SET OCIO=<MAYA_RESOURCES>\OCIO-configs\Maya2022-default\config.ocio
 SET MAYA_COLOR_MANAGEMENT_POLICY_FILE=%PIPELINE_DIR_MAYA%\colorManagement\cm_aces2.0.xml
 
-
-REM == Yeti
-REM == SET peregrinel_LICENSE=5053@BLOOM-NET
-
-
-REM= PATH (yeti + megascan)
-REM == SET PATH=%PATH%;R:\megascan\support\plugins\maya\6.6\MSLiveLink;
-
-REM == MAYA_SCRIPT_PATH (MEGASCAN,DEADLINE)
+rem \----DEADLINE
 SET MAYA_SCRIPT_PATH=%MAYA_SCRIPT_PATH%;R:\deadline\submission\Maya\Client;
-REM == R:\megascan\support\plugins\maya\6.6\MSLiveLink
-
-
-
-
 
 
 REM == Start maya and launch statupSettings (FPS, Unit ect...)
