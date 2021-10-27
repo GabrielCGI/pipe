@@ -33,7 +33,7 @@ global proc shelf_Bloom () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import abcPipelineExport as ppEx\nexportAnimGuiCls = ppEx.exportAnimGuiCls()\nexportAnimGuiCls.show()\nlist =  ppEx.listCharRef()\nexportAnimGuiCls.updateCharList(list)" 
+        -command "import abcPipelineExport as ppEx\nfrom importlib import reload\nreload(ppEx)\nexportAnimGuiCls = ppEx.exportAnimGuiCls()\nexportAnimGuiCls.show()\nlist =  ppEx.listCharRef()\nexportAnimGuiCls.updateCharList(list)" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -478,7 +478,7 @@ global proc shelf_Bloom () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import doctor\n\ndoctor.createGUI()" 
+        -command "\nimport importlib\nimportlib.reload(doctor_gui)\ndoctor_gui.createGUI()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

@@ -4,6 +4,7 @@ import time
 import shutil
 import maya.mel as mel
 import sys
+import doctor_utils as doc
 
 tasks = ["shading","fur","animation","anim","mod","modeling","fx","rigging","rig"]
 def isInt(s):
@@ -23,7 +24,6 @@ def mayaWarningExit(msg):
     cmds.warning(msg)
     cmds.confirmDialog(title="Error",message=msg)
     sys.exit(msg)
-
 
 def isLib(sceneName):
     """
@@ -62,6 +62,7 @@ def makeBackup(path):
                 return False
     else:
         return True
+
 def wipSave():
     """
     Save a scene as WIP.
@@ -118,7 +119,7 @@ def wipSave():
             #Split name and version number  (ch_someAsset_modeling.006)
             split = file.split(wipScene+".")
             if len(split) > 0:
-                print(len(split))
+
                 if isInt(split[-1]):
                     increment.append(int(split[-1]))
         # Sort list ascending order
@@ -156,11 +157,14 @@ def libSave():
     Save the file "on the spot". Make a backup in oldfile.
     If the scene is a Wip, transform as lib
     """
+    wipSave()
+
 
     _sSourcePath = cmds.file(q=True, sceneName=True)
     # Get the current scene path
     filename = os.path.basename(_sSourcePath)
     raw_name, extension = os.path.splitext(filename)
+      #make a wipSave just in case before autoclean
 
     if not isLib(raw_name):
         if not raw_name.split("_")[-1].split(".")[0] in tasks:
@@ -184,6 +188,15 @@ def libSave():
                 msg = "Abort by user"
                 mayaWarningExit(msg)
 
+        #Cleaning operation
+        doc.delCamera()
+        doc.cleanUpScene()
+        doc.fixcolorSpaceUnknown()
+        badColorSpaceTex = doc.getBadColorSpaceTex()
+        doc.fixColorSpace(badColorSpaceTex)
+        msg= "Auto cleaning the scene: Delete extra camera, Optimize scene size, Textures colorspaces checking"
+        cmds.warning(msg)
+
         if makeBackup(libpath):
             cmds.file(rename=libpath)
             cmds.file(save=True, type="mayaBinary")
@@ -191,32 +204,3 @@ def libSave():
         else:
             msg = "Save failed"
             mayaWarningExit(msg)
-
-    else:
-        if not raw_name.split("_")[-2].split(".")[0] in tasks:
-            msg = "Something wrong. The task name in not "+str(tasks)
-            mayaWarningExit(msg)
-        _sTargetDir = os.path.dirname(_sSourcePath) + '\\oldLib\\'
-        sTimestamp = time.strftime("%Y-%m-%d %Hh%Mm%Ss")
-        sTargetPath = _sTargetDir + '[' + sTimestamp + ']'+filename
-        try:
-            shutil.copyfile(_sSourcePath, sTargetPath)
-            try:
-                cmds.file(save=True)
-                print("// Saved !")
-            except:
-                cmds.error("Scene not saved")
-
-        except IOError as io_err:
-            print("%s doesn't exist. Creation !")
-            try:
-                os.makedirs(os.path.dirname(sTargetPath))
-            except:
-                cmds.error("Could not create director %s" %(sTargetPath))
-            try:
-                shutil.copyfile(_sSourcePath, sTargetPath)
-                cmds.file(save=True)
-                print("// Saved !")
-                return True
-            except:
-                cmds.error("Scene not saved")
