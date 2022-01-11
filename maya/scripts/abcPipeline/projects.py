@@ -19,12 +19,19 @@ projectsData ={
             "path": "B:\\blablanimals",
             "assetsDir": "B:\\blablanimals\\assets",
             "assetsDbDir": "B:\\blablanimals\\assets\\database",
+        },
+
+    "roger":
+        {
+            "path": "I:\\roger_2112",
+            "assetsDir": "I:\\roger_2112\\assets",
+            "assetsDbDir": "I:\\roger_2112\\assets\\database",
         }
 }
 
 computers ={
-"default" : "swarovski_2106",
-"SPRINTER-01": "swarovski_2106",
+"default" : "roger",
+"SPRINTER-01": "roger",
 }
 
 def getCurrentProject():

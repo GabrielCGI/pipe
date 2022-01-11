@@ -6,7 +6,7 @@ import maya.mel as mel
 import sys
 import doctor_utils as doc
 
-tasks = ["shading","fur","animation","anim","mod","modeling","fx","rigging","rig"]
+tasks = ["shading","fur","animation","anim","mod","modeling","model","fx","rigging","rig"]
 def isInt(s):
     """
     Check if a string can be converted to int.
