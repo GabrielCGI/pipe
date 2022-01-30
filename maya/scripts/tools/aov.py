@@ -12,16 +12,16 @@ import mtoa.aovs as aovs
 import maya.mel as mel
 import re
 
-fullDriverName = "fullDriver"
-imgFilePrefix = "<RenderLayer>/<Scene>/<RenderPass>"
+#fullDriverName = "fullDriver"
+imgFilePrefix = "<RenderLayer>/<Scene>/<Scene>"
 
 aovDic = {
 "default":
 {
-"N":{"bits":"full","type":"default","state":1,"action":""},
-"P":{"bits":"full","type":"default","state":1,"action":""},
-"Z":{"bits":"full","type":"default","state":1,"action":""},
-"motionvector":{"bits":"full","type":"default","state":1,"action":""},
+"N":{"bits":"half","type":"default","state":1,"action":""},
+"P":{"bits":"half","type":"default","state":1,"action":""},
+#"Z":{"bits":"half","type":"default","state":1,"action":""},
+"motionvector":{"bits":"half","type":"default","state":1,"action":""},
 "sheen":{"bits":"half","type":"default","state":1,"action":""},
 "specular":{"bits":"half","type":"default","state":1,"action":""},
 "transmission":{"bits":"half","type":"default","state":1,"action":""},
@@ -40,11 +40,9 @@ aovDic = {
 },
 "utils":
 {
-"flipMask":{"bits":"half","type":"custom","state":1,"action":""},
-"gusMask":{"bits":"half","type":"custom","state":1,"action":""},
 "occlusion":{"bits":"half","type":"custom","state":1,"action":"makeOcclusion()"},
 "UV":{"bits":"full","type":"custom","state":1,"action":"makeUV()"},
-"facingRatio":{"bits":"half","type":"custom","state":1,"action":"makeRimLight()"},
+
 }
 }
 
@@ -56,9 +54,7 @@ def setImgFilePrefix():
 
 
 #AOV
-def getLights():
-    lights = cmds.ls(type=["aiAreaLight","aiSkyDomeLight"])
-    return lights
+
 
 
 def makeOcclusion():
@@ -123,27 +119,27 @@ def mayaWarning(msg):
 def addAOVDefault(aov,bits,type,action):
     #Driver work
     #Create 32bit driver if not exist
-    if not cmds.objExists('fullDriver'):
-        cmds.createNode( 'aiAOVDriver', n=fullDriverName)
+    #if not cmds.objExists('fullDriver'):
+#        cmds.createNode( 'aiAOVDriver', n=fullDriverName)
     #Set prefix and merge
     #cmds.setAttr(fullDriverName+".prefix", "<Scene>_full",type="string")
     #cmds.setAttr("defaultArnoldDriver.prefix", "<Scene>_half",type="string")
-    cmds.setAttr(fullDriverName+".mergeAOVs", 0)
-    cmds.setAttr("defaultArnoldDriver.mergeAOVs", 0)
+    #cmds.setAttr(fullDriverName+".mergeAOVs", 0)
+    cmds.setAttr("defaultArnoldDriver.mergeAOVs", 1)
     #Half float for color
-    cmds.setAttr("defaultArnoldDriver.halfPrecision", 1)
+    cmds.setAttr("defaultArnoldDriver.halfPrecision", 0)
 
     if cmds.objExists("aiAOV_"+aov):
         msg = "AOV '%s' already exist. Skip."%(aov)
         mayaWarning(msg)
     else:
         newAov = aovs.AOVInterface().addAOV(aov)
-        if bits == "full":
-            cmds.connectAttr(fullDriverName+".message", "aiAOV_"+newAov.name+".outputs[0].driver", f=True)
-        if aov == "Z":
-            print("it's a z !")
-            cmds.connectAttr('defaultArnoldFilter.message', 'aiAOV_Z.outputs[1].filter')
-            cmds.connectAttr(fullDriverName+".message", 'aiAOV_Z.outputs[1].driver')
+        #if bits == "full":
+        #    cmds.connectAttr(fullDriverName+".message", "aiAOV_"+newAov.name+".outputs[0].driver", f=True)
+        #if aov == "Z":
+            #print("it's a z !")
+            #cmds.connectAttr('defaultArnoldFilter.message', 'aiAOV_Z.outputs[1].filter')
+            #cmds.connectAttr(fullDriverName+".message", 'aiAOV_Z.outputs[1].driver')
         if action:
             exec(action)
 
@@ -207,7 +203,7 @@ def createGUI():
     cmds.setParent('..')
     cmds.text( label='Render setting',font='boldLabelFont')
     #cmds.checkBox("halfFloat", label="Half float Exr (16bits)", value=True)
-    cmds.checkBox("prefix", label="File name prefix <Scene>/<RenderLayer>/<Scene>.exr", value=True)
+    cmds.checkBox("prefix", label="File name prefix <Scene>/<RenderPass>/<Scene>.exr", value=True)
     cmds.button( label='Run', width= 224, command=lambda x:queryValues())
     cmds.columnLayout()
     cmds.button( label='Uncheck all', width= 100, command=lambda x:uncheck())

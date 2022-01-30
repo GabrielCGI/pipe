@@ -135,7 +135,7 @@ global proc shelf_Bloom () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import aov as aov\n\n\naov.createGUI()" 
+        -command "import aov as aov\nfrom importlib import reload\nreload(aov)\n\naov.createGUI()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
