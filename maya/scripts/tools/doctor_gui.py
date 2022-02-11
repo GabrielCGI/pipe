@@ -48,6 +48,8 @@ def createGUI():
 
 #query checkboxes
 def doctor():
+    if cmds.checkBox("deleteUnknown", query = True, value =True):
+        doc.deleteUnknown()    
     if cmds.checkBox("texColorSpace", query = True, value =True):
 
         doc.fixcolorSpaceUnknown()
@@ -66,8 +68,7 @@ def doctor():
     #if cmds.checkBox("numObject", query = True, value =True):
     #    maxNumObject()
 
-    if cmds.checkBox("deleteUnknown", query = True, value =True):
-        doc.deleteUnknown()
+
 
     #if cmds.checkBox("deleteXg", query = True, value =True):
     #    deleteXg()
