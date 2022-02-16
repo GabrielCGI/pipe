@@ -47,7 +47,7 @@ def proxify():
 	lowPolyPath = dirPath+proxyName
 
 	#Export assa
-	cmds.file(standinPath,force=True,options="-shadowLinks 0;-mask 24;-lightLinks 0;-boundingBox;-fullPath", type="ASS Export", exportSelected=True)
+	cmds.file(standinPath,force=False,options="-shadowLinks 0;-mask 24;-lightLinks 0;-boundingBox;-fullPath", type="ASS Export", exportSelected=True)
 
 	standIn = cmds.createNode("aiStandIn", n=name+"standInShape")
 
@@ -75,4 +75,4 @@ def proxify():
 	cmds.select(standIn,proxy)
 
 
-	cmds.file(lowPolyPath,force=True, options="v=0;", type="mayaBinary", pr=True, es=True)
+	cmds.file(lowPolyPath,force=False, options="v=0;", type="mayaBinary", pr=True, es=True)
