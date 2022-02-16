@@ -7,7 +7,9 @@ import maya.cmds as cmds
 
 def proxify():
 	path = cmds.file(q=True, sn=True)
-	proxName= os.path.basename(path).split(".")[0]
+	filename = os.path.basename(path)
+	proxName= os.path.splitext(filename)[0]
+	#proxName.replace(".", "_")
 	result = cmds.promptDialog(
 			title='Proxy name',
 			message='Rename:',
