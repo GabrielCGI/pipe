@@ -14,11 +14,11 @@ projectsData ={
             "assetsDir": "B:\\swarovski_2106\\assets",
             "assetsDbDir": "B:\\swarovski_2106\\assets\\database",
         },
-    "blablanimals":
+    "candyUp_partage":
         {
-            "path": "B:\\blablanimals",
-            "assetsDir": "B:\\blablanimals\\assets",
-            "assetsDbDir": "B:\\blablanimals\\assets\\database",
+            "path": "I:\\candyUp_partage",
+            "assetsDir": "I:\\candyUp_partage\\assets",
+            "assetsDbDir": "I:\\candyUp_partage\\assets\\database",
         },
 
     "roger":
@@ -30,8 +30,8 @@ projectsData ={
 }
 
 computers ={
-"default" : "roger",
-"SPRINTER-01": "roger",
+"default" : "candyUp_partage",
+"SPRINTER-01": "candyUp_partage",
 }
 
 def getCurrentProject():

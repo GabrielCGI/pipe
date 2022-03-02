@@ -35,7 +35,21 @@ def delCamera():
             #deleted.append(getAttr(""))
         except:
             errors["Camera %s"%(c)]="Can't delete camera"%(c)
+def remove_CgAbBlastPanelOptChangeCallback():
+    """
+    Remove a reccuring errors raised by a missing plugings.
+    """
+    for model_panel in cmds.getPanel(typ="modelPanel"):
 
+        # Get callback of the model editor
+        callback = cmds.modelEditor(model_panel, query=True, editorChanged=True)
+
+        # If the callback is the erroneous `CgAbBlastPanelOptChangeCallback`
+        if callback == "CgAbBlastPanelOptChangeCallback":
+
+            # Remove the callbacks from the editor
+            cmds.modelEditor(model_panel, edit=True, editorChanged="")
+    cmds.delete ("uiConfigurationScriptNode")
 def cleanUpScene():
     # Source cleanUpScene.mel
     # to make scOpt_performOneCleanup available

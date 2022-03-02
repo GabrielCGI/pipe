@@ -22,7 +22,9 @@ def nameFromCharRef(charRef):
     name = "not a character"                # hack to avoid an error from empty string
     charRefUnique = charRef.split("RN")[0]              # Get only the reference name without number suffix
 
-    name = charRefUnique.split("_rigging_lib")[0]
+    split = charRefUnique.split("_")
+    name = split[0]+"_"+split[1]
+
     print(name)
     return name
 
@@ -112,11 +114,7 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
         num = "00"
     else:
         num = "%02d"%(int(charRef.split("RN")[1]))
-    #HACK BOX SWAROVKKY
-    name = name.replace ("ch_packSPink","ch_NpackSPink")
-    name = name.replace ("ch_packLBlue","ch_NpackLBlue")
-    name = name.replace ("ch_packMYellow","ch_NpackMYellow")
-    name = name.replace ("ch_packXSWhite","ch_NpackXSWhite")
+
 
     abcName = "%s_%s.abc"%(name,num)
     path = os.path.join(dirPath[0],abcName)

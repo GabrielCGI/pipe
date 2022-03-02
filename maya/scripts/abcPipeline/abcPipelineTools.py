@@ -86,7 +86,7 @@ def createNewAsset():
     assetNamespace = currentSelection[0].split(":")[0] #Something like Ch_assetName_rig_lib
     split = assetNamespace.split("_") #Somethinh like ["Ch","assetName","Rig","lib"]
     #Check: Does it match the pattern XX_assetName_rig_lib ?
-    if not (split[-2]=="rigging" and split[-1]=="lib"):
+    if not (split[-2]=="rigging"):
         msg = "Assets namespace does not match pattern: XX_assetName_rigging_lib \nCurrent name: %s"%(assetNamespace)
         mayaWarning(msg)
         sys.exit(msg)

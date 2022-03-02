@@ -20,7 +20,7 @@ def replace_by_tx():
            cmds.warning( error )
     print ("Replaced %s files !  \n%s errors"%(counter,errorcounter))
     for i in goodList:
-        print ("Succed Replaced:"+i)
+        print ("Replaced with succes: "+i)
 
 def replace_by_original():
     counter = 0
@@ -46,6 +46,6 @@ def replace_by_original():
                cmds.warning( error )
     print ("Replaced %s files !  \n%s errors"%(counter,errorcounter))
     for i in goodList:
-        print ("Succed Replaced:"+i)
+        print ("Replaced with succes:"+i)
 replace_by_tx()
 replace_by_original()

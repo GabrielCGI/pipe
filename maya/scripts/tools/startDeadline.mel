@@ -1,0 +1,5 @@
+
+python("import sys");
+python("sys.path.append('R:\pipeline\pipe\maya\scripts\tools')");
+python("import startupDeadline");
+python ("startupDeadline.run()");

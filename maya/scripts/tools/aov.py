@@ -20,7 +20,7 @@ aovDic = {
 {
 "N":{"bits":"half","type":"default","state":1,"action":""},
 "P":{"bits":"half","type":"default","state":1,"action":""},
-#"Z":{"bits":"half","type":"default","state":1,"action":""},
+"Z":{"bits":"half","type":"default","state":1,"action":""},
 "motionvector":{"bits":"half","type":"default","state":1,"action":""},
 "sheen":{"bits":"half","type":"default","state":1,"action":""},
 "specular":{"bits":"half","type":"default","state":1,"action":""},
@@ -72,7 +72,7 @@ def makeCrypto(cryptoType):
 def makeUV():
     uvNode = cmds.createNode("aiUtility", n="aiUtiliy_uv")
     cmds.setAttr(uvNode + '.shadeMode' , 2)
-    cmds.setAttr(uvNode + '.colorMode' , 3)
+    cmds.setAttr(uvNode + '.colorMode' , 5)
     #Create UV Shader
     cmds.connectAttr(uvNode + '.outColor' , 'aiAOV_UV.defaultValue')
 
@@ -136,8 +136,8 @@ def addAOVDefault(aov,bits,type,action):
         newAov = aovs.AOVInterface().addAOV(aov)
         #if bits == "full":
         #    cmds.connectAttr(fullDriverName+".message", "aiAOV_"+newAov.name+".outputs[0].driver", f=True)
-        #if aov == "Z":
-            #print("it's a z !")
+        if aov == "Z":
+            print("it's a z !")
             #cmds.connectAttr('defaultArnoldFilter.message', 'aiAOV_Z.outputs[1].filter')
             #cmds.connectAttr(fullDriverName+".message", 'aiAOV_Z.outputs[1].driver')
         if action:

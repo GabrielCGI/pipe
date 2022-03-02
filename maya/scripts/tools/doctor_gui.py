@@ -39,6 +39,8 @@ def createGUI():
     cmds.checkBox("deleteUnknown", label="Delete Unknown node", value=True)
     cmds.checkBox("delHistory", label="Delete Deformer History", value=False)
     cmds.checkBox("cam", label="Delete extra camera", value=False)
+    #Remove CgAbBlastPanel Error because of a missing plugin that keep raising errors.
+    cmds.checkBox("remove_CgAbBlastPanel", label="Remove CgAbBlastPanel Error", value=False)
     #cmds.checkBox("numObject", label="Objet Numbers", value=True)
 
     #cmds.checkBox("deleteXg", label="Delete Xgen expression", value=False)
@@ -49,7 +51,11 @@ def createGUI():
 #query checkboxes
 def doctor():
     if cmds.checkBox("deleteUnknown", query = True, value =True):
-        doc.deleteUnknown()    
+        doc.deleteUnknown()
+
+    if cmds.checkBox("remove_CgAbBlastPanel", query = True, value =True):
+
+        doc.remove_CgAbBlastPanelOptChangeCallback()
     if cmds.checkBox("texColorSpace", query = True, value =True):
 
         doc.fixcolorSpaceUnknown()
