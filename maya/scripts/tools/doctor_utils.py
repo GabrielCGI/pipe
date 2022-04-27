@@ -20,6 +20,17 @@ def maxNumObject():
     if len(objs)>=maxObj:
         mayaWarning("There is %s object in the scene. You should combine some together"%str(len(objs)))
 
+def unknownPlugin():
+    old_plug = cmds.unknownPlugin(query=True, list=True)
+    if old_plug:
+        for plug in old_plug:
+            print("Removing:" + plug)
+            try:
+                cmds.unknownPlugin(plug,remove=True)
+            except Exception as e:
+                print(e)
+    else:
+        print("There is no unknown plugin in the scene !")
 def delCamera():
     # Get all cameras first
     cameras = cmds.ls(type=('camera'), l=True)

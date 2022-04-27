@@ -12,7 +12,7 @@ import mtoa.aovs as aovs
 import maya.mel as mel
 import re
 
-#fullDriverName = "fullDriver"
+fullDriverName = "fullDriver"
 imgFilePrefix = "<RenderLayer>/<Scene>/<Scene>"
 
 aovDic = {
@@ -21,12 +21,12 @@ aovDic = {
 "N":{"bits":"half","type":"default","state":1,"action":""},
 "P":{"bits":"half","type":"default","state":1,"action":""},
 "Z":{"bits":"half","type":"default","state":1,"action":""},
-"motionvector":{"bits":"half","type":"default","state":1,"action":""},
-"sheen":{"bits":"half","type":"default","state":1,"action":""},
-"specular":{"bits":"half","type":"default","state":1,"action":""},
-"transmission":{"bits":"half","type":"default","state":1,"action":""},
-"sss":{"bits":"half","type":"default","state":1,"action":""},
-"coat":{"bits":"half","type":"default","state":1,"action":""},
+#"motionvector":{"bits":"half","type":"default","state":1,"action":""},
+"sheen":{"bits":"half","type":"default","state":0,"action":""},
+"specular":{"bits":"half","type":"default","state":0,"action":""},
+"transmission":{"bits":"half","type":"default","state":0,"action":""},
+"sss":{"bits":"half","type":"default","state":0,"action":""},
+"coat":{"bits":"half","type":"default","state":0,"action":""},
 "volume":{"bits":"half","type":"default","state":1,"action":""},
 "emission":{"bits":"half","type":"default","state":1,"action":""}
 
@@ -34,15 +34,15 @@ aovDic = {
 },
 "crypto":
 {
-"crypto_asset":{"bits":"full","type":"default","state":1,"action":"makeCrypto('aiAOV_crypto_asset')"},
+"crypto_asset":{"bits":"full","type":"default","state":0,"action":"makeCrypto('aiAOV_crypto_asset')"},
 "crypto_material":{"bits":"full","type":"default","state":1,"action":"makeCrypto('aiAOV_crypto_material')"},
 "crypto_object":{"bits":"full","type":"default","state":1,"action":"makeCrypto('aiAOV_crypto_object')"}
 },
 "utils":
 {
 "occlusion":{"bits":"half","type":"custom","state":1,"action":"makeOcclusion()"},
-"UV":{"bits":"full","type":"custom","state":1,"action":"makeUV()"},
-
+"UV":{"bits":"half","type":"custom","state":1,"action":"makeUV()"},
+"motionVectorBlur":{"bits":"half","type":"custom","state":1,"action":"makeMotionVector()"},
 }
 }
 
@@ -56,6 +56,10 @@ def setImgFilePrefix():
 #AOV
 
 
+def makeMotionVector():
+    motionVectorShader = cmds.createNode('aiMotionVector' , name = 'aiMotionVector')
+    cmds.setAttr(motionVectorShader + '.raw' ,1)
+    cmds.connectAttr(motionVectorShader + '.outColor' , "aiAOV_motionVectorBlur.defaultValue")
 
 def makeOcclusion():
     #Create Occlusion Shader and Connect
@@ -120,14 +124,14 @@ def addAOVDefault(aov,bits,type,action):
     #Driver work
     #Create 32bit driver if not exist
     #if not cmds.objExists('fullDriver'):
-#        cmds.createNode( 'aiAOVDriver', n=fullDriverName)
+    #cmds.createNode( 'aiAOVDriver', n=fullDriverName)
     #Set prefix and merge
     #cmds.setAttr(fullDriverName+".prefix", "<Scene>_full",type="string")
     #cmds.setAttr("defaultArnoldDriver.prefix", "<Scene>_half",type="string")
     #cmds.setAttr(fullDriverName+".mergeAOVs", 0)
     cmds.setAttr("defaultArnoldDriver.mergeAOVs", 1)
     #Half float for color
-    cmds.setAttr("defaultArnoldDriver.halfPrecision", 0)
+    cmds.setAttr("defaultArnoldDriver.halfPrecision", 1)
 
     if cmds.objExists("aiAOV_"+aov):
         msg = "AOV '%s' already exist. Skip."%(aov)
@@ -138,7 +142,7 @@ def addAOVDefault(aov,bits,type,action):
         #    cmds.connectAttr(fullDriverName+".message", "aiAOV_"+newAov.name+".outputs[0].driver", f=True)
         if aov == "Z":
             print("it's a z !")
-            #cmds.connectAttr('defaultArnoldFilter.message', 'aiAOV_Z.outputs[1].filter')
+            #cmds.connectAttr(fullDriverName+".message", 'aiAOV_Z.outputs[1].filter')
             #cmds.connectAttr(fullDriverName+".message", 'aiAOV_Z.outputs[1].driver')
         if action:
             exec(action)
@@ -203,7 +207,7 @@ def createGUI():
     cmds.setParent('..')
     cmds.text( label='Render setting',font='boldLabelFont')
     #cmds.checkBox("halfFloat", label="Half float Exr (16bits)", value=True)
-    cmds.checkBox("prefix", label="File name prefix <Scene>/<RenderPass>/<Scene>.exr", value=True)
+    cmds.checkBox("prefix", label="File name prefix <RenderLayer>/<Scene>/<Scene>", value=True)
     cmds.button( label='Run', width= 224, command=lambda x:queryValues())
     cmds.columnLayout()
     cmds.button( label='Uncheck all', width= 100, command=lambda x:uncheck())
