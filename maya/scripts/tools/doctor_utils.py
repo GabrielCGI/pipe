@@ -13,6 +13,18 @@ class FileTex:
         self.path = path
         self.colorSpace = colorSpace
 
+def removeAllNameSpace():
+    # Set root namespace
+    cmds.namespace(setNamespace=':')
+    # Collect all namespaces except for the Maya built ins.
+    all_namespaces = [x for x in cmds.namespaceInfo(listOnlyNamespaces=True, recurse=True) if x != "UI" and x != "shared"]
+    if all_namespaces: # Sort by hierarchy, deepest first.
+        all_namespaces.sort(key=len, reverse=True)
+        for namespace in all_namespaces: # When a deep namespace is removed, it also removes the root. So check here to see if these still exist.
+            if cmds.namespace(exists=namespace) is True:
+                cmds.namespace(removeNamespace=namespace, mergeNamespaceWithRoot=True)
+                print("Namespace removed -----  %s"%(namespace))
+
 def maxNumObject():
     #Select all geometry
     objs = cmds.ls(geometry=True)

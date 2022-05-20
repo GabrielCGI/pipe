@@ -8,11 +8,11 @@ import os
 
 
 projectsData ={
-    "swarovski_2106":
+    "trashtown_2112":
         {
-            "path": "B:\\swarovski_2106",
-            "assetsDir": "B:\\swarovski_2106\\assets",
-            "assetsDbDir": "B:\\swarovski_2106\\assets\\database",
+            "path": "B:\\trashtown_2112",
+            "assetsDir": "B:\\trashtown_2112\\assets",
+            "assetsDbDir": "B:\\trashtown_2112\\database",
         },
     "candyUp_partage":
         {
@@ -30,8 +30,8 @@ projectsData ={
 }
 
 computers ={
-"default" : "candyUp_partage",
-"SPRINTER-01": "candyUp_partage",
+"default" : "trashtown_2112",
+"SPRINTER-01": "trashtown_2112",
 }
 
 def getCurrentProject():
