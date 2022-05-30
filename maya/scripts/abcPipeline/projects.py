@@ -5,7 +5,7 @@ from os.path import isfile, join, splitext
 import json
 import os
 
-
+defaultProject="trashtown_2112"
 
 projectsData ={
     "trashtown_2112":
@@ -13,6 +13,12 @@ projectsData ={
             "path": "B:\\trashtown_2112",
             "assetsDir": "B:\\trashtown_2112\\assets",
             "assetsDbDir": "B:\\trashtown_2112\\database",
+        },
+    "swarovski_2205":
+        {
+            "path": "I:\\swarovski_2205",
+            "assetsDir": "I:\\swarovski_2205\\assets",
+            "assetsDbDir": "I:\\swarovski_2205\\assets\\database",
         },
     "candyUp_partage":
         {
@@ -29,18 +35,16 @@ projectsData ={
         }
 }
 
-computers ={
-"default" : "trashtown_2112",
-"SPRINTER-01": "trashtown_2112",
-}
+
 
 def getCurrentProject():
-    computer = os.environ['COMPUTERNAME']
-    if computer in computers:
-        currentProject = computers[computer]
+    project = os.getenv("CURRENT_PROJECT")
+    #computer = os.environ['COMPUTERNAME']
+    if project in projectsData.keys():
+        currentProject = project
     else:
-        currentProject = computers["default"]
-
+        currentProject = defaultProject
+    print("CURRENT PROJECT: %s"%(currentProject))
     return currentProject
 
 def getProjectData(project):

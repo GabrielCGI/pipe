@@ -12,7 +12,7 @@ SET MAYA_DISABLE_CER=1
 
 rem \---- Shelf
 SET MAYA_SHELF_PATH=%PIPELINE_DIR_MAYA%\shelfs
-SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons
+SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons\swarovky_icon;%PIPELINE_DIR_MAYA%\icons
 
 rem \---- ARNOLD SETUP
 SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.1.1.0_lentil\maya2022
@@ -45,6 +45,8 @@ SET MAYA_SCRIPT_PATH=%MAYA_SCRIPT_PATH%;R:\deadline\submission\Maya\Client;
 rem \---- Mgears
 
 SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\mgear_4.0.3\release;
+
+SET CURRENT_PROJECT=swarovski_2205
 
 REM == Start maya and launch statupSettings (FPS, Unit ect...)
 start C:\"Program Files"\Autodesk\Maya2022\bin\maya.exe -file %1 -command "python(\"import startupSettings\"); python (\"startupSettings.run()\");"  %*
