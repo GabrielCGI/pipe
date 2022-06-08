@@ -70,16 +70,16 @@ def listGeoByCharRef(charRef):
 
     # Get from a database a list of the character's shapes to be exported
     listGeoDic = assetsDic.get(name).get("geo")
+    print (listGeoDic)
     version = charRef.split("RN")[-1]
-    baseName = charRef.split("RN")[0]
+    baseName = charRef.split("RN")[0] #ch_gingerbreadCandy_rigging_lib
 
     for geoDic in listGeoDic:
-        if version: #Si il y a des version ['ch_rat_rig_lib', '1']
-            split = geoDic.split(baseName) #["ch_rat_rig_lib",":GEO"]
-            geoVersion = cmds.referenceQuery(charRef, namespace=True )+split[1] #["ch_rat_rig_lib1:GEO"] #REFERENCE QUERY ALLOW TO GET THE REALNAMESPACE IF CHANGED MANUALLY
-            listGeo.append(geoVersion)
-        if not version: #Si il n'y a pas de version ['ch_rat_rig_lib', '']
-            listGeo.append(geoDic)
+        print(geoDic)
+        geoOnly = geoDic.split(":")
+        geoWithNamespace = cmds.referenceQuery(charRef, namespace=True ) + ":" + geoOnly[-1]
+        print(geoWithNamespace)
+        listGeo.append(geoWithNamespace)
 
     #Return list
     print(listGeo)
@@ -109,6 +109,7 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
     "Export an Abc for a given character"
     name = nameFromCharRef(charRef)
     geoList = listGeoByCharRef(charRef)
+
     attrList = assetsDic.get(name).get("attr")
     if not charRef.split("RN")[1]:   #if list empty
         num = "00"
