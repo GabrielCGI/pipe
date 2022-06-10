@@ -18,4 +18,7 @@ def transferShaders():
         match =namespaceNew+":"+geo.split(":")[-1]
         cmds.select(geo)
         cmds.select(match, add=True)
+        if cmds.objectType(geo, isType='mesh' ):
+            traceSets= cmds.getAttr(geo+".trace_sets")
+            cmds.setAttr(match+".trace_sets",traceSets, type="string")
         cmds.transferShadingSets( sampleSpace=1 )

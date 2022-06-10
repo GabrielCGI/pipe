@@ -23,9 +23,12 @@ def nameFromCharRef(charRef):
     charRefUnique = charRef.split("RN")[0]              # Get only the reference name without number suffix
 
     split = charRefUnique.split("_")
-    name = split[0]+"_"+split[1]
+    try:
+        name = split[0]+"_"+split[1]
+    except:
+        pass
 
-    print(name)
+
     return name
 
 def listCharRef():
