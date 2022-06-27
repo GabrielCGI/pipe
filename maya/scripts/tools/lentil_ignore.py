@@ -1,3 +1,4 @@
+import maya.cmds as cmds
 def lentil_ignore():
     for s in cmds.ls(selection=True):
         #addAttr -ln "mtoa_constant_ign"  -at double  -dv 1 |group1|pTorus1|pTorusShape1;
