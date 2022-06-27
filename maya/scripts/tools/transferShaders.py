@@ -20,5 +20,8 @@ def transferShaders() :
         cmds.select(match, add=True)
         try:
             cmds.transferShadingSets( sampleSpace=1 )
+            if cmds.objectType(geo, isType='mesh' ):
+                traceSets= cmds.getAttr(geo+".trace_sets")
+                cmds.setAttr(match+".trace_sets",traceSets, type="string")
         except:
             print("Transfer failed: " + geo)    

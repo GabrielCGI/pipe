@@ -114,23 +114,11 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
     geoList = listGeoByCharRef(charRef)
 
     attrList = assetsDic.get(name).get("attr")
-    print("CHAR REF !!!!!!! = ")
-    #charRef = ch_nutcracker_rigging_003RN
-
-    intRiggingNumber = 0
-    riggingNumber = charRef.split("RN")[0].split("_")[-1]
-    print ("riggingNUmber"+riggingNumber)
-    if riggingNumber.isdigit():
-        print("isDIGIT!")
-        intRiggingNumber = int(riggingNumber)
-        print(intRiggingNumber)
-
     if not charRef.split("RN")[1]:   #if list empty
-        num = f'{intRiggingNumber:02d}'
-        print("NUM!!!!="+num)
+        num = "00"
     else:
-        num = intRiggingNumber + (int(charRef.split("RN")[1])*10)
-        num =  f'{num:02d}'
+        num = "%02d"%(int(charRef.split("RN")[1]))
+
 
     abcName = "%s_%s.abc"%(name,num)
     path = os.path.join(dirPath[0],abcName)

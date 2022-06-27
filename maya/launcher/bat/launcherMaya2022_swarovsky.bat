@@ -28,9 +28,9 @@ rem SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\HDRLightStudioConn
 
 
 rem \---- YETI SETUP
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\Yeti-v4.1.1_Maya2022-windows;
-SET ARNOLD_PLUGIN_PATH=%ARNOLD_PLUGIN_PATH%;%NETWORK_INSTALL%\Yeti-v4.1.1_Maya2022-windows\bin
-SET peregrinel_LICENSE=61314@illogic-net.illogic.studios.com
+rem SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\Yeti-v4.1.1_Maya2022-windows;
+rem SET ARNOLD_PLUGIN_PATH=%ARNOLD_PLUGIN_PATH%;%NETWORK_INSTALL%\Yeti-v4.1.1_Maya2022-windows\bin
+rem SET peregrinel_LICENSE=61314@illogic-net.illogic.studios.com
 
 rem \---- Scripts
 SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings;%SCRIPT_MAYA%\shaderTransferTool;%NETWORK_INSTALL%\script
@@ -43,8 +43,7 @@ rem \----DEADLINE
 SET MAYA_SCRIPT_PATH=%MAYA_SCRIPT_PATH%;R:\deadline\submission\Maya\Client;
 
 rem \---- Mgears
-
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\mgear_4.0.3\release;
+rem SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\mgear_4.0.3\release;
 
 SET CURRENT_PROJECT=swarovski_2205
 
