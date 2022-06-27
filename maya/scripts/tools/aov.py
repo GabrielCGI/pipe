@@ -34,15 +34,16 @@ aovDic = {
 },
 "crypto":
 {
-"crypto_asset":{"bits":"full","type":"default","state":0,"action":"makeCrypto('aiAOV_crypto_asset')"},
+"crypto_asset":{"bits":"full","type":"default","state":1,"action":"makeCrypto('aiAOV_crypto_asset')"},
 "crypto_material":{"bits":"full","type":"default","state":1,"action":"makeCrypto('aiAOV_crypto_material')"},
 "crypto_object":{"bits":"full","type":"default","state":1,"action":"makeCrypto('aiAOV_crypto_object')"}
 },
 "utils":
 {
-"occlusion":{"bits":"half","type":"custom","state":1,"action":"makeOcclusion()"},
+"occlusion":{"bits":"half","type":"custom","state":0,"action":"makeOcclusion()"},
 "UV":{"bits":"half","type":"custom","state":1,"action":"makeUV()"},
-"motionVectorBlur":{"bits":"half","type":"custom","state":1,"action":"makeMotionVector()"},
+"motionVectorBlur":{"bits":"half","type":"custom","state":0,"action":"makeMotionVector()"},
+"lentil_ignore":{"bits":"half","type":"custom","state":1,"action":"makeLentilIgnore()"},
 }
 }
 
@@ -79,6 +80,13 @@ def makeUV():
     cmds.setAttr(uvNode + '.colorMode' , 5)
     #Create UV Shader
     cmds.connectAttr(uvNode + '.outColor' , 'aiAOV_UV.defaultValue')
+
+def makeLentilIgnore():
+    lentilNode = cmds.createNode("aiUserDataFloat", n="lentil_ignore")
+    cmds.setAttr(lentilNode + '.attribute', "lentil_ignore", type="string")
+    cmds.setAttr('aiAOV_lentil_ignore.type', 4)
+
+    cmds.connectAttr(lentilNode + '.outValue' , 'aiAOV_lentil_ignore.defaultValue')
 
 
 def makeWireframe():
