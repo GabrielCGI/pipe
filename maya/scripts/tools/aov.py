@@ -83,7 +83,7 @@ def makeUV():
 
 def makeLentilIgnore():
     lentilNode = cmds.createNode("aiUserDataFloat", n="lentil_ignore")
-    cmds.setAttr(lentilNode + '.attribute', "lentil_ignore", type="string")
+    cmds.setAttr(lentilNode + '.attribute', "ignore", type="string")
     cmds.setAttr('aiAOV_lentil_ignore.type', 4)
 
     cmds.connectAttr(lentilNode + '.outValue' , 'aiAOV_lentil_ignore.defaultValue')
