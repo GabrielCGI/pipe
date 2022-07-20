@@ -148,9 +148,9 @@ def addAOVDefault(aov,bits,type,action):
         newAov = aovs.AOVInterface().addAOV(aov)
         #if bits == "full":
         #    cmds.connectAttr(fullDriverName+".message", "aiAOV_"+newAov.name+".outputs[0].driver", f=True)
-        if aov == "Z":
-            cmds.connectAttr("defaultArnoldDriver.message", 'aiAOV_Z.outputs[1].filter')
-            cmds.connectAttr("defaultArnoldDriver.message", 'aiAOV_Z.outputs[1].driver')
+        #if aov == "Z":
+            #cmds.connectAttr("defaultArnoldDriver.message", 'aiAOV_Z.outputs[1].filter')
+            #cmds.connectAttr("defaultArnoldDriver.message", 'aiAOV_Z.outputs[1].driver')
         if action:
             exec(action)
 

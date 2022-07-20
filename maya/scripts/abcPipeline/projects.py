@@ -20,11 +20,11 @@ projectsData ={
             "assetsDir": "I:\\swarovski_2205\\assets",
             "assetsDbDir": "I:\\swarovski_2205\\assets\\database",
         },
-    "candyUp_partage":
+    "guerlain_2206":
         {
-            "path": "I:\\candyUp_partage",
-            "assetsDir": "I:\\candyUp_partage\\assets",
-            "assetsDbDir": "I:\\candyUp_partage\\assets\\database",
+            "path": "I:\\guerlain_2206",
+            "assetsDir": "I:\\guerlain_2206\\assets",
+            "assetsDbDir": "I:\\guerlain_2206\\assets\\database",
         },
 
     "roger":
