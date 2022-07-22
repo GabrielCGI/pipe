@@ -38,7 +38,7 @@ def createGUI():
     cmds.checkBox("optimize", label="Optimize scene size", value=True)
     cmds.checkBox("deleteUnknown", label="Delete Unknown node", value=True)
     cmds.checkBox("unknownPlugin", label="Remove Unknown Plugins", value=True)
-    cmds.checkBox("removeAllNameSpace", label="Remove all namespaces", value=False)
+    cmds.checkBox("removeAllNameSpace", label="Delete namespaces. NOT ON SCENE WITH REFERENCE !", value=False)
     cmds.checkBox("delHistory", label="Delete Deformer History", value=False)
     cmds.checkBox("cam", label="Delete extra camera", value=False)
     #Remove CgAbBlastPanel Error because of a missing plugin that keep raising errors.
