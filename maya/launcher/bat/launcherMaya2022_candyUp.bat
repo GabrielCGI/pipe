@@ -14,7 +14,7 @@ SET MAYA_SHELF_PATH=%PIPELINE_DIR_MAYA%\shelfs
 SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons\trashtown_icon;%PIPELINE_DIR_MAYA%\icons
 
 rem \---- ARNOLD SETUP
-rem SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.0.0.2\maya2022
+
 
 
 rem \---- HDRLigthStudio
@@ -22,9 +22,9 @@ rem SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\HDRLightStudioConn
 
 
 rem \---- YETI SETUP
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\Yeti-v4.1.1_Maya2022-windows;
-SET ARNOLD_PLUGIN_PATH=%ARNOLD_PLUGIN_PATH%;%NETWORK_INSTALL%\Yeti-v4.1.1_Maya2022-windows\bin
-SET peregrinel_LICENSE=54007@illogic-net.illogic.studios.com
+SET MAYA_MODULE_PATH=R:\pipeline\networkInstall\Yeti-v4.1.1_Maya2022-windows;%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.0.0.1\maya2022
+SET ARNOLD_PLUGIN_PATH=R:\pipeline\networkInstall\Yeti-v4.1.1_Maya2022-windows\bin
+SET peregrinel_LICENSE=54373@illogic-net.illogic.studios.com
 
 rem \---- Scripts
 SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings;%SCRIPT_MAYA%\shaderTransferTool;%NETWORK_INSTALL%\script

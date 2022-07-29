@@ -92,7 +92,7 @@ def buildCommand (start, end, path, geoList, attrList, subframe, frameSample):
    "Build Command for abc export job"
    command = ""
    command += "-frameRange %s %s"%(start, end) #Frame Range
-   command += " -writeVisibility -uvWrite -writeUVSets -worldSpace -dataFormat ogawa "
+   command += " -writeVisibility -uvWrite -writeColorSets -writeUVSets -worldSpace -dataFormat ogawa "
    if subframe == True:
        if len(frameSample.split(" "))==3:
            for f in frameSample.split(" "):
@@ -115,7 +115,7 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
 
     attrList = assetsDic.get(name).get("attr")
     print("CHAR REF !!!!!!! = ")
-    #charRef = ch_nutcracker_rigging_003RN
+    print (charRef)
 
     intRiggingNumber = 0
     riggingNumber = charRef.split("RN")[0].split("_")[-1]
@@ -128,9 +128,17 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
     if not charRef.split("RN")[1]:   #if list empty
         num = f'{intRiggingNumber:02d}'
         print("NUM!!!!="+num)
+
     else:
         num = intRiggingNumber + (int(charRef.split("RN")[1])*10)
         num =  f'{num:02d}'
+
+#chekc if the reference is like ch_bee_rigging_lib2RN (and not ch_bee_rigging_libRN1)
+    if riggingNumber.split("lib")[-1].isdigit():
+        num  = int(riggingNumber.split("lib")[-1])
+        num = f'{num:02d}'
+
+
 
     abcName = "%s_%s.abc"%(name,num)
     path = os.path.join(dirPath[0],abcName)
