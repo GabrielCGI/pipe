@@ -28,7 +28,7 @@ def createGUI():
     winName = "TURBOTRON"
     if cmds.window(winName, exists=True):
       cmds.deleteUI(winName)
-    window = cmds.window(winName,title="SIMPLETON 1.0", width=winWidth, rtf=True)
+    window = cmds.window(winName,title="Control Room   (╯°□°）╯︵ ┻━┻", width=winWidth, rtf=True)
 
     #-----  CAMERA --------
     cmds.frameLayout( label='Camera', labelAlign='bottom' )
