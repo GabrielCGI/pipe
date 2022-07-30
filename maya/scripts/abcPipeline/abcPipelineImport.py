@@ -1,327 +1,82 @@
-
-import maya.mel as mel
 import maya.cmds as cmds
-import importlib
 import os
-import json
-
-importlib.reload(doc)
-
-#Init variables
-presets_folder = "R:\\pipeline\\pipe\\maya\\scripts\\tools\\presets_render_setting"
-presetDic={}
-
-
-def mayaWarning(msg):
-    """
-    Display of maya warning
-    """
-    cmds.warning(msg)
-    cmds.confirmDialog(title="Error",message=msg)
-
-def getRenderableCameras():
-    cameras = cmds.ls(type="camera")
-    renderableCameras=[]
-    for cam in cameras:
-        if cmds.getAttr(cam+".renderable"):
-            renderableCameras.append(cam)
-    return renderableCameras
-
-
-#Create my GUI
-def createGUI():
-    #window set up
-    winWidth = 450
-    winName = "TURBOTRON"
-    if cmds.window(winName, exists=True):
-      cmds.deleteUI(winName)
-    doctorWindow = cmds.window(winName,title="SIMPLETON 1.0", width=winWidth, rtf=True)
-    cmds.frameLayout( label='Camera', labelAlign='bottom' )
-    #cmds.rowColumnLayout( numberOfColumns =2 )
-    cmds.columnLayout(adjustableColumn= True, rowSpacing= 10)
-
-    #-----  CAMERA --------
-    # List renderables camera
-    cmds.rowColumnLayout( numberOfColumns =1 )
-    cmds.optionMenu("renderCamMenu", label='Renderable Camera')
-    renderableCameras= getRenderableCameras()
-    for cam in renderableCameras:
-        cmds.menuItem(label=cam)
-
-    #Camera type menu
-    try:
-        activeCamType = cmds.getAttr(renderableCameras[0]+".ai_translator")
-        if activeCamType == "lentil_camera":
-            lentil_enable=1
-        else:
-            lentil_enable=0
-    except:
-        lentil_enable=0
-
-    # DOF & MOTION BLUR
-    cmds.rowColumnLayout( numberOfColumns = 3 )
-    #Dof checkbox
-    #Get state
-
-    cmds.setParent("..")
-    cmds.frameLayout( label='Feature Overrides', labelAlign='bottom')
-    cmds.rowColumnLayout( numberOfColumns = 2 )
-    cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
-    dof_state= cmds.getAttr(renderableCameras[0]+".enableDof")
-    cmds.checkBox("aiEnableDOF", label="Enable Depth of Field", value=dof_state, changeCommand=lambda x:dof())
-    cmds.checkBox("motion_blur_enable", label="Enable Motion Blur", value=cmds.getAttr("defaultArnoldRenderOptions.motion_blur_enable"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.motion_blur_enable",cmds.checkBox("motion_blur_enable", query=True, value=True)))
-    cmds.checkBox("lentil_enable", label="Enable Lentil", value=lentil_enable, changeCommand=lambda x:changeCamType())
-    cmds.setParent("..")
-    cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
-    #-----  Feature Overrides  --------
-    #IGNORE SUBDIVISION
-    ignore_subdiv_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreSubdivision")
-    cmds.checkBox("ignoreSubdivision", label="Ignore Subdivision", value=ignore_subdiv_state, changeCommand=lambda x:ignore("ignoreSubdivision",cmds.checkBox("ignoreSubdivision", query=True, value=True)))
-
-    #IGNORE ATHMO
-    ignoreAtmosphere_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreAtmosphere")
-    cmds.checkBox("ignoreAtmosphere", label="Ignore Athmosphere", value=ignoreAtmosphere_state, changeCommand=lambda x:ignore("ignoreAtmosphere",cmds.checkBox("ignoreAtmosphere", query=True, value=True)))
-
-    #IGNORE DISPLACEMENT
-    ignoreDisplacement_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreDisplacement")
-    cmds.checkBox("ignoreDisplacement", label="Ignore Displacment", value=ignoreDisplacement_state, changeCommand=lambda x:ignore("ignoreDisplacement",cmds.checkBox("ignoreDisplacement", query=True, value=True)))
-
-
-    cmds.setParent("..")
-    cmds.setParent("..")
-
-
-    #-----  Render settings --------
-    cmds.frameLayout( label='Image size', labelAlign='bottom')
-    cmds.rowColumnLayout( numberOfColumns =1 )
-    cmds.optionMenu("renderSize", label='Presets',changeCommand=lambda x:renderSizePreset(cmds.optionMenu("renderSize",query=True,value=True)))
-    cmds.menuItem( label='HD_720' )
-    cmds.menuItem( label='HD_1080' )
-    cmds.menuItem( label='Custom' )
-    renderWidth= cmds.getAttr("defaultResolution.width")
-    renderHeight = cmds.getAttr("defaultResolution.height")
-    cmds.rowColumnLayout( numberOfColumns =2 )
-    cmds.text("Width:")
-    cmds.intField("renderWidth",value=renderWidth, changeCommand=lambda x:updateSize(cmds.intField("renderWidth",query=True,value=True),"width"))
-    cmds.text("Height:")
-    cmds.intField("renderHeigth",value=renderHeight,  changeCommand=lambda x:updateSize(cmds.intField("renderHeigth",query=True,value=True),"height"))
-
-    cmds.setParent("..")
+import sys
+import importlib
+#Load Abc Plugins
+cmds.loadPlugin("AbcImport.mll", quiet=True)
+cmds.loadPlugin("AbcExport.mll", quiet=True)
 
 
 
-    if renderWidth == 1280 and renderHeight == 720:
-        cmds.optionMenu("renderSize", e=True, value='HD_720')
-    elif renderWidth == 1920 and renderHeight == 1080:
-        cmds.optionMenu("renderSize", e=True, value="HD_1080")
+import assetsDb as assetsDb
+
+import projects as projects
+
+
+currentProject = projects.getCurrentProject()
+projectsData = projects.getProjectData(currentProject)
+assetsDir = projectsData.get("assetsDir")
+assetsDic = projects.buildAssetDb()   #Get dictionnary of all asset for th current project
+
+
+def listAbcFromDir(path):
+    "List all Abc from a directory"
+    listAbc = []
+    for abc in os.listdir(path):
+        if abc.endswith(".abc"):
+            listAbc.append(abc)
+    return listAbc
+
+def importReference(path, refNamespace):
+    "Import a reference given a path"
+    cmds.file(path, reference = True, namespace=refNamespace)
+
+def nameFromAbc(abc):
+    "ch_name_01.abc => ch_name"
+    #HacK paradise
+    if len(abc.split("_"))==3:
+        name = "%s_%s"%(abc.split("_")[0],abc.split("_")[1])
+    if len(abc.split("_"))==2:
+        name = abc.split("_")[0]
+    return name
+
+def createScriptNode(refNamespace, abcPath):
+    # HACK SWAROVKI OLD=> childRef = cmds.referenceQuery("%sRN"%(refNamespace), rfn=True, ch=True)[0]     #HACK PROD NUTRO !!!! [-1] to get the ABC. [0] usualy
+    childRefList = cmds.referenceQuery("%sRN"%(refNamespace), rfn=True, ch=True)
+    for c in childRefList:
+        if c.split(":")[-1].split("_")[0]=="ch":
+            childRef = c
+
+    script ='cmds.file ("%s", loadReference = "%s", type="Alembic")'%(abcPath, childRef)
+    scriptNodeName = "scriptNode_"+refNamespace
+    scriptNode = cmds.scriptNode (st= 1, n= scriptNodeName, bs=script, stp = "python")
+
+    deferScript = 'cmds.file("%s", loadReference="%s", type="Alembic")'%(abcPath, childRef)        #Update the alembic.
+    cmds.evalDeferred(deferScript)
+
+def abcLoad(abcPath):
+    "Import Abc from a directory"
+    abc = abcPath.split("/")[-1]
+    name = nameFromAbc(abc)
+    refNamespace = name +"_shading_lib_"+ abc.split("_")[-1].split(".")[0]  #00 ou 01 ou 02
+    print(name)
+    shadingRefPath = assetsDic.get(name).get("shading")
+    print(shadingRefPath)
+    scriptNodeName = "scriptNode_" + refNamespace
+
+    #Check if ABC has already been imported
+    if cmds.objExists(scriptNodeName):
+        print("Updating animation for: %s \n %s"%(refNamespace, abcPath))
+        cmds.delete (scriptNodeName)                #Delete old script Node
+        createScriptNode(refNamespace, abcPath)             #Create new script Node
     else:
-        cmds.optionMenu("renderSize", e=True, value="Custom")
-    cmds.setParent( '..' )
-    cmds.setParent( '..' )
+        print("Importing animation for: %s \n %s" % (refNamespace, abcPath))
+        importReference(shadingRefPath, refNamespace)               #Import Reference
+        createScriptNode(refNamespace, abcPath)             #Create new script Node
 
-    #SAMPLING
-    cmds.frameLayout( label='Sampling', labelAlign='bottom')
-
-
-
-    #CAMERA AA
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"AASamples")
-    cmds.intSliderGrp( "AASamples", field=True, label="Camera (AA)", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("AASamples") )
-
-    #Diffuse
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GIDiffuseSamples")
-    cmds.intSliderGrp( "GIDiffuseSamples", field=True, label="Diffuse", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GIDiffuseSamples") )
-
-    #Specualr
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GISpecularSamples")
-    cmds.intSliderGrp( "GISpecularSamples", field=True, label="Specular", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GISpecularSamples") )
-
-
-    #Transmssion
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GITransmissionSamples")
-    cmds.intSliderGrp( "GITransmissionSamples", field=True, label="Transmission", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GITransmissionSamples") )
-
-    #SSS
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GISssSamples")
-    cmds.intSliderGrp( "GISssSamples", field=True, label="SSS", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GISssSamples") )
-
-    #Volume Indirect
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GIVolumeSamples")
-    cmds.intSliderGrp( "GIVolumeSamples", field=True, label="Volume Indirect", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GIVolumeSamples") )
-
-    #ADAPTATIVE SAMPLING
-    cmds.frameLayout( label='Adaptive Sampling', labelAlign='bottom')
-    #Enable adaptative
-    cmds.checkBox("enableAdaptiveSampling", label="Adapativ Sampling Enable", value=cmds.getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling",cmds.checkBox("enableAdaptiveSampling", query=True, value=True)))
-    AASamplesMax_state = cmds.getAttr("defaultArnoldRenderOptions.AASamplesMax")
-    cmds.intSliderGrp( "AASamplesMax", field=True, label="Max. Camera (AA)", minValue=0, maxValue=25, fieldMinValue=0, fieldMaxValue=40, value=AASamplesMax_state, changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.AASamplesMax", cmds.intSliderGrp("AASamplesMax",query=True,value=True)) )
-
-    #Enable AAAdaptiveThreshold
-    AAAdaptiveThreshold_state = cmds.getAttr("defaultArnoldRenderOptions.AAAdaptiveThreshold")
-    cmds.floatSliderGrp( "AAAdaptiveThreshold", field=True,precision=3, label="Adaptive Threshold", minValue=0, maxValue=1, fieldMinValue=0, fieldMaxValue=1,sliderStep=0.01,value=AAAdaptiveThreshold_state, changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.AAAdaptiveThreshold", cmds.floatSliderGrp("AAAdaptiveThreshold",query=True,value=True)) )
-
-    #AOVs
-    cmds.frameLayout( label='AOVs', labelAlign='bottom' )
-    cmds.rowColumnLayout( numberOfColumns =3)
-    cmds.button("aov_on", label="AOVs ON",  command=lambda x:aov_enabled(1))
-    cmds.button("aov_off", label="AOVs OFF", command=lambda x:aov_enabled(0))
-
-    aovList = cmds.ls(type = "aiAOV")
-    enabled_aov = []
-    for aov in aovList:
-        if cmds.getAttr(aov+".enabled")==1:
-            enabled_aov.append(aov)
-    enabled_aov_total = len(enabled_aov)
-    aov_total = len(aovList)
-    text_aov_count = "  Enabled: "+ str(enabled_aov_total)+"/"+str(aov_total)
-    cmds.text("aov_counter",label=text_aov_count, font="boldLabelFont")
-    cmds.setParent("..")
-    cmds.frameLayout( label='Preset', labelAlign='bottom')
-    cmds.rowColumnLayout( numberOfColumns =3,columnSpacing=(20,20))
-    cmds.button("fast", width=140,height=80, label="Fast",command=lambda x:apply_preset("fast"))
-    cmds.button("lookdev",width=140,height=80, label="Look dev",  command=lambda x:apply_preset("lookdev"))
-    cmds.button("hd", width=140,height=80,label="HD",  command=lambda x:apply_preset("hd"))
-
-    cmds.showWindow(winName)
-
-###Read preset folder and return a dictionary
-def build_preset_dic():
-    listPresets = os.listdir(presets_folder)
-
-
-    for preset in listPresets:
-        filepath = os.path.join(presets_folder,preset)
-        with open(filepath) as json_file:
-            preset_data = json.load(json_file)
-        presetName, presetExtention = os.path.splitext(preset)
-        presetDic[presetName]=preset_data
-    return presetDic
-
-
-##### PRESET APPLY #####
-##### PRESET APPLY #####
-##### PRESET APPLY #####
-def apply_preset(preset):
-    presetDic = build_preset_dic()
-    preset = presetDic[preset]
-
-    #Note: Changer la veleur du checkbox en script ne déclenche pas la fonction "onChange". Il faut donc la recopier pour que le changement affect maya (et pas que l'UI)...
-    cmds.checkBox("lentil_enable",e=True,value=preset["lentil_enable"])
-    changeCamType()
-
-    cmds.checkBox("aiEnableDOF",e=True,value=preset["aiEnableDOF"])
-    dof()
-
-    cmds.checkBox("motion_blur_enable",e=True,value=preset["motion_blur_enable"])
-    cmds.setAttr("defaultArnoldRenderOptions.motion_blur_enable",cmds.checkBox("motion_blur_enable", query=True, value=True))
-
-    cmds.checkBox("ignoreDisplacement",e=True,value=preset["ignoreDisplacement"])
-    ignore("ignoreDisplacement",cmds.checkBox("ignoreDisplacement", query=True, value=True))
-
-    cmds.checkBox("ignoreAtmosphere",e=True,value=preset["ignoreAtmosphere"])
-    ignore("ignoreAtmosphere",cmds.checkBox("ignoreAtmosphere", query=True, value=True))
-
-    cmds.checkBox("ignoreSubdivision",e=True,value=preset["ignoreSubdivision"])
-    ignore("ignoreSubdivision",cmds.checkBox("ignoreSubdivision", query=True, value=True))
-
-    cmds.optionMenu("renderSize", e=True, value=preset["render_size"])
-    renderSizePreset(cmds.optionMenu("renderSize",query=True,value=True))
-
-    samples_list=["AASamples","GIDiffuseSamples","GISpecularSamples","GIDiffuseSamples","GITransmissionSamples","GISssSamples","GIDiffuseSamples","GIVolumeSamples","AASamplesMax"]
-    for sample in samples_list:
-        cmds.intSliderGrp(sample,e=True, value=preset[sample])
-        updateSample(sample)
-    cmds.floatSliderGrp("AAAdaptiveThreshold",e=True, value=preset["AAAdaptiveThreshold"])
-    cmds.setAttr("defaultArnoldRenderOptions.AAAdaptiveThreshold", cmds.floatSliderGrp("AAAdaptiveThreshold",query=True,value=True))
-
-    cmds.checkBox("enableAdaptiveSampling",e=True,value=preset["enableAdaptiveSampling"])
-    cmds.setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling",preset["enableAdaptiveSampling"])
-
-    if preset["AOV"]:
-        aov_enabled(1)
-    else:
-        aov_enabled(0)
-
-
-def aov_enabled(value):
-    aovList = cmds.ls(type = "aiAOV")
-    for aov in aovList:
-        cmds.setAttr(aov+".enabled",value)
-    #update text label enabled aov counter
-    enabled_aov = []
-
-    for aov in aovList:
-        if cmds.getAttr(aov+".enabled")==1:
-            enabled_aov.append(aov)
-    enabled_aov_total = len(enabled_aov)
-    aov_total = len(aovList)
-    edited_text =  "  Enabled: " + str(enabled_aov_total)+"/"+str(aov_total)
-    cmds.text("aov_counter", e=True, label= edited_text)
-
-def updateSample(sample):
-    value= cmds.intSliderGrp(sample,query=True,value=True)
-    print ("defaultArnoldRenderOptions."+sample)
-
-
-    cmds.setAttr("defaultArnoldRenderOptions."+sample,value)
-
-def updateSize(value, type):
-    #Set width or height
-    cmds.setAttr("defaultResolution."+type, value)
-    cmds.evalDeferred('cmds.setAttr("defaultResolution.pixelAspect", 1)') #HACK TO PRESERVE PIXEL ASPECT RATION WITH DEFERRED EVA
-    #Update preset format menu
-    renderWidth= cmds.getAttr("defaultResolution.width")
-    renderHeight = cmds.getAttr("defaultResolution.height")
-    if renderWidth == 1280 and renderHeight == 720:
-        cmds.optionMenu("renderSize", e=True, value="HD_720")
-    elif renderWidth == 1920 and renderHeight == 1080:
-        cmds.optionMenu("renderSize", e=True, value="HD_1080")
-    else:
-        cmds.optionMenu("renderSize", e=True, value="Custom")
-
-def renderSizePreset(preset):
-    if preset == "HD_720":
-        cmds.setAttr("defaultResolution.height", 720)
-        cmds.setAttr("defaultResolution.width", 1280)
-        cmds.intField("renderWidth",e=True, value=1280)
-        cmds.intField("renderHeigth",e=True, value=720)
-        cmds.evalDeferred('cmds.setAttr("defaultResolution.pixelAspect", 1)') #HACK TO PRESERVE PIXEL ASPECT RATION WITH DEFERRED EVAL
-
-    if preset == "HD_1080":
-        cmds.setAttr("defaultResolution.height", 1080)
-        cmds.setAttr("defaultResolution.width", 1920)
-        cmds.intField("renderWidth",e=True, value=1920)
-        cmds.intField("renderHeigth",e=True, value=1280)
-        cmds.evalDeferred('cmds.setAttr("defaultResolution.pixelAspect", 1)') #HACK TO PRESERVE PIXEL ASPECT RATION WITH DEFERRED EVAL
-
-
-
-def changeCamType():
-    cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
-    lentil_enable = cmds.checkBox("lentil_enable", query = True, value=True)
-    if lentil_enable:
-        cmds.setAttr(cam+".ai_translator", "lentil_camera",  type="string")
-    else:
-        cmds.setAttr(cam+".ai_translator", "perspective",  type="string")
-
-
-
-def dof():
-    cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
-    dof_value = cmds.checkBox("aiEnableDOF", query = True, value =True)
-    cmds.setAttr(cam+".enableDof", dof_value)
-    cmds.setAttr(cam+".aiEnableDOF", dof_value)
-
-def ignore(ignore_name,ignore_value):
-    cmds.setAttr("defaultArnoldRenderOptions."+ignore_name, ignore_value)
-
-def doctor():
-    if cmds.checkBox("cam", query = True, value =True):
-        doc.delCamera()
-
-
-    mayaWarning("Test finished.")
-
-
-
-gui = createGUI()
+def importAnim():
+    "Import selected alembic in the file dialog - Master fonction"
+    basicFilter = "*.abc"
+    listAbc = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, fileMode=4)
+    for abcPath in listAbc:
+        abcLoad(abcPath)
