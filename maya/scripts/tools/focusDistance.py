@@ -29,41 +29,55 @@ def setFocusDistance(cam):
     "Apply focus on a camera"
 
     #Create locator for focus
-    if cmds.objExists('focus_locator_%s'%cam[0]):
-        print('focus_distance_locator_%s already exist !'%cam[0])
-        cmds.delete('focus_locator_%s'%cam[0])
-    focus_distance_locator = cmds.spaceLocator(n='focus_locator_%s'%cam[0])
+    if not cmds.objExists('focus_locator_%s'%cam[0]):
+        focus_distance_locator = cmds.spaceLocator(n='focus_locator_%s'%cam[0])
 
-    #Create distance Node
-    distanceNode = cmds.shadingNode('distanceBetween',asUtility=True)
-    #Create vectorProduct
-    vectorNode = cmds.shadingNode('vectorProduct', asUtility=True)
-    cmds.setAttr(vectorNode+".operation", 4)
+        #Create distance Node
+        distanceNode = cmds.shadingNode('distanceBetween',asUtility=True)
+        #Create vectorProduct
+        vectorNode = cmds.shadingNode('vectorProduct', asUtility=True)
+        cmds.setAttr(vectorNode+".operation", 4)
 
-    #Conect worldMatrix camera > vectorNode
-    cmds.connectAttr (cam[0]+".worldMatrix", vectorNode+".matrix", f=True)
-    #Connect distance node
-    cmds.connectAttr (focus_distance_locator[0]+"Shape.worldPosition", distanceNode+".point1", f=True)
-    cmds.connectAttr (vectorNode+".output", distanceNode+".point2", f=True)
+        #Conect worldMatrix camera > vectorNode
+        cmds.connectAttr (cam[0]+".worldMatrix", vectorNode+".matrix", f=True)
+        #Connect distance node
+        cmds.connectAttr (focus_distance_locator[0]+"Shape.worldPosition", distanceNode+".point1", f=True)
+        cmds.connectAttr (vectorNode+".output", distanceNode+".point2", f=True)
 
-    cmds.connectAttr (distanceNode+".distance", cam[0]+".aiFocusDistance", f=True)
-    cmds.connectAttr (distanceNode+".distance", cam[0]+".focusDistance", f= True)
-    if cmds.getAttr("defaultRenderGlobals.currentRenderer") =="vray":
+        cmds.connectAttr (distanceNode+".distance", cam[0]+".aiFocusDistance", f=True)
+        cmds.connectAttr (distanceNode+".distance", cam[0]+".focusDistance", f= True)
         try:
-            cmds.setAttr (cam[0]+".vrayCameraPhysicalUseDof", 1)
-            cmds.setAttr (cam[0]+".vrayCameraPhysicalSpecifyFocus", 1)
-            cmds.connectAttr (distanceNode+".distance", cam[0]+".vrayCameraPhysicalFocusDistance", f= True)
+            cmds.connectAttr (distanceNode+".distance", cam[0]+".focusDist", f=True)
         except:
-            cmds.warning("ADD VRAY PHYSICAL CAMERA !")
+            print("not able to connect lentil focus distance")
 
-    #DOF viewport
-    cmds.setAttr(cam[0]+".depthOfField", 1)
-    #If the camera as already an expression it's would raise an error.
+
+
+        #DOF viewport
+        cmds.setAttr(cam[0]+".depthOfField", 1)
+
+    #CONNECT FOCUS DIST ARNOLD TO LENTIL FOCUS DIST
     try:
-        cmds.expression( s="%s.fStop = 2*(%s.focalLength*0.1)/(%s.aiApertureSize + 0.01);"%(cam[0],cam[0],cam[0]), o = cam[0], ae =True,)
+        cmds.connectAttr (cam[0]+".aiFocusDistance", cam[0]+".focusDist", f=True)
+        print ("Lentil focus distance connected !")
     except:
-        print("The camera F stop as already an expression")
+            print("not able to connect lentil focus distance")
 
+    try:
+        #connect apperture size to fstop
+        expression = "%s.aiApertureSize= %s.focalLength/10/perspShape.fStop/2;"%(cam[0],cam[0])
+        print(expression)
+        cmds.expression(s=expression)
+    except:
+        print("failed to add expression on apperture")
+
+    try:
+        #connect apperture size to fStop (lentil)
+        cmds.connectAttr(cam[0]+".fStop", cam[0]+".fstop", f=True)
+        #connect focal length to focal length lentil
+        cmds.connectAttr(cam[0]+".focalLength", cam[0]+".focalLengthLentil", f=True)
+    except:
+        print("failed to connect fstop or focal length to lentil Attributs")
 
 def focus():
     """

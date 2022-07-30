@@ -12,13 +12,7 @@ presets_folder = "R:\\pipeline\\pipe\\maya\\scripts\\tools\\presets_render_setti
 presetDic={}
 
 
-def mayaWarning(msg):
-    """
-    Display of maya warning
-    """
-    cmds.warning(msg)
-    cmds.confirmDialog(title="Error",message=msg)
-
+# List renderable cameras
 def getRenderableCameras():
     cameras = cmds.ls(type="camera")
     renderableCameras=[]
@@ -35,20 +29,17 @@ def createGUI():
     winName = "TURBOTRON"
     if cmds.window(winName, exists=True):
       cmds.deleteUI(winName)
-    doctorWindow = cmds.window(winName,title="SIMPLETON 1.0", width=winWidth, rtf=True)
-    cmds.frameLayout( label='Camera', labelAlign='bottom' )
-    #cmds.rowColumnLayout( numberOfColumns =2 )
-    cmds.columnLayout(adjustableColumn= True, rowSpacing= 10)
+    window = cmds.window(winName,title="SIMPLETON 1.0", width=winWidth, rtf=True)
 
     #-----  CAMERA --------
-    # List renderables camera
-    cmds.rowColumnLayout( numberOfColumns =1 )
+    cmds.frameLayout( label='Camera', labelAlign='bottom' )
+    cmds.columnLayout(adjustableColumn= True, rowSpacing=0)
     cmds.optionMenu("renderCamMenu", label='Renderable Camera')
+
     renderableCameras= getRenderableCameras()
     for cam in renderableCameras:
         cmds.menuItem(label=cam)
-
-    #Camera type menu
+    # Check camera type (lentil ou perspective)
     try:
         activeCamType = cmds.getAttr(renderableCameras[0]+".ai_translator")
         if activeCamType == "lentil_camera":
@@ -58,14 +49,11 @@ def createGUI():
     except:
         lentil_enable=0
 
-    # DOF & MOTION BLUR
-    cmds.rowColumnLayout( numberOfColumns = 3 )
-    #Dof checkbox
-    #Get state
+    #----- Global Features Overrides --------
 
-    cmds.setParent("..")
     cmds.frameLayout( label='Feature Overrides', labelAlign='bottom')
-    cmds.rowColumnLayout( numberOfColumns = 2 )
+    cmds.rowColumnLayout( numberOfColumns = 3)
+    # -- DOF / MB / LENTIL
     cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
     dof_state= cmds.getAttr(renderableCameras[0]+".enableDof")
     cmds.checkBox("aiEnableDOF", label="Enable Depth of Field", value=dof_state, changeCommand=lambda x:dof())
@@ -73,19 +61,32 @@ def createGUI():
     cmds.checkBox("lentil_enable", label="Enable Lentil", value=lentil_enable, changeCommand=lambda x:changeCamType())
     cmds.setParent("..")
     cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
-    #-----  Feature Overrides  --------
+    # -- Ignore Overriedes
     #IGNORE SUBDIVISION
     ignore_subdiv_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreSubdivision")
     cmds.checkBox("ignoreSubdivision", label="Ignore Subdivision", value=ignore_subdiv_state, changeCommand=lambda x:ignore("ignoreSubdivision",cmds.checkBox("ignoreSubdivision", query=True, value=True)))
-
     #IGNORE ATHMO
     ignoreAtmosphere_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreAtmosphere")
     cmds.checkBox("ignoreAtmosphere", label="Ignore Athmosphere", value=ignoreAtmosphere_state, changeCommand=lambda x:ignore("ignoreAtmosphere",cmds.checkBox("ignoreAtmosphere", query=True, value=True)))
-
     #IGNORE DISPLACEMENT
     ignoreDisplacement_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreDisplacement")
     cmds.checkBox("ignoreDisplacement", label="Ignore Displacment", value=ignoreDisplacement_state, changeCommand=lambda x:ignore("ignoreDisplacement",cmds.checkBox("ignoreDisplacement", query=True, value=True)))
+    cmds.setParent("..")
 
+    # -- AOVs Overriedes
+    cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
+    cmds.checkBox("ignoreAov",label="Ignore AOVs", changeCommand=lambda x:aov_enabled(1-cmds.checkBox("ignoreAov",query=True,value=True)))
+    aovList = cmds.ls(type = "aiAOV")
+    enabled_aov = []
+    for aov in aovList:
+        if cmds.getAttr(aov+".enabled")==1:
+            enabled_aov.append(aov)
+    enabled_aov_total = len(enabled_aov)
+    aov_total = len(aovList)
+    if enabled_aov_total == 0:
+        cmds.checkBox("ignoreAov",e=True,value=True)
+    text_aov_count = "  Enabled: "+ str(enabled_aov_total)+"/"+str(aov_total)
+    cmds.text("aov_counter",label=text_aov_count, font="boldLabelFont")
 
     cmds.setParent("..")
     cmds.setParent("..")
@@ -108,8 +109,6 @@ def createGUI():
 
     cmds.setParent("..")
 
-
-
     if renderWidth == 1280 and renderHeight == 720:
         cmds.optionMenu("renderSize", e=True, value='HD_720')
     elif renderWidth == 1920 and renderHeight == 1080:
@@ -121,8 +120,6 @@ def createGUI():
 
     #SAMPLING
     cmds.frameLayout( label='Sampling', labelAlign='bottom')
-
-
 
     #CAMERA AA
     samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"AASamples")
@@ -152,7 +149,8 @@ def createGUI():
     #ADAPTATIVE SAMPLING
     cmds.frameLayout( label='Adaptive Sampling', labelAlign='bottom')
     #Enable adaptative
-    cmds.checkBox("enableAdaptiveSampling", label="Adapativ Sampling Enable", value=cmds.getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling",cmds.checkBox("enableAdaptiveSampling", query=True, value=True)))
+
+    cmds.checkBox("enableAdaptiveSampling", label="Enable", value=cmds.getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling",cmds.checkBox("enableAdaptiveSampling", query=True, value=True)))
     AASamplesMax_state = cmds.getAttr("defaultArnoldRenderOptions.AASamplesMax")
     cmds.intSliderGrp( "AASamplesMax", field=True, label="Max. Camera (AA)", minValue=0, maxValue=25, fieldMinValue=0, fieldMaxValue=40, value=AASamplesMax_state, changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.AASamplesMax", cmds.intSliderGrp("AASamplesMax",query=True,value=True)) )
 
@@ -160,23 +158,8 @@ def createGUI():
     AAAdaptiveThreshold_state = cmds.getAttr("defaultArnoldRenderOptions.AAAdaptiveThreshold")
     cmds.floatSliderGrp( "AAAdaptiveThreshold", field=True,precision=3, label="Adaptive Threshold", minValue=0, maxValue=1, fieldMinValue=0, fieldMaxValue=1,sliderStep=0.01,value=AAAdaptiveThreshold_state, changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.AAAdaptiveThreshold", cmds.floatSliderGrp("AAAdaptiveThreshold",query=True,value=True)) )
 
-    #AOVs
-    cmds.frameLayout( label='AOVs', labelAlign='bottom' )
-    cmds.rowColumnLayout( numberOfColumns =3)
-    cmds.button("aov_on", label="AOVs ON",  command=lambda x:aov_enabled(1))
-    cmds.button("aov_off", label="AOVs OFF", command=lambda x:aov_enabled(0))
 
-    aovList = cmds.ls(type = "aiAOV")
-    enabled_aov = []
-    for aov in aovList:
-        if cmds.getAttr(aov+".enabled")==1:
-            enabled_aov.append(aov)
-    enabled_aov_total = len(enabled_aov)
-    aov_total = len(aovList)
-    text_aov_count = "  Enabled: "+ str(enabled_aov_total)+"/"+str(aov_total)
-    cmds.text("aov_counter",label=text_aov_count, font="boldLabelFont")
-    cmds.setParent("..")
-    cmds.frameLayout( label='Preset', labelAlign='bottom')
+    cmds.separator( height=10, style='in' )
     cmds.rowColumnLayout( numberOfColumns =3,columnSpacing=(20,20))
     cmds.button("fast", width=140,height=80, label="Fast",command=lambda x:apply_preset("fast"))
     cmds.button("lookdev",width=140,height=80, label="Look dev",  command=lambda x:apply_preset("lookdev"))
@@ -197,10 +180,7 @@ def build_preset_dic():
         presetDic[presetName]=preset_data
     return presetDic
 
-
-##### PRESET APPLY #####
-##### PRESET APPLY #####
-##### PRESET APPLY #####
+### APPLY A PRESET
 def apply_preset(preset):
     presetDic = build_preset_dic()
     preset = presetDic[preset]
@@ -239,9 +219,10 @@ def apply_preset(preset):
 
     if preset["AOV"]:
         aov_enabled(1)
+        cmds.checkBox("ignoreAov",e=True,value=False)
     else:
         aov_enabled(0)
-
+        cmds.checkBox("ignoreAov",e=True,value=True)
 
 def aov_enabled(value):
     aovList = cmds.ls(type = "aiAOV")
@@ -294,8 +275,6 @@ def renderSizePreset(preset):
         cmds.intField("renderHeigth",e=True, value=1280)
         cmds.evalDeferred('cmds.setAttr("defaultResolution.pixelAspect", 1)') #HACK TO PRESERVE PIXEL ASPECT RATION WITH DEFERRED EVAL
 
-
-
 def changeCamType():
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
     lentil_enable = cmds.checkBox("lentil_enable", query = True, value=True)
@@ -303,8 +282,6 @@ def changeCamType():
         cmds.setAttr(cam+".ai_translator", "lentil_camera",  type="string")
     else:
         cmds.setAttr(cam+".ai_translator", "perspective",  type="string")
-
-
 
 def dof():
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
@@ -314,14 +291,6 @@ def dof():
 
 def ignore(ignore_name,ignore_value):
     cmds.setAttr("defaultArnoldRenderOptions."+ignore_name, ignore_value)
-
-def doctor():
-    if cmds.checkBox("cam", query = True, value =True):
-        doc.delCamera()
-
-
-    mayaWarning("Test finished.")
-
 
 
 gui = createGUI()

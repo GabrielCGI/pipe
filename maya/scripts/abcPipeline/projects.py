@@ -1,71 +1,305 @@
-#! usr/bin/python
-# -*- coding: ISO-8859-1 -*-
-from os import listdir
-from os.path import isfile, join, splitext
-import json
+
+import maya.mel as mel
+import maya.cmds as cmds
+import importlib
 import os
+import json
 
-defaultProject="trashtown_2112"
+importlib.reload(doc)
 
-projectsData ={
-    "trashtown_2112":
-        {
-            "path": "B:\\trashtown_2112",
-            "assetsDir": "B:\\trashtown_2112\\assets",
-            "assetsDbDir": "B:\\trashtown_2112\\database",
-        },
-    "swarovski_2205":
-        {
-            "path": "I:\\swarovski_2205",
-            "assetsDir": "I:\\swarovski_2205\\assets",
-            "assetsDbDir": "I:\\swarovski_2205\\assets\\database",
-        },
-    "guerlain_2206":
-        {
-            "path": "I:\\guerlain_2206",
-            "assetsDir": "I:\\guerlain_2206\\assets",
-            "assetsDbDir": "I:\\guerlain_2206\\assets\\database",
-        },
-
-    "roger":
-        {
-            "path": "I:\\roger_2112",
-            "assetsDir": "I:\\roger_2112\\assets",
-            "assetsDbDir": "I:\\roger_2112\\assets\\database",
-        }
-}
+#Init variables
+presets_folder = "R:\\pipeline\\pipe\\maya\\scripts\\tools\\presets_render_setting"
+presetDic={}
 
 
+def mayaWarning(msg):
+    """
+    Display of maya warning
+    """
+    cmds.warning(msg)
+    cmds.confirmDialog(title="Error",message=msg)
 
-def getCurrentProject():
-    project = os.getenv("CURRENT_PROJECT")
-    #computer = os.environ['COMPUTERNAME']
-    if project in projectsData.keys():
-        currentProject = project
+def getRenderableCameras():
+    cameras = cmds.ls(type="camera")
+    renderableCameras=[]
+    for cam in cameras:
+        if cmds.getAttr(cam+".renderable"):
+            renderableCameras.append(cam)
+    return renderableCameras
+
+
+#Create my GUI
+def createGUI():
+    #window set up
+    winWidth = 450
+    winName = "TURBOTRON"
+    if cmds.window(winName, exists=True):
+      cmds.deleteUI(winName)
+    doctorWindow = cmds.window(winName,title="SIMPLETON 1.0", width=winWidth, rtf=True)
+    cmds.frameLayout( label='Camera', labelAlign='bottom', borderStyle='etchedOut' )
+    #cmds.rowColumnLayout( numberOfColumns =2 )
+    cmds.columnLayout(adjustableColumn= True, rowSpacing= 10)
+
+    #-----  CAMERA --------
+    # List renderables camera
+    cmds.optionMenu("renderCamMenu", label='Renderable Camera')
+    renderableCameras= getRenderableCameras()
+    for cam in renderableCameras:
+        cmds.menuItem(label=cam)
+
+    #Camera type menu
+    try:
+        activeCamType = cmds.getAttr(renderableCameras[0]+".ai_translator")
+        if activeCamType == "lentil_camera":
+            lentil_enable=1
+        else:
+            lentil_enable=0
+    except:
+        lentil_enable=0
+
+    # DOF & MOTION BLUR
+    cmds.rowColumnLayout( numberOfColumns = 3 )
+    #Dof checkbox
+    #Get state
+    dof_state= cmds.getAttr(renderableCameras[0]+".enableDof")
+    cmds.checkBox("aiEnableDOF", label="Enable Depth of Field", value=dof_state, changeCommand=lambda x:dof())
+    cmds.checkBox("motion_blur_enable", label="Enable Motion Blur", value=cmds.getAttr("defaultArnoldRenderOptions.motion_blur_enable"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.motion_blur_enable",cmds.checkBox("motion_blur_enable", query=True, value=True)))
+    cmds.checkBox("lentil_enable", label="Enable Lentil", value=lentil_enable, changeCommand=lambda x:changeCamType())
+
+
+    cmds.setParent("..")
+    cmds.frameLayout( label='Feature Overrides', labelAlign='bottom', borderStyle='etchedOut' )
+
+    #-----  Feature Overrides  --------
+    #IGNORE SUBDIVISION
+    ignore_subdiv_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreSubdivision")
+    cmds.checkBox("ignoreSubdivision", label="Ignore Subdivision", value=ignore_subdiv_state, changeCommand=lambda x:ignore("ignoreSubdivision",cmds.checkBox("ignoreSubdivision", query=True, value=True)))
+
+    #IGNORE ATHMO
+    ignoreAtmosphere_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreAtmosphere")
+    cmds.checkBox("ignoreAtmosphere", label="Ignore Athmosphere", value=ignoreAtmosphere_state, changeCommand=lambda x:ignore("ignoreAtmosphere",cmds.checkBox("ignoreAtmosphere", query=True, value=True)))
+
+    #IGNORE DISPLACEMENT
+    ignoreDisplacement_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreDisplacement")
+    cmds.checkBox("ignoreDisplacement", label="Ignore Displacment", value=ignoreDisplacement_state, changeCommand=lambda x:ignore("ignoreDisplacement",cmds.checkBox("ignoreDisplacement", query=True, value=True)))
+
+    #-----  Render settings --------
+    cmds.frameLayout( label='Image size', labelAlign='bottom', borderStyle='etchedOut' )
+
+    renderWidth= cmds.getAttr("defaultResolution.width")
+    renderHeight = cmds.getAttr("defaultResolution.height")
+    cmds.rowColumnLayout( numberOfColumns =2 )
+    cmds.text("Width:")
+    cmds.intField("renderWidth",value=renderWidth, changeCommand=lambda x:updateSize(cmds.intField("renderWidth",query=True,value=True),"width"))
+    cmds.text("Height:")
+    cmds.intField("renderHeigth",value=renderHeight,  changeCommand=lambda x:updateSize(cmds.intField("renderHeigth",query=True,value=True),"height"))
+
+
+    cmds.optionMenu("renderSize", label='Presets', changeCommand=lambda x:renderSizePreset(cmds.optionMenu("renderSize",query=True,value=True)))
+    cmds.menuItem( label='HD_720' )
+    cmds.menuItem( label='HD_1080' )
+    cmds.menuItem( label='Custom' )
+
+    if renderWidth == 1280 and renderHeight == 720:
+        cmds.optionMenu("renderSize", e=True, value='HD_720')
+    elif renderWidth == 1920 and renderHeight == 1080:
+        cmds.optionMenu("renderSize", e=True, value="HD_1080")
     else:
-        currentProject = defaultProject
-    print("CURRENT PROJECT: %s"%(currentProject))
-    return currentProject
+        cmds.optionMenu("renderSize", e=True, value="Custom")
+    cmds.setParent( '..' )
+    cmds.setParent( '..' )
 
-def getProjectData(project):
-    data = projectsData.get(project)
-    return data
+    #SAMPLING
+    cmds.frameLayout( label='Sampling', labelAlign='bottom', borderStyle='etchedOut' )
 
-def getCurrentProjectData():
-	getCurrentProjectData = getProjectData(getCurrentProject())
-	return getCurrentProjectData
 
-def buildAssetDb():
-    """
-    Look in the database directory and build a dictionary with asset data
-    """
-    assetsDbDir = getCurrentProjectData()['assetsDbDir']
-    assetsList = [asset for asset in listdir(assetsDbDir) if isfile(join(assetsDbDir,asset))]
-    assetsDbDic = {}
-    for asset in assetsList:
-        filepath = join(assetsDbDir,asset)
+
+    #CAMERA AA
+    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"AASamples")
+    cmds.intSliderGrp( "AASamples", field=True, label="Camera (AA)", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("AASamples") )
+
+    #Diffuse
+    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GIDiffuseSamples")
+    cmds.intSliderGrp( "GIDiffuseSamples", field=True, label="Diffuse", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GIDiffuseSamples") )
+
+    #Specualr
+    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GISpecularSamples")
+    cmds.intSliderGrp( "GISpecularSamples", field=True, label="Specular", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GISpecularSamples") )
+
+
+    #Transmssion
+    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GITransmissionSamples")
+    cmds.intSliderGrp( "GITransmissionSamples", field=True, label="Transmission", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GITransmissionSamples") )
+
+    #SSS
+    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GISssSamples")
+    cmds.intSliderGrp( "GISssSamples", field=True, label="SSS", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GISssSamples") )
+
+    #Volume Indirect
+    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GIVolumeSamples")
+    cmds.intSliderGrp( "GIVolumeSamples", field=True, label="Volume Indirect", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GIVolumeSamples") )
+
+    #ADAPTATIVE SAMPLING
+    cmds.frameLayout( label='Adaptive Sampling', labelAlign='bottom', borderStyle='etchedOut' )
+    #Enable adaptative
+    cmds.checkBox("enableAdaptiveSampling", label="Adapativ Sampling Enable", value=cmds.getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling",cmds.checkBox("enableAdaptiveSampling", query=True, value=True)))
+    AASamplesMax_state = cmds.getAttr("defaultArnoldRenderOptions.AASamplesMax")
+    cmds.intSliderGrp( "AASamplesMax", field=True, label="Max. Camera (AA)", minValue=0, maxValue=25, fieldMinValue=0, fieldMaxValue=40, value=AASamplesMax_state, changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.AASamplesMax", cmds.intSliderGrp("AASamplesMax",query=True,value=True)) )
+
+    #Enable AAAdaptiveThreshold
+    AAAdaptiveThreshold_state = cmds.getAttr("defaultArnoldRenderOptions.AAAdaptiveThreshold")
+    cmds.floatSliderGrp( "AAAdaptiveThreshold", field=True,precision=3, label="Adaptive Threshold", minValue=0, maxValue=1, fieldMinValue=0, fieldMaxValue=1,sliderStep=0.01,value=AAAdaptiveThreshold_state, changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.AAAdaptiveThreshold", cmds.floatSliderGrp("AAAdaptiveThreshold",query=True,value=True)) )
+
+    #AOVs
+    cmds.frameLayout( label='AOVs', labelAlign='bottom', borderStyle='etchedOut' )
+    cmds.rowColumnLayout( numberOfColumns =3, columnWidth=[(1, 150),(2,150)])
+    cmds.button("aov_on", label="ON",  command=lambda x:aov_enabled(1))
+    cmds.button("aov_off", label="OFF", command=lambda x:aov_enabled(0))
+
+    aovList = cmds.ls(type = "aiAOV")
+    enabled_aov = []
+    for aov in aovList:
+        if cmds.getAttr(aov+".enabled")==1:
+            enabled_aov.append(aov)
+    enabled_aov_total = len(enabled_aov)
+    aov_total = len(aovList)
+    text_aov_count = "  Enabled: "+ str(enabled_aov_total)+"/"+str(aov_total)
+    cmds.text("aov_counter",label=text_aov_count, font="boldLabelFont")
+    cmds.setParent("..")
+    cmds.frameLayout( label='Preset', labelAlign='bottom', borderStyle='etchedOut' )
+    cmds.button("fast", label="Fast",  command=lambda x:apply_preset("fast"))
+    cmds.showWindow(winName)
+
+###Read preset folder and return a dictionary
+def build_preset_dic():
+    listPresets = os.listdir(presets_folder)
+
+
+    for preset in listPresets:
+        filepath = os.path.join(presets_folder,preset)
         with open(filepath) as json_file:
-            assetData = json.load(json_file)
-        assetName, file_extension = splitext(asset)
-        assetsDbDic[assetName]=assetData
-    return assetsDbDic
+            preset_data = json.load(json_file)
+        presetName, presetExtention = os.path.splitext(preset)
+        presetDic[presetName]=preset_data
+    return presetDic
+
+
+##### PRESET APPLY #####
+##### PRESET APPLY #####
+##### PRESET APPLY #####
+def apply_preset(preset):
+    presetDic = build_preset_dic()
+    preset = presetDic[preset]
+
+    #Note: Changer la veleur du checkbox en script ne déclenche pas la fonction "onChange". Il faut donc la recopier pour que le changement affect maya (et pas que l'UI)...
+    cmds.checkBox("lentil_enable",e=True,value=preset["lentil_enable"])
+    changeCamType()
+
+    cmds.checkBox("aiEnableDOF",e=True,value=preset["aiEnableDOF"])
+    dof()
+
+    cmds.checkBox("motion_blur_enable",e=True,value=preset["motion_blur_enable"])
+    cmds.setAttr("defaultArnoldRenderOptions.motion_blur_enable",cmds.checkBox("motion_blur_enable", query=True, value=True))
+
+    cmds.checkBox("ignoreDisplacement",e=True,value=preset["ignoreDisplacement"])
+    ignore("ignoreDisplacement",cmds.checkBox("ignoreDisplacement", query=True, value=True))
+
+    cmds.checkBox("ignoreAtmosphere",e=True,value=preset["ignoreAtmosphere"])
+    ignore("ignoreAtmosphere",cmds.checkBox("ignoreAtmosphere", query=True, value=True))
+
+    cmds.checkBox("ignoreSubdivision",e=True,value=preset["ignoreSubdivision"])
+    ignore("ignoreSubdivision",cmds.checkBox("ignoreSubdivision", query=True, value=True))
+
+    cmds.optionMenu("renderSize", e=True, value=preset["render_size"])
+    renderSizePreset(cmds.optionMenu("renderSize",query=True,value=True))
+
+    samples_list=["AASamples","GIDiffuseSamples","GISpecularSamples","GIDiffuseSamples","GITransmissionSamples","GISssSamples","GIDiffuseSamples","GIVolumeSamples","AASamplesMax"]
+    for sample in samples_list:
+        cmds.intSliderGrp(sample,e=True, value=preset[sample])
+        updateSample(sample)
+    cmds.floatSliderGrp("AAAdaptiveThreshold",e=True, value=preset["AAAdaptiveThreshold"])
+    cmds.setAttr("defaultArnoldRenderOptions.AAAdaptiveThreshold", cmds.floatSliderGrp("AAAdaptiveThreshold",query=True,value=True))
+
+
+def aov_enabled(value):
+    aovList = cmds.ls(type = "aiAOV")
+    for aov in aovList:
+        cmds.setAttr(aov+".enabled",value)
+    #update text label enabled aov counter
+    enabled_aov = []
+
+    for aov in aovList:
+        if cmds.getAttr(aov+".enabled")==1:
+            enabled_aov.append(aov)
+    enabled_aov_total = len(enabled_aov)
+    aov_total = len(aovList)
+    edited_text =  "  Enabled: " + str(enabled_aov_total)+"/"+str(aov_total)
+    cmds.text("aov_counter", e=True, label= edited_text)
+
+def updateSample(sample):
+    value= cmds.intSliderGrp(sample,query=True,value=True)
+    print ("defaultArnoldRenderOptions."+sample)
+
+
+    cmds.setAttr("defaultArnoldRenderOptions."+sample,value)
+
+def updateSize(value, type):
+    #Set width or height
+    cmds.setAttr("defaultResolution."+type, value)
+    cmds.evalDeferred('cmds.setAttr("defaultResolution.pixelAspect", 1)') #HACK TO PRESERVE PIXEL ASPECT RATION WITH DEFERRED EVA
+    #Update preset format menu
+    renderWidth= cmds.getAttr("defaultResolution.width")
+    renderHeight = cmds.getAttr("defaultResolution.height")
+    if renderWidth == 1280 and renderHeight == 720:
+        cmds.optionMenu("renderSize", e=True, value="HD_720")
+    elif renderWidth == 1920 and renderHeight == 1080:
+        cmds.optionMenu("renderSize", e=True, value="HD_1080")
+    else:
+        cmds.optionMenu("renderSize", e=True, value="Custom")
+
+def renderSizePreset(preset):
+    if preset == "HD_720":
+        cmds.setAttr("defaultResolution.height", 720)
+        cmds.setAttr("defaultResolution.width", 1280)
+        cmds.intField("renderWidth",e=True, value=1280)
+        cmds.intField("renderHeigth",e=True, value=720)
+        cmds.evalDeferred('cmds.setAttr("defaultResolution.pixelAspect", 1)') #HACK TO PRESERVE PIXEL ASPECT RATION WITH DEFERRED EVAL
+
+    if preset == "HD_1080":
+        cmds.setAttr("defaultResolution.height", 1080)
+        cmds.setAttr("defaultResolution.width", 1920)
+        cmds.intField("renderWidth",e=True, value=1920)
+        cmds.intField("renderHeigth",e=True, value=1280)
+        cmds.evalDeferred('cmds.setAttr("defaultResolution.pixelAspect", 1)') #HACK TO PRESERVE PIXEL ASPECT RATION WITH DEFERRED EVAL
+
+
+
+def changeCamType():
+    cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
+    lentil_enable = cmds.checkBox("lentil_enable", query = True, value=True)
+    if lentil_enable:
+        cmds.setAttr(cam+".ai_translator", "lentil_camera",  type="string")
+    else:
+        cmds.setAttr(cam+".ai_translator", "perspective",  type="string")
+
+
+
+def dof():
+    cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
+    dof_value = cmds.checkBox("aiEnableDOF", query = True, value =True)
+    cmds.setAttr(cam+".enableDof", dof_value)
+    cmds.setAttr(cam+".aiEnableDOF", dof_value)
+
+def ignore(ignore_name,ignore_value):
+    cmds.setAttr("defaultArnoldRenderOptions."+ignore_name, ignore_value)
+
+def doctor():
+    if cmds.checkBox("cam", query = True, value =True):
+        doc.delCamera()
+
+
+    mayaWarning("Test finished.")
+
+
+
+gui = createGUI()
