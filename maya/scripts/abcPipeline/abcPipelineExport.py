@@ -94,9 +94,9 @@ def buildCommand (start, end, path, geoList, attrList, subframe, frameSample):
    command += "-frameRange %s %s"%(start, end) #Frame Range
    command += " -writeVisibility -uvWrite -writeColorSets -writeUVSets -worldSpace -dataFormat ogawa "
    if subframe == True:
-       if len(frameSample.split(" "))==3:
-           for f in frameSample.split(" "):
-               command += "-frameRelativeSample %s "%(f)
+       for f in frameSample.split(" "):
+           command += "-frameRelativeSample %s "%(f)
+
    if attrList[0]:
        for attr in attrList:
            command += " -attr %s"%(attr)           #Attributs
@@ -153,7 +153,7 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
     cmds.refresh(suspend=False)
     print("------------ SUCCESS EXPORT %s  ! ------------"%(charRef))
 
-def exportAnim(start=0, end=100, subframe=False, frameSample="0 0 0", charList=[]):
+def exportAnim(start=0, end=100, subframe=False, frameSample="0", charList=[]):
     basicFilter = "*.abc"
     dirPath = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, fileMode=2,)
     for char in charList:
@@ -190,8 +190,8 @@ class exportAnimGuiCls(object):
         cmds.setParent("..")
 
         cmds.rowLayout(numberOfColumns=2)
-        frameSample = cmds.textField(text = "-0.08 0 0.08")
-        subFrameCheckBox = cmds.checkBox(label="Subframes", value = False)
+        frameSample = cmds.textField(text = "-0.2 -0.1 0 0.1 0.2")
+        subFrameCheckBox = cmds.checkBox(label="Subframes", value = True)
 
         cmds.setParent("..")
 

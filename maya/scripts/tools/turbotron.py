@@ -28,7 +28,7 @@ def createGUI():
     winName = "TURBOTRON"
     if cmds.window(winName, exists=True):
       cmds.deleteUI(winName)
-    window = cmds.window(winName,title="Control Room   (╯°□°）╯︵ ┻━┻", width=winWidth, rtf=True)
+    window = cmds.window(winName,title="Control Room   ( ͡ಠ ʖ̯ ͡ಠ )", width=winWidth, rtf=True)
 
     #-----  CAMERA --------
     cmds.frameLayout( label='Camera', labelAlign='bottom' )
@@ -75,6 +75,7 @@ def createGUI():
     # -- AOVs Overriedes
     cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
     cmds.checkBox("ignoreAov",label="Ignore AOVs", changeCommand=lambda x:aov_enabled(1-cmds.checkBox("ignoreAov",query=True,value=True)))
+
     aovList = cmds.ls(type = "aiAOV")
     enabled_aov = []
     for aov in aovList:
@@ -86,7 +87,7 @@ def createGUI():
         cmds.checkBox("ignoreAov",e=True,value=True)
     text_aov_count = "  Enabled: "+ str(enabled_aov_total)+"/"+str(aov_total)
     cmds.text("aov_counter",label=text_aov_count, font="boldLabelFont")
-
+    cmds.checkBox("outputVarianceAOVs",label="Output Denoising AOVs",value=cmds.getAttr("defaultArnoldRenderOptions.outputVarianceAOVs"),changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", cmds.checkBox("outputVarianceAOVs", query=True,value=True)))
     cmds.setParent("..")
     cmds.setParent("..")
 
@@ -121,6 +122,7 @@ def createGUI():
     cmds.frameLayout( label='Sampling', labelAlign='bottom')
 
     #CAMERA AA
+    cmds.checkBox("enableProgressiveRender", label="Enable Progressive Render", value=cmds.getAttr("defaultArnoldRenderOptions.enableProgressiveRender"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",cmds.checkBox("enableProgressiveRender",query=True,value=True)))
     samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"AASamples")
     cmds.intSliderGrp( "AASamples", field=True, label="Camera (AA)", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("AASamples") )
 
@@ -145,6 +147,16 @@ def createGUI():
     samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GIVolumeSamples")
     cmds.intSliderGrp( "GIVolumeSamples", field=True, label="Volume Indirect", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GIVolumeSamples") )
 
+    cmds.separator( height=10, style='in' )
+
+    #RAY DEPTH
+    #Ray depth diffuse
+    samples_value= cmds.getAttr("defaultArnoldRenderOptions.GIDiffuseDepth")
+    cmds.intSliderGrp( "GIDiffuseDepth", field=True, label="Ray Depth Diffuse", minValue=0, maxValue=5, fieldMinValue=0, fieldMaxValue=5, value=samples_value, changeCommand=lambda x:updateSample("GIDiffuseDepth") )
+    #Ray depth specular
+    samples_value= cmds.getAttr("defaultArnoldRenderOptions.GISpecularDepth")
+    cmds.intSliderGrp( "GISpecularDepth", field=True, label="Ray Depth Specular", minValue=0, maxValue=5, fieldMinValue=0, fieldMaxValue=5, value=samples_value, changeCommand=lambda x:updateSample("GISpecularDepth") )
+
     #ADAPTATIVE SAMPLING
     cmds.frameLayout( label='Adaptive Sampling', labelAlign='bottom')
     #Enable adaptative
@@ -159,16 +171,58 @@ def createGUI():
 
 
     cmds.separator( height=10, style='in' )
-    cmds.rowColumnLayout( numberOfColumns =3,columnSpacing=(20,20))
-    cmds.button("fast", width=140,height=80, label="Fast",command=lambda x:apply_preset("fast"))
-    cmds.button("lookdev",width=140,height=80, label="Look dev",  command=lambda x:apply_preset("lookdev"))
-    cmds.button("hd", width=140,height=80,label="HD",  command=lambda x:apply_preset("hd"))
+    cmds.rowColumnLayout( numberOfColumns =4,columnSpacing=(20,20))
+    cmds.button("fast", width=100,height=60, label="Fast",command=lambda x:apply_preset("fast"))
+    cmds.button("lookdev",width=100,height=60, label="Look dev",  command=lambda x:apply_preset("lookdev"))
+    cmds.button("md", width=100,height=60,label="MD",  command=lambda x:apply_preset("md"))
+    cmds.button("hd", width=100,height=60,label="HD",  command=lambda x:apply_preset("hd"))
+    cmds.setParent("..")
+    cmds.rowColumnLayout( numberOfColumns =2,columnSpacing=(20,20))
+    cmds.optionMenu("scenePreset", label='Apply preset', changeCommand=lambda x:apply_preset(cmds.optionMenu("scenePreset",query=True,value=True)) )
+    presetDic = build_preset_dic()
+    presetDic
+    for preset in presetDic:
+        cmds.menuItem(preset)
+    cmds.button("save preset",label="Save New Preset",  command=lambda x:save_preset())
 
     cmds.showWindow(winName)
 
+##.................................................................##
+#######################################################################
+
+    def save_preset():
+
+        result = cmds.promptDialog(
+                    title='Preset Name',
+                    message='Preset name:',
+                    button=['OK'],
+                    defaultButton='OK',
+                    dismissString='Cancel')
+        attrString = cmds.promptDialog(query=True, text=True)
+        print (attrString)
+        if result == "OK":
+            param_dic = {}
+
+            param_list=["enableProgressiveRender","outputVarianceAOVs","AAAdaptiveThreshold","AASamplesMax","enableAdaptiveSampling","ignoreSubdivision","ignoreAtmosphere","ignoreDisplacement","motion_blur_enable","AASamples","GIDiffuseSamples","GISpecularSamples","GIDiffuseSamples","GITransmissionSamples","GISssSamples","GIDiffuseSamples","GIVolumeSamples","AASamplesMax","GIDiffuseDepth","GISpecularDepth"]
+            for param in param_list:
+                param_dic[param]=cmds.getAttr("defaultArnoldRenderOptions."+param )
+
+            param_dic["render_size"]=cmds.optionMenu("renderSize", query=True,value=True)
+            param_dic["lentil_enable"]=cmds.checkBox("lentil_enable",query=True,value=True)
+            param_dic["aiEnableDOF"]=cmds.checkBox("aiEnableDOF",query=True,value=True)
+            param_dic["AOV"]=(cmds.checkBox("ignoreAov",query=True,value=True))
+            print(param_dic)
+
+            preset_path = os.path.join(presets_folder,attrString+".txt")
+
+            with open(preset_path, "w") as f:
+                f.write(json.dumps(param_dic))
+            cmds.menuItem(parent = ( 'scenePreset'), label = attrString)
+            cmds.optionMenu("scenePreset",e=True,value=attrString)
 ###Read preset folder and return a dictionary
 def build_preset_dic():
     listPresets = os.listdir(presets_folder)
+
 
 
     for preset in listPresets:
@@ -206,7 +260,7 @@ def apply_preset(preset):
     cmds.optionMenu("renderSize", e=True, value=preset["render_size"])
     renderSizePreset(cmds.optionMenu("renderSize",query=True,value=True))
 
-    samples_list=["AASamples","GIDiffuseSamples","GISpecularSamples","GIDiffuseSamples","GITransmissionSamples","GISssSamples","GIDiffuseSamples","GIVolumeSamples","AASamplesMax"]
+    samples_list=["AASamples","GIDiffuseSamples","GISpecularSamples","GIDiffuseSamples","GITransmissionSamples","GISssSamples","GIDiffuseSamples","GIVolumeSamples","AASamplesMax","GIDiffuseDepth","GISpecularDepth"]
     for sample in samples_list:
         cmds.intSliderGrp(sample,e=True, value=preset[sample])
         updateSample(sample)
@@ -216,17 +270,19 @@ def apply_preset(preset):
     cmds.checkBox("enableAdaptiveSampling",e=True,value=preset["enableAdaptiveSampling"])
     cmds.setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling",preset["enableAdaptiveSampling"])
 
-    if preset["AOV"]:
-        aov_enabled(1)
-        cmds.checkBox("ignoreAov",e=True,value=False)
-    else:
-        aov_enabled(0)
-        cmds.checkBox("ignoreAov",e=True,value=True)
+    aov_enabled(preset["AOV"])
+    cmds.checkBox("ignoreAov",e=True,value=preset["AOV"])
+
+    cmds.checkBox("enableProgressiveRender",e=True,value=preset["enableProgressiveRender"])
+    cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",preset["enableProgressiveRender"])
+
+    cmds.checkBox("outputVarianceAOVs",e=True,value=preset["outputVarianceAOVs"])
+    cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",preset["outputVarianceAOVs"])
 
 def aov_enabled(value):
     aovList = cmds.ls(type = "aiAOV")
     for aov in aovList:
-        cmds.setAttr(aov+".enabled",value)
+        cmds.setAttr(aov+".enabled",1-value)
     #update text label enabled aov counter
     enabled_aov = []
 
@@ -280,8 +336,10 @@ def changeCamType():
     if lentil_enable:
         cmds.setAttr(cam+".ai_translator", "lentil_camera",  type="string")
     else:
-        cmds.setAttr(cam+".ai_translator", "perspective",  type="string")
-
+        try:
+            cmds.setAttr(cam+".ai_translator", "perspective",  type="string")
+        except:
+            print("fail to set perspective camera")
 def dof():
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
     dof_value = cmds.checkBox("aiEnableDOF", query = True, value =True)

@@ -14,8 +14,12 @@
 "GISssSamples":1,
 "GIDiffuseSamples":1,
 "GIVolumeSamples":1,
+"GIDiffuseDepth":2,
+"GISpecularDepth":2,
 "enableAdaptiveSampling":false,
 "AASamplesMax":15,
 "AAAdaptiveThreshold":0.015,
-"AOV":false
+"AOV":true,
+"enableProgressiveRender":true,
+"outputVarianceAOVs":false
 }

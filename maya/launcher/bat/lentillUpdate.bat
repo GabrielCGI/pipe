@@ -4,7 +4,7 @@ SET SCRIPT_MAYA=%PIPELINE_DIR%\maya\scripts
 SET NETWORK_INSTALL=R:\pipeline\networkInstall
 SET LIB_DIR=R:\lib
 
-SET PATH_TO_LENTIL=R:\pipeline\networkInstall\lentil\lentil_v2.4_20220714\lentil2.4.0-Windows-ai7.1.1.0
+SET PATH_TO_LENTIL=R:\pipeline\networkInstall\lentil\lentil2.3.0-Windows-ai7.1.1.0
 
 rem \---- IMPROVE MAYA STARTUP AND SHUTDOWN TIME
 SET MAYA_DISABLE_CIP=1
@@ -15,7 +15,7 @@ SET MAYA_SHELF_PATH=%PIPELINE_DIR_MAYA%\shelfs
 SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons\swarovky_icon;%PIPELINE_DIR_MAYA%\icons
 
 rem \---- ARNOLD SETUP
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.1.2.2_lentilv2\maya2022
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.1.2.1_lentil\maya2022
 
 rem \---- LENTILS
 

@@ -27,9 +27,15 @@ def isCam(cam):
 
 def setFocusDistance(cam):
     "Apply focus on a camera"
-
+    print("trung")
+    try:
+        print("tryin!")
+        expression = "%s.aiApertureSize= %s.focalLength/10/%s.fStop/2;"%(cam[0],cam[0],cam[0])
+        cmds.expression(s=expression)
+    except:
+        print("azzaaa")
     #Create locator for focus
-    if not cmds.objExists('focus_locator_%s'%cam[0]):
+    if not cmds.objExists('focus_locator_%s'%(cam[0])):
         focus_distance_locator = cmds.spaceLocator(n='focus_locator_%s'%cam[0])
 
         #Create distance Node
@@ -46,38 +52,28 @@ def setFocusDistance(cam):
 
         cmds.connectAttr (distanceNode+".distance", cam[0]+".aiFocusDistance", f=True)
         cmds.connectAttr (distanceNode+".distance", cam[0]+".focusDistance", f= True)
-        try:
-            cmds.connectAttr (distanceNode+".distance", cam[0]+".focusDist", f=True)
-        except:
-            print("not able to connect lentil focus distance")
 
-
-
-        #DOF viewport
-        cmds.setAttr(cam[0]+".depthOfField", 1)
-
+        cmds.connectAttr (distanceNode+".distance", cam[0]+".focusDist", f=True)
     #CONNECT FOCUS DIST ARNOLD TO LENTIL FOCUS DIST
-    try:
+
         cmds.connectAttr (cam[0]+".aiFocusDistance", cam[0]+".focusDist", f=True)
         print ("Lentil focus distance connected !")
-    except:
-            print("not able to connect lentil focus distance")
 
-    try:
-        #connect apperture size to fstop
-        expression = "%s.aiApertureSize= %s.focalLength/10/perspShape.fStop/2;"%(cam[0],cam[0])
-        print(expression)
-        cmds.expression(s=expression)
-    except:
-        print("failed to add expression on apperture")
+            #connect apperture size to fstop
 
-    try:
-        #connect apperture size to fStop (lentil)
+            #connect apperture size to fStop (lentil)
         cmds.connectAttr(cam[0]+".fStop", cam[0]+".fstop", f=True)
-        #connect focal length to focal length lentil
+            #connect focal length to focal length lentil
         cmds.connectAttr(cam[0]+".focalLength", cam[0]+".focalLengthLentil", f=True)
-    except:
-        print("failed to connect fstop or focal length to lentil Attributs")
+
+    else:
+        print("DELETE focus_locator_%s FIRST !"%(cam[0]))
+
+
+
+
+
+
 
 def focus():
     """

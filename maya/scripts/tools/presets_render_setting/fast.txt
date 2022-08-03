@@ -6,7 +6,6 @@
 "ignoreAtmosphere":true,
 "ignoreSubdivision":true,
 "render_size":"HD_1080",
-"render_size":"HD_720",
 "AASamples":5,
 "GIDiffuseSamples":1,
 "GISpecularSamples":1,
@@ -15,8 +14,12 @@
 "GISssSamples":1,
 "GIDiffuseSamples":1,
 "GIVolumeSamples":1,
+"GIDiffuseDepth":1,
+"GISpecularDepth":1,
 "enableAdaptiveSampling":0,
 "AASamplesMax":15,
 "AAAdaptiveThreshold":0.015,
-"AOV":false
+"AOV":true,
+"enableProgressiveRender":true,
+"outputVarianceAOVs":false
 }
