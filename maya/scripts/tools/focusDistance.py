@@ -27,50 +27,62 @@ def isCam(cam):
 
 def setFocusDistance(cam):
     "Apply focus on a camera"
-    print("trung")
-    try:
-        print("tryin!")
-        expression = "%s.aiApertureSize= %s.focalLength/10/%s.fStop/2;"%(cam[0],cam[0],cam[0])
-        cmds.expression(s=expression)
-    except:
-        print("azzaaa")
+
+
     #Create locator for focus
     if not cmds.objExists('focus_locator_%s'%(cam[0])):
-        focus_distance_locator = cmds.spaceLocator(n='focus_locator_%s'%cam[0])
+        focus_distance_locator_list = cmds.spaceLocator(n='focus_locator_%s'%cam[0])
+        focus_distance_locator = focus_distance_locator_list[0]
+    else:
+        focus_distance_locator='focus_locator_%s'%(cam[0])
 
         #Create distance Node
-        distanceNode = cmds.shadingNode('distanceBetween',asUtility=True)
+    distanceNode = cmds.shadingNode('distanceBetween',asUtility=True)
         #Create vectorProduct
-        vectorNode = cmds.shadingNode('vectorProduct', asUtility=True)
-        cmds.setAttr(vectorNode+".operation", 4)
+    vectorNode = cmds.shadingNode('vectorProduct', asUtility=True)
+    cmds.setAttr(vectorNode+".operation", 4)
 
         #Conect worldMatrix camera > vectorNode
-        cmds.connectAttr (cam[0]+".worldMatrix", vectorNode+".matrix", f=True)
+    cmds.connectAttr (cam[0]+".worldMatrix", vectorNode+".matrix", f=True)
         #Connect distance node
-        cmds.connectAttr (focus_distance_locator[0]+"Shape.worldPosition", distanceNode+".point1", f=True)
-        cmds.connectAttr (vectorNode+".output", distanceNode+".point2", f=True)
+    cmds.connectAttr (focus_distance_locator+"Shape.worldPosition", distanceNode+".point1", f=True)
+    cmds.connectAttr (vectorNode+".output", distanceNode+".point2", f=True)
 
-        cmds.connectAttr (distanceNode+".distance", cam[0]+".aiFocusDistance", f=True)
-        cmds.connectAttr (distanceNode+".distance", cam[0]+".focusDistance", f= True)
+    cmds.connectAttr (distanceNode+".distance", cam[0]+".aiFocusDistance", f=True)
+    cmds.connectAttr (distanceNode+".distance", cam[0]+".focusDistance", f= True)
 
-        cmds.connectAttr (distanceNode+".distance", cam[0]+".focusDist", f=True)
+    cmds.connectAttr (distanceNode+".distance", cam[0]+".focusDist", f=True)
     #CONNECT FOCUS DIST ARNOLD TO LENTIL FOCUS DIST
 
-        cmds.connectAttr (cam[0]+".aiFocusDistance", cam[0]+".focusDist", f=True)
-        print ("Lentil focus distance connected !")
+    cmds.connectAttr (cam[0]+".aiFocusDistance", cam[0]+".focusDist", f=True)
+    #cmds.setAttr(cam[0]+".depthOfField",1)
+    list = cmds.listConnections('%s.aiApertureSize'%cam[0])
+    if list == None:
+        expression = "%s.aiApertureSize= %s.focalLength/10/%s.fStop/2;"%(cam[0],cam[0],cam[0])
+        cmds.expression(s=expression)
+    else:
+        cmds.delete(list[0])
+        expression = "%s.aiApertureSize= %s.focalLength/10/%s.fStop/2;"%(cam[0],cam[0],cam[0])
+        cmds.expression(s=expression)
+        print ("New expression aiApertureSize !")
 
-            #connect apperture size to fstop
+        #connect apperture size to fstop
 
-            #connect apperture size to fStop (lentil)
+        #connect apperture size to fStop (lentil)
+    try:
         cmds.connectAttr(cam[0]+".fStop", cam[0]+".fstop", f=True)
-            #connect focal length to focal length lentil
+    except:
+        cmds.warning("Failed to connect Lentil Fstop !!!")
+        #connect focal length to focal length lentil
+
+    try:
         cmds.connectAttr(cam[0]+".focalLength", cam[0]+".focalLengthLentil", f=True)
 
-    else:
-        print("DELETE focus_locator_%s FIRST !"%(cam[0]))
+    except:
 
+        cmds.warning("Failed to connect Lentil focal Length !!!")
 
-
+    cmds.select(cam[0])
 
 
 

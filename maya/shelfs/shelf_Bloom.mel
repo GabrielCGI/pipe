@@ -204,7 +204,7 @@ global proc shelf_Bloom () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import focusDistance\nimport importlib\n\nimportlib.reload(focusDistance)\nfocusDistance.focus()" 
+        -command "import focusDistance\nimportlib.reload(focusDistance)\nfocusDistance.focus()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
