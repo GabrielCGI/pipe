@@ -39,8 +39,8 @@ def run():
 
     #increment and save
     mel.eval('incrementAndSaveScene 0;')
-    sys.stdout.flush()
-    sys.stdout.write("Run cacheMapping:\n")
+
+
 
     collectMayaScene.run()
 

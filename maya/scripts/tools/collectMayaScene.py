@@ -86,14 +86,17 @@ def run():
 
 
 
+    cmds.progressWindow(title='Stepped Progress Bar', progress=0, status='Local asset caching:', isInterruptable=False)
+    limit = len(allPath)
+    print("total path"+ str(limit))
+    step = 5
+    i = 0
     for path in allPath:
-
-
         splitPath = path.split(":")
         localPath = localCacheFolder +"/"+ splitPath[0] + splitPath[-1]
         assetFilename = os.path.basename(path)
         #logger.info("Cache on farm asset: %s"%(assetFilename))
-        print("Cache on farm asset: %s"%(assetFilename), end="")
+        print("Cache on farm asset: %s"%(assetFilename))
 
         try:
             copy = copyFromTo(path,localPath)
@@ -108,6 +111,12 @@ def run():
             counter_skip+=1
         print ("------------------------------------------------")
 
+        i += 1
+        progress = 100.0 / limit * i
+        if progress % step:
+            continue
+        cmds.progressWindow(e=1, progress=progress, status='Local asset caching')
+    cmds.progressWindow(endProgress=1)
 
     print("\n")
     print ("Done !")
