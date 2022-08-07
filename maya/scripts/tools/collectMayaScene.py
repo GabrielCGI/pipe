@@ -83,12 +83,17 @@ def run():
     counter_update=0
     counter_skip=0
     copy=""
+
+
+
     for path in allPath:
+
+
         splitPath = path.split(":")
         localPath = localCacheFolder +"/"+ splitPath[0] + splitPath[-1]
         assetFilename = os.path.basename(path)
         #logger.info("Cache on farm asset: %s"%(assetFilename))
-        sys.stdout.write("Cache on farm asset: %s\n"%(assetFilename))
+        print("Cache on farm asset: %s"%(assetFilename), end="")
 
         try:
             copy = copyFromTo(path,localPath)
@@ -109,3 +114,4 @@ def run():
     print (str(counter_new) +" new files cached")
     print (str(counter_update) +" files updated")
     print (str(counter_skip)+" files skipped (already cached)")
+print('teeeeest', end="")

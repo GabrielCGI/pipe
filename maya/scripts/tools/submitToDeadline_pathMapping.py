@@ -2,6 +2,7 @@ import importlib
 import maya.cmds as cmds
 import collectMayaScene
 import logging
+import sys
 
 importlib.reload(collectMayaScene)
 import replace_by_tx
@@ -38,6 +39,8 @@ def run():
 
     #increment and save
     mel.eval('incrementAndSaveScene 0;')
+    sys.stdout.flush()
+    sys.stdout.write("Run cacheMapping:\n")
 
     collectMayaScene.run()
 
