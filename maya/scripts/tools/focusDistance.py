@@ -28,16 +28,21 @@ def isCam(cam):
 def setFocusDistance(cam):
     "Apply focus on a camera"
 
-
+    distanceNode = cmds.shadingNode('distanceBetween',asUtility=True)
     #Create locator for focus
     if not cmds.objExists('focus_locator_%s'%(cam[0])):
         focus_distance_locator_list = cmds.spaceLocator(n='focus_locator_%s'%cam[0])
         focus_distance_locator = focus_distance_locator_list[0]
+        cmds.connectAttr (focus_distance_locator+"Shape.worldPosition", distanceNode+".point1", f=True)
+
     else:
+
         focus_distance_locator='focus_locator_%s'%(cam[0])
+        print ("LOCATOR HAS BEEN FOUND ! %s"%(focus_distance_locator))
+        cmds.connectAttr (focus_distance_locator+".worldPosition", distanceNode+".point1", f=True)
 
         #Create distance Node
-    distanceNode = cmds.shadingNode('distanceBetween',asUtility=True)
+
         #Create vectorProduct
     vectorNode = cmds.shadingNode('vectorProduct', asUtility=True)
     cmds.setAttr(vectorNode+".operation", 4)
@@ -45,7 +50,7 @@ def setFocusDistance(cam):
         #Conect worldMatrix camera > vectorNode
     cmds.connectAttr (cam[0]+".worldMatrix", vectorNode+".matrix", f=True)
         #Connect distance node
-    cmds.connectAttr (focus_distance_locator+"Shape.worldPosition", distanceNode+".point1", f=True)
+
     cmds.connectAttr (vectorNode+".output", distanceNode+".point2", f=True)
 
     cmds.connectAttr (distanceNode+".distance", cam[0]+".aiFocusDistance", f=True)
@@ -69,19 +74,20 @@ def setFocusDistance(cam):
         #connect apperture size to fstop
 
         #connect apperture size to fStop (lentil)
+
     try:
         cmds.connectAttr(cam[0]+".fStop", cam[0]+".fstop", f=True)
     except:
         cmds.warning("Failed to connect Lentil Fstop !!!")
         #connect focal length to focal length lentil
-
+    """
     try:
         cmds.connectAttr(cam[0]+".focalLength", cam[0]+".focalLengthLentil", f=True)
 
     except:
 
         cmds.warning("Failed to connect Lentil focal Length !!!")
-
+    """
     cmds.select(cam[0])
 
 

@@ -4,7 +4,13 @@ SET SCRIPT_MAYA=%PIPELINE_DIR%\maya\scripts
 SET NETWORK_INSTALL=R:\pipeline\networkInstall
 SET LIB_DIR=R:\lib
 
-SET PATH_TO_LENTIL=R:\pipeline\networkInstall\lentil\lentil_v2.4_20220714\lentil2.4.0-Windows-ai7.1.1.0
+SET PATH_TO_LENTIL=R:\pipeline\networkInstall\lentil\lentil_v2.4_hot_fix\lentil2.4.0-Windows-ai7.1.1.0
+
+
+rem \--- PATH RANCH & NETWORK
+SET DISK_I=I:
+SET DISK_R=R:
+
 
 rem \---- IMPROVE MAYA STARTUP AND SHUTDOWN TIME
 SET MAYA_DISABLE_CIP=1
@@ -15,7 +21,7 @@ SET MAYA_SHELF_PATH=%PIPELINE_DIR_MAYA%\shelfs
 SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons\guerlain_icon;%PIPELINE_DIR_MAYA%\icons
 
 rem \---- ARNOLD SETUP
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.1.2.2_lentilv2.4\maya2022
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.1.3.0_lentil_hotfix\maya2022
 
 rem \---- LENTILS
 
@@ -48,4 +54,4 @@ rem SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\mgear_4.0.3\releas
 SET CURRENT_PROJECT=guerlain_2206
 
 REM == Start maya and launch statupSettings (FPS, Unit ect...)
-start C:\"Program Files"\Autodesk\Maya2022\bin\maya.exe -file %1 -command "python(\"import startupSettings\"); python (\"startupSettings.run()\");"  %*
+start C:\"Program Files"\Autodesk\Maya2022\bin\maya.exe -file %1 -command "python(\"import startupSettings\"); python (\"startupSettings.run()\"); global proc CgAbBlastPanelOptChangeCallback(string $pass){};"  %*
