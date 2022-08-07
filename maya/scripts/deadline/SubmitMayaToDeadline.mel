@@ -429,7 +429,7 @@ global proc string GetRendermanRibDirectory( string $layer, string $cameraName )
 //Returns Rendermans Export Prefix after evaluating all tokens.
 global proc string GetRendermanRibPrefix( string $layer, string $cameraName )
 {
-	string $base_prefix = python( "dlRenderman.get_rib_prefix()" );
+	string $base_prefix = python( "dlRenderman.get_modified_rib_prefix()" );
 	string $prefixString = EvaluateRendermanTokens( $base_prefix, { "layer", $layer, "camera", $cameraName } );
 	return CheckSlashes($prefixString);
 }
@@ -707,12 +707,28 @@ global proc string GetOutputPrefix( int $replaceFrameNumber, int $newFrameNumber
 	return $outputPrefix;
 }
 
-global proc string DeadlineGetVrayOutputPrefix( int $multipleRenderableCams, string $cameraName, string $renderElement )
+// Returns if the given vray file extension represents a multichannel output file
+proc int isMultichannelExt_vray( string $ext )
 {
-	string $outputPrefix = "";
-	// Need to special case vray, because they like to do things differently.
-	global string $g_vrayImgExt[];
+	string $multichannelExts[] = {
+		"exr (multichannel)",
+		"exr (deep)",
+		"vrimg",
+		"vrst"
+	};
 
+	for( $multichannelExt in $multichannelExts )
+	{
+		if( $ext == $multichannelExt )
+			return true;
+	}
+
+	return false;
+}
+
+// Returns the extension that has been set in the Vray render settings.
+proc string extFromVraySettings()
+{
 	string $ext = "";
 	if (`optionMenuGrp -exists vrayImageFormatMenu`)
 		$ext = `optionMenuGrp -q -v vrayImageFormatMenu`;
@@ -720,16 +736,24 @@ global proc string DeadlineGetVrayOutputPrefix( int $multipleRenderableCams, str
 		$ext = `getAttr vraySettings.imageFormatStr`;
 		if ($ext == "")
 			$ext = "png";//for some reason this happens if you have not changed the format
+	return $ext;
+}
 
-	// VRay can append this to the end of the render settings display, but we don't want it in the file name.
-	int $isMultichannelExr = false;
-	string $multichannel = " (multichannel)";
-	if( endsWith( $ext, $multichannel ) )
+global proc string DeadlineGetVrayOutputPrefix( int $multipleRenderableCams, string $cameraName, string $renderElement )
+{
+
+	string $outputPrefix = "";
+	// Need to special case vray, because they like to do things differently.
+	global string $g_vrayImgExt[];
+
+	string $ext = extFromVraySettings();
+
+	int $isMultichannel = isMultichannelExt_vray($ext);
+	// there are multiple exr options that start with exr that all result with just exr as the extension
+	if (startsWith($ext, "exr"))
 	{
-		$ext = substring( $ext, 1, size( $ext ) - size( $multichannel ) );
-		$isMultichannelExr = true;
+		$ext = "exr";
 	}
-
 	float $version = GetVRayVersion();
 
 	// We need to use eval because the definition of vrayTransformFilename is different for
@@ -820,11 +844,11 @@ global proc string DeadlineGetVrayOutputPrefix( int $multipleRenderableCams, str
 			print( "Could not evaluate output path using vrayTransformFilename, please contact Deadline support and include the version of vray you are using\n" );
 	}
 
-	if( $renderElement != "" && $isMultichannelExr == 0 )
+	if( $renderElement != "" && !$isMultichannel )
 	{
 		$prefix = $prefix + (`getAttr "vraySettings.fileNameRenderElementSeparator"`) + $renderElement;
 	}
-	else if ( $renderElement == "" && $separateFolders && $separateRGBA && $isMultichannelExr == 0 )
+	else if ( $renderElement == "" && $separateFolders && $separateRGBA && !$isMultichannel )
 	{
 		$prefix = $prefix + (`getAttr "vraySettings.fileNameRenderElementSeparator"`) + "rgba";
 	}
@@ -837,7 +861,7 @@ global proc string DeadlineGetVrayOutputPrefix( int $multipleRenderableCams, str
 		{
 			// When rendering to a non-raw format, vray places a period before the padding, even though it
 			// doesn't show up in the render globals filename.
-			if( ($ext == "vrimg" && $version < 3.6) || ($isMultichannelExr && $version < 3) )
+			if( ($ext == "vrimg" && $version < 3.6) || ($isMultichannel && $version < 3) )
 				$outputPrefix = $prefix + "#." + $ext;
 			else
 				$outputPrefix = $prefix + ".#." + $ext;
@@ -2010,7 +2034,7 @@ global proc SavePersistentDeadlineOptions()
 		intSliderGrp -edit -enable (!$autoMemoryLimit) frw_memoryLimit;
 	}
 
-	if( $renderer == "redshift" || $renderer == "ifmIrayPhotoreal" || $renderer == "octaneRender"  )
+	if( $renderer == "redshift" || $renderer == "ifmIrayPhotoreal" || $renderer == "octaneRender" || $renderer == "vray"   )
 	{
 		AddLongAttribute( "deadlineGPUsPerTask" );
 		setAttr defaultRenderGlobals.deadlineGPUsPerTask `intSliderGrp -q -v frw_deadlineGPUsPerTask`;
@@ -3093,7 +3117,6 @@ proc string WriteJobFilesAndSubmit( string $renderer, int $showDialog, int $regi
 			$elements = getRendermanElements();
 		}
 
-
 		string $jobUUID = GetDeadlineUUID( 10 );
 		// Create the job info file.
 		string $submitFilename = CheckSlashes( $tempDir + "/maya_deadline_info_" + $jobUUID + ".job" );
@@ -3167,8 +3190,9 @@ proc string WriteJobFilesAndSubmit( string $renderer, int $showDialog, int $regi
 		string $megascan=getenv("megascan");
 		string $MAYA_MODULE_PATH=getenv("MAYA_MODULE_PATH");
 		string $MAYA_RENDER_DESC_PATH=getenv("MAYA_RENDER_DESC_PATH");
-		string $BIFROST_LIB_CONFIG_FILES=getenv("BIFROST_LIB_CONFIG_FILES");
+		string $ARNOLD_PLUGIN_PATH=getenv("ARNOLD_PLUGIN_PATH");
 		string $peregrinel_LICENSE=getenv("peregrinel_LICENSE");
+		string $MTOA_TEMPLATES_PATH=getenv("MTOA_TEMPLATES_PATH");
 
 
 
@@ -3176,9 +3200,9 @@ proc string WriteJobFilesAndSubmit( string $renderer, int $showDialog, int $regi
 		fprint $fileId ("EnvironmentKeyValue1=megascan="+$megascan+"\n");
 		fprint $fileId ("EnvironmentKeyValue2=MAYA_MODULE_PATH="+$MAYA_MODULE_PATH+"\n");
 		fprint $fileId ("EnvironmentKeyValue3=MAYA_RENDER_DESC_PATH="+$MAYA_RENDER_DESC_PATH+"\n");
-		fprint $fileId ("EnvironmentKeyValue4=BIFROST_LIB_CONFIG_FILES="+$BIFROST_LIB_CONFIG_FILES+"\n");
+		fprint $fileId ("EnvironmentKeyValue4=ARNOLD_PLUGIN_PATH="+$ARNOLD_PLUGIN_PATH+"\n");
 		fprint $fileId ("EnvironmentKeyValue5=peregrinel_LICENSE="+$peregrinel_LICENSE+"\n");
-
+		fprint $fileId ("EnvironmentKeyValue6=MTOA_TEMPLATES_PATH="+$MTOA_TEMPLATES_PATH+"\n");
 		if( `checkBox -q -value frw_isBlacklist` )
 		{
 			fprint $fileId ( "Blacklist=" + `textFieldGrp -q -text frw_machineList` + "\n" );
@@ -3393,7 +3417,12 @@ proc string WriteJobFilesAndSubmit( string $renderer, int $showDialog, int $regi
 		}
 		else if( $jobType == $RedshiftExportJobType )
 		{
-			fprint $fileId ( "OutputDirectory0=" + CheckSlashes( `textFieldGrp -q -text frw_projectPath` + "/redshift/" ) + "\n" );
+			string $outputDirectoryPath = GetBaseOutputDirectory( $renderer );
+			if( $outputDirectoryPath == "" )
+			{
+				$outputDirectoryPath = `textFieldGrp -q -text frw_projectPath`;
+			}
+			fprint $fileId ( "OutputDirectory0=" + CheckSlashes( $outputDirectoryPath + "/redshift/" ) + "\n" );
 		}
 
 		$frameList = FromArrayToCommaSeparatedString($frameRange);
@@ -4166,7 +4195,7 @@ proc string WriteJobFilesAndSubmit( string $renderer, int $showDialog, int $regi
 				fprint $fileId ( "MemoryLimit=" + $memoryLimit + "\n" );
 			}
 
-			if( $renderer == "redshift" || $renderer == "ifmIrayPhotoreal" || $renderer == "octaneRender" )
+			if( $renderer == "redshift" || $renderer == "ifmIrayPhotoreal" || $renderer == "octaneRender" || $renderer == "vray" )
 			{
 				int $deadlineGPUsPerTask = `intSliderGrp -q -v frw_deadlineGPUsPerTask`;
 				fprint $fileId ( "GPUsPerTask=" + $deadlineGPUsPerTask + "\n" );
@@ -4215,6 +4244,8 @@ proc string WriteJobFilesAndSubmit( string $renderer, int $showDialog, int $regi
 					int $vrayAutoMemoryBuffer = `intSliderGrp -q -v frw_vrayAutoMemoryBuffer`;
 					fprint $fileId ( "VRayAutoMemoryBuffer=" + $vrayAutoMemoryBuffer + "\n" );
 				}
+				fprint $fileId ( "SelectGPUDevices=" + `textFieldGrp -q -text frw_deadlineGPUsSelectDevices` + "\n" );
+				fprint $fileId ( "GPUsPerTask=" + `intSliderGrp -q -v frw_deadlineGPUsPerTask` + "\n" );
 			}
 
 			if( $renderer == "maxwell" )
@@ -4331,8 +4362,14 @@ proc string WriteJobFilesAndSubmit( string $renderer, int $showDialog, int $regi
 		}
 
 		int $OCIOEnabled = 0;
+		string $OCIOConfigFile = "";
+		string $PolicyFile = "";
 		catchQuiet( $OCIOEnabled = `colorManagementPrefs -q -cmConfigFileEnabled` );
+		catchQuiet( $OCIOConfigFile = `colorManagementPrefs -q -configFilePath ` );
+		catchQuiet( $PolicyFile = `colorManagementPrefs -q -policyFileName` );
 		fprint $fileId ( "EnableOpenColorIO=" + $OCIOEnabled + "\n" );
+		fprint $fileId ( "OCIOConfigFile=" + $OCIOConfigFile + "\n" );
+		fprint $fileId ( "OCIOPolicyFile=" + $PolicyFile + "\n" );
 
 		fclose $fileId;
 
@@ -5134,101 +5171,93 @@ global proc int[] removeDuplicateIntegers(int $array[])
 	return $newarray;
 }
 
+// Retrieves the name of a vray Render element as it will show up in the output file.
+proc string getNamefromVrayRenderElement( string $renderElement )
+{
+	//ExtraTexElement and Material Select elementstypes are handled differently since their name includes a linked objects name
+	string $reType = `getAttr ($renderElement+".vrayClassType")`;
+
+	string $reNameAttrs[] = `listAttr -st "vray_name_*" $renderElement`;
+
+	$reName = "";
+	if( $reType == "ExtraTexElement" || $reType == "MaterialSelectElement" )
+	{
+		//If the render element has an explicit name set use that name
+		string $reExplicitNameAttrs[]  = `listAttr -st "vray_explicit_name_*" $renderElement`;
+		$reName =`getAttr ($renderElement+"."+$reExplicitNameAttrs[0])`;
+		if( $reName != "" )
+			return $reName;
+
+		//Otherwise get the name from the node
+		$reName = `getAttr ($renderElement+"."+$reNameAttrs[0])`;
+
+		string $linkAttr = "";
+		//if the node has a connected texture/material append it's name to
+		if( $reType == "ExtraTexElement" )
+			$linkAttr = "vray_texture_extratex";
+		else if ( $reType == "MaterialSelectElement" )
+			$linkAttr = "vray_mtl_mtlselect";
+
+		string $connections[] = `listConnections( $renderElement + "." + $linkAttr )`;
+		if( size($connections) > 0 )
+		{
+			if( $reName != "" )
+				$reName += "_";
+			$reName += $connections[0];
+		}
+	}
+	else
+	{
+		//Added in Vray 5
+		if( `attributeExists "relements_useNodeName" "vraySettings"` && `getAttr "vraySettings.relements_useNodeName"` )
+			return $renderElement;
+
+		if( `size($reNameAttrs)` == 0 )
+			$reNameAttrs = `listAttr -st "vray_filename_*" $renderElement`;
+		$reName = `getAttr ($renderElement+"."+$reNameAttrs[0])`;
+
+	}
+
+	return $reName;
+}
+
+//Returns a list of all Vray Render element names as they show up in the output filenames
 global proc string[] getVRayElementNames()
 {
 	string $elementNames[] = {""};
 
-	int $isMultichannelExr = false;
-	string $multichannel = " (multichannel)";
-	string $ext = "";
+	// If the output is multichannel then we can ignore all render element names
+	string $ext = extFromVraySettings();
+	if( isMultichannelExt_vray($ext) )
+		return $elementNames;
+
+	//Render elements can be disabled as a whole or individually
+	int $enableAll = `getAttr "vraySettings.relements_enableall"`;
+	if( !$enableAll )
+		return $elementNames;
 
 	string $REs[] = `ls -type VRayRenderElement -type VRayRenderElementSet`;
-	if (`optionMenuGrp -exists vrayImageFormatMenu`)
-		$ext = `optionMenuGrp -q -v vrayImageFormatMenu`;
-	else
-		$ext = `getAttr vraySettings.imageFormatStr`;
-		if ($ext == "")
-			$ext = "png";//for some reason this happens if you have not changed the format
-
-	if( endsWith( $ext, $multichannel ) )
-	{
-		$ext = substring( $ext, 1, size( $ext ) - size( $multichannel ) );
-		$isMultichannelExr = true;
-	}
-	int $enableAll = `getAttr "vraySettings.relements_enableall"`;
 	int $useReferenced = `getAttr "vraySettings.relements_usereferenced"`;
 
-	if( !$isMultichannelExr && $enableAll )
+	for($RE in $REs)
 	{
-		for($RE in $REs)
-		{
-			int $enabled = `getAttr ($RE+".enabled")`;
-			int $isReferenced = `referenceQuery -isNodeReferenced $RE`;
+		int $enabled = `getAttr ($RE+".enabled")`;
+		if(!$enabled)
+			continue;
 
-			if($isReferenced == 1 && $useReferenced == 0)
-				continue;
+		//Vray only uses Render elements from referenced scenes if you specifically tell it to
+		int $isReferenced = `referenceQuery -isNodeReferenced $RE`;
+		if( $isReferenced && !$useReferenced )
+			continue;
 
-			if($enabled == 1)
-			{
-				string $reType = `getAttr ($RE+".vrayClassType")`;
+		$REName = getNamefromVrayRenderElement( $RE );
+		$REName = substituteAllString($REName, " ", "_" );
+		stringArrayInsertAtIndex( size( $elementNames ), $elementNames, $REName );
+	}
 
-				string $REName = "";
-				if( $reType == "ExtraTexElement" || $reType == "MaterialSelectElement" )
-				{
-					string $RENameFunction[]  = `listAttr -st "vray_explicit_name_*" $RE`;
-					$REName = `getAttr ($RE+"."+$RENameFunction[0])`;
-					if( $REName == "" )
-					{
-						$RENameFunction = `listAttr -st "vray_name_*" $RE`;
-
-						$REName = `getAttr ($RE+"."+$RENameFunction[0])`;
-
-						if( $reType == "ExtraTexElement" )
-						{
-							string $textures[] = `listConnections( $RE+ ".vray_texture_extratex")`;
-							if( size($textures) > 0 )
-							{
-								if( $REName != "" )
-								{
-									$REName+= "_";
-								}
-								$REName+=  $textures[0];
-							}
-						}
-						else if ( $reType == "MaterialSelectElement" )
-						{
-							string $materials[] = `listConnections( $RE+ ".vray_mtl_mtlselect")`;
-							if( size($materials) > 0 )
-							{
-								if( $REName != "" )
-								{
-									$REName+= "_";
-								}
-								$REName+= $materials[0];
-							}
-						}
-					}
-				}
-				else
-				{
-					string $RENameFunction[]  = `listAttr -st "vray_name_*" $RE`;
-					if( `size($RENameFunction)` == 0 )
-					{
-						$RENameFunction = `listAttr -st "vray_filename_*" $RE`;
-					}
-					$REName = `getAttr ($RE+"."+$RENameFunction[0])`;
-				}
-
-				$REName = substituteAllString($REName, " ", "_" );
-				stringArrayInsertAtIndex( size( $elementNames ), $elementNames, $REName );
-			}
-		}
-
-		int $separateAlpha = `getAttr "vraySettings.separateAlpha"`;
-		if( $separateAlpha == 1 )
-		{
-			stringArrayInsertAtIndex( size( $elementNames ), $elementNames, "Alpha" );
-		}
+	if( `getAttr "vraySettings.separateAlpha"` )
+	{
+		stringArrayInsertAtIndex( size( $elementNames ), $elementNames, "Alpha" );
 	}
 
 	return $elementNames;
@@ -5380,7 +5409,7 @@ global proc string[] getArnoldElementNames()
 		stringArrayInsertAtIndex(size($elementNames), $elementNames,`getAttr ($aovName+".name")`);
 	}
 
-	return $elementNames;
+	return stringArrayRemoveDuplicates($elementNames);
 }
 
 global proc string[] getArnoldElementDrivers()
@@ -8200,6 +8229,7 @@ proc SetupRenderManJob( string $jobId, string $renderLayer, string $cameraName )
 	string $inputPath = "";
 
 	string $renderer = GetCurrentRenderer();
+	string $framePaddingVersion = "above22";
 	if( $renderer == "renderman22" )
 	{
 		$inputPath = CheckSlashes( GetRendermanRibDirectory( $renderLayer, $cameraName ) + "/" + GetRendermanRibPrefix( $renderLayer, $cameraName ) );
@@ -8211,6 +8241,7 @@ proc SetupRenderManJob( string $jobId, string $renderLayer, string $cameraName )
 			$inputPath = CheckSlashes( $projectPath + "/renderman/" + GetStrippedSceneFileName() + "/rib/0000/0000.rib\n" );
 		else
 			$inputPath = CheckSlashes( $projectPath + "/renderman/" + GetStrippedSceneFileName() + "/rib/0000/0000_" + $renderLayer + ".rib\n" );
+		$framePaddingVersion = "pre22";
 	}
 	string $tempDir = `getAttr defaultRenderGlobals.DeadlineUserHomeDir` + "/temp";
 
@@ -8282,6 +8313,7 @@ proc SetupRenderManJob( string $jobId, string $renderLayer, string $cameraName )
 		print( "Error in Deadline Submission Script: could not create " + $jobFilename + "\n" );
 
 	fprint $fileId ( "RibFile=" + $inputPath + "\n" );
+	fprint $fileId ( "FramePadding=" + $framePaddingVersion + "\n" );
 	fprint $fileId ( "WorkingDirectory=" + CheckSlashes( $projectPath ) + "\n" );
 	fprint $fileId ( "Threads=" + `intSliderGrp -q -v frw_rendermanThreads` + "\n" );
 	fprint $fileId ( "CommandLineOptions=" + `textFieldGrp -q -text frw_rendermanArgs` + "\n" );
@@ -8389,8 +8421,18 @@ proc SetupRedshiftJob( string $jobId, string $renderLayer )
 	if( !$ignoreOutFormatControl && `getAttr "defaultRenderGlobals.outFormatControl"` == 0 )
 		$redShiftFileName += ".rs";
 
+	string $outputPath = $projectPath;
+	if(size($outputFilePath))
+	{
+		$outputPath = $outputFilePath;
+	}
 
-	string $inputPath = CheckSlashes( $projectPath + "/redshift/" );
+	string $inputBaseDirectory = $projectPath;
+	if (!$exportLocal && size($outputFilePath))
+	{
+		$inputBaseDirectory = $outputFilePath;
+	}
+	string $inputPath = CheckSlashes( $inputBaseDirectory + "/redshift/" );
 	if(size($renderLayer))
 	{
 		$inputPath += $renderLayer + "/";
@@ -8408,7 +8450,7 @@ proc SetupRedshiftJob( string $jobId, string $renderLayer )
 
 	if( size($renderLayer) )
 	{
-		$jobName += " - " + $renderLayer;
+		$jobName += " - " + GetRenderLayerDisplayName( $renderLayer );
 	}
 
 	fprint $fileId ( "Plugin=Redshift\n" );
@@ -8433,8 +8475,8 @@ proc SetupRedshiftJob( string $jobId, string $renderLayer )
 	fprint $fileId ( "MachineLimit=" + `intSliderGrp -q -v frw_RedshiftLimitCount` + "\n" );
 	fprint $fileId ( "LimitGroups=" + `textFieldGrp -q -text frw_RedshiftLimitGroups` + "\n" );
 
-	$outputPrefix = GetOutputPrefix( 0, 0, $renderLayer, "", "" );
-	fprint $fileId ( "OutputFilename0=" + CheckSlashes( $outputFilePath + "/" + $outputPrefix )  + "\n" );
+	$outputPrefix = GetOutputPrefix( 0, 0, GetRenderLayerDisplayName( $renderLayer ), "", "" );
+	fprint $fileId ( "OutputFilename0=" + CheckSlashes( $outputPath + "/" + $outputPrefix )  + "\n" );
 
 	fprint $fileId ( "JobDependencies=" + $jobId + "\n" );
 	fprint $fileId ( "IsFrameDependent=" + `checkBox -q -v frw_redshiftFrameDependent` + "\n" ); // this can be enabled because redshift export jobs can be done across multiple machines
@@ -8463,6 +8505,12 @@ proc SetupRedshiftJob( string $jobId, string $renderLayer )
 
 	fprint $fileId ( "SceneFile=" + $inputPath + "\n" );
 	fprint $fileId ( "WorkingDirectory=" + CheckSlashes( $projectPath ) + "\n" );
+	string $imageOutputDirectory = $outputPath;
+	if( size($renderLayer) )
+	{
+		$imageOutputDirectory += "/" + GetRenderLayerDisplayName( $renderLayer );
+	}
+	fprint $fileId ( "ImageOutputDirectory=" + CheckSlashes( $imageOutputDirectory ) + "\n" );
 	fprint $fileId ( "Threads=" + `intSliderGrp -q -v frw_redshiftThreads` + "\n" );
 	fprint $fileId ( "CommandLineOptions=" + `textFieldGrp -q -text frw_redshiftArgs` + "\n" );
 	fprint $fileId ( "ReplaceFrameNumber=" + IsAnimatedOn() + "\n" );
@@ -9286,7 +9334,8 @@ global proc OpenJigsawWindow()
 	string $path = `getAttr defaultRenderGlobals.DeadlineMayaRepoPath` + "/MayaJigsaw.py";
 	if(catchQuiet(`python("jigsawThread.isAlive()")`))
 	{
-		python("execfile(\""+$path+"\")");
+		// py2/3 compatible execfile
+		python("with open('" + $path + "') as f: exec(compile(f.read(), '" + $path + "', 'exec'), globals(), locals())");
 	}
 	else
 	{
@@ -9297,7 +9346,8 @@ global proc OpenJigsawWindow()
 		}
 		else
 		{
-			python("execfile(\""+$path+"\")");
+			// py2/3 compatible execfile
+			python("with open('" + $path + "') as f: exec(compile(f.read(), '" + $path + "', 'exec'), globals(), locals())");
 		}
 	}
 }
@@ -9859,7 +9909,7 @@ global proc SubmitJobToDeadline()
 						$DependenciesGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Dependencies" -buttonLabel "..." -text $dependencies -changeCommand SavePersistentDeadlineOptions -annotation "The jobs that this job is dependent on." frw_dependencies`;
 						textFieldButtonGrp -e -bc ("dlSetDependencies( \""+$DependenciesGrp+"\")") $DependenciesGrp;
 
-						$MachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text $machineList -changeCommand SavePersistentDeadlineOptions -annotation "The whitelist or blacklist for the job." frw_machineList`;
+						$MachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text $machineList -changeCommand SavePersistentDeadlineOptions -annotation "The allow list or deny list for the job." frw_machineList`;
 						textFieldButtonGrp -e -bc ("dlSetMachineList( \""+$MachineListGrp+"\")") $MachineListGrp;
 
 						rowLayout -numberOfColumns 2 -cw2 (160 + $labelWidth) 160 -ct2 "left" "left";
@@ -9869,7 +9919,7 @@ global proc SubmitJobToDeadline()
 							menuItem -label "Delete";
 							optionMenuGrp -e -select (1) $onCompleteBox;
 
-							checkBox -label "Machine List is a Blacklist" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a blacklist. Otherwise, it is a whitelist." frw_isBlacklist;
+							checkBox -label "Machine List Is A Deny List" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a deny list. Otherwise, it is an allow list." frw_isBlacklist;
 						setParent ..;
 
 						rowLayout -numberOfColumns 3 -cw3 $labelWidth 158 160 -ct3 "left" "left" "left";
@@ -10179,7 +10229,7 @@ global proc SubmitJobToDeadline()
 								$MentalLimitGroupGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Limit Groups" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The limit groups that this job requires." frw_MentalLimitGroups`;
 								textFieldButtonGrp -e -bc ("dlSetLimitGroups( \""+$MentalLimitGroupGrp+"\"  )") $MentalLimitGroupGrp;
 
-								$MentalMachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The whitelist or blacklist for the job." frw_MentalMachineList`;
+								$MentalMachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The allow list or deny list for the job." frw_MentalMachineList`;
 								textFieldButtonGrp -e -bc ("dlSetMachineList( \""+$MentalMachineListGrp+"\")") $MentalMachineListGrp;
 
 								rowLayout -numberOfColumns 2 -cw2 (160 + $labelWidth) 160 -ct2 "left" "left";
@@ -10189,7 +10239,7 @@ global proc SubmitJobToDeadline()
 									menuItem -label "Delete";
 									optionMenuGrp -e -select (1) $MentalOnCompleteBox;
 
-									checkBox -label "Machine List is a Blacklist" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a blacklist. Otherwise, it is a whitelist." frw_MentalIsBlacklist;
+									checkBox -label "Machine List Is A Deny List" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a deny list. Otherwise, it is an allow list." frw_MentalIsBlacklist;
 								setParent ..;
 
 								intSliderGrp -label "Threads" -cal 1 "left" -cw 1 $labelWidth -field true -minValue 0 -maxValue 256 -v $mentalRayThreads -changeCommand SavePersistentDeadlineOptions -annotation  "The number of threads to use during rendering (specify 0 to use all processors available)" frw_mentalRayThreads;
@@ -10276,7 +10326,7 @@ global proc SubmitJobToDeadline()
 								$VrayLimitGroupGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Limit Groups" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The limit groups that this job requires." frw_VrayLimitGroups`;
 								textFieldButtonGrp -e -bc ("dlSetLimitGroups( \""+$VrayLimitGroupGrp+"\"  )") $VrayLimitGroupGrp;
 
-								$VrayMachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The whitelist or blacklist for the job." frw_VrayMachineList`;
+								$VrayMachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The allow list or deny list for the job." frw_VrayMachineList`;
 								textFieldButtonGrp -e -bc ("dlSetMachineList( \""+$VrayMachineListGrp+"\")") $VrayMachineListGrp;
 
 								rowLayout -numberOfColumns 2 -cw2 (160 + $labelWidth) 160 -ct2 "left" "left";
@@ -10286,7 +10336,7 @@ global proc SubmitJobToDeadline()
 									menuItem -label "Delete";
 									optionMenuGrp -e -select (1) $VrayOnCompleteBox;
 
-									checkBox -label "Machine List is a Blacklist" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a blacklist. Otherwise, it is a whitelist." frw_VrayIsBlacklist;
+									checkBox -label "Machine List Is A Deny List" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a deny list. Otherwise, it is an allow list." frw_VrayIsBlacklist;
 								setParent ..;
 
 								intSliderGrp -label "Threads" -cal 1 "left" -cw 1 $labelWidth -field true -minValue 0 -maxValue 256 -v $vrayThreads -changeCommand SavePersistentDeadlineOptions -annotation  "The number of threads to use during rendering (specify 0 to use all processors available)" frw_vrayThreads;
@@ -10294,7 +10344,7 @@ global proc SubmitJobToDeadline()
 							setParent ..;
 						setParent ..;
 
-						$MayaRenderOptionsGPURollout = `frameLayout -label "GPU Affinity Overrides" -labelVisible true -borderVisible false -collapsable true -visible ($renderer == "redshift" || $renderer == "ifmIrayPhotoreal" || $renderer == "OctaneRender" )`;
+						$MayaRenderOptionsGPURollout = `frameLayout -label "GPU Affinity Overrides" -labelVisible true -borderVisible false -collapsable true -visible ($renderer == "redshift" || $renderer == "ifmIrayPhotoreal" || $renderer == "OctaneRender" || $renderer == "vray" )`;
 							columnLayout -adj true -columnAttach "both" 4 -rowSpacing 4;
 								intSliderGrp -enable (strcmp($deadlineGPUsSelectDevices, "") == 0) -label "GPUs Per Task" -cal 1 "left" -cw 1 $labelWidth -field true -minValue 0 -maxValue 16 -v $deadlineGPUsPerTask -changeCommand SavePersistentDeadlineOptions -annotation  "The number of GPUs to use per task. If set to 0, the default number of GPUs will be used." frw_deadlineGPUsPerTask;
 
@@ -10378,7 +10428,7 @@ global proc SubmitJobToDeadline()
 								$RendermanLimitGroupGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Limit Groups" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The limit groups that this job requires." frw_RendermanLimitGroups`;
 								textFieldButtonGrp -e -bc ("dlSetLimitGroups( \""+$RendermanLimitGroupGrp+"\"  )") $RendermanLimitGroupGrp;
 
-								$RendermanMachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The whitelist or blacklist for the job." frw_RendermanMachineList`;
+								$RendermanMachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The allow list or deny list for the job." frw_RendermanMachineList`;
 								textFieldButtonGrp -e -bc ("dlSetMachineList( \""+$RendermanMachineListGrp+"\")") $RendermanMachineListGrp;
 
 								rowLayout -numberOfColumns 2 -cw2 (160 + $labelWidth) 160 -ct2 "left" "left";
@@ -10388,7 +10438,7 @@ global proc SubmitJobToDeadline()
 									menuItem -label "Delete";
 									optionMenuGrp -e -select (1) $RendermanOnCompleteBox;
 
-									checkBox -label "Machine List is a Blacklist" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a blacklist. Otherwise, it is a whitelist." frw_RendermanIsBlacklist;
+									checkBox -label "Machine List Is A Deny List" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a deny list. Otherwise, it is an allow list." frw_RendermanIsBlacklist;
 								setParent ..;
 
 
@@ -10472,7 +10522,7 @@ global proc SubmitJobToDeadline()
 								$ArnoldLimitGroupGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Limit Groups" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The limit groups that this job requires." frw_ArnoldLimitGroups`;
 								textFieldButtonGrp -e -bc ("dlSetLimitGroups( \""+$ArnoldLimitGroupGrp+"\"  )") $ArnoldLimitGroupGrp;
 
-								$ArnoldMachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The whitelist or blacklist for the job." frw_ArnoldMachineList`;
+								$ArnoldMachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The allow list or deny list for the job." frw_ArnoldMachineList`;
 								textFieldButtonGrp -e -bc ("dlSetMachineList( \""+$ArnoldMachineListGrp+"\")") $ArnoldMachineListGrp;
 
 								rowLayout -numberOfColumns 2 -cw2 (160 + $labelWidth) 160 -ct2 "left" "left";
@@ -10482,7 +10532,7 @@ global proc SubmitJobToDeadline()
 									menuItem -label "Delete";
 									optionMenuGrp -e -select (1) $ArnoldOnCompleteBox;
 
-									checkBox -label "Machine List is a Blacklist" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a blacklist. Otherwise, it is a whitelist." frw_ArnoldIsBlacklist;
+									checkBox -label "Machine List Is A Deny List" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a deny list. Otherwise, it is an allow list." frw_ArnoldIsBlacklist;
 								setParent ..;
 
 								intSliderGrp -label "Threads" -cal 1 "left" -cw 1 $labelWidth -field true -minValue 0 -maxValue 256 -v $arnoldThreads -changeCommand SavePersistentDeadlineOptions -annotation  "The number of threads to use during rendering (specify 0 to use all processors available)" frw_arnoldThreads;
@@ -10548,7 +10598,7 @@ global proc SubmitJobToDeadline()
 								$MaxwellLimitGroupGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Limit Groups" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The limit groups that this job requires." frw_MaxwellLimitGroups`;
 								textFieldButtonGrp -e -bc ("dlSetLimitGroups( \""+$MaxwellLimitGroupGrp+"\"  )") $MaxwellLimitGroupGrp;
 
-								$MaxwellMachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The whitelist or blacklist for the job." frw_MaxwellMachineList`;
+								$MaxwellMachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The allow list or deny list for the job." frw_MaxwellMachineList`;
 								textFieldButtonGrp -e -bc ("dlSetMachineList( \""+$MaxwellMachineListGrp+"\")") $MaxwellMachineListGrp;
 
 								rowLayout -numberOfColumns 2 -cw2 (160 + $labelWidth) 160 -ct2 "left" "left";
@@ -10558,7 +10608,7 @@ global proc SubmitJobToDeadline()
 									menuItem -label "Delete";
 									optionMenuGrp -e -select (1) $MaxwellOnCompleteBox;
 
-									checkBox -label "Machine List is a Blacklist" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a blacklist. Otherwise, it is a whitelist." frw_MaxwellIsBlacklist;
+									checkBox -label "Machine List Is A Deny List" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a deny list. Otherwise, it is an allow list." frw_MaxwellIsBlacklist;
 								setParent ..;
 
 								intSliderGrp -label "Threads" -cal 1 "left" -cw 1 $labelWidth -field true -minValue 0 -maxValue 256 -v $maxwellThreads -changeCommand SavePersistentDeadlineOptions -annotation  "The number of threads to use during rendering (specify 0 to use all processors available)" frw_maxwellThreads;
@@ -10837,7 +10887,7 @@ global proc SubmitJobToDeadline()
 								$RedshiftLimitGroupGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Limit Groups" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The limit groups that this job requires." frw_RedshiftLimitGroups`;
 								textFieldButtonGrp -e -bc ("dlSetLimitGroups( \""+$RedshiftLimitGroupGrp+"\"  )") $RedshiftLimitGroupGrp;
 
-								$RedshiftMachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The whitelist or blacklist for the job." frw_RedshiftMachineList`;
+								$RedshiftMachineListGrp = `textFieldButtonGrp -cal 1 "left" -cw 1 $labelWidth -cw 2 300 -label "Machine List" -buttonLabel "..." -text "" -changeCommand SavePersistentDeadlineOptions -annotation "The allow list or deny list for the job." frw_RedshiftMachineList`;
 								textFieldButtonGrp -e -bc ("dlSetMachineList( \""+$RedshiftMachineListGrp+"\")") $RedshiftMachineListGrp;
 
 								rowLayout -numberOfColumns 2 -cw2 (160 + $labelWidth) 160 -ct2 "left" "left";
@@ -10847,7 +10897,7 @@ global proc SubmitJobToDeadline()
 									menuItem -label "Delete";
 									optionMenuGrp -e -select (1) $RedshiftOnCompleteBox;
 
-									checkBox -label "Machine List is a Blacklist" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a blacklist. Otherwise, it is a whitelist." frw_RedshiftIsBlacklist;
+									checkBox -label "Machine List Is A Deny List" -v $isBlacklist -changeCommand SavePersistentDeadlineOptions -annotation "If checked, the machine list will be a deny list. Otherwise, it is an allow list." frw_RedshiftIsBlacklist;
 								setParent ..;
 
 								intSliderGrp -label "Threads" -cal 1 "left" -cw 1 $labelWidth -field true -minValue 0 -maxValue 256 -v $redshiftThreads -changeCommand SavePersistentDeadlineOptions -annotation  "The number of threads to use during rendering (specify 0 to use all processors available)" frw_redshiftThreads;
