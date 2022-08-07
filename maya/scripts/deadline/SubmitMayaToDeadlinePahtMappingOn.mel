@@ -8962,6 +8962,9 @@ global proc SetupSubmission()
 	{
 		print( "Maya scene has been modified, saving file\n" );
 		file -save;
+		python("import collectMayaScene");
+		python("collectMayaScene.run()");
+
 	}
 	else
 		print( "Maya scene has not been modified, skipping save\n" );

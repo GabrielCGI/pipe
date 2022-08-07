@@ -53,7 +53,6 @@ def copyFromTo (source, to):
     elif(os.stat(source).st_mtime != os.stat(to).st_mtime):
         time_dif= str(os.stat(source).st_mtime - os.stat(to).st_mtime)
         try:
-            counter_update = counter_update+1
             shutil.copy2(source, to)
             kind="update"
             print ("Updating: %s ---> %s (time dif= %s seocnde)"%(source,to,time_dif))
@@ -123,4 +122,13 @@ def run():
     print (str(counter_new) +" new files cached")
     print (str(counter_update) +" files updated")
     print (str(counter_skip)+" files skipped (already cached)")
-print('teeeeest', end="")
+
+def copySceneFile():
+    path = cmds.file(q=True, sn=True)
+    splitPath = path.split(":")
+    localPath = localCacheFolder +"/"+ splitPath[0] + splitPath[-1]
+
+    try:
+        copy = copyFromTo(path,localPath)
+    except Exception as e:
+        print("Oops!", e.__class__, "occurred.")
