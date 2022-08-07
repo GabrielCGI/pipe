@@ -2,6 +2,9 @@ import shutil
 import os
 import time
 import maya.cmds as cmds
+import logging
+import sys
+logger = logging.getLogger("CollectFiles")
 #Init variable
 localCacheFolder = "I:/guerlain_cache"
 networkPath = "I:/"
@@ -83,8 +86,10 @@ def run():
     for path in allPath:
         splitPath = path.split(":")
         localPath = localCacheFolder +"/"+ splitPath[0] + splitPath[-1]
+        assetFilename = os.path.basename(path)
+        #logger.info("Cache on farm asset: %s"%(assetFilename))
+        sys.stdout.write("Cache on farm asset: %s\n"%(assetFilename))
 
-        print("Process started on:"+os.path.basename(path))
         try:
             copy = copyFromTo(path,localPath)
         except Exception as e:
