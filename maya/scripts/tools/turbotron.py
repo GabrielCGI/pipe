@@ -36,6 +36,14 @@ def createGUI():
     cmds.optionMenu("renderCamMenu", label='Renderable Camera')
 
     renderableCameras= getRenderableCameras()
+    cam_number =len(renderableCameras)
+    if cam_number == 0:
+        cmds.warning("There is no renderable camera set in render settings. ")
+
+    if cam_number > 1:
+        too_many_cam = cam_number-1
+
+        cmds.confirmDialog( title='Too many cam!', message='Did you know you have %s camera set a renderable?\nThat is %s too many !!!\n '%(len(renderableCameras),too_many_cam), button=['ok...'], defaultButton='Yes', cancelButton='No', dismissString='No' )
     for cam in renderableCameras:
         cmds.menuItem(label=cam)
     # Check camera type (lentil ou perspective)
@@ -55,9 +63,16 @@ def createGUI():
     # -- DOF / MB / LENTIL
     cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
     dof_state= cmds.getAttr(renderableCameras[0]+".enableDof")
-    cmds.checkBox("aiEnableDOF", label="Enable Depth of Field", value=dof_state, changeCommand=lambda x:dof())
-    cmds.checkBox("motion_blur_enable", label="Enable Motion Blur", value=cmds.getAttr("defaultArnoldRenderOptions.motion_blur_enable"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.motion_blur_enable",cmds.checkBox("motion_blur_enable", query=True, value=True)))
-    cmds.checkBox("lentil_enable", label="Enable Lentil", value=lentil_enable, changeCommand=lambda x:changeCamType())
+    cmds.checkBox("aiEnableDOF", label="Depth of Field", value=dof_state, changeCommand=lambda x:dof())
+    cmds.checkBox("motion_blur_enable", label="Motion Blur", value=cmds.getAttr("defaultArnoldRenderOptions.motion_blur_enable"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.motion_blur_enable",cmds.checkBox("motion_blur_enable", query=True, value=True)))
+
+    cmds.checkBox("lentil_enable", label="Lentil", value=lentil_enable, changeCommand=lambda x:changeCamType())
+
+    cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
+    cmds.rowColumnLayout( numberOfColumns = 2)
+    cmds.text("Lentil mult ")
+    cmds.intField("bidirSampleMult",value=cmds.getAttr(cam+".bidirSampleMult"), changeCommand=lambda x:cmds.setAttr(cam+".bidirSampleMult",cmds.intField("bidirSampleMult",query=True,value=True)))
+    cmds.setParent("..")
     cmds.setParent("..")
     cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
     # -- Ignore Overriedes
@@ -124,6 +139,7 @@ def createGUI():
     #CAMERA AA
     cmds.checkBox("enableProgressiveRender", label="Enable Progressive Render", value=cmds.getAttr("defaultArnoldRenderOptions.enableProgressiveRender"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",cmds.checkBox("enableProgressiveRender",query=True,value=True)))
     samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"AASamples")
+
     cmds.intSliderGrp( "AASamples", field=True, label="Camera (AA)", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("AASamples") )
 
     #Diffuse
@@ -343,12 +359,17 @@ def changeCamType():
         #LENTIL ON
         cmds.setAttr(cam+".ai_translator", "lentil_camera",  type="string")
 
+
+
     #LENTIL OFF
     else:
-        try:
-            cmds.setAttr(cam+".ai_translator", "perspective",  type="string")
-        except:
-            print("fail to set perspective camera")
+        #set all cam to prespective (otherwise lentil is still there and prevent progressive rendering)
+        allcam = cmds.ls(type="camera")
+        for c in allcam:
+            try:
+                cmds.setAttr(c+".ai_translator", "perspective",  type="string")
+            except:
+                print("Camera already set to prespective: %s" %c)
         imagerLentilList=cmds.ls( type="aiImagerLentil" )
         #disconnet Imager
         for imager in imagerLentilList:
@@ -357,7 +378,7 @@ def changeCamType():
             except Exception as e:
                 print ("Imager not connected: " + imager)
                 #print("Oops!", e.__class__, "occurred.")
-
+    cmds.select(cam)
 
 def dof():
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
