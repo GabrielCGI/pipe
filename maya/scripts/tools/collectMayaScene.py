@@ -36,7 +36,12 @@ def listAllAssPath():
 
 def copyFromTo (source, to):
     size_source= os.path.getsize(source)
-    size_dest = os.path.getsize(to)
+    size_dest=0
+    #need to check scene exist before getting size
+    try:
+        size_dest = os.path.getsize(to)
+    except:
+        pass
     kind=""
     os.makedirs(os.path.dirname(to),exist_ok=True)
 
@@ -47,6 +52,7 @@ def copyFromTo (source, to):
             kind="new"
             print ("New file cached:" + source + " ---> " + to+"\n")
         except Exception as e:
+
             cmds.warning("Failed to copy a new file: %s to %s"%(source,to))
             print("Oops!", e.__class__, "occurred.")
 
@@ -63,6 +69,7 @@ def copyFromTo (source, to):
         except Exception as e:
             cmds.warning("Failed to updated %s to %s (Time difference = %s secondes)"%(source,to,time_dif))
             print("Oops!", e.__class__, "occurred.")
+            
     #CHECK 3 !
     else:
         kind="skipped"
@@ -104,6 +111,8 @@ def run():
         try:
             copy = copyFromTo(path,localPath)
         except Exception as e:
+            print (path)
+            print (localPath)
             print("FAILURE!")
             print("Oops!", e.__class__, "occurred.")
         if copy == "update":
