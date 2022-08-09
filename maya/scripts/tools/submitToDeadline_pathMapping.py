@@ -30,17 +30,30 @@ def replace_abc_pipeline_script_node():
     print (str(counter_udpate) +" abc pipeline node modified !")
 
 def run():
+    msg="Send To deadline ?"
+    confirm = cmds.confirmDialog( title='Confirm',
+                                    message=msg,
+                                    button=['Continue','Stop'], defaultButton='Continue', cancelButton='Stop', dismissString='Stop' )
+    if confirm == "Stop":
+        msg = "Abort by user."
 
+        sys.exit(msg)
     debug_reed.run()
     replace_by_tx.replace_by_tx()
 
 
     replace_abc_pipeline_script_node()
-
-
+    msg = "Saving..."
+    confirm = cmds.confirmDialog( title='Saving option',
+                                    message=msg,
+                                    button=['Save','Incremental Save',"Skip"], defaultButton='Save', cancelButton='Skip', dismissString='Skip'      )
+    if confirm == "Save":
     #increment and save
-    mel.eval('incrementAndSaveScene 0;')
-
+        mel.eval('SaveScene 0;')
+    if confirm == "Incremental Save":
+        mel.eval('incrementAndSaveScene 0;')
+    if confirm == "Skip":
+        pass
 
 
     collectMayaScene.run()
