@@ -152,10 +152,10 @@ def createGUI():
     #RAY DEPTH
     #Ray depth diffuse
     samples_value= cmds.getAttr("defaultArnoldRenderOptions.GIDiffuseDepth")
-    cmds.intSliderGrp( "GIDiffuseDepth", field=True, label="Ray Depth Diffuse", minValue=0, maxValue=5, fieldMinValue=0, fieldMaxValue=5, value=samples_value, changeCommand=lambda x:updateSample("GIDiffuseDepth") )
+    cmds.intSliderGrp( "GIDiffuseDepth", field=True, label="Ray Depth Diffuse", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=12, value=samples_value, changeCommand=lambda x:updateSample("GIDiffuseDepth") )
     #Ray depth specular
     samples_value= cmds.getAttr("defaultArnoldRenderOptions.GISpecularDepth")
-    cmds.intSliderGrp( "GISpecularDepth", field=True, label="Ray Depth Specular", minValue=0, maxValue=5, fieldMinValue=0, fieldMaxValue=5, value=samples_value, changeCommand=lambda x:updateSample("GISpecularDepth") )
+    cmds.intSliderGrp( "GISpecularDepth", field=True, label="Ray Depth Specular", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=12, value=samples_value, changeCommand=lambda x:updateSample("GISpecularDepth") )
 
     #ADAPTATIVE SAMPLING
     cmds.frameLayout( label='Adaptive Sampling', labelAlign='bottom')
@@ -334,12 +334,31 @@ def changeCamType():
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
     lentil_enable = cmds.checkBox("lentil_enable", query = True, value=True)
     if lentil_enable:
+
+        if cmds.objExists("aiImagerLentil"):
+            cmds.connectAttr("aiImagerLentil1.message", "defaultArnoldRenderOptions.imagers[0]", f=True)
+        else:
+            cmds.createNode( 'aiImagerLentil', n='aiImagerLentil1' )
+            cmds.connectAttr("aiImagerLentil1.message", "defaultArnoldRenderOptions.imagers[0]", f=True)
+        #LENTIL ON
         cmds.setAttr(cam+".ai_translator", "lentil_camera",  type="string")
+
+    #LENTIL OFF
     else:
         try:
             cmds.setAttr(cam+".ai_translator", "perspective",  type="string")
         except:
             print("fail to set perspective camera")
+        imagerLentilList=cmds.ls( type="aiImagerLentil" )
+        #disconnet Imager
+        for imager in imagerLentilList:
+            try:
+                cmds.disconnectAttr("%s.message"%imager, "defaultArnoldRenderOptions.imagers[0]")
+            except Exception as e:
+                print ("Imager not connected: " + imager)
+                #print("Oops!", e.__class__, "occurred.")
+
+
 def dof():
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
     dof_value = cmds.checkBox("aiEnableDOF", query = True, value =True)

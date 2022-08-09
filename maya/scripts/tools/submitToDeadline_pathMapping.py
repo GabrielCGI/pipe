@@ -3,11 +3,12 @@ import maya.cmds as cmds
 import collectMayaScene
 import logging
 import sys
-
+import debug_reed #temporaire debug
 importlib.reload(collectMayaScene)
 import replace_by_tx
 import maya.mel as mel
 logger = logging.getLogger("submit")
+
 
 def replace_abc_pipeline_script_node():
     counter_udpate=0
@@ -30,7 +31,7 @@ def replace_abc_pipeline_script_node():
 
 def run():
 
-
+    debug_reed.run()
     replace_by_tx.replace_by_tx()
 
 
