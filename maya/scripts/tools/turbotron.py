@@ -89,7 +89,7 @@ def createGUI():
 
     # -- AOVs Overriedes
     cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
-    cmds.checkBox("ignoreAov",label="Ignore AOVs", changeCommand=lambda x:aov_enabled(1-cmds.checkBox("ignoreAov",query=True,value=True)))
+    cmds.checkBox("ignoreAov",label="Ignore AOVs", changeCommand=lambda x:aov_enabled(cmds.checkBox("ignoreAov",query=True,value=True)))
 
     aovList = cmds.ls(type = "aiAOV")
     enabled_aov = []
@@ -351,14 +351,15 @@ def changeCamType():
     lentil_enable = cmds.checkBox("lentil_enable", query = True, value=True)
     if lentil_enable:
 
-        if cmds.objExists("aiImagerLentil"):
+        if cmds.objExists("aiImagerLentil1"):
             cmds.connectAttr("aiImagerLentil1.message", "defaultArnoldRenderOptions.imagers[0]", f=True)
+            cmds.setAttr("aiImagerLentil1.enable",1)
         else:
             cmds.createNode( 'aiImagerLentil', n='aiImagerLentil1' )
             cmds.connectAttr("aiImagerLentil1.message", "defaultArnoldRenderOptions.imagers[0]", f=True)
         #LENTIL ON
         cmds.setAttr(cam+".ai_translator", "lentil_camera",  type="string")
-
+        cmds.setAttr("aiImagerLentil1.enable",1)
 
 
     #LENTIL OFF
