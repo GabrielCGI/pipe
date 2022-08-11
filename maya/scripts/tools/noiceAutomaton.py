@@ -58,10 +58,12 @@ def getNoiceSettings(*arg):
     v = 'variance'
     pr = 'patch radius'
     sr = 'search radius'
+    temporal = "temporal stability"
 
     p.addSingleLineInput(v, '.25')
     p.addSingleLineInput(pr, '3')
     p.addSingleLineInput(sr, '9')
+    p.addSingleLineInput(temporal, '0')
 
     # add checkboxes for AOV's to denoise
 
@@ -72,8 +74,9 @@ def getNoiceSettings(*arg):
         v = p.value(v)
         pr = p.value(pr)
         sr = p.value(sr)
+        temporal = p.value(temporal)
 
-    settings = [v, pr, sr]
+    settings = [v, pr, sr, temporal]
 
     return (settings)
 
@@ -139,7 +142,7 @@ def runNoice():
             # t = None
         print 'running noice on: ' + i
         oFile = denoiseName(i)
-        noice(i, oFile, aovs, vv, pr, sr)
+        noice(i, oFile, aovs, vv, pr, sr, temporal)
         print 'Done'
 
         # update progress bar
