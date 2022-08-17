@@ -6,7 +6,7 @@ import os
 # bakerbaker scripts www.aaronbaker.tv/scripts
 
 
-def noice(iFile, oFile, aovs, variance, pr, sr):
+def noice(iFile, oFile, aovs, variance, pr, sr, temporal):
     # change this to the path of the noice executable
     exe = r'C:/"Program Files"/Autodesk/Arnold/maya2022/bin/noice.exe'
 
@@ -14,7 +14,7 @@ def noice(iFile, oFile, aovs, variance, pr, sr):
     for i in aovs:
         aovString = aovString+' -l '+str(i)
 
-    exe = exe +' -v ' + str(variance) + ' -i ' + iFile + aovString +' -pr '+ str(pr) + ' -sr ' + str(sr) + ' -o ' + oFile
+    exe = exe +' -v ' + str(variance) + ' -i ' + iFile + aovString +' -pr '+ str(pr) + ' -sr ' + str(sr) + 'i' + temporal + ' -o ' + oFile
     print(exe)
     x = os.system(exe)
     # print x
@@ -128,6 +128,7 @@ def runNoice():
     vv = settings[0]
     pr = settings[1]
     sr = settings[2]
+    temporal = settings[3]
     print 'noice settings: ', settings
     files = getSequence(iFile)
     num = len(files)

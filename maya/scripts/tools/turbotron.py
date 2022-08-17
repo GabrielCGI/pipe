@@ -59,22 +59,10 @@ def createGUI():
     #----- Global Features Overrides --------
 
     cmds.frameLayout( label='Feature Overrides', labelAlign='bottom')
-    cmds.rowColumnLayout( numberOfColumns = 3)
-    # -- DOF / MB / LENTIL
-    cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
-    dof_state= cmds.getAttr(renderableCameras[0]+".enableDof")
-    cmds.checkBox("aiEnableDOF", label="Depth of Field", value=dof_state, changeCommand=lambda x:dof())
-    cmds.checkBox("motion_blur_enable", label="Motion Blur", value=cmds.getAttr("defaultArnoldRenderOptions.motion_blur_enable"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.motion_blur_enable",cmds.checkBox("motion_blur_enable", query=True, value=True)))
-
-    cmds.checkBox("lentil_enable", label="Lentil", value=lentil_enable, changeCommand=lambda x:changeCamType())
-
-    cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
     cmds.rowColumnLayout( numberOfColumns = 2)
-    cmds.text("Lentil mult ")
-    cmds.intField("bidirSampleMult",value=cmds.getAttr(cam+".bidirSampleMult"), changeCommand=lambda x:cmds.setAttr(cam+".bidirSampleMult",cmds.intField("bidirSampleMult",query=True,value=True)))
-    cmds.setParent("..")
-    cmds.setParent("..")
     cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
+    # -- DOF / MB / LENTIL
+
     # -- Ignore Overriedes
     #IGNORE SUBDIVISION
     ignore_subdiv_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreSubdivision")
@@ -89,6 +77,7 @@ def createGUI():
 
     # -- AOVs Overriedes
     cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
+    cmds.rowColumnLayout( numberOfColumns = 2)
     cmds.checkBox("ignoreAov",label="Ignore AOVs", changeCommand=lambda x:aov_enabled(cmds.checkBox("ignoreAov",query=True,value=True)))
 
     aovList = cmds.ls(type = "aiAOV")
@@ -100,12 +89,47 @@ def createGUI():
     aov_total = len(aovList)
     if enabled_aov_total == 0:
         cmds.checkBox("ignoreAov",e=True,value=True)
-    text_aov_count = "  Enabled: "+ str(enabled_aov_total)+"/"+str(aov_total)
+    text_aov_count = str(enabled_aov_total)+"/"+str(aov_total)
+
+
     cmds.text("aov_counter",label=text_aov_count, font="boldLabelFont")
+
+    cmds.setParent("..")
     cmds.checkBox("outputVarianceAOVs",label="Output Denoising AOVs",value=cmds.getAttr("defaultArnoldRenderOptions.outputVarianceAOVs"),changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", cmds.checkBox("outputVarianceAOVs", query=True,value=True)))
     cmds.setParent("..")
     cmds.setParent("..")
 
+    #-----  Motion blur --------
+    cmds.frameLayout( label='DOF', labelAlign='bottom')
+    cmds.rowColumnLayout( numberOfColumns = 2)
+    dof_state= cmds.getAttr(renderableCameras[0]+".enableDof")
+    cmds.checkBox("aiEnableDOF", label="Depth of Field", value=dof_state, changeCommand=lambda x:dof())
+    cmds.checkBox("lentil_enable", label="Lentil", value=lentil_enable, changeCommand=lambda x:changeCamType())
+    cmds.rowColumnLayout( numberOfColumns = 2)
+    cmds.text("FStop ")
+    cmds.intField("fStop",value=cmds.getAttr(cam+".fStop"), changeCommand=lambda x:cmds.setAttr(cam+".fStop",cmds.intField("fStop",query=True,value=True)))
+
+    cmds.setParent("..")
+    cmds.rowColumnLayout( numberOfColumns = 2)
+    cmds.text("Samples Mult.")
+    cmds.intField("bidirSampleMult",value=cmds.getAttr(cam+".bidirSampleMult"), changeCommand=lambda x:cmds.setAttr(cam+".bidirSampleMult",cmds.intField("bidirSampleMult",query=True,value=True)))
+    cmds.setParent("..")
+    cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
+
+    cmds.setParent("..")
+    cmds.setParent("..")
+    cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
+
+    cmds.setParent("..")
+
+    cmds.frameLayout( label='Motion blur', labelAlign='bottom')
+    cmds.checkBox("motion_blur_enable", label="Enable", value=cmds.getAttr("defaultArnoldRenderOptions.motion_blur_enable"), changeCommand=lambda x:motion_blur_enable(cmds.checkBox("motion_blur_enable", query=True,value=True)))
+    cmds.checkBox("ignoreMotionBlur", label="Instantaneaous Shutter", value=cmds.getAttr("defaultArnoldRenderOptions.ignoreMotionBlur"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.ignoreMotionBlur",cmds.checkBox("ignoreMotionBlur", query=True, value=True)))
+    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GISpecularSamples")
+    cmds.intSliderGrp( "motion_steps", field=True, label="Keys", minValue=2, maxValue=10, fieldMinValue=0, fieldMaxValue=30, value=cmds.getAttr("defaultArnoldRenderOptions.motion_steps"), changeCommand=lambda x:updateSample("motion_steps") )
+    cmds.floatSliderGrp( "motion_frames", field=True, label="Length", minValue=0, maxValue=1, sliderStep=0.01, precision=3,fieldMinValue=0, fieldMaxValue=1, value=cmds.getAttr("defaultArnoldRenderOptions.motion_frames"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.motion_frames",cmds.floatSliderGrp("motion_frames",query=True,value=True )) )
+
+    cmds.setParent("..")
 
     #-----  Render settings --------
     cmds.frameLayout( label='Image size', labelAlign='bottom')
@@ -137,7 +161,7 @@ def createGUI():
     cmds.frameLayout( label='Sampling', labelAlign='bottom')
 
     #CAMERA AA
-    cmds.checkBox("enableProgressiveRender", label="Enable Progressive Render", value=cmds.getAttr("defaultArnoldRenderOptions.enableProgressiveRender"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",cmds.checkBox("enableProgressiveRender",query=True,value=True)))
+    cmds.checkBox("enableProgressiveRender", label="Enable Progressive Render", value=cmds.getAttr("defaultArnoldRenderOptions.enableProgressiveRender"), changeCommand=lambda x:enableProgessiveRender())
     samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"AASamples")
 
     cmds.intSliderGrp( "AASamples", field=True, label="Camera (AA)", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("AASamples") )
@@ -177,7 +201,7 @@ def createGUI():
     cmds.frameLayout( label='Adaptive Sampling', labelAlign='bottom')
     #Enable adaptative
 
-    cmds.checkBox("enableAdaptiveSampling", label="Enable", value=cmds.getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling",cmds.checkBox("enableAdaptiveSampling", query=True, value=True)))
+    cmds.checkBox("enableAdaptiveSampling", label="Enable", value=cmds.getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling"), changeCommand=lambda x:setAdaptatif())
     AASamplesMax_state = cmds.getAttr("defaultArnoldRenderOptions.AASamplesMax")
     cmds.intSliderGrp( "AASamplesMax", field=True, label="Max. Camera (AA)", minValue=0, maxValue=25, fieldMinValue=0, fieldMaxValue=40, value=AASamplesMax_state, changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.AASamplesMax", cmds.intSliderGrp("AASamplesMax",query=True,value=True)) )
 
@@ -206,6 +230,11 @@ def createGUI():
 ##.................................................................##
 #######################################################################
 
+    def motion_blur_enable(state):
+        cmds.setAttr("defaultArnoldRenderOptions.motion_blur_enable",state)
+        cmds.checkBox("ignoreMotionBlur",edit= True, editable=state)
+        cmds.intSliderGrp("motion_steps",edit= True,manage=state)
+        cmds.floatSliderGrp("motion_frames",edit= True,manage=state)
     def save_preset():
 
         result = cmds.promptDialog(
@@ -295,6 +324,22 @@ def apply_preset(preset):
     cmds.checkBox("outputVarianceAOVs",e=True,value=preset["outputVarianceAOVs"])
     cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",preset["outputVarianceAOVs"])
 
+def setAdaptatif():
+    cmds.setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling",cmds.checkBox("enableAdaptiveSampling", query=True, value=True))
+    if cmds.checkBox("enableAdaptiveSampling", query=True, value=True) == True:
+        if cmds.checkBox("enableProgressiveRender", query=True, value=True) == True:
+            msg = cmds.confirmDialog( title='Disabling Progressive', message='Progressive render is not working well with Adaptative Sampling.', button=['Disable Progressive'], defaultButton='Disable Progressive', cancelButton='No', dismissString='No' )
+            if msg == "Disable Progressive":
+                cmds.checkBox("enableProgressiveRender", edit=True, value=False)
+
+def enableProgessiveRender():
+    cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",cmds.checkBox("enableProgressiveRender", query=True, value=True))
+    if cmds.checkBox("enableProgressiveRender", query=True, value=True) == True:
+        if cmds.checkBox("enableAdaptiveSampling", query=True, value=True) == True:
+            msg = cmds.confirmDialog( title='Disabling Adaptative', message='Adaptative sampling is not working well with Progressive render.', button=['Disable Adaptative'], defaultButton='Disable Adaptative', cancelButton='No', dismissString='No' )
+            if msg == "Disable Adaptative":
+                cmds.checkBox("enableAdaptiveSampling", edit=True, value=False)
+
 def aov_enabled(value):
     aovList = cmds.ls(type = "aiAOV")
     for aov in aovList:
@@ -307,7 +352,7 @@ def aov_enabled(value):
             enabled_aov.append(aov)
     enabled_aov_total = len(enabled_aov)
     aov_total = len(aovList)
-    edited_text =  "  Enabled: " + str(enabled_aov_total)+"/"+str(aov_total)
+    edited_text =  str(enabled_aov_total)+"/"+str(aov_total)
     cmds.text("aov_counter", e=True, label= edited_text)
 
 def updateSample(sample):
@@ -346,6 +391,21 @@ def renderSizePreset(preset):
         cmds.intField("renderHeigth",e=True, value=1280)
         cmds.evalDeferred('cmds.setAttr("defaultResolution.pixelAspect", 1)') #HACK TO PRESERVE PIXEL ASPECT RATION WITH DEFERRED EVAL
 
+def aovZFix(state):
+        if state ==1:
+            if cmds.objExists("aiAOV_Z"):
+                if cmds.getAttr("aiAOV_Z.type") != 5:
+                    msg = cmds.confirmDialog( title='Fix Z AOV ', message='Z AOV with lentil has a bug. Need to change data type. \n (RGB=Gaussian and VECTOR=Closet) ', button=['SET TO RGB'], defaultButton='SET To RGB', cancelButton='No', dismissString='No' )
+                    if msg == "SET TO RGB":
+                        print(msg)
+                        cmds.setAttr("aiAOV_Z.type",5)
+                    if msg == "SET TO VECTOR":
+                        cmds.setAttr("aiAOV_Z.type",7)
+        elif state==0:
+            print("setting z back to float")
+            if cmds.objExists("aiAOV_Z"):
+                if cmds.getAttr("aiAOV_Z.type") == 5 or cmds.getAttr("aiAOV_Z.type") == 7:
+                    cmds.setAttr("aiAOV_Z.type",4)
 def changeCamType():
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
     lentil_enable = cmds.checkBox("lentil_enable", query = True, value=True)
@@ -361,7 +421,14 @@ def changeCamType():
         cmds.setAttr(cam+".ai_translator", "lentil_camera",  type="string")
         cmds.setAttr("aiImagerLentil1.enable",1)
 
+        #turn off variance aov
+        cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",0)
+        cmds.checkBox("outputVarianceAOVs", e=True,value=False)
 
+        #disable progressive
+        cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",0)
+        cmds.checkBox("enableProgressiveRender",edit=True, value=0)
+        aovZFix(1)
     #LENTIL OFF
     else:
         #set all cam to prespective (otherwise lentil is still there and prevent progressive rendering)
@@ -379,6 +446,11 @@ def changeCamType():
             except Exception as e:
                 print ("Imager not connected: " + imager)
                 #print("Oops!", e.__class__, "occurred.")
+        cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",1)
+        cmds.checkBox("outputVarianceAOVs", e=True,value=True)
+        cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",1)
+        #cmds.checkBox("enableProgressiveRender",edit=True, value=1)
+        aovZFix(0)
     cmds.select(cam)
 
 def dof():

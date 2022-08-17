@@ -4,7 +4,7 @@ SET SCRIPT_MAYA=%PIPELINE_DIR%\maya\scripts
 SET NETWORK_INSTALL=R:\pipeline\networkInstall
 SET LIB_DIR=R:\lib
 
-SET PATH_TO_LENTIL=R:\pipeline\networkInstall\lentil\lentil_v2.4_hot_fix\lentil2.4.0-Windows-ai7.1.1.0
+SET PATH_TO_LENTIL=R:\pipeline\networkInstall\lentil\lentil2.4.1-Windows-ai7.1.1.0
 
 
 rem \--- PATH RANCH & NETWORK
@@ -21,7 +21,7 @@ SET MAYA_SHELF_PATH=%PIPELINE_DIR_MAYA%\shelfs
 SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons\guerlain_icon;%PIPELINE_DIR_MAYA%\icons
 
 rem \---- ARNOLD SETUP
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.1.3.0_lentil_hotfix\maya2022
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.1.3.0_lentilv2.4.1\maya2022
 
 rem \---- LENTILS
 
