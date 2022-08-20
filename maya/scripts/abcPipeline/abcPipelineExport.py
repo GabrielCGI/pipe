@@ -88,7 +88,7 @@ def listGeoByCharRef(charRef):
     print(listGeo)
     return listGeo
 
-def buildCommand (start, end, path, geoList, attrList, subframe, frameSample):
+def buildCommand (start, end, path, geoList, attrList, subframe, frameSample,filterEuler):
    "Build Command for abc export job"
    command = ""
    command += "-frameRange %s %s"%(start, end) #Frame Range
@@ -96,7 +96,8 @@ def buildCommand (start, end, path, geoList, attrList, subframe, frameSample):
    if subframe == True:
        for f in frameSample.split(" "):
            command += "-frameRelativeSample %s "%(f)
-
+   if filterEuler == True:
+       command += "-eulerFilter"
    if attrList[0]:
        for attr in attrList:
            command += " -attr %s"%(attr)           #Attributs
@@ -108,7 +109,7 @@ def buildCommand (start, end, path, geoList, attrList, subframe, frameSample):
    command += " -file \"%s\""%(path)                #File Path
    return command
 
-def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
+def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample, filterEuler):
     "Export an Abc for a given character"
     name = nameFromCharRef(charRef)
     geoList = listGeoByCharRef(charRef)
@@ -141,18 +142,18 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample):
     path = path.replace("\\",'\\\\')
 
 
-    command = buildCommand(start,end,path,geoList,attrList,subframe,frameSample)
+    command = buildCommand(start,end,path,geoList,attrList,subframe,frameSample,filterEuler)
     print("------------------------\n------------ BEGGINING EXPORT %s ------------ \n %s"%(charRef, command))
     cmds.refresh(suspend=True)
     cmds.AbcExport (j= command )
     cmds.refresh(suspend=False)
     print("------------ SUCCESS EXPORT %s  ! ------------"%(charRef))
 
-def exportAnim(start=0, end=100, subframe=False, frameSample="0", charList=[]):
+def exportAnim(start=0, end=100, subframe=False, frameSample="0", charList=[],filterEuler=False):
     basicFilter = "*.abc"
     dirPath = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, fileMode=2,)
     for char in charList:
-        exportAbcByChar(char, start, end, dirPath, subframe, frameSample)
+        exportAbcByChar(char, start, end, dirPath, subframe, frameSample, filterEuler)
 
 def updateList():
     return
@@ -184,9 +185,10 @@ class exportAnimGuiCls(object):
         endField = cmds.intField('end', v=cmds.playbackOptions(max=True, query=True))
         cmds.setParent("..")
 
-        cmds.rowLayout(numberOfColumns=2)
+        cmds.rowLayout(numberOfColumns=3)
         frameSample = cmds.textField(text = "-0.2 -0.1 0 0.1 0.2")
         subFrameCheckBox = cmds.checkBox(label="Subframes", value = True)
+        filterEurlerCheckBox = cmds.checkBox(label="Filter Euler Rotation", value = True)
 
         cmds.setParent("..")
 
@@ -195,7 +197,8 @@ class exportAnimGuiCls(object):
             start=cmds.intField(startField, q=1, v=1),end=cmds.intField(endField, q=1, v=1),
             charList= cmds.textScrollList(self.charList,q=True,selectItem=True),
             subframe=cmds.checkBox(subFrameCheckBox,q=1,v=1),
-            frameSample= cmds.textField(frameSample, q=1, text=1)
+            frameSample= cmds.textField(frameSample, q=1, text=1),
+            filterEuler = cmds.checkBox(filterEurlerCheckBox,q=1,v=1)
             ))
         cmds.setParent("..")
 
@@ -205,8 +208,8 @@ class exportAnimGuiCls(object):
         print(cmds.textScrollList(self.charList, e=True, append=charList))
 
 
-    def exportClicked(self, start=0, end=100,subframe=False,frameSample="0 0 0", charList=[]):
+    def exportClicked(self, start=0, end=100,subframe=False,frameSample="0 0 0", charList=[],filterEuler=False):
         if charList:
-            exportAnim(start=start, end=end, subframe=subframe,frameSample=frameSample, charList=charList)
+            exportAnim(start=start, end=end, subframe=subframe,frameSample=frameSample, charList=charList,filterEuler=filterEuler)
         else:
             cmds.confirmDialog(title="Nothing selected",message="Nothing selected !")

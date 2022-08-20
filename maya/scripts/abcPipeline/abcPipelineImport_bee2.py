@@ -61,7 +61,7 @@ def abcLoad(abcPath):
     refNamespace = name +"_shading_lib_"+ abc.split("_")[-1].split(".")[0]  #00 ou 01 ou 02
     print(name)
     shadingRefPath = assetsDic.get(name).get("shading")
-    shadingRefPath= shadingRefPath.replace("ch_bee_shading_lib","ch_bee_fur_lib2")
+    shadingRefPath= shadingRefPath.replace("ch_bee_shading_lib","ch_bee_fur_lib3")
     print(shadingRefPath)
     scriptNodeName = "scriptNode_" + refNamespace
 
