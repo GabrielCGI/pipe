@@ -294,8 +294,18 @@ def denoise_on():
                 cmds.connectAttr("aiImagerDenoiserOidn1.message", "defaultArnoldRenderOptions.imagers[1]", f=True)
         else:
             cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 0)
+            cmds.disconnectAttr("aiImagerDenoiserOidn1.message", "defaultArnoldRenderOptions.imagers[1]")
 
     if not lentil_enable:
+        listConnectionImagers = cmds.listConnections("defaultArnoldRenderOptions.imagers")
+        #HACK TO PREVENT "NoneType" is not iterable
+        if not listConnectionImagers:
+            listConnectionImagers=[]
+        #END HACK
+        if "aiImagerDenoiserOidn1" in listConnectionImagers:
+
+            cmds.disconnectAttr("aiImagerDenoiserOidn1.message", "defaultArnoldRenderOptions.imagers[1]")
+
         if cmds.checkBox("outputVarianceAOVs", query=True,value=True):
             noice_setup_variance_aov.createGUI()
             cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 1)
@@ -435,7 +445,6 @@ def changeCamType():
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
     lentil_enable = cmds.checkBox("lentil_enable", query = True, value=True)
     if lentil_enable:
-
         if cmds.objExists("aiImagerLentil1"):
             cmds.connectAttr("aiImagerLentil1.message", "defaultArnoldRenderOptions.imagers[0]", f=True)
             cmds.setAttr("aiImagerLentil1.enable",1)
@@ -455,6 +464,7 @@ def changeCamType():
         cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",0)
         cmds.checkBox("enableProgressiveRender",edit=True, value=0)
         aovZFix(1)
+
     #LENTIL OFF
     else:
         #set all cam to prespective (otherwise lentil is still there and prevent progressive rendering)
@@ -476,8 +486,10 @@ def changeCamType():
         #cmds.checkBox("outputVarianceAOVs", e=True,value=True)
         #cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",1)
         #cmds.checkBox("enableProgressiveRender",edit=True, value=1)
-        print("yo")
+
         aovZFix(0)
+    #Checking on denoising since camera type change
+    denoise_on()
     cmds.select(cam)
 
 def dof():
