@@ -5,7 +5,8 @@ import importlib
 import os
 import json
 
-
+import noice_setup_variance_aov
+importlib.reload(noice_setup_variance_aov)
 #Init variables
 presets_folder = "R:\\pipeline\\pipe\\maya\\scripts\\tools\\presets_render_setting"
 presetDic={}
@@ -20,7 +21,19 @@ def getRenderableCameras():
             renderableCameras.append(cam)
     return renderableCameras
 
+def isLentilEnable():
+    cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
+    activeCamType = cmds.getAttr(cam+".ai_translator")
+    try:
+        if activeCamType == "lentil_camera":
+            lentil_enable=1
+        else:
+            lentil_enable=0
+    except Exception as e :
+        lentil_enable=0
+        print (e)
 
+    return lentil_enable
 #Create my GUI
 def createGUI():
     #window set up
@@ -47,14 +60,7 @@ def createGUI():
     for cam in renderableCameras:
         cmds.menuItem(label=cam)
     # Check camera type (lentil ou perspective)
-    try:
-        activeCamType = cmds.getAttr(renderableCameras[0]+".ai_translator")
-        if activeCamType == "lentil_camera":
-            lentil_enable=1
-        else:
-            lentil_enable=0
-    except:
-        lentil_enable=0
+    lentil_enable=isLentilEnable()
 
     #----- Global Features Overrides --------
 
@@ -95,7 +101,7 @@ def createGUI():
     cmds.text("aov_counter",label=text_aov_count, font="boldLabelFont")
 
     cmds.setParent("..")
-    cmds.checkBox("outputVarianceAOVs",label="Output Denoising AOVs",value=cmds.getAttr("defaultArnoldRenderOptions.outputVarianceAOVs"),changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", cmds.checkBox("outputVarianceAOVs", query=True,value=True)))
+    cmds.checkBox("outputVarianceAOVs",label="Output Denoising AOVs",value=cmds.getAttr("defaultArnoldRenderOptions.outputVarianceAOVs"),changeCommand=lambda x:denoise_on())
     cmds.setParent("..")
     cmds.setParent("..")
 
@@ -107,7 +113,7 @@ def createGUI():
     cmds.checkBox("lentil_enable", label="Lentil", value=lentil_enable, changeCommand=lambda x:changeCamType())
     cmds.rowColumnLayout( numberOfColumns = 2)
     cmds.text("FStop ")
-    cmds.intField("fStop",value=cmds.getAttr(cam+".fStop"), changeCommand=lambda x:cmds.setAttr(cam+".fStop",cmds.intField("fStop",query=True,value=True)))
+    cmds.floatField("fStop",precision=2,value=cmds.getAttr(cam+".fStop"), changeCommand=lambda x:cmds.setAttr(cam+".fStop",cmds.floatField("fStop",query=True,value=True)))
 
     cmds.setParent("..")
     cmds.rowColumnLayout( numberOfColumns = 2)
@@ -267,9 +273,6 @@ def createGUI():
 ###Read preset folder and return a dictionary
 def build_preset_dic():
     listPresets = os.listdir(presets_folder)
-
-
-
     for preset in listPresets:
         filepath = os.path.join(presets_folder,preset)
         with open(filepath) as json_file:
@@ -277,6 +280,28 @@ def build_preset_dic():
         presetName, presetExtention = os.path.splitext(preset)
         presetDic[presetName]=preset_data
     return presetDic
+
+def denoise_on():
+    cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
+    lentil_enable = isLentilEnable()
+    if lentil_enable:
+        if cmds.checkBox("outputVarianceAOVs", query=True,value=True):
+            if cmds.objExists("aiImagerDenoiserOidn1"):
+                cmds.connectAttr("aiImagerDenoiserOidn1.message", "defaultArnoldRenderOptions.imagers[1]", f=True)
+                cmds.setAttr("aiImagerDenoiserOidn1.enable",1)
+            else:
+                cmds.createNode( 'aiImagerDenoiserOidn', n='aiImagerDenoiserOidn1' )
+                cmds.connectAttr("aiImagerDenoiserOidn1.message", "defaultArnoldRenderOptions.imagers[1]", f=True)
+        else:
+            cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 0)
+
+    if not lentil_enable:
+        if cmds.checkBox("outputVarianceAOVs", query=True,value=True):
+            noice_setup_variance_aov.createGUI()
+            cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 1)
+        else:
+            noice_setup_variance_aov.remove()
+            cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 0)
 
 ### APPLY A PRESET
 def apply_preset(preset):
@@ -422,8 +447,9 @@ def changeCamType():
         cmds.setAttr("aiImagerLentil1.enable",1)
 
         #turn off variance aov
-        cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",0)
-        cmds.checkBox("outputVarianceAOVs", e=True,value=False)
+
+        #cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",0)
+        #cmds.checkBox("outputVarianceAOVs", e=True,value=False)
 
         #disable progressive
         cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",0)
@@ -446,10 +472,11 @@ def changeCamType():
             except Exception as e:
                 print ("Imager not connected: " + imager)
                 #print("Oops!", e.__class__, "occurred.")
-        cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",1)
-        cmds.checkBox("outputVarianceAOVs", e=True,value=True)
-        cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",1)
+        #cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",1)
+        #cmds.checkBox("outputVarianceAOVs", e=True,value=True)
+        #cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",1)
         #cmds.checkBox("enableProgressiveRender",edit=True, value=1)
+        print("yo")
         aovZFix(0)
     cmds.select(cam)
 
