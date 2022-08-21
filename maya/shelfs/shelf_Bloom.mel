@@ -788,7 +788,7 @@ global proc shelf_Bloom () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import importlib\nimport turbotron\nimportlib.reload(turbotron)\nturbotron.createGUI()\n" 
+        -command "import importlib\nimport turbotron_dev\nimportlib.reload(turbotron_dev)\nturbotron_dev.createGUI()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

@@ -34,6 +34,11 @@ def isLentilEnable():
 
     return lentil_enable
 
+def createOidn():
+    if not cmds.objExists("aiImagerDenoiserOidn1"):
+        cmds.createNode( 'aiImagerDenoiserOidn', n='aiImagerDenoiserOidn1' )
+createOidn()
+
 #Create my GUI
 def createGUI():
     #window set up
@@ -274,7 +279,7 @@ def createGUI():
             param_dic["lentil_enable"]=cmds.checkBox("lentil_enable",query=True,value=True)
             param_dic["aiEnableDOF"]=cmds.checkBox("aiEnableDOF",query=True,value=True)
             param_dic["AOV"]=(cmds.checkBox("ignoreAov",query=True,value=True))
-            print(param_dic)
+
 
             preset_path = os.path.join(presets_folder,attrString+".txt")
 
@@ -467,7 +472,7 @@ def changeCamType():
 
         aovZFix(0)
     #Checking on denoising since camera type change
-    denoise_on("keep")
+    denoise_on(get_pretty_aovs())
     cmds.select(cam)
 
 def dof():
@@ -551,32 +556,24 @@ def refresh_list():
 
 def denoise_on(aov):
 
-    if aov == "keep":
-        pretty_aovs=get_pretty_aovs()
-        already_on = []
-        for pretty_aov in pretty_aovs:
-            if pretty_aov.endswith(" (on)"):
-                already_on.append(pretty_aov)
-        aov = already_on
-
     if cmds.checkBox("outputVarianceAOVs", query=True,value=True)==False:
-        if not isLentilEnable():
-            add_denoise_aovs_perspective([]) #Remove all
-            cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 0)
-        else:
-            remove_denoise_lentil()
+        add_denoise_aovs_perspective([]) #Remove all
+        cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 0)
+        remove_denoise_lentil()
     else:
         if not isLentilEnable():
             add_denoise_aovs_perspective(aov) #SET ALL TO ON BY DEFAULT
+            #remove_denoise_lentil() #DELETE LENTIL STUFF
             cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 1)
+            remove_denoise_lentil()
         else:
+            add_denoise_aovs_perspective([]) #DELETE PRESPECTIVE STUFF
             add_denoise_aovs_lentil(aov) #SET ALL TO ON BY DEFAULT
             cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 0)
 
 
 def add_denoise_aovs_lentil(selected_prettyAovs):
-    print(selected_prettyAovs)
-    print ("selecte pretty")
+
     selected_aovs=convertPrettyAovBackToNormal(selected_prettyAovs)
     selected_aovsNoPrefix = []
     #Remove "aiAOV" preffix
@@ -602,6 +599,7 @@ def add_denoise_aovs_lentil(selected_prettyAovs):
     cmds.setAttr("aiImagerDenoiserOidn1.layer_selection",layer_selection,type="string")
     cmds.setAttr("aiImagerDenoiserOidn1.output_suffix","_denoised",type="string")
     refresh_list()
+
 def remove_denoise_lentil():
     listConnectionImagers = cmds.listConnections("defaultArnoldRenderOptions.imagers")
     #HACK TO PREVENT "NoneType" is not iterable
@@ -612,8 +610,9 @@ def remove_denoise_lentil():
         cmds.disconnectAttr("aiImagerDenoiserOidn1.message", "defaultArnoldRenderOptions.imagers[1]")
     cmds.setAttr("aiImagerDenoiserOidn1.layer_selection","",type="string")
     refresh_list()
-def add_denoise_aovs_perspective(selected_prettyAovs):
 
+
+def add_denoise_aovs_perspective(selected_prettyAovs):
     allAovs = get_aovs()
     varianceDriverExr, varianceFilter= setup_driver()
     if not selected_prettyAovs:
@@ -662,20 +661,3 @@ def disconnectVariance(aov):
     if driverList:
         if driverList[0] == "varianceDriver":
             cmds.disconnectAttr(driverList[0]+".message", aov+".outputs[1].driver")
-"""
-def remove_denoise_aovs():
-    aovList = cmds.ls(type = "aiAOV")
-    for aov in aovList:
-        filterList = cmds.listConnections(aov+".outputs[1].filter")
-        driverList = cmds.listConnections(aov+".outputs[1].driver")
-
-        if filterList:
-            if filterList[0] == "varianceFilter":
-                cmds.disconnectAttr(filterList[0]+".message", aov+".outputs[1].filter")
-        if driverList:
-            if driverList[0] == "varianceDriver":
-                cmds.disconnectAttr(driverList[0]+".message", aov+".outputs[1].driver")
-    #setup Output Denoising AOVs
-    cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",0)
-    refresh_list()
-"""
