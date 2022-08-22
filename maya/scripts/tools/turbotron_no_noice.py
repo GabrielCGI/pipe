@@ -20,24 +20,6 @@ def getRenderableCameras():
             renderableCameras.append(cam)
     return renderableCameras
 
-def isLentilEnable():
-    cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
-    activeCamType = cmds.getAttr(cam+".ai_translator")
-    try:
-        if activeCamType == "lentil_camera":
-            lentil_enable=1
-        else:
-            lentil_enable=0
-    except Exception as e :
-        lentil_enable=0
-        print (e)
-
-    return lentil_enable
-
-def createOidn():
-    if not cmds.objExists("aiImagerDenoiserOidn1"):
-        cmds.createNode( 'aiImagerDenoiserOidn', n='aiImagerDenoiserOidn1' )
-createOidn()
 
 #Create my GUI
 def createGUI():
@@ -65,7 +47,14 @@ def createGUI():
     for cam in renderableCameras:
         cmds.menuItem(label=cam)
     # Check camera type (lentil ou perspective)
-    lentil_enable=isLentilEnable()
+    try:
+        activeCamType = cmds.getAttr(renderableCameras[0]+".ai_translator")
+        if activeCamType == "lentil_camera":
+            lentil_enable=1
+        else:
+            lentil_enable=0
+    except:
+        lentil_enable=0
 
     #----- Global Features Overrides --------
 
@@ -106,18 +95,7 @@ def createGUI():
     cmds.text("aov_counter",label=text_aov_count, font="boldLabelFont")
 
     cmds.setParent("..")
-
-    cmds.setParent("..")
-    cmds.setParent("..")
-
-    #-----  Denoiseing --------
-    cmds.frameLayout( label='Denoising', labelAlign='bottom', collapsable=True)
-    cmds.checkBox("outputVarianceAOVs",label="Output Denoising AOVs",value=cmds.getAttr("defaultArnoldRenderOptions.outputVarianceAOVs"),changeCommand=lambda x:denoise_on(get_pretty_aovs()))
-    aovs= get_pretty_aovs()
-    cmds.textScrollList("aov_list",numberOfRows=20, allowMultiSelection=True, append=aovs, showIndexedItem=4 )
-    cmds.rowColumnLayout( numberOfColumns = 3)
-    cmds.button("add_denoise_all",label="Set selected",  command=lambda x:denoise_on(cmds.textScrollList("aov_list", q=True,selectItem=True)))
-    cmds.button("remove_denoise",label="Clear all",  command=lambda x:denoise_on([]))
+    cmds.checkBox("outputVarianceAOVs",label="Output Denoising AOVs",value=cmds.getAttr("defaultArnoldRenderOptions.outputVarianceAOVs"),changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", cmds.checkBox("outputVarianceAOVs", query=True,value=True)))
     cmds.setParent("..")
     cmds.setParent("..")
 
@@ -129,7 +107,7 @@ def createGUI():
     cmds.checkBox("lentil_enable", label="Lentil", value=lentil_enable, changeCommand=lambda x:changeCamType())
     cmds.rowColumnLayout( numberOfColumns = 2)
     cmds.text("FStop ")
-    cmds.floatField("fStop",precision=2,value=cmds.getAttr(cam+".fStop"), changeCommand=lambda x:cmds.setAttr(cam+".fStop",cmds.floatField("fStop",query=True,value=True)))
+    cmds.intField("fStop",value=cmds.getAttr(cam+".fStop"), changeCommand=lambda x:cmds.setAttr(cam+".fStop",cmds.intField("fStop",query=True,value=True)))
 
     cmds.setParent("..")
     cmds.rowColumnLayout( numberOfColumns = 2)
@@ -257,7 +235,6 @@ def createGUI():
         cmds.checkBox("ignoreMotionBlur",edit= True, editable=state)
         cmds.intSliderGrp("motion_steps",edit= True,manage=state)
         cmds.floatSliderGrp("motion_frames",edit= True,manage=state)
-
     def save_preset():
 
         result = cmds.promptDialog(
@@ -279,7 +256,7 @@ def createGUI():
             param_dic["lentil_enable"]=cmds.checkBox("lentil_enable",query=True,value=True)
             param_dic["aiEnableDOF"]=cmds.checkBox("aiEnableDOF",query=True,value=True)
             param_dic["AOV"]=(cmds.checkBox("ignoreAov",query=True,value=True))
-
+            print(param_dic)
 
             preset_path = os.path.join(presets_folder,attrString+".txt")
 
@@ -290,6 +267,9 @@ def createGUI():
 ###Read preset folder and return a dictionary
 def build_preset_dic():
     listPresets = os.listdir(presets_folder)
+
+
+
     for preset in listPresets:
         filepath = os.path.join(presets_folder,preset)
         with open(filepath) as json_file:
@@ -297,7 +277,6 @@ def build_preset_dic():
         presetName, presetExtention = os.path.splitext(preset)
         presetDic[presetName]=preset_data
     return presetDic
-
 
 ### APPLY A PRESET
 def apply_preset(preset):
@@ -416,18 +395,22 @@ def aovZFix(state):
         if state ==1:
             if cmds.objExists("aiAOV_Z"):
                 if cmds.getAttr("aiAOV_Z.type") != 5:
-                    cmds.setAttr("aiAOV_Z.type",5)
-
+                    msg = cmds.confirmDialog( title='Fix Z AOV ', message='Z AOV with lentil has a bug. Need to change data type. \n (RGB=Gaussian and VECTOR=Closet) ', button=['SET TO RGB'], defaultButton='SET To RGB', cancelButton='No', dismissString='No' )
+                    if msg == "SET TO RGB":
+                        print(msg)
+                        cmds.setAttr("aiAOV_Z.type",5)
+                    if msg == "SET TO VECTOR":
+                        cmds.setAttr("aiAOV_Z.type",7)
         elif state==0:
             print("setting z back to float")
             if cmds.objExists("aiAOV_Z"):
                 if cmds.getAttr("aiAOV_Z.type") == 5 or cmds.getAttr("aiAOV_Z.type") == 7:
                     cmds.setAttr("aiAOV_Z.type",4)
-
 def changeCamType():
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
     lentil_enable = cmds.checkBox("lentil_enable", query = True, value=True)
     if lentil_enable:
+
         if cmds.objExists("aiImagerLentil1"):
             cmds.connectAttr("aiImagerLentil1.message", "defaultArnoldRenderOptions.imagers[0]", f=True)
             cmds.setAttr("aiImagerLentil1.enable",1)
@@ -439,15 +422,13 @@ def changeCamType():
         cmds.setAttr("aiImagerLentil1.enable",1)
 
         #turn off variance aov
-
-        #cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",0)
-        #cmds.checkBox("outputVarianceAOVs", e=True,value=False)
+        cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",0)
+        cmds.checkBox("outputVarianceAOVs", e=True,value=False)
 
         #disable progressive
         cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",0)
         cmds.checkBox("enableProgressiveRender",edit=True, value=0)
         aovZFix(1)
-
     #LENTIL OFF
     else:
         #set all cam to prespective (otherwise lentil is still there and prevent progressive rendering)
@@ -465,14 +446,11 @@ def changeCamType():
             except Exception as e:
                 print ("Imager not connected: " + imager)
                 #print("Oops!", e.__class__, "occurred.")
-        #cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",1)
-        #cmds.checkBox("outputVarianceAOVs", e=True,value=True)
-        #cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",1)
+        cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",1)
+        cmds.checkBox("outputVarianceAOVs", e=True,value=True)
+        cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",1)
         #cmds.checkBox("enableProgressiveRender",edit=True, value=1)
-
         aovZFix(0)
-    #Checking on denoising since camera type change
-    denoise_on(get_pretty_aovs())
     cmds.select(cam)
 
 def dof():
@@ -483,181 +461,3 @@ def dof():
 
 def ignore(ignore_name,ignore_value):
     cmds.setAttr("defaultArnoldRenderOptions."+ignore_name, ignore_value)
-
-
-### DENOISE UTILITAIRE
-### DENOISE UTILITAIRE
-### DENOISE UTILITAIRE
-### DENOISE UTILITAIRE
-### DENOISE UTILITAIRE
-### DENOISE UTILITAIRE
-
-def setup_driver():
-
-    if not cmds.objExists('varianceFilter'):
-        varianceFilter = cmds.createNode( 'aiAOVFilter', n="varianceFilter")
-    else:
-        varianceFilter = "varianceFilter"
-    if not cmds.objExists('varianceDriver'):
-        varianceDriverExr= cmds.createNode( 'aiAOVDriver', n="varianceDriver")
-    else:
-        varianceDriverExr = "varianceDriver"
-
-    cmds.setAttr(varianceDriverExr+".halfPrecision", 1)
-    cmds.setAttr(varianceDriverExr+".mergeAOVs", 1)
-    cmds.setAttr(varianceDriverExr+".prefix", "<RenderLayer>/<Scene>/variance_<Scene>", type="string")
-    cmds.setAttr(varianceFilter+'.ai_translator', "variance", type="string")
-    return varianceDriverExr, varianceFilter
-def run():
-    pass
-
-def get_aovs():
-    allAovsList = cmds.ls(type = "aiAOV")
-    aovs = []
-    ok_list = ["aiAOV_sss","aiAOV_specular","aiAOV_direct","aiAOV_indirect","aiAOV_sheen","aiAOV_transmssion","aiAOV_coat","aiAOV_diffuse","aiAOV_specular_direct", "aiAOV_specular_indirect", "aiAOV_diffuse_direct","aiAOV_diffuse_indirect"]
-    for aov in allAovsList:
-        if aov in ok_list or aov.startswith("aiAOV_RGBA_"):
-            aovs.append(aov)
-    return aovs
-def get_pretty_aovs():
-    allAovsList = cmds.ls(type = "aiAOV")
-    pretty_aov_list = []
-    ok_list = ["sss","specular","direct","indirect","sheen","transmssion","coat","diffuse", "specular_direct", "specular_indirect", "diffuse_direct","diffuse_indirect"]
-
-    for aov in allAovsList:
-            pretty_aov = aov.split("aiAOV_")[-1]
-            if pretty_aov in ok_list or pretty_aov.startswith("RGBA_"):
-                if not isLentilEnable():
-                    if cmds.listConnections(aov+".outputs[1].driver"):
-                        pretty_aov+=" (on)"
-                if isLentilEnable():
-                    try:
-                        layer_selection = cmds.getAttr("aiImagerDenoiserOidn1.layer_selection")
-                        layerList = layer_selection.split(" or ")
-                        print ("layerlist")
-
-                        if pretty_aov in layerList:
-                            pretty_aov=pretty_aov+" (on)"
-
-                    except Exception as e :
-                        print("Failed to get pretty aov list from Oidn denoiser")
-                        print (e)
-                pretty_aov_list.append(pretty_aov)
-            #check if already connected
-
-    return pretty_aov_list
-
-
-def refresh_list():
-    aovs= get_pretty_aovs()
-    cmds.textScrollList("aov_list", edit=True, removeAll=True)
-    cmds.textScrollList("aov_list", edit=True, append=aovs)
-
-
-def denoise_on(aov):
-
-    if cmds.checkBox("outputVarianceAOVs", query=True,value=True)==False:
-        add_denoise_aovs_perspective([]) #Remove all
-        cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 0)
-        remove_denoise_lentil()
-    else:
-        if not isLentilEnable():
-            add_denoise_aovs_perspective(aov) #SET ALL TO ON BY DEFAULT
-            #remove_denoise_lentil() #DELETE LENTIL STUFF
-            cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 1)
-            remove_denoise_lentil()
-        else:
-            add_denoise_aovs_perspective([]) #DELETE PRESPECTIVE STUFF
-            add_denoise_aovs_lentil(aov) #SET ALL TO ON BY DEFAULT
-            cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", 0)
-
-
-def add_denoise_aovs_lentil(selected_prettyAovs):
-
-    selected_aovs=convertPrettyAovBackToNormal(selected_prettyAovs)
-    selected_aovsNoPrefix = []
-    #Remove "aiAOV" preffix
-    for selected_aov in selected_aovs:
-        selected_aov= selected_aov.split("aiAOV_")[-1]
-        selected_aovsNoPrefix.append(selected_aov)
-    #BUILD LAYER string
-    layer_selection =""
-    counter = 0
-    for aov in selected_aovsNoPrefix:
-        if counter == 0:
-            layer_selection = "RGBA or " + aov
-        else:
-            layer_selection=layer_selection+ " or "+aov
-        counter += 1
-
-    if cmds.objExists("aiImagerDenoiserOidn1"):
-        cmds.connectAttr("aiImagerDenoiserOidn1.message", "defaultArnoldRenderOptions.imagers[1]", f=True)
-        cmds.setAttr("aiImagerDenoiserOidn1.enable",1)
-    else:
-        cmds.createNode( 'aiImagerDenoiserOidn', n='aiImagerDenoiserOidn1' )
-        cmds.connectAttr("aiImagerDenoiserOidn1.message", "defaultArnoldRenderOptions.imagers[1]", f=True)
-    cmds.setAttr("aiImagerDenoiserOidn1.layer_selection",layer_selection,type="string")
-    cmds.setAttr("aiImagerDenoiserOidn1.output_suffix","_denoised",type="string")
-    refresh_list()
-
-def remove_denoise_lentil():
-    listConnectionImagers = cmds.listConnections("defaultArnoldRenderOptions.imagers")
-    #HACK TO PREVENT "NoneType" is not iterable
-    if not listConnectionImagers:
-        listConnectionImagers=[]
-    #END HACK
-    if "aiImagerDenoiserOidn1" in listConnectionImagers:
-        cmds.disconnectAttr("aiImagerDenoiserOidn1.message", "defaultArnoldRenderOptions.imagers[1]")
-    cmds.setAttr("aiImagerDenoiserOidn1.layer_selection","",type="string")
-    refresh_list()
-
-
-def add_denoise_aovs_perspective(selected_prettyAovs):
-    allAovs = get_aovs()
-    varianceDriverExr, varianceFilter= setup_driver()
-    if not selected_prettyAovs:
-        selected_prettyAovs=[]
-
-    selected_aovs=convertPrettyAovBackToNormal(selected_prettyAovs)
-
-    #CONVERT PRETTY AOV BACK TO NORMAL
-    for prettyAov in selected_prettyAovs:
-        aovWithoutState = prettyAov.split(" (on)")[0]
-        selected_aov = "aiAOV_"+ aovWithoutState
-        selected_aovs.append(selected_aov)
-
-    for aov in selected_aovs:
-        connectVariance(aov,varianceDriverExr,varianceFilter)
-
-    #Know we disconnect not selected aovs
-    not_selected_aovs= [aov for aov in allAovs if aov not in selected_aovs]
-    for aov in not_selected_aovs:
-        disconnectVariance(aov)
-
-    refresh_list()
-
-def convertPrettyAovBackToNormal(selected_prettyAovs):
-    """
-    Convert pretty aov to normal aovs
-    Exemple: RGBA_studioLight (on) > aiAOV_RGBA_studioLight
-    """
-    selected_aovs = []
-    for prettyAov in selected_prettyAovs:
-        aovWithoutState = prettyAov.split(" (on)")[0]
-        selected_aov = "aiAOV_"+ aovWithoutState
-        selected_aovs.append(selected_aov)
-    return selected_aovs
-
-def connectVariance(aov,varianceDriverExr,varianceFilter):
-    cmds.connectAttr(varianceDriverExr+".message", aov+'.outputs[1].driver', f=True)
-    cmds.connectAttr(varianceFilter+".message", aov+'.outputs[1].filter', f=True)
-
-def disconnectVariance(aov):
-    filterList = cmds.listConnections(aov+".outputs[1].filter")
-    driverList = cmds.listConnections(aov+".outputs[1].driver")
-    if filterList:
-        if filterList[0] == "varianceFilter":
-            cmds.disconnectAttr(filterList[0]+".message", aov+".outputs[1].filter")
-    if driverList:
-        if driverList[0] == "varianceDriver":
-            cmds.disconnectAttr(driverList[0]+".message", aov+".outputs[1].driver")

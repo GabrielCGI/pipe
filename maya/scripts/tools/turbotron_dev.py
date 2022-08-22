@@ -514,7 +514,7 @@ def run():
 def get_aovs():
     allAovsList = cmds.ls(type = "aiAOV")
     aovs = []
-    ok_list = ["aiAOV_sss","aiAOV_specular","aiAOV_direct","aiAOV_indirect","aiAOV_sheen","aiAOV_transmssion","aiAOV_coat","aiAOV_diffuse"]
+    ok_list = ["aiAOV_sss","aiAOV_specular","aiAOV_direct","aiAOV_indirect","aiAOV_sheen","aiAOV_transmssion","aiAOV_coat","aiAOV_diffuse","aiAOV_specular_direct", "aiAOV_specular_indirect", "aiAOV_diffuse_direct","aiAOV_diffuse_indirect"]
     for aov in allAovsList:
         if aov in ok_list or aov.startswith("aiAOV_RGBA_"):
             aovs.append(aov)
@@ -522,7 +522,7 @@ def get_aovs():
 def get_pretty_aovs():
     allAovsList = cmds.ls(type = "aiAOV")
     pretty_aov_list = []
-    ok_list = ["sss","specular","direct","indirect","sheen","transmssion","coat","diffuse"]
+    ok_list = ["sss","specular","direct","indirect","sheen","transmssion","coat","diffuse", "specular_direct", "specular_indirect", "diffuse_direct","diffuse_indirect"]
 
     for aov in allAovsList:
             pretty_aov = aov.split("aiAOV_")[-1]
@@ -585,7 +585,7 @@ def add_denoise_aovs_lentil(selected_prettyAovs):
     counter = 0
     for aov in selected_aovsNoPrefix:
         if counter == 0:
-            layer_selection = aov
+            layer_selection = "RGBA or " + aov
         else:
             layer_selection=layer_selection+ " or "+aov
         counter += 1
