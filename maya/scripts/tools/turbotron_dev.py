@@ -4,8 +4,9 @@ import maya.cmds as cmds
 import importlib
 import os
 import json
-
-
+import maya.app.renderSetup.model.override as override
+import maya.app.renderSetup.model.renderSetup as renderSetup
+from functools import partial
 #Init variables
 presets_folder = "R:\\pipeline\\pipe\\maya\\scripts\\tools\\presets_render_setting"
 presetDic={}
@@ -39,6 +40,22 @@ def createOidn():
         cmds.createNode( 'aiImagerDenoiserOidn', n='aiImagerDenoiserOidn1' )
 createOidn()
 
+def printTest(text):
+    print(text)
+
+
+def createOverride(param):
+    visibleLayer = renderSetup.instance().getVisibleRenderLayer()
+    col = visibleLayer.renderSettingsCollectionInstance()
+    ov = col.createAbsoluteOverride('defaultArnoldRenderOptions',param)
+    cmds.checkBox(param, edit=True,enableBackground=True)
+    #ov.setAttrValue(value)
+
+
+
+def popMenuItem(param):
+    cmds.popupMenu(param)
+    cmds.menuItem("Absolute override", c = lambda x: createOverride(param))
 #Create my GUI
 def createGUI():
     #window set up
@@ -77,19 +94,22 @@ def createGUI():
     # -- Ignore Overriedes
     #IGNORE SUBDIVISION
     ignore_subdiv_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreSubdivision")
-    cmds.checkBox("ignoreSubdivision", label="Ignore Subdivision", value=ignore_subdiv_state, changeCommand=lambda x:ignore("ignoreSubdivision",cmds.checkBox("ignoreSubdivision", query=True, value=True)))
+    cmds.checkBox("ignoreSubdivision", backgroundColor=[0.5,0.3,0.3],enableBackground=False,label="Ignore Subdivision", value=ignore_subdiv_state, changeCommand=lambda x:ignore("ignoreSubdivision",cmds.checkBox("ignoreSubdivision", query=True, value=True)))
+    popMenuItem("ignoreSubdivision")
     #IGNORE ATHMO
     ignoreAtmosphere_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreAtmosphere")
     cmds.checkBox("ignoreAtmosphere", label="Ignore Athmosphere", value=ignoreAtmosphere_state, changeCommand=lambda x:ignore("ignoreAtmosphere",cmds.checkBox("ignoreAtmosphere", query=True, value=True)))
+    popMenuItem("ignoreAtmosphere")
     #IGNORE DISPLACEMENT
     ignoreDisplacement_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreDisplacement")
     cmds.checkBox("ignoreDisplacement", label="Ignore Displacment", value=ignoreDisplacement_state, changeCommand=lambda x:ignore("ignoreDisplacement",cmds.checkBox("ignoreDisplacement", query=True, value=True)))
-    cmds.setParent("..")
+    popMenuItem("ignoreDisplacement")
 
     # -- AOVs Overriedes
     cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
     cmds.rowColumnLayout( numberOfColumns = 2)
     cmds.checkBox("ignoreAov",label="Ignore AOVs", changeCommand=lambda x:aov_enabled(cmds.checkBox("ignoreAov",query=True,value=True)))
+    popMenuItem("ignoreAov")
 
     aovList = cmds.ls(type = "aiAOV")
     enabled_aov = []
@@ -105,8 +125,9 @@ def createGUI():
 
     cmds.text("aov_counter",label=text_aov_count, font="boldLabelFont")
 
-    cmds.setParent("..")
 
+    cmds.setParent("..")
+    cmds.setParent("..")
     cmds.setParent("..")
     cmds.setParent("..")
 
@@ -251,6 +272,8 @@ def createGUI():
 
 ##.................................................................##
 #######################################################################
+
+
 
     def motion_blur_enable(state):
         cmds.setAttr("defaultArnoldRenderOptions.motion_blur_enable",state)
