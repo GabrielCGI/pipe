@@ -28,12 +28,12 @@ global proc shelf_MSPlugin () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "R:/megascan/support/plugins/maya/6.9/MSLiveLink/Megascans/MS_Logo.png" 
-        -image1 "R:/megascan/support/plugins/maya/6.9/MSLiveLink/Megascans/MS_Logo.png" 
+        -image "R:/megascan/support/plugins/maya/6.8/MSLiveLink/Megascans/MS_Logo.png" 
+        -image1 "R:/megascan/support/plugins/maya/6.8/MSLiveLink/Megascans/MS_Logo.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\npath_ = 'R:/megascan/support/plugins/maya/6.9/MSLiveLink'\nif path_ not in sys.path:\n    sys.path.append( path_ )\nimport LiveLink as msAPI\nmsAPI.initLiveLink()\n            " 
+        -command "import sys\npath_ = 'R:/megascan/support/plugins/maya/6.8/MSLiveLink'\nif path_ not in sys.path:\n    sys.path.append( path_ )\nimport LiveLink as msAPI\nmsAPI.initLiveLink()\n            " 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

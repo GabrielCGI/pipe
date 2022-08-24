@@ -7,6 +7,7 @@ import json
 import maya.app.renderSetup.model.override as mayaOv
 import maya.app.renderSetup.model.renderSetup as renderSetup
 import maya.app.renderSetup.model.utils as utils
+
 from functools import partial
 #Init variables
 presets_folder = "R:\\pipeline\\pipe\\maya\\scripts\\tools\\presets_render_setting"
