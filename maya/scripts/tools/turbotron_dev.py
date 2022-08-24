@@ -4,14 +4,34 @@ import maya.cmds as cmds
 import importlib
 import os
 import json
-import maya.app.renderSetup.model.override as override
+import maya.app.renderSetup.model.override as mayaOv
 import maya.app.renderSetup.model.renderSetup as renderSetup
+import maya.app.renderSetup.model.utils as utils
 from functools import partial
 #Init variables
 presets_folder = "R:\\pipeline\\pipe\\maya\\scripts\\tools\\presets_render_setting"
 presetDic={}
+bgColor = [0.7,0.4,0.2]
+bgColorOff = [0.28,0.28,0.28]
 
-
+labelPretty = {"ignoreSubdivision":"Ignore Subdivision",
+                "ignoreDisplacement":"Ignore Displacement",
+                "ignoreAtmosphere":"Ignore Athmosphere",
+                "ignoreMotionBlur":"Instantaneous Shutter",
+                "motion_blur_enable":"Enable",
+                "enableProgressiveRender":"Progressive Render",
+                "AASamples":"Camera (AA)",
+                "GIDiffuseSamples":"Diffuse",
+                "GISpecularSamples":"Specular",
+                "GITransmissionSamples":"Transmission",
+                "GISssSamples":"SSS", "GIVolumeSamples":"Volume Indirect",
+                "GIDiffuseDepth":"Ray Depth Diffuse",
+                 "GISpecularDepth":"Ray Depth Specular",
+                 "enableAdaptiveSampling":"Enable",
+                 "AASamplesMax":"Max. Camera (AA)",
+                 "motion_steps":"Keys",
+                 "motion_frames":"Motion step"
+                }
 # List renderable cameras
 def getRenderableCameras():
     cameras = cmds.ls(type="camera")
@@ -20,6 +40,50 @@ def getRenderableCameras():
         if cmds.getAttr(cam+".renderable"):
             renderableCameras.append(cam)
     return renderableCameras
+
+def hasOverride(param, node="defaultArnoldRenderOptions"):
+    overides= cmds.ls(cmds.listHistory("defaultArnoldRenderOptions."+param, pruneDagObjects=True), type="applyOverride")
+    print (overides)
+    if overides:
+        overideFound =0
+        for overide in overides:
+            if param in overide:
+                overideFound= 1
+                print("found overide"+ param)
+        if overideFound == 1:
+
+            return True
+        else:
+            return False
+    else:
+        return False
+
+def checkBoxCreate(param):
+
+    state= cmds.getAttr("defaultArnoldRenderOptions."+param)
+    cmds.checkBox(param, backgroundColor=bgColor ,enableBackground=hasOverride(param),label=labelPretty[param], value=state, changeCommand=lambda x:ignore(param,cmds.checkBox(param, query=True, value=True)))
+    popMenuItem(param,0)
+
+def sliderCreate(param):
+    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+param)
+    if hasOverride(param):
+        sliderbgColor = bgColor
+    else:
+        minValue= 0
+        if param=="motion_steps": minValue= 2
+        cmds.intSliderGrp( param, ebg=True, backgroundColor=bgColorOff, field=True, label=labelPretty[param], minValue=minValue, maxValue=20, value=samples_value, changeCommand=lambda x:updateSample(param) )
+
+    popMenuItem(param,1)
+
+def floatSliderCreate(param):
+    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+param)
+    if hasOverride(param):
+        sliderbgColor = bgColor
+    else:
+        cmds.floatSliderGrp( param, ebg=True, backgroundColor=bgColorOff, field=True, label=labelPretty[param], minValue=0, maxValue=1,sliderStep=0.01, precision=3, value=samples_value, changeCommand=lambda x:updateSampleFloat(param) )
+
+    popMenuItem(param,2)
+
 
 def isLentilEnable():
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
@@ -43,19 +107,55 @@ createOidn()
 def printTest(text):
     print(text)
 
+def createOverride(param, type=0):
+    try:
+        already_exist = 0
+        visibleLayer = renderSetup.instance().getVisibleRenderLayer()
+        col = visibleLayer.renderSettingsCollectionInstance()
+        for i in utils.getOverridesRecursive(visibleLayer):
+            if param == i.attributeName():
+                already_exist = 1
+        if not already_exist:
+            ov = col.createAbsoluteOverride('defaultArnoldRenderOptions',param)
+            if type==0:
+                cmds.checkBox(param, edit=True,enableBackground=True)
+            if type==1:
+                cmds.intSliderGrp(param, edit=True, backgroundColor=bgColor)
+            if type==2:
+                cmds.floatSliderGrp(param, edit=True, backgroundColor=bgColor)
 
-def createOverride(param):
-    visibleLayer = renderSetup.instance().getVisibleRenderLayer()
-    col = visibleLayer.renderSettingsCollectionInstance()
-    ov = col.createAbsoluteOverride('defaultArnoldRenderOptions',param)
-    cmds.checkBox(param, edit=True,enableBackground=True)
+    except Exception as e:
+        cmds.confirmDialog( title='Erreur', message="Not possible to create overide \n %s"%e, button=['ok'])
+        print(e)
     #ov.setAttrValue(value)
 
 
+def removeOverride(param,type=0):
+    try:
+        visibleLayer = renderSetup.instance().getVisibleRenderLayer()
+        col = visibleLayer.renderSettingsCollectionInstance()
+        for i in utils.getOverridesRecursive(visibleLayer):
+            if param == i.attributeName():
+                mayaOv.delete(i)
+                if type==0:
+                    cmds.checkBox(param, edit=True,enableBackground=False)
+                if type==1:
+                    cmds.intSliderGrp(param, edit=True, backgroundColor=bgColorOff)
+                    cmds.intSliderGrp(param, edit=True,enableBackground=False)
+                if type==2:
+                    cmds.floatSliderGrp(param, edit=True, backgroundColor=bgColorOff)
+                    cmds.floatSliderGrp(param, edit=True,enableBackground=False)
+    except Exception as e:
+        print (e)
+        cmds.confirmDialog( title='Erreur', message="Not possible to delete overide \n %s"%e, button=['ok'])
+#ov.setAttrValue(value)
 
-def popMenuItem(param):
+
+def popMenuItem(param, type=0):
     cmds.popupMenu(param)
-    cmds.menuItem("Absolute override", c = lambda x: createOverride(param))
+    cmds.menuItem("Absolute override", c = lambda x: createOverride(param, type))
+    cmds.menuItem("Remove override", c = lambda x: removeOverride(param, type))
+
 #Create my GUI
 def createGUI():
     #window set up
@@ -93,23 +193,15 @@ def createGUI():
 
     # -- Ignore Overriedes
     #IGNORE SUBDIVISION
-    ignore_subdiv_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreSubdivision")
-    cmds.checkBox("ignoreSubdivision", backgroundColor=[0.5,0.3,0.3],enableBackground=False,label="Ignore Subdivision", value=ignore_subdiv_state, changeCommand=lambda x:ignore("ignoreSubdivision",cmds.checkBox("ignoreSubdivision", query=True, value=True)))
-    popMenuItem("ignoreSubdivision")
+    checkBoxCreate("ignoreSubdivision")
+    checkBoxCreate("ignoreAtmosphere")
+    checkBoxCreate("ignoreDisplacement")
     #IGNORE ATHMO
-    ignoreAtmosphere_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreAtmosphere")
-    cmds.checkBox("ignoreAtmosphere", label="Ignore Athmosphere", value=ignoreAtmosphere_state, changeCommand=lambda x:ignore("ignoreAtmosphere",cmds.checkBox("ignoreAtmosphere", query=True, value=True)))
-    popMenuItem("ignoreAtmosphere")
-    #IGNORE DISPLACEMENT
-    ignoreDisplacement_state= cmds.getAttr("defaultArnoldRenderOptions.ignoreDisplacement")
-    cmds.checkBox("ignoreDisplacement", label="Ignore Displacment", value=ignoreDisplacement_state, changeCommand=lambda x:ignore("ignoreDisplacement",cmds.checkBox("ignoreDisplacement", query=True, value=True)))
-    popMenuItem("ignoreDisplacement")
 
     # -- AOVs Overriedes
     cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
     cmds.rowColumnLayout( numberOfColumns = 2)
     cmds.checkBox("ignoreAov",label="Ignore AOVs", changeCommand=lambda x:aov_enabled(cmds.checkBox("ignoreAov",query=True,value=True)))
-    popMenuItem("ignoreAov")
 
     aovList = cmds.ls(type = "aiAOV")
     enabled_aov = []
@@ -166,11 +258,11 @@ def createGUI():
     cmds.setParent("..")
 
     cmds.frameLayout( label='Motion blur', labelAlign='bottom')
-    cmds.checkBox("motion_blur_enable", label="Enable", value=cmds.getAttr("defaultArnoldRenderOptions.motion_blur_enable"), changeCommand=lambda x:motion_blur_enable(cmds.checkBox("motion_blur_enable", query=True,value=True)))
-    cmds.checkBox("ignoreMotionBlur", label="Instantaneaous Shutter", value=cmds.getAttr("defaultArnoldRenderOptions.ignoreMotionBlur"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.ignoreMotionBlur",cmds.checkBox("ignoreMotionBlur", query=True, value=True)))
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GISpecularSamples")
-    cmds.intSliderGrp( "motion_steps", field=True, label="Keys", minValue=2, maxValue=10, fieldMinValue=0, fieldMaxValue=30, value=cmds.getAttr("defaultArnoldRenderOptions.motion_steps"), changeCommand=lambda x:updateSample("motion_steps") )
-    cmds.floatSliderGrp( "motion_frames", field=True, label="Length", minValue=0, maxValue=1, sliderStep=0.01, precision=3,fieldMinValue=0, fieldMaxValue=1, value=cmds.getAttr("defaultArnoldRenderOptions.motion_frames"), changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.motion_frames",cmds.floatSliderGrp("motion_frames",query=True,value=True )) )
+    checkBoxCreate("motion_blur_enable")
+    checkBoxCreate("ignoreMotionBlur")
+
+    sliderCreate("motion_steps")
+    floatSliderCreate("motion_frames")
 
     cmds.setParent("..")
 
@@ -204,49 +296,19 @@ def createGUI():
     cmds.frameLayout( label='Sampling', labelAlign='bottom')
 
     #CAMERA AA
-    cmds.checkBox("enableProgressiveRender", label="Enable Progressive Render", value=cmds.getAttr("defaultArnoldRenderOptions.enableProgressiveRender"), changeCommand=lambda x:enableProgessiveRender())
+    checkBoxCreate("enableProgressiveRender")
     samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"AASamples")
 
-    cmds.intSliderGrp( "AASamples", field=True, label="Camera (AA)", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("AASamples") )
-
-    #Diffuse
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GIDiffuseSamples")
-    cmds.intSliderGrp( "GIDiffuseSamples", field=True, label="Diffuse", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GIDiffuseSamples") )
-
-    #Specualr
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GISpecularSamples")
-    cmds.intSliderGrp( "GISpecularSamples", field=True, label="Specular", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GISpecularSamples") )
-
-
-    #Transmssion
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GITransmissionSamples")
-    cmds.intSliderGrp( "GITransmissionSamples", field=True, label="Transmission", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GITransmissionSamples") )
-
-    #SSS
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GISssSamples")
-    cmds.intSliderGrp( "GISssSamples", field=True, label="SSS", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GISssSamples") )
-
-    #Volume Indirect
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions."+"GIVolumeSamples")
-    cmds.intSliderGrp( "GIVolumeSamples", field=True, label="Volume Indirect", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=30, value=samples_value, changeCommand=lambda x:updateSample("GIVolumeSamples") )
-
-    cmds.separator( height=10, style='in' )
-
-    #RAY DEPTH
-    #Ray depth diffuse
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions.GIDiffuseDepth")
-    cmds.intSliderGrp( "GIDiffuseDepth", field=True, label="Ray Depth Diffuse", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=12, value=samples_value, changeCommand=lambda x:updateSample("GIDiffuseDepth") )
-    #Ray depth specular
-    samples_value= cmds.getAttr("defaultArnoldRenderOptions.GISpecularDepth")
-    cmds.intSliderGrp( "GISpecularDepth", field=True, label="Ray Depth Specular", minValue=0, maxValue=12, fieldMinValue=0, fieldMaxValue=12, value=samples_value, changeCommand=lambda x:updateSample("GISpecularDepth") )
+    #CREATE SLIDERS
+    sliderList = ["AASamples", "GIDiffuseSamples","GISpecularSamples","GITransmissionSamples","GISssSamples","GIVolumeSamples","GIDiffuseDepth","GISpecularDepth",]
+    for slider in sliderList:
+        sliderCreate(slider)
 
     #ADAPTATIVE SAMPLING
     cmds.frameLayout( label='Adaptive Sampling', labelAlign='bottom')
     #Enable adaptative
-
-    cmds.checkBox("enableAdaptiveSampling", label="Enable", value=cmds.getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling"), changeCommand=lambda x:setAdaptatif())
-    AASamplesMax_state = cmds.getAttr("defaultArnoldRenderOptions.AASamplesMax")
-    cmds.intSliderGrp( "AASamplesMax", field=True, label="Max. Camera (AA)", minValue=0, maxValue=25, fieldMinValue=0, fieldMaxValue=40, value=AASamplesMax_state, changeCommand=lambda x:cmds.setAttr("defaultArnoldRenderOptions.AASamplesMax", cmds.intSliderGrp("AASamplesMax",query=True,value=True)) )
+    checkBoxCreate("enableAdaptiveSampling")
+    sliderCreate( "AASamplesMax")
 
     #Enable AAAdaptiveThreshold
     AAAdaptiveThreshold_state = cmds.getAttr("defaultArnoldRenderOptions.AAAdaptiveThreshold")
@@ -368,21 +430,8 @@ def apply_preset(preset):
     cmds.checkBox("outputVarianceAOVs",e=True,value=preset["outputVarianceAOVs"])
     cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",preset["outputVarianceAOVs"])
 
-def setAdaptatif():
-    cmds.setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling",cmds.checkBox("enableAdaptiveSampling", query=True, value=True))
-    if cmds.checkBox("enableAdaptiveSampling", query=True, value=True) == True:
-        if cmds.checkBox("enableProgressiveRender", query=True, value=True) == True:
-            msg = cmds.confirmDialog( title='Disabling Progressive', message='Progressive render is not working well with Adaptative Sampling.', button=['Disable Progressive'], defaultButton='Disable Progressive', cancelButton='No', dismissString='No' )
-            if msg == "Disable Progressive":
-                cmds.checkBox("enableProgressiveRender", edit=True, value=False)
 
-def enableProgessiveRender():
-    cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",cmds.checkBox("enableProgressiveRender", query=True, value=True))
-    if cmds.checkBox("enableProgressiveRender", query=True, value=True) == True:
-        if cmds.checkBox("enableAdaptiveSampling", query=True, value=True) == True:
-            msg = cmds.confirmDialog( title='Disabling Adaptative', message='Adaptative sampling is not working well with Progressive render.', button=['Disable Adaptative'], defaultButton='Disable Adaptative', cancelButton='No', dismissString='No' )
-            if msg == "Disable Adaptative":
-                cmds.checkBox("enableAdaptiveSampling", edit=True, value=False)
+
 
 def aov_enabled(value):
     aovList = cmds.ls(type = "aiAOV")
@@ -401,6 +450,9 @@ def aov_enabled(value):
 
 def updateSample(sample):
     value= cmds.intSliderGrp(sample,query=True,value=True)
+    print ("defaultArnoldRenderOptions."+sample)
+def updateSampleFloat(sample):
+    value= cmds.floatSliderGrp(sample,query=True,value=True)
     print ("defaultArnoldRenderOptions."+sample)
 
 
