@@ -31,7 +31,8 @@ labelPretty = {"ignoreSubdivision":"Ignore Subdivision",
                  "enableAdaptiveSampling":"Enable",
                  "AASamplesMax":"Max. Camera (AA)",
                  "motion_steps":"Keys",
-                 "motion_frames":"Motion step"
+                 "motion_frames":"Motion step",
+                 "ignoreMotion": "Ignore Motion"
                 }
 
 #FIX .aovName' is locked or connected and cannot be modified. #
@@ -48,7 +49,7 @@ def getRenderableCameras():
 
 def hasOverride(param, node="defaultArnoldRenderOptions"):
     overides= cmds.ls(cmds.listHistory("defaultArnoldRenderOptions."+param, pruneDagObjects=True), type="applyOverride")
-    print (overides)
+
     if overides:
         overideFound =0
         for overide in overides:
@@ -131,8 +132,6 @@ def createOidn():
         cmds.createNode( 'aiImagerDenoiserOidn', n='aiImagerDenoiserOidn1' )
 createOidn()
 
-def printTest(text):
-    print(text)
 
 def createOverride(param, type=0):
     try:
@@ -227,6 +226,11 @@ def createGUI():
     checkBoxCreate("ignoreSubdivision")
     checkBoxCreate("ignoreAtmosphere")
     checkBoxCreate("ignoreDisplacement")
+    checkBoxCreate("ignoreMotion")
+    cmds.setParent("..")
+    cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
+
+
     #IGNORE ATHMO
 
     # -- AOVs Overriedes
@@ -474,10 +478,10 @@ def aov_enabled(value):
 
 def updateSample(sample):
     value= cmds.intSliderGrp(sample,query=True,value=True)
-    print ("defaultArnoldRenderOptions."+sample)
+
 def updateSampleFloat(sample):
     value= cmds.floatSliderGrp(sample,query=True,value=True)
-    print ("defaultArnoldRenderOptions."+sample)
+
 
 
     cmds.setAttr("defaultArnoldRenderOptions."+sample,value)
@@ -664,6 +668,7 @@ def add_denoise_aovs_lentil():
         cmds.connectAttr("aiImagerDenoiserOidn1.message", "defaultArnoldRenderOptions.imagers[1]", f=True)
     cmds.setAttr("aiImagerDenoiserOidn1.layer_selection",layer_selection,type="string")
     cmds.setAttr("aiImagerDenoiserOidn1.output_suffix","_denoised",type="string")
+    print("Setting Oidn layer_selection to :"+ layer_selection)
 
 
 def remove_denoise_lentil():
@@ -674,6 +679,7 @@ def remove_denoise_lentil():
     #END HACK
     if "aiImagerDenoiserOidn1" in listConnectionImagers:
         cmds.disconnectAttr("aiImagerDenoiserOidn1.message", "defaultArnoldRenderOptions.imagers[1]")
+        print(" aiImagerDenoiserOidn disconnected")
     cmds.setAttr("aiImagerDenoiserOidn1.layer_selection","",type="string")
 
 
@@ -683,6 +689,7 @@ def remove_denoise_persepective():
     for aov in allAovs:
         try:
             disconnectVariance(aov)
+            print (aov + "variance disconneted")
         except Exception as e:
             print (e)
 
@@ -691,8 +698,11 @@ def add_denoise_aovs_perspective():
     varianceDriverExr, varianceFilter= setup_driver()
 
     for aov in allAovs:
-        connectVariance(aov,varianceDriverExr,varianceFilter)
-
+        try:
+            connectVariance(aov,varianceDriverExr,varianceFilter)
+            print (aov + " variance connected")
+        except Exception as e:
+            print (e)
 
 
 
