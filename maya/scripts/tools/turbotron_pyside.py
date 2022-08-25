@@ -3,6 +3,10 @@ from PySide2 import QtCore
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 import maya.cmds as cmds
+
+
+
+
 def maya_main_window():
     '''
     Return the Maya main window widget as a Python object
@@ -18,7 +22,13 @@ class TestTool(QtWidgets.QDialog):
 
         self.createUI()
         self.create_connections()
+
         #################################################################
+    def createCheckBox(self, name):
+        box = QtWidgets.QCheckBox(name)
+        box.clicked.connect(self.printName)
+        return box
+
     def createUI(self):
         self.setWindowTitle("Skin Weights Tool")
         self.setWindowFlags(QtCore.Qt.Tool)
@@ -64,24 +74,36 @@ class TestTool(QtWidgets.QDialog):
         self.skinWeightGrid.addLayout(self.infLabelLayout, 0, 0)
         self.skinWeightGrid.addLayout(self.weightLayout, 1, 0)
 
-        self.ignoreSubdivision = QtWidgets.QCheckBox("ignoreSubdivision")
+        self.ignoreSub  = QtWidgets.QCheckBox("ignor")
         self.color = QtWidgets.QCheckBox("Color")
         self.position = QtWidgets.QCheckBox("Position")
         self.rotation = QtWidgets.QCheckBox("Rotation")
 
         self.runButton = QtWidgets.QPushButton("Assign")
+        self.test = self.createCheckBox("test")
+        self.mainLayout.addWidget(self.test)
 
-        self.mainLayout.addWidget(self.jointTitle)
+        """
+        for i in range(10):
+            self.btn.append(i)
+            self.btn[i] = QtWidgets.QCheckBox(self)
+        self.mainLayout.addWidget(self.btn)
+        """
+
         self.mainLayout.addWidget(self.jointList)
         self.mainLayout.addWidget(self.skinTitle)
         self.mainLayout.addLayout(self.skinWeightGrid)
-        self.mainLayout.addWidget(self.ignoreSubdivision)
+        self.mainLayout.addWidget(self.ignoreSub)
         self.mainLayout.addWidget(self.color)
         self.mainLayout.addWidget(self.position)
         self.mainLayout.addWidget(self.runButton)
 
     def create_connections(self):
-        self.ignoreSubdivision.clicked.connect(self.ignore)
+        pass
+        self.ignoreSub.clicked.connect(self.ignore)
+
+    def printName(self):
+        print(self.sender().text())
 
     def ignore(self):
         print("ignor")
@@ -100,11 +122,7 @@ def showUI():
 import importlib
 import turbotron_pyside
 importlib.reload(turbotron_pyside)
-try:
-    ui.deleteLater()
-except:
-    pass
-ui= turbotron_pyside.TestTool()
-ui.createUI()
-ui.show()
+
+turbotron_pyside.showUI()
+
 """

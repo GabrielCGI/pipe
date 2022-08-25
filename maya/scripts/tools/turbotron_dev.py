@@ -12,8 +12,8 @@ from functools import partial
 #Init variables
 presets_folder = "R:\\pipeline\\pipe\\maya\\scripts\\tools\\presets_render_setting"
 presetDic={}
-bgColor = [0.7,0.4,0.2]
-bgColorOff = [0.28,0.28,0.28]
+bgColor = [0.4,0.2,0.1]
+bgColorOff = [0.32,0.32,0.32]
 
 labelPretty = {"ignoreSubdivision":"Ignore Subdivision",
                 "ignoreDisplacement":"Ignore Displacement",
@@ -62,26 +62,48 @@ def hasOverride(param, node="defaultArnoldRenderOptions"):
 def checkBoxCreate(param):
 
     state= cmds.getAttr("defaultArnoldRenderOptions."+param)
-    cmds.checkBox(param, backgroundColor=bgColor ,enableBackground=hasOverride(param),label=labelPretty[param], value=state, changeCommand=lambda x:ignore(param,cmds.checkBox(param, query=True, value=True)))
+    if hasOverride(param):
+        cmds.checkBox(param, enableBackground=True,label=labelPretty[param],
+                            value=state, backgroundColor=bgColor,
+                            changeCommand=lambda x:ignore(param,cmds.checkBox(param, query=True, value=True)))
+
+    else:
+            cmds.checkBox(param, label=labelPretty[param],
+                        value=state, noBackground=1-hasOverride(param),
+                        changeCommand=lambda x:ignore(param,cmds.checkBox(param, query=True, value=True)))
     popMenuItem(param,0)
 
 def sliderCreate(param):
     samples_value= cmds.getAttr("defaultArnoldRenderOptions."+param)
+    minValue= 0
+    if param=="motion_steps": minValue= 2
     if hasOverride(param):
-        sliderbgColor = bgColor
+        cmds.intSliderGrp( param,  field=True, label=labelPretty[param], minValue=minValue,
+                                maxValue=20, enableBackground=hasOverride(param), backgroundColor=bgColor,
+                                 value=samples_value, changeCommand=lambda x:updateSample(param) )
+
+
     else:
-        minValue= 0
-        if param=="motion_steps": minValue= 2
-        cmds.intSliderGrp( param, ebg=True, backgroundColor=bgColorOff, field=True, label=labelPretty[param], minValue=minValue, maxValue=20, value=samples_value, changeCommand=lambda x:updateSample(param) )
+
+        cmds.intSliderGrp( param,  field=True, label=labelPretty[param], minValue=minValue,
+                                maxValue=20,
+                                 value=samples_value, changeCommand=lambda x:updateSample(param) )
+
 
     popMenuItem(param,1)
 
 def floatSliderCreate(param):
     samples_value= cmds.getAttr("defaultArnoldRenderOptions."+param)
     if hasOverride(param):
-        sliderbgColor = bgColor
+
+        cmds.floatSliderGrp( param, backgroundColor=bgColor, enableBackground=hasOverride(param),
+        field=True, label=labelPretty[param], minValue=0, maxValue=1,sliderStep=0.01, precision=3, value=samples_value, changeCommand=lambda x:updateSampleFloat(param) )
+
     else:
-        cmds.floatSliderGrp( param, ebg=True, backgroundColor=bgColorOff, field=True, label=labelPretty[param], minValue=0, maxValue=1,sliderStep=0.01, precision=3, value=samples_value, changeCommand=lambda x:updateSampleFloat(param) )
+
+
+        cmds.floatSliderGrp( param, field=True, label=labelPretty[param],
+        minValue=0, maxValue=1,sliderStep=0.01, precision=3, value=samples_value, changeCommand=lambda x:updateSampleFloat(param) )
 
     popMenuItem(param,2)
 
@@ -119,7 +141,8 @@ def createOverride(param, type=0):
         if not already_exist:
             ov = col.createAbsoluteOverride('defaultArnoldRenderOptions',param)
             if type==0:
-                cmds.checkBox(param, edit=True,enableBackground=True)
+                cmds.checkBox(param, edit=True,noBackground=False)
+                cmds.checkBox(param, edit=True,backgroundColor=bgColor)
             if type==1:
                 cmds.intSliderGrp(param, edit=True, backgroundColor=bgColor)
             if type==2:
@@ -139,7 +162,10 @@ def removeOverride(param,type=0):
             if param == i.attributeName():
                 mayaOv.delete(i)
                 if type==0:
+                    cmds.checkBox(param, edit=True,backgroundColor=bgColorOff)
                     cmds.checkBox(param, edit=True,enableBackground=False)
+                    cmds.checkBox(param, edit=True,noBackground=True)
+
                 if type==1:
                     cmds.intSliderGrp(param, edit=True, backgroundColor=bgColorOff)
                     cmds.intSliderGrp(param, edit=True,enableBackground=False)
@@ -340,7 +366,7 @@ def createGUI():
 
     def motion_blur_enable(state):
         cmds.setAttr("defaultArnoldRenderOptions.motion_blur_enable",state)
-        cmds.checkBox("ignoreMotionBlur",edit= True, editable=state)
+        cmds.checkBox("MotionBlur",edit= True, editable=state)
         cmds.intSliderGrp("motion_steps",edit= True,manage=state)
         cmds.floatSliderGrp("motion_frames",edit= True,manage=state)
 

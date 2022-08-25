@@ -3,6 +3,11 @@ import mtoa.aovs as aovs
 
 def aovMaskBottle():
     if not cmds.objExists("aiAOV_mask_bottle"):
+
+
+        cmds.lockNode('initialShadingGroup', lock=False, lu=False)
+
+        cmds.lockNode('initialParticleSE', lock=False, lu=False)
         aovs.AOVInterface().addAOV("mask_bottle")
         cmds.setAttr("aiAOV_mask_bottle.type",4)
         fileMask = cmds.shadingNode("file",asTexture=True)
@@ -37,17 +42,17 @@ def run():
             print ("FIXED :"+ node)
             cmds.setAttr(node+".overrideShaders",0)
 
-    #Alemanchier
-    for node in nodes:
 
-        if "leafA" in node or "leafsG" in node:
-            if cmds.getAttr(node+".dso") == "I:/guerlain_2206/assets/plantAmelanchier/houdini/export/leafA.abc" :
-                cmds.setAttr(node+".dso", "I:/guerlain_2206/assets/plantAmelanchier/ass/leafA.ass", type="string")
-                cmds.setAttr(node+".overrideShaders",0)
-                print ("FIXED :"+ node)
-                cmds.setAttr(node+".overrideShaders",0)
-            if cmds.getAttr(node+".dso") == "I:/guerlain_2206/assets/plantAmelanchier/houdini/export/leafG.abc" :
-                cmds.setAttr(node+".dso", "I:/guerlain_2206/assets/plantAmelanchier/ass/leafG.ass", type="string")
-                cmds.setAttr(node+".overrideShaders",0)
-                print ("FIXED :"+ node)
-                cmds.setAttr(node+".overrideShaders",0)
+    dic = {"I:/guerlain_2206/assets/plantAmelanchier/houdini/export/trunckG.abc":"I:/guerlain_2206/assets/plantAmelanchier/ass/trunk_plantG.ass",
+           "I:/guerlain_2206/assets/plantAmelanchier/houdini/export/flowerG_instance2.abc":"I:/guerlain_2206/assets/plantAmelanchier/ass/flowerG_plantG.ass",
+           "I:/guerlain_2206/assets/plantAmelanchier/houdini/export/flowerA_instance2.abc":"I:/guerlain_2206/assets/plantAmelanchier/ass/flowerA_plantA.ass",
+           "I:/guerlain_2206/assets/plantAmelanchier/houdini/export/trunckA.abc":"I:/guerlain_2206/assets/plantAmelanchier/ass/trunk_plantA.ass",
+           "I:/guerlain_2206/assets/plantAmelanchier/houdini/export/leafA.abc":"I:/guerlain_2206/assets/plantAmelanchier/ass/leafA.ass",
+           "I:/guerlain_2206/assets/plantAmelanchier/houdini/export/leafG.abc":"I:/guerlain_2206/assets/plantAmelanchier/ass/leafG.ass"
+           }
+    for node in nodes:
+        dso=cmds.getAttr(node+".dso")
+        if dso in dic:
+            cmds.setAttr(node+".dso",  dic[dso], type="string")
+            cmds.setAttr(node+".overrideShaders",0)
+            print ("FIXED :"+ node)
