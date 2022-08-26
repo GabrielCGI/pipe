@@ -32,7 +32,8 @@ labelPretty = {"ignoreSubdivision":"Ignore Subdivision",
                  "AASamplesMax":"Max. Camera (AA)",
                  "motion_steps":"Keys",
                  "motion_frames":"Motion step",
-                 "ignoreMotion": "Ignore Motion"
+                 "ignoreMotion": "Ignore Motion",
+                 "ignoreDof":"Ignore Depth of field"
                 }
 
 #FIX .aovName' is locked or connected and cannot be modified. #
@@ -227,6 +228,7 @@ def createGUI():
     checkBoxCreate("ignoreAtmosphere")
     checkBoxCreate("ignoreDisplacement")
     checkBoxCreate("ignoreMotion")
+    checkBoxCreate("ignoreDof")
     cmds.setParent("..")
     cmds.columnLayout(adjustableColumn= True, rowSpacing= 0)
 
@@ -478,12 +480,10 @@ def aov_enabled(value):
 
 def updateSample(sample):
     value= cmds.intSliderGrp(sample,query=True,value=True)
+    cmds.setAttr("defaultArnoldRenderOptions."+sample,value)
 
 def updateSampleFloat(sample):
     value= cmds.floatSliderGrp(sample,query=True,value=True)
-
-
-
     cmds.setAttr("defaultArnoldRenderOptions."+sample,value)
 
 def updateSize(value, type):

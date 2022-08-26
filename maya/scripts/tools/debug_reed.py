@@ -20,7 +20,7 @@ def aovMaskBottle():
         blendColor= cmds.shadingNode("blendColors",asUtility=True)
         cmds.setAttr(blendColor+".color2", 0, 0, 0 , type="double3")
 
-        cmds.setAttr(fileMask+".fileTextureName", "$DISK_I/guerlain_2206/assets/ch_beeBottleGold/textures/mask7/phong1SG_Base_color_ACES - ACEScg_1001.exr", type="string")
+        cmds.setAttr(fileMask+".fileTextureName", "$DISK_I/guerlain_2206/assets/ch_beeBottleGold/textures/mask7/phong1SG_Base_color_ACES - ACEScg_1001.tx", type="string")
         cmds.setAttr(fileMask+".uvTilingMode", 3)
 
         cmds.setAttr(fileMask+".colorSpace", "Raw", type="string")
@@ -48,7 +48,8 @@ def run():
            "I:/guerlain_2206/assets/plantAmelanchier/houdini/export/flowerA_instance2.abc":"I:/guerlain_2206/assets/plantAmelanchier/ass/flowerA_plantA.ass",
            "I:/guerlain_2206/assets/plantAmelanchier/houdini/export/trunckA.abc":"I:/guerlain_2206/assets/plantAmelanchier/ass/trunk_plantA.ass",
            "I:/guerlain_2206/assets/plantAmelanchier/houdini/export/leafA.abc":"I:/guerlain_2206/assets/plantAmelanchier/ass/leafA.ass",
-           "I:/guerlain_2206/assets/plantAmelanchier/houdini/export/leafG.abc":"I:/guerlain_2206/assets/plantAmelanchier/ass/leafG.ass"
+           "I:/guerlain_2206/assets/plantAmelanchier/houdini/export/leafG.abc":"I:/guerlain_2206/assets/plantAmelanchier/ass/leafG.ass",
+           "I:/guerlain_2206/assets/plantSyringa/ass/syringa_trunck6.ass":"I:/guerlain_2206/assets/plantSyringa/ass/syringa_trunck7.ass",
            }
     for node in nodes:
         dso=cmds.getAttr(node+".dso")
