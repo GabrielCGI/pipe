@@ -9,11 +9,52 @@ logger = logging.getLogger("CollectFiles")
 localCacheFolder = "I:/guerlain_cache"
 networkPath = "I:/"
 dirList=[] #List of full directory to copy
-
+assSequenceDir= []
 #Return ful path for list directroy
 def list_full_paths(directory):
     return [os.path.join(directory, file) for file in os.listdir(directory)]
 
+def getHotCacheDir(dir):
+    splitDir = dir.split(":")
+    hotCacheDir  = localCacheFolder +"/"+ splitDir[0] + splitDir[-1]
+    return hotCacheDir
+
+def mTimeListDir(dir):
+    list = os.listdir(dir)
+    mtimeList = []
+    for a in list:
+        path = os.path.join(dir,a)
+        mTime = os.stat(path).st_mtime
+        mtimeList.append(mTime)
+    return(mtimeList)
+
+
+def isDirModified(dir):
+    timestamp = None
+    hotCacheDir  = getHotCacheDir(dir)
+    os.makedirs(hotCacheDir,exist_ok=True)
+    #dirTime = os.stat(dir).st_mtime
+    #print ("DIR TIME: "+str(dirTime))
+    last_modif_dir = mTimeListDir(dir)
+    last_modif_hotDir = mTimeListDir(hotCacheDir)
+
+    if last_modif_dir != last_modif_hotDir:
+        return True
+    else:
+        return False
+
+def writeTimeStamp(time, dir):
+    timeStamp = os.path.join(dir, "timestamp.txt")
+    with open(timeStamp, 'w') as f:
+        f.write(str(time))
+
+def getTimeStamp(dir):
+    hotCacheDir  = getHotCacheDir(dir)
+    timeStampPath = os.path.join(hotCacheDir,"timestamp.txt")
+    with open(timeStampPath) as f:
+        lines = f.readlines()
+    timestamp = float(lines[0])
+    return timestamp
 
 #Return the path of all Arnold Ass StadnIN
 def listAllAssPath():
@@ -24,9 +65,17 @@ def listAllAssPath():
         #CHECK IS IT'S AN ASS SEQUENCE
         if assPath.endswith('.####.ass'):
             dirname = os.path.dirname(assPath).replace("\\", "/")
-            assListDir = list_full_paths(dirname)
+            print("ASS SEQUENCE FOUND: " + assPath)
+            if dirname not in assSequenceDir:
+                assSequenceDir.append(dirname)
+                if isDirModified(dirname):
+                    print("Difference found. Updating "+ dirname)
+                    assListDir = list_full_paths(dirname)
+                    allAssPath = allAssPath + assListDir
+                    writeTimeStamp(os.stat(dirname).st_mtime, getHotCacheDir(dirname))
+                else:
+                    print("No folder difference found. Skipping  "+ dirname)
 
-            allAssPath = allAssPath + assListDir
         else:
             if assPath not in allAssPath:
                 allAssPath.append(assPath)
@@ -69,12 +118,16 @@ def copyFromTo (source, to):
         except Exception as e:
             cmds.warning("Failed to updated %s to %s (Time difference = %s secondes)"%(source,to,time_dif))
             print("Oops!", e.__class__, "occurred.")
-            
+
     #CHECK 3 !
     else:
         kind="skipped"
         print ("Already sync: " + source)
     return kind
+
+
+
+
 def run():
     print("\n")
     print("\n")
@@ -98,7 +151,7 @@ def run():
 
     cmds.progressWindow(title='Stepped Progress Bar', progress=0, status='Local asset caching:', isInterruptable=False)
     limit = len(allPath)
-    print("total path"+ str(limit))
+    print("Total path: "+ str(limit))
     step = 10
     i = 0
     for path in allPath:

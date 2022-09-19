@@ -109,6 +109,7 @@ def fixcolorSpaceUnknown():
     for tex in textures_file:
         texFile = FileTex(tex, cmds.getAttr(tex+".fileTextureName"), cmds.getAttr(tex+".colorSpace"))
         listFile.append(texFile)
+
     for f in listFile:
         #Check if the colorspace is not authorized
         if f.colorSpace not in colorSpaceKnown:
@@ -166,6 +167,7 @@ def getBadColorSpaceTex():
 def fixColorSpace(dict):
     for key in list(dict.keys()):
         colorSpaceList = [c for c in dict[key]["colorSpace"]]
+        colorSpaceList.sort()
         #colorSpaceList.append("Cancel")
         confirm = cmds.confirmDialog( title='Color space conflict', message='-------------\n%s\n-------------\n\nThe same texture file use multiple color space!\nPlease choose one. '%(key), button=colorSpaceList, defaultButton='Yes', cancelButton='Cancel', dismissString='Cancel' )
         if str(confirm) != "Cancel":

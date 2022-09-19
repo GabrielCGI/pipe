@@ -1,6 +1,6 @@
 import maya.cmds as cmds
 import mtoa.aovs as aovs
-
+import os
 def aovMaskBottle():
     if not cmds.objExists("aiAOV_mask_bottle"):
 
@@ -34,7 +34,8 @@ def aovMaskBottle():
         print("MASK BOTLLE CREATED !")
 
 def run():
-    aovMaskBottle()
+    if os.environ["CURRENT_PROJECT"] == "guerlain_2206":
+        aovMaskBottle()
     nodes=cmds.ls( type="aiStandIn" )
     for node in nodes:
 
