@@ -905,7 +905,7 @@ global proc shelf_Bloom () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "import maya.cmds as cmds\ntry:\n    cmds.dublasdt()\n    \nexcept:\n    cmds.confirmDialog( title='Dublast warning', message='The pluggin is not loaded or not installed?\\n Install available here: \\n R:\\pipeline\\\\networkInstall\\dublast', button=['Ok'], )" 
+        -annotation "import maya.cmds as cmds\ntry:\n    cmds.dublast()\n    \nexcept:\n    cmds.confirmDialog( title='Dublast warning', message='The pluggin is not loaded or not installed?\\n Install available here: \\n R:\\pipeline\\\\networkInstall\\dublast', button=['Ok'], )" 
         -enableBackground 0
         -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
