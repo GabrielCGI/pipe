@@ -40,6 +40,15 @@ labelPretty = {"ignoreSubdivision":"Ignore Subdivision",
 cmds.lockNode('initialShadingGroup', lock=False, lu=False)
 cmds.lockNode('initialParticleSE', lock=False, lu=False)
 # List renderable cameras
+
+def isLentilInstalled():
+
+    try:
+        dof_state= cmds.getAttr(renderableCameras[0]+".enableDof")
+        return True
+    except:
+        return False
+
 def getRenderableCameras():
     cameras = cmds.ls(type="camera")
     renderableCameras=[]
@@ -267,9 +276,16 @@ def createGUI():
     #-----  Motion blur --------
     cmds.frameLayout( label='DOF', labelAlign='bottom')
     cmds.rowColumnLayout( numberOfColumns = 2)
-    dof_state= cmds.getAttr(renderableCameras[0]+".enableDof")
+    try:
+        dof_state= cmds.getAttr(renderableCameras[0]+".enableDof")
+    except:
+        dof_state= cmds.getAttr(renderableCameras[0]+".aiEnableDOF")
     cmds.checkBox("aiEnableDOF", label="Depth of Field", value=dof_state, changeCommand=lambda x:dof())
-    cmds.checkBox("lentil_enable", label="Lentil", value=lentil_enable, changeCommand=lambda x:changeCamType())
+    if isLentilInstalled():
+        lentilBoxVisible = True
+    else:
+        lentilBoxVisible =False
+    cmds.checkBox("lentil_enable", label="Lentil", value=lentil_enable,visible=lentilBoxVisible, changeCommand=lambda x:changeCamType())
     cmds.rowColumnLayout( numberOfColumns = 2)
     cmds.text("FStop ")
     cmds.floatField("fStop",precision=2,value=cmds.getAttr(cam+".fStop"), changeCommand=lambda x:cmds.setAttr(cam+".fStop",cmds.floatField("fStop",query=True,value=True)))
@@ -277,7 +293,11 @@ def createGUI():
     cmds.setParent("..")
     cmds.rowColumnLayout( numberOfColumns = 2)
     cmds.text("Samples Mult.")
-    cmds.intField("bidirSampleMult",value=cmds.getAttr(cam+".bidirSampleMult"), changeCommand=lambda x:cmds.setAttr(cam+".bidirSampleMult",cmds.intField("bidirSampleMult",query=True,value=True)))
+    try:
+        bidirSampleMult = getAttr(cam+".bidirSampleMult")
+    except:
+        bidirSampleMult =0
+    cmds.intField("bidirSampleMult",value=bidirSampleMult, changeCommand=lambda x:cmds.setAttr(cam+".bidirSampleMult",cmds.intField("bidirSampleMult",query=True,value=True)))
     cmds.setParent("..")
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
 
@@ -581,7 +601,8 @@ def changeCamType():
 def dof():
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
     dof_value = cmds.checkBox("aiEnableDOF", query = True, value =True)
-    cmds.setAttr(cam+".enableDof", dof_value)
+    if isLentilInstalled():
+        cmds.setAttr(cam+".enableDof", dof_value)
     cmds.setAttr(cam+".aiEnableDOF", dof_value)
 
 def ignore(ignore_name,ignore_value):
