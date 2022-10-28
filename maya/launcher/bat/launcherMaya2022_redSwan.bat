@@ -51,7 +51,7 @@ SET MAYA_SCRIPT_PATH=%MAYA_SCRIPT_PATH%;R:\deadline\submission\Maya\Client;
 rem \---- Mgears
 rem SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\mgear_4.0.3\release;
 
-SET CURRENT_PROJECT=swarovski_2205
+SET CURRENT_PROJECT=swaRedSwan_2209
 
 REM == Start maya and launch statupSettings (FPS, Unit ect...)
 start C:\"Program Files"\Autodesk\Maya2022\bin\maya.exe -file %1 -command "python(\"import startupSettings\"); python (\"startupSettings.run()\");"  %*

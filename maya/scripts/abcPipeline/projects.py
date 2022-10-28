@@ -27,11 +27,11 @@ projectsData ={
             "assetsDbDir": "I:\\guerlain_2206\\assets\\database",
         },
 
-    "roger":
+    "swaRedSwan_2209":
         {
-            "path": "I:\\roger_2112",
-            "assetsDir": "I:\\roger_2112\\assets",
-            "assetsDbDir": "I:\\roger_2112\\assets\\database",
+            "path": "I:\\swaRedSwan_2209",
+            "assetsDir": "I:\\swaRedSwan_2209\\assets",
+            "assetsDbDir": "I:\\swaRedSwan_2209\\assets\\database",
         }
 }
 

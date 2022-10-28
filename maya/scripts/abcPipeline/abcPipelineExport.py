@@ -186,8 +186,8 @@ class exportAnimGuiCls(object):
         cmds.setParent("..")
 
         cmds.rowLayout(numberOfColumns=3)
-        frameSample = cmds.textField(text = "-0.2 -0.1 0 0.1 0.2")
-        subFrameCheckBox = cmds.checkBox(label="Subframes", value = True)
+        frameSample = cmds.textField(text = "-0.25 0 0.25")
+        subFrameCheckBox = cmds.checkBox(label="Subframes", value = False)
         filterEurlerCheckBox = cmds.checkBox(label="Filter Euler Rotation", value = True)
 
         cmds.setParent("..")
