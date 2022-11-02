@@ -29,6 +29,9 @@ rem \---- SET MTOA_TEMPLATES_PATH=%PATH_TO_LENTIL%\ae
 rem \---- HDRLigthStudio
 rem SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\HDRLightStudioConnectionMaya\2022
 
+rem \ MAYA SECURITY TOOL
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;R:\pipeline\networkInstall\MayaScanner;
+
 rem \---- PLace Reflection
 SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\placeReflection_braveRabbit
 

@@ -9,10 +9,16 @@ def run():
     cmds.currentUnit(linear='cm')
     print("unit = cm")
 
+    #VIRUS SECURITY TOOL
+    print("LOADING MAYA SECURITY TOOL... ")
+    cmds.loadPlugin( "MayaScanner.py" )
+    cmds.pluginInfo("MayaScanner.py", edit=True, autoload=True)
 
+    cmds.loadPlugin( "MayaScannerCB.py" )
+    cmds.pluginInfo("MayaScannerCB.py", edit=True, autoload=True)
 
     # HACK TO FORCE PLUGIN PREFS AUTOLOADING
+
     cmds.evalDeferred('for plug in ["bifmeshio.mll","bifrostGraph.mll","bifrostshellnode.mll","bifrostshellnode.mll","bifrostvisplugin.mll","Turtle.mll" ]:  cmds.pluginInfo(plug, edit=True, autoload=False ) if cmds.pluginInfo(plug, query=True, autoload=True) else print("Already no autoload: "+plug) ; cmds.pluginInfo(savePluginPrefs=True)',lp=True)
-    cmds.evalDeferred('cmds.setAttr(setAttr "defaultArnoldRenderOptions.renderUnit", 7)')
-    print("Arnold render unit = cm")
+
     cmds.file( modified=False )
