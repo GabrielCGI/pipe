@@ -1,29 +1,8 @@
-
-"""
-import sys
-sys.path.append("D:/gabriel/assetizer/scripts")
-
-import assetPublisher
-import importlib
-importlib.reload(assetPublisher)
-
-"""
 import maya.cmds as cmds
 import os
+import sys
 
-
-def get_asset_dirs():
-    maya_scene_path = cmds.file(q=True, sn=True)
-    asset_directory = os.path.dirname( os.path.dirname (maya_scene_path ))
-    lib_directory =  os.path.join(asset_directory,"lib")
-    ass_directory = os.path.join(lib_directory,"ass")
-    return asset_directory, lib_directory, ass_directory
-
-def get_asset_name_from_scene():
-    maya_scene_path = cmds.file(q=True, sn=True)
-    asset_name = os.path.basename(maya_scene_path).split("_")[0]
-    return asset_name
-
+# UTILITY FUNCTION
 def write_ass(path=""):
     cmds.file(path,
               force=False,
@@ -31,89 +10,108 @@ def write_ass(path=""):
               type="ASS Export",
               exportSelected=True)
 
-class asset():
-    def __init__(self):
-        asset_directory, lib_directory, ass_directory = get_asset_dirs()
-        self.name = get_asset_name_from_scene()
-        self.asset_directory = asset_directory
-        self.ass_directory = ass_directory
-        self.lib_directory = lib_directory
-        self.lib_name = os.path.join(lib_directory,self.name+"_v001.ma")
-        self.variant_list = self.get_variant_list()
+# EXPORT FUNCTION
+def exportVariant(ass_directory, assetName, variantSet, variant):
+    variant_basename = variant.split("|")[-1] # ex: "toy_default|HIGH" --> "HIGH"
+    variantName = variantSet + "_" + variant_basename + ".ass" #ex: "HIGH" --> "toy_default_HIGH.ass"
+    variantPath = os.path.join(ass_directory,variantSet,variantName)
 
-    def get_variant_list(self):
-        #Scan the scene and return a list of variant
-        #Naming convention: assetName_variantName
-        variant_list = []
-        all_maya_root_transform = cmds.ls(assemblies=True)
-        for node in all_maya_root_transform:
-            try:
-                split_node = node.split("_")
-                if len(split_node) == 2 and split_node[0] == self.name:
-                    variant_list.append(node)
-            except Exception as e:
-                print(e.message, e.args)
-        return variant_list
+    #select variant in maya
+    cmds.select(variant)
 
+    #Store visibility
+    variant_visibility_state = cmds.getAttr(variant+".visibility")
+    variantSet_visibitlity_state = cmds.getAttr(variantSet+".visibility")
 
+    #Make visible
+    cmds.setAttr(variant+".visibility",1)
+    cmds.setAttr(variantSet+".visibility",1)
 
-class LOD():
-    def __init__(self,asset_name, variant_name, lod_maya_path):
-        self.asset_name = asset_name
-        self.variant_name = variant_name
-        self.lod_maya_path =  lod_maya_path
-        self.lod_name = lod_maya_path.split("|")[-1]
+    #Export ass
+    print ("-------- %s ---------"%(variant))
+    write_ass(variantPath)
 
-        self.ass_name =  "%s_%s.ass "%(self.variant_name,self.lod_name) #assName_High.ass
-        self.ass_path = os.path.join(asset.ass_directory, self.variant_name, self.ass_name)
+    #Restore visibility_state
+    cmds.setAttr(variant+".visibility",variant_visibility_state)
+    cmds.setAttr(variantSet+".visibility",variantSet_visibitlity_state)
 
-    def export_to_ass(self):
-        cmds.select(self.lod_maya_path)
-        visibility_state = cmds.getAttr(self.lod_maya_path+".visibility")
-        cmds.setAttr(self.lod_maya_path+".visibility",1)
-        cmds.setAttr(self.lod_maya_path+".aiOverrideShaders",0)
+def make_proxy_scene(asset):
+    #Init name
 
-        print("START EXPORING:" + self.ass_path)
-
-        write_ass(self.ass_path)
-        cmds.setAttr(self.lod_maya_path+".visibility",visibility_state)
-
-
-asset = asset()
-for variant in asset.variant_list:
-    lod_list = cmds.listRelatives(variant, path=True)
-    for lod in lod_list:
-        print(variant)
-        print(lod)
-        class_lod = LOD(asset.name, variant, lod)
-        class_lod.export_to_ass()
-
-
-def make_proxy_scene():
     proxy = "PROXY"
     asset_proxy = asset.name+"_proxy"
+
+    #Visibility
     visibility_state = cmds.getAttr(proxy+".visibility")
     cmds.setAttr(proxy+".visibility",1)
 
-
+    #Arnold attribut
     cmds.setAttr(proxy+".ai_translator",  "procedural", type="string")
-    #TO DO: CLEAN deafault_ass_path
     default_ass_path = os.path.join(asset.ass_directory,  asset.name+"_default", asset.name+"_default_HIGH.ass")
     cmds.setAttr(proxy+".dso",default_ass_path,type="string")
+    cmds.setAttr(proxy+".aiOverrideShaders",0)
+    cmds.setAttr(proxy+".aiOverrideMatte",1)
 
 
-    #Lock Proxy
-    attrList = [".tx", ".ty", ".tz",".rx", ".ry", ".rz",".sx", ".sy", ".sz"]
-    for attr in attrList: cmds.setAttr(proxy+attr,lock=True)
+
 
     #rename proxy group before export
     cmds.rename(proxy,asset_proxy)
     cmds.select(asset_proxy )
     cmds.file(asset.lib_name,force=False, options="v=0;", type="mayaAscii", pr=True, es=True)
+
+    #Restore properties
     cmds.rename(asset_proxy , proxy)
     cmds.setAttr(proxy+".ai_translator",  "polymesh", type="string")
-
-    #DELETE standIn
     cmds.setAttr(proxy+".visibility",visibility_state)
 
-make_proxy_scene()
+class Asset():
+    def __init__(self):
+        self.maya_scene = cmds.file(q=True, sn=True)
+        self.name =  os.path.basename(self.maya_scene).split("_")[0] # ex: "../assets/shading/toy_shading.002.ma" --> "toy"
+        self.directory =  os.path.dirname(os.path.dirname(self.maya_scene))
+        self.lib_name = os.path.join(self.directory, "lib",self.name+".v001")
+        self.ass_directory = os.path.join(self.directory,"lib","ass")
+        self.variantSets = self.scan_scene_variantSets()
+
+    def scan_scene_variantSets(self):
+        variantSets = [i for i in cmds.ls(assemblies=True) if i.split("_")[0] == self.name and len(i.split("_"))== 2]
+        return variantSets
+
+def checkScene(asset):
+    error_report = None
+    error_message = ""
+    #Test if an object PROXY exist
+
+    if not cmds.objExists('PROXY'):
+        error_report = True
+        error_message  += "PROXY object missing"
+
+    if len(asset.variantSets) == 0:
+        error_report = True
+        error_message  += "NO variantSet found. Check naming (case sensitve)"
+
+    if asset.name+"_default" not in asset.variantSets:
+        error_report = True
+        error_message  += "default variant set not found"
+
+    if error_report is not None:
+        cmds.warning("Something went wrong... " + error_message)
+
+    return error_report
+
+def run ():
+
+    #Init asset
+    asset= Asset()
+    error_report = checkScene(asset)
+    if error_report is not None:
+        return
+
+    #List variantSet children to find variant then export
+    for variantSet in asset.variantSets:
+        variants = cmds.listRelatives(variantSet, path=True)
+        for variant in variants:
+            exportVariant(asset.ass_directory, asset.name, variantSet, variant)
+
+    make_proxy_scene(asset)
