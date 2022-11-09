@@ -12,8 +12,14 @@ from PySide2 import QtWidgets
 
 class Variant():
     def __init__(self, name, variant_directory):
-        self.name = name
-        self.full_path = os.path.join(variant_directory,name)
+        self.name = name #ex: HD
+        self.full_path = os.path.join(variant_directory,name) #ex: ass\basic\HD\v004\toy_basic_HD.ass
+        self.all_version = self.get_all_version()
+    def get_all_version(self):
+        list = os.listdir(self.full_path)
+        return list
+
+
 
 
 class VariantSet():
@@ -42,10 +48,22 @@ class Asset():
         #self.all_LOD = self.get_all_LOD()
         self.name = self.get_name()
 
+    def printInfo(self):
+        attrs = vars(self)
+        print("---- Asset %s infos ---"%(self.name))
+        for attr in attrs:
+            if str(attr)=="all_variantSets":
+                print("VariantSet list:")
+                for a in attrs[attr]:
+                    print("__ " + a.name)
+                    for variant in a.all_variants:
+                        print ("___ "+ variant.name )
+            else:
+                print("#"+ attr+": "+attrs[attr])
+
     def get_all_variantSets(self, ass_directory):
         all_variantSets = []
-        print (ass_directory)
-        list = [ name for name in os.listdir(ass_directory) if os.path.isdir(os.path.join(ass_directory, name)) ]
+        list = [ name for name in os.listdir(ass_directory) ]
         for name in list:
             variantSet_directory = os.path.join(ass_directory,name)
             variantSet = VariantSet(name, variantSet_directory)
@@ -58,10 +76,11 @@ class Asset():
         return value
 
     def get_variantSet_by_name(self, variantSet_name):
+        print("looking for"+variantSet_name)
         for variantSet in self.all_variantSets:
             if variantSet.name == variantSet_name:
+                print("found!"+variantSet.name)
                 return variantSet
-
 
 
     def get_variant_by_name(self, variantSet_name, variant_name):
@@ -71,7 +90,7 @@ class Asset():
                 return variant
 
     def get_ass_directory(self):
-        ass_directory=  os.path.dirname(os.path.dirname(self.dso))
+        ass_directory=  os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(self.dso)))) #4 level up
         return ass_directory
 
     def get_current_variantName(self):
