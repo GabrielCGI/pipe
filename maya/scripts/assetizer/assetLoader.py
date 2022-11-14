@@ -69,10 +69,15 @@ class AssetLoader(QtWidgets.QDialog):
         self.comboLayout = QtWidgets.QHBoxLayout(self)
         self.button_layout = QtWidgets.QVBoxLayout(self)
 
-        # WIDGET
+        # WIDGET LIST
         self.variantSet_Qlist = QtWidgets.QListWidget()
         self.variant_Qlist = QtWidgets.QListWidget()
         self.version_Qlist = QtWidgets.QListWidget()
+        self.version_Qlist.setVisible(False)
+
+        #WIDGET CHECKBOX
+        self.use_latest =  QtWidgets.QCheckBox("Use latest version")
+        self.use_latest.setChecked(True)
 
 
         self.display_label = QtWidgets.QLabel("Asset:")
@@ -86,6 +91,7 @@ class AssetLoader(QtWidgets.QDialog):
         self.comboLayout.addWidget(self.variant_Qlist)
         self.comboLayout.addWidget(self.version_Qlist)
 
+        self.button_layout.addWidget(self.use_latest)
         self.button_layout.addWidget(self.display_label)
         self.button_layout.addWidget(self.load_asset_button)
         self.button_layout.addWidget(self.set_version)
@@ -101,10 +107,32 @@ class AssetLoader(QtWidgets.QDialog):
         self.convert_to_maya.clicked.connect(self.convert_to_maya_clicked)
         self.variantSet_Qlist.itemClicked.connect(self.variantSet_Qlist_changed)
         self.variant_Qlist.itemClicked.connect(self.variant_Qlist_changed)
+        self.use_latest.stateChanged.connect(self.use_latest_changed)
+
+    def checkAsset(self):
+        check = True
+        error_msg = ""
+        if len(cmds.ls(selection=True)) == 0:
+            error_msg += "No selection"
+            check = False
+        try:
+            asset_dso = cmds.getAttr(self.maya_proxy_name+".dso")
+        except:
+            error_msg += "Not a standin"
+            check = False
+        return check, error_msg
+
 
     def load_asset_clicked(self):
         #GET PROXY NAME FROM MAYA SELECTION
-        self.maya_proxy_name = cmds.ls(selection=True)[0]
+        if len(cmds.ls(selection=True)[0]) >0:
+            self.maya_proxy_name = cmds.ls(selection=True)[0]
+        check, error_msg = self.checkAsset()
+
+        if check == False:
+            print(error_msg)
+            
+
 
         #Set label:
         self.display_label.setText("Asset: "+self.maya_proxy_name)
@@ -132,6 +160,7 @@ class AssetLoader(QtWidgets.QDialog):
         self.rebuild_variantSet_Qlist()
         self.rebuild_variant_Qlist()
         self.rebuild_version_Qlist()
+        self.use_latest_changed()
 
         #Set list selection from current item
         list_set_selected_byName(self.variantSet_Qlist,self.current_variantSet)
@@ -139,11 +168,19 @@ class AssetLoader(QtWidgets.QDialog):
         list_set_selected_byName(self.version_Qlist,self.current_version)
 
 
+    ###USE LASTEST CHANGED ####
+    def use_latest_changed(self):
+        state = self.use_latest.isChecked()
+        if state == True:
+            self.version_Qlist.setVisible(False)
+            pass
+        else:
+            self.version_Qlist.setVisible(True)
+            pass
     ### QLIST CHANGED ###
     # ON VARIANT_SET CHANGE
     def variantSet_Qlist_changed(self):
         self.current_variantSet = self.variantSet_Qlist.currentItem().text()
-        print(self.current_variantSet)
         self.rebuild_variant_Qlist()
 
     # ON VARIANT CHANGE
@@ -186,7 +223,7 @@ class AssetLoader(QtWidgets.QDialog):
         new_dso = build_dso(self.asset_dir, self.asset_name, variantSet_name, variant_name, version)
 
         cmds.setAttr(self.maya_proxy_name+".dso",new_dso, type="string")
-        cmds.setAttr()
+
 
     def convert_to_maya_clicked(self):
         #Get maya scene path
@@ -217,6 +254,7 @@ class AssetLoader(QtWidgets.QDialog):
 
 
 try:
+    OpenMaya.MMessage.removeCallback(ui.selection_changed_callback)
     ui.deleteLater()
 except:
     pass

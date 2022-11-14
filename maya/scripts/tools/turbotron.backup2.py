@@ -42,14 +42,13 @@ cmds.lockNode('initialParticleSE', lock=False, lu=False)
 # List renderable cameras
 
 def isLentilInstalled():
-    return True
-"""
+
     try:
         dof_state= cmds.getAttr(renderableCameras[0]+".enableDof")
         return True
     except:
         return False
-"""
+
 def getRenderableCameras():
     cameras = cmds.ls(type="camera")
     renderableCameras=[]
@@ -250,13 +249,7 @@ def createGUI():
     cmds.rowColumnLayout( numberOfColumns = 2)
     cmds.checkBox("ignoreAov",label="Ignore AOVs", changeCommand=lambda x:aov_enabled(cmds.checkBox("ignoreAov",query=True,value=True)))
 
-    all_aovList = cmds.ls(type = "aiAOV")
-    aovList = []
-    for aov in all_aovList:
-        if len(aov.split(":"))==1:
-            aovList.append(aov)
-
-
+    aovList = cmds.ls(type = "aiAOV")
     enabled_aov = []
     for aov in aovList:
         if cmds.getAttr(aov+".enabled")==1:
@@ -491,12 +484,7 @@ def apply_preset(preset):
 
 
 def aov_enabled(value):
-    all_aovList = cmds.ls(type = "aiAOV")
-    aovList = []
-    for aov in all_aovList:
-        if len(aov.split(":"))==1:
-            aovList.append(aov)
-
+    aovList = cmds.ls(type = "aiAOV")
     for aov in aovList:
         cmds.setAttr(aov+".enabled",1-value)
     #update text label enabled aov counter
@@ -569,11 +557,6 @@ def changeCamType():
         else:
             cmds.createNode( 'aiImagerLentil', n='aiImagerLentil1' )
             cmds.connectAttr("aiImagerLentil1.message", "defaultArnoldRenderOptions.imagers[0]", f=True)
-        if cmds.objExists("aiLentilOperator1"):
-            cmds.connectAttr("aiLentilOperator1.message","defaultArnoldRenderOptions.operator")
-        else:
-            cmds.createNode( 'aiLentilOperator', n='aiLentilOperator1' )
-
         #LENTIL ON
         cmds.setAttr(cam+".ai_translator", "lentil_camera",  type="string")
         cmds.setAttr("aiImagerLentil1.enable",1)
@@ -586,7 +569,7 @@ def changeCamType():
         #disable progressive
         cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",0)
         cmds.checkBox("enableProgressiveRender",edit=True, value=0)
-        #aovZFix(1)
+        aovZFix(1)
 
     #LENTIL OFF
     else:
@@ -604,19 +587,13 @@ def changeCamType():
                 cmds.disconnectAttr("%s.message"%imager, "defaultArnoldRenderOptions.imagers[0]")
             except Exception as e:
                 print ("Imager not connected: " + imager)
-        try:
-            cmds.disconnectAttr("aiLentilOperator1.message","defaultArnoldRenderOptions.operator")
-        except Exception as e:
-            print(e)
-            print ("Lentil Operator not connected: ")
-
                 #print("Oops!", e.__class__, "occurred.")
         #cmds.setAttr("defaultArnoldRenderOptions.outputVarianceAOVs",1)
         #cmds.checkBox("outputVarianceAOVs", e=True,value=True)
         #cmds.setAttr("defaultArnoldRenderOptions.enableProgressiveRender",1)
         #cmds.checkBox("enableProgressiveRender",edit=True, value=1)
 
-        #aovZFix(0)
+        aovZFix(0)
     #Checking on denoising since camera type change
     denoise_on()
     cmds.select(cam)
