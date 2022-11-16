@@ -38,7 +38,7 @@ def maya_main_window():
 
 
 
-current_project = "D:/"
+current_project = "B:/trashtown_2112"
 empty_scene = ""
 all_assets_dir = os.path.join(current_project,"assets")
 all_shots_dir =  os.path.join(current_project,"shots")
@@ -297,7 +297,7 @@ class AssetBrowser(QtWidgets.QDialog):
         self.clear_all_list()
         packages_list = os.listdir(self.all_packages_dir)
         self.clean_package_list = [package for package in packages_list if not_blacklisted(package)]
-        print(self.clean_package_list)
+
 
 
         for package in self.clean_package_list:
@@ -306,10 +306,8 @@ class AssetBrowser(QtWidgets.QDialog):
     def filter_package_list(self):
 
         pattern = "*"+self.filter_text.text()+"*"
-        print("pattern:")
-        print(pattern)
         filtered_package_list =  fnmatch.filter(self.clean_package_list, pattern)
-        print(filtered_package_list)
+
         self.clear_all_list()
         for package in filtered_package_list:
             self.package_Qlist.addItem(package)
