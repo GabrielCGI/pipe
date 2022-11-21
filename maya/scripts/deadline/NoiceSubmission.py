@@ -2,7 +2,9 @@ from DeadlineUI.Controls.Scripting.DeadlineScriptDialog import DeadlineScriptDia
 from Deadline.Scripting import *
 import os
 import re
-
+import sys
+sys.path.append("R:/pipeline/pipe/maya/scripts/deadline")
+import read_exr_metadata
 from System import *
 from System.Collections.Specialized import *
 from System.IO import *
@@ -14,15 +16,27 @@ row = 0
 writer_info = ""
 
 
-def __main__():
+def __main__(*args):
+
+    firstFrameFile = ""
+    job = MonitorUtils.GetSelectedJobs()[0]
+    inputFile = job.OutputDirectories[0]
+    inputFile = os.path.join( inputFile, job.OutputFileNames[0] )
+    inputFile = re.sub( "\?", "#", inputFile )
+    firstFrameFile = FrameUtils.ReplacePaddingWithFrameNumber( inputFile, job.Frames[0] )
+    jobname =  os.path.basename(os.path.normpath(job.OutputDirectories[0]))+"_denoiseJob"
+    print("Output file: " +firstFrameFile)
     global dialog
     dialog = DeadlineScriptDialog()
     dialog.SetTitle("Submit Noice Job to Deadline")
     standard_options()
     plugin_options()
     buttons()
+    dialog.SetValue( "InputPattern", firstFrameFile )
+    dialog.SetValue( "NameBox", jobname )
     dialog.ShowDialog(True)
-
+    dialog.SetValue( "InputPattern", firstFrameFile )
+    autofill_from_input_pattern()
 
 def plugin_options():
     global dialog
@@ -47,23 +61,24 @@ def plugin_options():
     field("ExtraFrames",
           "Extra frames",
           "Number of frames to pad before and after for temporal stability",
-          0, (0, 2), True)
+          2, (0, 2), True)
     field("PatchRadius",
           "Patch radius",
           "Neighborhood patch radius, size of pixel neighborhood to compare",
-          3, (0, 6), True)
+          1, (0, 6), True)
     field("SearchRadius",
           "Search radius",
           "Search radius, higher values mean a wider search for similar pixel neighborhoods",
-          9, (6, 21), True)
+          18, (6, 21), True)
     field("Variance",
           "Variance",
           "Variance threshold, higher values mean more aggressive denoising",
-          0.25, (0.0, 1.0))
+          0.2, (0.0, 1.0))
     field("AOV",
           "AOVs",
           "Space-separated list of light AOVs to be co-denoised")
     dialog.EndGrid()
+
 
 
 def buttons():
@@ -103,6 +118,7 @@ def button(label, callback):
 def autofill_from_input_pattern():
     populate_frame_list()
     populate_output_path()
+    populate_aov_list()
 
 
 # Rudimentary, just uses the smallest and greatest frame numbers that match the pattern
@@ -126,6 +142,12 @@ def populate_output_path():
         output_pattern = "{0}_denoised.exr".format(match.group(1))
         dialog.SetValue("OutputPattern", output_pattern)
 
+def populate_aov_list():
+    print("inputpattern")
+    exrpath = dialog.GetValue("InputPattern")
+    aov_list = read_exr_metadata.parse_aov_list(exrpath)
+    aov_list_str = " ".join(aov_list)
+    dialog.SetValue("AOV",aov_list_str)
 
 def next_row():
     global row
@@ -231,6 +253,7 @@ def create_job_options():
     writer.WriteLine("ConcurrentTasks={0}".format(dialog.GetValue("ConcurrentTasksBox")))
     writer.WriteLine("LimitConcurrentTasksToNumberOfCpus={0}".format(dialog.GetValue("LimitConcurrentTasksBox")))
     writer.WriteLine("ChunkSize={0}".format(dialog.GetValue("ChunkSize")))
+    writer.WriteLine("OutputDirectory0={0}".format(os.path.dirname(dialog.GetValue("InputPattern"))))
 
     writer.WriteLine("MachineLimit={0}".format(dialog.GetValue("MachineLimitBox")))
     if(bool(dialog.GetValue("IsBlacklistBox"))):
@@ -280,7 +303,7 @@ def standard_options():
     dialog.AddControlToGrid("GroupBox", "GroupComboControl", "none", 3, 1)
 
     dialog.AddControlToGrid("PriorityLabel", "LabelControl", "Priority", 4, 0, "A job can have a numeric priority ranging from 0 to 100, where 0 is the lowest priority and 100 is the highest priority.", False)
-    dialog.AddRangeControlToGrid("PriorityBox", "RangeControl", RepositoryUtils.GetMaximumPriority() / 2, 0, RepositoryUtils.GetMaximumPriority(), 0, 1, 4, 1)
+    dialog.AddRangeControlToGrid("PriorityBox", "RangeControl", RepositoryUtils.GetMaximumPriority(), 0, RepositoryUtils.GetMaximumPriority(), 0, 1, 4, 1)
 
     dialog.AddControlToGrid("TaskTimeoutLabel", "LabelControl", "Task Timeout", 5, 0, "The number of minutes a slave has to render a task for this job before it requeues it. Specify 0 for no limit.", False)
     dialog.AddRangeControlToGrid("TaskTimeoutBox", "RangeControl", 0, 0, 1000000, 0, 1, 5, 1)

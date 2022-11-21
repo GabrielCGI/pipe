@@ -144,6 +144,10 @@ class AssetBrowser(QtWidgets.QDialog):
         self.topLayout = QtWidgets.QHBoxLayout(self)
         self.bodyLayout = QtWidgets.QHBoxLayout(self)
 
+        self.packageLayout = QtWidgets.QVBoxLayout(self)
+        self.departementLayout = QtWidgets.QVBoxLayout(self)
+        self.fileLayout = QtWidgets.QVBoxLayout(self)
+
         #WIDGET BUTTONS
         self.buttons_layout =  QtWidgets.QHBoxLayout(self)
         self.buttons_left_layout = QtWidgets.QVBoxLayout(self)
@@ -179,7 +183,11 @@ class AssetBrowser(QtWidgets.QDialog):
 
         #WIDGET CHECKBOX
         self.filter_text = QtWidgets.QLineEdit()
-        self.filter_text.setMaximumWidth(100)
+        self.filter_text.setMaximumWidth(200)
+        self.filter_text.setMinimumWidth(160)
+        self.filter_departement = QtWidgets.QLineEdit()
+        self.filter_departement.setMaximumWidth(200)
+        self.filter_departement.setMinimumWidth(160)
 
 
 
@@ -192,7 +200,7 @@ class AssetBrowser(QtWidgets.QDialog):
 
         #DISPLAY IMAGE
 
-        imgPath = ""
+        imgPath = "R:/pipeline/pipe/maya/scripts/assetizer/icons/open.JPG"
         self.image = QtGui.QImage(imgPath)
         self.pixmap = QtGui.QPixmap(self.image.scaledToWidth(450))
 
@@ -202,11 +210,20 @@ class AssetBrowser(QtWidgets.QDialog):
         self.package_infos_label =  QtWidgets.QLabel()
 
         # ADD WIDGET TO LAYOUT
+        self.packageLayout.addWidget(self.filter_text)
+        self.packageLayout.addWidget(self.package_Qlist)
 
-        self.comboLayout.addWidget(self.package_Qlist)
+        self.departementLayout.addWidget(self.filter_departement)
+        self.departementLayout.addWidget(self.second_Qlist)
 
-        self.comboLayout.addWidget(self.second_Qlist)
-        self.comboLayout.addWidget(self.third_Qlist)
+        self.fileLayout.addWidget(self.sort_by_last_checkbox)
+        self.fileLayout.addWidget(self.third_Qlist)
+
+        self.comboLayout.addLayout(self.packageLayout)
+        self.comboLayout.addLayout(self.departementLayout)
+        self.comboLayout.addLayout(self.fileLayout)
+
+
 
         self.rightLayout.addWidget(self.label)
         self.rightLayout.addWidget(self.package_infos_label)
@@ -233,8 +250,8 @@ class AssetBrowser(QtWidgets.QDialog):
         self.topLayout.addWidget(self.button_mode_asset)
         self.topLayout.addWidget(self.button_mode_shot)
         self.topLayout.addWidget(self.button_add_new)
-        self.topLayout.addWidget(self.sort_by_last_checkbox)
-        self.topLayout.addWidget(self.filter_text)
+        #self.topLayout.addWidget(self.sort_by_last_checkbox)
+        #self.topLayout.addWidget(self.filter_text)
         self.topLayout.addStretch()
         self.mainLayout.addLayout(self.topLayout)
         self.mainLayout.addLayout(self.bodyLayout)
@@ -244,8 +261,8 @@ class AssetBrowser(QtWidgets.QDialog):
         self.mode = "asset"
         self.all_packages_dir = os.path.join(current_project,"assets")
         self.rebuild_package_list()
-        self.package_Qlist.setCurrentRow(0)
-        self.package_Qlist_changed()
+        #self.package_Qlist.setCurrentRow(0)
+        #self.package_Qlist_changed()
 
         #CONNECT WIDGET
         self.import_button.clicked.connect(self.import_clicked)
@@ -256,6 +273,7 @@ class AssetBrowser(QtWidgets.QDialog):
         #Connect CHECKBOX
         self.sort_by_last_checkbox.clicked.connect(self.sort_by_last_clicked)
         self.filter_text.textEdited.connect(self.filter_package_list)
+        self.filter_departement.textEdited.connect(self.filter_departement_list)
         #Connect asset and shot buttons
         self.button_mode_asset.clicked.connect(self.button_mode_asset_clicked)
         self.button_mode_shot.clicked.connect(self.button_mode_shot_clicked)
@@ -318,18 +336,25 @@ class AssetBrowser(QtWidgets.QDialog):
         self.second_Qlist.clear()
         self.second_Qlist.setSortingEnabled(False)
 
-        file_list, dir_list = list_files_and_dirs_sorted(self.package.dir)
+        self.departement_file_list, self.departement_dir_list = list_files_and_dirs_sorted(self.package.dir)
 
-        for dir in dir_list:
+        self.filter_departement_list()
+    def filter_departement_list(self):
+        pattern = "*"+self.filter_departement.text()+"*"
+        filtered_departement_dir_list =  fnmatch.filter(self.departement_dir_list, pattern)
+        filtered_departement_file_list =   fnmatch.filter(self.departement_file_list, pattern)
+
+        self.second_Qlist.clear()
+        for dir in filtered_departement_dir_list:
                 self.second_Qlist.addItem(dir)
         item = QtWidgets.QListWidgetItem("----------------")
         item.setFlags(QtCore.Qt.ItemIsSelectable)
         self.second_Qlist.addItem(item)
-        for file in file_list:
+
+        for file in filtered_departement_file_list:
             item = QtWidgets.QListWidgetItem(file)
             item.setForeground(file_color_item)
             self.second_Qlist.addItem(item)
-
 
 
         list_set_selected_byName(self.second_Qlist,self.package.favorite_dir)
