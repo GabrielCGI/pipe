@@ -45,11 +45,14 @@ def exportVariant(variant, variantSet):
     cmds.setAttr(variant.maya_name+".visibility",variant_visibility_state)
     cmds.setAttr(variantSet.maya_name+".visibility",variantSet_visibitlity_state)
 
+
+
+    #Freeze transform
+
+
 def make_proxy_scene(asset):
     #Init name
-
-    proxy = "PROXY"
-    asset_proxy = asset.name+"_proxy"
+    proxy = asset.proxy_name
 
     #Visibility
     visibility_state = cmds.getAttr(proxy+".visibility")
@@ -61,21 +64,24 @@ def make_proxy_scene(asset):
     cmds.setAttr(proxy+".dso",default_ass_path,type="string")
     cmds.setAttr(proxy+".aiOverrideShaders",0)
     cmds.setAttr(proxy+".aiOverrideMatte",1)
-
+    cmds.makeIdentity(proxy, apply=True, t=1, r=1, s=1, n=2 )
     #rename proxy group before export
-    cmds.rename(proxy,asset_proxy)
-    cmds.select(asset_proxy )
+    cmds.select(proxy)
+    if cmds.objExists("assets"):
+        cmds.select("assets",add=True,)
     cmds.file(asset.publish_maye_scene,force=False, options="v=0;", type="mayaAscii", pr=True, es=True)
 
     #Restore properties
-    cmds.rename(asset_proxy , proxy)
+
     cmds.setAttr(proxy+".ai_translator",  "polymesh", type="string")
     cmds.setAttr(proxy+".visibility",visibility_state)
 
 class Asset():
     def __init__(self):
         self.maya_scene = cmds.file(q=True, sn=True)
+
         self.name =  os.path.basename(self.maya_scene).split("_")[0] # ex: "../assets/shading/toy_shading.002.ma" --> "toy"
+        self.proxy_name = self.name +"_proxy"
         self.directory =  os.path.dirname(os.path.dirname(self.maya_scene))
         self.publish_directory =  os.path.join(self.directory, "publish")
         self.publish_maye_scene = self.get_next_maya_publish_scene()
@@ -196,9 +202,9 @@ def checkScene(asset):
     error_message = ""
     #Test if an object PROXY exist
 
-    if not cmds.objExists('PROXY'):
+    if not cmds.objExists(asset.proxy_name):
         error_report = True
-        error_message  += "PROXY object missing"
+        error_message  += "PROXY object missing:  %s"%(asset.proxy_name)
 
     if len(asset.variantSets) == 0:
         error_report = True

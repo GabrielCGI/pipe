@@ -28,9 +28,12 @@ importlib.reload(assetTool)
 import dic as dic_tool
 importlib.reload(dic_tool)
 
+
+assets_directory  = "D:/gabriel/assetizer/assets"
 def list_set_selected_byName(list,name):
     items = list.findItems(name,QtCore.Qt.MatchExactly)
-    list.setCurrentItem(items[0])
+    if len(items)>0:
+        list.setCurrentItem(items[0])
 
 def build_dso(asset_dir, asset_name, variantSet_name, variant_name, version):
     ass_name = "%s_%s_%s.ass"%(asset_name, variantSet_name,variant_name)
@@ -49,7 +52,39 @@ def maya_main_window():
     main_window_ptr = omui.MQtUtil.mainWindow()
     return wrapInstance(int(main_window_ptr), QtWidgets.QWidget)
 
+def get_next_version(variant_dir):
 
+    #Create the directory if needed
+    os.makedirs(variant_dir,exist_ok=True)
+    #List all version directory
+    listDir = os.listdir(variant_dir)
+    listDir.sort()
+
+    #Keep only directory starting with a "V"
+    for item in listDir:
+        if not item.startswith("v"):
+            listDir.remove(item)
+
+    #If not version yet, return v001
+    if len(listDir) == 0:
+        next_version = "v001"
+        return next_version
+
+    last_version = listDir[-1] #Get last version
+    last_version_number = int(last_version.split("v")[-1]) #v001 --> 1 (int)
+    next_version_number = last_version_number + 1 # 1 --> 2
+    next_version = "v" + str(next_version_number).zfill(3) # 2 --> v002
+    return next_version
+
+def write_ass(path=""):
+    cmds.file(path,
+              force=False,
+              options="-shadowLinks 0;-mask 24;-lightLinks 0;-boundingBox;-fullPath",
+              type="ASS Export",
+              exportSelected=True)
+
+def write_maya_scene(path):
+    cmds.file(path,force=False, options="v=0;", type="mayaAscii", pr=True, es=True)
 
 class AssetLoader(QtWidgets.QDialog):
     def __init__(self, parent=maya_main_window()):
@@ -81,7 +116,7 @@ class AssetLoader(QtWidgets.QDialog):
 
 
         self.display_label = QtWidgets.QLabel("Asset:")
-        self.load_asset_button = QtWidgets.QPushButton("Select asset")
+        self.push_edit_button = QtWidgets.QPushButton("Push edit")
         self.convert_to_maya = QtWidgets.QPushButton("Convert to maya")
         self.set_version = QtWidgets.QPushButton("Set version")
 
@@ -93,7 +128,7 @@ class AssetLoader(QtWidgets.QDialog):
 
         self.button_layout.addWidget(self.use_latest)
         self.button_layout.addWidget(self.display_label)
-        self.button_layout.addWidget(self.load_asset_button)
+        self.button_layout.addWidget(self.push_edit_button)
         self.button_layout.addWidget(self.set_version)
         self.button_layout.addWidget(self.convert_to_maya)
 
@@ -102,12 +137,14 @@ class AssetLoader(QtWidgets.QDialog):
 
 
         #CONNECT WIDGET
-        self.load_asset_button.clicked.connect(self.load_asset_clicked)
+        self.push_edit_button.clicked.connect(self.push_edit_clicked)
         self.set_version.clicked.connect(self.set_version_clicked)
         self.convert_to_maya.clicked.connect(self.convert_to_maya_clicked)
         self.variantSet_Qlist.itemClicked.connect(self.variantSet_Qlist_changed)
         self.variant_Qlist.itemClicked.connect(self.variant_Qlist_changed)
         self.use_latest.stateChanged.connect(self.use_latest_changed)
+
+        self.load_asset_clicked()
 
     def checkAsset(self):
         check = True
@@ -117,21 +154,31 @@ class AssetLoader(QtWidgets.QDialog):
             check = False
         try:
             asset_dso = cmds.getAttr(self.maya_proxy_name+".dso")
+            if cmds.getAttr(self.maya_proxy_name+".ai_translator") != "procedural":
+                error_msg += "Not a procedural" + cmds.getAttr(self.maya_proxy_name+".ai_translator")
+                check = False
         except:
-            error_msg += "Not a standin"
+            error_msg += "No dso"
             check = False
+
+
+
         return check, error_msg
 
 
     def load_asset_clicked(self):
         #GET PROXY NAME FROM MAYA SELECTION
-        if len(cmds.ls(selection=True)[0]) >0:
+        if len(cmds.ls(selection=True)) >0:
             self.maya_proxy_name = cmds.ls(selection=True)[0]
+        else:
+            return
         check, error_msg = self.checkAsset()
 
         if check == False:
+            self.display_label.setText("Not a standin")
             print(error_msg)
-            
+            return
+
 
 
         #Set label:
@@ -242,6 +289,105 @@ class AssetLoader(QtWidgets.QDialog):
         #Hide and rename proxy "TO_DELETE"
         cmds.setAttr(self.maya_proxy_name+".visibility",0)
         cmds.rename(self.maya_proxy_name,self.maya_proxy_name+"_TO_DELETE")
+
+    def push_edit_clicked(self):
+        #Get maya selection
+        maya_sel = cmds.ls(selection=True)[0]
+
+        if  cmds.listRelatives( maya_sel, parent=True ) is not None:
+            cmds.warning("Select the top parent of the asset.")
+            return
+
+        #PAUSE CALLBACK
+        #OpenMaya.MMessage.removeCallback(self.selection_changed_callback)
+        #Get namescape
+        ns = cmds.referenceQuery(maya_sel, namespace=True, shortName=True)
+        full_namespace = cmds.referenceQuery(maya_sel, namespace=True)
+        reference_node = cmds.referenceQuery(maya_sel,filename=True)
+
+        #Get asset name , variant set name  and variant name
+        asset_full_name = ns if not ns[-1].isdigit() else ns.rstrip(ns[-1])
+
+        #Query the user and ask for asset name, variant set name, and variant name
+        text, ok = QtWidgets.QInputDialog.getText(self, 'Input Dialog',
+            'Name:',QtWidgets.QLineEdit.Normal,text=asset_full_name)
+
+        if ok:
+            asset_name = str(text).split("_")[0]
+            variantSet_name = str(text).split("_")[1]
+            variant = str(text).split("_")[2]
+        else:
+            print("Abort by user")
+            return
+
+        # Build directories
+        variantSet_dir = os.path.join(assets_directory,asset_name,"publish","ass",variantSet_name)
+        variant_dir = os.path.join(variantSet_dir,variant)
+        next_version = get_next_version(variant_dir)
+        variant_with_version_dir = os.path.join(variant_dir,next_version)
+
+        #Build paths
+        name = "%s_%s_%s"%(asset_name,variantSet_name,variant)
+        ass_path = os.path.join(variant_with_version_dir, name+".ass")
+        maya_scene_path = os.path.join(variant_with_version_dir,name + ".ma")
+
+        #### MAYA SHADING SCENE (with version awardness)
+        maya_shading_scene_dir = os.path.join(os.path.join(assets_directory,asset_name,"shading"))
+        maya_shading_scene_name = "%s_shading_%s_%s"%(asset_name,variantSet_name, variant)
+        os.makedirs(maya_shading_scene_dir,exist_ok=True)
+
+        #Return a list of files matching the rules:
+        #   --- starts with "variantSetName_shading"
+        #   --- at least two "." in the filename
+        list = [f for f in os.listdir(maya_shading_scene_dir) if f.startswith(maya_shading_scene_name) and len(f.split("."))>=2]
+        #Version parsing
+        versions =[]
+        for f in list:
+            version = f.split(".")[-2]
+            if version.isdigit(): versions.append(version)
+        versions.sort()
+        last_version = int(versions[-1])+1 if len(versions)>0 else 1
+        maya_shading_scene_with_version = maya_shading_scene_name +"."+ str(last_version).zfill(4) + ".ma"
+        maya_shading_scene_path = os.path.join(maya_shading_scene_dir,maya_shading_scene_with_version )
+        ### END  MAYA SHADING SCENE
+
+        #Create a temp group (hack to preserve object name when removing namespace)
+        tmp_grp = cmds.group( maya_sel , n='tmp_grp')
+        cmds.file(reference_node, importReference=True)
+        cmds.namespace(removeNamespace=full_namespace, mergeNamespaceWithRoot=True)
+        childs = cmds.listRelatives(tmp_grp, fullPath=True)
+        variant_maya_sel = cmds.parent(childs, world=True)
+
+        #Reset transform
+        cmds.move(0, 0, 0, ls=True)
+        cmds.rotate(0, 0, 0)
+        cmds.scale(1, 1, 1)
+
+        #Write ass and ma
+        print ("------- Start pushing ! --------")
+        write_ass(ass_path)
+        print("Writing: %s"%maya_scene_path)
+        write_maya_scene(maya_scene_path)
+        print("Writing: %s"%maya_shading_scene_path)
+        write_maya_scene(maya_shading_scene_path)
+        print ("-------- Success pushed ! --------")
+
+        #Clean up
+        cmds.delete(tmp_grp)
+        cmds.delete(variant_maya_sel)
+
+
+        #TO DO: CLEAN SHADER AFTER DELETION
+        #IMPORT PROXY
+        #SAVE VARIANT SHADING SCENE
+        #SAVE AS NEW VARIANT
+        #CALL BACK
+        #OFFSET PB
+
+        #ADD CALLBACK AGAIN
+        #self.selection_changed_callback = OpenMaya.MEventMessage.addEventCallback("SelectionChanged", self.maya_selection_changed_callback)
+
+
 
     def maya_selection_changed_callback(self,*args):
         try:
