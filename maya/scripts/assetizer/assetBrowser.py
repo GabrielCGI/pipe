@@ -497,7 +497,8 @@ class AssetBrowser(QtWidgets.QDialog):
 
     def copy_path_clicked(self):
         path, namespace = self.build_path_scene()
-        copy2clip(path)
+        forward_path = path.replace(os.sep, '/')
+        copy2clip(forward_path)
 
     def open_scene_clicked(self):
         path, namespace = self.build_path_scene()
