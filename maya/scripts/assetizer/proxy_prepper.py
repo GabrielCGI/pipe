@@ -56,10 +56,15 @@ def merge_uv_sets(obj):
 
 
 
-def proxy_generate(obj_list, name, targetVertex= 500):
-    if len(obj_list)>1:
-        cmds.polyUnite  (obj_list,mergeUVSets=True, n=name)
+def proxy_generate(obj_root, name, maxEdgeLength=3,collapseThreshold=60, targetVertex= 3000):
 
+    for o in cmds.listRelatives(obj_root,allDescendents=True, fullPath=True):
+        if cmds.objectType(o, isType='mesh'):
+             cmds.select(o)
+             cmds.polyRemesh(maxEdgeLength=maxEdgeLength, constructionHistory=0,collapseThreshold=collapseThreshold,caching=1)
+
+    cmds.polyUnite (obj_root,mergeUVSets=True, n=name)
+    cmds.delete(name, constructionHistory = True)
     cmds.polyReduce (ver=1 ,trm=1 ,shp=0, keepBorder=1 ,keepMapBorder=1 ,
                     keepColorBorder=1 ,keepFaceGroupBorder=1 ,keepHardEdge=1 ,
                     keepCreaseEdge=1 ,keepBorderWeight=0.5 ,
