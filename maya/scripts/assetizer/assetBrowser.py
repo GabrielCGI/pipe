@@ -493,7 +493,11 @@ class AssetBrowser(QtWidgets.QDialog):
         cmds.file(path, reference=True,namespace=namespace)
 
     def open_folder_clicked(self):
-        os.startfile(self.package.dir)
+        path, namespace = self.build_path_scene()
+        if os.path.isdir(path):
+            os.startfile(path)
+        else:
+            os.startfile(self.package.dir)
 
     def copy_path_clicked(self):
         path, namespace = self.build_path_scene()
