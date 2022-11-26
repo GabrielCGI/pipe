@@ -163,29 +163,31 @@ def has_transfrom(obj):
         return False
 
 def cleanAssetBeforeExport(obj):
-    obj = obj
-    logger.info("1")
+    if not obj:
+        logger.error('Need to have an obj to clean!')
+        return None
     #CHECK IF VARIANT SETS EXIST
+    logger.debug('cleanning... is there a variant set ?')
     vSets = [vSet for vSet in cmds.listRelatives(obj, fullPath=True)
             if short_name(vSet).startswith("variant_") ]
     if not vSets:
         logger.error('No variant set found !')
         return None
+    logger.debug("variants set found: %s"%vSets)
     variants=[]
-    logger.info("1")
+    logger.debug('cleanning... is there variant ?')
     #CHECK IF VARIANTS SET AND VARIANTS TRANSFROMS = 0
     for vSet in vSets:
-        print(vSet)
         if has_transfrom(vSet): return None
         variants += [v for v in cmds.listRelatives(vSet, fullPath=True)]
     for v in variants:
         if has_transfrom(v): return None
-    logger.info("1")
+    logger.debug("variants  found: %s"%variants)
     #CHECK IF PARENT IS WORLD
     if cmds.listRelatives(obj,parent=True ) is not None:
         logger.info('Reparenting to world %s'%obj)
-        obj = cmds.parent(obj, world=True )
-    logger.info("1")
+        obj = cmds.parent(obj, world=True )[0]
+
     #CHECK IF ASSET TRANSFORMS == 0
     if cmds.xform(obj,query=True, matrix=True) != zero_matrix:
         msg = ("The asset has transfrom information.\n"
@@ -240,15 +242,16 @@ def get_last_basic_variant_ass(ass_dir):
     ass_path = os.path.join(ass_dir,vSet,variant,last,"%s_%s_%s.ass"%(vSet,variant,last))
     return ass_path
 
-def get_sub_assets_from_asset(asset_name_long):
+def get_from_asset(asset_name_long, pattern):
 
-    sub_assets = asset_name_long+"|sub_assets"
-    logger.debug('Looking for sub asset %s !' %sub_assets )
-    if cmds.objExists(sub_assets):
-        logger.debug('Found %s !' %sub_assets)
-        return sub_assets
+    obj = asset_name_long+"|"+pattern
+    logger.debug('Looking for... %s !' %obj)
+
+    if cmds.objExists(obj):
+        logger.debug('Found %s !' %obj)
+        return obj
     else:
-        logger.debug('Not Found %s !' %sub_assets)
+        logger.debug('Not Found %s !' %obj)
         return None
 
 def make_proxy_scene(asset_name,dir,proxy, sub_assets=None):
@@ -272,13 +275,13 @@ def make_proxy_scene(asset_name,dir,proxy, sub_assets=None):
 
     publish_proxy_scene_dir = os.path.join(dir,asset_name)
     next_publish_proxy_scene= get_next_publish_scene(publish_proxy_scene_dir, asset_name)
-    logger.debug("Next publish proxy maya scene  = %s"%next_publish_proxy_scene)
+    logger.info("Next publish proxy maya scene  = %s"%next_publish_proxy_scene)
 
     cmds.select(proxy)
     if sub_assets:
         cmds.select(sub_assets,add=True,)
     cmds.file(next_publish_proxy_scene,force=False, options="v=0;", type="mayaAscii", pr=True, es=True)
-
+    logger.info('Proxy export success %s!'%next_publish_proxy_scene)
     #Restore properties
 
     cmds.setAttr(proxy+".ai_translator",  "polymesh", type="string")
