@@ -8,8 +8,6 @@ import importlib
 importlib.reload(assetPublisher_ui)
 
 """
-import maya.OpenMaya as OpenMaya
-from maya import OpenMaya
 
 from maya import OpenMayaUI as omui
 import os
@@ -19,12 +17,12 @@ from PySide2 import QtCore
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 from pathlib import Path
-
+import sys
 import assTools
 import importlib
 importlib.reload(assTools)
 
-
+dir_global = "D:/gabriel/assetizer/assets"
 def maya_main_window():
     '''
     Return the Maya main window widget as a Python object
@@ -55,9 +53,14 @@ class AssetLoader(QtWidgets.QDialog):
 
 
         #WIDGET CHECKBOX
-        self.use_latest =  QtWidgets.QCheckBox("Use latest version")
-        self.use_latest.setChecked(True)
+        self.is_a_shot_asset =  QtWidgets.QCheckBox("is a shot asset")
+        self.is_a_shot_asset.setChecked(True)
 
+        self.keep_original =  QtWidgets.QCheckBox("keep original")
+        self.keep_original.setChecked(False)
+
+        self.import_published =  QtWidgets.QCheckBox("import published")
+        self.import_published.setChecked(False)
 
         self.display_label = QtWidgets.QLabel("Asset:")
         self.publish_asset = QtWidgets.QPushButton("Publish selected asset")
@@ -67,10 +70,13 @@ class AssetLoader(QtWidgets.QDialog):
         # ADD WIDGET TO LAYOUT
 
 
-        self.button_layout.addWidget(self.use_latest)
+        self.button_layout.addWidget(self.is_a_shot_asset)
+        self.button_layout.addWidget(self.keep_original)
+        self.button_layout.addWidget(self.import_published)
+
         self.button_layout.addWidget(self.display_label)
         self.button_layout.addWidget(self.publish_asset)
-        self.button_layout.addWidget(self.set_version)
+        #self.button_layout.addWidget(self.set_version)
         self.button_layout.addWidget(self.publish_variant )
 
         self.mainLayout.addLayout(self.comboLayout)
@@ -84,53 +90,53 @@ class AssetLoader(QtWidgets.QDialog):
         #self.use_latest.stateChanged.connect(self.use_latest_changed)
 
     def publish_asset_clicked(self):
-        sel = cmds.ls(selection=True)[0]
-        obj = assTools.cleanAssetBeforeExport(sel)
-        if not obj: return
-        asset, variants = assTools.scanAsset(obj)
-        sub_assets = assTools.get_from_asset(asset.name_long, "sub_assets")
-        proxy = assTools.get_from_asset(asset.name_long, asset.name+"_proxy")
-        if not obj: return
-        if not asset: return
-        if not proxy: return
+        sel = cmds.ls(selection=True,long=True)
+        dir = self.get_dir()
+        try:
+            obj = sel[0]
+        except:
+            assTools.warning("The selected obj is not working -> %s"%sel)
+        new_obj, original_obj, proxy = assTools.cleanAsset(obj, needProxy=True)
+        asset, variants = assTools.scanAsset(new_obj)
+        sub_assets = assTools.get_from_asset(asset.name_long, "sub_assets", must_exist=False)
 
-        dir = "D:/gabriel/assetizer/shots/shot10/lighting/assets"
         for v in variants:
-            assTools.printInfo(v)
             assTools.exportVariant(dir, asset, v, export_shading_scene = True)
+        publish_proxy_scene = assTools.make_proxy_scene(asset.name,dir,proxy,sub_assets)
+        if self.import_published.isChecked():
+            maya_object = cmds.file(publish_proxy_scene, reference=True, namespace=asset.name)
+            nodes= cmds.referenceQuery(maya_object ,nodes=True)
+            assTools.match_matrix(nodes[0],asset.name_long)
+        cmds.delete(asset.name_long)
+        assTools.deleteSource(original_obj, asset.name_long, asset.name, self.keep_original.isChecked())
 
-        assTools.make_proxy_scene(asset.name,dir,proxy,sub_assets)
+
     def publish_variant_clicked(self):
-        asset=None
-        sel = cmds.ls(selection=True)
-        if not sel:
-            cmds.warning("Select something !")
-            return
-        variant_select = sel[0]
-        variant_set = cmds.listRelatives(variant_select, parent = True, fullPath=True)
-        if variant_set:
-            parent = cmds.listRelatives(variant_set[0], parent = True, fullPath=True)
-            if parent:
-                asset=parent[0]
-                if not asset:
-                    cmds.warning("No variant selected.")
-        if not asset:cmds.warning("No variant selected.")
+        sel = cmds.ls(selection=True,long=True)
+        dir = self.get_dir()
+        try:
+            var_set = cmds.listRelatives(sel[0], parent=True)
+            obj= cmds.listRelatives(var_set[0],parent=True)[0]
+        except:
+            assTools.warning("The selected obj is not working -> %s"%sel)
 
-        obj = assTools.cleanAssetBeforeExport(asset)
-        if not obj:
-            cmds.warning("cleanAssetBeforeExport asset went wrong")
-            return
-        asset, variants = assTools.scanAsset(obj)
-        if any( [asset == None, variants == None,obj==None] ):
-            cmds.warning("scanAsset went wrong... ")
-            return
-
-
-        dir = "D:/gabriel/assetizer/shots/shot10/lighting/assets"
+        new_obj, original_obj, proxy = assTools.cleanAsset(obj, needProxy=False)
+        asset, variants = assTools.scanAsset(new_obj)
+        sub_assets = assTools.get_from_asset(asset.name_long, "sub_assets", must_exist=False)
         for v in variants:
-            if v.name == variant_select:
+            if assTools.short_name(sel[0]) == v.name:
                 assTools.exportVariant(dir, asset, v, export_shading_scene = True)
 
+        cmds.delete(asset.name_long)
+        assTools.deleteSource(original_obj, asset.name_long, asset.name, self.keep_original.isChecked())
+
+    def get_dir(self):
+        if self.is_a_shot_asset.isChecked():
+            filepath = cmds.file(q=True, sn=True)
+            dir =os.path.dirname(filepath)
+        else:
+            dir = dir_global
+        return dir
 try:
     ui.deleteLater()
 except:

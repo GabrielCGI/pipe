@@ -30,6 +30,11 @@ importlib.reload(dic_tool)
 
 
 assets_directory  = "D:/gabriel/assetizer/assets"
+
+def match_matrix(source,target):
+    m = cmds.xform(source, worldSpace = True, matrix=True, query=True)
+    cmds.xform(target,  matrix=m)
+
 def list_set_selected_byName(list,name):
     items = list.findItems(name,QtCore.Qt.MatchExactly)
     if len(items)>0:
@@ -285,7 +290,7 @@ class AssetLoader(QtWidgets.QDialog):
         #Get the REAL namesapce (with "RN" and versioning)
         namespace = cmds.file(maya_object, referenceNode=True, query=True)
         node= cmds.referenceQuery(namespace,nodes=True )
-        cmds.matchTransform(node[0],self.maya_proxy_name)
+        match_matrix(node[0],self.maya_proxy_name)
         #Hide and rename proxy "TO_DELETE"
         cmds.setAttr(self.maya_proxy_name+".visibility",0)
         cmds.rename(self.maya_proxy_name,self.maya_proxy_name+"_TO_DELETE")

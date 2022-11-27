@@ -54,8 +54,16 @@ def get_next_publish_scene(dir, asset_name):
     next_maya_publish_scene=os.path.join(dir, next_publish_name )
     return next_maya_publish_scene
 
+def warning(txt):
+    cmds.confirmDialog(message= txt)
+    cmds.error(txt)
+
+
 def short_name(long_name):
-    short_name = long_name.split("|")[-1]
+    logger.debug('Trying to shorten name %s'%long_name)
+    short_name_withnamespace = long_name.split("|")[-1]
+    short_name = short_name_withnamespace.split(":")[-1]
+    logger.debug('Succes %s -> %s'%(long_name,short_name))
     return short_name
 
 def is_dir_exist(path):
@@ -68,6 +76,7 @@ def is_dir_exist(path):
             return True
         else:
             logger.info('Abort directory creation: %s'%path)
+            raise
             return False
     else:
         logger.debug('Check directory existence success: %s '%path)
@@ -86,9 +95,9 @@ def exportVariant(dir, asset, variant, export_shading_scene = False):
     cmds.setAttr(variant.vSet_name_long+".visibility",1)
 
     asset_publish_dir = os.path.join(dir, asset.name)
-    if not is_dir_exist(asset_publish_dir): return
+    is_dir_exist(asset_publish_dir)
     variant_publish_dir = os.path.join(asset_publish_dir,"publish", "ass", variant.dir)
-    if not is_dir_exist(variant_publish_dir): return
+    is_dir_exist(variant_publish_dir)
     variant_publish_name = "%s_%s_%s"%(asset.name, variant.vSet_name, variant.name)
     variant_last_v = get_last_v(variant_publish_dir)
     variant_full_path = os.path.join(variant_publish_dir,variant_last_v,variant_publish_name)
@@ -96,7 +105,7 @@ def exportVariant(dir, asset, variant, export_shading_scene = False):
     variant_maya_ass = variant_full_path+".ass"
     if export_shading_scene:
         shading_scene_dir = os.path.join(asset_publish_dir,"shading")
-        if not is_dir_exist(shading_scene_dir): return
+        is_dir_exist(shading_scene_dir)
         variant_shading_scene_name= "%s_%s_%s_shading"%(asset.name, variant.vSet_name, variant.name)
         variant_shading_scene = get_next_publish_scene(shading_scene_dir, variant_shading_scene_name)
     #Export ass
@@ -132,6 +141,7 @@ class Asset():
     def __init__(self,maya_name):
         self.name = short_name(maya_name)
         self.name_long = maya_name
+        self.vSets_list = []
 
 
 def build_dic_variantSet(ass_dir):
@@ -154,41 +164,13 @@ def build_dic_variantSet(ass_dir):
     return dic_variantSet
 
 def has_transfrom(obj):
-
-
     if cmds.xform(obj,query=True, matrix=True) != zero_matrix:
         logger.error('Transfroms applied on %s -> Plz fix manually'%obj)
         return True
     else:
         return False
 
-def cleanAssetBeforeExport(obj):
-    if not obj:
-        logger.error('Need to have an obj to clean!')
-        return None
-    #CHECK IF VARIANT SETS EXIST
-    logger.debug('cleanning... is there a variant set ?')
-    vSets = [vSet for vSet in cmds.listRelatives(obj, fullPath=True)
-            if short_name(vSet).startswith("variant_") ]
-    if not vSets:
-        logger.error('No variant set found !')
-        return None
-    logger.debug("variants set found: %s"%vSets)
-    variants=[]
-    logger.debug('cleanning... is there variant ?')
-    #CHECK IF VARIANTS SET AND VARIANTS TRANSFROMS = 0
-    for vSet in vSets:
-        if has_transfrom(vSet): return None
-        variants += [v for v in cmds.listRelatives(vSet, fullPath=True)]
-    for v in variants:
-        if has_transfrom(v): return None
-    logger.debug("variants  found: %s"%variants)
-    #CHECK IF PARENT IS WORLD
-    if cmds.listRelatives(obj,parent=True ) is not None:
-        logger.info('Reparenting to world %s'%obj)
-        obj = cmds.parent(obj, world=True )[0]
-
-    #CHECK IF ASSET TRANSFORMS == 0
+def has_transfrom_user_fix_possible(obj):
     if cmds.xform(obj,query=True, matrix=True) != zero_matrix:
         msg = ("The asset has transfrom information.\n"
                "The asset should be exported from the center of the world \n"
@@ -202,48 +184,105 @@ def cleanAssetBeforeExport(obj):
             cmds.scale(1, 1, 1)
         if result == "Freeze transforms":
             cmds.makeIdentity(obj,apply=True )
-    return obj
+        if result == "Cancel":
+            warning("Abort by user")
+def deleteSource(original_obj, name_long, name, keep_original):
+
+    if keep_original == False:
+        if cmds.referenceQuery(original_obj,isNodeReferenced=True):
+            reference_node = cmds.referenceQuery(original_obj,filename=True)
+            cmds.file(reference_node, importReference=True)
+            cmds.delete(original_obj)
+        else:
+            cmds.delete(original_obj)
+    if keep_original == True:
+        if original_obj != name_long:
+            cmds.rename(original_obj,name)
+
+def cleanAsset(obj, needProxy=True):
+    #SCAN
+    asset, variants = scanAsset(obj)
+    logger.debug("Clean asset before export start...")
+    obj = asset.name_long
+    #CHECK IF THERE IS ALL THE IS NEEDED
+    for vSet in asset.vSets_list:
+        cmds.delete(vSet, constructionHistory = True)
+        if has_transfrom(vSet): warning("%s has transfrom. Plz reset of freeze manualy"%vSet)
+    for v in variants:
+        cmds.delete(v.name_long, constructionHistory = True)
+        if has_transfrom(v.name_long): warning("%s has transfrom. Plz reset of freeze manualy"%v)
+    logger.debug("Variant and Variant Set's transfroms are clean !")
+    proxy = get_from_asset(asset.name_long, asset.name+"_proxy",must_exist=needProxy)
+    #CHECK IF PARENT IS WORLD
+    if cmds.listRelatives(obj,parent=True ) is not None:
+        logger.info('Reparenting to world %s'%obj)
+        obj = cmds.parent(obj, world=True )[0]
+
+    #CHECK IF ASSET TRANSFORMS == 0
+    if has_transfrom_user_fix_possible(obj):  warning("%s has transfrom. Plz reset of freeze manualy"%obj)
+
+    original_name = asset.name
+    orignal_obj = asset.name_long
+
+    new_obj = cmds.duplicate(obj)[0]
+    if new_obj != original_name:
+        orignal_obj= cmds.rename(original_name, original_name+"_original")
+        new_obj= cmds.rename(new_obj, original_name)
+
+
+    return new_obj, orignal_obj, proxy
 
 def scanAsset(obj):
+
     variants =[]
     asset = Asset(obj)
     vSets = [vSet for vSet in cmds.listRelatives(obj, fullPath=True)
             if short_name(vSet).startswith("variant_") ]
 
-    if not vSets:
-        logger.error('No variant set found !')
-        return None, None
+    if not vSets: warning("No variant set found")
+    asset.vSets_list = vSets
     for vSet in vSets:
         variants += [Variant(var, vSet, obj) for var in cmds.listRelatives(vSet, fullPath=True)]
 
-    if not variants:
-        logger.error('No variants found !')
-        return None, None
+    if not variants:  warning("No variant found")
+
     logger.info('Scan success !')
     return asset, variants
 
-def get_last_basic_variant_ass(ass_dir):
+def get_last_basic_variant_ass(asset_name,ass_dir):
+    logger.debug("Looking for a basic variant...")
     dic = build_dic_variantSet(ass_dir)
-    ass_path = None
-    if "variant_basic" in dic.keys():
-        if "HD" in dic["variant_basic"].keys():
 
-            vSet = "variant_basic"
+    ass_path = None
+    if "basic" in dic.keys():
+        if "HD" in dic["basic"].keys():
+            vSet = "basic"
             variant = "HD"
-            last = dic["variant_basic"]["HD"][-1]
+            last = dic["basic"]["HD"][-1]
+            logger.debug("last found:%s %s %s"%(vSet, variant ,last))
         else:
-            vSet = "variant_basic"
+            vSet = "basic"
             variant = list(dic[vSet].keys())[0]
-            last = dic["variant_basic"][variant][-1]
+            last = dic["basic"][variant][-1]
+            logger.debug("Basic but not HD found: %s %s %s"%(vSet, variant ,last))
     else:
         vSet  = list(dic.keys())[0]
         variant = list(dic[vSet].keys())[0]
         last =   dic[vSet][variant][-1]
-    ass_path = os.path.join(ass_dir,vSet,variant,last,"%s_%s_%s.ass"%(vSet,variant,last))
+        logger.debug("Found that, not sure what it is...: %s %s %s"%(vSet, variant ,last))
+    ass_path = os.path.join(ass_dir,vSet,variant,last,"%s_%s_%s.ass"%(asset_name,vSet,variant))
     return ass_path
 
-def get_from_asset(asset_name_long, pattern):
-
+def get_from_asset(asset_name_long, pattern, must_exist=True):
+    child = cmds.listRelatives(asset_name_long, children=True, fullPath=True)
+    for c in child:
+        if short_name(c) == pattern:
+            return c
+    if must_exist:
+        return warning("not found %s"%pattern)
+    else:
+        logger.info("Not found %s"%pattern)
+        return None
     obj = asset_name_long+"|"+pattern
     logger.debug('Looking for... %s !' %obj)
 
@@ -256,6 +295,9 @@ def get_from_asset(asset_name_long, pattern):
 
 def make_proxy_scene(asset_name,dir,proxy, sub_assets=None):
     #Init name
+    if not asset_name: warning("make_proxy_scene say: Asset object is missing.")
+    if not dir: warning("make_proxy_scene say: Directory is missing.")
+    if not proxy: warning("make_proxy_scene say:Proxy is missing.")
 
     #Visibility
     visibility_state = cmds.getAttr(proxy+".visibility")
@@ -264,7 +306,7 @@ def make_proxy_scene(asset_name,dir,proxy, sub_assets=None):
     #Arnold attribut
     cmds.setAttr(proxy+".ai_translator",  "procedural", type="string")
     ass_dir = os.path.join(dir,asset_name,"publish","ass")
-    ass_path =  get_last_basic_variant_ass(ass_dir)
+    ass_path =  get_last_basic_variant_ass(asset_name,ass_dir)
     logger.debug("get_last_basic_variant_ass() = %s"%ass_path)
     cmds.setAttr(proxy+".dso",ass_path,type="string")
     cmds.setAttr(proxy+".aiOverrideShaders",0)
@@ -286,3 +328,4 @@ def make_proxy_scene(asset_name,dir,proxy, sub_assets=None):
 
     cmds.setAttr(proxy+".ai_translator",  "polymesh", type="string")
     cmds.setAttr(proxy+".visibility",visibility_state)
+    return next_publish_proxy_scene
