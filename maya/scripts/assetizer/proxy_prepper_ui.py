@@ -34,14 +34,14 @@ def maya_main_window():
 
 
 
-class AssetLoader(QtWidgets.QDialog):
+class ProxyPrepper(QtWidgets.QDialog):
     def __init__(self, parent=maya_main_window()):
-        super(AssetLoader, self).__init__(parent)
+        super(ProxyPrepper, self).__init__(parent)
         self.qtSignal = QtCore.Signal()
 
         #################################################################
     def create(self):
-        self.setWindowTitle("AssetLoader")
+        self.setWindowTitle("Proxy Prepper")
         self.setWindowFlags(QtCore.Qt.Tool)
         self.resize(300, 100) # re-size the window
 
@@ -53,7 +53,13 @@ class AssetLoader(QtWidgets.QDialog):
 
         # WIDGET LIST
         self.reduce_value = QtWidgets.QLineEdit(self)
-        self.reduce_value.setText("3 60 3000")
+        try:
+            size = round(pp.getsize(cmds.ls(selection=True)[0]),3)
+            if size == 0:
+                size=0.05
+        except:
+            size = 3
+        self.reduce_value.setText("%s 60 2000"%str(size))
 
         self.dir_image = QtWidgets.QLineEdit(self)
         self.dir_image.setText(self.get_image_dir())
@@ -64,10 +70,11 @@ class AssetLoader(QtWidgets.QDialog):
         self.is_a_shot_asset =  QtWidgets.QCheckBox("is a shot asset")
         self.is_a_shot_asset.setChecked(True)
 
-        self.display_label = QtWidgets.QLabel("Edge lenght: %s"%(pp.getsize(cmds.ls(selection=True)[0])))
+        self.display_label = QtWidgets.QLabel("Edge lenght: %s"%(size))
         self.generate_proxy_button = QtWidgets.QPushButton("Generate proxy")
         self.bakeTexture_button = QtWidgets.QPushButton("Bake Texture")
         self.generate_lowpoly_button = QtWidgets.QPushButton("Generate Low poly")
+        self.hierarchy = QtWidgets.QPushButton("Generate hierarchy")
 
         # ADD WIDGET TO LAYOUT
 
@@ -80,6 +87,7 @@ class AssetLoader(QtWidgets.QDialog):
         self.button_layout.addWidget(self.generate_proxy_button)
         self.button_layout.addWidget(self.bakeTexture_button)
         self.button_layout.addWidget(self.generate_lowpoly_button)
+        self.button_layout.addWidget(self.hierarchy)
 
 
         self.mainLayout.addLayout(self.comboLayout)
@@ -90,22 +98,41 @@ class AssetLoader(QtWidgets.QDialog):
         self.generate_proxy_button.clicked.connect(self.generate_proxy_clicked)
         self.bakeTexture_button.clicked.connect(self.bakeTexture_button_clicked)
         self.generate_lowpoly_button.clicked.connect(self.generate_lowpoly_clicked)
+        self.hierarchy.clicked.connect(self.hierarchy_clicked)
         #self.publish_variant.clicked.connect(self.publish_variant_clicked)
         #sself.convert_to_maya.clicked.connect(self.convert_to_maya_clicked)
         #self.use_latest.stateChanged.connect(self.use_latest_changed)
 
+    def hierarchy_clicked(self):
+        sel = cmds.ls(selection=True)[0]
+        text, ok = QtWidgets.QInputDialog.getText(self, 'Input Dialog','asset Name:')
+        if ok:
+            asset_name = str(text)
+        else:
+            cmds.warning('abort by user')
+            raise
+        hd = cmds.group(sel, n='HD')
+        basic = cmds.group(hd,n="variant_basic")
+        asset = cmds.group(basic,n=asset_name)
+
+
     def get_image_dir(self):
         filepath = cmds.file(q=True, sn=True)
-        granpa =os.path.dirname(os.path.dirname(filepath))
-        dir = os.path.join(granpa,"publish")
-        os.makedirs(dir, exist_ok=True)
-        return dir
+        if filepath:
+            granpa =os.path.dirname(os.path.dirname(filepath))
+            dir = os.path.join(granpa,"publish")
+            os.makedirs(dir, exist_ok=True)
+            return dir
+        else:
+            return "none"
 
     def generate_proxy_clicked(self):
         text = self.reduce_value.text()
         maxEdgeLength,collapseThreshold,targetVertex = text.split(" ")
         root = cmds.ls(selection=True)
-        pp.proxy_generate(root, "proxy",float(maxEdgeLength), float(collapseThreshold),float(targetVertex))
+        sel = cmds.ls(selection=True)[0]
+
+        pp.proxy_generate(sel, "proxy",float(maxEdgeLength), float(collapseThreshold),float(targetVertex))
 
     def bakeTexture_button_clicked(self):
         dir =self.dir_image.text()
@@ -113,13 +140,13 @@ class AssetLoader(QtWidgets.QDialog):
         pp.bake_texture(root,dir)
 
     def generate_lowpoly_clicked(self):
+        sel =  cmds.ls(dag=1,o=1,s=1,sl=1)
         pp.displace_disable()
-        pass
-
+        pp.catclark_max(sel,1)
 try:
     ui.deleteLater()
 except:
     pass
-ui = AssetLoader()
+ui = ProxyPrepper()
 ui.create()
 ui.show()

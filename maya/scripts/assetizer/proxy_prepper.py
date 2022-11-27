@@ -61,8 +61,24 @@ def displace_disable():
     list_shadingGrp = []
     for shape in shapes:
         shadingGrp = cmds.listConnections(shape,type='shadingEngine')
-        if shadingGrp[0] not in list_shadingGrp:
-            list_shadingGrp.append(shadingGrp[0])
+        if shadingGrp :
+            print("shading group found")
+            if len(shadingGrp)==1:
+                print("only one shafding group")
+                if shadingGrp[0] != 'initialShadingGroup':
+                    print("not a initialShadingGroup")
+                    if shadingGrp[0] not in list_shadingGrp:
+                        list_shadingGrp.append(shadingGrp[0])
+                else:
+                    print("It's a initialShadingGroup, can't duplicate")
+            else:
+                print (shadingGrp)
+                print ("Too many shading group: %s"%str(len(shadingGrp)))
+        else:
+            print("No shading engine found !")
+
+    if 'initialShadingGroup'in list_shadingGrp:  list_shadingGrp.remove('initialShadingGroup')
+    print (list_shadingGrp)
     try:
         for shadingGrp in list_shadingGrp:
             shader = cmds.listConnections(shadingGrp+".surfaceShader")
@@ -72,8 +88,11 @@ def displace_disable():
 
                 cmds.connectAttr("%s.outColor" % shader_2[0], "%s.surfaceShader" % newshadingGroup)
                 member_list = cmds.sets(shadingGrp, q=True)
-                print(member_list)
-                cmds.sets(member_list, e=True, forceElement=newshadingGroup)
+
+                #Assign only to the geo that is both part of lowpoly set and shading group set
+                match_set = set(member_list).intersection(shapes)
+
+                cmds.sets(list(match_set), e=True, forceElement=newshadingGroup)
 
     except Exception as e:
             print(e)
@@ -92,17 +111,32 @@ def getsize(sel):
     except Exception as e:
         print(e)
         return 0
-def proxy_generate(obj_root,name, maxEdgeLength=3,collapseThreshold=60, targetVertex= 3000):
 
-    for o in cmds.listRelatives(obj_root,allDescendents=True, fullPath=True):
+def catclark_max(objs,max=1):
+    for obj in objs:
+        try:
+            type = cmds.getAttr(obj+".aiSubdivType")
+
+            ite = cmds.getAttr(obj+".aiSubdivIterations")
+
+            if type ==1 and ite > max:
+                cmds.setAttr(obj+".aiSubdivIterations",max)
+        except Exception as e:
+            print(e)
+
+def proxy_generate(obj_root,name, maxEdgeLength=3,collapseThreshold=60, targetVertex= 3000):
+    proxy= cmds.duplicate(obj_root, name=name)
+    proxy = proxy[0]
+
+    for o in cmds.listRelatives(proxy ,allDescendents=True, fullPath=True):
         if cmds.objectType(o, isType='mesh'):
              cmds.select(o)
              cmds.polyRemesh(maxEdgeLength=maxEdgeLength, constructionHistory=0,collapseThreshold=collapseThreshold,caching=1)
     try:
-        cmds.polyUnite (obj_root,mergeUVSets=True, n=name)
+        proxy = cmds.polyUnite (proxy,mergeUVSets=True, n=name)
     except:
         print("Poly unit failed")
-    cmds.delete(name, constructionHistory = True)
+    cmds.delete(proxy, constructionHistory = True)
     cmds.polyReduce (ver=1 ,trm=1 ,shp=0, keepBorder=1 ,keepMapBorder=1 ,
                     keepColorBorder=1 ,keepFaceGroupBorder=1 ,keepHardEdge=1 ,
                     keepCreaseEdge=1 ,keepBorderWeight=0.5 ,
@@ -111,4 +145,5 @@ def proxy_generate(obj_root,name, maxEdgeLength=3,collapseThreshold=60, targetVe
                     keepHardEdgeWeight=0.5 , keepCreaseEdgeWeight=0.5,
                     useVirtualSymmetry=0,preserveTopology=1,keepQuadsWeight=0,
                     cachingReduce=1 ,ch=1 ,p=50 ,vct=targetVertex ,tct=0 ,replaceOriginal=1)
-    cmds.delete(name, constructionHistory = True)
+    cmds.delete(proxy, constructionHistory = True)
+    cmds.select(proxy)
