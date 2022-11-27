@@ -7,6 +7,10 @@ logger.setLevel(logging.DEBUG)
 #logger.setLevel(logging.INFO)
 zero_matrix = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 
+def match_matrix(source,target):
+    m = cmds.xform(source, worldSpace = True, matrix=True, query=True)
+    cmds.xform(target,  matrix=m)
+
 def write_ass(path=""):
     cmds.file(path,
               force=False,
@@ -269,7 +273,7 @@ def get_last_basic_variant_ass(asset_name,ass_dir):
         vSet  = list(dic.keys())[0]
         variant = list(dic[vSet].keys())[0]
         last =   dic[vSet][variant][-1]
-        logger.debug("Found that, not sure what it is...: %s %s %s"%(vSet, variant ,last))
+        logger.debug("Found something, not sure what it is...: %s %s %s"%(vSet, variant ,last))
     ass_path = os.path.join(ass_dir,vSet,variant,last,"%s_%s_%s.ass"%(asset_name,vSet,variant))
     return ass_path
 
@@ -282,15 +286,6 @@ def get_from_asset(asset_name_long, pattern, must_exist=True):
         return warning("not found %s"%pattern)
     else:
         logger.info("Not found %s"%pattern)
-        return None
-    obj = asset_name_long+"|"+pattern
-    logger.debug('Looking for... %s !' %obj)
-
-    if cmds.objExists(obj):
-        logger.debug('Found %s !' %obj)
-        return obj
-    else:
-        logger.debug('Not Found %s !' %obj)
         return None
 
 def make_proxy_scene(asset_name,dir,proxy, sub_assets=None):

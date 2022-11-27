@@ -96,6 +96,7 @@ class AssetLoader(QtWidgets.QDialog):
             obj = sel[0]
         except:
             assTools.warning("The selected obj is not working -> %s"%sel)
+        matrix = cmds.xform(obj, worldSpace = True, matrix=True, query=True)
         new_obj, original_obj, proxy = assTools.cleanAsset(obj, needProxy=True)
         asset, variants = assTools.scanAsset(new_obj)
         sub_assets = assTools.get_from_asset(asset.name_long, "sub_assets", must_exist=False)
@@ -106,7 +107,7 @@ class AssetLoader(QtWidgets.QDialog):
         if self.import_published.isChecked():
             maya_object = cmds.file(publish_proxy_scene, reference=True, namespace=asset.name)
             nodes= cmds.referenceQuery(maya_object ,nodes=True)
-            assTools.match_matrix(nodes[0],asset.name_long)
+            cmds.xform(nodes[0],  matrix=matrix )
         cmds.delete(asset.name_long)
         assTools.deleteSource(original_obj, asset.name_long, asset.name, self.keep_original.isChecked())
 

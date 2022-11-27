@@ -3,6 +3,7 @@ import maya.cmds as cmds
 #TO DO create light no shadow?
 
 def bake_texture(obj, dir,resolution=1024):
+
     #Lights manipulation
     dic_lights={}
     lights = cmds.ls(type="light")
@@ -54,27 +55,53 @@ def merge_uv_sets(obj):
     return default_uv
 
 
-def displace_disable(objs):
+def displace_disable():
     shaderGroup=[]
-shapes =  cmds.ls(dag=1,o=1,s=1,sl=1)
-for shape in shapes:
-    shadingGrp = cmds.listConnections(shape,type='shadingEngine')
-    shader = cmds.listConnections(shadingGrp[0]+".surfaceShader")
-    print(shader)
-shadingGrps = cmds.listConnections(shapesInSel,type='shadingEngine')
-# get the shaders:
-shaders = cmds.ls(cmds.listConnections(shadingGrps+".surfaceShader"))
-if len(shaders)>1:
-    cmds.duplicate(shaders[0])    
+    shapes =  cmds.ls(dag=1,o=1,s=1,sl=1)
+    list_shadingGrp = []
+    for shape in shapes:
+        shadingGrp = cmds.listConnections(shape,type='shadingEngine')
+        if shadingGrp[0] not in list_shadingGrp:
+            list_shadingGrp.append(shadingGrp[0])
+    try:
+        for shadingGrp in list_shadingGrp:
+            shader = cmds.listConnections(shadingGrp+".surfaceShader")
+            if len(shader)>0:
+                shader_2  = cmds.duplicate(shader[0], n="%s_lowpoly"%shader[0])
+                newshadingGroup = cmds.sets(name="lowpoly_%s" % shadingGrp, empty=True, renderable=True, noSurfaceShader=True)
 
-def proxy_generate(obj_root, name, maxEdgeLength=3,collapseThreshold=60, targetVertex= 3000):
+                cmds.connectAttr("%s.outColor" % shader_2[0], "%s.surfaceShader" % newshadingGroup)
+                member_list = cmds.sets(shadingGrp, q=True)
+                print(member_list)
+                cmds.sets(member_list, e=True, forceElement=newshadingGroup)
+
+    except Exception as e:
+            print(e)
+
+def getsize(sel):
+    if not sel:
+        return 0
+    try:
+        bb = cmds.xform(sel,bb=True, query=True)
+        x = bb[3]-bb[0]
+        y = bb[4]-bb[1]
+        z = bb[5]-bb[2]
+        moy = (x+y+z)/3
+        edge_length = moy *0.05
+        return edge_length
+    except Exception as e:
+        print(e)
+        return 0
+def proxy_generate(obj_root,name, maxEdgeLength=3,collapseThreshold=60, targetVertex= 3000):
 
     for o in cmds.listRelatives(obj_root,allDescendents=True, fullPath=True):
         if cmds.objectType(o, isType='mesh'):
              cmds.select(o)
              cmds.polyRemesh(maxEdgeLength=maxEdgeLength, constructionHistory=0,collapseThreshold=collapseThreshold,caching=1)
-
-    cmds.polyUnite (obj_root,mergeUVSets=True, n=name)
+    try:
+        cmds.polyUnite (obj_root,mergeUVSets=True, n=name)
+    except:
+        print("Poly unit failed")
     cmds.delete(name, constructionHistory = True)
     cmds.polyReduce (ver=1 ,trm=1 ,shp=0, keepBorder=1 ,keepMapBorder=1 ,
                     keepColorBorder=1 ,keepFaceGroupBorder=1 ,keepHardEdge=1 ,
