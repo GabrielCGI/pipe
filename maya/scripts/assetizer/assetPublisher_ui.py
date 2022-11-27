@@ -54,13 +54,13 @@ class AssetLoader(QtWidgets.QDialog):
 
         #WIDGET CHECKBOX
         self.is_a_shot_asset =  QtWidgets.QCheckBox("is a shot asset")
-        self.is_a_shot_asset.setChecked(True)
+        self.is_a_shot_asset.setChecked(False)
 
         self.keep_original =  QtWidgets.QCheckBox("keep original")
         self.keep_original.setChecked(False)
 
         self.import_published =  QtWidgets.QCheckBox("import published")
-        self.import_published.setChecked(False)
+        self.import_published.setChecked(True)
 
         self.display_label = QtWidgets.QLabel("Asset:")
         self.publish_asset = QtWidgets.QPushButton("Publish selected asset")

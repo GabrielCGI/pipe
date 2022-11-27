@@ -10,24 +10,29 @@ def bake_texture(obj, dir,resolution=1024):
     for l in lights:
         dic_lights[l]= cmds.getAttr(l+".visibility")
         cmds.setAttr(l+".visibility",0)
-    domeL = cmds.createNode("aiSkyDomeLight", n="tex_bake_dome")
-    cmds.setAttr(domeL+".aiCastShadows",0)
+    domeL = cmds.createNode("aiSkyDomeLight")
+    transform_domeL= cmds.listRelatives(domeL,parent=True)[0]
+    cmds.connectAttr(transform_domeL+".instObjGroups", "defaultLightSet.dagSetMembers",nextAvailable=True)
+    cmds.setAttr(domeL+".aiCastShadows",1)
     cmds.setAttr(domeL+".aiSpecular",0)
 
 
     default_uv  = merge_uv_sets(obj)
+    print(default_uv)
 
     cmds.select(obj)
     proxy_uvset = cmds.polyUVSet(create=True,uvSet = "proxyUv")
     cmds.polyAutoProjection(uvSetName=proxy_uvset[0])
+    cmds.select(obj)
     cmds.arnoldRenderToTexture(folder=dir,aa_samples=1,extend_edges=True,resolution=resolution, enable_aovs=True,uv_set=proxy_uvset[0])
-
-    albedo = [f for f in os.listdir(dir) if f.endswith(".exr")][0]
+    shape = cmds.listRelatives(obj, shapes=True)[0]
+    albedo = [f for f in os.listdir(dir) if f.endswith(".exr") and shape in f][0]
     albedo_path = os.path.join(dir,albedo)
     file_node_albedo = cmds.shadingNode("file", asTexture=True, name ="proxyAlbedo")
     cmds.setAttr(file_node_albedo+".fileTextureName",albedo_path, type="string")
 
-    proxy_shader = cmds.shadingNode("aiStandardSurface", asShader=True, name ="proxyShader")
+    proxy_shader = cmds.shadingNode("aiStandardSurface", asShader=True)
+    #TO DO rename
     cmds.setAttr(proxy_shader+".specular",0.4)
     shadingGroup = cmds.sets(name="%sSG" % proxy_shader, empty=True, renderable=True, noSurfaceShader=True)
     cmds.connectAttr(file_node_albedo+".outColor ", proxy_shader +".baseColor")
@@ -37,7 +42,7 @@ def bake_texture(obj, dir,resolution=1024):
     cmds.polyCopyUV(obj, uvi=proxy_uvset[0],uvs=default_uv )
     cmds.delete(obj, constructionHistory = True)
     #Clean Lights
-    cmds.delete(domeL)
+    cmds.delete(transform_domeL)
     for l in dic_lights.keys():
         cmds.setAttr(l+".visibility",dic_lights[l])
 
@@ -133,10 +138,13 @@ def proxy_generate(obj_root,name, maxEdgeLength=3,collapseThreshold=60, targetVe
              cmds.select(o)
              cmds.polyRemesh(maxEdgeLength=maxEdgeLength, constructionHistory=0,collapseThreshold=collapseThreshold,caching=1)
     try:
-        proxy = cmds.polyUnite (proxy,mergeUVSets=True, n=name)
+        proxy = cmds.polyUnite (proxy,mergeUVSets=True, n=name)[0]
+
+
     except:
         print("Poly unit failed")
     cmds.delete(proxy, constructionHistory = True)
+    cmds.select(proxy)
     cmds.polyReduce (ver=1 ,trm=1 ,shp=0, keepBorder=1 ,keepMapBorder=1 ,
                     keepColorBorder=1 ,keepFaceGroupBorder=1 ,keepHardEdge=1 ,
                     keepCreaseEdge=1 ,keepBorderWeight=0.5 ,
@@ -145,5 +153,6 @@ def proxy_generate(obj_root,name, maxEdgeLength=3,collapseThreshold=60, targetVe
                     keepHardEdgeWeight=0.5 , keepCreaseEdgeWeight=0.5,
                     useVirtualSymmetry=0,preserveTopology=1,keepQuadsWeight=0,
                     cachingReduce=1 ,ch=1 ,p=50 ,vct=targetVertex ,tct=0 ,replaceOriginal=1)
+
     cmds.delete(proxy, constructionHistory = True)
     cmds.select(proxy)
