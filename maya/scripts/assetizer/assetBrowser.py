@@ -37,7 +37,7 @@ def maya_main_window():
 
 
 
-
+#current_project="D:/gabriel/assetizer"
 current_project = "B:/trashtown_2112"
 empty_scene = ""
 all_assets_dir = os.path.join(current_project,"assets")
