@@ -12,6 +12,84 @@ class FileTex:
         self.name = name
         self.path = path
         self.colorSpace = colorSpace
+def flattenSet():
+    counter=0
+    """
+    Using the cmds.transferShadingSets() command create set like "object.f[0:3300]""
+    The set has an array with the face assigned.
+    This function flatten into a simple set "objectShape" if the shader there is only one shader.
+    """
+    dic_sg={}
+
+    #SELECT ALL SHADING ENGINE MINUS DEFAULT
+    listShadingEngine = cmds.ls(type="shadingEngine")
+    listShadingEngine.remove('initialParticleSE')
+    listShadingEngine.remove('initialShadingGroup')
+
+    #FIND ALL SHAPES OF A SHADING GROUP
+    #Return a dictionary with key = sg name, value = list of shapes
+    for sg in listShadingEngine:
+
+        #GET THE SET
+        set = cmds.sets(sg, query=True)
+        setSimple = set
+        if set:
+            setSimple = [s.split(".")[0] for s in set]
+
+        cmds.sets(setSimple, e=True, forceElement= sg)
+        #BUILD A LIST OF PATH WITH FORWARD SLASH
+
+
+def fix_shader_vp():
+    dic_sg={}
+    listShadingEngine = cmds.ls(type="shadingEngine")
+    listShadingEngine.remove('initialParticleSE')
+    listShadingEngine.remove('initialShadingGroup')
+    for sg in listShadingEngine:
+        try:
+            a = cmds.listConnections( sg+".surfaceShader", plugs =True)
+            cmds.connectAttr(a[0], sg+".aiSurfaceShader")
+            print("succes aiSurfaceShader: "+ a[0])
+
+        except Exception as e:
+            print (e)
+    for sg in listShadingEngine:
+        try:
+            a = cmds.listConnections( sg+".surfaceShader", plugs =True)
+            cmds.connectAttr("lambert1.outColor", sg+".surfaceShader",f=True)
+            print("succes lambert surface: "+ a[0])
+
+        except Exception as e:
+            print (e)
+def merge_uv_sets(obj):
+    default_uv = cmds.getAttr(obj+".uvSet[0].uvSetName")
+    all_uv_sets = cmds.polyUVSet(obj, q=1, allUVSets=1)
+    all_uv_sets.remove(default_uv)
+    #temp_uv  = cmds.polyUVSet(create=True,uvSet = "temp_uv")[0]
+    for uv_set in all_uv_sets:
+        cmds.polyUVSet(currentUVSet = True, uvSet=uv_set)
+        uvs = cmds.polyListComponentConversion(obj, toUV=True)
+        #cmds.select(uvs)
+        cmds.polyCopyUV( uvs, uvi= uv_set, uvs=default_uv )
+        cmds.polyUVSet( delete=True, uvSet=uv_set)
+    if default_uv != "map1":
+        cmds.polyUVSet(obj, rename=True, newUVSet='map1', uvSet=default_uv)
+    return default_uv
+
+def deleteLockNode():
+    allNodes = cmds.ls()
+    for node in allNodes:
+        cmds.lockNode(node, l=False)
+
+def mergeAlluvSet():
+    sel = cmds.ls( type="mesh")
+    for s in sel:
+        print(s)
+        try:
+            merge_uv_sets(s)
+        except:
+            print("failed merge uv!! " + s)
+    flattenSet()
 
 def removeAllNameSpace():
     # Set root namespace

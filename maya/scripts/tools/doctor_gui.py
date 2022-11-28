@@ -40,7 +40,10 @@ def createGUI():
     cmds.checkBox("unknownPlugin", label="Remove Unknown Plugins", value=True)
     cmds.checkBox("removeAllNameSpace", label="Delete namespaces. NOT ON SCENE WITH REFERENCE !", value=False)
     cmds.checkBox("delHistory", label="Delete Deformer History", value=False)
+    cmds.checkBox("flattenSet", label="Flatten uv & faceSet", value=False)
     cmds.checkBox("cam", label="Delete extra camera", value=False)
+    cmds.checkBox("lock", label="Unlock all nodes", value=True)
+    cmds.checkBox("fixShaderVp", label="Force lambert viewport", value=False)
     #Remove CgAbBlastPanel Error because of a missing plugin that keep raising errors.
     cmds.checkBox("remove_CgAbBlastPanel", label="Remove CgAbBlastPanel Error", value=False)
     #cmds.checkBox("numObject", label="Objet Numbers", value=True)
@@ -52,18 +55,34 @@ def createGUI():
 
 #query checkboxes
 def doctor():
+
+    if cmds.checkBox("lock", query = True, value =True):
+        try:
+            doc.deleteLockNode()
+        except Exception as e:
+            print(e)
+    if cmds.checkBox("fixShaderVp", query = True, value =True):
+        try:
+            doc.fix_shader_vp()
+        except Exception as e:
+            print(e)
+
     if cmds.checkBox("deleteUnknown", query = True, value =True):
         doc.deleteUnknown()
 
     if cmds.checkBox("removeAllNameSpace", query = True, value =True):
         doc.removeAllNameSpace()
-
+    if cmds.checkBox("flattenSet", query = True, value =True):
+        doc.mergeAlluvSet()
     if cmds.checkBox("unknownPlugin", query = True, value =True):
         doc.unknownPlugin()
 
     if cmds.checkBox("remove_CgAbBlastPanel", query = True, value =True):
+        try:
+            doc.remove_CgAbBlastPanelOptChangeCallback()
+        except Exception as e:
+            print(e)
 
-        doc.remove_CgAbBlastPanelOptChangeCallback()
     if cmds.checkBox("texColorSpace", query = True, value =True):
 
         doc.fixcolorSpaceUnknown()

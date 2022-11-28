@@ -30,7 +30,8 @@ rem \---- ENVIT
 SET PATH=%PATH%;%NETWORK_INSTALL%\EnvIt
 
 rem \---- BIFRSOT 
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\bifrost\2.4.0.0;
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\bifrost\bifrost_2.5.1;
+SET BIFROST_LIB_CONFIG_FILES=R:\pipeline\networkInstall\bifrost\MJCG_compounds\bifrost_lib_config.json;R:\pipeline\networkInstall\bifrost\rebel_pack_0.4.1\bifrost_lib_config.json;
 
 rem \ MAYA SECURITY TOOL
 SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;R:\pipeline\networkInstall\MayaScanner;

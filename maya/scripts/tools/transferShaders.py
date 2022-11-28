@@ -7,6 +7,36 @@ import maya.cmds as cmds
 #Name must match
 
 
+
+
+#INIT DIC
+def flattenSet():
+    counter=0
+    """
+    Using the cmds.transferShadingSets() command create set like "object.f[0:3300]""
+    The set has an array with the face assigned.
+    This function flatten into a simple set "objectShape" if the shader there is only one shader.
+    """
+    dic_sg={}
+
+    #SELECT ALL SHADING ENGINE MINUS DEFAULT
+    listShadingEngine = cmds.ls(type="shadingEngine")
+    listShadingEngine.remove('initialParticleSE')
+    listShadingEngine.remove('initialShadingGroup')
+
+    #FIND ALL SHAPES OF A SHADING GROUP
+    #Return a dictionary with key = sg name, value = list of shapes
+    for sg in listShadingEngine:
+
+        #GET THE SET
+        set = cmds.sets(sg, query=True)
+        setSimple = set
+        if set:
+            setSimple = [s.split(".")[0] for s in set]
+
+        cmds.sets(setSimple, e=True, forceElement= sg)
+        #BUILD A LIST OF PATH WITH FORWARD SLASH
+
 def transferShaders() :
     fails = [""]
     sel = cmds.ls(selection=True)
@@ -74,3 +104,4 @@ def transferShaders() :
     print("\n ---FAILED LIST----")
     for fail in fails:
         print(fail)
+    flattenSet()
