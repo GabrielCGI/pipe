@@ -3,7 +3,17 @@ import maya.cmds as cmds
 #TO DO create light no shadow?
 
 def bake_texture(obj, dir,resolution=1024):
+    result = cmds.confirmDialog( title='UV?',
+                        message='What about uvs?',
+                        button=['Auto-generate','Use existing'],
+                        defaultButton='Use existing',
+                        cancelButton='"Cancel',
+                        dismissString='"Cancel' )
+    if result == "Auto-generate":
+        uv_generate = True
 
+    if result == "Use existing":
+        uv_generate = False
     #Lights manipulation
     dic_lights={}
     lights = cmds.ls(type="light")
@@ -21,8 +31,9 @@ def bake_texture(obj, dir,resolution=1024):
     print(default_uv)
 
     cmds.select(obj)
-    proxy_uvset = cmds.polyUVSet(create=True,uvSet = "proxyUv")
-    cmds.polyAutoProjection(uvSetName=proxy_uvset[0])
+    if uv_generate:
+        proxy_uvset = cmds.polyUVSet(create=True,uvSet = "proxyUv")
+        cmds.polyAutoProjection(uvSetName=proxy_uvset[0])
     cmds.select(obj)
     cmds.arnoldRenderToTexture(folder=dir,aa_samples=1,extend_edges=True,resolution=resolution, enable_aovs=True,uv_set=proxy_uvset[0])
     shape = cmds.listRelatives(obj, shapes=True)[0]
@@ -87,11 +98,17 @@ def displace_disable():
     try:
         for shadingGrp in list_shadingGrp:
             shader = cmds.listConnections(shadingGrp+".surfaceShader")
-            if len(shader)>0:
-                shader_2  = cmds.duplicate(shader[0], n="%s_lowpoly"%shader[0])
-                newshadingGroup = cmds.sets(name="lowpoly_%s" % shadingGrp, empty=True, renderable=True, noSurfaceShader=True)
+            shader_ai = cmds.listConnections(shadingGrp+".aiSurfaceShader")
+            if shader_ai != None:
+                shader = shader_ai
+            if shader != None:
 
-                cmds.connectAttr("%s.outColor" % shader_2[0], "%s.surfaceShader" % newshadingGroup)
+                newshadingGroup = cmds.sets(name="lowpoly_%s" % shadingGrp, empty=True, renderable=True, noSurfaceShader=True)
+                print("connecting aiSurface: %s"%shader[0])
+                cmds.connectAttr("%s.outColor" % shader[0], "%s.aiSurfaceShader" % newshadingGroup)
+
+                cmds.connectAttr("lambert1.outColor", "%s.surfaceShader" % newshadingGroup)
+                print("connecting lambert success !")
                 member_list = cmds.sets(shadingGrp, q=True)
 
                 #Assign only to the geo that is both part of lowpoly set and shading group set
@@ -129,18 +146,19 @@ def catclark_max(objs,max=1):
         except Exception as e:
             print(e)
 
+
 def proxy_generate(obj_root,name, maxEdgeLength=3,collapseThreshold=60, targetVertex= 3000):
     proxy= cmds.duplicate(obj_root, name=name)
     proxy = proxy[0]
-
-    for o in cmds.listRelatives(proxy ,allDescendents=True, fullPath=True):
-        if cmds.objectType(o, isType='mesh'):
-             cmds.select(o)
-             cmds.polyRemesh(maxEdgeLength=maxEdgeLength, constructionHistory=0,collapseThreshold=collapseThreshold,caching=1)
+    childrens = cmds.listRelatives(proxy,allDescendents=True, type="mesh",fullPath=True)
+    #for o in cmds.listRelatives(proxy ,allDescendents=True, fullPath=True):
+        #if cmds.objectType(o, isType='mesh'):
+             #cmds.select(o)
+             #cmds.polyRemesh(maxEdgeLength=maxEdgeLength, constructionHistory=0,collapseThreshold=collapseThreshold,caching=1)
+    if cmds.listRelatives(proxy,parent=True) != None:
+        proxy = cmds.parent(proxy, world=True )[0]
     try:
         proxy = cmds.polyUnite (proxy,mergeUVSets=True, n=name)[0]
-
-
     except:
         print("Poly unit failed")
     cmds.delete(proxy, constructionHistory = True)
@@ -155,4 +173,6 @@ def proxy_generate(obj_root,name, maxEdgeLength=3,collapseThreshold=60, targetVe
                     cachingReduce=1 ,ch=1 ,p=50 ,vct=targetVertex ,tct=0 ,replaceOriginal=1)
 
     cmds.delete(proxy, constructionHistory = True)
+    cmds.move(0, 0,0, proxy+".scalePivot",proxy+".rotatePivot", absolute=True)
     cmds.select(proxy)
+    return (proxy)

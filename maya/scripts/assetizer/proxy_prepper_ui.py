@@ -72,6 +72,8 @@ class ProxyPrepper(QtWidgets.QDialog):
 
         self.display_label = QtWidgets.QLabel("Edge lenght: %s"%(size))
         self.generate_proxy_button = QtWidgets.QPushButton("Generate proxy")
+        self.hierarchy = QtWidgets.QPushButton("Generate hierarchy")
+        self.mergeuvs_button = QtWidgets.QPushButton("Merge uvset")
         self.bakeTexture_button = QtWidgets.QPushButton("Bake Texture")
         self.generate_lowpoly_button = QtWidgets.QPushButton("Generate Low poly")
         self.hierarchy = QtWidgets.QPushButton("Generate hierarchy")
@@ -86,6 +88,7 @@ class ProxyPrepper(QtWidgets.QDialog):
 
         self.button_layout.addWidget(self.generate_proxy_button)
         self.button_layout.addWidget(self.bakeTexture_button)
+        self.button_layout.addWidget(self.mergeuvs_button)
         self.button_layout.addWidget(self.generate_lowpoly_button)
         self.button_layout.addWidget(self.hierarchy)
 
@@ -99,10 +102,14 @@ class ProxyPrepper(QtWidgets.QDialog):
         self.bakeTexture_button.clicked.connect(self.bakeTexture_button_clicked)
         self.generate_lowpoly_button.clicked.connect(self.generate_lowpoly_clicked)
         self.hierarchy.clicked.connect(self.hierarchy_clicked)
+        self.mergeuvs_button.clicked.connect(self.mergeuvs_button_clicked)
         #self.publish_variant.clicked.connect(self.publish_variant_clicked)
         #sself.convert_to_maya.clicked.connect(self.convert_to_maya_clicked)
         #self.use_latest.stateChanged.connect(self.use_latest_changed)
 
+    def mergeuvs_button_clicked(self):
+        obj = cmds.ls(selection=True)[0]
+        pp.merge_uv_sets(obj)
     def hierarchy_clicked(self):
         sel = cmds.ls(selection=True)[0]
         text, ok = QtWidgets.QInputDialog.getText(self, 'Input Dialog','asset Name:')

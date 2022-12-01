@@ -48,19 +48,17 @@ def fix_shader_vp():
     for sg in listShadingEngine:
         try:
             a = cmds.listConnections( sg+".surfaceShader", plugs =True)
-            cmds.connectAttr(a[0], sg+".aiSurfaceShader")
-            print("succes aiSurfaceShader: "+ a[0])
-
-        except Exception as e:
-            print (e)
-    for sg in listShadingEngine:
-        try:
-            a = cmds.listConnections( sg+".surfaceShader", plugs =True)
+            aishader=  cmds.listConnections( sg+".aiSurfaceShader", plugs =True)
+            if aishader ==None:
+                cmds.connectAttr(a[0], sg+".aiSurfaceShader")
+                print("succes aiSurfaceShader: "+ a[0])
             cmds.connectAttr("lambert1.outColor", sg+".surfaceShader",f=True)
             print("succes lambert surface: "+ a[0])
 
+
         except Exception as e:
             print (e)
+
 def merge_uv_sets(obj):
     default_uv = cmds.getAttr(obj+".uvSet[0].uvSetName")
     all_uv_sets = cmds.polyUVSet(obj, q=1, allUVSets=1)

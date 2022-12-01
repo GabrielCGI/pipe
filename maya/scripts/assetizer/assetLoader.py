@@ -290,7 +290,8 @@ class AssetLoader(QtWidgets.QDialog):
         #Get the REAL namesapce (with "RN" and versioning)
         namespace = cmds.file(maya_object, referenceNode=True, query=True)
         node= cmds.referenceQuery(namespace,nodes=True )
-        match_matrix(node[0],self.maya_proxy_name)
+        cmds.matchTransform(node[0],self.maya_proxy_name)
+        #☻match_matrix(node[0],self.maya_proxy_name)
         #Hide and rename proxy "TO_DELETE"
         cmds.setAttr(self.maya_proxy_name+".visibility",0)
         cmds.rename(self.maya_proxy_name,self.maya_proxy_name+"_TO_DELETE")

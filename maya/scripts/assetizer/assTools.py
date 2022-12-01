@@ -62,6 +62,22 @@ def warning(txt):
     cmds.confirmDialog(message= txt)
     cmds.error(txt)
 
+def ask_save():
+    fileCheckState = cmds.file(q=True, modified=True)
+    if fileCheckState:
+        result = cmds.confirmDialog( title='Save ?',
+                            message='Do you want to save?',
+                            button=['Yes','Skip',"Cancel"],
+                            defaultButton='Yes',
+                            cancelButton='"Cancel',
+                            dismissString='"Cancel' )
+        if result == "Yes":
+            name= cmds.file(q=True, sn=True)
+            cmds.file(rename=name)
+            cmds.file(save=True)
+
+        if result == "Cancel":
+            warning("Abort by user")
 
 def short_name(long_name):
     logger.debug('Trying to shorten name %s'%long_name)
@@ -87,6 +103,9 @@ def is_dir_exist(path):
         return True
 
 def exportVariant(dir, asset, variant, export_shading_scene = False):
+    mb_state = cmds.getAttr("defaultArnoldRenderOptions.motion_blur_enable")
+    if mb_state == 1:
+        cmds.setAttr("defaultArnoldRenderOptions.motion_blur_enable",0)
     cmds.select(variant.name_long)
 
 
@@ -123,7 +142,8 @@ def exportVariant(dir, asset, variant, export_shading_scene = False):
     #Restore visibility_state
     cmds.setAttr(variant.name_long+".visibility",variant_visibility_state)
     cmds.setAttr(variant.vSet_name_long+".visibility",variantSet_visibitlity_state)
-
+    if mb_state == 1:
+        cmds.setAttr("defaultArnoldRenderOptions.motion_blur_enable",mb_state)
 def printInfo(object):
 
     logger.debug("--- Object Infos ----")
@@ -230,10 +250,10 @@ def cleanAsset(obj, needProxy=True):
 
     new_obj = cmds.duplicate(obj)[0]
     if new_obj != original_name:
-        orignal_obj= cmds.rename(original_name, original_name+"_original")
+        orignal_obj= cmds.rename(orignal_obj, original_name+"_original")
         new_obj= cmds.rename(new_obj, original_name)
 
-
+    #TO DO PROBLEME AVEC LE NOM DE L'ASSET PRESENT DANS UN SOUS GROUP
     return new_obj, orignal_obj, proxy
 
 def scanAsset(obj):
@@ -306,7 +326,7 @@ def make_proxy_scene(asset_name,dir,proxy, sub_assets=None):
     cmds.setAttr(proxy+".dso",ass_path,type="string")
     cmds.setAttr(proxy+".aiOverrideShaders",0)
     cmds.setAttr(proxy+".aiOverrideMatte",1)
-    cmds.makeIdentity(proxy, apply=True, t=1, r=1, s=1, n=2 )
+    #cmds.makeIdentity(proxy, apply=True, t=1, r=1, s=1, n=2 )
     #rename proxy group before export
 
 

@@ -22,7 +22,7 @@ import assTools
 import importlib
 importlib.reload(assTools)
 
-dir_global = "D:/gabriel/assetizer/assets"
+dir_global = "D:/proA/assets"
 def maya_main_window():
     '''
     Return the Maya main window widget as a Python object
@@ -54,7 +54,7 @@ class AssetLoader(QtWidgets.QDialog):
 
         #WIDGET CHECKBOX
         self.is_a_shot_asset =  QtWidgets.QCheckBox("is a shot asset")
-        self.is_a_shot_asset.setChecked(False)
+        self.is_a_shot_asset.setChecked(True)
 
         self.keep_original =  QtWidgets.QCheckBox("keep original")
         self.keep_original.setChecked(False)
@@ -90,6 +90,7 @@ class AssetLoader(QtWidgets.QDialog):
         #self.use_latest.stateChanged.connect(self.use_latest_changed)
 
     def publish_asset_clicked(self):
+        assTools.ask_save()
         sel = cmds.ls(selection=True,long=True)
         dir = self.get_dir()
         try:
@@ -99,6 +100,7 @@ class AssetLoader(QtWidgets.QDialog):
         matrix = cmds.xform(obj, worldSpace = True, matrix=True, query=True)
         new_obj, original_obj, proxy = assTools.cleanAsset(obj, needProxy=True)
         asset, variants = assTools.scanAsset(new_obj)
+        proxy = assTools.get_from_asset(asset.name_long, asset.name+"_proxy",must_exist=True)
         sub_assets = assTools.get_from_asset(asset.name_long, "sub_assets", must_exist=False)
 
         for v in variants:
