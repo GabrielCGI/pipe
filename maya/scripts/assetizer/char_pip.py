@@ -15,12 +15,11 @@ def shader_operator():
     for sg in listShadingEngine:
         #GET THE SET
         set = cmds.sets(sg, query=True)
-        print (sg)
-        print(set)
-        print("_____")
+
         #BUILD A LIST OF PATH WITH FORWARD SLASH
         if set:
-            shapes_full_path_list = [cmds.ls(fp, long=True)[0].replace("|","/") for fp in set]
+            shapes_full_path_list = ["*"+cmds.ls(fp, long=True)[0].replace("|","/*").replace("ShapeDeformed","Shape*") for fp in set]
+            print(shapes_full_path_list)
             if len(shapes_full_path_list)>0:
                 dic_sg[sg]=shapes_full_path_list
 
@@ -33,13 +32,19 @@ def shader_operator():
         counter+=1
         cmds.setAttr ( setShader +".selection", selection,type="string")
 
-        list_input = cmds.ls(cmds.listConnections(sg),materials=1)
-        shader = list_input[0]
+        surf = cmds.ls(cmds.listConnections(sg+".surfaceShader"),materials=1)
+        aiSurf = cmds.ls(cmds.listConnections(sg+".aiSurfaceShader"),materials=1)
+        disp = cmds.ls(cmds.listConnections(sg+".displacementShader"),materials=1)
+        if not aiSurf:
+            shader = surf[0]
+        else:
+            shader = aiSurf[0]
+
         cmds.setAttr (setShader+".assignment[0]", "shader='%s'"%(shader),type="string")
-        if len(list_input)>1:
-            displace  = list_input[1]
+        if disp :
+
             #Displace
-            cmds.setAttr (setShader+".assignment[1]", "disp_map='%s'"%(displace),type="string")
+            cmds.setAttr (setShader+".assignment[1]", "disp_map='%s'"%(disp[0]),type="string")
 
 
 def catclark_operator():

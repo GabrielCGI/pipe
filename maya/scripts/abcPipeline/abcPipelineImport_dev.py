@@ -54,27 +54,42 @@ def createScriptNode(refNamespace, abcPath):
     deferScript = 'cmds.file("%s", loadReference="%s", type="Alembic")'%(abcPath, childRef)        #Update the alembic.
     cmds.evalDeferred(deferScript)
 
+def createCharStandIn(name,abc,asset_path_publish):
+    a = cmds.createNode("aiStandIn",n=abc.split(".")[0]+"Shape")
+    b= cmds.listRelatives(a,parent=True)
+    c=cmds.rename(b,abc.split(".")[0])
+    cmds.setAttr(c+".dso",abc,type="string")
+    list = os.listdir(asset_path_publish)
+    cmds.setAttr(a+".useFrameExtension", 1)
+    operators = [o for o in list if o.endswith(".ass")]
+    operators.sort()
+    if operators:
+        op = operators[-1]
+        op_path= os.path.join(asset_path_publish,op)
+        set_shader = cmds.createNode("aiIncludeGraph", n="aiIncludeGraph_"+abc.split(".")[0])
+        cmds.setAttr(set_shader+".filename",op_path , type="string")
+        cmds.setAttr(set_shader+".target", "aiStandInShape/input_merge_op", type="string" )
+        cmds.connectAttr(set_shader+".out",c+".operators[0]", f=True )
+
 def abcLoad(abcPath):
     "Import Abc from a directory"
     abc = abcPath.split("/")[-1]
+    dir="B:/trashtown_2112/assets"
     name = nameFromAbc(abc)
-    refNamespace = name +"_shading_lib_"+ abc.split("_")[-1].split(".")[0]  #00 ou 01 ou 02
-    print(name)
-    shadingRefPath = assetsDic.get(name).get("shading")
-    shadingRefPath= shadingRefPath.replace("ch_bee_shading_lib","ch_bee_fur_lib")
-    print(shadingRefPath)
-    scriptNodeName = "scriptNode_" + refNamespace
+    asset_path_publish= os.path.join(dir,name,"publish")
+    if os.path.isdir(asset_path_publish):
 
-    #Check if ABC has already been imported
-    if cmds.objExists(scriptNodeName):
-        print("Updating animation for: %s \n %s"%(refNamespace, abcPath))
-        cmds.delete (scriptNodeName)                #Delete old script Node
-        createScriptNode(refNamespace, abcPath)             #Create new script Node
+        createCharStandIn(name, abc,asset_path_publish)
+
+        refNamespace = name +"_shading_lib_"+ abc.split("_")[-1].split(".")[0]  #00 ou 01 ou 02
+        print(name)
+        shadingRefPath = assetsDic.get(name).get("shading")
+        print(shadingRefPath)
+        scriptNodeName = "scriptNode_" + refNamespace
+
+
     else:
-        print("Importing animation for: %s \n %s" % (refNamespace, abcPath))
-        importReference(shadingRefPath, refNamespace)               #Import Reference
-        createScriptNode(refNamespace, abcPath)             #Create new script Node
-
+        print(name + "FAIL: it's not V2")
 def importAnim():
     "Import selected alembic in the file dialog - Master fonction"
     basicFilter = "*.abc"

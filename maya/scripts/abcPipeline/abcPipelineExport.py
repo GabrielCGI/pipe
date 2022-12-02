@@ -80,6 +80,12 @@ def listGeoByCharRef(charRef):
     for geoDic in listGeoDic:
         print(geoDic)
         geoOnly = geoDic.split(":")
+        if len(geoOnly)>1:
+            del geoOnly[0]
+            geo_stich = (":").join(geoOnly)
+            geoOnly=[]
+            geoOnly.append(geo_stich)
+
         geoWithNamespace = cmds.referenceQuery(charRef, namespace=True ) + ":" + geoOnly[-1]
         print(geoWithNamespace)
         listGeo.append(geoWithNamespace)
@@ -92,7 +98,7 @@ def buildCommand (start, end, path, geoList, attrList, subframe, frameSample,fil
    "Build Command for abc export job"
    command = ""
    command += "-frameRange %s %s"%(start, end) #Frame Range
-   command += " -writeVisibility -uvWrite -writeColorSets -writeUVSets -worldSpace -dataFormat ogawa "
+   command += " -writeVisibility -uvWrite -writeColorSets -stripNamespaces -writeUVSets -worldSpace -dataFormat ogawa "
    if subframe == True:
        for f in frameSample.split(" "):
            command += "-frameRelativeSample %s "%(f)
