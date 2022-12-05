@@ -64,6 +64,10 @@ def warning(txt):
 
 def ask_save():
     fileCheckState = cmds.file(q=True, modified=True)
+    scene_file = cmds.file(q=True, sn=True)
+    if not scene_file:
+        warning("Save the scene before!")
+
     if fileCheckState:
         result = cmds.confirmDialog( title='Save ?',
                             message='Do you want to save?',
@@ -87,6 +91,7 @@ def short_name(long_name):
     return short_name
 
 def is_dir_exist(path):
+    path = path.replace("\\","/")
     if not os.path.isdir(path):
         msg = cmds.confirmDialog( title='Confirm',message='The directory does not exist.\n%s'%(path),
         button=['Create','Cancel'], defaultButton='Cancel', cancelButton='Cancel', dismissString='Cancel')
@@ -194,7 +199,8 @@ def has_transfrom(obj):
     else:
         return False
 
-def has_transfrom_user_fix_possible(obj):
+def has_transfrom_user_fix_possible_backup(obj):
+
     if cmds.xform(obj,query=True, matrix=True) != zero_matrix:
         msg = ("The asset has transfrom information.\n"
                "The asset should be exported from the center of the world \n"
@@ -210,68 +216,79 @@ def has_transfrom_user_fix_possible(obj):
             cmds.makeIdentity(obj,apply=True )
         if result == "Cancel":
             warning("Abort by user")
-def deleteSource(original_obj, name_long, name, keep_original):
 
-    if keep_original == False:
-        if cmds.referenceQuery(original_obj,isNodeReferenced=True):
-            reference_node = cmds.referenceQuery(original_obj,filename=True)
-            cmds.file(reference_node, importReference=True)
-            cmds.delete(original_obj)
-        else:
-            cmds.delete(original_obj)
-    if keep_original == True:
-        if original_obj != name_long:
-            cmds.rename(original_obj,name)
+def has_transfrom_user_fix_possible(obj):
 
-def cleanAsset(obj, needProxy=True):
-    #SCAN
-    asset, variants = scanAsset(obj)
-    logger.debug("Clean asset before export start...")
-    obj = asset.name_long
-    #CHECK IF THERE IS ALL THE IS NEEDED
+    if cmds.xform(obj,query=True, matrix=True) != zero_matrix:
+        msg = ("The root of the asset has transfrom informations.\n"
+               "Transform will be reset before export\n"
+               )
+        result = cmds.confirmDialog( title='Confirm',message=msg,
+        button=['Continue', "Cancel"],
+        defaultButton='Continue', cancelButton='Cancel', dismissString='Cancel')
+        if result == "Continue":
+            cmds.move(0, 0, 0, ls=True)
+            cmds.rotate(0, 0, 0)
+            cmds.scale(1, 1, 1)
+        if result == "Cancel":
+            warning("Abort by user")
+
+def deleteSource(node):
+    if cmds.referenceQuery(node,isNodeReferenced=True):
+        reference_node = cmds.referenceQuery(node,filename=True)
+        cmds.file(reference_node, importReference=True)
+        cmds.delete(node)
+    else:
+        cmds.delete(node)
+
+def cleanAsset(sel):
+    asset_og, variants_og, proxy_og = scanAsset(sel[0])
+    parent = cmds.listRelatives(sel,parent=True,fullPath=True)
+    if parent:
+        parent=parent[0]+"|"
+    else:
+        parent="|"
+    sel2 = cmds.duplicate(sel)[0]
+    sel2 = parent+sel2
+    #HACK BECAUSE THE DUPLICATE COMMAND DON'T RETURN FULL PATH. SO IF THERE IS ANOTHER OBJECT WITH THE SAME Name
+    #THE LIST RELATIVE FAIL
+
+    if cmds.listRelatives(sel2,parent=True) is not None:
+        sel2  = cmds.parent(sel2, world=True )[0]
+        sel2 = cmds.rename(sel2,asset_og.name)
+    else:
+        if not cmds.referenceQuery(asset_og.name_long,isNodeReferenced=True):
+            asset_og.name_long = cmds.rename(asset_og.name_long, asset_og.name+"_original")
+        sel2 = cmds.rename(sel2,asset_og.name)
+    asset, variants, proxy = scanAsset(sel2)
+
+
     for vSet in asset.vSets_list:
         cmds.delete(vSet, constructionHistory = True)
         if has_transfrom(vSet): warning("%s has transfrom. Plz reset of freeze manualy"%vSet)
     for v in variants:
         cmds.delete(v.name_long, constructionHistory = True)
         if has_transfrom(v.name_long): warning("%s has transfrom. Plz reset of freeze manualy"%v)
-    logger.debug("Variant and Variant Set's transfroms are clean !")
-    proxy = get_from_asset(asset.name_long, asset.name+"_proxy",must_exist=needProxy)
-    #CHECK IF PARENT IS WORLD
-    if cmds.listRelatives(obj,parent=True ) is not None:
-        logger.info('Reparenting to world %s'%obj)
-        obj = cmds.parent(obj, world=True )[0]
 
-    #CHECK IF ASSET TRANSFORMS == 0
-    if has_transfrom_user_fix_possible(obj):  warning("%s has transfrom. Plz reset of freeze manualy"%obj)
+    if has_transfrom_user_fix_possible(asset.name_long):  warning("%s has transfrom. Plz reset of freeze manualy"%obj)
 
-    original_name = asset.name
-    orignal_obj = asset.name_long
 
-    new_obj = cmds.duplicate(obj)[0]
-    if new_obj != original_name:
-        orignal_obj= cmds.rename(orignal_obj, original_name+"_original")
-        new_obj= cmds.rename(new_obj, original_name)
-
-    #TO DO PROBLEME AVEC LE NOM DE L'ASSET PRESENT DANS UN SOUS GROUP
-    return new_obj, orignal_obj, proxy
+    return asset, variants, proxy, asset_og.name_long
 
 def scanAsset(obj):
-
     variants =[]
     asset = Asset(obj)
-    vSets = [vSet for vSet in cmds.listRelatives(obj, fullPath=True)
-            if short_name(vSet).startswith("variant_") ]
+    vSets = [vSet for vSet in cmds.listRelatives(obj, fullPath=True) if short_name(vSet).startswith("variant_") ]
 
     if not vSets: warning("No variant set found")
     asset.vSets_list = vSets
     for vSet in vSets:
         variants += [Variant(var, vSet, obj) for var in cmds.listRelatives(vSet, fullPath=True)]
-
     if not variants:  warning("No variant found")
 
+    proxy = get_from_asset(asset.name_long,asset.name+"_proxy", must_exist=False)
     logger.info('Scan success !')
-    return asset, variants
+    return asset, variants, proxy
 
 def get_last_basic_variant_ass(asset_name,ass_dir):
     logger.debug("Looking for a basic variant...")
@@ -330,17 +347,20 @@ def make_proxy_scene(asset_name,dir,proxy, sub_assets=None):
     #rename proxy group before export
 
 
-    publish_proxy_scene_dir = os.path.join(dir,asset_name)
+    publish_proxy_scene_dir = os.path.join(dir,asset_name,"publish")
     next_publish_proxy_scene= get_next_publish_scene(publish_proxy_scene_dir, asset_name)
     logger.info("Next publish proxy maya scene  = %s"%next_publish_proxy_scene)
 
     cmds.select(proxy)
     if sub_assets:
         cmds.select(sub_assets,add=True,)
+    else:
+        proxy = cmds.parent(proxy,world=True)[0]
+        cmds.select(proxy)
     cmds.file(next_publish_proxy_scene,force=False, options="v=0;", type="mayaAscii", pr=True, es=True)
     logger.info('Proxy export success %s!'%next_publish_proxy_scene)
     #Restore properties
 
     cmds.setAttr(proxy+".ai_translator",  "polymesh", type="string")
     cmds.setAttr(proxy+".visibility",visibility_state)
-    return next_publish_proxy_scene
+    return next_publish_proxy_scene,proxy

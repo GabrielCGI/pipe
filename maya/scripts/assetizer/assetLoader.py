@@ -113,15 +113,13 @@ class AssetLoader(QtWidgets.QDialog):
         self.variantSet_Qlist = QtWidgets.QListWidget()
         self.variant_Qlist = QtWidgets.QListWidget()
         self.version_Qlist = QtWidgets.QListWidget()
-        self.version_Qlist.setVisible(False)
+
 
         #WIDGET CHECKBOX
-        self.use_latest =  QtWidgets.QCheckBox("Use latest version")
-        self.use_latest.setChecked(True)
 
 
         self.display_label = QtWidgets.QLabel("Asset:")
-        self.push_edit_button = QtWidgets.QPushButton("Push edit")
+        #self.push_edit_button = QtWidgets.QPushButton("Push edit")
         self.convert_to_maya = QtWidgets.QPushButton("Convert to maya")
         self.set_version = QtWidgets.QPushButton("Set version")
 
@@ -131,9 +129,9 @@ class AssetLoader(QtWidgets.QDialog):
         self.comboLayout.addWidget(self.variant_Qlist)
         self.comboLayout.addWidget(self.version_Qlist)
 
-        self.button_layout.addWidget(self.use_latest)
+
         self.button_layout.addWidget(self.display_label)
-        self.button_layout.addWidget(self.push_edit_button)
+        #self.button_layout.addWidget(self.push_edit_button)
         self.button_layout.addWidget(self.set_version)
         self.button_layout.addWidget(self.convert_to_maya)
 
@@ -142,12 +140,11 @@ class AssetLoader(QtWidgets.QDialog):
 
 
         #CONNECT WIDGET
-        self.push_edit_button.clicked.connect(self.push_edit_clicked)
+        #self.push_edit_button.clicked.connect(self.push_edit_clicked)
         self.set_version.clicked.connect(self.set_version_clicked)
         self.convert_to_maya.clicked.connect(self.convert_to_maya_clicked)
         self.variantSet_Qlist.itemClicked.connect(self.variantSet_Qlist_changed)
         self.variant_Qlist.itemClicked.connect(self.variant_Qlist_changed)
-        self.use_latest.stateChanged.connect(self.use_latest_changed)
 
         self.load_asset_clicked()
 
@@ -180,8 +177,11 @@ class AssetLoader(QtWidgets.QDialog):
         check, error_msg = self.checkAsset()
 
         if check == False:
-            self.display_label.setText("Not a standin")
-            print(error_msg)
+            self.display_label.setText("The current selected obj is not a standin")
+            self.display_label.setStyleSheet("color: None")
+            self.variantSet_Qlist.clear()
+            self.variant_Qlist.clear()
+            self.version_Qlist.clear()
             return
 
 
@@ -201,7 +201,7 @@ class AssetLoader(QtWidgets.QDialog):
 
         #BUILD DIC
         self.asset_dic = dic_tool.buildAssetDic(self.ass_dir)
-        print(json.dumps(self.asset_dic ,indent=4))
+
 
         #CLEAR COMBOBOX
         self.variantSet_Qlist.clear()
@@ -212,23 +212,24 @@ class AssetLoader(QtWidgets.QDialog):
         self.rebuild_variantSet_Qlist()
         self.rebuild_variant_Qlist()
         self.rebuild_version_Qlist()
-        self.use_latest_changed()
+
 
         #Set list selection from current item
         list_set_selected_byName(self.variantSet_Qlist,self.current_variantSet)
         list_set_selected_byName(self.variant_Qlist,self.current_variant)
         list_set_selected_byName(self.version_Qlist,self.current_version)
 
+        if self.current_version != self.version_Qlist.item(0).text():
+            self.display_label.setText("Out of date - %s %s %s"%(self.current_variantSet,self.current_variant,self.current_version))
+            self.display_label.setStyleSheet("color: yellow")
+        else:
+            self.display_label.setText("Up to date - %s %s %s"%(self.current_variantSet,self.current_variant,self.current_version))
+            self.display_label.setStyleSheet("color: green")
+
+
 
     ###USE LASTEST CHANGED ####
-    def use_latest_changed(self):
-        state = self.use_latest.isChecked()
-        if state == True:
-            self.version_Qlist.setVisible(False)
-            pass
-        else:
-            self.version_Qlist.setVisible(True)
-            pass
+
     ### QLIST CHANGED ###
     # ON VARIANT_SET CHANGE
     def variantSet_Qlist_changed(self):
@@ -275,6 +276,12 @@ class AssetLoader(QtWidgets.QDialog):
         new_dso = build_dso(self.asset_dir, self.asset_name, variantSet_name, variant_name, version)
 
         cmds.setAttr(self.maya_proxy_name+".dso",new_dso, type="string")
+        if version != self.version_Qlist.item(0).text():
+            self.display_label.setText("Out of date - %s %s %s"%(variantSet_name, variant_name, version))
+            self.display_label.setStyleSheet("color: yellow")
+        else:
+            self.display_label.setText("Up to date - %s %s %s"%(variantSet_name, variant_name, version))
+            self.display_label.setStyleSheet("color: green")
 
 
     def convert_to_maya_clicked(self):
@@ -289,12 +296,12 @@ class AssetLoader(QtWidgets.QDialog):
         maya_object = cmds.file(maya_path, reference=True, namespace=namespace_for_creation)
         #Get the REAL namesapce (with "RN" and versioning)
         namespace = cmds.file(maya_object, referenceNode=True, query=True)
-        node= cmds.referenceQuery(namespace,nodes=True )
+        node= cmds.referenceQuery(namespace,nodes=True,dagPath=True)
         cmds.matchTransform(node[0],self.maya_proxy_name)
         #☻match_matrix(node[0],self.maya_proxy_name)
         #Hide and rename proxy "TO_DELETE"
         cmds.setAttr(self.maya_proxy_name+".visibility",0)
-        cmds.rename(self.maya_proxy_name,self.maya_proxy_name+"_TO_DELETE")
+        #cmds.rename(self.maya_proxy_name,self.maya_proxy_name+"_TO_DELETE")
 
     def push_edit_clicked(self):
         #Get maya selection
@@ -392,7 +399,6 @@ class AssetLoader(QtWidgets.QDialog):
 
         #ADD CALLBACK AGAIN
         #self.selection_changed_callback = OpenMaya.MEventMessage.addEventCallback("SelectionChanged", self.maya_selection_changed_callback)
-
 
 
     def maya_selection_changed_callback(self,*args):
