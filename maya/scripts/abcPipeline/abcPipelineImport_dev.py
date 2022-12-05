@@ -54,38 +54,40 @@ def createScriptNode(refNamespace, abcPath):
     deferScript = 'cmds.file("%s", loadReference="%s", type="Alembic")'%(abcPath, childRef)        #Update the alembic.
     cmds.evalDeferred(deferScript)
 
-def createCharStandIn(name,abc,asset_path_publish):
-    a = cmds.createNode("aiStandIn",n=abc.split(".")[0]+"Shape")
+def createCharStandIn(name, anim_abc_path,abcv, asset_publish_path, asset_abc_path):
+    a = cmds.createNode("aiStandIn",n=abcv+"Shape")
     b= cmds.listRelatives(a,parent=True)
-    c=cmds.rename(b,abc.split(".")[0])
-    cmds.setAttr(c+".dso",abc,type="string")
-    list = os.listdir(asset_path_publish)
-    cmds.setAttr(a+".useFrameExtension", 1)
+    c=cmds.rename(b,abcv)
+
+    abc_mod = [abc for abc in os.listdir(asset_abc_path) if abc.endswith("mod.abc")][0]
+    abc_mod_path = os.path.join(asset_abc_path,abc_mod)
+    cmds.setAttr(c+".dso",abc_mod_path,type="string")
+
+    list = os.listdir(asset_publish_path)
+    cmds.setAttr(c+".useFrameExtension", 1)
     operators = [o for o in list if o.endswith(".ass")]
     operators.sort()
     if operators:
         op = operators[-1]
-        op_path= os.path.join(asset_path_publish,op)
-        set_shader = cmds.createNode("aiIncludeGraph", n="aiIncludeGraph_"+abc.split(".")[0])
+        op_path= os.path.join(asset_publish_path,op)
+        cmds.setAttr(c+".abc_layers", anim_abc_path , type="string")
+        set_shader = cmds.createNode("aiIncludeGraph", n="aiIncludeGraph_"+abcv)
         cmds.setAttr(set_shader+".filename",op_path , type="string")
         cmds.setAttr(set_shader+".target", "aiStandInShape/input_merge_op", type="string" )
         cmds.connectAttr(set_shader+".out",c+".operators[0]", f=True )
 
-def abcLoad(abcPath):
+def abcLoad(anim_abc_path):
     "Import Abc from a directory"
-    abc = abcPath.split("/")[-1]
+    abc_filename = anim_abc_path.split("/")[-1]
+    abcv = abc_filename.split(".")[0]
     dir="B:/trashtown_2112/assets"
-    name = nameFromAbc(abc)
-    asset_path_publish= os.path.join(dir,name,"publish")
-    if os.path.isdir(asset_path_publish):
+    name = nameFromAbc(abc_filename)
+    asset_path= os.path.join(dir,name)
+    asset_publish_path = os.path.join(asset_path,"publish")
+    asset_abc_path = os.path.join(asset_path,"abc")
+    if os.path.isdir(asset_publish_path):
 
-        createCharStandIn(name, abc,asset_path_publish)
-
-        refNamespace = name +"_shading_lib_"+ abc.split("_")[-1].split(".")[0]  #00 ou 01 ou 02
-        print(name)
-        shadingRefPath = assetsDic.get(name).get("shading")
-        print(shadingRefPath)
-        scriptNodeName = "scriptNode_" + refNamespace
+        createCharStandIn(name, anim_abc_path, abcv, asset_publish_path, asset_abc_path)
 
 
     else:

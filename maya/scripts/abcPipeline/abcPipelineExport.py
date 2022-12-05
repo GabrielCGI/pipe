@@ -73,7 +73,7 @@ def listGeoByCharRef(charRef):
 
     # Get from a database a list of the character's shapes to be exported
     listGeoDic = assetsDic.get(name).get("geo")
-    print (listGeoDic)
+
     version = charRef.split("RN")[-1]
     baseName = charRef.split("RN")[0] #ch_gingerbreadCandy_rigging_lib
 
@@ -94,11 +94,14 @@ def listGeoByCharRef(charRef):
     print(listGeo)
     return listGeo
 
-def buildCommand (start, end, path, geoList, attrList, subframe, frameSample,filterEuler):
+def buildCommand (start, end, path, geoList, attrList, subframe, frameSample,filterEuler,v2):
    "Build Command for abc export job"
    command = ""
    command += "-frameRange %s %s"%(start, end) #Frame Range
-   command += " -writeVisibility -uvWrite -writeColorSets -stripNamespaces -writeUVSets -worldSpace -dataFormat ogawa "
+   if v2:
+       command += " -writeVisibility  -stripNamespaces  -worldSpace -dataFormat ogawa "
+   else:
+       command += " -writeVisibility -uvWrite -writeColorSets -stripNamespaces -writeUVSets -worldSpace -dataFormat ogawa "
    if subframe == True:
        for f in frameSample.split(" "):
            command += "-frameRelativeSample %s "%(f)
@@ -119,6 +122,9 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample, filterE
     "Export an Abc for a given character"
     name = nameFromCharRef(charRef)
     geoList = listGeoByCharRef(charRef)
+    v2 = False
+    if os.path.isdir(os.path.join(assetsDir,name,"publish")):
+        v2=True
 
     attrList = assetsDic.get(name).get("attr")
     intRiggingNumber = 0
@@ -140,7 +146,6 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample, filterE
 
         num = f'{num:02d}'
 
-    print ("THE Number"+num)
 
     abcName = "%s_%s.abc"%(name,num)
     path = os.path.join(dirPath[0],abcName)
@@ -148,7 +153,7 @@ def exportAbcByChar(charRef, start, end, dirPath, subframe, frameSample, filterE
     path = path.replace("\\",'\\\\')
 
 
-    command = buildCommand(start,end,path,geoList,attrList,subframe,frameSample,filterEuler)
+    command = buildCommand(start,end,path,geoList,attrList,subframe,frameSample,filterEuler,v2)
     print("------------------------\n------------ BEGGINING EXPORT %s ------------ \n %s"%(charRef, command))
     cmds.refresh(suspend=True)
     cmds.AbcExport (j= command )
