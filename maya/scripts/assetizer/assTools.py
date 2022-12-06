@@ -19,6 +19,7 @@ def write_ass(path=""):
               exportSelected=True)
 
 def write_maya_scene(path):
+    os.makedirs(path, exist_ok=True)
     cmds.file(path,force=False, options="v=0;", type="mayaAscii", pr=True, es=True)
 
 def get_last_v(path):

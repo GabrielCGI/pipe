@@ -22,7 +22,7 @@ import assTools
 import importlib
 importlib.reload(assTools)
 
-dir_global = "D:/gabriel/assetizer/assets"
+dir_global = "B:/trashtown_2112/assets"
 def maya_main_window():
     '''
     Return the Maya main window widget as a Python object
@@ -133,6 +133,7 @@ class AssetLoader(QtWidgets.QDialog):
 
 
     def publish_variant_clicked(self):
+        assTools.ask_save()
         sel = cmds.ls(selection=True,long=True)
         dir = self.get_dir()
         try:

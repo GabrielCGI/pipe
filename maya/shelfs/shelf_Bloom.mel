@@ -1054,11 +1054,10 @@ global proc shelf_Bloom () {
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
-        -imageOverlayLabel "prepper" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "pythonFamily.png" 
-        -image1 "pythonFamily.png" 
+        -image "R:/pipeline/pipe/maya/icons/box.ico" 
+        -image1 "R:/pipeline/pipe/maya/icons/box.ico" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -1089,11 +1088,10 @@ global proc shelf_Bloom () {
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
-        -imageOverlayLabel "publish" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "pythonFamily.png" 
-        -image1 "pythonFamily.png" 
+        -image "R:/pipeline/pipe/maya/icons/box_publish.ico" 
+        -image1 "R:/pipeline/pipe/maya/icons/box_publish.ico" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -1124,11 +1122,10 @@ global proc shelf_Bloom () {
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
-        -imageOverlayLabel "loader" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "pythonFamily.png" 
-        -image1 "pythonFamily.png" 
+        -image "R:/pipeline/pipe/maya/icons/box_lib.ico" 
+        -image1 "R:/pipeline/pipe/maya/icons/box_lib.ico" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
