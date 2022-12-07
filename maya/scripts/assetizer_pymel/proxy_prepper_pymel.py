@@ -13,20 +13,31 @@ def warning(txt):
     pm.error(txt)
 
 def only_name(obj):
-    only_name = obj.name("|")[-1]
+    only_name = obj.name().split("|")[-1]
     return only_name
 
-def lock_all_transforms(obj):
-    if type(obj) == list:
-        for o in obj:
-            o.translate.lock(True)
-            o.rotate.lock(True)
-            o.scale.lock(True)
-    else:
-        obj.translate.lock(True)
-        obj.rotate.lock(True)
-        obj.scale.lock(True)
+def lock_all_transforms(obj, lock=True):
 
+    if lock == True:
+        if type(obj) == list:
+            for o in obj:
+                o.translate.lock()
+                o.rotate.lock()
+                o.scale.lock()
+        else:
+            obj.translate.lock()
+            obj.rotate.lock()
+            obj.scale.lock()
+    if lock == False:
+        if type(obj) == list:
+            for o in obj:
+                o.translate.unlock()
+                o.rotate.unlock()
+                o.scale.unlock()
+        else:
+            obj.translate.unlock()
+            obj.rotate.unlock()
+            obj.scale.unlock()     
 
 def build_hiearchy(obj):
     #Check
@@ -41,8 +52,8 @@ def build_hiearchy(obj):
     else:
         asset_name = os.path.basename(scene_path).split("_")[0].split(".")[0]
         logger.info("Current scene is detected as: asset")
-    """    
-    result = cmds.promptDialog(
+
+    result = pm.promptDialog(
                     title='Rename Object',
                     message='Enter Name:',
                     text = str(asset_name),
@@ -51,22 +62,22 @@ def build_hiearchy(obj):
                     cancelButton='Cancel',
                     dismissString='Cancel')
     if result == "OK":
-        asset_name = cmds.promptDialog(query=True, text=True)
+        asset_name = pm.promptDialog(query=True, text=True)
     else:
         warning('abort by user')
-    """
-    asset_name = "test"
+
     scene_parent = pm.listRelatives(obj,parent=True)
 
     if pm.objExists("|"+asset_name):
         pm.rename("|"+asset_name,"|"+asset_name+"_1")    
     asset_grp = pm.createNode("transform", n=asset_name)
-    pm.matchTransform(asset_grp, obj)
     pm.parent(obj,asset_grp)
+    pm.matchTransform(asset_grp, obj)
     pm.makeIdentity(obj, apply=True)
     pm.delete(obj, constructionHistory=True)
-    pm.rename(obj, "HD")
-    print(obj)
+    print(asset_name)
+    pm.rename(obj, asset_name+"_HD")
+
     lock_all_transforms(obj)
     
 
@@ -77,12 +88,14 @@ def build_hiearchy(obj):
     
 
 def generate_lowpoly(hd_grp):
-    sd_grp = pm.duplicate(hd_grp,name="SD")
+    asset_name =only_name(hd_grp).split("_")[0]
+    sd_grp = pm.duplicate(hd_grp,name=asset_name+"_SD")
 
     sd_grp=sd_grp[0]
     shapes = pm.listRelatives(sd_grp,allDescendents=True,shapes=True)
     disable_displace(shapes)
     catclark_max(shapes)
+    logger.info("Generate lowpoly success!")
     return sd_grp
 
 def disable_displace(shapes):
@@ -140,6 +153,7 @@ def merge_uv_sets(obj):
     return default_uv
 
 def bake_texture(obj,dir,resolution=512):
+
     if not obj.endswith("_proxy"):
         warning("Not a proxy")
 
@@ -154,7 +168,8 @@ def bake_texture(obj,dir,resolution=512):
         warning("abort by user")
 
     default_uv  = merge_uv_sets(obj)
-    
+    os.makedirs(dir, exist_ok=True)
+
     if result == "Auto-generate":
         proxy_uvset = pm.polyUVSet(create=True,uvSet = "proxyUv")[0]
         pm.polyAutoProjection(uvSetName=proxy_uvset,ps= 0.4)
@@ -215,7 +230,28 @@ def bake_texture(obj,dir,resolution=512):
         l.visibility.set(True)
     logger.info("Bake textures success ! ")
 
-def generate_proxy(grp, target_vertex=500):
+def generate_proxy(grp, name, target_vertex=500):
+
+    try:
+        asset = grp.getParent()
+
+    except Exception as e:
+        print(e)
+        utils.warning("Please select a valide group")
+    result = pm.promptDialog(
+                    title='Proxy name',
+                    message='Enter Name:',
+                    text = str(only_name(asset))+"_proxy",
+                    button=['OK', 'Cancel'],
+                    defaultButton='OK',
+                    cancelButton='Cancel',
+                    dismissString='Cancel')
+
+    if result == "OK":
+        pass
+    else:
+        utils.warning('abort by user')
+
     proxy = pm.duplicate(grp)
     proxy_parent = pm.listRelatives(proxy,parent=True)
 
@@ -225,13 +261,17 @@ def generate_proxy(grp, target_vertex=500):
         logger.info("Poly Unit success %s"%proxy)
     except Exception as e:
         logger.info("Skipping poly unit %s"%proxy)
-        pass
+        pass  
     pm.polyReduce(proxy,ver = 1,trm=1, keepQuadsWeight=0,vct=500 )
-    pm.parent(proxy,proxy_parent)
+
+    lock_all_transforms(proxy, lock=False)
+
     pm.makeIdentity(proxy, apply=True )
-    pm.matchTransform(proxy,proxy_parent, pivots=True)
-    pm.rename(proxy, proxy_parent[0]+"_proxy")
+    pm.matchTransform(proxy,proxy_parent, pivots=True) 
+    pm.parent(proxy,proxy_parent)
+    pm.rename(proxy, name)
     pm.delete(proxy,constructionHistory=True)
+    lock_all_transforms(proxy)
     
 obj = pm.ls(selection=True)[0]
 
@@ -241,4 +281,4 @@ obj = pm.ls(selection=True)[0]
 #generate_proxy(sd_grp)
 
 #merge_uv_sets(obj)
-bake_texture(obj,"D:/")
+#bake_texture(obj,"D:/")

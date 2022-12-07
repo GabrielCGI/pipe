@@ -1061,7 +1061,7 @@ global proc shelf_Bloom () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nsys.path.append(\"R:/pipeline/pipe/maya/scripts/assetizer\")\n\nimport proxy_prepper_ui\nimport importlib\nimportlib.reload(proxy_prepper_ui)\n" 
+        -command "import sys\nsys.path.append(\"R:/pipeline/pipe/maya/scripts/assetizer_pymel\")\n\nimport proxy_prepper_ui_pymel\nimport importlib\nimportlib.reload( proxy_prepper_ui_pymel)\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

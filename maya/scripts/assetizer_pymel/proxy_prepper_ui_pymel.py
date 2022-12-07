@@ -20,13 +20,16 @@ from shiboken2 import wrapInstance
 from pathlib import Path
 import sys
 import importlib
-import utils as utils
-import proxy_prepper as pp
+import utils_pymel as utils
+import pymel.core as pm
+import proxy_prepper_pymel as pp
 importlib.reload(pp)
 importlib.reload(utils)
 
 
 dir_global = "D:/gabriel/assetizer/assets"
+
+
 def maya_main_window():
     '''
     Return the Maya main window widget as a Python object
@@ -96,53 +99,36 @@ class ProxyPrepper(QtWidgets.QDialog):
         self.hierarchy.clicked.connect(self.hierarchy_clicked)
 
 
-    def mergeuvs_button_clicked(self):
-        obj = cmds.ls(selection=True)[0]
-        pp.merge_uv_sets(obj)
+
     def hierarchy_clicked(self):
-        pp.build_hiearchy()
+        obj = pm.ls(selection=True)
+        pp.build_hiearchy(obj)
 
     def get_image_dir(self):
-        filepath = cmds.file(q=True, sn=True)
+        filepath = pm.system.sceneName()
         if filepath:
             granpa =os.path.dirname(os.path.dirname(filepath))
             dir = os.path.join(granpa,"publish","textures")
-            #dir= os.path.abspath(dir)
             dir = dir.replace("\\","/")
-            os.makedirs(dir, exist_ok=True)
             return dir
         else:
             return "none"
 
     def generate_proxy_clicked(self):
         target_reduce = self.reduce_value.text()
-        root = cmds.ls(selection=True,long=True)
-        sel = cmds.ls(selection=True, long=True)[0]
-        try:
-            asset_name =  cmds.listRelatives(cmds.listRelatives(sel,parent=True, fullPath=True)[0],parent=True,fullPath=True)[0]
-            asset_root = cmds.listRelatives(cmds.listRelatives(sel,parent=True, fullPath=True)[0],parent=True, fullPath=True)[0]
-
-        except Exception as e:
-            print(e)
-            utils.warning("Please select a valide variant. Exemple: |rock|variant_basic|HD")
-        text, ok = QtWidgets.QInputDialog.getText(self, 'Input Dialog','asset Name:',text=asset_name.split("|")[-1]+"_proxy" )
-        if ok:
-
-            pp.proxy_generate(asset_name,asset_root, sel,text,int(target_reduce))
-        else:
-            utils.warning('abort by user')
+        grp = pm.ls(selection=True)[0]
+        pp.generate_proxy(grp, int(target_reduce))
 
 
 
     def bakeTexture_button_clicked(self):
         dir =self.dir_image.text()
-        os.makedirs(dir, exist_ok = True)
-        root = cmds.ls(selection=True)[0]
-        pp.bake_texture(root,dir)
+        obj = pm.ls(selection=True)[0]
+        pp.bake_texture(obj,dir)
 
     def generate_lowpoly_clicked(self):
-        hd_grp =cmds.ls(sl=True, long=True)[0]
-        if hd_grp.split("|")[-1] != 'HD':
+        hd_grp =pm.ls(sl=True)[0]
+        if not hd_grp.name().split("|")[-1].endswith('HD'):
             utils.warning("Please select HD group")
         pp.generate_lowpoly(hd_grp)
 
