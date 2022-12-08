@@ -3,14 +3,14 @@ import maya.cmds as cmds
 import importlib
 import logging
 import pymel.core as pm
+import utils_pymel as utils
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
 
 
 
 zero_matrix = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
-def warning(txt):
-    pm.error(txt)
+
 
 def only_name(obj):
     only_name = obj.name().split("|")[-1]
@@ -42,7 +42,7 @@ def lock_all_transforms(obj, lock=True):
 def build_hiearchy(obj):
     #Check
     if len(obj) != 1:
-        warning("Too many object selected")
+        utils.warning("Too many object selected")
 
     #Get asset name
     scene_path = pm.system.sceneName()
@@ -64,15 +64,16 @@ def build_hiearchy(obj):
     if result == "OK":
         asset_name = pm.promptDialog(query=True, text=True)
     else:
-        warning('abort by user')
+        utils.warning('abort by user')
 
     scene_parent = pm.listRelatives(obj,parent=True)
 
     if pm.objExists("|"+asset_name):
         pm.rename("|"+asset_name,"|"+asset_name+"_1")    
     asset_grp = pm.createNode("transform", n=asset_name)
-    pm.parent(obj,asset_grp)
     pm.matchTransform(asset_grp, obj)
+    pm.parent(obj,asset_grp)
+    
     pm.makeIdentity(obj, apply=True)
     pm.delete(obj, constructionHistory=True)
     print(asset_name)
@@ -155,7 +156,7 @@ def merge_uv_sets(obj):
 def bake_texture(obj,dir,resolution=512):
 
     if not obj.endswith("_proxy"):
-        warning("Not a proxy")
+        utils.warning("Not a proxy")
 
     result = pm.confirmDialog( title='UV?',
                         message='What about uvs?',
@@ -165,7 +166,7 @@ def bake_texture(obj,dir,resolution=512):
                         dismissString='"Cancel' )
 
     if result == "Cancel":
-        warning("abort by user")
+        utils.warning("abort by user")
 
     default_uv  = merge_uv_sets(obj)
     os.makedirs(dir, exist_ok=True)
@@ -248,7 +249,7 @@ def generate_proxy(grp, name, target_vertex=500):
                     dismissString='Cancel')
 
     if result == "OK":
-        pass
+        proxy_name = pm.promptDialog(query=True, text=True)
     else:
         utils.warning('abort by user')
 
@@ -263,16 +264,18 @@ def generate_proxy(grp, name, target_vertex=500):
         logger.info("Skipping poly unit %s"%proxy)
         pass  
     pm.polyReduce(proxy,ver = 1,trm=1, keepQuadsWeight=0,vct=500 )
+    pm.delete(proxy,constructionHistory=True)
 
     lock_all_transforms(proxy, lock=False)
 
     pm.makeIdentity(proxy, apply=True )
     pm.matchTransform(proxy,proxy_parent, pivots=True) 
     pm.parent(proxy,proxy_parent)
-    pm.rename(proxy, name)
+    pm.rename(proxy, proxy_name)
     pm.delete(proxy,constructionHistory=True)
     lock_all_transforms(proxy)
-    
+    logger.info("Proxy generate success ! ")
+
 obj = pm.ls(selection=True)[0]
 
 #asset_grp, hd_grp = build_hiearchy(obj)
