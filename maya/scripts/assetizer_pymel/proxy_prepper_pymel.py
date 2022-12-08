@@ -16,29 +16,6 @@ def only_name(obj):
     only_name = obj.name().split("|")[-1]
     return only_name
 
-def lock_all_transforms(obj, lock=True):
-
-    if lock == True:
-        if type(obj) == list:
-            for o in obj:
-                o.translate.lock()
-                o.rotate.lock()
-                o.scale.lock()
-        else:
-            obj.translate.lock()
-            obj.rotate.lock()
-            obj.scale.lock()
-    if lock == False:
-        if type(obj) == list:
-            for o in obj:
-                o.translate.unlock()
-                o.rotate.unlock()
-                o.scale.unlock()
-        else:
-            obj.translate.unlock()
-            obj.rotate.unlock()
-            obj.scale.unlock()     
-
 def build_hiearchy(obj):
     #Check
     if len(obj) != 1:
@@ -79,7 +56,7 @@ def build_hiearchy(obj):
     print(asset_name)
     pm.rename(obj, asset_name+"_HD")
 
-    lock_all_transforms(obj)
+    utils.lock_all_transforms(obj)
     
 
     if scene_parent:
@@ -266,14 +243,14 @@ def generate_proxy(grp, name, target_vertex=500):
     pm.polyReduce(proxy,ver = 1,trm=1, keepQuadsWeight=0,vct=500 )
     pm.delete(proxy,constructionHistory=True)
 
-    lock_all_transforms(proxy, lock=False)
+    utils.lock_all_transforms(proxy, lock=False)
 
     pm.makeIdentity(proxy, apply=True )
     pm.matchTransform(proxy,proxy_parent, pivots=True) 
     pm.parent(proxy,proxy_parent)
     pm.rename(proxy, proxy_name)
     pm.delete(proxy,constructionHistory=True)
-    lock_all_transforms(proxy)
+    utils.lock_all_transforms(proxy)
     logger.info("Proxy generate success ! ")
 
 obj = pm.ls(selection=True)[0]

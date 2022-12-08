@@ -19,7 +19,29 @@ def write_ass(path=""):
 
 def write_maya_scene(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
+    has_unknown_nodes = False
+    unkown_nodes = pm.ls(type="unknown")
+    if len(unkown_nodes)>0:
+        logger.info("Unknown nodes found. Trying to delete")
+        try:
+            pm.delete(unkown_nodes)
+            logger.info("Unknown nodes deleted.")
+        except:
+            logger.info("Can't delete unknown node")
+            logger.info(unkown_nodes)
+            has_unknown_nodes = True
+            
+    if has_unknown_nodes:
+        filename, extension = os.path.splitext(path)
+        scene_file, scene_extention = os.path.splitext(pm.system.sceneName())
+        if extension != scene_extention:
+            path = filename+scene_extention
+            logger.info("Changing scene extention to prevent maya refusing to save because of unknown nodes")
+        else:
+            logger.info("Unknown nodes present, but no need to change the scene format")
+
     pm.system.exportSelected(path, force=False)
+
     #cmds.file(path,force=False, options="v=0;", type="mayaAscii", pr=True, es=True)
 
 def get_last_v(path):
@@ -64,22 +86,20 @@ def warning(txt):
     cmds.error(txt)
 
 def ask_save():
-    fileCheckState = cmds.file(q=True, modified=True)
-    scene_file = cmds.file(q=True, sn=True)
+    fileCheckState = pm.system.isModified()
+    scene_file = pm.system.sceneName()
     if not scene_file:
-        warning("Save the scene before!")
+        utils.warning("Save the scene before!")
 
     if fileCheckState:
-        result = cmds.confirmDialog( title='Save ?',
+        result = pm.confirmDialog( title='Save ?',
                             message='Do you want to save?',
                             button=['Yes','Skip',"Cancel"],
                             defaultButton='Yes',
                             cancelButton='"Cancel',
                             dismissString='"Cancel' )
         if result == "Yes":
-            name= cmds.file(q=True, sn=True)
-            cmds.file(rename=name)  
-            cmds.file(save=True)
+            pm.saveFile()
 
         if result == "Cancel":
             warning("Abort by user")
@@ -143,7 +163,7 @@ def exportVariant(asset, variant, assets_dir, export_shading=False):
     write_ass(variant_maya_ass)
     log += ("- %s\n"%variant_maya_ass)
     write_maya_scene(variant_maya_scene)
-    log += (" %s\n"%variant_maya_scene)
+    log += ("- %s\n"%variant_maya_scene)
     logger.info("Maya variant scene export succes: %s"%variant_maya_scene)
     if export_shading:
         write_maya_scene(variant_shading_scene)
@@ -187,12 +207,13 @@ def has_transfrom_user_fix_possible(obj):
             warning("Abort by user")
 
 def deleteSource(node):
-    if cmds.referenceQuery(node,isNodeReferenced=True):
-        reference_node = cmds.referenceQuery(node,filename=True)
-        cmds.file(reference_node, importReference=True)
-        cmds.delete(node)
+    if pm.referenceQuery(node,isNodeReferenced=True):
+        path = pm.referenceQuery(node, filename=True)
+        reference_node = pm.FileReference(path)
+        pm.FileReference.importContents(reference_node)
+        pm.delete(node)
     else:
-        cmds.delete(node)
+        pm.delete(node)
 
 def cleanAsset(asset):
     asset_name = asset.name().split(":")[-1]
@@ -214,20 +235,66 @@ def cleanAsset(asset):
 
     return asset_copy
 
-def publish(asset):
+def publish(asset, asset_dir, import_proxy_scene=False, selected_variant=False):
     log = "Export done:\n"
-    asset_dir= "D:/april/assets"
+
     asset_name = asset.name()
     asset_clean = cleanAsset(asset)
     variants, proxy = scanAsset(asset_clean)
+
     for v in variants:
         log += exportVariant(asset_clean,v,asset_dir,export_shading=True)
-    log += make_proxy_scene(asset_clean, asset_dir)
+
+    proxy_scene_path = make_proxy_scene(asset_clean, asset_dir)
+    if import_proxy_scene:
+        namespace = utils.nameSpace_from_path(proxy_scene_path)
+        refNode = pm.system.createReference(proxy_scene_path, namespace=namespace)
+        nodes = pm.FileReference.nodes(refNode)
+        if asset.getParent():
+            pm.parent(nodes[0], asset.getParent())
+        utils.match_matrix(nodes[0],asset)
+    log += "- " + proxy_scene_path
     pm.delete(proxy)
     pm.delete(asset_clean)
-    pm.rename(asset,asset_name)
-    pm.confirmDialog(message= log)
+    if not pm.referenceQuery(asset, isNodeReferenced=True):
+        pm.rename(asset,asset_name)
+    pm.confirmDialog(message= log.replace("\\","/"))
+    logger.info("Publish succes !")
 
+def publish_selected_variant(selected_variant, asset_dir):
+    
+    asset= selected_variant.getParent()
+    if not asset: utils.warning("Can't get parent!")
+    proxy_name = asset.name()+("|%s_proxy"%utils.only_name(asset))
+    logger.debug(proxy_name+ "fake proxy")
+    if not pm.objExists(proxy_name):
+        logger.debug("Temp proxy created.")
+        fake_proxy = pm.polySphere()[0]
+        pm.parent(fake_proxy,asset)
+        pm.rename(fake_proxy, proxy_name)
+    else:
+        fake_proxy= pm.ls(proxy_name)
+    log = "Export done:\n"
+    asset_name = asset.name()
+    asset_clean = cleanAsset(asset)
+    variants, proxy = scanAsset(asset_clean)
+
+    match = [v for v in variants if utils.only_name(v) == utils.only_name(selected_variant)]
+    variants = match
+
+    for v in variants:
+        log += exportVariant(asset_clean,v,asset_dir,export_shading=True)
+
+    pm.delete(proxy)
+    pm.delete(asset_clean)
+    pm.delete(fake_proxy)
+    if not pm.referenceQuery(asset, isNodeReferenced=True):
+        pm.rename(asset,asset_name)
+    pm.confirmDialog(message= log.replace("\\","/"))
+    logger.info("Publish succes !")
+
+
+      
 def has_transform(obj):
     if pm.xform(obj,query=True, matrix=True) != zero_matrix:
         return True
@@ -237,6 +304,7 @@ def has_transform(obj):
 def scanAsset(asset):
 
     variants = [v for v in pm.listRelatives(asset,children=True) if v.endswith("_HD") or v.endswith("_SD")] 
+
     proxy =  [p for p in pm.listRelatives(asset,children=True) if utils.only_name(p)==utils.only_name(asset)+"_proxy"]
     if not variants: utils.warning("No variants found")
     if not proxy: utils.warning("No proxy found")
@@ -250,7 +318,6 @@ def scanAsset(asset):
     logger.info("Proxy found: " +proxy[0].name())
 
     return variants, proxy[0]
-
 
 def scan_ass_directory(ass_dir):
 
@@ -306,12 +373,14 @@ def make_proxy_scene(asset, asset_dir):
     logger.info("Next publish proxy maya scene  = %s"%next_publish_proxy_scene)
 
     pm.select(proxy)
-    sub_assets = [s for s in pm.listRelatives(asset,children=True) if s.endswith("_subAssets")] 
+    sub_assets = [s for s in pm.listRelatives(asset,children=True) if s.endswith("_assets")] 
 
     if sub_assets:
         pm.select(sub_assets[0],add=True,)
     else:
+
         proxy = pm.parent(proxy,world=True)[0]
+        utils.lock_all_transforms(proxy, lock=False)
         pm.select(proxy)
     pm.system.exportSelected(next_publish_proxy_scene, force=False)    
     #cmds.file(next_publish_proxy_scene,force=False, options="v=0;", type="mayaAscii", pr=True, es=True)
@@ -322,4 +391,3 @@ def make_proxy_scene(asset, asset_dir):
     return next_publish_proxy_scene
 
 
-publish(pm.ls(sl=True)[0])

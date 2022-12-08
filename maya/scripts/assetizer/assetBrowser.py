@@ -38,10 +38,10 @@ def maya_main_window():
 
 
 #current_project="D:/gabriel/assetizer"
-current_project = "B:/trashtown_2112"
+project_list = ["B:/trashtown_2112","D:/tmp"]
+
 empty_scene = ""
-all_assets_dir = os.path.join(current_project,"assets")
-all_shots_dir =  os.path.join(current_project,"shots")
+
 
 template_directories = {"assets" :["modeling","shading","rigging"],
                         "shots" : ["anim","lighting","comp"]
@@ -116,12 +116,14 @@ def list_set_selected_byName(list,name):
 
 
 class Package():
-    def __init__(self, name, type):
+    def __init__(self, name, type, current_project):
         self.name = name
-        type_dir = "assets" if type == "asset" else "shots"
+
         self.favorite_dir = "publish" if type == "asset" else "lighting"
-        dir = os.path.join(current_project,type_dir,name)
+        dir = os.path.join(current_project,type,name)
+        print(dir)
         self.dir = dir if os.path.isdir(dir) else None
+        print(self.dir)
         self.shading_scene = None
 
 
@@ -165,6 +167,9 @@ class AssetBrowser(QtWidgets.QDialog):
         self.button_add_new = QtWidgets.QPushButton("+")
         self.button_add_new.setMaximumWidth(25)
 
+        #Current prod:
+        self.comboBox_current_prod = QtWidgets.QComboBox()
+        self.comboBox_current_prod.addItems(project_list)
         #Add Last Modified sort checkbox
         self.sort_by_last_checkbox = QtWidgets.QCheckBox("Sort by last modified")
 
@@ -250,6 +255,7 @@ class AssetBrowser(QtWidgets.QDialog):
         self.topLayout.addWidget(self.button_mode_asset)
         self.topLayout.addWidget(self.button_mode_shot)
         self.topLayout.addWidget(self.button_add_new)
+        self.topLayout.addWidget(self.comboBox_current_prod)
         #self.topLayout.addWidget(self.sort_by_last_checkbox)
         #self.topLayout.addWidget(self.filter_text)
         self.topLayout.addStretch()
@@ -257,9 +263,10 @@ class AssetBrowser(QtWidgets.QDialog):
         self.mainLayout.addLayout(self.bodyLayout)
 
         #OPEN BY DEFAULT AS ASSET BROWSER
+        self.current_project = project_list[0]
         self.button_mode_asset.setChecked(True)
-        self.mode = "asset"
-        self.all_packages_dir = os.path.join(current_project,"assets")
+        self.mode = "assets"
+        self.all_packages_dir = os.path.join(self.current_project,"assets")
         self.rebuild_package_list()
         #self.package_Qlist.setCurrentRow(0)
         #self.package_Qlist_changed()
@@ -270,6 +277,8 @@ class AssetBrowser(QtWidgets.QDialog):
         self.open_scene.clicked.connect(self.open_scene_clicked)
         self.copy_path.clicked.connect(self.copy_path_clicked)
 
+        #Connect curent dir changed:
+        self.comboBox_current_prod.currentTextChanged.connect(self.current_prod_changed)
         #Connect CHECKBOX
         self.sort_by_last_checkbox.clicked.connect(self.sort_by_last_clicked)
         self.filter_text.textEdited.connect(self.filter_package_list)
@@ -292,7 +301,8 @@ class AssetBrowser(QtWidgets.QDialog):
         """
 
         packageName = self.package_Qlist.currentItem().text()
-        self.package = Package(packageName, self.mode)
+        print (self.mode)
+        self.package = Package(packageName, self.mode, self.current_project)
         if self.package.dir is not None:
             self.rebuild_departementList()
             self.rebuild_files_list()
@@ -425,8 +435,9 @@ class AssetBrowser(QtWidgets.QDialog):
     def create_entity(self, name):
 
         mode = "assets" if self.button_mode_asset.isChecked() else "shots"
-        path = os.path.join(current_project,mode,name)
+        path = os.path.join(self.current_project,mode,name)
         if os.path.isdir(path):
+
             cmds.confirmDialog( title='Warning',
                     message='Asset "%s" already exist. \n Creation impossible'%(name), )
             return
@@ -449,8 +460,8 @@ class AssetBrowser(QtWidgets.QDialog):
 
     def button_mode_asset_clicked(self):
         if self.button_mode_asset.isChecked() and self.button_mode_shot.isChecked() ==True:
-            self.mode = "asset"
-            self.all_packages_dir = os.path.join(current_project,"assets")
+            self.mode = "assets"
+            self.all_packages_dir = os.path.join(self.current_project,"assets")
             self.rebuild_package_list()
             self.button_mode_shot.setChecked(False)
         else:
@@ -459,14 +470,17 @@ class AssetBrowser(QtWidgets.QDialog):
 
     def button_mode_shot_clicked(self):
         if self.button_mode_shot.isChecked() and self.button_mode_asset.isChecked() ==True:
-            self.mode = "shot"
-            self.all_packages_dir = os.path.join(current_project,"shots")
+            self.mode = "shots"
+            self.all_packages_dir = os.path.join(self.current_project,"shots")
             self.rebuild_package_list()
-            self.third_Qlist.setVisible(True)
             self.button_mode_asset.setChecked(False)
         else:
             self.button_mode_shot.setChecked(True)
             pass
+    def current_prod_changed(self):
+        self.current_project = self.comboBox_current_prod.currentText()
+        self.all_packages_dir = os.path.join(self.current_project,self.mode)
+        self.rebuild_package_list()
 
     def build_path_scene(self):
         package_name = self.package_Qlist.currentItem().text()
