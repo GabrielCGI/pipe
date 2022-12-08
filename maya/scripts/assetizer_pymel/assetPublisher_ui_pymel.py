@@ -2,7 +2,6 @@
 from maya import OpenMayaUI as omui
 import os
 import json
-import maya.cmds as cmds
 from PySide2 import QtCore
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
@@ -15,7 +14,7 @@ importlib.reload(pub)
 importlib.reload(utils)
 import pymel.core as pm
 
-asset_dir = utils.get_working_directory()
+
 def maya_main_window():
     '''
     Return the Maya main window widget as a Python object
@@ -85,10 +84,10 @@ class AssetLoader(QtWidgets.QDialog):
         self.publish_variant.clicked.connect(self.publish_variant_clicked)
 
     def init_checkbox(self):
-        filepath = cmds.file(q=True, sn=True)
+        filepath = pm.system.sceneName()
         if filepath:
             split = filepath.split("/")
-            if split[-2] != "shading":
+            if "assets" not in split:
                 self.delete_after_publish.setChecked(True)
                 self.is_a_shot_asset.setChecked(True)
                 self.import_published.setChecked(True)
@@ -109,6 +108,8 @@ class AssetLoader(QtWidgets.QDialog):
     def publish_variant_clicked(self):
         if self.import_published.isChecked(): utils.warning("Import published not currently supported in Publish selected variant. Aborted")
         pub.ask_save()
+
+
         selected_variant = pm.ls(sl=True)[0]
 
         asset_dir = self.get_dir()
@@ -120,15 +121,13 @@ class AssetLoader(QtWidgets.QDialog):
 
 
 
-
-
     def get_dir(self):
         if self.is_a_shot_asset.isChecked():
-            filepath = cmds.file(q=True, sn=True)
-            dir =os.path.dirname(filepath)
+            filepath = pm.system.sceneName()
+            asset_dir =os.path.join(os.path.dirname(filepath),"assets")
         else:
-            dir = asset_dir
-        return dir
+            asset_dir = utils.get_working_directory()
+        return asset_dir
 try:
     ui.deleteLater()
 except:

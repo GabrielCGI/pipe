@@ -64,7 +64,6 @@ def build_hiearchy(obj):
 
     return asset_grp, obj  
     
-
 def generate_lowpoly(hd_grp):
     asset_name =only_name(hd_grp).split("_")[0]
     sd_grp = pm.duplicate(hd_grp,name=asset_name+"_SD")
@@ -208,7 +207,7 @@ def bake_texture(obj,dir,resolution=512):
         l.visibility.set(True)
     logger.info("Bake textures success ! ")
 
-def generate_proxy(grp, name, target_vertex=500):
+def generate_proxy(grp, target_vertex):
 
     try:
         asset = grp.getParent()
@@ -240,7 +239,7 @@ def generate_proxy(grp, name, target_vertex=500):
     except Exception as e:
         logger.info("Skipping poly unit %s"%proxy)
         pass  
-    pm.polyReduce(proxy,ver = 1,trm=1, keepQuadsWeight=0,vct=500 )
+    pm.polyReduce(proxy,ver = 1,trm=1, keepQuadsWeight=0,vct=target_vertex)
     pm.delete(proxy,constructionHistory=True)
 
     utils.lock_all_transforms(proxy, lock=False)
@@ -253,12 +252,5 @@ def generate_proxy(grp, name, target_vertex=500):
     utils.lock_all_transforms(proxy)
     logger.info("Proxy generate success ! ")
 
-obj = pm.ls(selection=True)[0]
 
-#asset_grp, hd_grp = build_hiearchy(obj)
-#sd_grp = generate_lowpoly(hd_grp)
 
-#generate_proxy(sd_grp)
-
-#merge_uv_sets(obj)
-#bake_texture(obj,"D:/")

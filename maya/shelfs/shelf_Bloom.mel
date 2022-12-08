@@ -1129,7 +1129,7 @@ global proc shelf_Bloom () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nsys.path.append(\"R:/pipeline/pipe/maya/scripts/assetizer\")\n\nimport assetLoader\nimport importlib\nimportlib.reload(assetLoader)\n" 
+        -command "import sys\nsys.path.append(\"R:/pipeline/pipe/maya/scripts/assetizer_pymel\")\n\nimport assetLoader_pymel\nimport importlib\nimportlib.reload(assetLoader_pymel)\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

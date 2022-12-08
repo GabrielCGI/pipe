@@ -504,8 +504,10 @@ class AssetBrowser(QtWidgets.QDialog):
 
     def reference_clicked(self):
         path, namespace = self.build_path_scene()
-        cmds.file(path, reference=True,namespace=namespace)
-
+        if path.endswith(".ma") or path.endswith(".mb"):
+            cmds.file(path, reference=True,namespace=namespace)
+        else:
+            print("Not a maya scene")
     def open_folder_clicked(self):
         path, namespace = self.build_path_scene()
         if os.path.isdir(path):
@@ -520,7 +522,10 @@ class AssetBrowser(QtWidgets.QDialog):
 
     def open_scene_clicked(self):
         path, namespace = self.build_path_scene()
-        cmds.file(path, open=True, force=True)
+        if path.endswith(".ma") or path.endswith(".mb"):
+            cmds.file(path, open=True, force=True)
+        else:
+            print("Not a maya scene !")
 
 """
 

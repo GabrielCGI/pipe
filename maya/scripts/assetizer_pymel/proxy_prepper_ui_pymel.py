@@ -117,6 +117,7 @@ class ProxyPrepper(QtWidgets.QDialog):
     def generate_proxy_clicked(self):
         target_reduce = self.reduce_value.text()
         grp = pm.ls(selection=True)[0]
+
         pp.generate_proxy(grp, int(target_reduce))
 
 

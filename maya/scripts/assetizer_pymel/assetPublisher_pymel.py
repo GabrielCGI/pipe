@@ -217,7 +217,8 @@ def deleteSource(node):
 
 def cleanAsset(asset):
     asset_name = asset.name().split(":")[-1]
-    
+    asset_visibility_state= asset.visibility.get()
+    asset.visibility.set(1)
     variants, proxy = scanAsset(asset)
     asset_copy = pm.duplicate(asset)[0]
     if asset_copy.getParent():
@@ -233,10 +234,18 @@ def cleanAsset(asset):
     asset_copy.rotate.set(0,0,0)
     asset_copy.scale.set(1,1,1)
 
+
+    utils.convert_selected_to_tx(asset)
+
+    #Textures search path
+    pm.setAttr("defaultArnoldRenderOptions.absoluteTexturePaths",0)
+    pm.setAttr("defaultArnoldRenderOptions.texture_searchpath", "[DISK_I];[DISK_B];[DISK_P];I:/;P:/;B:/")
+
+    asset.visibility.set(0)
     return asset_copy
 
 def publish(asset, asset_dir, import_proxy_scene=False, selected_variant=False):
-    log = "Export done:\n"
+    log = "---- SUCCES ---- \n"
 
     asset_name = asset.name()
     asset_clean = cleanAsset(asset)
@@ -262,7 +271,7 @@ def publish(asset, asset_dir, import_proxy_scene=False, selected_variant=False):
     logger.info("Publish succes !")
 
 def publish_selected_variant(selected_variant, asset_dir):
-    
+    fake_proxy = False
     asset= selected_variant.getParent()
     if not asset: utils.warning("Can't get parent!")
     proxy_name = asset.name()+("|%s_proxy"%utils.only_name(asset))
@@ -271,10 +280,10 @@ def publish_selected_variant(selected_variant, asset_dir):
         logger.debug("Temp proxy created.")
         fake_proxy = pm.polySphere()[0]
         pm.parent(fake_proxy,asset)
+        pm.xform(fake_proxy,m=zero_matrix)
         pm.rename(fake_proxy, proxy_name)
-    else:
-        fake_proxy= pm.ls(proxy_name)
-    log = "Export done:\n"
+
+    log = "---- SUCCES ---- \n"
     asset_name = asset.name()
     asset_clean = cleanAsset(asset)
     variants, proxy = scanAsset(asset_clean)
@@ -287,7 +296,8 @@ def publish_selected_variant(selected_variant, asset_dir):
 
     pm.delete(proxy)
     pm.delete(asset_clean)
-    pm.delete(fake_proxy)
+    if fake_proxy:
+        pm.delete(fake_proxy)
     if not pm.referenceQuery(asset, isNodeReferenced=True):
         pm.rename(asset,asset_name)
     pm.confirmDialog(message= log.replace("\\","/"))
@@ -310,8 +320,8 @@ def scanAsset(asset):
     if not proxy: utils.warning("No proxy found")
 
     for v in variants:
-        if has_transform(v) : utils.warning('Transfroms applied on %s -> Plz fix manually'%obj)
-    if has_transform(proxy[0]) : utils.warning('Transfroms applied on %s -> Plz fix manually'%obj)
+        if has_transform(v) : utils.warning('Transfroms applied on %s -> Plz fix manually'%v )
+    if has_transform(proxy[0]) : utils.warning('Transfroms applied on %s -> Plz fix manually'%proxy[0])
 
     logger.info("Scan success")
     logger.info("Variants found: " + ", ".join([variant.name() for variant in variants]))
@@ -319,21 +329,9 @@ def scanAsset(asset):
 
     return variants, proxy[0]
 
-def scan_ass_directory(ass_dir):
-
-    dic_variants={}
-    variants = os.listdir(ass_dir)
-
-    for v in variants:
-        v_dir = os.path.join(ass_dir,v)
-        versions = os.listdir(v_dir)
-        dic_variants[v]=versions
-
-    return dic_variants
-
 def get_last_basic_variant_ass(asset_name,ass_dir):
 
-    dic = scan_ass_directory(ass_dir)
+    dic = utils.scan_ass_directory(ass_dir)
     if not dic: utils.warning("No variant found for proxy default DSO")
     ass_path = None
     default_variant = asset_name+"_HD"
@@ -346,8 +344,8 @@ def get_last_basic_variant_ass(asset_name,ass_dir):
         variant = list(dic.keys())[0]
         last =  dic[variant][-1]
 
-        logger.debug("Found something, not sure what it is...: %s %s"%(variant ,last))
-    ass_path = os.path.join(ass_dir,variant,last,"%s_%s.ass"%(asset_name,variant))
+        logger.debug("Found something, not sure what it is...:  %s"%(last))
+    ass_path = os.path.join(ass_dir,variant,last,"%s.ass"%(variant))
     return ass_path
 
 def make_proxy_scene(asset, asset_dir):
