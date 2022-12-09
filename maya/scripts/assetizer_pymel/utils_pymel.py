@@ -100,10 +100,10 @@ def convert_to_tx(texture):
 
         else:
             logger.info("Failed to set tx on: %s"%tx_path)
-            
+
 def convert_selected_to_tx(obj):
-    print("cooooooooooonveeeeeeeert")
+
     tex_list= list_all_textures_from_selected(obj)
     for tex in tex_list:
-        print(tex)
+
         convert_to_tx(tex)

@@ -54,44 +54,26 @@ def createScriptNode(refNamespace, abcPath):
     deferScript = 'cmds.file("%s", loadReference="%s", type="Alembic")'%(abcPath, childRef)        #Update the alembic.
     cmds.evalDeferred(deferScript)
 
-def createCharStandIn(name, anim_abc_path,abcv, asset_publish_path, asset_abc_path):
-    a = cmds.createNode("aiStandIn",n=abcv+"Shape")
-    b= cmds.listRelatives(a,parent=True)
-    c=cmds.rename(b,abcv)
-
-    abc_mod = [abc for abc in os.listdir(asset_abc_path) if abc.endswith("mod.abc")][0]
-    abc_mod_path = os.path.join(asset_abc_path,abc_mod)
-    cmds.setAttr(c+".dso",abc_mod_path,type="string")
-
-    list = os.listdir(asset_publish_path)
-    cmds.setAttr(c+".useFrameExtension", 1)
-    operators = [o for o in list if o.endswith(".ass")]
-    operators.sort()
-    if operators:
-        op = operators[-1]
-        op_path= os.path.join(asset_publish_path,op)
-        cmds.setAttr(c+".abc_layers", anim_abc_path , type="string")
-        set_shader = cmds.createNode("aiIncludeGraph", n="aiIncludeGraph_"+abcv)
-        cmds.setAttr(set_shader+".filename",op_path , type="string")
-        cmds.setAttr(set_shader+".target", "aiStandInShape/input_merge_op", type="string" )
-        cmds.connectAttr(set_shader+".out",c+".operators[0]", f=True )
-
-def abcLoad(anim_abc_path):
+def abcLoad(abcPath):
     "Import Abc from a directory"
-    abc_filename = anim_abc_path.split("/")[-1]
-    abcv = abc_filename.split(".")[0]
-    dir="B:/trashtown_2112/assets"
-    name = nameFromAbc(abc_filename)
-    asset_path= os.path.join(dir,name)
-    asset_publish_path = os.path.join(asset_path,"publish")
-    asset_abc_path = os.path.join(asset_path,"abc")
-    if os.path.isdir(asset_publish_path):
+    abc = abcPath.split("/")[-1]
+    name = nameFromAbc(abc)
+    refNamespace = name +"_shading_lib_"+ abc.split("_")[-1].split(".")[0]  #00 ou 01 ou 02
+    print(name)
+    shadingRefPath = assetsDic.get(name).get("shading")
+    print(shadingRefPath)
+    scriptNodeName = "scriptNode_" + refNamespace
 
-        createCharStandIn(name, anim_abc_path, abcv, asset_publish_path, asset_abc_path)
-
-
+    #Check if ABC has already been imported
+    if cmds.objExists(scriptNodeName):
+        print("Updating animation for: %s \n %s"%(refNamespace, abcPath))
+        cmds.delete (scriptNodeName)                #Delete old script Node
+        createScriptNode(refNamespace, abcPath)             #Create new script Node
     else:
-        print(name + "FAIL: it's not V2")
+        print("Importing animation for: %s \n %s" % (refNamespace, abcPath))
+        importReference(shadingRefPath, refNamespace)               #Import Reference
+        createScriptNode(refNamespace, abcPath)             #Create new script Node
+
 def importAnim():
     "Import selected alembic in the file dialog - Master fonction"
     basicFilter = "*.abc"

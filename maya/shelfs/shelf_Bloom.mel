@@ -14,6 +14,40 @@ global proc shelf_Bloom () {
         -manage 1
         -visible 1
         -preventOverride 0
+        -annotation "Export character to alembic" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "\n\nimport abcPipelineExport_ui as abcExp_ui\nimport importlib\nimpo..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/abc_export3.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/abc_export3.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "\n\nimport abcPipelineExport_ui as abcExp_ui\nimport importlib\nimportlib.reload(abcExp_ui)\n\ntry:\n    ui.deleteLater()\nexcept:\n    pass\nui = abcExp_ui.ABC_pipelineExport()\nui.create()\nui.show()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
         -annotation "Auto-export anim as Alembic" 
         -enableBackground 0
         -backgroundColor 0 0 0 
@@ -67,7 +101,7 @@ global proc shelf_Bloom () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import abcPipelineImport as ppIm\n\nppIm.importAnim()" 
+        -command "import abcPipelineImport as ppIm\nfrom importlib import reload\nreload(ppIm)\nppIm.importAnim()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
