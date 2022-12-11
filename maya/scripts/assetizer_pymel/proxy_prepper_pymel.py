@@ -20,15 +20,11 @@ def build_hiearchy(obj):
     #Check
     if len(obj) != 1:
         utils.warning("Too many object selected")
-
+    if pm.referenceQuery(obj,isNodeReferenced=True):
+        utils.warning("Please import reference before")
     #Get asset name
-    scene_path = pm.system.sceneName()
-    if "shots" in scene_path:
-        asset_name = only_name(obj)
-        logger.info("Current scene is detected as: shot")
-    else:
-        asset_name = os.path.basename(scene_path).split("_")[0].split(".")[0]
-        logger.info("Current scene is detected as: asset")
+    obj= obj[0]
+    asset_name = utils.only_name(obj)
 
     result = pm.promptDialog(
                     title='Rename Object',
@@ -134,10 +130,20 @@ def merge_uv_sets(obj):
         pm.polyUVSet( delete=True, uvSet=uv_set)
     return default_uv
 
-def bake_texture(obj,dir,resolution=512):
-
+def bake_texture(obj,dir,resolution=512, proxy_texture=False):
     if not obj.endswith("_proxy"):
         utils.warning("Not a proxy")
+
+    if not proxy_texture:
+        proxy_shader = pm.shadingNode("aiStandardSurface", asShader=True, name=obj.name()+"_shader")
+        proxy_shader.specular.set(0.4)
+
+        shadingGroup = pm.sets(name="%sSG" % proxy_shader, empty=True, renderable=True, noSurfaceShader=True)
+        pm.connectAttr("%s.outColor" % proxy_shader, "%s.surfaceShader" % shadingGroup)
+        shadingGroup.forceElement(obj)
+        default_uv  = merge_uv_sets(obj)
+        pm.delete(obj, constructionHistory = True)
+        return
 
     result = pm.confirmDialog( title='UV?',
                         message='What about uvs?',
@@ -212,7 +218,7 @@ def bake_texture(obj,dir,resolution=512):
         l.visibility.set(True)
     logger.info("Bake textures success ! ")
 
-def generate_proxy(grp, target_vertex):
+def generate_proxy(grp, percentage):
 
     try:
         asset = grp.getParent()
@@ -244,10 +250,10 @@ def generate_proxy(grp, target_vertex):
     except Exception as e:
         logger.info("Skipping poly unit %s"%proxy)
         pass
-    pm.polyReduce(proxy,ver = 1,trm=1, keepQuadsWeight=0,vct=target_vertex)
+    pm.polyReduce(proxy,ver = 1, keepQuadsWeight=0, p = percentage)
     pm.delete(proxy,constructionHistory=True)
     utils.lock_all_transforms(proxy, lock=False)
-    #utils.match_zero_matrix(proxy)
+
     pm.parent(proxy,proxy_parent)
     pm.matchTransform(proxy,proxy_parent, pivots=True)
     pm.makeIdentity(proxy, apply=True )

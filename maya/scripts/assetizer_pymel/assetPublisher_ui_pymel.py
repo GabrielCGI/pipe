@@ -92,32 +92,23 @@ class AssetLoader(QtWidgets.QDialog):
                 self.is_a_shot_asset.setChecked(True)
                 self.import_published.setChecked(True)
 
-
-
-
     def publish_asset_clicked(self):
         pub.ask_save()
-        asset = pm.ls(sl=True)[0]
+        maya_root = pm.ls(sl=True)[0]
         asset_dir = self.get_dir()
-        import_proxy_scene = self.import_published.isChecked()
-        pub.publish(asset,asset_dir,import_proxy_scene)
+        pub.publish(maya_root,asset_dir,self.import_published.isChecked())
         if self.delete_after_publish.isChecked():
-            pub.deleteSource(asset)
-
+            pub.deleteSource(maya_root)
 
     def publish_variant_clicked(self):
-        if self.import_published.isChecked(): utils.warning("Import published not currently supported in Publish selected variant. Aborted")
         pub.ask_save()
-
-
         selected_variant = pm.ls(sl=True)[0]
-
+        maya_root = selected_variant.getParent()
+        if not maya_root: utils.warning("Can't get parent")
         asset_dir = self.get_dir()
-        
-        pub.publish_selected_variant(selected_variant,asset_dir)
+        pub.publish(maya_root,asset_dir,self.import_published.isChecked(),selected_variant)
         if self.delete_after_publish.isChecked():
-            asset= selected_variant.getParent()
-            pub.deleteSource(asset)
+            pub.deleteSource(maya_root)
 
 
 

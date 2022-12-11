@@ -27,8 +27,6 @@ importlib.reload(pp)
 importlib.reload(utils)
 
 
-dir_global = "D:/gabriel/assetizer/assets"
-
 
 def maya_main_window():
     '''
@@ -55,42 +53,54 @@ class ProxyPrepper(QtWidgets.QDialog):
         self.mainLayout = QtWidgets.QVBoxLayout(self)
         self.comboLayout = QtWidgets.QHBoxLayout(self)
         self.button_layout = QtWidgets.QVBoxLayout(self)
+        self.reduce_layout = QtWidgets.QHBoxLayout(self)
 
         # WIDGET LIST
-        self.onlyInt = QtGui.QIntValidator()
-        self.reduce_value = QtWidgets.QLineEdit(self)
-        self.reduce_value.setValidator(self.onlyInt)
-        self.reduce_value.setText("2000")
+        #self.onlyInt = QtGui.QIntValidator()
+        #self.onlyInt.setRange(0,100)
+        self.reduce_value = QtWidgets.QSpinBox(self)
+        self.reduce_value.setValue(90)
+        self.reduce_value.setRange(0,100)
+        self.reduce_value.setMaximumWidth(90)
+        self.reduce_value.setMinimumWidth(30)
+        #self.reduce_value.setValidator(self.onlyInt)
+        #self.reduce_value.setText("85")
+        self.proxy_baked_texture = QtWidgets.QCheckBox(self)
+        self.proxy_baked_texture.setChecked(False)
 
-        self.dir_image = QtWidgets.QLineEdit(self)
-        self.dir_image.setText(self.get_image_dir())
+        #self.dir_image = QtWidgets.QLineEdit(self)
+        #self.dir_image.setText(self.get_image_dir())
 
         #WIDGET CHECKBOX
 
 
 
-        self.display_label = QtWidgets.QLabel("Bake texture directory")
+        self.display_label = QtWidgets.QLabel("Reduce %")
+        self.display_label2 = QtWidgets.QLabel("Proxy with textures")
         self.generate_proxy_button = QtWidgets.QPushButton("Generate proxy")
         self.hierarchy = QtWidgets.QPushButton("Generate hierarchy")
-        self.bakeTexture_button = QtWidgets.QPushButton("Bake Texture")
+        self.bakeTexture_button = QtWidgets.QPushButton("Proxy shader")
         self.generate_lowpoly_button = QtWidgets.QPushButton("Generate Low poly")
         self.hierarchy = QtWidgets.QPushButton("Generate hierarchy")
 
         # ADD WIDGET TO LAYOUT
 
-        self.button_layout.addWidget(self.display_label)
+        self.reduce_layout.addWidget(self.display_label)
+        self.reduce_layout.addWidget(self.reduce_value )
+        self.reduce_layout.addWidget(self.display_label2)
+        self.reduce_layout.addWidget(self.proxy_baked_texture)
+        #self.reduce_layout.addStretch()
 
-        self.button_layout.addWidget(self.dir_image )
-
-        self.button_layout.addWidget(self.reduce_value )
 
         self.button_layout.addWidget(self.hierarchy)
         self.button_layout.addWidget(self.generate_lowpoly_button)
         self.button_layout.addWidget(self.generate_proxy_button)
         self.button_layout.addWidget(self.bakeTexture_button)
 
-        self.mainLayout.addLayout(self.comboLayout)
+
+        #self.mainLayout.addLayout(self.comboLayout)
         self.mainLayout.addLayout(self.button_layout)
+        self.mainLayout.addLayout(self.reduce_layout)
 
         #CONNECT WIDGET
         self.generate_proxy_button.clicked.connect(self.generate_proxy_clicked)
@@ -115,17 +125,18 @@ class ProxyPrepper(QtWidgets.QDialog):
             return "none"
 
     def generate_proxy_clicked(self):
-        target_reduce = self.reduce_value.text()
+        target_reduce = self.reduce_value.value()
         grp = pm.ls(selection=True)[0]
 
-        pp.generate_proxy(grp, int(target_reduce))
+        pp.generate_proxy(grp, target_reduce)
 
 
 
     def bakeTexture_button_clicked(self):
-        dir =self.dir_image.text()
+        dir = self.get_image_dir()
         obj = pm.ls(selection=True)[0]
-        pp.bake_texture(obj,dir)
+        print (self.proxy_baked_texture.isChecked())
+        pp.bake_texture(obj,dir,proxy_texture=self.proxy_baked_texture.isChecked())
 
     def generate_lowpoly_clicked(self):
         hd_grp =pm.ls(sl=True)[0]

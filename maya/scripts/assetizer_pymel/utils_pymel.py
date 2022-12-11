@@ -29,7 +29,7 @@ def nameSpace_from_path(path):
         filename = os.path.basename(path)
         name, ext = os.path.splitext(filename)
         nameSpace = name + "_00"
-        nameSpace.replace(".","_")
+        nameSpace= nameSpace.replace(".","_")
         return nameSpace
 
 def lock_all_transforms(obj, lock=True):
