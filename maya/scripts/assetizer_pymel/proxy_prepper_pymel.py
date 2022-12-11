@@ -46,24 +46,29 @@ def build_hiearchy(obj):
     scene_parent = pm.listRelatives(obj,parent=True)
 
     if pm.objExists("|"+asset_name):
-        pm.rename("|"+asset_name,"|"+asset_name+"_1")    
+        pm.rename("|"+asset_name,"|"+asset_name+"_1")
     asset_grp = pm.createNode("transform", n=asset_name)
     pm.matchTransform(asset_grp, obj)
     pm.parent(obj,asset_grp)
-    
-    pm.makeIdentity(obj, apply=True)
+    try:
+        childs = pm.listRelatives(obj, allDescendents=True,type="transform")
+        utils.lock_all_transforms(obj, lock=False)
+        utils.lock_all_transforms(childs, lock=False)
+        pm.makeIdentity(obj, apply=True)
+    except Exception as e:
+        utils.popUp("Can't freeze transform on %s. \nCheck the log"%[o.longName() for o in obj])
+        logger.warning(e)
     pm.delete(obj, constructionHistory=True)
-    print(asset_name)
     pm.rename(obj, asset_name+"_HD")
 
     utils.lock_all_transforms(obj)
-    
+
 
     if scene_parent:
         pm.parent(asset_grp,scene_parent)
 
-    return asset_grp, obj  
-    
+    return asset_grp, obj
+
 def generate_lowpoly(hd_grp):
     asset_name =only_name(hd_grp).split("_")[0]
     sd_grp = pm.duplicate(hd_grp,name=asset_name+"_SD")
@@ -78,7 +83,7 @@ def generate_lowpoly(hd_grp):
 def disable_displace(shapes):
     list_sg = []
     for shape in shapes:
-        sg = pm.listConnections(shape,type="shadingEngine", destination=True)     
+        sg = pm.listConnections(shape,type="shadingEngine", destination=True)
         if len(sg) == 1:
             if sg[0].name() != "initialShadingGroup":
                 if sg[0] not in list_sg:
@@ -160,7 +165,7 @@ def bake_texture(obj,dir,resolution=512):
     if result == "Use existing":
         proxy_uvset = default_uv
 
-    
+
 
     dic_lights={}
     lights = pm.ls(type=["light","aiSkyDomeLight","aiAreaLight"])
@@ -174,7 +179,7 @@ def bake_texture(obj,dir,resolution=512):
 
     pm.move(obj,1000,r=True)
     pm.select(obj)
-    pm.arnoldRenderToTexture(   
+    pm.arnoldRenderToTexture(
                                 folder=dir,
                                 aa_samples=2,extend_edges=True,
                                 resolution=resolution,
@@ -183,7 +188,7 @@ def bake_texture(obj,dir,resolution=512):
                             )
     pm.move(obj,-1000,r=True)
 
-    
+
     albedo = [f for f in os.listdir(dir) if f.endswith(".exr") and obj.name() in f][0]
     albedo_path = os.path.join(dir,albedo)
     file_node_albedo = pm.shadingNode("file", asTexture=True, name ="proxyAlbedo")
@@ -238,19 +243,16 @@ def generate_proxy(grp, target_vertex):
         logger.info("Poly Unit success %s"%proxy)
     except Exception as e:
         logger.info("Skipping poly unit %s"%proxy)
-        pass  
+        pass
     pm.polyReduce(proxy,ver = 1,trm=1, keepQuadsWeight=0,vct=target_vertex)
     pm.delete(proxy,constructionHistory=True)
-
     utils.lock_all_transforms(proxy, lock=False)
-
-    pm.makeIdentity(proxy, apply=True )
-    pm.matchTransform(proxy,proxy_parent, pivots=True) 
+    #utils.match_zero_matrix(proxy)
     pm.parent(proxy,proxy_parent)
+    pm.matchTransform(proxy,proxy_parent, pivots=True)
+    pm.makeIdentity(proxy, apply=True )
+
     pm.rename(proxy, proxy_name)
     pm.delete(proxy,constructionHistory=True)
     utils.lock_all_transforms(proxy)
     logger.info("Proxy generate success ! ")
-
-
-

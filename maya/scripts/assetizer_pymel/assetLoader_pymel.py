@@ -127,14 +127,14 @@ class AssetLoader(QtWidgets.QDialog):
                 check = False
         except:
             error_msg += "No dso"
-            check = False    
-        try:      
+            check = False
+        try:
             if sel[0].ai_translator.get() != "procedural":
                 error_msg += "Not a procedural"
                 check = False
         except:
             error_msg += "No dso"
-            check = False               
+            check = False
         return sel, check, error_msg
 
 
@@ -153,15 +153,15 @@ class AssetLoader(QtWidgets.QDialog):
         else:
             self.proxy=sel[0]
 
-    
+
         #Set label:
         self.display_label.setText("Asset: "+self.proxy.name())
         #GET DSO
-        asset_dso = self.proxy.dso.get() 
+        asset_dso = self.proxy.dso.get()
         #GET ASSET INFOS
-        self.asset_dir = Path(asset_dso).parents[4] 
+        self.asset_dir = Path(asset_dso).parents[4]
         print(self.asset_dir)
-        self.ass_dir = Path(asset_dso).parents[2] 
+        self.ass_dir = Path(asset_dso).parents[2]
 
         dso_split = os.path.normpath(asset_dso).split(os.sep)
         print(dso_split)
@@ -262,7 +262,6 @@ class AssetLoader(QtWidgets.QDialog):
 
     def maya_selection_changed_callback(self,*args):
         try:
-            return
             self.load_asset_clicked()
         except Exception as e:
             print (e)

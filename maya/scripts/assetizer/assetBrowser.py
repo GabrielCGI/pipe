@@ -38,7 +38,7 @@ def maya_main_window():
 
 
 #current_project="D:/gabriel/assetizer"
-project_list = ["B:/trashtown_2112","D:/tmp"]
+project_list = ["B:/trashtown_2112","D:/"]
 
 empty_scene = ""
 
@@ -263,7 +263,7 @@ class AssetBrowser(QtWidgets.QDialog):
         self.mainLayout.addLayout(self.bodyLayout)
 
         #OPEN BY DEFAULT AS ASSET BROWSER
-        self.current_project = project_list[0]
+        self.current_project = project_list[0] if os.path.isdir(project_list[0]) else "D:/"
         self.button_mode_asset.setChecked(True)
         self.mode = "assets"
         self.all_packages_dir = os.path.join(self.current_project,"assets")

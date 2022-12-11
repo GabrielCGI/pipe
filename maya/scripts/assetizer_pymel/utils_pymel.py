@@ -5,12 +5,24 @@ import os
 def warning(txt):
     pm.error(txt)
 
+def popUp(txt):
+
+    result = pm.confirmDialog( title='Pop up',
+                        message=txt,
+                        button=["Continue", "Stop"],
+                        defaultButton='Continue',
+                        cancelButton='"Stop',
+                        dismissString='"Stop' )
+
+    if result == "Stop":
+        utils.warning("abort by user")
+
 def only_name(obj):
     only_name = obj.name().split("|")[-1].split(":")[-1]
     return only_name
 
 def get_working_directory():
-    working_directory = "D:/tmp/assets"
+    working_directory = "D:/assets"
     return working_directory
 
 def nameSpace_from_path(path):
@@ -23,29 +35,43 @@ def nameSpace_from_path(path):
 def lock_all_transforms(obj, lock=True):
 
     if lock == True:
-        if type(obj) == list:
-            for o in obj:
-                o.translate.lock()
-                o.rotate.lock()
-                o.scale.lock()
-        else:
-            obj.translate.lock()
-            obj.rotate.lock()
-            obj.scale.lock()
+        if type(obj) is not list:
+            tpm_list = []
+            tpm_list.append(obj)
+            obj=tpm_list
+        for o in obj:
+            o.translate.lock()
+            o.rotate.lock()
+            o.scale.lock()
+
     if lock == False:
-        if type(obj) == list:
-            for o in obj:
-                o.translate.unlock()
-                o.rotate.unlock()
-                o.scale.unlock()
-        else:
-            obj.translate.unlock()
-            obj.rotate.unlock()
-            obj.scale.unlock() 
+        if type(obj) is not list:
+            tpm_list = []
+            tpm_list.append(obj)
+            obj=tpm_list
+        for o in obj:
+            #Note need to unlock both translate and translateXYZ to be sure
+            o.translate.unlock()
+            o.translateX.unlock()
+            o.translateY.unlock()
+            o.translateZ.unlock()
+            o.rotate.unlock()
+            o.rotateX.unlock()
+            o.rotateY.unlock()
+            o.rotateZ.unlock()
+            o.scale.unlock()
+            o.scaleX.unlock()
+            o.scaleY.unlock()
+            o.scaleZ.unlock()
+
 
 def match_matrix(source, target):
     m = pm.xform(target, matrix=True, query=True)
     pm.xform(source, matrix=m)
+
+def match_zero_matrix(source):
+    zero_matrix = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    pm.xform(source, matrix=zero_matrix)
 
 def scan_ass_directory(ass_dir):
 
@@ -63,9 +89,10 @@ def list_all_textures_from_selected(obj):
     sg_list = []
     shapes= pm.listRelatives(allDescendents=True,shapes=True)
     for s in shapes:
-        sg = pm.listConnections(s,type='shadingEngine')[0]
-        if sg not in sg_list:
-            sg_list.append(sg)
+        sg = pm.listConnections(s,type='shadingEngine')
+        if sg:
+            if sg not in sg_list:
+                sg_list.append(sg)
     for sg in sg_list:
         files = pm.listHistory(sg, type="file")
         tex_list += files

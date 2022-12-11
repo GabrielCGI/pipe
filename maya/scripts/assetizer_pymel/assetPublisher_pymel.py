@@ -30,7 +30,7 @@ def write_maya_scene(path):
             logger.info("Can't delete unknown node")
             logger.info(unkown_nodes)
             has_unknown_nodes = True
-            
+
     if has_unknown_nodes:
         filename, extension = os.path.splitext(path)
         scene_file, scene_extention = os.path.splitext(pm.system.sceneName())
@@ -94,12 +94,15 @@ def ask_save():
     if fileCheckState:
         result = pm.confirmDialog( title='Save ?',
                             message='Do you want to save?',
-                            button=['Yes','Skip',"Cancel"],
+                            button=['Save','Incremente & Save','Skip',"Cancel"],
                             defaultButton='Yes',
                             cancelButton='"Cancel',
                             dismissString='"Cancel' )
         if result == "Yes":
             pm.saveFile()
+
+        if result == "Incremente & Save":
+            pm.mel.eval("incrementAndSaveScene 0;")
 
         if result == "Cancel":
             warning("Abort by user")
@@ -221,13 +224,16 @@ def cleanAsset(asset):
     asset.visibility.set(1)
     variants, proxy = scanAsset(asset)
     asset_copy = pm.duplicate(asset)[0]
+    logger.debug(asset_copy.name())
     if asset_copy.getParent():
         pm.parent(asset_copy, world=True)
+        logger.debug("parent")
 
     if pm.objExists("|"+asset_name):
         asset_rename = pm.rename("|"+asset_name, asset_name+"_original")
     pm.rename(asset_copy,asset_name)
-    if asset_copy.name() != asset_name:
+    if utils.only_name(asset_copy) != asset_name:
+        logger.debug("%s----> %s"%(asset_copy.name(),asset_name) )
         pm.delete(asset_copy)
         utils.warning("Could not rename before export: %s exist already "%asset_name)
     asset_copy.translate.set(0,0,0)
@@ -241,7 +247,7 @@ def cleanAsset(asset):
     pm.setAttr("defaultArnoldRenderOptions.absoluteTexturePaths",0)
     pm.setAttr("defaultArnoldRenderOptions.texture_searchpath", "[DISK_I];[DISK_B];[DISK_P];I:/;P:/;B:/")
 
-    asset.visibility.set(0)
+    asset.visibility.set(asset_visibility_state)
     return asset_copy
 
 def publish(asset, asset_dir, import_proxy_scene=False, selected_variant=False):
@@ -292,7 +298,7 @@ def publish_selected_variant(selected_variant, asset_dir):
     variants = match
 
     for v in variants:
-        log += exportVariant(asset_clean,v,asset_dir,export_shading=True)
+        log += exportVariant(asset_clean,v,asset_dir,export_shading=False)
 
     pm.delete(proxy)
     pm.delete(asset_clean)
@@ -303,8 +309,46 @@ def publish_selected_variant(selected_variant, asset_dir):
     pm.confirmDialog(message= log.replace("\\","/"))
     logger.info("Publish succes !")
 
+def recursive_publish(root):
 
-      
+    childs= pm.listRelatives(root, children=True)
+    shapes_list=[]
+    transforms_list=[]
+    for c in childs:
+        shape = c.getShape()
+        if shape:
+            if pm.objectType(shape) == "mesh":
+                print("mesh_found%s"%shape)
+                shapes_list.append(c)
+        else:
+            transforms_list.append(c)
+
+    if shapes_list:
+        hd_grp= pm.createNode("transform",n="HD")
+        pm.parent(hd_grp,root)
+        utils.match_zero_matrix(hd_grp)
+        pm.matchTransform(hd_grp,root,pivots=True)
+        pm.parent(shapes_list,hd_grp)
+        path = "D:/tmp/"+root.longName().replace("|","_")+".ass"
+        #pm.select(hd_grp)
+        publish_selected_variant(hd_grp, "D:/tmp/")
+        #pm.system.exportSelected(path,force=False, type="ASS Export")
+        """
+        pm.delete(hd_grp)
+        proxy_name = root.name()+"_proxy"
+        proxyShape = pm.createNode("aiStandIn", n=proxy_name+"Shape")
+        proxy = proxyShape.getParent()
+        pm.rename(proxy,proxy_name)
+        proxy.dso.set(path)
+        pm.parent(proxy, root)
+        utils.match_zero_matrix(proxy)
+        pm.matchTransform(proxy,root, pivots=True)
+        """
+    if transforms_list:
+        for transform in transforms_list:
+            if pm.listRelatives(transform, children=True):
+                recursive_publish(transform)
+
 def has_transform(obj):
     if pm.xform(obj,query=True, matrix=True) != zero_matrix:
         return True
@@ -313,7 +357,7 @@ def has_transform(obj):
 
 def scanAsset(asset):
 
-    variants = [v for v in pm.listRelatives(asset,children=True) if v.endswith("_HD") or v.endswith("_SD")] 
+    variants = [v for v in pm.listRelatives(asset,children=True) if v.endswith("HD") or v.endswith("SD")]
 
     proxy =  [p for p in pm.listRelatives(asset,children=True) if utils.only_name(p)==utils.only_name(asset)+"_proxy"]
     if not variants: utils.warning("No variants found")
@@ -345,6 +389,7 @@ def get_last_basic_variant_ass(asset_name,ass_dir):
         last =  dic[variant][-1]
 
         logger.debug("Found something, not sure what it is...:  %s"%(last))
+    ass_name = "%s_%s_%s_00"%(asset_name,variant,last)
     ass_path = os.path.join(ass_dir,variant,last,"%s.ass"%(variant))
     return ass_path
 
@@ -352,15 +397,17 @@ def make_proxy_scene(asset, asset_dir):
     #Init name
     variants, proxy = scanAsset(asset)
     asset_name = utils.only_name(asset)
+
     #Visibility
     visibility_state = proxy.visibility.get()
     proxy.visibility.set(True)
 
     #Arnold attribut
+    proxy_name = proxy.name()
     proxy.ai_translator.set("procedural")
     ass_dir = os.path.join(asset_dir)
     ass_dir = os.path.join(asset_dir,asset_name,"publish","ass")
-    ass_path =  get_last_basic_variant_ass(asset_name,ass_dir)
+    ass_path=  get_last_basic_variant_ass(asset_name,ass_dir)
 
     proxy.dso.set(ass_path)
     proxy.aiOverrideShaders.set(0)
@@ -369,9 +416,14 @@ def make_proxy_scene(asset, asset_dir):
     publish_proxy_scene_dir = os.path.join(asset_dir,asset_name,"publish")
     next_publish_proxy_scene= get_next_publish_scene(publish_proxy_scene_dir, asset_name)
     logger.info("Next publish proxy maya scene  = %s"%next_publish_proxy_scene)
+    #Cosmetic color
+    proxy.useOutlinerColor.set(True)
+    proxy.outlinerColor.set(1,0,0)
+    pm.mel.eval('AEdagNodeCommonRefreshOutliners();')
+
 
     pm.select(proxy)
-    sub_assets = [s for s in pm.listRelatives(asset,children=True) if s.endswith("_assets")] 
+    sub_assets = [s for s in pm.listRelatives(asset,children=True) if s.endswith("_assets")]
 
     if sub_assets:
         pm.select(sub_assets[0],add=True,)
@@ -380,12 +432,11 @@ def make_proxy_scene(asset, asset_dir):
         proxy = pm.parent(proxy,world=True)[0]
         utils.lock_all_transforms(proxy, lock=False)
         pm.select(proxy)
-    pm.system.exportSelected(next_publish_proxy_scene, force=False)    
+    pm.system.exportSelected(next_publish_proxy_scene, force=False)
     #cmds.file(next_publish_proxy_scene,force=False, options="v=0;", type="mayaAscii", pr=True, es=True)
     logger.info('Proxy export success %s!'%next_publish_proxy_scene)
     #Restore properties
     proxy.ai_translator.set("polymesh")
+
     proxy.visibility.set(visibility_state)
     return next_publish_proxy_scene
-
-
