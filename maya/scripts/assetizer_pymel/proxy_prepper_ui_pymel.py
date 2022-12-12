@@ -113,6 +113,7 @@ class ProxyPrepper(QtWidgets.QDialog):
     def hierarchy_clicked(self):
         obj = pm.ls(selection=True)
         pp.build_hiearchy(obj)
+        self.hierarchy.setStyleSheet("background-color:rgb(110,150,110)")
 
     def get_image_dir(self):
         filepath = pm.system.sceneName()
@@ -127,7 +128,7 @@ class ProxyPrepper(QtWidgets.QDialog):
     def generate_proxy_clicked(self):
         target_reduce = self.reduce_value.value()
         grp = pm.ls(selection=True)[0]
-
+        self.generate_proxy_button.setStyleSheet("background-color:rgb(110,150,110)")
         pp.generate_proxy(grp, target_reduce)
 
 
@@ -136,13 +137,13 @@ class ProxyPrepper(QtWidgets.QDialog):
         dir = self.get_image_dir()
         obj = pm.ls(selection=True)[0]
         pp.bake_texture(obj,dir,proxy_texture=self.proxy_baked_texture.isChecked())
-
+        self.bakeTexture_button.setStyleSheet("background-color:rgb(110,150,110)")
     def generate_lowpoly_clicked(self):
         hd_grp =pm.ls(sl=True)[0]
         if not hd_grp.name().split("|")[-1].endswith('HD'):
             utils.warning("Please select HD group")
         pp.generate_lowpoly(hd_grp)
-
+        self.generate_lowpoly_button.setStyleSheet("background-color:rgb(110,150,110)");
 try:
     ui.deleteLater()
 except:

@@ -41,29 +41,27 @@ def build_hiearchy(obj):
 
     scene_parent = pm.listRelatives(obj,parent=True)
 
-    if pm.objExists("|"+asset_name):
-        pm.rename("|"+asset_name,"|"+asset_name+"_1")
-    asset_grp = pm.createNode("transform", n=asset_name)
-    pm.matchTransform(asset_grp, obj)
-    pm.parent(obj,asset_grp)
-    try:
-        childs = pm.listRelatives(obj, allDescendents=True,type="transform")
-        utils.lock_all_transforms(obj, lock=False)
-        utils.lock_all_transforms(childs, lock=False)
-        pm.makeIdentity(obj, apply=True)
-    except Exception as e:
-        utils.popUp("Can't freeze transform on %s. \nCheck the log"%[o.longName() for o in obj])
-        logger.warning(e)
-    pm.delete(obj, constructionHistory=True)
-    pm.rename(obj, asset_name+"_HD")
 
-    utils.lock_all_transforms(obj)
+    asset_grp = pm.createNode("transform")
+    asset_grp_hd = pm.createNode("transform")
+    pm.parent(asset_grp_hd,asset_grp)
+
+    pm.matchTransform(asset_grp, obj)
+    pm.parent(obj,asset_grp_hd)
+    utils.lock_all_transforms(asset_grp_hd)
+    for s in pm.listRelatives(asset_grp_hd, allDescendents=True, type="transform"):
+        utils.lock_all_transforms(s)
+    pm.rename(asset_grp, asset_name)
+    pm.rename(asset_grp_hd, asset_name+"_HD")
+    if utils.only_name(obj)==utils.only_name(asset_grp):
+        pm.rename(obj,asset_name+"_geo")
+
 
 
     if scene_parent:
         pm.parent(asset_grp,scene_parent)
-
-    return asset_grp, obj
+    pm.select(asset_grp_hd)
+    return asset_grp
 
 def generate_lowpoly(hd_grp):
     asset_name =only_name(hd_grp).split("_HD")[0]
@@ -258,19 +256,27 @@ def generate_proxy(grp, percentage):
     proxy = pm.duplicate(grp)
     proxy_parent = pm.listRelatives(proxy,parent=True)
     utils.delete_hidden_children(proxy)
+    print (proxy)
+
     try:
         proxy_unit =pm.polyUnite(proxy, mergeUVSets=True)[0]
         pm.delete(proxy_unit,constructionHistory=True)
-        pm.delete(proxy) #Get ride of non polymesh & non united leftover
+        if pm.objExists(proxy):
+            logger.info("Leftover found, cleaning...")
+            pm.delete(proxy) #Get ride of non polymesh & non united leftover
         proxy=proxy_unit
         logger.info("Poly Unit success %s"%proxy)
     except Exception as e:
         logger.info("Skipping poly unit %s"%proxy)
         pass
+
+
     pm.polyReduce(proxy,ver = 1, keepQuadsWeight=0, p = percentage)
     pm.polySetToFaceNormal(proxy)
     pm.delete(proxy,constructionHistory=True)
     utils.lock_all_transforms(proxy, lock=False)
+    for s in pm.listRelatives(proxy,allDescendents=True,type="transform"):
+        utils.lock_all_transforms(s, lock=False)
 
     pm.parent(proxy,proxy_parent)
     pm.matchTransform(proxy,proxy_parent, pivots=True)

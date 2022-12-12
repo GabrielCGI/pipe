@@ -14,10 +14,9 @@ zero_matrix = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 
 def write_ass(path=""):
     cmds.file(path,
               force=False,
-              options="-shadowLinks 0;-mask 24;-lightLinks 0;-boundingBox;-fullPath",
+              options="-shadowLinks 0;-mask 6201;-lightLinks 0;-boundingBox;-fullPath",
               type="ASS Export",
               exportSelected=True)
-
 def write_maya_scene(path):
     os.makedirs(os.path.dirname(path), exist_ok=True)
     has_unknown_nodes = False
@@ -159,7 +158,7 @@ def exportVariant(asset, variant, assets_dir, export_shading=False):
     #Make visible
     if not variant_visibility_state:
         variant.visibility.set(True)
-
+    utils.delete_hidden_children(variant)
     asset_publish_dir = os.path.join(assets_dir, asset_name )
     is_dir_exist(asset_publish_dir)
     variant_publish_dir = os.path.join(asset_publish_dir,"publish", "ass",variant_name)
