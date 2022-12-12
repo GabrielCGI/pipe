@@ -223,14 +223,24 @@ def has_transfrom_user_fix_possible(obj):
         if result == "Cancel":
             warning("Abort by user")
 
-def deleteSource(node):
+def import_all_references(node):
+
+    list_path = []
     if pm.referenceQuery(node,isNodeReferenced=True):
-        path = pm.referenceQuery(node, filename=True)
-        reference_node = pm.FileReference(path)
-        pm.FileReference.importContents(reference_node)
-        pm.delete(node)
-    else:
-        pm.delete(node)
+        list_path.append(pm.referenceQuery(node, filename=True))
+    for s in pm.listRelatives(node, allDescendents=True):
+        if pm.referenceQuery(s,isNodeReferenced=True):
+            path = pm.referenceQuery(s, filename=True)
+            if path not in list_path:
+                list_path.append(path)
+    if list_path:
+        for path in list_path:
+            ref_node = pm.FileReference(path)
+            pm.FileReference.importContents(ref_node)
+
+def deleteSource(node):
+    import_all_references(node)
+    pm.delete(node)
 
 def cleanAsset(asset):
     asset_visibility_state= asset.maya.visibility.get()
@@ -419,14 +429,27 @@ def make_proxy_scene(asset, asset_dir):
     pm.mel.eval('AEdagNodeCommonRefreshOutliners();')
 
 
-    pm.select(proxy)
     sub_assets = [s for s in pm.listRelatives(asset.maya,children=True) if s.endswith("_assets")]
 
+    #Clean inputs listConnection
+    shape = asset.proxy.getShape()
+    try:
+        sg = pm.listConnections(shape ,type="shadingEngine",plugs=True,connections=True)[0]
+        pm.disconnectAttr(shape)
+        pm.connectAttr(sg[0],sg[1])
+    except:
+        logger.warning("Fail to disconnect attr on: %s"%shape)
     if sub_assets:
-        pm.select(sub_assets[0],add=True,)
+        #pm.parent(sub_assets,world=True)
+        #pm.parent(proxy,world=True)
+        pm.select(proxy[0])
+        pm.select(sub_assets[0],add=True)
+        logger.infos("Childs assets found ! %s"%" ".join(sub_assets))
     else:
-
+        pm.select(proxy)
+        logger.info("No Childs assets found ! ")
         proxy = pm.parent(proxy,world=True)[0]
+        print(proxy)
         utils.lock_all_transforms(proxy, lock=False)
         pm.select(proxy)
     pm.system.exportSelected(next_publish_proxy_scene, force=False)

@@ -73,6 +73,17 @@ def match_zero_matrix(source):
     zero_matrix = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
     pm.xform(source, matrix=zero_matrix)
 
+def delete_hidden_children(root):
+    childs= pm.listRelatives(root,allDescendents=True)
+    for c in childs:
+        try:
+            if c.visibility.get() ==0 and pm.objExists(c):
+                pm.delete(c)
+                logger.debug("Hidden item delete before proxy generation %s"%c)
+        except Exception as e:
+            logger.debug("Fail to delete %s in deletehiddenchildren()" %c)
+            print (e)
+
 def scan_ass_directory(ass_dir):
 
     dic_variants={}

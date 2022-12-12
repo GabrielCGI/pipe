@@ -66,7 +66,7 @@ def build_hiearchy(obj):
     return asset_grp, obj
 
 def generate_lowpoly(hd_grp):
-    asset_name =only_name(hd_grp).split("_")[0]
+    asset_name =only_name(hd_grp).split("_HD")[0]
     sd_grp = pm.duplicate(hd_grp,name=asset_name+"_SD")
 
     sd_grp=sd_grp[0]
@@ -119,6 +119,8 @@ def catclark_max(shapes, sub_max=1):
             print(e)
 
 def merge_uv_sets(obj):
+    if type(obj) == list:
+        obj=obj[0]
     default_uv = pm.getAttr(obj+".uvSet[0].uvSetName")
     all_uv_sets = pm.polyUVSet(obj, q=1, allUVSets=1)
     all_uv_sets.remove(default_uv)
@@ -130,6 +132,18 @@ def merge_uv_sets(obj):
         pm.polyUVSet( delete=True, uvSet=uv_set)
     return default_uv
 
+def delete_all_uv_sets(obj):
+    if type(obj) == list:
+        obj=obj[0]
+    uv_sets_list = pm.polyUVSet(obj, q=True,allUVSets=True)
+    default_uv = pm.getAttr(obj+".uvSet[0].uvSetName")
+    uv_sets_list.remove(default_uv)
+    for uv_set in uv_sets_list:
+        try:
+            pm.polyUVSet(delete=True, uvSet=uv_set)
+        except:
+            logger.debug("Can't delete %s"%uv_set)
+
 def bake_texture(obj,dir,resolution=512, proxy_texture=False):
     if not obj.endswith("_proxy"):
         utils.warning("Not a proxy")
@@ -137,11 +151,11 @@ def bake_texture(obj,dir,resolution=512, proxy_texture=False):
     if not proxy_texture:
         proxy_shader = pm.shadingNode("aiStandardSurface", asShader=True, name=obj.name()+"_shader")
         proxy_shader.specular.set(0.4)
-
+        proxy_shader.baseColor.set(0.59436, 0.936, 0.936)
         shadingGroup = pm.sets(name="%sSG" % proxy_shader, empty=True, renderable=True, noSurfaceShader=True)
         pm.connectAttr("%s.outColor" % proxy_shader, "%s.surfaceShader" % shadingGroup)
         shadingGroup.forceElement(obj)
-        default_uv  = merge_uv_sets(obj)
+        delete_all_uv_sets(obj)
         pm.delete(obj, constructionHistory = True)
         return
 
@@ -203,6 +217,7 @@ def bake_texture(obj,dir,resolution=512, proxy_texture=False):
 
     proxy_shader = pm.shadingNode("aiStandardSurface", asShader=True, name=obj.name()+"_shader")
     proxy_shader.specular.set(0.4)
+    proxy_shader.baseColor.set(0.59436, 0.936, 0.936)
 
     shadingGroup = pm.sets(name="%sSG" % proxy_shader, empty=True, renderable=True, noSurfaceShader=True)
     pm.connectAttr(file_node_albedo+".outColor ", proxy_shader +".baseColor")
@@ -242,15 +257,18 @@ def generate_proxy(grp, percentage):
 
     proxy = pm.duplicate(grp)
     proxy_parent = pm.listRelatives(proxy,parent=True)
-
+    utils.delete_hidden_children(proxy)
     try:
-        proxy =pm.polyUnite(proxy, mergeUVSets=True)[0]
-        pm.delete(proxy,constructionHistory=True)
+        proxy_unit =pm.polyUnite(proxy, mergeUVSets=True)[0]
+        pm.delete(proxy_unit,constructionHistory=True)
+        pm.delete(proxy) #Get ride of non polymesh & non united leftover
+        proxy=proxy_unit
         logger.info("Poly Unit success %s"%proxy)
     except Exception as e:
         logger.info("Skipping poly unit %s"%proxy)
         pass
     pm.polyReduce(proxy,ver = 1, keepQuadsWeight=0, p = percentage)
+    pm.polySetToFaceNormal(proxy)
     pm.delete(proxy,constructionHistory=True)
     utils.lock_all_transforms(proxy, lock=False)
 

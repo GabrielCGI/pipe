@@ -135,7 +135,6 @@ class ProxyPrepper(QtWidgets.QDialog):
     def bakeTexture_button_clicked(self):
         dir = self.get_image_dir()
         obj = pm.ls(selection=True)[0]
-        print (self.proxy_baked_texture.isChecked())
         pp.bake_texture(obj,dir,proxy_texture=self.proxy_baked_texture.isChecked())
 
     def generate_lowpoly_clicked(self):
