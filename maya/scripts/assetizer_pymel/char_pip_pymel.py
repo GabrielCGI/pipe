@@ -1,13 +1,17 @@
 import pymel.core as pm
 import utils_pymel as utils
-
-def shader_operator():
+import re
+import os
+def shader_operator(aiStandIn):
     counter=0
     #INIT DIC
     dic_sg={}
     #SELECT ALL SHADING ENGINE MINUS DEFAULT
-    listShadingEngine = pm.ls(type="shadingEngine")
+    ai_merge = pm.createNode("aiMerge", n="aiMerge_%s"%aiStandIn.getParent().name())
+    pm.addAttr(ai_merge,ln="mtoa_constant_is_target",attributeType="bool",defaultValue=True)
+    pm.connectAttr(ai_merge+".out",aiStandIn+".operators[0]")
 
+    listShadingEngine = pm.ls(type="shadingEngine")
     listShadingEngine.remove('initialParticleSE')
     listShadingEngine.remove('initialShadingGroup')
 
@@ -32,7 +36,7 @@ def shader_operator():
         #Build selection string
         selection = " or ".join(dic_sg[sg])
         setShader = pm.createNode("aiSetParameter", n="setShader_"+sg)
-        pm.connectAttr(setShader+".out","aiStandInShape.operators[%s]"%(counter), f=True)
+        pm.connectAttr(setShader+".out",ai_merge+".inputs[%s]"%(counter), f=True)
         counter+=1
         pm.setAttr ( setShader +".selection", selection,type="string")
 
@@ -52,15 +56,14 @@ def shader_operator():
             pm.setAttr (setShader+".assignment[1]", "disp_map='%s'"%(disp[0]),type="string")
 
 
-def catclark_operator():
-    counter = len(pm.listConnections( 'aiStandInShape.operators'))
+    #CATCLARK
     sel = pm.ls( long=True, type="mesh")
-    i=0
+
     dic={}
     for i in range(5):
         shape_list = []
         for s in sel:
-            if pm.getAttr(s+".aiSubdivIterations") == i:
+            if pm.getAttr(s+".aiSubdivIterations") == i and pm.getAttr(s+".aiSubdivType") != 0:
                 s = s.longName().replace(s.namespace(),"")
                 s = s.replace("|","/")
                 s = s.replace("ShapeDeformed","Shape*")
@@ -76,9 +79,8 @@ def catclark_operator():
             pm.setAttr ( set_param_subdiv +".selection", selection,type="string")
             pm.setAttr (set_param_subdiv+".assignment[0]", "subdiv_type='catclark'",type="string")
             pm.setAttr (set_param_subdiv+".assignment[1]", "subdiv_iterations=%s"%(key),type="string")
-            pm.connectAttr(set_param_subdiv+".out","aiStandInShape.operators[%s]"%(counter), f=True )
+            pm.connectAttr(set_param_subdiv+".out",ai_merge+".inputs[%s]"%(counter), f=True )
             counter+=1
-
 
 def guess_dir():
     scene = pm.system.sceneName()
@@ -91,9 +93,8 @@ def guess_dir():
             found = True
             asset_name = split[i+1]
             return asset_dir, asset_name
-
-        asset_dir = os.path.join(asset_dir,split[i])
-    return False
+    print("NO ASSET FOLDER FOND !")
+    raise
 
 def abcExport(sel):
     if not sel:
@@ -103,20 +104,31 @@ def abcExport(sel):
     abc_name = asset_name+"_mod.abc"
     abc_path= os.path.join(abc_dir,abc_name)
     abc_path=abc_path.replace("\\","/")
-    print(abc_path)
     utils.popUp("ABC export ready \n%s"%abc_path)
     os.makedirs(abc_dir, exist_ok=True)
     job = '-frameRange 1 1 -stripNamespaces -uvWrite -worldSpace -writeVisibility -dataFormat ogawa -root %s -file "%s"'%(sel[0].longName(),abc_path)
-    print (job)
+
     pm.AbcExport(j= job)
     return abc_path, abc_name
 
 def create_standIn(abc_path, abc_name):
-    ass = pm.createNode("aiStandIn",n=abc_name.split(".")[0])
-    ass.dso.set(abc_path)
+    aiStandIn = pm.createNode("aiStandIn",n=abc_name.split(".")[0]+"Shape")
+    parent = aiStandIn.getParent()
+    pm.rename(parent,abc_name.split(".")[0])
+    aiStandIn.dso.set(abc_path)
+    return aiStandIn
 
-sel = pm.ls(sl=True)
-abc_path, abc_name= abcExport(sel)
-create_standIn(abc_path, abc_name)
-#shader_operator()
-#catclark_operator()
+def export_arnold_graph(aiStandIn):
+    asset_dir, asset_name = guess_dir()
+    look_dir = os.path.join(asset_dir, "publish")
+
+    path = os.path.join(look_dir,asset_name+"_operator.v001.ass")
+    look = pm.listConnections(aiStandIn+".operators")
+    pm.other.arnoldExportAss(look,f=path, s=True, asciiAss=True, mask=4112, lightLinks=0, shadowLinks=0,fullPath=0 )
+
+def run():   
+    sel = pm.ls(sl=True)
+    abc_path, abc_name= abcExport(sel)
+    aiStandIn= create_standIn(abc_path, abc_name)
+    shader_operator(aiStandIn)
+    export_arnold_graph(aiStandIn)

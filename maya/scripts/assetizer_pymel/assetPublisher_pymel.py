@@ -206,22 +206,6 @@ def has_transfrom(obj):
     else:
         return False
 
-def has_transfrom_user_fix_possible(obj):
-
-    if cmds.xform(obj,query=True, matrix=True) != zero_matrix:
-        msg = ("The root of the asset has transfrom informations.\n"
-               "Transform will be reset before export\n"
-               )
-        result = cmds.confirmDialog( title='Confirm',message=msg,
-        button=['Continue', "Cancel"],
-        defaultButton='Continue', cancelButton='Cancel', dismissString='Cancel')
-        if result == "Continue":
-            cmds.move(0, 0, 0, ls=True)
-            cmds.rotate(0, 0, 0)
-            cmds.scale(1, 1, 1)
-        if result == "Cancel":
-            warning("Abort by user")
-
 def import_all_references(node):
 
     list_path = []
@@ -308,6 +292,18 @@ def checkAsset(asset, proxy_must_exist=False):
     logger.info("Variants found: " + ", ".join([variant.name() for variant in asset.variants]))
     if asset.proxy: logger.info("Proxy found:" +asset.proxy.name())
 
+def check_is_retake(assets_dir,maya_root):
+    current_asset_dir = os.path.join(assets_dir, utils.only_name(maya_root))
+    current_asset_dir = current_asset_dir.replace("\\","/")
+    if os.path.isdir(current_asset_dir):
+        msg = pm.confirmDialog( title='Confirm',message='The asset already exist: \n%s'%(current_asset_dir),
+        button=['Update asset','Cancel'], defaultButton='Cancel', cancelButton='Cancel', dismissString='Cancel')
+        if msg == "Update asset":
+            return True
+        else:
+            utils.warning('Abort directory creation: %s'%current_asset_dir)
+
+       
 def publish(root, asset_dir, import_proxy_scene=False, selected_variant=False):
 
     asset= Asset(root)
@@ -316,8 +312,10 @@ def publish(root, asset_dir, import_proxy_scene=False, selected_variant=False):
     checkAsset(asset,  proxy_must_exist= proxy_must_exist)
     asset_clean = cleanAsset(asset)
 
+
     if selected_variant:
-        exportVariant(asset_clean,selected_variant,asset_dir,export_shading=False)
+        tmp_list=[v for v in asset_clean.variants if utils.only_name(v)==utils.only_name(selected_variant)]
+        asset_clean.variants = tmp_list
 
     for v in asset_clean.variants:
         log = exportVariant(asset_clean,v,asset_dir,export_shading=False)
@@ -337,6 +335,7 @@ def publish(root, asset_dir, import_proxy_scene=False, selected_variant=False):
         utils.match_matrix(nodes[0],asset.maya)
     log += "- " + proxy_scene_path
     if proxy_must_exist: pm.delete(asset_clean.proxy)
+
     pm.delete(asset_clean.maya)
     if not pm.referenceQuery(asset.maya, isNodeReferenced=True):
         pm.rename(asset.maya,root)
@@ -448,7 +447,7 @@ def make_proxy_scene(asset, asset_dir):
         pm.select(proxy)
         logger.info("No Childs assets found ! ")
         proxy = pm.parent(proxy,world=True)[0]
-        print(proxy)
+
         utils.lock_all_transforms(proxy, lock=False)
         pm.select(proxy)
     pm.system.exportSelected(next_publish_proxy_scene, force=False)

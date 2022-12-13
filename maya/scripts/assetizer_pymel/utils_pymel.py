@@ -3,6 +3,10 @@ import logging
 logger = logging.getLogger()
 import os
 def warning(txt):
+    result = pm.confirmDialog( title='Warning',
+                            message=txt,
+                            button=["Continue"],
+                            defaultButton='Continue')
     pm.error(txt)
 
 def popUp(txt):
@@ -22,7 +26,7 @@ def only_name(obj):
     return only_name
 
 def get_working_directory():
-    working_directory = "D:/assets"
+    working_directory = "B:/trashtown_2112/assets"
     return working_directory
 
 def nameSpace_from_path(path):

@@ -95,8 +95,11 @@ class AssetLoader(QtWidgets.QDialog):
     def publish_asset_clicked(self):
         pub.ask_save()
         maya_root = pm.ls(sl=True)[0]
-        asset_dir = self.get_dir()
-        pub.publish(maya_root,asset_dir,self.import_published.isChecked())
+
+        assets_dir = self.get_dir()
+        pub.check_is_retake(assets_dir,maya_root)
+
+        pub.publish(maya_root,assets_dir,self.import_published.isChecked())
         if self.delete_after_publish.isChecked():
             pub.deleteSource(maya_root)
 
@@ -104,9 +107,15 @@ class AssetLoader(QtWidgets.QDialog):
         pub.ask_save()
         selected_variant = pm.ls(sl=True)[0]
         maya_root = selected_variant.getParent()
+
         if not maya_root: utils.warning("Can't get parent")
-        asset_dir = self.get_dir()
-        pub.publish(maya_root,asset_dir,self.import_published.isChecked(),selected_variant)
+
+        assets_dir = self.get_dir()
+
+        pub.check_is_retake(assets_dir,maya_root)
+
+        pub.publish(maya_root,assets_dir,self.import_published.isChecked(),selected_variant)
+        
         if self.delete_after_publish.isChecked():
             pub.deleteSource(maya_root)
 

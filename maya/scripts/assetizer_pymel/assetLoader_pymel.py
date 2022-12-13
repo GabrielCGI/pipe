@@ -45,6 +45,12 @@ def build_dso(asset_dir, asset_name, variant_name, version):
 def build_maya_path(asset_dir, asset_name, variant_name, version):
     maya_name = "%s.ma"%(variant_name)
     maya_path = os.path.join(asset_dir,"publish","ass",variant_name,version,maya_name)
+    if not os.path.exists(maya_path):
+        raw_name, extension = os.path.splitext(maya_path)
+        maya_mb_path = raw_name+".mb"
+        if os.path.exists(maya_mb_path):
+            return maya_mb_path
+
     return maya_path
 
 def maya_main_window():
@@ -88,6 +94,7 @@ class AssetLoader(QtWidgets.QDialog):
         #self.push_edit_button = QtWidgets.QPushButton("Push edit")
         self.convert_to_maya = QtWidgets.QPushButton("Convert to maya")
         self.set_version = QtWidgets.QPushButton("Set version")
+        self.convert_to_procedural = QtWidgets.QPushButton("Convert to procedural")
 
         # ADD WIDGET TO LAYOUT
 
@@ -100,6 +107,8 @@ class AssetLoader(QtWidgets.QDialog):
         #self.button_layout.addWidget(self.push_edit_button)
         self.button_layout.addWidget(self.set_version)
         self.button_layout.addWidget(self.convert_to_maya)
+        self.button_layout.addWidget(self.convert_to_procedural)
+
 
         self.mainLayout.addLayout(self.comboLayout)
         self.mainLayout.addLayout(self.button_layout)
@@ -109,8 +118,10 @@ class AssetLoader(QtWidgets.QDialog):
         #self.push_edit_button.clicked.connect(self.push_edit_clicked)
         self.set_version.clicked.connect(self.set_version_clicked)
         self.convert_to_maya.clicked.connect(self.convert_to_maya_clicked)
+        self.convert_to_procedural.clicked.connect(self.convert_proxy_to_procedrual_clicked)
 
         self.variant_Qlist.itemClicked.connect(self.variant_Qlist_changed)
+
 
         self.load_asset_clicked()
 
@@ -129,7 +140,7 @@ class AssetLoader(QtWidgets.QDialog):
             error_msg += "No dso"
             check = False
         try:
-            if sel[0].ai_translator.get() != "procedural":
+            if sel[0].ai_translator.get() != "procedural": #TO FIX CONVERT PROCEDURAL
                 error_msg += "Not a procedural"
                 check = False
         except:
@@ -142,6 +153,7 @@ class AssetLoader(QtWidgets.QDialog):
         #GET PROXY NAME FROM MAYA SELECTION
 
         sel, check, error_msg = self.checkAsset()
+        print(error_msg)
 
         if check == False:
             self.display_label.setText("The current selected obj is not a standin")
@@ -160,19 +172,15 @@ class AssetLoader(QtWidgets.QDialog):
         asset_dso = self.proxy.dso.get()
         #GET ASSET INFOS
         self.asset_dir = Path(asset_dso).parents[4]
-        print(self.asset_dir)
         self.ass_dir = Path(asset_dso).parents[2]
 
         dso_split = os.path.normpath(asset_dso).split(os.sep)
-        print(dso_split)
         self.current_variant = dso_split[-3]
         self.current_version = dso_split[-2]
         self.asset_name = dso_split[-6]
 
-
         #BUILD DIC
         self.asset_dic = utils.scan_ass_directory(self.ass_dir)
-        print(self.ass_dir)
 
         #CLEAR COMBOBOX
         self.variant_Qlist.clear()
@@ -257,6 +265,29 @@ class AssetLoader(QtWidgets.QDialog):
         utils.match_matrix(nodes[0],self.proxy)
 
         self.proxy.visibility.set(False)
+
+    def convert_proxy_to_procedrual_clicked(self):
+        standInShape = pm.createNode("aiStandIn")
+        standIn =standInShape.getParent()
+        standInShape.dso.set(self.proxy.dso.get())
+        pm.parent(standIn,self.proxy.getParent())
+        pm.matchTransform(standIn,self.proxy)
+        #list_connection = pm.listConnections(self.proxy,connections=True, plugs=True, type="objectSet")
+        #for c in list_connection:
+            #pm.connectAttr(standIn+"."+c[0].split(".")[-1], c[1],f=True)
+        if pm.referenceQuery(self.proxy,isNodeReferenced=True):
+            path = pm.referenceQuery(self.proxy, filename=True)
+            ref_node = pm.FileReference(path)
+            pm.FileReference.importContents(ref_node)
+
+        pm.delete(self.proxy)
+        pm.rename(standIn,self.proxy)
+        pm.rename(standInShape,self.proxy+"Shape")
+
+    def convert_procedural_to_proxy(self):
+        dso =  self.proxy.dso.get()
+
+
 
 
 

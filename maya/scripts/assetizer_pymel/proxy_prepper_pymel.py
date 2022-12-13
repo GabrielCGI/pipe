@@ -56,8 +56,6 @@ def build_hiearchy(obj):
     if utils.only_name(obj)==utils.only_name(asset_grp):
         pm.rename(obj,asset_name+"_geo")
 
-
-
     if scene_parent:
         pm.parent(asset_grp,scene_parent)
     pm.select(asset_grp_hd)
@@ -71,6 +69,7 @@ def generate_lowpoly(hd_grp):
     shapes = pm.listRelatives(sd_grp,allDescendents=True,shapes=True)
     disable_displace(shapes)
     catclark_max(shapes)
+    hd_grp.visibility.set(0)
     logger.info("Generate lowpoly success!")
     return sd_grp
 
@@ -112,7 +111,7 @@ def catclark_max(shapes, sub_max=1):
 
             if subdiv_type == 1 and ite >sub_max:
                 logger.debug("Lowering catclark on %s: %s to %s"%(s, ite,sub_max))
-                pm.setAttr(s+".aiSubdivIterations",max)
+                pm.setAttr(s+".aiSubdivIterations",sub_max)
         except Exception as e:
             print(e)
 
@@ -254,9 +253,8 @@ def generate_proxy(grp, percentage):
         utils.warning('abort by user')
 
     proxy = pm.duplicate(grp)
-    proxy_parent = pm.listRelatives(proxy,parent=True)
+    proxy_parent = pm.listRelatives(grp,parent=True)
     utils.delete_hidden_children(proxy)
-    print (proxy)
 
     try:
         proxy_unit =pm.polyUnite(proxy, mergeUVSets=True)[0]
@@ -267,6 +265,10 @@ def generate_proxy(grp, percentage):
         proxy=proxy_unit
         logger.info("Poly Unit success %s"%proxy)
     except Exception as e:
+        child = pm.listRelatives(proxy,children=True)[0]
+        pm.parent(child, proxy_parent)
+        pm.delete(proxy)
+        proxy = child
         logger.info("Skipping poly unit %s"%proxy)
         pass
 
@@ -285,4 +287,5 @@ def generate_proxy(grp, percentage):
     pm.rename(proxy, proxy_name)
     pm.delete(proxy,constructionHistory=True)
     utils.lock_all_transforms(proxy)
+    grp.visibility.set(0)
     logger.info("Proxy generate success ! ")
