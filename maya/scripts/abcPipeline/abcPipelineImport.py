@@ -8,7 +8,6 @@ cmds.loadPlugin("AbcExport.mll", quiet=True)
 
 import maya.mel as mel
 
-import assetsDb as assetsDb
 
 import projects as projects
 

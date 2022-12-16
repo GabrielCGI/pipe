@@ -62,6 +62,10 @@ def maya_main_window():
 
 
 
+class Proxy():
+    def __init__(self, maya):
+        self.maya = maya
+
 
 class AssetLoader(QtWidgets.QDialog):
     def __init__(self, parent=maya_main_window()):
@@ -94,7 +98,7 @@ class AssetLoader(QtWidgets.QDialog):
         #self.push_edit_button = QtWidgets.QPushButton("Push edit")
         self.convert_to_maya = QtWidgets.QPushButton("Convert to maya")
         self.set_version = QtWidgets.QPushButton("Set version")
-        self.convert_to_procedural = QtWidgets.QPushButton("Convert to procedural")
+        self.switch_proxy_type = QtWidgets.QPushButton("Convert to procedural")
 
         # ADD WIDGET TO LAYOUT
 
@@ -107,7 +111,7 @@ class AssetLoader(QtWidgets.QDialog):
         #self.button_layout.addWidget(self.push_edit_button)
         self.button_layout.addWidget(self.set_version)
         self.button_layout.addWidget(self.convert_to_maya)
-        self.button_layout.addWidget(self.convert_to_procedural)
+        self.button_layout.addWidget(self.switch_proxy_type)
 
 
         self.mainLayout.addLayout(self.comboLayout)
@@ -118,7 +122,7 @@ class AssetLoader(QtWidgets.QDialog):
         #self.push_edit_button.clicked.connect(self.push_edit_clicked)
         self.set_version.clicked.connect(self.set_version_clicked)
         self.convert_to_maya.clicked.connect(self.convert_to_maya_clicked)
-        self.convert_to_procedural.clicked.connect(self.convert_proxy_to_procedrual_clicked)
+        self.switch_proxy_type.clicked.connect(self.switch_proxy_type_clicked)
 
         self.variant_Qlist.itemClicked.connect(self.variant_Qlist_changed)
 
@@ -130,22 +134,25 @@ class AssetLoader(QtWidgets.QDialog):
         error_msg = ""
         sel = pm.ls(selection=True)
         if not sel:
-            error_msg += "No selection"
-            check = False
+            check= False
+            error_msg = "No selection"
+            return sel, check, error_msg
+        else:
+            sel=sel[0]
         try:
-            if not sel[0].dso.get():
-                error_msg += "No dso"
-                check = False
+            dso=sel.dso.get()
         except:
-            error_msg += "No dso"
-            check = False
-        try:
-            if sel[0].ai_translator.get() != "procedural": #TO FIX CONVERT PROCEDURAL
-                error_msg += "Not a procedural"
-                check = False
-        except:
-            error_msg += "No dso"
-            check = False
+            check=False
+            error_msg = "Not a procedural"
+            return sel, check, error_msg
+
+        if not os.path.isfile(dso):
+            check=False
+            error_msg = "Not a valid path"
+            return sel, check, error_msg
+        if pm.objectType(sel) == "aiStandIn" or pm.objectType(sel) == "mesh":
+            sel=sel.getParent()
+
         return sel, check, error_msg
 
 
@@ -156,15 +163,17 @@ class AssetLoader(QtWidgets.QDialog):
         print(error_msg)
 
         if check == False:
-            self.display_label.setText("The current selected obj is not a standin")
+            self.isValid = False
+            self.display_label.setText("The current selected obj is not a standIn")
             self.display_label.setStyleSheet("color: None")
-
             self.variant_Qlist.clear()
             self.version_Qlist.clear()
             return
         else:
-            self.proxy=sel[0]
-
+            self.isValid = True
+            self.proxy=sel
+            self.proxyShape = pm.listRelatives(sel,children=True)[0]
+            self.proxyType = pm.objectType(self.proxyShape)
 
         #Set label:
         self.display_label.setText("Asset: "+self.proxy.name())
@@ -203,9 +212,7 @@ class AssetLoader(QtWidgets.QDialog):
             self.display_label.setStyleSheet("color: green")
 
 
-
     ### QLIST CHANGED ###
-
 
     # ON VARIANT CHANGE
     def variant_Qlist_changed(self):
@@ -253,6 +260,7 @@ class AssetLoader(QtWidgets.QDialog):
 
     def convert_to_maya_clicked(self):
         #Get maya scene path
+        if not self.isValid == True: utils.warning("Not a valid standIn")
         variant_name = self.variant_Qlist.currentItem().text()
         version = self.version_Qlist.currentItem().text()
         maya_path = build_maya_path(self.asset_dir, self.asset_name,variant_name, version)
@@ -266,30 +274,45 @@ class AssetLoader(QtWidgets.QDialog):
 
         self.proxy.visibility.set(False)
 
-    def convert_proxy_to_procedrual_clicked(self):
+    def switch_proxy_type_clicked(self):
+        if self.proxyType == "mesh":
+            self.convert_proxy_to_procedrual()
+        if self.proxyType == "aiStandIn":
+            self.convert_procedural_to_proxy()
+
+    def convert_proxy_to_procedrual(self):
+        if not self.isValid == True: utils.warning("Not a valid standIn")
         standInShape = pm.createNode("aiStandIn")
         standIn =standInShape.getParent()
         standInShape.dso.set(self.proxy.dso.get())
         pm.parent(standIn,self.proxy.getParent())
         pm.matchTransform(standIn,self.proxy)
-        #list_connection = pm.listConnections(self.proxy,connections=True, plugs=True, type="objectSet")
-        #for c in list_connection:
-            #pm.connectAttr(standIn+"."+c[0].split(".")[-1], c[1],f=True)
+
         if pm.referenceQuery(self.proxy,isNodeReferenced=True):
             path = pm.referenceQuery(self.proxy, filename=True)
             ref_node = pm.FileReference(path)
             pm.FileReference.importContents(ref_node)
 
+        utils.import_all_references(self.proxy)
+        name = self.proxy.name()
         pm.delete(self.proxy)
-        pm.rename(standIn,self.proxy)
-        pm.rename(standInShape,self.proxy+"Shape")
+
+        pm.rename(standIn,name)
+        pm.rename(standInShape,name+"Shape")
 
     def convert_procedural_to_proxy(self):
-        dso =  self.proxy.dso.get()
-
-
-
-
+        if not self.isValid == True: utils.warning("Not a valid standIn")
+        proxy_dir = Path(self.proxy.dso.get()).parents[3]
+        print(proxy_dir)
+        proxy_path = utils.get_last_scene(proxy_dir, self.asset_name+"\.v*")
+        if not proxy_path: utils.warning("No proxy path found to replace %s"%proxy_path)
+        namespace = utils.nameSpace_from_path(proxy_path)
+        refNode = pm.system.createReference(proxy_path, namespace=namespace)
+        nodes = pm.FileReference.nodes(refNode)
+        if self.proxy.getParent():
+            pm.parent(nodes[0], self.proxy.getParent())
+        utils.match_matrix(nodes[0],self.proxy)
+        pm.delete(self.proxy)
 
     def maya_selection_changed_callback(self,*args):
         try:

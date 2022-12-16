@@ -1,4 +1,5 @@
 import pymel.core as pm
+import re
 import logging
 logger = logging.getLogger()
 import os
@@ -8,6 +9,25 @@ def warning(txt):
                             button=["Continue"],
                             defaultButton='Continue')
     pm.error(txt)
+
+def info(txt):
+    pm.confirmDialog( title='Info',
+                        message=txt,
+                        button=["Continue"],
+                        defaultButton='Continue')
+
+def get_last_scene(dir, pattern, nextAvailable=False):
+    if os.path.isdir(dir):
+        my_list = os.listdir(dir)
+    r = re.compile(pattern)
+    newlist = list(filter(r.match, my_list))
+    newlist.sort()
+    if newlist:
+        last_scene = newlist[-1]
+        path = os.path.join(dir,last_scene)
+        return path
+    else:
+        return None
 
 def popUp(txt):
 
@@ -149,3 +169,18 @@ def convert_selected_to_tx(obj):
     for tex in tex_list:
 
         convert_to_tx(tex)
+
+def import_all_references(node):
+
+    list_path = []
+    if pm.referenceQuery(node,isNodeReferenced=True):
+        list_path.append(pm.referenceQuery(node, filename=True))
+    for s in pm.listRelatives(node, allDescendents=True):
+        if pm.referenceQuery(s,isNodeReferenced=True):
+            path = pm.referenceQuery(s, filename=True)
+            if path not in list_path:
+                list_path.append(path)
+    if list_path:
+        for path in list_path:
+            ref_node = pm.FileReference(path)
+            pm.FileReference.importContents(ref_node)

@@ -189,7 +189,7 @@ def exportVariant(asset, variant, assets_dir, export_shading=False):
     variant.visibility.set(variant_visibility_state)
     if mb_state == 1:
         pm.setAttr("defaultArnoldRenderOptions.motion_blur_enable",mb_state)
-    return log
+    return log, variant_maya_ass
 
 def printInfo(object):
 
@@ -279,13 +279,14 @@ class Asset():
         variants = [v for v in pm.listRelatives(root,children=True) if v.endswith("HD") or v.endswith("SD")]
         return variants
 
-def checkAsset(asset, proxy_must_exist=False):
+def checkAsset(asset):
     if not asset.variants: utils.warning("No variants found")
-    if not asset.proxy and proxy_must_exist: utils.warning("No proxy found")
+    if not asset.proxy: utils.popUp("No proxy found. Do you want to continue ?")
+
 
     for v in asset.variants:
         if has_transform(v) : utils.warning('Transfroms applied on %s -> Plz fix manually'%v )
-    if proxy_must_exist:
+    if asset.proxy:
         if has_transform(asset.proxy) : utils.warning('Transfroms applied on %s -> Plz fix manually'%asset.proxy)
 
     logger.info("Check success")
@@ -303,13 +304,12 @@ def check_is_retake(assets_dir,maya_root):
         else:
             utils.warning('Abort directory creation: %s'%current_asset_dir)
 
-       
+
 def publish(root, asset_dir, import_proxy_scene=False, selected_variant=False):
 
     asset= Asset(root)
-    proxy_must_exist = True if selected_variant == False else False
 
-    checkAsset(asset,  proxy_must_exist= proxy_must_exist)
+    checkAsset(asset)
     asset_clean = cleanAsset(asset)
 
 
@@ -318,27 +318,42 @@ def publish(root, asset_dir, import_proxy_scene=False, selected_variant=False):
         asset_clean.variants = tmp_list
 
     for v in asset_clean.variants:
-        log = exportVariant(asset_clean,v,asset_dir,export_shading=False)
+        log, variant_maya_ass = exportVariant(asset_clean,v,asset_dir,export_shading=False)
 
-    if selected_variant:
+    if not asset_clean.proxy:
         proxy_dir = os.path.join(asset_dir, asset_clean.name, "publish")
         proxy_scene_path = get_last_scene(proxy_dir,asset_clean.name+".v.*")
     else:
         proxy_scene_path = make_proxy_scene(asset_clean, asset_dir)
 
     if import_proxy_scene:
-        namespace = utils.nameSpace_from_path(proxy_scene_path)
-        refNode = pm.system.createReference(proxy_scene_path, namespace=namespace)
-        nodes = pm.FileReference.nodes(refNode)
-        if asset.maya.getParent():
-            pm.parent(nodes[0], asset.maya.getParent())
-        utils.match_matrix(nodes[0],asset.maya)
-    log += "- " + proxy_scene_path
-    if proxy_must_exist: pm.delete(asset_clean.proxy)
+        if proxy_scene_path:
+            namespace = utils.nameSpace_from_path(proxy_scene_path)
+            refNode = pm.system.createReference(proxy_scene_path, namespace=namespace)
+            nodes = pm.FileReference.nodes(refNode)
+            if asset.maya.getParent():
+                pm.parent(nodes[0], asset.maya.getParent())
+            utils.match_matrix(nodes[0],asset.maya)
+            log += "- " + proxy_scene_path
+        else:
+            utils.info("No proxy scene has been found. Importing procedural instead")
+            aiStandInShape = pm.createNode("aiStandIn")
+            aiStandInShape.dso.set(variant_maya_ass)
+            aiStandIn = aiStandInShape.getParent()
+            if asset.maya.getParent():
+                pm.parent(aiStandIn,asset.maya.getParent() )
+            utils.match_matrix(aiStandIn,asset.maya)
+            proxy_name = asset_clean.name+"_proxy"
+            pm.rename(aiStandIn,proxy_name)
+            pm.rename(aiStandInShape,proxy_name+"Shape")
+            log += "- " + variant_maya_ass
+
+    if asset_clean.proxy: pm.delete(asset_clean.proxy)
 
     pm.delete(asset_clean.maya)
     if not pm.referenceQuery(asset.maya, isNodeReferenced=True):
-        pm.rename(asset.maya,root)
+
+        pm.rename(asset.maya,asset.name)
     pm.confirmDialog(message= log.replace("\\","/"))
     logger.info("Publish succes !")
 
@@ -375,7 +390,6 @@ def has_transform(obj):
         return True
     else:
         return False
-
 
 def get_last_basic_variant_ass(asset_name,ass_dir):
 
