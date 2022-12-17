@@ -10,7 +10,7 @@ API_ass.run()
 """
 
 import sys
-sys.path.append(r"D:\softs_install\Arnold-7.1.4.1-windows\python")
+sys.path.append(r"R:\pipeline\networkInstall\arnold\Arnold-7.1.4.1-windows")
 import pymel.core as pm
 from arnold import *
 
@@ -28,11 +28,10 @@ def aiMatrixToMaya(aiMatrix):
             m.append(aiMatrix[i][ii])
     return m
 
-def scanAss():
+def scanAss(dso):
     items=[]
     AiBegin (AI_SESSION_BATCH )
 
-    dso = pm.ls(sl=True)[0].listRelatives(children=True)[0].dso.get()
     AiMsgSetConsoleFlags(AI_LOG_ALL)
 
     # Required if the ASS file uses any SItoA shaders
@@ -57,7 +56,7 @@ def scanAss():
     return items
 
 
-ass = pm.ls(sl=True)[0].listRelatives(children=True)[0]
+
 
 def createLocator(short_name,matrix):
     locator_shape = pm.createNode("locator",n=short_name)
@@ -90,8 +89,11 @@ def getNextOperatorSlotAvailable(ass):
     else:
         pm.error("Not a standin ! %s"%ass)
 
-def run():
-    items = scanAss()
+
+def run(ass):
+    dso = ass.dso.get()
+    items = scanAss(dso)
+
     for i in items:
 
         print(i.short_name, i.long_name)

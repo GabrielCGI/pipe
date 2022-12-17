@@ -29,8 +29,16 @@ def get_last_scene(dir, pattern, nextAvailable=False):
     else:
         return None
 
-def popUp(txt):
 
+def assignAiStandard(objs, color=(0.5,0.5,0.8), name="aiStandardSurface"):
+    proxy_shader = pm.shadingNode("aiStandardSurface", asShader=True, name=name)
+    proxy_shader.specular.set(0.4)
+    proxy_shader.baseColor.set(color)
+    shadingGroup = pm.sets(name="%sSG" % proxy_shader, empty=True, renderable=True, noSurfaceShader=True)
+    pm.connectAttr("%s.outColor" % proxy_shader, "%s.surfaceShader" % shadingGroup)
+    shadingGroup.forceElement(objs)
+
+def popUp(txt):
     result = pm.confirmDialog( title='Pop up',
                         message=txt,
                         button=["Continue", "Stop"],
@@ -39,14 +47,17 @@ def popUp(txt):
                         dismissString='"Stop' )
 
     if result == "Stop":
-        utils.warning("abort by user")
+        warning("abort by user")
 
 def only_name(obj):
     only_name = obj.name().split("|")[-1].split(":")[-1]
     return only_name
 
 def get_working_directory():
-    working_directory = "B:/trashtown_2112/assets"
+    CURRENT_PROJECT_DIR = os.getenv('CURRENT_PROJECT_DIR')
+    if not CURRENT_PROJECT_DIR:
+        warning("NO CURRENT PROJECT SET ! ")
+    working_directory = os.path.join(CURRENT_PROJECT_DIR,"assets")
     return working_directory
 
 def nameSpace_from_path(path):

@@ -28,6 +28,8 @@ import importlib
 import utils_pymel as utils
 importlib.reload(utils)
 import pymel.core as pm
+import API_ass
+importlib.reload(API_ass)
 
 assets_directory  = utils.get_working_directory()
 
@@ -98,7 +100,8 @@ class AssetLoader(QtWidgets.QDialog):
         #self.push_edit_button = QtWidgets.QPushButton("Push edit")
         self.convert_to_maya = QtWidgets.QPushButton("Convert to maya")
         self.set_version = QtWidgets.QPushButton("Set version")
-        self.switch_proxy_type = QtWidgets.QPushButton("Convert to procedural")
+        self.add_transform = QtWidgets.QPushButton("Add transforms")
+        #self.switch_proxy_type = QtWidgets.QPushButton("Convert to procedural")
 
         # ADD WIDGET TO LAYOUT
 
@@ -111,7 +114,8 @@ class AssetLoader(QtWidgets.QDialog):
         #self.button_layout.addWidget(self.push_edit_button)
         self.button_layout.addWidget(self.set_version)
         self.button_layout.addWidget(self.convert_to_maya)
-        self.button_layout.addWidget(self.switch_proxy_type)
+        self.button_layout.addWidget(self.add_transform)
+        #self.button_layout.addWidget(self.switch_proxy_type)
 
 
         self.mainLayout.addLayout(self.comboLayout)
@@ -122,7 +126,8 @@ class AssetLoader(QtWidgets.QDialog):
         #self.push_edit_button.clicked.connect(self.push_edit_clicked)
         self.set_version.clicked.connect(self.set_version_clicked)
         self.convert_to_maya.clicked.connect(self.convert_to_maya_clicked)
-        self.switch_proxy_type.clicked.connect(self.switch_proxy_type_clicked)
+        self.add_transform.clicked.connect(self.add_transform_clicked)
+        #self.switch_proxy_type.clicked.connect(self.switch_proxy_type_clicked)
 
         self.variant_Qlist.itemClicked.connect(self.variant_Qlist_changed)
 
@@ -139,14 +144,41 @@ class AssetLoader(QtWidgets.QDialog):
             return sel, check, error_msg
         else:
             sel=sel[0]
-        try:
-            dso=sel.dso.get()
-        except:
-            check=False
-            error_msg = "Not a procedural"
-            return sel, check, error_msg
 
-        if not os.path.isfile(dso):
+        try:
+            shape = sel.getShape()
+        except:
+            shape = False
+            pass
+        if shape:
+            if pm.objectType(shape)=="mesh":
+                try:
+                    if sel.getParent().getShape().hasAttr('dso'):
+                        sel = sel.getParent()
+                        print("SETING PARENT %s"%sel)
+                    else:
+                        check=False
+                        error_msg = "Not a procedural"
+                        return sel, check, error_msg
+                except:
+                    check=False
+                    error_msg = "Not a procedural"
+                    return sel, check, error_msg                    
+
+        print (sel)
+        print("seeeeeeel")
+        if not sel:
+                check=False
+                error_msg = "Not a procedural"
+                return sel, check, error_msg
+
+
+        if not sel.hasAttr("dso"):
+                check=False
+                error_msg = "Not a procedural"
+                return sel, check, error_msg
+
+        if not os.path.isfile(sel.dso.get()):
             check=False
             error_msg = "Not a valid path"
             return sel, check, error_msg
@@ -155,6 +187,8 @@ class AssetLoader(QtWidgets.QDialog):
 
         return sel, check, error_msg
 
+    def add_transform_clicked(self):
+        API_ass.run(self.proxy.getShape())
 
     def load_asset_clicked(self):
         #GET PROXY NAME FROM MAYA SELECTION
@@ -270,6 +304,10 @@ class AssetLoader(QtWidgets.QDialog):
 
         refNode = pm.system.createReference(maya_path, namespace=namespace_for_creation)
         nodes = pm.FileReference.nodes(refNode)
+        parent = self.proxy.getParent()
+        if parent:
+            pm.parent(nodes[0],parent)
+
         utils.match_matrix(nodes[0],self.proxy)
 
         self.proxy.visibility.set(False)

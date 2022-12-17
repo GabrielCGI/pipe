@@ -348,8 +348,6 @@ def publish(root, asset_dir, import_proxy_scene=False, selected_variant=False):
             pm.rename(aiStandInShape,proxy_name+"Shape")
             log += "- " + variant_maya_ass
 
-    if asset_clean.proxy: pm.delete(asset_clean.proxy)
-
     pm.delete(asset_clean.maya)
     if not pm.referenceQuery(asset.maya, isNodeReferenced=True):
 
@@ -416,28 +414,45 @@ def make_proxy_scene(asset, asset_dir):
     proxy = asset.proxy
     variants = asset.variants
     asset_name = asset.name
-
+    standInShape = pm.createNode("aiStandIn")
+    standIn = standInShape.getParent()
+    pm.rename(standIn, asset_name+"_standIn")
+    pm.rename(standInShape, asset_name+"_standInShape")
     #Visibility
     visibility_state = proxy.visibility.get()
     proxy.visibility.set(True)
 
     #Arnold attribut
     proxy_name = proxy.name()
-    proxy.ai_translator.set("procedural")
+    #proxy.ai_translator.set("procedural")
     ass_dir = os.path.join(asset_dir)
     ass_dir = os.path.join(asset_dir,asset_name,"publish","ass")
     ass_path=  get_last_basic_variant_ass(asset_name,ass_dir)
 
-    proxy.dso.set(ass_path)
-    proxy.aiOverrideShaders.set(0)
-    proxy.aiOverrideMatte.set(1)
+    standInShape.dso.set(ass_path)
+    standInShape.ignoreGroupNodes.set(1)
+    standInShape.overrideShaders.set(0)
+    standInShape.overrideMatte.set(1)
+    standInShape.standInDrawOverride.set(3)
+    proxy.aiVisibleInDiffuseReflection.set(0)
+    proxy.aiVisibleInSpecularReflection.set(0)
+    proxy.aiVisibleInDiffuseTransmission.set(0)
+    proxy.aiVisibleInVolume.set(0)
+    proxy.aiSelfShadows.set(0)
+    proxy.aiVisibleInSpecularTransmission.set(0)
+    sg= pm.listConnections(proxy.getShape(),type='shadingEngine')
+    if sg[0]== "initialShadingGroup":
+        utils.assignAiStandard(proxy,name=proxy_name+"_shader")
+
 
     publish_proxy_scene_dir = os.path.join(asset_dir,asset_name,"publish")
     next_publish_proxy_scene= get_next_publish_scene(publish_proxy_scene_dir, asset_name)
     logger.info("Next publish proxy maya scene  = %s"%next_publish_proxy_scene)
     #Cosmetic color
     proxy.useOutlinerColor.set(True)
-    proxy.outlinerColor.set(1,0,0)
+    proxy.outlinerColor.set(0.5,0.5,1)
+
+    pm.parent(proxy,standIn)
     pm.mel.eval('AEdagNodeCommonRefreshOutliners();')
 
 
@@ -451,24 +466,21 @@ def make_proxy_scene(asset, asset_dir):
         pm.connectAttr(sg[0],sg[1])
     except:
         logger.warning("Fail to disconnect attr on: %s"%shape)
+
+    pm.parent(standIn, world=True)
+    pm.select(standIn)
     if sub_assets:
-        #pm.parent(sub_assets,world=True)
-        #pm.parent(proxy,world=True)
-        pm.select(proxy[0])
+        pm.parent(sub_assets[0], world=True)
         pm.select(sub_assets[0],add=True)
         logger.infos("Childs assets found ! %s"%" ".join(sub_assets))
-    else:
-        pm.select(proxy)
-        logger.info("No Childs assets found ! ")
-        proxy = pm.parent(proxy,world=True)[0]
 
-        utils.lock_all_transforms(proxy, lock=False)
-        pm.select(proxy)
+    utils.lock_all_transforms(proxy)
+
     pm.system.exportSelected(next_publish_proxy_scene, force=False)
     #cmds.file(next_publish_proxy_scene,force=False, options="v=0;", type="mayaAscii", pr=True, es=True)
-    logger.info('Proxy export success %s!'%next_publish_proxy_scene)
-    #Restore properties
-    proxy.ai_translator.set("polymesh")
+    pm.delete(standIn)
+    if sub_assets:
+        pm.delete(sub_assets[0])
 
-    proxy.visibility.set(visibility_state)
+    logger.info('Proxy export success %s!'%next_publish_proxy_scene)
     return next_publish_proxy_scene

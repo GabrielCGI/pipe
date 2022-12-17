@@ -450,7 +450,7 @@ class AssetBrowser(QtWidgets.QDialog):
             if task not in maya_taks_template:
                 continue
 
-            task_file = os.path.join(task_dir,name+"_"+task+".0000.ma")
+            task_file = os.path.join(task_dir,name+"_"+task+".0001.ma")
             if not os.path.isfile(task_file):
                 absolute_path = os.path.dirname(os.path.realpath(__file__))
                 scene_empty = os.path.join(absolute_path, "template","empty.ma")

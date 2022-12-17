@@ -44,6 +44,7 @@ class AssetLoader(QtWidgets.QDialog):
 
 
         # WIDGET LIST
+        self.label = QtWidgets.QLabel("Prod: " + utils.get_working_directory())
 
 
         #WIDGET CHECKBOX
@@ -69,7 +70,7 @@ class AssetLoader(QtWidgets.QDialog):
 
 
 
-
+        self.button_layout.addWidget(self.label)
         self.button_layout.addWidget(self.publish_asset)
         self.button_layout.addWidget(self.publish_variant )
         #self.button_layout.addWidget(self.display_label)
@@ -115,7 +116,7 @@ class AssetLoader(QtWidgets.QDialog):
         pub.check_is_retake(assets_dir,maya_root)
 
         pub.publish(maya_root,assets_dir,self.import_published.isChecked(),selected_variant)
-        
+
         if self.delete_after_publish.isChecked():
             pub.deleteSource(maya_root)
 
