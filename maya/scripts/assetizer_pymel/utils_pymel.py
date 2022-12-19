@@ -53,12 +53,48 @@ def only_name(obj):
     only_name = obj.name().split("|")[-1].split(":")[-1]
     return only_name
 
-def get_working_directory():
-    CURRENT_PROJECT_DIR = os.getenv('CURRENT_PROJECT_DIR')
-    if not CURRENT_PROJECT_DIR:
-        warning("NO CURRENT PROJECT SET ! ")
-    working_directory = os.path.join(CURRENT_PROJECT_DIR,"assets")
-    return working_directory
+def get_assets_directory():
+    assets_dir = os.getenv('ASSETS_DIR')
+    if not assets_dir:
+        warning("NO ASSETS_DIR ! ")
+    return assets_dir
+
+def use_prism():
+    current_project = os.getenv("CURRENT_PROJECT")
+    if current_project == "trashtown_2112":
+        return False
+    else:
+        return True
+
+def get_asset_directory_from_asset_name(asset_name):
+    #NO MAJUSCULE AT ASSET MEANING IT'S A SHOT ASSETS OR TRASHTOWN
+    assets_dir = get_assets_directory()
+    kind = ["Environment","Prop"]
+    if not use_prism():
+
+        asset_dir = os.path.join(assets_dir, asset_name)
+        print (asset_dir)
+        return asset_dir
+
+
+    asset_enviro = os.path.join(assets_dir, kind[0], asset_name)
+    is_enviro = os.path.isdir(asset_enviro)
+    asset_prop = os.path.join(assets_dir, kind[1], asset_name)
+    is_prop = os.path.isdir(asset_prop)
+
+    if is_enviro and not is_prop:
+        assets_dir = os.path.join(assets_dir, kind[0])
+        return assets_dir
+
+    if is_prop and not is_enviro:
+        assets_dir = os.path.join(assets_dir, kind[1])
+        return assets_dir
+
+    if is_prop and is_enviro:
+        warning("FAIL TO GUSS THE ASSET TYPE (Environment or Prop). Both exist with same name %s"%asset_name)
+
+    if not is_enviro and not is_prop:
+        warning("FAILED TO FIND THE ASSETS DIRECTORY FOR %s in %s"%(asset_name,assets_dir))
 
 def nameSpace_from_path(path):
         filename = os.path.basename(path)

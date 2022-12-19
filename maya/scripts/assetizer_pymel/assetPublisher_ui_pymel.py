@@ -44,7 +44,7 @@ class AssetLoader(QtWidgets.QDialog):
 
 
         # WIDGET LIST
-        self.label = QtWidgets.QLabel("Prod: " + utils.get_working_directory())
+        self.label = QtWidgets.QLabel("Prod: " + utils.get_assets_directory())
 
 
         #WIDGET CHECKBOX
@@ -88,7 +88,9 @@ class AssetLoader(QtWidgets.QDialog):
         filepath = pm.system.sceneName()
         if filepath:
             split = filepath.split("/")
-            if "assets" not in split:
+            if "assets" in split or "Assets" in split:
+                pass
+            else:
                 self.delete_after_publish.setChecked(True)
                 self.is_a_shot_asset.setChecked(True)
                 self.import_published.setChecked(True)
@@ -96,11 +98,11 @@ class AssetLoader(QtWidgets.QDialog):
     def publish_asset_clicked(self):
         pub.ask_save()
         maya_root = pm.ls(sl=True)[0]
+        asset_name = utils.only_name(maya_root)
+        asset_dir = self.get_dir(asset_name)
+        pub.check_is_retake(asset_dir,maya_root)
 
-        assets_dir = self.get_dir()
-        pub.check_is_retake(assets_dir,maya_root)
-
-        pub.publish(maya_root,assets_dir,self.import_published.isChecked())
+        pub.publish(maya_root,asset_dir,self.import_published.isChecked())
         if self.delete_after_publish.isChecked():
             pub.deleteSource(maya_root)
 
@@ -111,24 +113,24 @@ class AssetLoader(QtWidgets.QDialog):
 
         if not maya_root: utils.warning("Can't get parent")
 
-        assets_dir = self.get_dir()
+        asset_dir = self.get_dir()
 
-        pub.check_is_retake(assets_dir,maya_root)
+        pub.check_is_retake(asset_dir,maya_root)
 
-        pub.publish(maya_root,assets_dir,self.import_published.isChecked(),selected_variant)
+        pub.publish(maya_root,asset_dir,self.import_published.isChecked(),selected_variant)
 
         if self.delete_after_publish.isChecked():
             pub.deleteSource(maya_root)
 
 
-
-    def get_dir(self):
+    def get_dir(self,asset_name):
         if self.is_a_shot_asset.isChecked():
             filepath = pm.system.sceneName()
             asset_dir =os.path.join(os.path.dirname(filepath),"assets")
         else:
-            asset_dir = utils.get_working_directory()
+            asset_dir = utils.get_asset_directory_from_asset_name(asset_name)
         return asset_dir
+
 try:
     ui.deleteLater()
 except:

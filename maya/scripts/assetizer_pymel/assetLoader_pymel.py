@@ -31,7 +31,7 @@ import pymel.core as pm
 import API_ass
 importlib.reload(API_ass)
 
-assets_directory  = utils.get_working_directory()
+assets_directory  = utils.get_assets_directory()
 
 
 def list_set_selected_byName(list,name):
@@ -163,7 +163,7 @@ class AssetLoader(QtWidgets.QDialog):
                 except:
                     check=False
                     error_msg = "Not a procedural"
-                    return sel, check, error_msg                    
+                    return sel, check, error_msg
 
         print (sel)
         print("seeeeeeel")

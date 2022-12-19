@@ -18,6 +18,7 @@ def write_ass(path=""):
               type="ASS Export",
               exportSelected=True)
 def write_maya_scene(path):
+
     os.makedirs(os.path.dirname(path), exist_ok=True)
     has_unknown_nodes = False
     unkown_nodes = pm.ls(type="unknown")
@@ -144,7 +145,7 @@ def is_dir_exist(path):
         logger.debug('Check directory existence success: %s '%path)
         return True
 
-def exportVariant(asset, variant, assets_dir, export_shading=False):
+def exportVariant(asset, variant, asset_dir, export_shading=False):
     log = ""
     asset_name = asset.name
     variant_name = utils.only_name(variant)
@@ -159,20 +160,16 @@ def exportVariant(asset, variant, assets_dir, export_shading=False):
     if not variant_visibility_state:
         variant.visibility.set(True)
     utils.delete_hidden_children(variant)
-    asset_publish_dir = os.path.join(assets_dir, asset_name )
-    is_dir_exist(asset_publish_dir)
-    variant_publish_dir = os.path.join(asset_publish_dir,"publish", "ass",variant_name)
+
+    is_dir_exist(asset_dir)
+    variant_publish_dir = os.path.join(asset_dir,"Export", "ass",variant_name)
     is_dir_exist(variant_publish_dir)
     variant_last_v = get_last_v(variant_publish_dir)
 
     variant_full_path = os.path.join(variant_publish_dir,variant_last_v,variant_name)
     variant_maya_scene = variant_full_path+".ma"
     variant_maya_ass = variant_full_path+".ass"
-    if export_shading:
-        shading_scene_dir = os.path.join(asset_publish_dir,"shading")
-        is_dir_exist(shading_scene_dir)
-        variant_shading_scene_name= "%s_shading"%(variant_name)
-        variant_shading_scene = get_next_publish_scene(shading_scene_dir, variant_shading_scene_name)
+
     #Export ass
     logger.info("--------Start export %s  ---------"%(variant.name()))
     pm.select(variant)
@@ -191,35 +188,6 @@ def exportVariant(asset, variant, assets_dir, export_shading=False):
         pm.setAttr("defaultArnoldRenderOptions.motion_blur_enable",mb_state)
     return log, variant_maya_ass
 
-def printInfo(object):
-
-    logger.debug("--- Object Infos ----")
-    infos = vars(object)
-    for i in infos.keys():
-        logger.debug(i+": "+infos[i])
-    logger.debug("--- Object Infos End ----")
-
-def has_transfrom(obj):
-    if cmds.xform(obj,query=True, matrix=True) != zero_matrix:
-        logger.error('Transfroms applied on %s -> Plz fix manually'%obj)
-        return True
-    else:
-        return False
-
-def import_all_references(node):
-
-    list_path = []
-    if pm.referenceQuery(node,isNodeReferenced=True):
-        list_path.append(pm.referenceQuery(node, filename=True))
-    for s in pm.listRelatives(node, allDescendents=True):
-        if pm.referenceQuery(s,isNodeReferenced=True):
-            path = pm.referenceQuery(s, filename=True)
-            if path not in list_path:
-                list_path.append(path)
-    if list_path:
-        for path in list_path:
-            ref_node = pm.FileReference(path)
-            pm.FileReference.importContents(ref_node)
 
 def deleteSource(node):
     import_all_references(node)
@@ -293,16 +261,15 @@ def checkAsset(asset):
     logger.info("Variants found: " + ", ".join([variant.name() for variant in asset.variants]))
     if asset.proxy: logger.info("Proxy found:" +asset.proxy.name())
 
-def check_is_retake(assets_dir,maya_root):
-    current_asset_dir = os.path.join(assets_dir, utils.only_name(maya_root))
-    current_asset_dir = current_asset_dir.replace("\\","/")
-    if os.path.isdir(current_asset_dir):
-        msg = pm.confirmDialog( title='Confirm',message='The asset already exist: \n%s'%(current_asset_dir),
+def check_is_retake(asset_dir,maya_root):
+
+    if os.path.isdir(asset_dir):
+        msg = pm.confirmDialog( title='Confirm',message='The asset already exist: \n%s'%(asset_dir),
         button=['Update asset','Cancel'], defaultButton='Cancel', cancelButton='Cancel', dismissString='Cancel')
         if msg == "Update asset":
             return True
         else:
-            utils.warning('Abort directory creation: %s'%current_asset_dir)
+            utils.warning('Abort directory creation: %s'%asset_dir)
 
 
 def publish(root, asset_dir, import_proxy_scene=False, selected_variant=False):
@@ -321,7 +288,7 @@ def publish(root, asset_dir, import_proxy_scene=False, selected_variant=False):
         log, variant_maya_ass = exportVariant(asset_clean,v,asset_dir,export_shading=False)
 
     if not asset_clean.proxy:
-        proxy_dir = os.path.join(asset_dir, asset_clean.name, "publish")
+        proxy_dir = os.path.join(asset_dir, "Export")
         proxy_scene_path = get_last_scene(proxy_dir,asset_clean.name+".v.*")
     else:
         proxy_scene_path = make_proxy_scene(asset_clean, asset_dir)
@@ -424,9 +391,8 @@ def make_proxy_scene(asset, asset_dir):
 
     #Arnold attribut
     proxy_name = proxy.name()
-    #proxy.ai_translator.set("procedural")
-    ass_dir = os.path.join(asset_dir)
-    ass_dir = os.path.join(asset_dir,asset_name,"publish","ass")
+
+    ass_dir = os.path.join(asset_dir,"Export","ass")
     ass_path=  get_last_basic_variant_ass(asset_name,ass_dir)
 
     standInShape.dso.set(ass_path)
@@ -445,7 +411,7 @@ def make_proxy_scene(asset, asset_dir):
         utils.assignAiStandard(proxy,name=proxy_name+"_shader")
 
 
-    publish_proxy_scene_dir = os.path.join(asset_dir,asset_name,"publish")
+    publish_proxy_scene_dir = os.path.join(asset_dir,"Export")
     next_publish_proxy_scene= get_next_publish_scene(publish_proxy_scene_dir, asset_name)
     logger.info("Next publish proxy maya scene  = %s"%next_publish_proxy_scene)
     #Cosmetic color
