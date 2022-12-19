@@ -42,7 +42,7 @@ cmds.lockNode('initialParticleSE', lock=False, lu=False)
 # List renderable cameras
 
 def isLentilInstalled():
-    return True
+    return False
 """
     try:
         dof_state= cmds.getAttr(renderableCameras[0]+".enableDof")
@@ -126,7 +126,10 @@ def floatSliderCreate(param):
 
 def isLentilEnable():
     cam = cmds.optionMenu("renderCamMenu", query = True, value=True)
-    activeCamType = cmds.getAttr(cam+".ai_translator")
+    try:
+        activeCamType = cmds.getAttr(cam+".ai_translator")
+    except:
+        activeCamType = "perspective"
     try:
         if activeCamType == "lentil_camera":
             lentil_enable=1

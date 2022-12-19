@@ -28,8 +28,8 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "abc_export3.png" 
-        -image1 "abc_export3.png" 
+        -image "R:/pipeline/pipe/maya/icons/abc_export3.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/abc_export3.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -43,7 +43,7 @@ global proc shelf_Bloom () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 39
         -height 34
         -manage 1
         -visible 1
@@ -77,7 +77,7 @@ global proc shelf_Bloom () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 39
         -height 34
         -manage 1
         -visible 1
@@ -135,7 +135,7 @@ global proc shelf_Bloom () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "\nimport char_pip_pymel\nimport importlib\nimportlib.reload(char_pip_pymel)\n\nchar_pip_pymel.run()" 
+        -command "import sys\nsys.path.append(\"R:/pipeline/pipe/maya/scripts/assetizer_pymel\")\nimport char_pip_pymel\nimport importlib\nimportlib.reload(char_pip_pymel)\n\nchar_pip_pymel.run()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -145,7 +145,7 @@ global proc shelf_Bloom () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 39
         -height 34
         -manage 1
         -visible 1
@@ -164,8 +164,8 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "abcPipelineTool2.png" 
-        -image1 "abcPipelineTool2.png" 
+        -image "B:/ressources/sharedMaya/icons/abcPipelineTool2.png" 
+        -image1 "B:/ressources/sharedMaya/icons/abcPipelineTool2.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -179,7 +179,7 @@ global proc shelf_Bloom () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 39
         -height 34
         -manage 1
         -visible 1
@@ -198,8 +198,8 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "aov.png" 
-        -image1 "aov.png" 
+        -image "B:/ressources/sharedMaya/icons/aov.png" 
+        -image1 "B:/ressources/sharedMaya/icons/aov.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -248,7 +248,7 @@ global proc shelf_Bloom () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 39
         -height 34
         -manage 1
         -visible 1
@@ -282,7 +282,7 @@ global proc shelf_Bloom () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 39
         -height 34
         -manage 1
         -visible 1
@@ -301,8 +301,8 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "substanceImp.png" 
-        -image1 "substanceImp.png" 
+        -image "B:/ressources/sharedMaya/icons/substanceImp.png" 
+        -image1 "B:/ressources/sharedMaya/icons/substanceImp.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -316,7 +316,7 @@ global proc shelf_Bloom () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 39
         -height 34
         -manage 1
         -visible 1
@@ -335,12 +335,12 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "on.png" 
-        -image1 "on.png" 
+        -image "B:/ressources/sharedMaya/icons/on.png" 
+        -image1 "B:/ressources/sharedMaya/icons/on.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import maya.mel as mel\nimport maya.cmds as cmds\n\nlibDir = mel.eval('$s=`getenv \"LIB_DIR\"`;')\n\ncmds.file( 'R:/lib/3d/studio/3d/studio/studio.mb', r=True )\n#cmds.file( 'R:/lib/3d/studio/3d/studio/studio.mb', rr=True )" 
+        -command "import maya.mel as mel\nimport maya.cmds as cmds\n\nlibDir = mel.eval('$s=`getenv \"LIB_DIR\"`;')\n\ncmds.file( libDir+'/3d/studio/studio.mb', r=True )\n#cmds.file( libDir+'/3d/studio/studio.mb', rr=True )" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -369,8 +369,8 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "off.png" 
-        -image1 "off.png" 
+        -image "R:/pipeline/pipe/maya/icons/off.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/off.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -404,8 +404,8 @@ global proc shelf_Bloom () {
         -imageOverlayLabel "LIB" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "saveLib2.png" 
-        -image1 "saveLib2.png" 
+        -image "R:/pipeline/pipe/maya/icons/saveLib2.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/saveLib2.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -419,7 +419,7 @@ global proc shelf_Bloom () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 39
         -height 34
         -manage 1
         -visible 1
@@ -439,8 +439,8 @@ global proc shelf_Bloom () {
         -imageOverlayLabel "WIP" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "wipLib.png" 
-        -image1 "wipLib.png" 
+        -image "B:/ressources/sharedMaya/icons/wipLib.png" 
+        -image1 "B:/ressources/sharedMaya/icons/wipLib.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -454,7 +454,7 @@ global proc shelf_Bloom () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 39
         -height 34
         -manage 1
         -visible 1
@@ -473,8 +473,8 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "savePreview.png" 
-        -image1 "savePreview.png" 
+        -image "B:/ressources/sharedMaya/icons/savePreview.png" 
+        -image1 "B:/ressources/sharedMaya/icons/savePreview.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -488,7 +488,7 @@ global proc shelf_Bloom () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 39
         -height 34
         -manage 1
         -visible 1
@@ -507,8 +507,8 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "doctor.png" 
-        -image1 "doctor.png" 
+        -image "B:/ressources/sharedMaya/icons/doctor.png" 
+        -image1 "B:/ressources/sharedMaya/icons/doctor.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -541,8 +541,8 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "tweenMachine.png" 
-        -image1 "tweenMachine.png" 
+        -image "R:/pipeline/pipe/maya/icons/tweenMachine.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/tweenMachine.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -747,12 +747,80 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "turobtron.png" 
-        -image1 "turobtron.png" 
+        -image "R:/pipeline/pipe/maya/icons/turobtron.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/turobtron.png" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
         -command "import importlib\nimport turbotron\nimportlib.reload(turbotron)\nturbotron.createGUI()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 39
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Open the Arnold RenderView window" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Open Arnold RenderView" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "RenderViewShelf.png" 
+        -image1 "RenderViewShelf.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "cmdArnoldMtoARenderView" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import submitToDeadline_pathMapping\nimport importlib\nimportlib.reload(submitToDeadline_pathMapping)\nsubmitToDeadline_pathMapping.run()" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import submitToDeadline_pathMapping\nimport importlib\nimportlib.r..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/custom_deadline_submit.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/custom_deadline_submit.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import submitToDeadline_pathMapping\nimport importlib\nimport debug_reed\ndebug_reed.run()\n\n\nsubmitToDeadline_pathMapping.run()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -884,8 +952,8 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "box.ico" 
-        -image1 "box.ico" 
+        -image "R:/pipeline/pipe/maya/icons/box.ico" 
+        -image1 "R:/pipeline/pipe/maya/icons/box.ico" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -918,8 +986,8 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "box_publish.ico" 
-        -image1 "box_publish.ico" 
+        -image "R:/pipeline/pipe/maya/icons/box_publish.ico" 
+        -image1 "R:/pipeline/pipe/maya/icons/box_publish.ico" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
@@ -952,8 +1020,8 @@ global proc shelf_Bloom () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "box_lib.ico" 
-        -image1 "box_lib.ico" 
+        -image "R:/pipeline/pipe/maya/icons/box_lib.ico" 
+        -image1 "R:/pipeline/pipe/maya/icons/box_lib.ico" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1

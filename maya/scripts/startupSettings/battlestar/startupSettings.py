@@ -1,17 +1,13 @@
 import maya.cmds as cmds
 import pymel.core as pm
 import maya.cmds as cmds
-import sys
-sys.path.append("R:/pipeline/pipe/maya/scripts/assetBrowser")
+
 import assetBrowser
-import importlib
-importlib.reload(assetBrowser)
+
 
 def run():
     cmds.currentUnit( time='pal' )  #film: 24 fps, pal: 25 fps, ntsc: 30 fps
-    print("time = pal 25FPS")
     cmds.currentUnit(linear='cm')
-    print("unit = cm")
 
     #VIRUS SECURITY TOOL
     print("LOADING MAYA SECURITY TOOL... ")
