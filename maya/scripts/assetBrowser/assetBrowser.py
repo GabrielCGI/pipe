@@ -452,7 +452,10 @@ class AssetBrowser(QtWidgets.QDialog):
 
     ### BUTTON CLICKED ###
     def sort_by_last_clicked(self):
-        self.rebuild_files_list()
+        item = self.third_Qlist.currentItem()
+        data = item.data(QtCore.Qt.UserRole)
+        dir = os.path.dirname(data)
+        self.rebuild_files_list(dir)
 
 
     def button_add_new_clicked(self):
