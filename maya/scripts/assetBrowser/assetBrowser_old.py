@@ -78,8 +78,6 @@ def list_files_and_dirs_sorted(path, sort_by_last=False):
         file_list =[]
         dir_list= []
         all_list = []
-        if not path:
-            return file_list, dir_list
         if not os.path.isdir(path):
             return file_list, dir_list
 
@@ -123,7 +121,9 @@ class Package():
 
         self.favorite_dir = "publish" if type == "asset" else "lighting"
         dir = os.path.join(current_project,type,name)
+        print(dir)
         self.dir = dir if os.path.isdir(dir) else None
+        print(self.dir)
         self.shading_scene = None
 
 
@@ -149,7 +149,6 @@ class AssetBrowser(QtWidgets.QDialog):
         self.packageLayout = QtWidgets.QVBoxLayout(self)
         self.departementLayout = QtWidgets.QVBoxLayout(self)
         self.fileLayout = QtWidgets.QVBoxLayout(self)
-        self.header_fileLayout = QtWidgets.QHBoxLayout(self)
 
         #WIDGET BUTTONS
         self.buttons_layout =  QtWidgets.QHBoxLayout(self)
@@ -173,8 +172,7 @@ class AssetBrowser(QtWidgets.QDialog):
         self.comboBox_current_prod.addItems(project_list)
         #Add Last Modified sort checkbox
         self.sort_by_last_checkbox = QtWidgets.QCheckBox("Sort by last modified")
-        self.button_return_previous = QtWidgets.QPushButton("<")
-        self.button_return_previous.setMaximumWidth(25)
+
 
         # WIDGET LIST
         self.package_Qlist = QtWidgets.QListWidget()
@@ -207,7 +205,7 @@ class AssetBrowser(QtWidgets.QDialog):
 
         #DISPLAY IMAGE
 
-        imgPath = "R:/pipeline/pipe/maya/scripts/assetBrowser/icons/open.JPG"
+        imgPath = "R:/pipeline/pipe/maya/scripts/assetizer/icons/open.JPG"
         self.image = QtGui.QImage(imgPath)
         self.pixmap = QtGui.QPixmap(self.image.scaledToWidth(450))
 
@@ -223,11 +221,7 @@ class AssetBrowser(QtWidgets.QDialog):
         self.departementLayout.addWidget(self.filter_departement)
         self.departementLayout.addWidget(self.second_Qlist)
 
-        self.header_fileLayout.addWidget(self.button_return_previous)
-        self.header_fileLayout.addWidget(self.sort_by_last_checkbox)
-
-        self.fileLayout.addLayout(self.header_fileLayout)
-
+        self.fileLayout.addWidget(self.sort_by_last_checkbox)
         self.fileLayout.addWidget(self.third_Qlist)
 
         self.comboLayout.addLayout(self.packageLayout)
@@ -287,7 +281,6 @@ class AssetBrowser(QtWidgets.QDialog):
         self.comboBox_current_prod.currentTextChanged.connect(self.current_prod_changed)
         #Connect CHECKBOX
         self.sort_by_last_checkbox.clicked.connect(self.sort_by_last_clicked)
-        self.button_return_previous.clicked.connect(self.button_return_previous_clicked)
         self.filter_text.textEdited.connect(self.filter_package_list)
         self.filter_departement.textEdited.connect(self.filter_departement_list)
         #Connect asset and shot buttons
@@ -299,7 +292,6 @@ class AssetBrowser(QtWidgets.QDialog):
         self.package_Qlist.itemClicked.connect(self.package_Qlist_changed)
         self.second_Qlist.itemClicked.connect(self.second_Qlist_changed)
         self.third_Qlist.itemClicked.connect(self.third_Qlist_changed)
-        self.third_Qlist.itemDoubleClicked.connect(self.enter_directory)
 
 
     ##############QLIST CHANGED ##############
@@ -309,15 +301,15 @@ class AssetBrowser(QtWidgets.QDialog):
         """
 
         packageName = self.package_Qlist.currentItem().text()
+        print (self.mode)
         self.package = Package(packageName, self.mode, self.current_project)
         if self.package.dir is not None:
             self.rebuild_departementList()
-            self.rebuild_files_list(None)
+            self.rebuild_files_list()
             self.rebuild_image()
 
     def second_Qlist_changed(self):
-        departement_dir = os.path.join(self.package.dir,self.second_Qlist.currentItem().text())
-        self.rebuild_files_list(departement_dir)
+        self.rebuild_files_list()
 
     def third_Qlist_changed(self):
         path, namespace = self.build_path_scene()
@@ -333,6 +325,8 @@ class AssetBrowser(QtWidgets.QDialog):
         self.clear_all_list()
         packages_list = os.listdir(self.all_packages_dir)
         self.clean_package_list = [package for package in packages_list if not_blacklisted(package)]
+
+
 
         for package in self.clean_package_list:
             self.package_Qlist.addItem(package)
@@ -353,34 +347,19 @@ class AssetBrowser(QtWidgets.QDialog):
         self.second_Qlist.setSortingEnabled(False)
 
         self.departement_file_list, self.departement_dir_list = list_files_and_dirs_sorted(self.package.dir)
-        self.filter_departement_list()
 
+        self.filter_departement_list()
     def filter_departement_list(self):
         pattern = "*"+self.filter_departement.text()+"*"
         filtered_departement_dir_list =  fnmatch.filter(self.departement_dir_list, pattern)
         filtered_departement_file_list =   fnmatch.filter(self.departement_file_list, pattern)
-        parent_dir = self.package.dir
-        self.second_Qlist.clear()
-        for dir_name in filtered_departement_dir_list:
-            item = QtWidgets.QListWidgetItem()
-            item.setText(dir_name)
-            dir = os.path.join(parent_dir,dir_name)
-            item.setData(QtCore.Qt.UserRole,dir)
-            self.second_Qlist.addItem(item)
 
+        self.second_Qlist.clear()
+        for dir in filtered_departement_dir_list:
+                self.second_Qlist.addItem(dir)
         item = QtWidgets.QListWidgetItem("----------------")
         item.setFlags(QtCore.Qt.ItemIsSelectable)
         self.second_Qlist.addItem(item)
-
-        for file in filtered_departement_file_list:
-            item = QtWidgets.QListWidgetItem()
-            item.setText(file)
-            dir = os.path.join(parent_dir,file)
-            item.setData(QtCore.Qt.UserRole,dir)
-            self.second_Qlist.addItem(item)
-            item.setForeground(file_color_item)
-
-
 
         for file in filtered_departement_file_list:
             item = QtWidgets.QListWidgetItem(file)
@@ -390,29 +369,20 @@ class AssetBrowser(QtWidgets.QDialog):
 
         list_set_selected_byName(self.second_Qlist,self.package.favorite_dir)
 
-    def rebuild_files_list(self,parent_dir):
+    def rebuild_files_list(self):
         self.third_Qlist.clear()
-
-        file_list, dir_list = list_files_and_dirs_sorted(parent_dir, self.sort_by_last_checkbox.isChecked())
-
-
-
-        for dir_name in dir_list:
-            item = QtWidgets.QListWidgetItem()
-            item.setText(dir_name)
-            dir = os.path.join(parent_dir,dir_name)
-            item.setData(QtCore.Qt.UserRole,dir)
-            self.third_Qlist.addItem(item)
+        try:
+            departement_dir = os.path.join(self.package.dir,self.second_Qlist.currentItem().text())
+        except:
+            department_dir = None
+        file_list, dir_list = list_files_and_dirs_sorted(departement_dir, self.sort_by_last_checkbox.isChecked())
 
         for file in file_list:
-            item = QtWidgets.QListWidgetItem()
-            item.setText(file)
-            dir = os.path.join(parent_dir,file)
-            item.setData(QtCore.Qt.UserRole,dir)
-            self.third_Qlist.addItem(item)
+            item = QtWidgets.QListWidgetItem(file)
             item.setForeground(file_color_item)
             self.third_Qlist.addItem(item)
-
+        for dir in dir_list:
+            self.third_Qlist.addItem(dir)
         self.third_Qlist.setCurrentRow(0)
         self.third_Qlist_changed()
 
@@ -513,30 +483,20 @@ class AssetBrowser(QtWidgets.QDialog):
         self.rebuild_package_list()
 
     def build_path_scene(self):
-        item_third = self.third_Qlist.currentItem()
-        item_seconde = self.second_Qlist.currentItem()
-        item = item_third if item_third is not None else item_seconde
-        if item is None:
-            return None, None
-
-        data = item.data(QtCore.Qt.UserRole)
-        namespace = os.path.splitext(item.text())[0]
-        path = data
+        package_name = self.package_Qlist.currentItem().text()
+        package_departement = self.second_Qlist.currentItem().text()
+        departement_path = os.path.join(self.package.dir, package_departement)
+        if os.path.isfile(departement_path):
+            path = departement_path
+            namespace = os.path.splitext(package_departement)[0]
+        else:
+            if self.third_Qlist.currentItem() is not None:
+                package_scene = self.third_Qlist.currentItem().text()
+            else:
+                return None, None
+            namespace = os.path.splitext(package_scene)[0]
+            path = os.path.join(self.package.dir,package_departement,package_scene)
         return path, namespace
-
-    def enter_directory(self,item):
-        data = item.data(QtCore.Qt.UserRole)
-        self.rebuild_files_list(data)
-
-    def button_return_previous_clicked(self):
-        item = self.third_Qlist.currentItem()
-        data = item.data(QtCore.Qt.UserRole)
-
-        departement_dir =  self.second_Qlist.currentItem().data(QtCore.Qt.UserRole)
-        if os.path.dirname(data) == os.path.join(self.package.dir,departement_dir):
-            return
-        dir = os.path.dirname(os.path.dirname(data))
-        self.rebuild_files_list(dir)
 
     def import_clicked(self):
         path, namespace = self.build_path_scene()
@@ -544,8 +504,7 @@ class AssetBrowser(QtWidgets.QDialog):
 
     def reference_clicked(self):
         path, namespace = self.build_path_scene()
-
-        if path.endswith(".ma") or path.endswith(".mb") or path.endswith(".abc"):
+        if path.endswith(".ma") or path.endswith(".mb"):
             cmds.file(path, reference=True,namespace=namespace)
         else:
             print("Not a maya scene")
@@ -554,7 +513,7 @@ class AssetBrowser(QtWidgets.QDialog):
         if os.path.isdir(path):
             os.startfile(path)
         else:
-            os.startfile(os.path.dirname(path))
+            os.startfile(self.package.dir)
 
     def copy_path_clicked(self):
         path, namespace = self.build_path_scene()
