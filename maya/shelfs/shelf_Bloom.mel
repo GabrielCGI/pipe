@@ -340,7 +340,7 @@ global proc shelf_Bloom () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import maya.mel as mel\nimport maya.cmds as cmds\n\nlibDir = mel.eval('$s=`getenv \"LIB_DIR\"`;')\n\ncmds.file( 'R:/lib/3d/studio/3d/studio/studio.mb', r=True )\n#cmds.file( 'R:/lib/3d/studio/3d/studio/studio.mb', rr=True )" 
+        -command "import maya.mel as mel\nimport maya.cmds as cmds\n\nlibDir = mel.eval('$s=`getenv \"LIB_DIR\"`;')\n\ncmds.file( 'R:/lib/3d/studio/studio.mb', r=True )\n#cmds.file( 'R:/lib/3d/studio/studio.mb', rr=True )" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

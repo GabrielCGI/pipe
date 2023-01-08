@@ -38,7 +38,7 @@ def maya_main_window():
 
 
 #current_project="D:/gabriel/assetizer"
-project_list = ["B:/trashtown_2112","D:/"]
+project_list = ["B:/trashtown_2112","I:/battlestar_2206","D:/"]
 
 empty_scene = ""
 
@@ -382,12 +382,6 @@ class AssetBrowser(QtWidgets.QDialog):
 
 
 
-        for file in filtered_departement_file_list:
-            item = QtWidgets.QListWidgetItem(file)
-            item.setForeground(file_color_item)
-            self.second_Qlist.addItem(item)
-
-
         list_set_selected_byName(self.second_Qlist,self.package.favorite_dir)
 
     def rebuild_files_list(self,parent_dir):
@@ -529,7 +523,8 @@ class AssetBrowser(QtWidgets.QDialog):
 
     def enter_directory(self,item):
         data = item.data(QtCore.Qt.UserRole)
-        self.rebuild_files_list(data)
+        if os.path.isdir(data):
+            self.rebuild_files_list(data)
 
     def button_return_previous_clicked(self):
         item = self.third_Qlist.currentItem()
