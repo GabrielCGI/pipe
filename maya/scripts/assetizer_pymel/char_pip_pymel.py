@@ -9,9 +9,13 @@ def build_shader_operator(aiStandIn, sel):
 
     ai_merge = pm.createNode("aiMerge", n="aiMerge_%s"%aiStandIn.getParent().name())
     empty_displace = None
+    shaders_used = []
     pm.addAttr(ai_merge,ln="mtoa_constant_is_target",attributeType="bool",defaultValue=True)
     pm.connectAttr(ai_merge+".out",aiStandIn+".operators[0]")
     meshes = pm.listRelatives(sel, allDescendents=True, shapes=True)
+    for m in meshes:
+        if "ShapeOrig" in m.name():
+            meshes.remove(m)
 
 
 
@@ -20,6 +24,9 @@ def build_shader_operator(aiStandIn, sel):
         selection = m.getParent()
         namespace = selection.namespace()
         selection = selection.longName()
+        if sel.getParent():
+            selection = selection.split(sel.getParent().longName())[-1]
+
         selection = selection.replace(namespace,"")
         selection = selection.replace("|","/")
         selection = selection+"*"
@@ -37,24 +44,36 @@ def build_shader_operator(aiStandIn, sel):
         if len(sgs)==1:
             sg = sgs[0]
             if sg.aiSurfaceShader.isConnected():
-                shader += "'%s'"%sg.aiSurfaceShader.inputs()[0]
+                shader_maya = sg.aiSurfaceShader.inputs()[0]
+                shader += "'%s'"%shader_maya
+                shaders_used.append(shader_maya)
             elif sg.surfaceShader.isConnected():
-                shader += "'%s'"%sg.surfaceShader.inputs()[0]
+                shader_maya = sg.surfaceShader.inputs()[0]
+                shader += "'%s'"%shader_maya
+                shaders_used.append(shader_maya)
 
             if sg.displacementShader.isConnected():
-                displacement_shader_string = "'%s'"%sg.displacementShader.inputs()[0]
+                shader_maya = sg.displacementShader.inputs()[0]
+                displacement_shader_string = "'%s'"%shader_maya
+                shaders_used.append(shader_maya)
         else:
             all_disp = [sg.displacementShader for sg in sgs if sg.displacementShader.isConnected()]
             for sg in sgs:
                 if sg.aiSurfaceShader.isConnected():
-                    shader += "'%s' "%(sg.aiSurfaceShader.inputs()[0])
+                    shader_maya = sg.aiSurfaceShader.inputs()[0]
+                    shaders_used.append(shader_maya)
+                    shader += "'%s' "%(shader_maya)
                 elif sg.surfaceShader.isConnected():
+                    shader_maya = sg.surfaceShader.inputs()[0]
+                    shaders_used.append(shader_maya)
                     shader += "'%s' "%(sg.surfaceShader.inputs()[0])
             #Check if there is any displacement shader because if there is one, all sg will need a displacement
             #So if an object has two shaders one with a displace and one without, we will need to create an empty shaders
             #to make the operator per face assignement work
                 if len(all_disp)>0:
                     if sg.displacementShader.isConnected():
+                        shader_maya = sg.displacementShader.inputs()[0]
+                        shaders_used.append(shader_maya)
                         displacement_shader_string += "'%s' "%(sg.displacementShader.inputs()[0])
                     else:
                         if not empty_displace:
@@ -62,6 +81,7 @@ def build_shader_operator(aiStandIn, sel):
                         autobump_attr = empty_displace.attr("aiDisplacementAutoBump")
                         autobump_attr.set(0)
                         pm.connectAttr(empty_displace.displacement, sg.displacementShader)
+                        shaders_used.append(empty_displace)
                         displacement_shader_string +=  "'%s' "%(empty_displace)
 
 
@@ -78,9 +98,7 @@ def build_shader_operator(aiStandIn, sel):
         if catclark_type >0 and catclark_subdiv>0 :
             pm.setAttr(set_shader+".assignment[3]", "subdiv_type='catclark'",type="string")
             pm.setAttr(set_shader+".assignment[4]", "subdiv_iterations=%s"%(catclark_subdiv),type="string")
-    if empty_displace:
-        pass
-        #pm.delete(empty_displace)
+    return shaders_used
 
 def guess_dir():
     """Guess the asset directory and name from the current scene name.
@@ -93,8 +111,8 @@ def guess_dir():
     split[0]=split[0]+"\\" #idk why i need that, but otherwise the result is missing a "\" ex: D:proA\assset"
     for i, s in enumerate(reversed(split)):
         if s == "assets":
-            asset_dir = os.path.join(*split[0:i+1])
-            asset_name = split[i]
+            asset_dir = os.path.join(*split[0:-(i-1)])
+            asset_name = split[-i]
             return asset_dir, asset_name
     print ("Dir not found in guess_dir")
     raise
@@ -110,7 +128,7 @@ def abcExport(sel):
     abc_path=abc_path.replace("\\","/")
 
     os.makedirs(abc_dir, exist_ok=True)
-    job = '-frameRange 1 1 -stripNamespaces -uvWrite -worldSpace -writeFaceSets -writeVisibility -dataFormat ogawa -root %s -file "%s"'%(sel[0].longName(),abc_path)
+    job = '-frameRange 1 1 -stripNamespaces -uvWrite -worldSpace -writeFaceSets -writeVisibility -dataFormat ogawa -root %s -file "%s"'%(sel.longName(),abc_path)
 
     pm.AbcExport(j= job)
     return abc_path, abc_name
@@ -122,17 +140,20 @@ def create_standIn(abc_path, abc_name):
     aiStandIn.dso.set(abc_path)
     return aiStandIn
 
-def export_arnold_graph(aiStandIn):
+def export_arnold_graph(aiStandIn, shaders_used):
     asset_dir, asset_name = guess_dir()
     look_dir = os.path.join(asset_dir, "publish")
 
     path = os.path.join(look_dir,asset_name+"_operator.v001.ass")
+    print (path)
     look = pm.listConnections(aiStandIn+".operators")
-    shader = pm.list
-    pm.other.arnoldExportAss(look,f=path, s=True, asciiAss=True, mask=4112, lightLinks=0, shadowLinks=0,fullPath=0 )
+    export_list = look + shaders_used
+    pm.other.arnoldExportAss(export_list ,f=path, s=True, asciiAss=True, mask=4112, lightLinks=0, shadowLinks=0,fullPath=0 )
 
 def run():
-    sel = pm.ls(sl=True)
+    sel = pm.ls(sl=True)[0]
     abc_path, abc_name= abcExport(sel)
     aiStandIn= create_standIn(abc_path, abc_name)
-    build_shader_operator(aiStandIn,sel)
+    shaders_used = build_shader_operator(aiStandIn,sel)
+    export_arnold_graph(aiStandIn, shaders_used)
+run()
