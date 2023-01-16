@@ -1,0 +1,17 @@
+//ZBrush macro - Save to ZBrush 2019\ZStartup\Macros\Misc\ folder
+
+[IButton,Apply s dynamic,"Turn off texture map for all subtools",
+	[IConfig,2019]
+	[If,[SubToolGetCount],
+		[VarSet,activeST,[SubToolGetActiveIndex]]
+		[Loop,[SubToolGetCount],
+			[SubToolSelect,n]
+			[If,[IExists,Tool:Geometry:s.Dynamic],
+				[If,[IsEnabled,Tool:Geometry:s.Dynamic],
+					[IPress,Tool:Geometry:s.Apply]
+				]
+			]
+		,n]
+		[SubToolSelect,activeST]
+	]
+,,0.5]//end macro

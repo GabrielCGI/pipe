@@ -1,0 +1,23 @@
+//ZBrush macro - Save to ZBrush 2019\ZStartup\Macros\Misc\ folder
+
+[IButton,subdivision_reconstruct,"subdivision_reconstruct",
+	[IConfig,2019]
+	[If,[SubToolGetCount],
+		[VarSet,activeST,[SubToolGetActiveIndex]]
+		[Loop,[SubToolGetCount],
+			[SubToolSelect,n]
+			[If,[IExists,Tool:Geometry:Reconstruct Subdiv],
+						[IPress,Tool:Geometry:Reconstruct Subdiv]
+						[IPress,Tool:Geometry:Reconstruct Subdiv]
+						[IPress,Tool:Geometry:Reconstruct Subdiv]
+						[IPress,Tool:Geometry:Reconstruct Subdiv]
+						[IPress,Tool:Geometry:Reconstruct Subdiv]
+						[IPress,Tool:Geometry:Reconstruct Subdiv]
+						[IPress,Tool:Geometry:Reconstruct Subdiv]
+						[IPress,Tool:Geometry:Reconstruct Subdiv]
+
+			]
+		,n]
+		[SubToolSelect,activeST]
+	]
+,,0.5]//end macro
