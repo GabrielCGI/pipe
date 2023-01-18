@@ -6,7 +6,8 @@ set filepath=%~1
 echo %dirfilepath%
 
 rem Change the start of the path and get filename
-set "newpath=%filepath:I:\battlestar_2206=G:\Drive partagés\battlestar_partage\battlestar_2206%"
+set "newpath=%filepath:G:\Drive partagés\battlestar_partage\battlestar_2206=I:\battlestar_2206%"
+set "newpath=%newpath:G:\Drive partagés\battlestar_image\battlestar_2206=I:\battlestar_2206%"
 
 rem Get the path directories of the newpath
 call :getPath %newpath% dirfilepath
@@ -21,6 +22,7 @@ if exist "%dirfilepath%" (
   pause
   exit /b
 )
+
 
 set /p create=Do you want to create missing directories? [y/n]
 

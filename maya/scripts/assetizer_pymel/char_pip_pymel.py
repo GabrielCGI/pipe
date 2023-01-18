@@ -1,6 +1,7 @@
 import pymel.core as pm
 import secrets
 import re
+import os
 
 
 def build_shader_operator(aiStandIn, sel):
@@ -156,4 +157,3 @@ def run():
     aiStandIn= create_standIn(abc_path, abc_name)
     shaders_used = build_shader_operator(aiStandIn,sel)
     export_arnold_graph(aiStandIn, shaders_used)
-run()

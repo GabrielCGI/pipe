@@ -166,6 +166,7 @@ def aovLigths():
     aovLigths = {}
     for light in getLights():
         aovName = re.sub('[:]', '', light) #Delete ":" from ref to avoid AOV naming error
+        aovName = re.sub('[|]', '_', light)
         rgba_aovName = "RGBA_"+aovName
         aovLigths[rgba_aovName] = light
     return aovLigths
@@ -176,25 +177,32 @@ def setCompress(value):
     zipListAov = ["aiAOV_N","aiAOV_P","aiAOV_Z","aiAOV_UV","aiAOV_crypto_asset","aiAOV_crypto_material","aiAOV_crypto_object","aiAOV_motionVectorBlur","aiAOV_motionvector"]
     aovs = cmds.ls(type = "aiAOV")
     if value == True:
-        if not cmds.objExists('zipDriver'):
-            zipDriver = cmds.createNode( 'aiAOVDriver', n="zipDriver")
-        cmds.setAttr('zipDriver'+".halfPrecision", 1)
-        cmds.setAttr('zipDriver'+".mergeAOVs", 1)
-        cmds.setAttr('zipDriver'+".multipart", 1)
-        cmds.setAttr('zipDriver'+".prefix", "<RenderLayer>/<Scene>/<Scene>_utility", type="string")
+        if not cmds.objExists('fullDriver'):
+            fullDriver = cmds.createNode( 'aiAOVDriver', n="fullDriver")
+        cmds.setAttr('fullDriver'+".halfPrecision", 0)
+        cmds.setAttr('fullDriver'+".mergeAOVs", 1)
+        cmds.setAttr('fullDriver'+".multipart", 1)
+        cmds.setAttr('fullDriver'+".prefix", "<RenderLayer>/<Scene>/<Scene>_utility", type="string")
         cmds.setAttr("defaultArnoldDriver"+".exrCompression", 9)
+        cmds.setAttr("defaultArnoldDriver"+".multipart", 1)
+        cmds.setAttr("defaultArnoldDriver"+".halfPrecision", 1)
 
 
         for aov in aovs:
             if aov in zipListAov:
-                cmds.connectAttr("zipDriver"+".message", aov+'.outputs[0].driver', f=True)
+                cmds.connectAttr("fullDriver"+".message", aov+'.outputs[0].driver', f=True)
                 if aov == "aiAOV_Z":
 
                     cmds.connectAttr("defaultArnoldFilter.message", 'aiAOV_Z.outputs[1].filter', f=True)
-                    cmds.connectAttr("zipDriver"+".message", 'aiAOV_Z.outputs[1].driver', f=True)
+                    cmds.connectAttr("fullDriver"+".message", 'aiAOV_Z.outputs[1].driver', f=True)
+            else:
+                cmds.connectAttr("defaultArnoldDriver"+".message", aov+'.outputs[0].driver', f=True)
+
 
     if value == False:
         cmds.setAttr("defaultArnoldDriver"+".exrCompression", 3)
+        cmds.setAttr("defaultArnoldDriver"+".multipart", 1)
+        cmds.setAttr("defaultArnoldDriver"+".halfPrecision", 1)
         for aov in aovs:
             cmds.connectAttr("defaultArnoldDriver"+".message", aov+'.outputs[0].driver', f=True)
             if aov == "aiAOV_Z":

@@ -16,6 +16,7 @@ import json
 import sys
 import projects as projects
 import importlib
+importlib.reload(projects)
 
 # Project variable initialisation
 assetsDbDir = projects.getCurrentProjectData()["assetsDbDir"] #Something like B:\Teaser\assets\database #HACK paradise usually

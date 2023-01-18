@@ -55,16 +55,14 @@ def only_name(obj):
 
 def get_assets_directory():
     assets_dir = os.getenv('ASSETS_DIR')
+    print (assets_dir)
     if not assets_dir:
         warning("NO ASSETS_DIR ! ")
     return assets_dir
 
 def use_prism():
-    current_project = os.getenv("CURRENT_PROJECT")
-    if current_project == "trashtown_2112":
         return False
-    else:
-        return True
+
 
 def get_asset_directory_from_asset_name(asset_name):
     #NO MAJUSCULE AT ASSET MEANING IT'S A SHOT ASSETS OR TRASHTOWN
@@ -73,7 +71,6 @@ def get_asset_directory_from_asset_name(asset_name):
     if not use_prism():
 
         asset_dir = os.path.join(assets_dir, asset_name)
-        print (asset_dir)
         return asset_dir
 
 

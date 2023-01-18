@@ -56,6 +56,6 @@ rem SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\mgear_4.0.3\releas
 
 SET CURRENT_PROJECT=trashtown_2112
 SET CURRENT_PROJECT_DIR=B:/trashtown_2112
-
+SET ASSETS_DIR=B:/trashtown_2112/assets
 REM == Start maya and launch statupSettings (FPS, Unit ect...)
 start C:\"Program Files"\Autodesk\Maya2022\bin\maya.exe -file %1 -command "python(\"import startupSettings\"); python (\"startupSettings.run()\"); global proc CgAbBlastPanelOptChangeCallback(string $pass){};"  %*

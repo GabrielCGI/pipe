@@ -1,0 +1,19 @@
+import pymel.core as pm
+import random
+
+# Get all shading groups in the scene
+shading_groups = pm.ls(type='shadingEngine')
+
+# Iterate over all shading groups
+for shading_group in shading_groups:
+    # Create a new Blinn shader
+    new_shader = pm.shadingNode('blinn', asShader=True)
+
+    # Generate a random color for the shader
+    color = [random.uniform(0, 1) for i in range(3)]
+
+    # Set the color of the shader
+    pm.setAttr(new_shader + '.color', color[0], color[1], color[2], type='double3')
+
+    # Connect the new shader to the surfaceShader input of the shading group
+    pm.connectAttr(new_shader + '.outColor', shading_group + '.surfaceShader', force=True)

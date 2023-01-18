@@ -3,17 +3,17 @@ chcp 65001 > NUL
 
 rem Get the file path
 set filepath=%~1
-echo %dirfilepath%
+
 
 rem Change the start of the path and get filename
-set "newpath=%filepath:I:\battlestar_2206=G:\Drive partagés\battlestar_partage\battlestar_2206%"
+set newpath="%filepath:I:\battlestar_2206=G:\Drive partagés\battlestar_image\battlestar_2206%"
 
 rem Get the path directories of the newpath
 call :getPath %newpath% dirfilepath
 
 echo From: %filepath%
 echo To:   %newpath%
-
+echo %dirfilepath%
 rem Check if the destination directory exists
 if exist "%dirfilepath%" (
   rem Copy the file to the new path

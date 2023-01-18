@@ -110,10 +110,10 @@ class AssetLoader(QtWidgets.QDialog):
         pub.ask_save()
         selected_variant = pm.ls(sl=True)[0]
         maya_root = selected_variant.getParent()
-
+        asset_name = utils.only_name(maya_root)
         if not maya_root: utils.warning("Can't get parent")
 
-        asset_dir = self.get_dir()
+        asset_dir = self.get_dir(asset_name)
 
         pub.check_is_retake(asset_dir,maya_root)
 

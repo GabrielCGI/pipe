@@ -162,7 +162,7 @@ def exportVariant(asset, variant, asset_dir, export_shading=False):
     utils.delete_hidden_children(variant)
 
     is_dir_exist(asset_dir)
-    variant_publish_dir = os.path.join(asset_dir,"Export", "ass",variant_name)
+    variant_publish_dir = os.path.join(asset_dir,"publish", "ass",variant_name)
     is_dir_exist(variant_publish_dir)
     variant_last_v = get_last_v(variant_publish_dir)
 
@@ -190,7 +190,7 @@ def exportVariant(asset, variant, asset_dir, export_shading=False):
 
 
 def deleteSource(node):
-    import_all_references(node)
+    utils.import_all_references(node)
     pm.delete(node)
 
 def cleanAsset(asset):
@@ -288,7 +288,7 @@ def publish(root, asset_dir, import_proxy_scene=False, selected_variant=False):
         log, variant_maya_ass = exportVariant(asset_clean,v,asset_dir,export_shading=False)
 
     if not asset_clean.proxy:
-        proxy_dir = os.path.join(asset_dir, "Export")
+        proxy_dir = os.path.join(asset_dir, "publish")
         proxy_scene_path = get_last_scene(proxy_dir,asset_clean.name+".v.*")
     else:
         proxy_scene_path = make_proxy_scene(asset_clean, asset_dir)
@@ -392,7 +392,7 @@ def make_proxy_scene(asset, asset_dir):
     #Arnold attribut
     proxy_name = proxy.name()
 
-    ass_dir = os.path.join(asset_dir,"Export","ass")
+    ass_dir = os.path.join(asset_dir,"publish","ass")
     ass_path=  get_last_basic_variant_ass(asset_name,ass_dir)
 
     standInShape.dso.set(ass_path)
@@ -411,7 +411,7 @@ def make_proxy_scene(asset, asset_dir):
         utils.assignAiStandard(proxy,name=proxy_name+"_shader")
 
 
-    publish_proxy_scene_dir = os.path.join(asset_dir,"Export")
+    publish_proxy_scene_dir = os.path.join(asset_dir,"publish")
     next_publish_proxy_scene= get_next_publish_scene(publish_proxy_scene_dir, asset_name)
     logger.info("Next publish proxy maya scene  = %s"%next_publish_proxy_scene)
     #Cosmetic color

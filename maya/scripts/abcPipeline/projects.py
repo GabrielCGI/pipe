@@ -8,6 +8,12 @@ import os
 defaultProject="trashtown_2112"
 
 projectsData ={
+    "battlestar_2206":
+        {
+            "path": "I:\\battlestar_2206",
+            "assetsDir": "I:\\battlestar_2206\\assets",
+            "assetsDbDir": "I:\\battlestar_2206\\database",
+        },
     "trashtown_2112":
         {
             "path": "B:\\trashtown_2112",
@@ -39,6 +45,8 @@ projectsData ={
 
 def getCurrentProject():
     project = os.getenv("CURRENT_PROJECT")
+    project =project.split("/")[-1]
+
     #computer = os.environ['COMPUTERNAME']
     if project in projectsData.keys():
         currentProject = project
