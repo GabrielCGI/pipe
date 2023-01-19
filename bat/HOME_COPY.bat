@@ -10,7 +10,7 @@ set "newpath=%filepath:G:\Drive partagés\battlestar_partage\battlestar_2206=I:\
 set "newpath=%newpath:G:\Drive partagés\battlestar_image\battlestar_2206=I:\battlestar_2206%"
 
 rem Get the path directories of the newpath
-call :getPath %newpath% dirfilepath
+call :getPath "%newpath%" dirfilepath
 
 echo From: %filepath%
 echo To:   %newpath%

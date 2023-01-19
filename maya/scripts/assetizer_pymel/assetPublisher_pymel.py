@@ -278,12 +278,13 @@ def publish(root, asset_dir, import_proxy_scene=False, selected_variant=False):
 
     checkAsset(asset)
     asset_clean = cleanAsset(asset)
-
-
+    print("asset clean list")
+    print (asset_clean.variants)
     if selected_variant:
         tmp_list=[v for v in asset_clean.variants if utils.only_name(v)==utils.only_name(selected_variant)]
         asset_clean.variants = tmp_list
 
+    print (asset_clean.variants)
     for v in asset_clean.variants:
         log, variant_maya_ass = exportVariant(asset_clean,v,asset_dir,export_shading=False)
 
