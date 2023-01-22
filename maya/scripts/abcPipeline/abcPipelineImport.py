@@ -85,14 +85,14 @@ def createCharStandIn(name, anim_abc_path,abcv, asset_publish_path, asset_abc_pa
         cmds.setAttr(c+".abc_layers", anim_abc_path , type="string")
         set_shader = cmds.createNode("aiIncludeGraph", n="aiIncludeGraph_"+abcv)
         cmds.setAttr(set_shader+".filename",op_path , type="string")
-        cmds.setAttr(set_shader+".target", "aiStandInShape/input_merge_op", type="string" )
+        #cmds.setAttr(set_shader+".target", "aiStandInShape/input_merge_op", type="string" )
         cmds.connectAttr(set_shader+".out",c+".operators[0]", f=True )
     return c
 def abcLoad(anim_abc_path):
     "Import Abc from a directory"
     abc_filename = anim_abc_path.split("/")[-1]
     abcv = abc_filename.split(".")[0]
-    dir="B:/trashtown_2112/assets"
+    dir=assetsDir
     name = nameFromAbc(abc_filename)
     #LEGACY WORKFLOW
     refNamespace = name +"_shading_lib_"+ abc_filename.split("_")[-1].split(".")[0]  #00 ou 01 ou 02

@@ -50,7 +50,7 @@ class Char():
 	def list_geo(self, name, namespace):
 		geos = assetsDic[name]["geo"]
 		newgeos = [swap_namespace(g, namespace) for g in geos if pm.objExists(swap_namespace(g, namespace))]
-		return newgeos 
+		return newgeos
 
 def list_char_in_scene():
 	char_list=[]
@@ -58,7 +58,7 @@ def list_char_in_scene():
 	for ns in namespaces:
 		for name in assetsDic.keys():
 			match = False
-			if name in ns and "rigging" in ns :
+			if name+"_" in ns and "rigging" in ns :
 				match = True
 				break
 
@@ -79,10 +79,10 @@ def exportAbc(char, export_dir, start, end):
 	if not char.geos:
 		logger.error("Fail to export %s_%s"%(char.name,char.version))
 		logger.error("Geo list empty %s"%char.geos)
-		return 
+		return
 	for geo in char.geos:
 		command += " -root %s"%geo
-	
+
 	command += " -file \"%s\""%(path)
 	logger.info("Start export on: %s"%char.ns)
 	logger.info(command)
@@ -92,5 +92,3 @@ def exportAbc(char, export_dir, start, end):
 	logger.info("Succes !")
 
 char_list = list_char_in_scene()
-
-
