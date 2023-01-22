@@ -42,6 +42,9 @@ def build_shader_operator(aiStandIn, sel):
 
         shader = ""
         displacement_shader_string = ""
+        all_disp = None
+        shader_maya_disp = None
+        autoBump= False
         if len(sgs)==1:
             sg = sgs[0]
             if sg.aiSurfaceShader.isConnected():
@@ -54,9 +57,9 @@ def build_shader_operator(aiStandIn, sel):
                 shaders_used.append(shader_maya)
 
             if sg.displacementShader.isConnected():
-                shader_maya = sg.displacementShader.inputs()[0]
-                displacement_shader_string = "'%s'"%shader_maya
-                shaders_used.append(shader_maya)
+                shader_maya_disp = sg.displacementShader.inputs()[0]
+                displacement_shader_string = "'%s'"%shader_maya_disp
+                shaders_used.append(shader_maya_disp)
         else:
             all_disp = [sg.displacementShader for sg in sgs if sg.displacementShader.isConnected()]
             for sg in sgs:
@@ -89,8 +92,14 @@ def build_shader_operator(aiStandIn, sel):
         pm.setAttr (set_shader+".assignment[0]", "shader=%s"%(shader),type="string")
         if displacement_shader_string != "":
             pm.setAttr (set_shader+".assignment[1]", "disp_map=%s"%(displacement_shader_string),type="string")
-            autoBump = [True for disp in all_disp if disp.inputs()[0].aiDisplacementAutoBump.get() == True]
-            if len(autoBump) > 0:
+            if all_disp:
+                all_disp[0].inputs()[0].aiDisplacementAutoBump.get()
+
+            else:
+                if shader_maya_disp.aiDisplacementAutoBump.get() == True:
+                    print ("debug autobump ture")
+                    autoBump = True
+            if autoBump:
                 pm.setAttr (set_shader+".assignment[2]", "bool disp_autobump=True",type="string")
 
         #CATCLARK
@@ -123,8 +132,8 @@ def abcExport(sel):
         pm.error("No selection")
     asset_dir, asset_name= guess_dir()
     abc_dir = os.path.join(asset_dir,"abc")
-    random_string = secrets.token_hex(5)
-    abc_name = asset_name+random_string+"_mod.abc"
+    #random_string = secrets.token_hex(5)
+    abc_name = asset_name+"_mod.abc"
     abc_path= os.path.join(abc_dir,abc_name)
     abc_path=abc_path.replace("\\","/")
 

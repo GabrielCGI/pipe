@@ -144,6 +144,15 @@ def is_dir_exist(path):
     else:
         logger.debug('Check directory existence success: %s '%path)
         return True
+def is_dir_exist_no_confirm(path):
+    path = path.replace("\\","/")
+    if not os.path.isdir(path):
+        os.makedirs(path, exist_ok = True)
+        logger.info('Directory created: %s'%path)
+        return True
+
+        logger.debug('Check directory existence success: %s '%path)
+        return True
 
 def exportVariant(asset, variant, asset_dir, export_shading=False):
     log = ""
@@ -163,7 +172,8 @@ def exportVariant(asset, variant, asset_dir, export_shading=False):
 
     is_dir_exist(asset_dir)
     variant_publish_dir = os.path.join(asset_dir,"publish", "ass",variant_name)
-    is_dir_exist(variant_publish_dir)
+    
+    is_dir_exist_no_confirm(variant_publish_dir)
     variant_last_v = get_last_v(variant_publish_dir)
 
     variant_full_path = os.path.join(variant_publish_dir,variant_last_v,variant_name)
