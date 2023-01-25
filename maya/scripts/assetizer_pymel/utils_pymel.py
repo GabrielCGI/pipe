@@ -178,6 +178,7 @@ def list_all_textures_from_selected(obj):
         aiImages= pm.listHistory(sg, type="aiImage")
         tex_list += aiImages
     tex_list = list(set(tex_list))
+    print (tex_list)
     return tex_list
 
 def convert_to_tx(texture):

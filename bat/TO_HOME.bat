@@ -70,5 +70,5 @@ if %3==1 (
     copy %1 %2
   )
 ) else (
-  robocopy %1 %2 /E /CREATE
+  robocopy %1 %2 /E 
 )

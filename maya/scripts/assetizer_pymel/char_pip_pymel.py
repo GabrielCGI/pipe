@@ -1,4 +1,5 @@
 import pymel.core as pm
+import utils_pymel as utils
 import secrets
 import re
 import os
@@ -7,7 +8,6 @@ import os
 def build_shader_operator(aiStandIn, sel):
 
     # Get the selected objects
-
     ai_merge = pm.createNode("aiMerge", n="aiMerge_%s"%aiStandIn.getParent().name())
     empty_displace = None
     shaders_used = []
@@ -22,15 +22,12 @@ def build_shader_operator(aiStandIn, sel):
 
     counter = 0
     for m in meshes:
-        selection = m.getParent()
+        selection = m
         namespace = selection.namespace()
         selection = selection.longName()
-        if sel.getParent():
-            selection = selection.split(sel.getParent().longName())[-1]
-
         selection = selection.replace(namespace,"")
         selection = selection.replace("|","/")
-        selection = selection+"*"
+
 
         sgs = m.outputs(type='shadingEngine')
         sgs = list(set(sgs))
@@ -97,17 +94,21 @@ def build_shader_operator(aiStandIn, sel):
 
             else:
                 if shader_maya_disp.aiDisplacementAutoBump.get() == True:
-                    print ("debug autobump ture")
                     autoBump = True
             if autoBump:
                 pm.setAttr (set_shader+".assignment[2]", "bool disp_autobump=True",type="string")
 
         #CATCLARK
+        sss_setName = m.ai_sss_setname.get()
         catclark_type = m.aiSubdivType.get()
         catclark_subdiv= m.aiSubdivIterations.get()
         if catclark_type >0 and catclark_subdiv>0 :
             pm.setAttr(set_shader+".assignment[3]", "subdiv_type='catclark'",type="string")
             pm.setAttr(set_shader+".assignment[4]", "subdiv_iterations=%s"%(catclark_subdiv),type="string")
+        if sss_setName != "":
+            print (m.name()+ " sss_setName" + sss_setName )
+            pm.setAttr(set_shader+".assignment[5]", "ai_sss_setname=%s"%(sss_setName),type="string")
+
     return shaders_used
 
 def guess_dir():
@@ -162,6 +163,7 @@ def export_arnold_graph(aiStandIn, shaders_used):
 
 def run():
     sel = pm.ls(sl=True)[0]
+    utils.convert_selected_to_tx(sel)
     abc_path, abc_name= abcExport(sel)
     aiStandIn= create_standIn(abc_path, abc_name)
     shaders_used = build_shader_operator(aiStandIn,sel)
