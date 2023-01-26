@@ -5,6 +5,7 @@ import utils_pymel as utils
 import importlib
 importlib.reload(utils)
 import logging
+import doctor_utils as doc
 import re
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
@@ -172,7 +173,7 @@ def exportVariant(asset, variant, asset_dir, export_shading=False):
 
     is_dir_exist(asset_dir)
     variant_publish_dir = os.path.join(asset_dir,"publish", "ass",variant_name)
-    
+
     is_dir_exist_no_confirm(variant_publish_dir)
     variant_last_v = get_last_v(variant_publish_dir)
 
@@ -283,7 +284,9 @@ def check_is_retake(asset_dir,maya_root):
 
 
 def publish(root, asset_dir, import_proxy_scene=False, selected_variant=False):
-
+    doc.fixcolorSpaceUnknown()
+    badColorSpaceTex = doc.getBadColorSpaceTex()
+    doc.fixColorSpace(badColorSpaceTex)
     asset= Asset(root)
 
     checkAsset(asset)

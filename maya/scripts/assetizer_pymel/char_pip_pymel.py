@@ -27,6 +27,7 @@ def build_shader_operator(aiStandIn, sel):
         selection = selection.longName()
         selection = selection.replace(namespace,"")
         selection = selection.replace("|","/")
+        #selection = selection + "*"
 
 
         sgs = m.outputs(type='shadingEngine')
@@ -100,6 +101,7 @@ def build_shader_operator(aiStandIn, sel):
 
         #CATCLARK
         sss_setName = m.ai_sss_setname.get()
+        castsShadows = m.castsShadows.get()
         catclark_type = m.aiSubdivType.get()
         catclark_subdiv= m.aiSubdivIterations.get()
         if catclark_type >0 and catclark_subdiv>0 :
@@ -108,6 +110,10 @@ def build_shader_operator(aiStandIn, sel):
         if sss_setName != "":
             print (m.name()+ " sss_setName" + sss_setName )
             pm.setAttr(set_shader+".assignment[5]", "ai_sss_setname=%s"%(sss_setName),type="string")
+        if castsShadows == 0:
+            print("CAST SHADOW 0")
+            pm.setAttr(set_shader+".assignment[6]", "visibility=253",type="string")
+
 
     return shaders_used
 
