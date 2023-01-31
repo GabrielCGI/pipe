@@ -35,7 +35,7 @@ def replace_by_original():
     errorcounter= 0
     goodList=[]
     allFileNodes = cmds.ls(et="file")
-    fileType = ["exr","jpg","png","tiff"]
+    fileType = ["exr","jpg","png","tiff","tif"]
     for eachFile in allFileNodes:
         my_file = cmds.getAttr("%s.fileTextureName" % eachFile)
         base = os.path.splitext(my_file)[0]

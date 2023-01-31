@@ -26,15 +26,15 @@ rem \---- LENTILS
 rem \---- HDRLigthStudio
 rem SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\HDRLightStudioConnectionMaya\2022
 
-rem \---- ENVIT
-SET PATH=%PATH%;%NETWORK_INSTALL%\EnvIt
+
 
 rem \ BRAVE RABBIT PLACER TOOL
 SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;R:\pipeline\networkInstall\placeReflection_braveRabbit;
 
 rem \---- BIFRSOT 
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\bifrost\2.6.0.0;
-SET BIFROST_LIB_CONFIG_FILES=R:\pipeline\networkInstall\bifrost\MJCG_compounds_2_1_2\MJCG_compounds\bifrost_lib_config.json;R:\pipeline\networkInstall\bifrost\rebel_pack.0.4.2\rebel_pack\bifrost_lib_config.json;
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\bifrost\bifrost_2.5.1;
+SET BIFROST_LIB_CONFIG_FILES=R:\pipeline\networkInstall\bifrost\MJCG_compounds\bifrost_lib_config.json;R:\pipeline\networkInstall\bifrost\rebel_pack_0.4.1\bifrost_lib_config.json;
+
 
 rem \ MAYA SECURITY TOOL
 SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;R:\pipeline\networkInstall\MayaScanner;
