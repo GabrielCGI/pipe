@@ -9,6 +9,11 @@ importlib.reload(assetBrowser)
 
 """
 
+# ######################################################################################################################
+
+_FILE_NAME_PREFS = "asset_browser"
+
+# ######################################################################################################################
 
 import os
 import json
@@ -25,8 +30,11 @@ import subprocess
 import time
 from datetime import datetime
 import fnmatch
+from Prefs import Prefs
 #TO DO: packageClass()
 #CONNECT BUTTON
+
+asset_browser_prefs = Prefs(_FILE_NAME_PREFS)
 
 def maya_main_window():
     '''
@@ -111,8 +119,8 @@ def list_set_selected_byName(list,name):
     for item in list_item:
         if "shading_lib" in item and "publish" not in list_item:
             name = item
-    #DIRTY HACK END #
 
+    #DIRTY HACK END #
     items = list.findItems(name,QtCore.Qt.MatchExactly)
     list.setCurrentItem(items[0]) if len(items)>0 else list.setCurrentRow(0)
 
@@ -182,6 +190,7 @@ class AssetBrowser(QtWidgets.QDialog):
         self.package_Qlist.setMinimumWidth(160)
 
         self.second_Qlist = QtWidgets.QListWidget()
+        self.second_Qlist_refresh = True
         self.second_Qlist.setMaximumWidth(220)
         self.second_Qlist.setMinimumWidth(160)
 
@@ -269,11 +278,22 @@ class AssetBrowser(QtWidgets.QDialog):
         self.mainLayout.addLayout(self.bodyLayout)
 
         #OPEN BY DEFAULT AS ASSET BROWSER
-        self.current_project = project_list[0] if os.path.isdir(project_list[0]) else "D:/"
+        if "current_project" in asset_browser_prefs:
+            current_project_dir = asset_browser_prefs["current_project"]
+        else:
+            current_project_dir = os.getenv("CURRENT_PROJECT_DIR")
+
+        self.current_project = None
+        if current_project_dir is not None:
+            if current_project_dir in project_list:
+                self.current_project = current_project_dir
+        if self.current_project is None:
+            self.current_project = project_list[0] if os.path.isdir(project_list[0]) else "D:/"
+        self.comboBox_current_prod.setCurrentText(self.current_project)
+
         self.button_mode_asset.setChecked(True)
         self.mode = "assets"
         self.all_packages_dir = os.path.join(self.current_project,"assets")
-        self.rebuild_package_list()
         #self.package_Qlist.setCurrentRow(0)
         #self.package_Qlist_changed()
 
@@ -296,10 +316,12 @@ class AssetBrowser(QtWidgets.QDialog):
         self.button_add_new.clicked.connect(self.button_add_new_clicked)
 
         self.reference_button.clicked.connect(self.reference_clicked)
-        self.package_Qlist.itemClicked.connect(self.package_Qlist_changed)
-        self.second_Qlist.itemClicked.connect(self.second_Qlist_changed)
+        self.package_Qlist.itemSelectionChanged.connect(self.package_Qlist_changed)
+        self.second_Qlist.itemSelectionChanged.connect(self.second_Qlist_changed)
         self.third_Qlist.itemClicked.connect(self.third_Qlist_changed)
         self.third_Qlist.itemDoubleClicked.connect(self.enter_directory)
+
+        self.rebuild_package_list()
 
 
     ##############QLIST CHANGED ##############
@@ -309,15 +331,35 @@ class AssetBrowser(QtWidgets.QDialog):
         """
 
         packageName = self.package_Qlist.currentItem().text()
+        if packageName:
+            asset_browser_prefs["package_name"] = packageName
         self.package = Package(packageName, self.mode, self.current_project)
         if self.package.dir is not None:
+
+            self.second_Qlist_refresh = False
             self.rebuild_departementList()
-            self.rebuild_files_list(None)
+            self.second_Qlist_refresh = True
+
+            if "departement_selection" in asset_browser_prefs:
+                departement_selection = asset_browser_prefs["departement_selection"]
+                for i in range(self.second_Qlist.count()):
+                    item = self.second_Qlist.item(i)
+                    if item.text() == departement_selection:
+                        self.second_Qlist.setCurrentItem(item)
+                        break
+
             self.rebuild_image()
 
+
     def second_Qlist_changed(self):
-        departement_dir = os.path.join(self.package.dir,self.second_Qlist.currentItem().text())
-        self.rebuild_files_list(departement_dir)
+        current_item = self.second_Qlist.currentItem()
+        if current_item is not None:
+            text = current_item.text()
+            departement_dir = os.path.join(self.package.dir,text)
+            if self.second_Qlist_refresh:
+                if departement_dir:
+                    asset_browser_prefs["departement_selection"] = text
+            self.rebuild_files_list(departement_dir)
 
     def third_Qlist_changed(self):
         path, namespace = self.build_path_scene()
@@ -335,7 +377,12 @@ class AssetBrowser(QtWidgets.QDialog):
         self.clean_package_list = [package for package in packages_list if not_blacklisted(package)]
 
         for package in self.clean_package_list:
-            self.package_Qlist.addItem(package)
+            item = QtWidgets.QListWidgetItem(package)
+            self.package_Qlist.addItem(item)
+            if "package_name" in asset_browser_prefs:
+                if asset_browser_prefs["package_name"] == package:
+                    self.package_Qlist.setCurrentItem(item)
+
 
     def filter_package_list(self):
 
@@ -506,6 +553,10 @@ class AssetBrowser(QtWidgets.QDialog):
             pass
     def current_prod_changed(self):
         self.current_project = self.comboBox_current_prod.currentText()
+        asset_browser_prefs["current_project"] = self.current_project
+        asset_browser_prefs.pop("package_name")
+        asset_browser_prefs.pop("departement_selection")
+
         self.all_packages_dir = os.path.join(self.current_project,self.mode)
         self.rebuild_package_list()
 

@@ -88,7 +88,7 @@ def get_asset_directory_from_asset_name(asset_name):
         return assets_dir
 
     if is_prop and is_enviro:
-        warning("FAIL TO GUSS THE ASSET TYPE (Environment or Prop). Both exist with same name %s"%asset_name)
+        warning("FAIL TO GUESS THE ASSET TYPE (Environment or Prop). Both exist with same name %s"%asset_name)
 
     if not is_enviro and not is_prop:
         warning("FAILED TO FIND THE ASSETS DIRECTORY FOR %s in %s"%(asset_name,assets_dir))
@@ -209,11 +209,13 @@ def convert_to_tx(texture):
             logger.info("Failed to set tx on: %s"%tx_path)
 
 def convert_selected_to_tx(obj):
+    if not isinstance(obj, list):
+        obj = [obj]
+    for o in obj:
+        tex_list= list_all_textures_from_selected(o)
+        for tex in tex_list:
 
-    tex_list= list_all_textures_from_selected(obj)
-    for tex in tex_list:
-
-        convert_to_tx(tex)
+            convert_to_tx(tex)
 
 def import_all_references(node):
 

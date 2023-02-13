@@ -10,14 +10,20 @@ import maya.OpenMayaUI as omui
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
+from PySide2.QtWidgets import *
+from PySide2.QtGui import *
+from PySide2.QtCore import *
 
 from shiboken2 import wrapInstance
 
 import utils
+from Prefs import *
 
 import maya.OpenMaya as OpenMaya
 
 ########################################################################################################################
+
+_FILE_NAME_PREFS = "shader_maker"
 
 DEFAULT_DIR_BROWSE = "I:/"
 
@@ -77,6 +83,11 @@ class ShaderMaker(QtWidgets.QDialog):
     def __init__(self, prnt=wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)):
         super(ShaderMaker, self).__init__(prnt)
 
+        # Common Preferences (common preferences on all tools)
+        self.__common_prefs = Prefs()
+        # Preferences for this tool
+        self.__prefs = Prefs(_FILE_NAME_PREFS)
+
         # Model attributes
         self.__cs_folder_path = ""
         self.__cs_shaders = []
@@ -87,7 +98,21 @@ class ShaderMaker(QtWidgets.QDialog):
         self.__displacement_mid = DEFAULT_DISPLACEMENT_MID
 
         # UI attributes
-        self.__reinit_ui()
+        self.__ui_width = 750
+        self.__ui_height = 700
+        self.__ui_min_width = 750
+        self.__ui_min_height = 200
+        self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width,self.__ui_height)/2
+        self.__ui_cs_folder_path = None
+        self.__ui_us_folder_path = None
+        self.__ui_cs_submit_btn = None
+        self.__ui_us_submit_btn = None
+        self.__ui_shaders_cs_lyt = None
+        self.__auto_assign_radio = None
+        self.__assign_to_selection_radio = None
+        self.__no_assign_radio = None
+
+        self.__retrieve_prefs()
 
         # Retrieve us data
         self.__generate_us_data()
@@ -104,30 +129,31 @@ class ShaderMaker(QtWidgets.QDialog):
         self.__refresh_ui()
         self.__create_callback()
 
+
+    # Save preferences
+    def __save_prefs(self):
+        size = self.size()
+        self.__prefs["window_size"] = {"width": size.width(), "height": size.height()}
+        pos = self.pos()
+        self.__prefs["window_pos"] = {"x": pos.x(), "y": pos.y()}
+
+    # Retrieve preferences
+    def __retrieve_prefs(self):
+        if "window_pos" in self.__prefs:
+            pos = self.__prefs["window_pos"]
+            self.__ui_pos = QPoint(pos["x"],pos["y"])
+
+
     # Create a callback for when new Maya selection
     def __create_callback(self):
         self.__us_selection_callback = \
             OpenMaya.MEventMessage.addEventCallback("SelectionChanged", self.on_selection_changed)
 
     # Remove callback
-    def closeEvent(self, arg__1: QtGui.QCloseEvent) -> None:
+    def hideEvent(self, arg__1: QtGui.QCloseEvent) -> None:
         OpenMaya.MMessage.removeCallback(self.__us_selection_callback)
+        self.__save_prefs()
 
-    # initialize the ui
-    def __reinit_ui(self):
-        self.__ui_width = 750
-        self.__ui_height = 700
-        self.__ui_min_height = 200
-        self.__ui_cs_folder_path = None
-        self.__ui_us_folder_path = None
-        self.__ui_cs_submit_btn = None
-        self.__ui_us_submit_btn = None
-        self.__ui_shaders_cs_lyt = None
-        self.__auto_assign_radio = None
-        self.__assign_to_selection_radio = None
-        self.__no_assign_radio = None
-
-    # Get the parent directory of the scene or a default one
 
     # Function to browse a new folder for the creation part
     def __browse_cs_folder(self):
@@ -152,11 +178,9 @@ class ShaderMaker(QtWidgets.QDialog):
     # Create the ui
     def __create_ui(self):
         # Reinit attributes of the UI
-        self.__reinit_ui()
-        self.setMinimumHeight(self.__ui_min_height)
-        self.setFixedWidth(self.__ui_width)
+        self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
-        self.move(QtWidgets.QDesktopWidget().availableGeometry().center() - self.frameGeometry().center())
+        self.move(self.__ui_pos)
 
         browse_icon_path = os.path.dirname(__file__) + "/assets/browse.png"
 
@@ -181,6 +205,8 @@ class ShaderMaker(QtWidgets.QDialog):
 
         # Layout ML.2 : Update shaders
         us_lyt = QtWidgets.QVBoxLayout()
+        us_lyt.setSpacing(4)
+        us_lyt.setMargin(5)
         us_lyt.setAlignment(QtCore.Qt.AlignTop)
         us_widget = QtWidgets.QWidget()
         us_widget.setLayout(us_lyt)
@@ -343,6 +369,7 @@ class ShaderMaker(QtWidgets.QDialog):
 
     def __refresh_us_body(self):
         # Refresh the body of the update part
+        textures_displayed= {}
         if self.__ui_tree_us_files is not None:
             self.__ui_tree_us_files.clear()
             update_btn_enabled = False
@@ -357,17 +384,29 @@ class ShaderMaker(QtWidgets.QDialog):
                         dir_string += ", "
                 dir_string += "]"
 
+                if directory not in textures_displayed:
+                    textures_displayed[directory] = []
+
                 item = QtWidgets.QTreeWidgetItem([dir_string])
                 self.__ui_tree_us_files.addTopLevelItem(item)
                 for texture in textures:
                     filepath = texture.getAttr("fileTextureName")
-                    filename = os.path.basename(filepath)
-                    child = QtWidgets.QTreeWidgetItem([filename])
-                    new_file_path = self.__us_find_file_in_directory(self.__us_folder_path, filename)
-                    child_enabled = new_file_path is not None and new_file_path != filepath
-                    update_btn_enabled |= child_enabled
-                    child.setDisabled(not child_enabled)
-                    item.addChild(child)
+                    if filepath not in textures_displayed[directory]:
+                        textures_displayed[directory].append(filepath)
+
+                        filename = os.path.basename(filepath)
+                        child = QtWidgets.QTreeWidgetItem([filename])
+
+                        base = re.search("(.*)(?:<UDIM>|[0-9]{4})\.(?:exr|jpg|jpeg|tif|png)", filename)
+                        match = base.groups()[0]
+                        regex = match.replace(".", "\.") + "((?:[0-9]{0,4})\.(?:exr|jpg|jpeg|tif|png))"
+                        new_file_path = self.__us_find_file_in_directory(
+                            self.__us_folder_path, regex)
+
+                        child_enabled = new_file_path is not None and new_file_path != filepath
+                        update_btn_enabled |= child_enabled
+                        child.setDisabled(not child_enabled)
+                        item.addChild(child)
                 item.setExpanded(True)
 
             # Refresh the update button according to the update body
@@ -432,6 +471,7 @@ class ShaderMaker(QtWidgets.QDialog):
             dirname = os.path.dirname(texture.getAttr("fileTextureName"))
             if dirname not in self.__us_data:
                 self.__us_data[dirname] = [[], []]
+
             self.__us_data[dirname][0].append(texture)
 
             if shading_group not in self.__us_data[dirname][1]:
@@ -450,7 +490,7 @@ class ShaderMaker(QtWidgets.QDialog):
             if os.path.isdir(self.__cs_folder_path + "/" + child):
                 list_dir.append(child)
             else:
-                if re.match(r".*\.(" + FILE_EXTENSION_SUPPORTED_REGEX + ")", child):
+                if re.match(r".*\.(?:" + FILE_EXTENSION_SUPPORTED_REGEX + ")", child):
                     has_texture = True
 
         if has_texture:
@@ -466,7 +506,7 @@ class ShaderMaker(QtWidgets.QDialog):
                 has_texture_2 = False
                 child_dir_2 = os.listdir(dir_path)
                 for child in child_dir_2:
-                    if re.match(r".*\.(" + FILE_EXTENSION_SUPPORTED_REGEX + ")", child):
+                    if re.match(r".*\.(?:" + FILE_EXTENSION_SUPPORTED_REGEX + ")", child):
                         has_texture_2 = True
                         break
                 if has_texture_2:
@@ -513,7 +553,8 @@ class ShaderMaker(QtWidgets.QDialog):
                 for shading_group, shader_title in to_reassign.items():
                     arnold_node, displacement_node = shading_nodes[shader_title]
                     arnold_node.outColor >> shading_group.surfaceShader
-                    displacement_node.displacement >> shading_group.displacementShader
+                    if displacement_node is not None:
+                        displacement_node.displacement >> shading_group.displacementShader
 
         elif self.__assign_cs == Assignation.AssignToSelection:  # AssignToSelection
             selection = ls(sl=True, transforms=True)
@@ -526,7 +567,8 @@ class ShaderMaker(QtWidgets.QDialog):
                     if shader.is_enabled():
                         arnold_node, displacement_node = shader.generate_shading_nodes(shading_values)
                         arnold_node.outColor >> shading_group.surfaceShader
-                        displacement_node.displacement >> shading_group.displacementShader
+                        if displacement_node is not None:
+                            displacement_node.displacement >> shading_group.displacementShader
                 # Assign the object in the shading group
                 for obj in selection:
                     sets(shading_group, forceElement=obj)
@@ -552,13 +594,15 @@ class ShaderMaker(QtWidgets.QDialog):
     # Delete an existing shader recursively
     def __delete_existing_shader(self, node):
         for s in node.inputs():
-            if s.type() != "transform":
-                self.__delete_existing_shader(s)
-                try:
-                    if "default" not in s.name():
-                        delete(s)
-                except:
-                    pass
+            if objExists(s):
+                if s.type() != "transform":
+                    self.__delete_existing_shader(s)
+                    try:
+                        if "default" not in s.name():
+                            delete(s)
+                    except:
+                        pass
+        print("Existing shaders deleted")
 
     # Update file path with model datas
     def __submit_update_shader(self):
@@ -568,23 +612,35 @@ class ShaderMaker(QtWidgets.QDialog):
             for texture in textures:
                 filepath = texture.getAttr("fileTextureName")
                 filename = os.path.basename(filepath)
-                new_file_path = self.__us_find_file_in_directory(self.__us_folder_path, filename)
+
+                base = re.search("(.*)(?:<UDIM>|[0-9]{4})\.(?:exr|jpg|jpeg|tif|png)", filename)
+                match = base.groups()[0]
+                regex = match.replace(".", "\.") + "((?:[0-9]{0,4})\.(?:exr|jpg|jpeg|tif|png))"
+
+                new_file_path = self.__us_find_file_in_directory(self.__us_folder_path, regex)
                 if new_file_path is not None and new_file_path != filepath:
                     texture.fileTextureName.set(new_file_path)
         self.__generate_us_data()
         self.__refresh_us_body()
         undoInfo(closeChunk=True)
 
-    def __us_find_file_in_directory(self, directory, filename, depth=4):
+    def __us_find_file_in_directory(self, directory, regex, depth=4):
         if depth > 0:
-            exists = os.path.exists(directory + "/" + filename)
-            if exists:
+            filename = None
+            if os.path.isdir(directory):
+                for f in os.listdir(directory):
+                    if os.path.isfile(directory+"/"+f):
+                        match = re.match(regex, f)
+                        if match is not None:
+                            filename = match.group()
+                            break
+            if filename is not None:
                 return directory + "/" + filename
             else:
                 if os.path.exists(directory):
                     for d in os.scandir(directory):
                         if d.is_dir():
-                            filepath = self.__us_find_file_in_directory(d.path.replace('\\', '/'), filename, depth - 1)
+                            filepath = self.__us_find_file_in_directory(d.path.replace('\\', '/'), regex, depth - 1)
                             if filepath is not None:
                                 return filepath
         return None

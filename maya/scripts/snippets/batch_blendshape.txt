@@ -1,0 +1,12 @@
+a= pm.ls(sl=True)[0] #BASE
+b= pm.ls(sl=True)[1] #REF
+
+a_child_mshs= pm.listRelatives(a, ad=True,type="mesh")
+b_child_mshs= pm.listRelatives(b, ad=True,type="mesh")
+for a in a_child_mshs:
+    name_target = "ch_roseKnight_shading_0037:"+a.name()
+    if name_target in b_child_mshs:
+
+        print ("SETTTING ON %s_ TO _%s"%(a,name_target))
+        blendshape= pm.blendShape(a, name_target, name=a.name()+'_blendShape' )
+        pm.setAttr(blendshape[0] + '.' + a.name(), 1)

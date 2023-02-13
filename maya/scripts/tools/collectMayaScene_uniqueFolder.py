@@ -4,9 +4,10 @@ import time
 import maya.cmds as cmds
 import logging
 import sys
+import math
 logger = logging.getLogger("CollectFiles")
 #Init variable
-localCacheFolder = "I:/guerlain_cache"
+localCacheFolder = "D:/cache"
 networkPath = "I:/"
 dirList=[] #List of full directory to copy
 assSequenceDir= []
@@ -19,21 +20,29 @@ def getHotCacheDir(dir):
     hotCacheDir  = localCacheFolder +"/"+ splitDir[0] + splitDir[-1]
     return hotCacheDir
 
+def mTimeListDir(dir):
+    list = os.listdir(dir)
+    mtimeList = []
+    for a in list:
+        path = os.path.join(dir,a)
+        mTime = os.stat(path).st_mtime
+        mtimeList.append(mTime)
+    return(mtimeList)
+
+
 def isDirModified(dir):
     timestamp = None
     hotCacheDir  = getHotCacheDir(dir)
     os.makedirs(hotCacheDir,exist_ok=True)
-    dirTime = os.stat(dir).st_mtime
-    try:
-        timestamp = getTimeStamp(dir)
-    except Exception as e:
-        print (e)
+    #dirTime = os.stat(dir).st_mtime
+    #print ("DIR TIME: "+str(dirTime))
+    last_modif_dir = mTimeListDir(dir)
+    last_modif_hotDir = mTimeListDir(hotCacheDir)
 
-    if dirTime != timestamp:
+    if last_modif_dir != last_modif_hotDir:
         return True
     else:
         return False
-
 
 def writeTimeStamp(time, dir):
     timeStamp = os.path.join(dir, "timestamp.txt")
@@ -57,6 +66,7 @@ def listAllAssPath():
         #CHECK IS IT'S AN ASS SEQUENCE
         if assPath.endswith('.####.ass'):
             dirname = os.path.dirname(assPath).replace("\\", "/")
+            print("ASS SEQUENCE FOUND: " + assPath)
             if dirname not in assSequenceDir:
                 assSequenceDir.append(dirname)
                 if isDirModified(dirname):
@@ -117,7 +127,13 @@ def copyFromTo (source, to):
     return kind
 
 
-
+def scan():
+    allMayaFile = cmds.file(list=True, q=True)
+    allAssFile = listAllAssPath()
+    allPath = allMayaFile + allAssFile
+    for path in allPath:
+        size = round(os.path.getsize(path)*0.000001, 1)
+        print ("%s: %s MO"%(path,size))
 
 def run():
     print("\n")
@@ -146,11 +162,10 @@ def run():
     step = 10
     i = 0
     for path in allPath:
-        splitPath = path.split(":")
-        localPath = localCacheFolder +"/"+ splitPath[0] + splitPath[-1]
-        assetFilename = os.path.basename(path)
+        dirname, basename = os.path.split(path)
+        localPath = os.path.join(localCacheFolder,basename)
         #logger.info("Cache on farm asset: %s"%(assetFilename))
-        print("Cache on farm asset: %s"%(assetFilename))
+        print("Cache on farm asset: %s"%(basename))
 
         try:
             copy = copyFromTo(path,localPath)
@@ -189,4 +204,5 @@ def copySceneFile():
         copy = copyFromTo(path,localPath)
     except Exception as e:
         print("Oops!", e.__class__, "occurred.")
-run()
+scan()
+#run()

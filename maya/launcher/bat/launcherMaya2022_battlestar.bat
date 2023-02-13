@@ -32,7 +32,8 @@ rem \ BRAVE RABBIT PLACER TOOL
 SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;R:\pipeline\networkInstall\placeReflection_braveRabbit;
 
 rem \---- Scripts
-SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings\battlestar;%SCRIPT_MAYA%\shaderTransferTool;%SCRIPT_MAYA%\assetBrowser;%SCRIPT_MAYA\assetizer_pymel;%NETWORK_INSTALL%\script
+SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings\battlestar;%SCRIPT_MAYA%\shaderTransferTool;%SCRIPT_MAYA%\assetBrowser;%NETWORK_INSTALL%\script;%SCRIPT_MAYA%\assetizer_pymel
+
 
 rem \---- Color
 rem \---- SET OCIO=<MAYA_RESOURCES>\OCIO-configs\Maya2022-default\config.ocio
@@ -42,8 +43,8 @@ rem \----DEADLINE
 SET MAYA_SCRIPT_PATH=%MAYA_SCRIPT_PATH%;R:\deadline\submission\Maya\Client;
 
 
-SET CURRENT_PROJECT=I:/battlestar_2206
-SET CURRENT_PROJECT_DIR=I:/battlestar_2206/assets
+SET CURRENT_PROJECT=battlestar_2206
+SET CURRENT_PROJECT_DIR=I:/battlestar_2206
 SET ASSETS_DIR=I:/battlestar_2206/assets
 
 REM == Start maya and launch statupSettings (FPS, Unit ect...)

@@ -155,7 +155,7 @@ class AssetLoader(QtWidgets.QDialog):
                 try:
                     if sel.getParent().getShape().hasAttr('dso'):
                         sel = sel.getParent()
-                        print("SETING PARENT %s"%sel)
+                        print("SETTING PARENT %s"%sel)
                     else:
                         check=False
                         error_msg = "Not a procedural"
@@ -166,7 +166,6 @@ class AssetLoader(QtWidgets.QDialog):
                     return sel, check, error_msg
 
         print (sel)
-        print("seeeeeeel")
         if not sel:
                 check=False
                 error_msg = "Not a procedural"
@@ -292,25 +291,39 @@ class AssetLoader(QtWidgets.QDialog):
             self.display_label.setStyleSheet("color: green")
 
 
-    def convert_to_maya_clicked(self):
-        #Get maya scene path
-        if not self.isValid == True: utils.warning("Not a valid standIn")
-        variant_name = self.variant_Qlist.currentItem().text()
-        version = self.version_Qlist.currentItem().text()
-        maya_path = build_maya_path(self.asset_dir, self.asset_name,variant_name, version)
-        #Build a namescape
-        namespace_for_creation = utils.nameSpace_from_path(maya_path)
-        #Reference the maya scene
-
+    def to_maya(self, standIn):
+        dso = standIn.dso.get()
+        maya_path = dso.replace(".ass",".ma")
+        namespace_for_creation= utils.nameSpace_from_path(maya_path)
         refNode = pm.system.createReference(maya_path, namespace=namespace_for_creation)
         nodes = pm.FileReference.nodes(refNode)
-        parent = self.proxy.getParent()
+        transform = standIn.getParent()
+        parent = transform.getParent()
         if parent:
             pm.parent(nodes[0],parent)
+        utils.match_matrix(nodes[0],transform)
+        transform.visibility.set(False)
 
-        utils.match_matrix(nodes[0],self.proxy)
+    def batch_convert(self, sel):
+        standIn_list = []
+        for s in sel:
+            ass = s.getShape()
+            if pm.objectType(ass) == "aiStandIn" :
+                standIn_list.append(ass)
+            elif pm.objectType(s) == "aiStandIn":
+                standIn_list.append(s)
+            elif pm.objectType(s.getParent().getShape()) == "aiStandIn":
+                standIn_list.append(s.getParent().getShape())
 
-        self.proxy.visibility.set(False)
+        for ass in standIn_list:
+            self.to_maya(ass)
+
+
+
+    def convert_to_maya_clicked(self):
+        sel = pm.ls(sl=True)
+        self.batch_convert(sel)
+
 
     def switch_proxy_type_clicked(self):
         if self.proxyType == "mesh":

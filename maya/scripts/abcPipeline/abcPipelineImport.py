@@ -1,131 +1,90 @@
 import maya.cmds as cmds
 import os
 import sys
+import re
 import importlib
-#Load Abc Plugins
+
+# Load Abc Plugins
 cmds.loadPlugin("AbcImport.mll", quiet=True)
 cmds.loadPlugin("AbcExport.mll", quiet=True)
 
-import maya.mel as mel
+def create_char_standin(anim_abc_path,abc_char_name, mod_folder, operator_folder):
+    # Find mod abc file
+    mod_files = []
+    for file in os.listdir(mod_folder):
+        file_path = os.path.join(mod_folder, file)
+        print(file)
+        if os.path.isfile(file_path) and re.match(r".*mod(\.v[0-9]+)?\.abc", file, re.IGNORECASE):
+            mod_files.append(file_path)
+    mod_files = sorted(mod_files, reverse=True)
 
+    if len(mod_files) == 0:
+        raise Exception("No mod file found in " + mod_folder)
 
-import projects as projects
+    operator_files = []
+    for file in os.listdir(operator_folder):
+        file_path = os.path.join(operator_folder, file)
+        if os.path.isfile(file_path) and re.match(r".*\.ass", file, re.IGNORECASE):
+            operator_files.append(file_path)
+    operator_files = sorted(operator_files, reverse=True)
 
+    if len(operator_files) == 0:
+        raise Exception("No operator file found in " + operator_folder)
 
-currentProject = projects.getCurrentProject()
-projectsData = projects.getProjectData(currentProject)
-assetsDir = projectsData.get("assetsDir")
-assetsDic = projects.buildAssetDb()   #Get dictionnary of all asset for th current project
+    mod_file_path = mod_files[0]
+    operator_file_path = operator_files[0]
+    print("mod file           \t", mod_file_path)
+    print("operator file      \t", operator_file_path)
 
+    standin_name = abc_char_name + "_00"
+    standin_shape_name = standin_name + "Shape"
 
-def listAbcFromDir(path):
-    "List all Abc from a directory"
-    listAbc = []
-    for abc in os.listdir(path):
-        if abc.endswith(".abc"):
-            listAbc.append(abc)
-    return listAbc
-
-def importReference(path, refNamespace):
-    "Import a reference given a path"
-    cmds.file(path, reference = True, namespace=refNamespace)
-
-def nameFromAbc(abc):
-    "ch_name_01.abc => ch_name"
-    #HacK paradise
-    if len(abc.split("_"))==3:
-        name = "%s_%s"%(abc.split("_")[0],abc.split("_")[1])
-    if len(abc.split("_"))==2:
-        name = abc.split("_")[0]
-    return name
-
-def createScriptNode(refNamespace, abcPath):
-    # HACK SWAROVKI OLD=> childRef = cmds.referenceQuery("%sRN"%(refNamespace), rfn=True, ch=True)[0]     #HACK PROD NUTRO !!!! [-1] to get the ABC. [0] usualy
-    childRefList = cmds.referenceQuery("%sRN"%(refNamespace), rfn=True, ch=True)
-    for c in childRefList:
-        if c.split(":")[-1].split("_")[0]=="ch":
-            childRef = c
-
-    script ='cmds.file ("%s", loadReference = "%s", type="Alembic")'%(abcPath, childRef)
-    scriptNodeName = "scriptNode_"+refNamespace
-    scriptNode = cmds.scriptNode (st= 1, n= scriptNodeName, bs=script, stp = "python")
-
-    deferScript = 'cmds.file("%s", loadReference="%s", type="Alembic")'%(abcPath, childRef)        #Update the alembic.
-    cmds.evalDeferred(deferScript)
-
-def createCharStandIn(name, anim_abc_path,abcv, asset_publish_path, asset_abc_path):
-    name_standin_shape =abcv+"_00Shape"
-    name_standin =abcv+"_00"
-    if cmds.objExists(name_standin):
-        result = cmds.confirmDialog( title='Confirm', message='The character already exist: %s'%name_standin,
-        button=['Delete manually later',"Delete now"] )
+    if cmds.objExists(standin_name):
+        result = cmds.confirmDialog(title='Confirm', message='The character already exist: %s' % standin_name,
+                                    button=['Delete manually later', "Delete now"])
         if result == "Delete now":
-            cmds.delete(name_standin)
-    a = cmds.createNode("aiStandIn",n=name_standin_shape)
-    b= cmds.listRelatives(a,parent=True)
-    c=cmds.rename(b,name_standin)
+            cmds.delete(standin_name)
+    standin_shape_node = cmds.createNode("aiStandIn", n=standin_shape_name)
+    standin_node = cmds.listRelatives(standin_shape_node, parent=True)
+    standin_node = cmds.rename(standin_node, standin_name)
 
-    abc_mod = [abc for abc in os.listdir(asset_abc_path) if abc.endswith("mod.abc")]
-    if len(abc_mod) == 0:
-        abc_mod = "none.abc"
-        cmds.warning("Can't find modeling abc for %s"%name)
-    else:
-        abc_mod=abc_mod[0]
+    cmds.setAttr(standin_node + ".dso", mod_file_path, type="string")
+    cmds.setAttr(standin_node + ".useFrameExtension", 1)
+    cmds.setAttr(standin_node + ".abc_layers", anim_abc_path, type="string")
+    set_shader = cmds.createNode("aiIncludeGraph", n="aiIncludeGraph_" + abc_char_name)
 
-    abc_mod_path = os.path.join(asset_abc_path,abc_mod)
-    cmds.setAttr(c+".dso",abc_mod_path,type="string")
+    cmds.setAttr(set_shader + ".filename", operator_file_path, type="string")
+    cmds.connectAttr(set_shader + ".out", standin_node + ".operators[0]", f=True)
 
-    list = os.listdir(asset_publish_path)
-    cmds.setAttr(c+".useFrameExtension", 1)
-    operators = [o for o in list if o.endswith(".ass")]
-    operators.sort()
-    if operators:
-        op = operators[-1]
-        op_path= os.path.join(asset_publish_path,op)
-        cmds.setAttr(c+".abc_layers", anim_abc_path , type="string")
-        set_shader = cmds.createNode("aiIncludeGraph", n="aiIncludeGraph_"+abcv)
-        cmds.setAttr(set_shader+".filename",op_path , type="string")
-        #cmds.setAttr(set_shader+".target", "aiStandInShape/input_merge_op", type="string" )
-        cmds.connectAttr(set_shader+".out",c+".operators[0]", f=True )
-    return c
-def abcLoad(anim_abc_path):
-    "Import Abc from a directory"
+    return standin_node
+
+
+def load_abc(anim_abc_path, assets_dir):
+    """Import Abc from a directory"""
     abc_filename = anim_abc_path.split("/")[-1]
-    abcv = abc_filename.split(".")[0]
-    dir=assetsDir
-    name = nameFromAbc(abc_filename)
-    #LEGACY WORKFLOW
-    refNamespace = name +"_shading_lib_"+ abc_filename.split("_")[-1].split(".")[0]  #00 ou 01 ou 02
-    shadingRefPath = assetsDic.get(name).get("shading")
-    scriptNodeName = "scriptNode_" + refNamespace
-    #LEGACY WORKFLOW  END
-    asset_path= os.path.join(dir,name)
-    asset_publish_path = os.path.join(asset_path,"publish")
-    asset_abc_path = os.path.join(asset_path,"abc")
+    abc_char_name = abc_filename[:-len(abc_filename.split("_")[-1]) - 1]
+    mod_folder = assets_dir + "\\" + abc_char_name + "\\abc"
+    operator_folder = assets_dir + "\\" + abc_char_name + "\\publish"
+    print("abc_filename       \t", abc_filename)
+    print("abc_char_name      \t", abc_char_name)
+    print("assets_dir         \t", assets_dir, os.path.exists(assets_dir))
+    print("mod_folder         \t", mod_folder, os.path.exists(mod_folder))
+    print("operator_folder    \t", operator_folder, os.path.exists(operator_folder))
 
-    if os.path.isdir(asset_publish_path):
-        standin =createCharStandIn(name, anim_abc_path, abcv, asset_publish_path, asset_abc_path)
-        return standin
+    return create_char_standin(anim_abc_path,abc_char_name, mod_folder, operator_folder)
 
-    else:
-        #LEGACY WORKFLOW
-        if cmds.objExists(scriptNodeName):
-            print("Updating animation for: %s \n %s"%(refNamespace, anim_abc_path))
-            cmds.delete (scriptNodeName)                #Delete old script Node
-            createScriptNode(refNamespace, abcPath)
-           #Create new script Node
-        else:
-            print("LEGACY MODE !")
-            print("Importing animation for: %s \n %s" % (refNamespace, anim_abc_path))
-            importReference(shadingRefPath, refNamespace)               #Import Reference
-            createScriptNode(refNamespace, anim_abc_path)
-            #Create new script Node
-def importAnim():
-    "Import selected alembic in the file dialog - Master fonction"
-    basicFilter = "*.abc"
-    listAbc = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, fileMode=4)
-    list = []
-    for abcPath in listAbc:
-        standin = abcLoad(abcPath)
-        list.append(standin)
-    cmds.select(list)
+
+def import_anim():
+    """Import selected alembic in the file dialog"""
+
+    assets_dir = os.getenv("ASSETS_DIR")
+
+    if assets_dir is None:
+        raise Exception("Assets dir environment variable not found : Use an Illogic Launcher")
+
+    list_abc = cmds.fileDialog2(fileFilter="*.abc", dialogStyle=2, fileMode=4)
+    list_selected = []
+    for abc_path in list_abc:
+        standin = load_abc(abc_path, assets_dir)
+        list_selected.append(standin)
+    cmds.select(list_selected)

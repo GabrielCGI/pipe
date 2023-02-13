@@ -1,0 +1,1716 @@
+[33mcommit 4c7c2052551f928313d2d5d12d23967fc305f579[m[33m ([m[1;36mHEAD -> [m[1;32mmaster[m[33m)[m
+Author: mariusjenin <marius2401@laposte.net>
+Date:   Tue Jan 31 16:09:09 2023 +0100
+
+    Undo chunks
+
+[33mcommit 15be159ecf178809b6d2c74d040a848582c1aa35[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Jan 31 12:11:26 2023 +0100
+
+    update
+
+[33mcommit bceaa234f68320585b58277a6ee85a3027852ddc[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jan 26 18:22:47 2023 +0100
+
+    publish
+    
+    zd
+
+[33mcommit 1f43174b1b797633444514d44164971d84970ad6[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jan 25 15:46:36 2023 +0100
+
+    global
+
+[33mcommit 19f57d5a04a0662f52fc7a83364c50158526b3f7[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Jan 22 21:13:32 2023 +0100
+
+    abcimport
+
+[33mcommit e3e4fd0c3456642bedabe37af4a483b9fc85dbf8[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Jan 22 17:26:41 2023 +0100
+
+    shadermaker
+
+[33mcommit 15957769f467f1ed86ea6270e7fccfea65772a4a[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jan 19 16:42:36 2023 +0100
+
+    bat
+
+[33mcommit 6def1f523ccb060be24d9b165a5eded8542bcfaa[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jan 18 15:01:05 2023 +0100
+
+    update
+
+[33mcommit abc523e8523210c1d388cc7f551e034c2759d372[m
+Merge: be13837 5aadd4e
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 16 12:41:04 2023 +0100
+
+    Merge branch 'master' of https://github.com/GabrielCGI/pipe
+
+[33mcommit be13837e1788b534c15f254f946f7c354a859268[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 16 12:40:34 2023 +0100
+
+    snippet
+
+[33mcommit 5aadd4e21af6c7c9207ea3ee92773defec9dc8b9[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Jan 8 18:53:05 2023 +0100
+
+    add per face assign char pip
+
+[33mcommit 419410fc18c207708c8b92f658c08aeb04472cd6[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Jan 8 17:54:07 2023 +0100
+
+    snippet
+
+[33mcommit d55616faa03c315c630c20b7997e628c7da67f7d[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Jan 8 17:53:42 2023 +0100
+
+    Update char_pip_pymel.py
+
+[33mcommit fd7662d5a4a4fadf84a20f5bd1fb60c62478a4f8[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Jan 3 10:33:06 2023 +0100
+
+    exr2mov
+
+[33mcommit c280ace9c4e13180085fd0a548a38fc4008f47b2[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Dec 20 11:47:52 2022 +0100
+
+    fix sort
+
+[33mcommit a21ffe41ac75fb1576fffb3d8ad043b9355c9161[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Dec 20 11:41:01 2022 +0100
+
+    deploiment assetBrwoser
+
+[33mcommit 545588761afd68076f60b315cbdf5ee6e85e6b8c[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Dec 20 09:56:06 2022 +0100
+
+    Create assetBrowserdev.py
+
+[33mcommit 2bdabbd030431b2c07d099b5e6eedc0524147d98[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Dec 19 16:39:37 2022 +0100
+
+    menage
+
+[33mcommit c72c3ef67594b994c25830e426b97c3567bba189[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Dec 19 09:42:46 2022 +0100
+
+    updae
+
+[33mcommit 4a63bfa8edbb830171b6b8d01cb66da1e03ec7d9[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sat Dec 17 10:01:37 2022 +0100
+
+    update
+
+[33mcommit 0d7cdcc91348f1b3d7670355181cf7b1344dba3b[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Dec 16 14:55:43 2022 +0100
+
+    delete unused script
+
+[33mcommit b0fc03ec899e272c30e0410515add1644d6c28cd[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Dec 13 18:44:28 2022 +0100
+
+    update
+
+[33mcommit 2a316b9965bd63f9ea98d0d6551fbe458538ecef[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Dec 12 18:55:49 2022 +0100
+
+    dzd
+    
+    zd
+
+[33mcommit 109ae9819b353f83629d97b0f25245a13b3b3c05[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Dec 12 16:05:24 2022 +0100
+
+    up
+
+[33mcommit 768405722da82c4b47b7756f2d621ef20edab5b4[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Dec 11 17:31:33 2022 +0100
+
+    update
+
+[33mcommit aeb1ef1d0a4046f2a5345a4ffb14d50e01c2c5db[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Dec 11 13:02:22 2022 +0100
+
+    update_global
+
+[33mcommit 692ba7977bfe3baffdd7e9148dd88bd18e4806da[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Dec 9 19:49:31 2022 +0100
+
+    clean shelves
+
+[33mcommit ffcb956b0fcce57c5f120bb575d0e8086fd0e387[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Dec 9 19:47:51 2022 +0100
+
+    new_abc_export
+
+[33mcommit 711f880e9c7ca63ce9dea2ff5a19ceb06612769a[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Dec 8 19:22:14 2022 +0100
+
+    publish
+
+[33mcommit fd3acb45e81d29f769291a141bca31fd10b97188[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Dec 8 14:34:42 2022 +0100
+
+    updat
+
+[33mcommit 681afdecacd734f83aa3c09dd60ffe7342d5e44f[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Dec 8 10:07:13 2022 +0100
+
+    pymel_continue
+
+[33mcommit 70391b6459c093590b6c239040102565191f4ec3[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Dec 7 17:55:10 2022 +0100
+
+    pymel
+
+[33mcommit d6fe20f202d90bd87a40cc08ff1ddc099b90d4b7[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Dec 7 15:32:51 2022 +0100
+
+    pymel
+
+[33mcommit 1819eea2042d9086f6523751bd26267e6d1365bc[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Dec 6 15:27:37 2022 +0100
+
+    pymel
+
+[33mcommit fb4b82defba1b914afe6d4c681281bd4e3b04904[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Dec 5 11:02:57 2022 +0100
+
+    loader_update
+
+[33mcommit f35f8dfcc78b136ae54b917a8bfe139c06ede2a6[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Dec 5 11:02:03 2022 +0100
+
+    abcPipeline update
+
+[33mcommit 134b06b9acb52aca864df2e18d34f95593412b53[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Dec 2 17:03:30 2022 +0100
+
+    update
+
+[33mcommit e563d29ab94086d2a6dee6b4c4cd8adb1000dad9[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Dec 1 14:18:34 2022 +0100
+
+    UPDATE
+
+[33mcommit 8c3e7ae98ef7a7f1cbb25ff370d21cb24098d0a0[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Nov 28 10:33:41 2022 +0100
+
+    idk
+
+[33mcommit 0c9520a5ecc13538d5d23f58b2ca8d4b602e1193[m
+Merge: 2703454 4d199ec
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Nov 28 10:27:51 2022 +0100
+
+    Merge branch 'master' of https://github.com/GabrielCGI/pipe
+
+[33mcommit 4d199ec29aefbbae3381996bf4481ad3a5ddc7ee[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Nov 27 22:52:02 2022 +0100
+
+    update_baker
+
+[33mcommit f597e76eaebfba191f79e8cdccf078665358b6e3[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Nov 27 20:16:54 2022 +0100
+
+    clean_copy_shader
+
+[33mcommit 185be4ceebdfe820cedecf77d662b943e7ac05aa[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Nov 27 16:56:49 2022 +0100
+
+    super_publish
+
+[33mcommit 520f2c8e2136369643aa82debd12a65901b7a68a[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Nov 27 15:02:07 2022 +0100
+
+    ca avance
+
+[33mcommit 095e115bf212937fb24e0dbdd4d4d317357a4f3d[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sat Nov 26 19:48:19 2022 +0100
+
+    update
+
+[33mcommit 31520cca3dda3c0ae15cc8a8f2e83a11aeff016f[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sat Nov 26 18:06:09 2022 +0100
+
+    advancement
+
+[33mcommit 13348e40f8a96f0cd36f4fcc71188266382c71c9[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sat Nov 26 09:05:16 2022 +0100
+
+    home copy
+
+[33mcommit 2703454728fc9e405f2e181dbba91df22c61921c[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Nov 24 10:37:11 2022 +0100
+
+    proxypreeper
+
+[33mcommit 715436bb748c5910d1584b174fe94c04f3118c02[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Nov 22 15:42:38 2022 +0100
+
+    prepper_proxy
+
+[33mcommit fd6208db886baab02eb12aba93de12c58b83cbd7[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Nov 21 12:42:08 2022 +0100
+
+    asset publisher update and push function to asset loader
+
+[33mcommit f12d60af441c5e4cfd24fc3f871352cf69a5419c[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Nov 21 12:40:59 2022 +0100
+
+    noice + aov update
+
+[33mcommit 23489aaaab425db3d005f4b46da36eab7fc22764[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Nov 16 13:53:39 2022 +0100
+
+    clean
+
+[33mcommit 6f5fabd719236a7ce17698acf253c624cf7cffd4[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Nov 14 14:38:10 2022 +0100
+
+    browser_ update + lentil
+
+[33mcommit 06e89902acd5f0ee766898e2101bbc5175bc4068[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Nov 9 18:34:22 2022 +0100
+
+    asset_publisher_progress
+
+[33mcommit f3aae17954d83506f897055f14636d2702082fc2[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Nov 7 19:31:58 2022 +0100
+
+    assetPubliser
+
+[33mcommit 776b1a9e0c21e766813e558b6d860e7b4d5b3bd2[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Nov 7 16:49:19 2022 +0100
+
+    asset_publisher
+
+[33mcommit 2af5147c42729e0e0f0c1d34234d791405e51b32[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Nov 2 14:37:31 2022 +0100
+
+    maya_scanner
+
+[33mcommit 2d190537b75abd7bad1e58f13757fc43fa7682d4[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Oct 28 13:02:17 2022 +0200
+
+    update
+
+[33mcommit c9573683610028199b729caf4f99e14e4dcb2d46[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Sep 26 15:39:39 2022 +0200
+
+    light picker
+
+[33mcommit 40ec66a0d6e95afb19a53c1449c9409a4bd10ac7[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Sep 26 12:45:16 2022 +0200
+
+    dublas
+
+[33mcommit 76413cff9ada47f0d2e458fa66502b01d2ff6e33[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Sep 26 12:40:30 2022 +0200
+
+    dublast
+
+[33mcommit ac4bc4709d0d059bf279df99472c175c67e449a6[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Sep 19 15:15:40 2022 +0200
+
+    update avant red swan
+
+[33mcommit d32b39e6ef596250e1704bbcafe5e3684aea4008[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Aug 26 16:28:38 2022 +0200
+
+    collectMayaScene fast with time stamp
+
+[33mcommit 737814a09d77e9ad8b083016658f935473629a06[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Aug 25 16:01:01 2022 +0200
+
+    turbotron_override
+
+[33mcommit 2c955626f5ce1512630a94c33e7696ed09117f68[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Aug 25 15:59:53 2022 +0200
+
+    Update turbotron_dev.py
+
+[33mcommit a8dfd519a11c8b8185272f9e2b6efecc23e8e870[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Aug 25 15:39:30 2022 +0200
+
+    update turbotron
+
+[33mcommit 10b6eb45505d5b57e20ec871ba9df8ecad83a595[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Aug 25 15:01:57 2022 +0200
+
+    turbotron_dev
+
+[33mcommit 554a6fc8617907c3bc149ab6420650f0dc39ec53[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Aug 24 13:17:23 2022 +0200
+
+    pyside_version of turbotron
+
+[33mcommit 383b33bf0ee71b0e1e0b7db1f0fc2dcb2263dadb[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Aug 24 10:47:20 2022 +0200
+
+    turbotron overide
+
+[33mcommit 53fec8bb4cc394dcd18679233e229037b7ab956c[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Aug 23 12:12:06 2022 +0200
+
+    noice submission add + aov bottle
+
+[33mcommit 59ca3c89cffc5c1dd6fc42b858982885013987d5[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Aug 22 17:42:54 2022 +0200
+
+    turbotron_save_before_update
+
+[33mcommit adc3aef7a722973199c60f709f0921ed474858ce[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 21 22:19:39 2022 +0200
+
+    turbotron_dev_official_release
+
+[33mcommit e7eca76c3e1a3b47e950b4023a93bcead62efa5f[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 21 21:04:54 2022 +0200
+
+    turbotron
+
+[33mcommit 97f8ea5fd3c23404056d31ccf69f21352aec5812[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 21 19:51:13 2022 +0200
+
+    fork turbotron
+
+[33mcommit 19e2a2a71712e018fbe416afd580653f68d18d74[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 21 17:54:44 2022 +0200
+
+    add denoiser
+
+[33mcommit 34aad8659ceeaefa11887c4c11f4cc5f46e45da9[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 21 16:39:54 2022 +0200
+
+    add denoiser for lentil
+
+[33mcommit d9b0669658d72882bb2c139eeef9ddc42e8823ca[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sat Aug 20 20:53:11 2022 +0200
+
+    add setup variance
+
+[33mcommit 0fab0802c1af7297737776c76047757630275670[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Aug 17 11:46:11 2022 +0200
+
+    globalupdate
+
+[33mcommit b5de2dabbd878f3f72fd88e449ac33126fbd7304[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Aug 11 22:26:54 2022 +0200
+
+    prevent same naming in alembic (self overwriting)
+
+[33mcommit d68e9e017c01739a9dda7e81338eeeda0d530645[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Aug 11 17:39:06 2022 +0200
+
+    noice_automaton_add
+
+[33mcommit 15e01ac9cb27b6964e64987a1f93fbaf56ee0bf9[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Aug 10 00:11:38 2022 +0200
+
+    set all cam to perspective
+
+[33mcommit 60dd27b8c35096261573705f7a26add5e35094e9[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Aug 9 21:52:02 2022 +0200
+
+    Update collectMayaScene.py
+
+[33mcommit 937cabe35d29c2766fb73d8067093b8795cc7d0f[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Aug 9 16:37:46 2022 +0200
+
+    Update submitToDeadline_pathMapping.py
+
+[33mcommit 9aae243d02f5fdc453920245e50ca715820d3ba1[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Aug 9 15:01:29 2022 +0200
+
+    verification time AND size for collect file
+
+[33mcommit 952e3ebc4991b50057c7faf1de1f9a67a33196ba[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 7 23:39:59 2022 +0200
+
+    copy scene file option to copy online the scene
+
+[33mcommit d722d7e2d80681e9a3a2265b10133decc45dd38c[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 7 22:35:54 2022 +0200
+
+    add progress bar
+
+[33mcommit a89683215e64a86ae90e127949bd862a160c310c[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 7 22:06:18 2022 +0200
+
+    update
+
+[33mcommit 6bb22aa0c24a1c460d9d124805bc308d7ef4689f[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 7 21:52:17 2022 +0200
+
+    shelf_submit_to_deadline
+
+[33mcommit bd6073d2c3ed3deb548f5fa4c20f20987a24250c[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 7 20:57:17 2022 +0200
+
+    add custom deadline to shelf
+
+[33mcommit 825d7d6f6b60cc105e986edf764fba7fe46ca635[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 7 20:00:31 2022 +0200
+
+    submitToDealine custom (add comment used as variable)
+
+[33mcommit 0cadbbeda269617bbb387f3fc15f561a82f0b827[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 7 18:11:04 2022 +0200
+
+    submit_to_deadline_path_mapping_processing
+
+[33mcommit 46f6f227844ac3b9f4ea219b7c19ea0c3691f4cb[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 7 17:07:39 2022 +0200
+
+    add my_comment = "ranch_path_mapping" as controler
+
+[33mcommit 8e0dbc268f3826479f96e46c6ab71458a8c92e09[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 7 17:06:25 2022 +0200
+
+    deadline_rangement
+
+[33mcommit a6f353dbff165e6692b87e5474216038d8b7bd82[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 7 16:57:52 2022 +0200
+
+    deadline modification
+
+[33mcommit ba61694c5972835ec4ab91ce7dbae1395c644114[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Aug 7 16:50:06 2022 +0200
+
+    lentil_hot_fix
+
+[33mcommit 09d7dde3c4cf51480e6d0e61d0774196f4263c59[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Aug 4 11:54:39 2022 +0200
+
+    updateda shelf reload camfocus
+
+[33mcommit b33f3d5d1b06c85f934c243243278f73b6c9156a[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Aug 4 11:53:58 2022 +0200
+
+    focus distance_fix
+
+[33mcommit b51b17ff9047ab6ec696eb610f6012432d9a674a[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Aug 3 20:05:47 2022 +0200
+
+    control_room
+
+[33mcommit 57b6718e1b4d71cc9fd0f7336f499f24f0e00475[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sat Jul 30 21:13:13 2022 +0200
+
+    fixe fichier écraser par turbotron
+
+[33mcommit 5b8632f1f6a62491d89615e425e816409f3a5b49[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sat Jul 30 21:06:49 2022 +0200
+
+    Update turbotron.py
+
+[33mcommit 9cc56d71a27b6e76800f647e272b23db30040f83[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sat Jul 30 20:55:22 2022 +0200
+
+    turbotron + menage
+
+[33mcommit 4f728da5e29bb4ccaaf5a22bdf7cbbd78a07099d[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Jul 29 15:17:18 2022 +0200
+
+    abc pipeline modif
+
+[33mcommit 606658d5cc79f01199919fe786b4aa2928304186[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Jul 22 16:08:57 2022 +0200
+
+    doctor fix
+
+[33mcommit 667f5bfef0cc295de868163f44d36def0a834be2[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jul 20 14:36:16 2022 +0200
+
+    guerlain launcher
+
+[33mcommit 4a100229077a6a3e850697aad0ceafee1141b973[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jul 18 10:53:40 2022 +0200
+
+    update lentil
+
+[33mcommit 0606f7044aa3006585446b6c310bb9e4fa3d2312[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jul 6 17:40:23 2022 +0200
+
+    update
+
+[33mcommit bfd92760a70c787c3427e43f2c8d283b46953625[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Jul 1 19:19:20 2022 +0200
+
+    fixaov
+
+[33mcommit c468ed97ed1599c1b4b816bb5926bf041f1ea14f[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Jul 1 14:59:59 2022 +0200
+
+    lentil_ignore
+
+[33mcommit 306fa63c99c0efb7183fdb4921ac1d2837c7093d[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Jul 1 11:06:25 2022 +0200
+
+    update
+
+[33mcommit 8346f3ff67df55f9ec0eeaacf8b642fe48c6d830[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jun 27 20:10:43 2022 +0200
+
+    Update aov.py
+
+[33mcommit 031fd55836a9ffb4297a70a6632390b820cd6891[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jun 27 19:04:02 2022 +0200
+
+    shelf
+
+[33mcommit 05959c5309ef41c560fe91af70c94d701076e6aa[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jun 27 18:59:32 2022 +0200
+
+    abc_pipe
+
+[33mcommit 567b5abe00bc1688d2d33ac88fab75941b8f35a5[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Jun 10 17:09:36 2022 +0200
+
+    Update shelf_Bloom.mel
+
+[33mcommit 2b356f2939427524d5ab0024681d928d340ba1bd[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Jun 10 17:08:31 2022 +0200
+
+    fix bug
+    
+    fix bug
+
+[33mcommit 60dadd6c0bfe719be3ed16f6c6acf6ccbf7c4001[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jun 8 14:46:17 2022 +0200
+
+    transferShaders
+
+[33mcommit c372581376b7f9f3f89d1c093cbcaf9560182ea3[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon May 30 14:52:43 2022 +0200
+
+    Delete 2022087995704.pdf
+
+[33mcommit 96447e23a64d49c47aeb172baba1258b7283b3d3[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon May 30 14:52:21 2022 +0200
+
+    uptdate
+
+[33mcommit 24feb09272c216a86cb7fd2da028187322ba289c[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 20 10:45:02 2022 +0200
+
+    genreral update
+
+[33mcommit b94b42b4764959437f267b7c20ca1d4d0fb7f34d[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Apr 27 14:43:18 2022 +0200
+
+    update_post_candyUp
+
+[33mcommit a67eb6cd9e5dc22fc673f30bd0df079c93d7391c[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Mar 2 12:22:18 2022 +0100
+
+    global_update
+
+[33mcommit 3101cd810dd317b2600450bc0bf5720d6686d4fb[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Feb 16 20:33:24 2022 +0100
+
+    copy_shader
+
+[33mcommit 4d8763b355929d40676b042d0429cb0ceec8814d[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Feb 16 17:26:24 2022 +0100
+
+    proxyfy
+
+[33mcommit 6fa730500e8f1c87a94a07b95cebfdad312ec275[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Feb 16 14:06:12 2022 +0100
+
+    tx pipe
+
+[33mcommit 8a97eadcb2c9c8204c6185d06d4a31ed7f7a71a7[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Feb 11 16:22:18 2022 +0100
+
+    candyUp update
+    
+    candyUp update
+
+[33mcommit ecfb35c2403d99504c6d288d65b364987086eaae[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Jan 30 13:14:04 2022 +0100
+
+    global change
+
+[33mcommit 21f9cec8b7a94279aba817a09a0e702d59048ad3[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Jan 11 23:13:23 2022 +0100
+
+    BACKUP
+    
+    EF
+
+[33mcommit 0b872a1b16c32b7681419348618ab0d5d7378ab4[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Oct 27 16:42:34 2021 +0200
+
+    Cleaning tool improving !
+
+[33mcommit 091d8cfa1b576a4df1e418696f92d0aecebdd59d[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Oct 25 19:34:46 2021 +0200
+
+    maintenance
+
+[33mcommit 485cbd4cbbac8bca27c811a35704246875f7cf8b[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Oct 5 16:41:32 2021 +0200
+
+    pipe export
+
+[33mcommit 1acafa694dc163f22efb03a273c5a1400bc7ed7b[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Sep 9 13:18:35 2021 +0200
+
+    swarovki update
+    
+    daily update
+
+[33mcommit b24397d3eb15eca65a1a88b0d8918bb6de75013f[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Aug 23 14:31:51 2021 +0200
+
+    Update shelf_Bloom.mel
+
+[33mcommit 8c45fcfafdbbf86cf0b12514263bdaf6f4e50a6a[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Aug 23 14:31:32 2021 +0200
+
+    general
+
+[33mcommit 5949aa006a432e3c41b466e2529f20959fb9f0d1[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Jul 30 18:11:12 2021 +0200
+
+    DIVERS
+
+[33mcommit af08918243137f43d4f64589e80b5edf40f312eb[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jul 29 15:39:53 2021 +0200
+
+    Update startupSettings.py
+
+[33mcommit 9e1de0746b0e087518f6d3edd69ca6a1e688bd9e[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jul 29 15:37:42 2021 +0200
+
+    megascan + abcpipeline + launcher + startupSetting
+
+[33mcommit 744b9cea2b77be0881d83d8bb5a09be1dbc03f0f[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jul 15 18:52:51 2021 +0200
+
+    ACES 2.0 TEXTURES CONVERTER
+
+[33mcommit bc892a6264abaec18cfd4ca0076c2449fa4201ed[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jul 15 14:59:26 2021 +0200
+
+    python 3
+
+[33mcommit 97193b3bf8cc3ea3625264e782801ebde300cd7f[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed May 12 16:18:56 2021 +0200
+
+    python 3 migration
+
+[33mcommit 97d027f692139b9c885bbab0acf81ea7263cdd0b[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed May 12 11:35:32 2021 +0200
+
+    maya 2022 update
+
+[33mcommit 6b8496f0df21bc00f7f4b3f26148ed5e8247238d[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu May 6 11:15:46 2021 +0200
+
+    Maintenance
+
+[33mcommit 0226ea8f68866b3024ec85685e348e7adcda226e[m
+Merge: 3dcabc1 fb2457b
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Feb 8 12:12:51 2021 +0100
+
+    Merge branch 'master' of https://github.com/GabrielCGI/pipe
+
+[33mcommit 3dcabc140c1094186d540867e26121d5eda2e57a[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Feb 8 12:12:38 2021 +0100
+
+    launcher
+    
+    Yeti & Arnold launcher
+    script nuke to list read node
+
+[33mcommit fb2457b1a60999f90340cafaf399f80474f65fc5[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Sun Nov 8 21:07:12 2020 +0100
+
+    gazu snippet test
+
+[33mcommit 55102c44f147e3b1cd03f29a3147f5c143578e77[m
+Merge: 223ad58 b68ac82
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Oct 5 14:39:31 2020 +0200
+
+    Merge pull request #38 from GabrielCGI/dev
+    
+    Update fastVP.py
+
+[33mcommit b68ac82d2c9aee2b306d1c88d0bf2f7470d4ca69[m[33m ([m[1;31morigin/dev[m[33m, [m[1;32mdev[m[33m)[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Oct 5 14:39:30 2020 +0200
+
+    Update fastVP.py
+
+[33mcommit 223ad58dfb38aed855c32a5f2d3c760909900d3b[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Oct 5 14:36:35 2020 +0200
+
+    yetilauncher
+
+[33mcommit dbb5bb4e28afd94e9284a2ea1d01b36804f9b6e4[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Sep 9 12:23:33 2020 +0200
+
+    update doctor
+
+[33mcommit b3b8b7574e8ca823a737e41d48b6102231e597af[m
+Merge: e85fd2f dbb5bb4
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Sep 9 12:23:02 2020 +0200
+
+    Merge pull request #37 from GabrielCGI/dev
+    
+    update doctor
+
+[33mcommit e85fd2fc75f5822ed8baed50fccb3164e9aea991[m
+Merge: 6dd1cef 0198012
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Sep 9 11:35:43 2020 +0200
+
+    Merge pull request #36 from GabrielCGI/dev
+    
+    Update doctor.py
+
+[33mcommit 01980124dcab6ac59f14e3c1afd8301cfe1726f7[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Sep 9 11:27:10 2020 +0200
+
+    Update doctor.py
+
+[33mcommit 6dd1cef60a135acc0676052d9abe9c7eb42adf77[m
+Merge: ee5a204 b6bfe4b
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Aug 26 19:22:54 2020 +0200
+
+    Merge pull request #35 from GabrielCGI/dev
+    
+    Update aov.py
+
+[33mcommit b6bfe4b282c4e430356b9380c98a7043f5408e73[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Aug 26 19:22:46 2020 +0200
+
+    Update aov.py
+
+[33mcommit ee5a20446d3c8e5f3245d105573486735e48e1cd[m
+Merge: f6ad814 9a4ccf3
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Aug 26 19:10:45 2020 +0200
+
+    Merge pull request #34 from GabrielCGI/dev
+    
+    aov character mask
+
+[33mcommit 9a4ccf364b4e8b859dba052c66e3c14a25b3df2e[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Aug 26 19:10:34 2020 +0200
+
+    aov character mask
+
+[33mcommit f6ad8149df12fc885dc2a2728ad826fdcdf5a23e[m
+Merge: 547ce44 cb320f2
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Aug 20 15:59:48 2020 +0200
+
+    Merge pull request #33 from GabrielCGI/dev
+    
+    Dev
+
+[33mcommit cb320f2061bef7345e7faf7fa2deb3afaf5d6a96[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Aug 20 15:59:35 2020 +0200
+
+    Update abcPipelineExport.py
+
+[33mcommit 547ce444d68df0d8dbef37e8316ecc7f7c4dc224[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Aug 20 15:59:29 2020 +0200
+
+    abcUpdater
+
+[33mcommit 77e0a7b1f10278334e0f1f3918e9d343ae50c75b[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Aug 20 15:57:57 2020 +0200
+
+    Update nukeReadLoader.py
+
+[33mcommit 5dee3b0720ecd0791ed48455c3806cefe37c6e4e[m
+Merge: 399d63c 0cf0faa
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Aug 10 13:54:25 2020 +0200
+
+    Merge pull request #32 from GabrielCGI/dev
+    
+    update abcPipeline paradise adaptation
+
+[33mcommit 399d63c0a4327a1747fb1f8a1cd214c44390d56e[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Aug 10 13:54:10 2020 +0200
+
+    backup abcpipeline
+    
+    backup
+
+[33mcommit 0cf0faa00f0c42f5a166fadf2120799d9e473869[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Aug 10 13:53:26 2020 +0200
+
+    update abcPipeline paradise adaptation
+    
+    Make it work with props having incorect pattern (no PR_xxx)
+    Make it work with Google drive path using accent.
+
+[33mcommit 79377ee496cb5c739668f598d3c64dc937d79320[m
+Merge: f1c3bab 80b1eef
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Aug 7 14:07:59 2020 +0200
+
+    Merge pull request #31 from GabrielCGI/dev
+    
+    Update shelf_Bloom.mel
+
+[33mcommit 80b1eeff313621f06156933a448f395fb960de02[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Aug 7 14:06:34 2020 +0200
+
+    Update shelf_Bloom.mel
+
+[33mcommit f1c3baba15b5d7b9220fb10299854c0aea9eab56[m
+Merge: dc71727 b784d48
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Aug 7 14:04:27 2020 +0200
+
+    Merge branch 'dev'
+
+[33mcommit b784d48a4aaed2957160b001785690387764452d[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Aug 7 14:03:58 2020 +0200
+
+    fast viewport
+
+[33mcommit dc71727260fd33f09f78c5f0e747895a9feaf595[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Aug 7 12:43:54 2020 +0200
+
+    Update launcherMaya.exe
+
+[33mcommit a40a3b5e8e55d0531f7122e0e6546fdba7628ed8[m
+Merge: b96e248 e8d78a3
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Jul 31 11:03:28 2020 +0200
+
+    Merge pull request #30 from GabrielCGI/dev
+    
+    Update abcPipelineExport.py
+
+[33mcommit e8d78a3617c587e44364a770c3d88c288dea9050[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Jul 31 11:02:58 2020 +0200
+
+    Update abcPipelineExport.py
+    
+    fix comment adding error
+
+[33mcommit b96e2489f66aabb4cbecbfce0d5004b3a3973080[m
+Merge: f1e2b32 d970c25
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jul 30 19:06:09 2020 +0200
+
+    Merge branch 'dev'
+
+[33mcommit d970c25958cba608acaf89bce7c4bd5a2f493abc[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jul 30 19:02:18 2020 +0200
+
+    drive partagé export update
+
+[33mcommit f1e2b32dcfc78155ee81b015b91478ce58a04e08[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jul 27 14:14:41 2020 +0200
+
+    clean bifrost
+
+[33mcommit c9074bcbbc025b557dfc1ea9bbc6fa292fe82e4c[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jul 27 14:12:34 2020 +0200
+
+    launcherupdate
+
+[33mcommit 2b83a0c4c69bf9ab21f1d4caa936e151b322b1ea[m
+Merge: e1a76b8 dd60ca9
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jul 20 18:06:41 2020 +0200
+
+    Merge branch 'dev'
+
+[33mcommit dd60ca979221f69b9003672ae0ff25fda5858dca[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jul 20 18:04:27 2020 +0200
+
+    abcpipeline update
+
+[33mcommit e1a76b82318d4acb19e486bec5fa28be7a3d03cf[m
+Merge: 85ccd5c 312d6a9
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jul 20 12:00:53 2020 +0200
+
+    Merge pull request #29 from GabrielCGI/dev
+    
+    modified scene
+
+[33mcommit 85ccd5c366d224664eb755adbec4ee85904bdb97[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jul 20 12:00:42 2020 +0200
+
+    launcher fix
+
+[33mcommit 312d6a9c7a373b7cce9241576413a4e2d4e23d31[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jul 20 11:59:22 2020 +0200
+
+    modified scene
+    
+    make maya scene  without asking to save
+
+[33mcommit 13890ad5f7d3c285fbd656b3fa77e2e1cc18429c[m
+Merge: ac0da55 ef5bccc
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jul 8 15:25:09 2020 +0200
+
+    Merge pull request #28 from GabrielCGI/dev
+    
+    Update libSave.py
+
+[33mcommit ef5bccc90177b53493763805cb92922695481769[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jul 8 15:25:08 2020 +0200
+
+    Update libSave.py
+
+[33mcommit ac0da55d588904ba6a4912b00b093349fed07473[m
+Merge: c3264a5 63701e2
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jul 8 12:56:44 2020 +0200
+
+    Merge pull request #27 from GabrielCGI/dev
+    
+    Update startupSettings.py
+
+[33mcommit 63701e236fe47802c1ec5dda56e3369795925339[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jul 8 12:56:41 2020 +0200
+
+    Update startupSettings.py
+    
+    delete turtle kille
+
+[33mcommit c3264a5309591374076669e3c0c8d43bf3126dd9[m
+Merge: b546178 9efc974
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jul 8 12:55:32 2020 +0200
+
+    Merge pull request #26 from GabrielCGI/dev
+    
+    Dev
+
+[33mcommit 9efc97448d13175c17505467d11032a20b21f2d7[m
+Merge: 88edcb7 1e7e472
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jul 8 12:49:58 2020 +0200
+
+    Merge branch 'dev' of https://github.com/GabrielCGI/pipe into dev
+
+[33mcommit 88edcb72f334ad4942a6ba5acbf8f3f8fdd68d1e[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jul 8 12:47:38 2020 +0200
+
+    lib save update
+
+[33mcommit b54617853a7a3eb53396e2de4d6d5d86ff94ecf3[m
+Merge: 14c91fb 1e7e472
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jun 29 14:09:25 2020 +0200
+
+    Merge pull request #25 from GabrielCGI/dev
+    
+    turtle delete
+
+[33mcommit 1e7e4726bf5abb3211ebd5e17095e2cc7817a94d[m
+Merge: 65a34a2 14c91fb
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jun 29 14:09:16 2020 +0200
+
+    Merge branch 'master' into dev
+
+[33mcommit 65a34a20ecc3e15d04915392639754f5e5f3c71c[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jun 29 14:08:34 2020 +0200
+
+    turtle delete
+
+[33mcommit 14c91fb00886d2565454ff6e4913d8b783903cb0[m
+Merge: 0526113 86684af
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jun 25 17:46:00 2020 +0200
+
+    Merge branch 'dev'
+
+[33mcommit 0526113d378bfc19b4bd301cf7a308493be236e6[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jun 25 17:43:17 2020 +0200
+
+    Update cm_aces1.2.xml
+
+[33mcommit 86684afe4b35d5659559ef8fb2aabccb3d23b4f7[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jun 25 17:41:34 2020 +0200
+
+    Update cm_aces1.2.xml
+    
+    CM.XML
+
+[33mcommit b6434f36bd1994df61388706585ecadc734f4501[m
+Merge: c893cef 990e4cf
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jun 15 14:42:45 2020 +0200
+
+    Merge pull request #23 from GabrielCGI/dev
+    
+    launcher open scene
+
+[33mcommit c893cef12f4d2d0f6ac9a4b55ed87cbe292ea202[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jun 15 14:41:55 2020 +0200
+
+    launcher exe
+
+[33mcommit 990e4cf05094298eaa3c98f4cf3de01cf6e084e3[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jun 15 14:34:40 2020 +0200
+
+    launcher open scene
+
+[33mcommit 0c7a1bd36f8eeb4199a92d52ba285518e3600789[m
+Merge: e56574a 0e40660
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Jun 9 10:18:51 2020 +0200
+
+    Merge pull request #22 from GabrielCGI/dev
+    
+    change drive letter to R
+
+[33mcommit 0e40660cb0f20063628241edaefe3700f88be2ba[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue Jun 9 10:18:43 2020 +0200
+
+    change drive letter to R
+
+[33mcommit e56574a20f0d5daa4027ba6bd5ddfaf04d85c545[m
+Merge: 9d10913 5da0868
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Jun 5 15:14:14 2020 +0200
+
+    Merge pull request #21 from GabrielCGI/dev
+    
+    waterDrop script
+
+[33mcommit 5da0868eceb3a306b81fe1824ad01fe6243cfd65[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri Jun 5 15:13:25 2020 +0200
+
+    waterDrop script
+
+[33mcommit 9d1091366dfd59fa7d52023c8ec99b42b70a1923[m
+Merge: ebd94ee 0f4dfa9
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jun 1 10:07:18 2020 +0200
+
+    Merge branch 'dev'
+
+[33mcommit 0f4dfa97eaadb7347bb1fcfd1ba8e972729c6dcb[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jun 1 09:57:07 2020 +0200
+
+    remove pyc
+
+[33mcommit ebd94ee712d5150de171bff0d3b756d92aa8de6e[m
+Merge: 2d8739f 3ecbef5
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 29 16:12:27 2020 +0200
+
+    Merge branch 'dev'
+
+[33mcommit 3ecbef554bfa02193b4003ce50120c9138612d42[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 29 16:12:07 2020 +0200
+
+    Update shelf_Bloom.mel
+
+[33mcommit 2d8739f7652c1b76d2d25ce145a033ddbcbb3ebe[m
+Merge: 0834bb9 2caf70d
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 29 16:06:12 2020 +0200
+
+    Merge branch 'dev'
+
+[33mcommit 2caf70dd1bfa89fa02625c07bc0afe9f354f2484[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 29 14:56:32 2020 +0200
+
+    Update shelf_Bloom.mel
+
+[33mcommit 0834bb9d11c76a81d65ee336c9dc4e131bbbf761[m
+Merge: 487b380 cb1f2d4
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 29 11:33:19 2020 +0200
+
+    Merge pull request #18 from GabrielCGI/dev
+    
+    Dev
+
+[33mcommit cb1f2d425d944791865a31625e3b6eee5908240d[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 29 11:33:03 2020 +0200
+
+    Update launcherMaya.bat
+
+[33mcommit 6e4fdf4cedc5185058aa7ca79601be84c1fd00e1[m
+Merge: 088e607 ac6e8f4
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 29 11:30:59 2020 +0200
+
+    Merge branch 'dev' of https://github.com/GabrielCGI/pipe into dev
+
+[33mcommit 088e607937f2df1b6b97027c3c27bd4ef6dce21d[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 29 11:30:31 2020 +0200
+
+    tweenmachine2
+
+[33mcommit 487b3800487848319c6cd1bde3fddb2328d1696b[m
+Merge: 323026e ac6e8f4
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 29 11:28:14 2020 +0200
+
+    Merge pull request #17 from GabrielCGI/dev
+    
+    Create icons - Raccourci.lnk
+
+[33mcommit ac6e8f49cd8dececba06a6459503874bb1dde777[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 29 11:27:49 2020 +0200
+
+    Create icons - Raccourci.lnk
+
+[33mcommit 323026efdd3147d2ee526f0e65bcd1bc7882f78c[m
+Merge: 09b82d2 8e406c8
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 29 11:18:14 2020 +0200
+
+    Merge pull request #16 from GabrielCGI/dev
+    
+    tweenmachine
+
+[33mcommit 8e406c88c1378a7c4fb31f9b068674d08ef7592a[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 29 11:17:35 2020 +0200
+
+    tweenmachine
+
+[33mcommit 09b82d2844a0b60da5ec2965d13add1efa5e6e35[m
+Merge: 19fa41c 26495f0
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 22 14:14:08 2020 +0200
+
+    Merge pull request #15 from GabrielCGI/dev
+    
+    yeti variable + wind compound
+
+[33mcommit 26495f0bc9a188f36615eab3f5f93cb6858d255b[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 22 14:13:54 2020 +0200
+
+    yeti variable + wind compound
+
+[33mcommit 19fa41cdedbc7b002bafc0534ce44a74a290a08e[m
+Merge: 25afed2 890d4c3
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu May 21 13:26:33 2020 +0200
+
+    Merge branch 'dev'
+
+[33mcommit 890d4c3ad6097bde1a0ce172ea1e850546a0f657[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu May 21 13:25:54 2020 +0200
+
+    deadline add env variable
+
+[33mcommit 25afed2fd1e52fa530d5ecf48d1c01e7525a9d9b[m
+Merge: e925f8a 679375f
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu May 21 11:12:36 2020 +0200
+
+    Merge branch 'dev'
+
+[33mcommit 679375fc1595cac5c10f3b025ed6b4820f6ea567[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu May 21 11:10:50 2020 +0200
+
+    startupSettings2
+
+[33mcommit e925f8a706a14cdc763a783202a13e99d90f9d7f[m
+Merge: 2c7471b 125eb3b
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu May 21 11:06:17 2020 +0200
+
+    Merge branch 'dev'
+
+[33mcommit 125eb3b350b33a68ae67fca9d2b11d69aefe33ac[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu May 21 11:00:45 2020 +0200
+
+    commit fix
+
+[33mcommit 6439ec1f54127098474a347a6375f73868aebc95[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu May 21 10:44:53 2020 +0200
+
+    Update LauchenDev and startupsetting
+
+[33mcommit 2c7471ba96d84e6f92df89cfbc033bc929429a63[m
+Merge: 6750d16 b2cddd8
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed May 20 13:11:37 2020 +0200
+
+    Merge pull request #11 from GabrielCGI/dev
+    
+    Update launcherMaya.bat
+
+[33mcommit b2cddd85e283e3a90648733dbe8af78be6f9ad9c[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed May 20 13:11:08 2020 +0200
+
+    Update launcherMaya.bat
+
+[33mcommit 6750d160b5402dd72f4780c705fa54c854ecd943[m
+Merge: 938af40 afb5530
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed May 20 11:35:50 2020 +0200
+
+    Merge pull request #10 from GabrielCGI/dev
+    
+    ressources hiearchy update
+
+[33mcommit afb5530e3bef22a5b2762d30d80a015fd5302d93[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed May 20 11:34:45 2020 +0200
+
+    ressources hiearchy update
+
+[33mcommit 938af405156a61e862c92175b93457e68c392a8e[m
+Merge: 7706bd9 b16730e
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 19 16:36:08 2020 +0200
+
+    Merge pull request #9 from GabrielCGI/dev
+    
+    bifrost relative path
+
+[33mcommit b16730e2180efb11d679e8efd19423b434d2735d[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 19 16:35:51 2020 +0200
+
+    bifrost relative path
+
+[33mcommit 7706bd93df30a33c95ab860342a48ab7e3fdaa12[m
+Merge: 780afd2 4012f66
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 19 15:43:11 2020 +0200
+
+    Merge branch 'master' of https://github.com/GabrielCGI/pipe
+
+[33mcommit 780afd2227fbe68fa61119e5c61360617bb4a0bb[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 19 15:41:02 2020 +0200
+
+    gitignore
+
+[33mcommit 4012f663efd42b41324fa2e2f1c3add843b90ed2[m
+Merge: faa7224 42244de
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 19 15:39:47 2020 +0200
+
+    Merge pull request #8 from GabrielCGI/dev
+    
+    R transition
+
+[33mcommit 42244dea33d506d4e82163edf6ce673ef2cdd275[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 19 15:38:01 2020 +0200
+
+    R transition
+
+[33mcommit faa722491036f903477d141e794e634f86ae7083[m
+Merge: fe1f896 546b97b
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 19 11:51:14 2020 +0200
+
+    Merge pull request #7 from GabrielCGI/dev
+    
+    Dev
+
+[33mcommit 546b97b177083a3149092b472ffc470c906c7729[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 19 11:50:30 2020 +0200
+
+    add batchproxy to shelf. update megascan maya plug
+
+[33mcommit 82c367efa0f41a0d3860f3c5e8f8ddd47eba8495[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Fri May 15 14:12:59 2020 +0200
+
+    nutrolauncher
+
+[33mcommit fe1f896b58866c0914477a8a1a73ccd573066c9d[m
+Merge: caf5a56 1c4d5f8
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu May 14 16:09:13 2020 +0200
+
+    Merge pull request #6 from GabrielCGI/dev
+    
+    Dev
+
+[33mcommit 1c4d5f844ba8b00caef54de5282e1619b0487aa1[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu May 14 16:08:32 2020 +0200
+
+    Megascan API
+
+[33mcommit e017a89c977e73b14e9e3a8cb7920b6b76da13dd[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu May 14 11:29:56 2020 +0200
+
+    bifrost moss
+
+[33mcommit caf5a56c70cd94ce102004c2fc9b4a673d37b18f[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed May 13 11:35:16 2020 +0200
+
+    pyc
+
+[33mcommit a8c8be077b479a10de26bf1f2d48c374fb3763e4[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed May 13 11:34:59 2020 +0200
+
+    ignore pyc
+
+[33mcommit 65a386c7d24912356ab102144d4fb7a75ea5ae85[m
+Merge: 22d530e b522119
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 12 19:36:32 2020 +0200
+
+    Merge branch 'master' of https://github.com/GabrielCGI/pipe
+
+[33mcommit 22d530e8e06c0c401d7e78dfdc7162e4e23a7eec[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 12 19:36:06 2020 +0200
+
+    cant merge without
+
+[33mcommit b5221195f5e0d9101725a1d0fc385cbcc84b9d1d[m
+Merge: 7c27f44 d8e4688
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 12 19:35:05 2020 +0200
+
+    Merge pull request #5 from GabrielCGI/dev
+    
+    Launcher
+
+[33mcommit d8e468894511c589741a38362ecd3c75dbe5cfcc[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon May 11 17:15:50 2020 +0200
+
+    prod maya launcher
+
+[33mcommit c860026a120846b3496ca0d5e3510d2e747dbf88[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon May 11 17:15:05 2020 +0200
+
+    clean up launcher
+
+[33mcommit 7c27f4466f9aaa50233f518fa303f2f13dc4325e[m
+Merge: 93daf1f 0fc2be0
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 5 17:25:24 2020 +0200
+
+    Merge pull request #4 from GabrielCGI/dev
+    
+    menage
+
+[33mcommit 0fc2be0110da3eb4726947bd769b1b346cd39394[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Tue May 5 17:23:40 2020 +0200
+
+    menage
+    
+    Rangement & mise à jour global.
+
+[33mcommit 93daf1fe7ae91999b0dd0aae226b965d0c1b5ae1[m
+Merge: 5ed0d10 93400d7
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jan 16 16:58:07 2020 +0100
+
+    Merge pull request #3 from GabrielCGI/dev
+    
+    Create cm_ACES1.1.1.xml
+
+[33mcommit 93400d7f24010a1ad5e7eac3e407c2fedd466a54[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jan 16 16:56:50 2020 +0100
+
+    Create cm_ACES1.1.1.xml
+
+[33mcommit 5ed0d10231fd97361d39b2ed604d657b256be686[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Thu Jan 16 16:44:51 2020 +0100
+
+    update launcher
+
+[33mcommit c3b0916fb5b4522ed5b6d2ffbceaba8216ec434a[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Wed Jan 15 18:38:33 2020 +0100
+
+    clean folder
+
+[33mcommit 53c934bfd4bd52e13128e6b2acf5e82298f6a4f9[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 13 18:20:46 2020 +0100
+
+    Re based
+    
+    Bring back old file, new start !
+
+[33mcommit cab16febb44333ff7472d343f54eefefc3ec015a[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 13 16:56:28 2020 +0100
+
+    New start
+    
+    Cleaning test repo
+
+[33mcommit 894c7f6db0b5d18ec02576e4fe9b10ea7e22d864[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 13 16:47:45 2020 +0100
+
+    Update main.py
+
+[33mcommit 940448871f8a32d81540f9e13b35bedd3b54cf87[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 13 16:45:50 2020 +0100
+
+    Update main.py
+
+[33mcommit 54c6e1ad3e821e7c8871197daecfac19bfd7baf9[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 6 18:49:30 2020 +0100
+
+    Revert "Merge pull request #2 from GabrielCGI/dev"
+    
+    This reverts commit 985d927756adb21c04a66c984b7e230a512beaba, reversing
+    changes made to fa65366e90ea7c8bc5a036622fb0ac9a4790d432.
+
+[33mcommit 985d927756adb21c04a66c984b7e230a512beaba[m
+Merge: fa65366 dd0da1f
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 6 18:46:39 2020 +0100
+
+    Merge pull request #2 from GabrielCGI/dev
+    
+    Update main.py
+
+[33mcommit dd0da1f169b4333a3b3ad84323ca006a7de3e3d1[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 6 18:44:37 2020 +0100
+
+    Update main.py
+
+[33mcommit fa65366e90ea7c8bc5a036622fb0ac9a4790d432[m
+Merge: 3d9d880 6f91444
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 6 18:28:20 2020 +0100
+
+    Merge pull request #1 from GabrielCGI/dev
+    
+    Update main.py
+
+[33mcommit 6f914443a6bf1c86172825e04180117e2c845f8f[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 6 18:19:00 2020 +0100
+
+    Update main.py
+
+[33mcommit 3d9d8808cf2668876dce2854bc3a401e8774e6d7[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 6 18:17:45 2020 +0100
+
+    Create reader.py
+
+[33mcommit b62448cc62664a0a2643a8e9ed7165ba4d256645[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 6 18:16:16 2020 +0100
+
+    Create main.py
+
+[33mcommit a12bd3ef6f2778d49649d07c090ec688af26f031[m
+Author: GabrielCGI <49843136+GabrielCGI@users.noreply.github.com>
+Date:   Mon Jan 6 18:15:37 2020 +0100
+
+    Initial commit

@@ -96,7 +96,6 @@ def build_shader_operator(aiStandIn, sel):
 
         # CATCLARK
         sss_setName = m.ai_sss_setname.get()
-        aiDispHeight = m.aiDispHeight.get()
         castsShadows = m.castsShadows.get()
         catclark_type = m.aiSubdivType.get()
         catclark_subdiv = m.aiSubdivIterations.get()
@@ -105,14 +104,10 @@ def build_shader_operator(aiStandIn, sel):
             pm.setAttr(set_shader + ".assignment[4]", "subdiv_iterations=%s" % (catclark_subdiv), type="string")
         if sss_setName != "":
             print(m.name() + " sss_setName" + sss_setName)
-            pm.setAttr(set_shader + ".assignment[5]", "string ai_sss_setname=\"%s\"" % (sss_setName), type="string")
+            pm.setAttr(set_shader + ".assignment[5]", "ai_sss_setname=%s" % (sss_setName), type="string")
         if castsShadows == 0:
             print("CAST SHADOW 0")
             pm.setAttr(set_shader + ".assignment[6]", "visibility=253", type="string")
-        if aiDispHeight != 1:
-            print (aiDispHeight)
-            pm.setAttr(set_shader + ".assignment[7]", "disp_height=%s"% (aiDispHeight), type="string")
-
 
     return shaders_used
 
@@ -128,7 +123,9 @@ def guess_dir():
     split[0] = split[0] + "\\"  # idk why i need that, but otherwise the result is missing a "\" ex: D:proA\assset"
     for i, s in enumerate(reversed(split)):
         if s == "assets":
-            asset_dir = os.path.join(*split[0:-(i - 1)])
+            print(os.path.dirname(os.path.join(*split)), split[-i])
+            # asset_dir = os.path.join(*split[0:-(i - 1)])
+            asset_dir = os.path.dirname(os.path.join(*split))
             asset_name = split[-i]
             return asset_dir, asset_name
     print("Dir not found in guess_dir")
@@ -140,37 +137,14 @@ def abcExport(sel):
         pm.error("No selection")
     asset_dir, asset_name = guess_dir()
     abc_dir = os.path.join(asset_dir, "abc")
-    os.makedirs(abc_dir, exist_ok=True)
-
-    higher_version_file = 0
-    for file in os.listdir(abc_dir):
-        if os.path.isfile(abc_dir+"/"+file):
-            match = re.search(r".*v([0-9]+).abc",file)
-            if match:
-                version = int(match.group(1))
-                if version > higher_version_file:
-                    higher_version_file = version
-
-    num = higher_version_file+1
-    num_str = str(num)
-    abc_name = asset_name + "_mod.v"+(3 - len(num_str)) * '0' + num_str+".abc"
-    while os.path.exists(abc_dir+"/"+abc_name):
-        num_str = str(num)
-        num_str = (3 - len(num_str)) * '0' + num_str
-        abc_name = asset_name + "_mod.v"+ num_str +".abc"
-        num+=1
-
+    # random_string = secrets.token_hex(5)
+    abc_name = asset_name + "_mod.abc"
     abc_path = os.path.join(abc_dir, abc_name)
     abc_path = abc_path.replace("\\", "/")
 
     os.makedirs(abc_dir, exist_ok=True)
-    geo_list_to_export = [s.longName() for s in sel]
-    print (geo_list_to_export)
-    geo_string_to_export = " -root ".join(geo_list_to_export)
-    print("geo strin")
-    print (geo_string_to_export)
     job = '-frameRange 1 1 -stripNamespaces -uvWrite -worldSpace -writeFaceSets -writeVisibility -dataFormat ogawa -root %s -file "%s"' % (
-    geo_string_to_export, abc_path)
+    sel.longName(), abc_path)
 
     pm.AbcExport(j=job)
     return abc_path, abc_name
@@ -187,27 +161,7 @@ def create_standIn(abc_path, abc_name):
 def export_arnold_graph(aiStandIn, shaders_used):
     asset_dir, asset_name = guess_dir()
     look_dir = os.path.join(asset_dir, "publish")
-    os.makedirs(look_dir, exist_ok=True)
-    path = os.path.join(look_dir, asset_name + "_operator.")
-    higher_version_file = 0
-    for file in os.listdir(look_dir):
-        if os.path.isfile(look_dir+"/"+file):
-            match = re.search(r".*v([0-9]+).ass",file)
-            if match :
-                version = int(match.group(1))
-                if version > higher_version_file:
-                    higher_version_file = version
-    num = higher_version_file+1
-    num_str = str(num)
-    path_test = path+"v"+(3 - len(num_str)) * '0' + num_str+".ass"
-
-    while os.path.exists(path_test):
-        num+=1
-        num_str = str(num)
-        num_str = (3-len(num_str))*'0' + num_str
-        path_test = path+"v"+num_str+".ass"
-
-    path = path_test
+    path = os.path.join(look_dir, asset_name + "_operator.VOo1.ass")
     print(path)
     look = pm.listConnections(aiStandIn + ".operators")
     export_list = look + shaders_used
@@ -216,7 +170,7 @@ def export_arnold_graph(aiStandIn, shaders_used):
 
 
 def run():
-    sel = pm.ls(sl=True)
+    sel = pm.ls(sl=True)[0]
     utils.convert_selected_to_tx(sel)
     abc_path, abc_name = abcExport(sel)
     aiStandIn = create_standIn(abc_path, abc_name)

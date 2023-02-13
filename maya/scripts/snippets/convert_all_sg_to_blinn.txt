@@ -1,0 +1,17 @@
+for shading_node in pm.ls(sl=True):
+    print (shading_node)
+    material = shading_node.surfaceShader.inputs()[0]
+    aimaterial = shading_node.aiSurfaceShader.inputs()
+    dispmaterial = shading_node.displacementShader.inputs()
+    if aimaterial:
+        pm.delete(aimaterial[0])
+    if dispmaterial:
+        pm.delete(dispmaterial[0])
+    if pm.objectType(material) == "aiStandardSurface":
+        name = material.name()
+        pm.rename(material, name+"old")
+        blinn_material = pm.shadingNode('blinn', asShader=True, n=name)
+        pm.connectAttr(blinn_material + '.outColor', shading_node + '.surfaceShader', f=True)
+        tex= material.baseColor.inputs()[0]
+        tex.outColor >> blinn_material.color
+        pm.delete(material)
