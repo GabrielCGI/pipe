@@ -90,7 +90,7 @@ class BobCollapsibleWidget(QtWidgets.QWidget):
         """
         super(BobCollapsibleWidget, self).__init__()
         if margins is None:
-            margins = [0, 0, 0, 0]
+            margins = [8, 0, 0, 0]
 
         layout = QtWidgets.QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)

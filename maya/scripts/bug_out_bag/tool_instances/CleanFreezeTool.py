@@ -9,21 +9,19 @@ class CleanFreezeTool(ActionTool):
         selection_arr = []
         selection_arr.extend(selection)
         for sel in selection:
-            parent = sel.getParent()
-            if parent is not None:
-                selection_arr.append(parent)
             selection_arr.extend(listRelatives(sel, allDescendents=True, type="transform"))
-        return selection
+        return selection_arr
 
     def __init__(self):
         tooltip = "Freeze Transform of selection and set the pivot to (0,0,0) in world"
         super().__init__(name="Clean Freeze", pref_name="clean_freeze",
-                         description="Freeze Transform and center pivot", button_text="Run", tooltip = tooltip)
+                         description="Freeze Transform and center pivot", button_text="Run", tooltip=tooltip)
         self.__selection = []
 
     def _action(self):
         self.__retrieve_selection()
         self.__unlock_selection()
+        self.__delete_history()
         self.__freeze_transform()
         self.__center_pivot()
         self.__lock_selection()
@@ -34,14 +32,16 @@ class CleanFreezeTool(ActionTool):
 
     def __center_pivot(self):
         for item in self.__selection:
-            xform(item["transform"], zeroTransformPivots=True, worldSpaceDistance =True)
+            xform(item["transform"], pivots=(0,0,0), worldSpace =True)
 
+    def __delete_history(self):
+        for item in self.__selection:
+            delete(item["transform"].history(pruneDagObjects=True))
 
     def __retrieve_selection(self):
         selection = CleanFreezeTool.__get_transforms_selected()
         self.__selection.clear()
         for transform in selection:
-            print(transform, transform.type())
             item = {
                 "transform": transform,
                 "translate": transform.translate.isLocked(),

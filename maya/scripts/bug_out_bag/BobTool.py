@@ -19,7 +19,7 @@ class BobTool(BobElement, ABC):
     def populate(self):
         layout = QVBoxLayout()
         collapsible = BobCollapsibleWidget(self._name, self._pref_name, self._prefs, bg_color="rgb(50, 50, 50)",
-                                           widget_color="rgb(93, 93, 93)", margins=[3, 3, 3, 3])
+                                           widget_color="rgb(80, 80, 100)", margins=[3, 3, 3, 3])
         collapsible.setToolTip(self.__tooltip)
         layout.addWidget(collapsible)
         return layout

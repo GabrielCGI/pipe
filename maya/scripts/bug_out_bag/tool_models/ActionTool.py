@@ -6,6 +6,7 @@ class ActionTool(BobTool, ABC):
         super().__init__(name, pref_name,tooltip)
         self.__description = description
         self.__button_text = button_text
+        self._action_btn = None
 
     @abstractmethod
     def _action(self):
@@ -31,7 +32,7 @@ class ActionTool(BobTool, ABC):
         desc_lbl.setWordWrap(True)
         hlyt.addWidget(desc_lbl, 1)
 
-        action_btn = QPushButton(self.__button_text)
-        action_btn.clicked.connect(self.__action_with_chunks)
-        hlyt.addWidget(action_btn)
+        self._action_btn = QPushButton(self.__button_text)
+        self._action_btn.clicked.connect(self.__action_with_chunks)
+        hlyt.addWidget(self._action_btn)
         return layout
