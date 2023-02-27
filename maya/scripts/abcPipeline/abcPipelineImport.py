@@ -13,7 +13,6 @@ def create_char_standin(anim_abc_path,abc_char_name, mod_folder, operator_folder
     mod_files = []
     for file in os.listdir(mod_folder):
         file_path = os.path.join(mod_folder, file)
-        print(file)
         if os.path.isfile(file_path) and re.match(r".*mod(\.v[0-9]+)?\.abc", file, re.IGNORECASE):
             mod_files.append(file_path)
     mod_files = sorted(mod_files, reverse=True)

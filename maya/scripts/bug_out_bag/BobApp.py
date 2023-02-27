@@ -20,13 +20,15 @@ import utils
 from Prefs import *
 from BobCategory import *
 
-# from tool_instances.RoutineTemplateTool import *
-# from tool_instances.ActionTemplateTool import *
-# from tool_instances.MultipleActionTemplateTool import *
 from tool_instances.LockTool import *
 from tool_instances.CleanFreezeTool import *
 from tool_instances.CleanerTool import *
 from tool_instances.TextureCheckTool import *
+from tool_instances.ShaderTransfer import *
+from tool_instances.RestPosToVertexColorTool import *
+from tool_instances.DeleteOrigTool import *
+from tool_instances.UVCopierTool import *
+from tool_instances.ShapeRenamerTool import *
 
 # ######################################################################################################################
 
@@ -52,10 +54,17 @@ class BobApp(QDialog):
         self.__bob_categories = [
             BobCategory("Utils", self.__prefs, [
                 LockTool(),
+                ShaderTransfer(),
+                RestPosToVertexColorTool(),
+                UVCopierTool(),
+            ]),
+            BobCategory("Clean", self.__prefs, [
                 CleanFreezeTool(),
                 CleanerTool(),
                 TextureCheckTool(),
-            ])
+                DeleteOrigTool(),
+                ShapeRenamerTool(),
+            ]),
         ]
         self.__selected_category = 0
 

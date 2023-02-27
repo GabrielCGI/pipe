@@ -37,7 +37,6 @@ class BobCategory(BobElement):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll.setWidgetResizable(True)
         scroll.setWidget(widget)
-
         return scroll
 
     def on_selection_changed(self):

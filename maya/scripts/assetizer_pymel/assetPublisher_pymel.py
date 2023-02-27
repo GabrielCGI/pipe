@@ -433,8 +433,11 @@ def make_proxy_scene(asset, asset_dir):
     proxy.outlinerColor.set(0.5,0.5,1)
 
     pm.parent(proxy,standIn)
-    pm.mel.eval('AEdagNodeCommonRefreshOutliners();')
-
+    try:
+        pm.mel.eval('AEdagNodeCommonRefreshOutliners();')
+    except:
+        logger.info("Could not referehs outliner AEdagNodeCommonRefreshOutliners() ")
+        pass
 
     sub_assets = [s for s in pm.listRelatives(asset.maya,children=True) if s.endswith("_assets")]
 

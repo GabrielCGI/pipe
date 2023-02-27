@@ -10,3 +10,4 @@ def lentil_ignore():
                 cmds.setAttr(shape+".mtoa_constant_ignore",keyable=True)
             except:
                 print("skipping " + shape)
+lentil_ignore()

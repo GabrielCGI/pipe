@@ -1,4 +1,6 @@
+import math
 import sys
+from pymel.core import *
 
 
 # Clear a layout recusrively
@@ -44,8 +46,7 @@ def __get_val(v):
 
 
 def print_var(*vs):
-    for v in vs:
-        __print_var_aux(v)
+    __print_var_aux(vs)
 
 
 def __print_var_aux(v, tabs=0, v_in_dict=False):
@@ -60,13 +61,19 @@ def __print_var_aux(v, tabs=0, v_in_dict=False):
                 __print_var_aux(elems,tabs + 1, True)
             print(tabs * tabulation + "}")
     elif type(v) is list or type(v) is tuple:
-        if len(v) == 0 : print("[]")
+        if type(v) is list:
+            char_start = "["
+            char_end = "]"
+        else:
+            char_start = "("
+            char_end = ")"
+        if len(v) == 0 : print(char_start+char_end)
         else:
             if v_in_dict : print("")
-            print(tabs * tabulation + "[")
+            print(tabs * tabulation + char_start)
             for elem_list in v:
                 __print_var_aux(elem_list,tabs + 1, False)
-            print(tabs * tabulation + "]")
+            print(tabs * tabulation + char_end)
     else:
 
         tabs_str = "" if v_in_dict else tabs * tabulation
@@ -74,3 +81,21 @@ def __print_var_aux(v, tabs=0, v_in_dict=False):
             print(tabs_str + __get_val(v))
         except:
             print(tabs_str + "Unknown value")
+
+
+def print_warning(msg, char_filler='-'):
+    if type(msg) is not list and type(msg) is not tuple:
+        msg = [msg]
+
+    max_len_msg_line = 0
+    for m in msg:
+        max_len_msg_line = max(max_len_msg_line, len(m))
+    warning_filler = char_filler * int(2 * max_len_msg_line / 3 - 5 / 2)
+    warning_msg = warning_filler + " /!\\ " + warning_filler
+    warning(warning_msg)
+    for m in msg:
+        float_length = (len(warning_msg) - len(m)) / 2
+        warning_space_filler = ' ' * int(float_length)
+        warning_space_filler2 = ' ' * math.ceil(float_length)
+        warning(warning_space_filler + m + warning_space_filler2)
+    warning(warning_msg)

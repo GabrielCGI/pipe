@@ -146,6 +146,7 @@ class LightTexturePicker(QtWidgets.QDialog):
                         cmds.disconnectAttr(conn, attr_light)
                 # Connect the new texture
                 cmds.connectAttr(render_node + '.outColor', light + '.color')
+                cmds.setAttr(light+".ai_translator","quad", type="string")
 
     # Remove the texture of lights
     def remove_textures(self):

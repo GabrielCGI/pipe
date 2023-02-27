@@ -43,7 +43,7 @@ aovDic = {
 "occlusion":{"bits":"half","type":"custom","state":0,"action":"makeOcclusion()"},
 "UV":{"bits":"half","type":"custom","state":1,"action":"makeUV()"},
 "motionVectorBlur":{"bits":"half","type":"custom","state":0,"action":"makeMotionVector()"},
-#"lentil_ignore":{"bits":"half","type":"custom","state":1,"action":"makeLentilIgnore()"},
+"lentil_ignore":{"bits":"half","type":"custom","state":0,"action":"makeLentilIgnore()"},
 }
 }
 
@@ -254,8 +254,8 @@ def createGUI():
     cmds.setParent('..')
     cmds.text( label='Render setting',font='boldLabelFont')
     #cmds.checkBox("halfFloat", label="Half float Exr (16bits)", value=True)
-    cmds.checkBox("prefix", label="File name prefix <RenderLayer>/<Scene>/<Scene>", value=True)
-    cmds.checkBox("compress", label="DWAAB compression", value=True)
+    cmds.checkBox("prefix", label="File name prefix <RenderLayer>/<Scene>/<Scene>", value=False)
+    cmds.checkBox("compress", label="DWAAB compression", value=False)
     cmds.button( label='Run', width= 224, command=lambda x:queryValues())
     cmds.columnLayout()
     cmds.button( label='Uncheck all', width= 100, command=lambda x:uncheck())

@@ -22,4 +22,5 @@ def light_link():
     cmds.setAttr (node +".selection", "*",type="string")
     cmds.setAttr (node +".assignment[3]", "bool use_shadow_group=True",type="string")
 
+    print(assShape)
     cmds.connectAttr(node+".out","%s.operators[30]"%(assShape), f=True )

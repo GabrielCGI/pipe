@@ -12,13 +12,13 @@ projectsData ={
         {
             "path": "I:\\battlestar_2206",
             "assetsDir": "I:\\battlestar_2206\\assets",
-            "assetsDbDir": "I:\\battlestar_2206\\database",
+            "assetsDbDir": "I:\\battlestar_2206\\assets\\_database",
         },
     "trashtown_2112":
         {
             "path": "B:\\trashtown_2112",
             "assetsDir": "B:\\trashtown_2112\\assets",
-            "assetsDbDir": "B:\\trashtown_2112\\database",
+            "assetsDbDir": "B:\\trashtown_2112\\assets\\_database",
         },
     "swarovski_2205":
         {

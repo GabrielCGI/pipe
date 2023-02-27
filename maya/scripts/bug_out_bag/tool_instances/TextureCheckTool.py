@@ -69,16 +69,6 @@ _STYLESHEET_COLORSPACE_NOT_FOUND = {
 
 
 class TextureCheckTool(ActionTool):
-
-    # Launch the Dialog to check textures
-    def _action(self):
-        try:
-            self.__texture_check_dialog.hide()
-        except RuntimeError:
-            self.__texture_check_dialog = TextureCheckDialog(self)
-        self.__texture_check_dialog.show()
-        self.__texture_check_dialog.refresh_ui()
-
     def __init__(self):
 
         tooltip = "Check if File Nodes with same file have different colorspaces or" \
@@ -90,6 +80,20 @@ class TextureCheckTool(ActionTool):
         self.__dialog_opened = False
         self.__texture_check_dialog = TextureCheckDialog(self)
 
+    # Launch the Dialog to check textures
+    def _action(self):
+        try:
+            self.__texture_check_dialog.hide()
+        except RuntimeError:
+            self.__texture_check_dialog = TextureCheckDialog(self)
+        self.__texture_check_dialog.show()
+        self.__texture_check_dialog.refresh_ui()
+
+    def populate(self):
+        layout = super(TextureCheckTool, self).populate()
+        self.__refresh_btn()
+        return layout
+
     # setter of the state opened
     def set_opened(self, opened):
         self.__dialog_opened = opened
@@ -99,7 +103,7 @@ class TextureCheckTool(ActionTool):
     def __refresh_btn(self):
         self._action_btn.setEnabled(not self.__dialog_opened and len(ls(type="file")) > 0)
 
-    # Refresh the button on selectino changed
+    # Refresh the button on selection changed
     def on_selection_changed(self):
         self.__refresh_btn()
 
@@ -224,14 +228,15 @@ class TextureCheckDialog(QDialog):
 
                 # Get the colorspace of the file node
                 colorspace = tex.colorSpace.get()
-                colorspace_corresp = None
+                colorspace_known = False
                 for colorspace_data in self.__known_cs:
                     if re.match(colorspace_data["name_regexp"], colorspace, re.IGNORECASE):
-                        colorspace_corresp = colorspace_data["name"]
+                        colorspace_known = True
+                        colorspace = colorspace_data["name"]
                         break
 
                 # Determine if the colorspace is known or not
-                if colorspace_corresp is None:
+                if not colorspace_known:
                     if colorspace not in bad_cs_tex[filepath]["unknown_colorspaces"]:
                         bad_cs_tex[filepath]["unknown_colorspaces"][colorspace] = []
                     bad_cs_tex[filepath]["unknown_colorspaces"][colorspace].append(tex)
