@@ -127,7 +127,7 @@ class AssetLoader(QtWidgets.QDialog):
             if objectType(sel, isType="aiStandIn"):
                 # Standin found
                 standins[sel.name()] = Standin(sel)
-            else:
+            elif objectType(sel, isType="transform"):
                 prt = sel.getParent()
                 if prt is not None and objectType(prt, isType="transform"):
                     shape = prt.getShape()

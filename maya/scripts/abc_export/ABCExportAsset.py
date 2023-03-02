@@ -104,6 +104,7 @@ class ABCExportAsset:
             abc_name = self.get_name_with_num()
             path = os.path.join(version_dir_path, abc_name + "_light.abc")
             path = path.replace("\\", "/")
+            select(bake_list)
             exportSelected(path, type="mayaAscii")
 
             for i in bake_list:

@@ -140,7 +140,7 @@ class Standin:
         transform = self.__standin.getParent()
         trsf_parent = transform.getParent()
         if trsf_parent:
-            parent(nodes[0], trsf_parent)
+            group(nodes[0], parent=trsf_parent)
 
         m = xform(transform, matrix=True, query=True)
         xform(nodes[0], matrix=m)

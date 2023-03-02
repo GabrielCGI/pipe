@@ -1,0 +1,5 @@
+for i in pm.ls(sl=True):
+    try:
+        i.aiTraceSets.set("violet")
+    except:
+        pass

@@ -11,7 +11,7 @@ def light_link():
     expression= "['"+string+"']"
     node = cmds.createNode("aiSetParameter")
 
-
+    print(expression)
     #Light GROUP
     cmds.setAttr (node +".assignment[0]", "light_group=%s"%expression,type="string")
     cmds.setAttr ( node +".selection", "*",type="string")
