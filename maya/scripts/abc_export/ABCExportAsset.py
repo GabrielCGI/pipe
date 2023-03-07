@@ -35,7 +35,11 @@ class ABCExportAsset:
         self.__num = 0
         self.__geos = geos
 
-    # Geter of the name merged with the num
+    # Getter of the name
+    def get_name(self):
+        return self.__name
+
+    # Getter of the name merged with the num
     def get_name_with_num(self):
         return self.__name + "_" + str(self.__num).zfill(2)
 
@@ -48,7 +52,7 @@ class ABCExportAsset:
         return self.__geos
 
     # Export this reference in ABC in a new version
-    def export(self, folder, start, end):
+    def export(self, folder, start, end, subsamples_enbaled, subsamples, euler_filter):
         abc_name = self.get_name_with_num()
         asset_dir_path = os.path.join(folder, abc_name)
         next_version = ABCExportAsset.next_version(asset_dir_path)
@@ -59,7 +63,14 @@ class ABCExportAsset:
         os.makedirs(version_dir_path, exist_ok=True)
 
         command = "-frameRange %s %s" % (start, end)
-        command += " -writeVisibility  -stripNamespaces  -worldSpace -dataFormat ogawa -eulerFilter "
+        if subsamples_enbaled:
+            command +=" -step 1.0"
+            for frame in subsamples.split(" "):
+                command += " -frameRelativeSample " + frame
+
+        command += " -writeVisibility  -stripNamespaces  -worldSpace -dataFormat ogawa"
+        if euler_filter:
+            command += " -eulerFilter"
         if not self.__geos:
             return
 
@@ -67,6 +78,7 @@ class ABCExportAsset:
             command += " -root %s" % geo
         command += " -file \"%s\"" % (path)
 
+        # print(command)
         refresh(suspend=True)
         AbcExport(j=command)
         refresh(suspend=False)

@@ -7,8 +7,11 @@ importlib.reload(export_abc_scenes)
 
 # ######################################################################################################################
 __FOLDER_TYPE = r"^anim$"  # ANIM
-# __FOLDER_TYPE = r"^layout$"                 # LAYOUT
-# __FOLDER_TYPE = r"^(anim|layout)$"          # ANIM and LAYOUT
+#__FOLDER_TYPE = r"^layout$"                 # LAYOUT
+#__FOLDER_TYPE = r"^(anim|layout)$"          # ANIM and LAYOUT
+
+__FILTER_CHAR = ""
+#__FILTER_CHAR = "ch_namechar"
 # ######################################################################################################################
 
-export_abc_scenes.run_export_abc_scenes(__FOLDER_TYPE)
+export_abc_scenes.run_export_abc_scenes(__FOLDER_TYPE, __FILTER_CHAR)

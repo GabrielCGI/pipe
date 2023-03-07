@@ -39,7 +39,7 @@ def multiple_replace(adict, text):
 shots= listdir2(drive_dir)
 
 def find_last_maya(shot):
-	versions = listdir2(os.path.join(shot,"anim"))
+	versions = listdir2(os.path.join(shot,"layout"))
 	versions.sort()
 	last_version=versions[-1]
 	maya_scenes = listfile2(last_version)
@@ -56,11 +56,18 @@ def find_destination(source):
 
 def copy_scene(scene):
 	dest = find_destination(scene)
-	print ("dest:%s"%dest)
 	try:
-		if not os.path.exists(dest):
-			os.makedirs(dest)
-		shutil.copy2(scene, dest)
+		dirName= os.path.dirname(dest)
+
+		if not os.path.exists(dirName):
+			os.makedirs(dirName)
+		if not os.path.isfile(dest):
+			if os.path.isdir(dest):
+				print("IT'S A DIIIIIIIIIIIR")
+			print("Copy new scene: "+dest)
+			shutil.copy2(scene, dest)
+		else:
+			print("Skipping: " + dest)
 	except:
 		print("ERROR: file already exist %s" %dest)
 

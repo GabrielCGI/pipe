@@ -75,6 +75,9 @@ class ABCExport(QDialog):
         # Model attributes
         self.__start_frame = int(playbackOptions(min=True, query=True))
         self.__end_frame = int(playbackOptions(max=True, query=True))
+        self.__enable_subsamples = False
+        self.__subsamples = "-0.125 0 0.125"
+        self.__euler_filter = True
         self.__folder_path = ""
         found = self.__retrieve_database_dir()
         if not found:
@@ -85,9 +88,9 @@ class ABCExport(QDialog):
 
         # UI attributes
         self.__ui_width = 400
-        self.__ui_height = 400
+        self.__ui_height = 500
         self.__ui_min_width = 350
-        self.__ui_min_height = 250
+        self.__ui_min_height = 300
         self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width, self.__ui_height) / 2
 
         self.__retrieve_prefs()
@@ -140,6 +143,9 @@ class ABCExport(QDialog):
         self.__prefs["window_size"] = {"width": size.width(), "height": size.height()}
         pos = self.pos()
         self.__prefs["window_pos"] = {"x": pos.x(), "y": pos.y()}
+        self.__prefs["enable_abc_subsamples"] = self.__enable_subsamples
+        self.__prefs["abc_subsamples"] = self.__subsamples
+        self.__prefs["euler_filter"] = self.__euler_filter
 
     # Retrieve preferences
     def __retrieve_prefs(self):
@@ -151,6 +157,14 @@ class ABCExport(QDialog):
         if "window_pos" in self.__prefs:
             pos = self.__prefs["window_pos"]
             self.__ui_pos = QPoint(pos["x"], pos["y"])
+
+        if "enable_abc_subsamples" in self.__prefs:
+            self.__enable_subsamples = self.__prefs["enable_abc_subsamples"]
+        if "abc_subsamples" in self.__prefs:
+            self.__subsamples = self.__prefs["abc_subsamples"]
+
+        if "euler_filter" in self.__prefs:
+            self.__euler_filter = self.__prefs["euler_filter"]
 
     # Remove callbacks
     def hideEvent(self, arg__1: QCloseEvent) -> None:
@@ -211,6 +225,22 @@ class ABCExport(QDialog):
         self.__ui_end_frame.editingFinished.connect(self.__on_end_frame_edited)
         frame_lyt.addWidget(self.__ui_end_frame)
 
+        # Subsamples layout
+        subsamples_lyt = QHBoxLayout()
+        main_lyt.addLayout(subsamples_lyt)
+        self.__ui_subsamples_enable_cb = QCheckBox("Enable Subsamples")
+        self.__ui_subsamples_enable_cb.stateChanged.connect(self.__on_subsample_enable_change)
+        subsamples_lyt.addWidget(self.__ui_subsamples_enable_cb)
+        self.__ui_subsamples = QLineEdit(self.__subsamples)
+        self.__ui_subsamples.setValidator(QRegExpValidator(QRegExp(r"(-?[0-9]+\.?[0-9]*\ *)*")))
+        self.__ui_subsamples.editingFinished.connect(self.__on_subsamples_edited)
+        subsamples_lyt.addWidget(self.__ui_subsamples)
+
+        # Euler Filter
+        self.__ui_euler_filter_cb = QCheckBox("Euler Filter")
+        self.__ui_euler_filter_cb.stateChanged.connect(self.__on_euler_filter_change)
+        main_lyt.addWidget(self.__ui_euler_filter_cb)
+
         # Submit Export button
         self.__export_btn = QPushButton("Export selection")
         self.__export_btn.clicked.connect(self.__export_selected_abcs)
@@ -219,6 +249,7 @@ class ABCExport(QDialog):
     # Refresh the ui according to the model attribute
     def __refresh_ui(self):
         self.__refresh_btn()
+        self.__refresh_param()
         self.__refresh_abcs_table()
 
     # Refresh the submit button
@@ -234,6 +265,12 @@ class ABCExport(QDialog):
             tooltip = "The export folder must be named \"abc\""
         self.__export_btn.setEnabled(enabled)
         self.__export_btn.setToolTip(tooltip)
+
+    # Refresh the subsamples fields
+    def __refresh_param(self):
+        self.__ui_subsamples_enable_cb.setChecked(self.__enable_subsamples)
+        self.__ui_subsamples.setEnabled(self.__enable_subsamples)
+        self.__ui_euler_filter_cb.setChecked(self.__euler_filter)
 
     # Refresh the asset table
     def __refresh_abcs_table(self):
@@ -315,6 +352,18 @@ class ABCExport(QDialog):
     # On end frame loose focus refresh the display
     def __on_end_frame_edited(self):
         self.__ui_end_frame.setText(str(self.__end_frame))
+
+    # Retrieve the subsamples
+    def __on_subsamples_edited(self):
+        self.__subsamples = self.__ui_subsamples.text()
+        print_var(self.__subsamples)
+
+    def __on_subsample_enable_change(self, state):
+        self.__enable_subsamples = state == 2
+        self.__refresh_param()
+
+    def __on_euler_filter_change(self, state):
+        self.__euler_filter = state == 2
 
     # Retrieve the abcs selected on rows selected in the asset table
     def __on_abcs_selection_changed(self):
@@ -403,6 +452,7 @@ class ABCExport(QDialog):
     def __export_selected_abcs(self):
         self.__export_btn.setEnabled(False)
         for abc in self.__selected_abcs:
-            abc.export(self.__folder_path, self.__start_frame, self.__end_frame)
+            abc.export(self.__folder_path, self.__start_frame, self.__end_frame,
+                       self.__enable_subsamples, self.__subsamples, self.__euler_filter)
         self.__selected_abcs.clear()
         self.__refresh_ui()

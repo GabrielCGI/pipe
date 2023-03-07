@@ -38,7 +38,14 @@ projectsData ={
             "path": "I:\\swaRedSwan_2209",
             "assetsDir": "I:\\swaRedSwan_2209\\assets",
             "assetsDbDir": "I:\\swaRedSwan_2209\\assets\\database",
+        },
+    "swarovski_2301":
+        {
+            "path": "I:\\swarovski_2301",
+            "assetsDir": "I:\\swarovski_2301\\assets",
+            "assetsDbDir": "I:\\swarovski_2301\\assets\\database",
         }
+
 }
 
 
