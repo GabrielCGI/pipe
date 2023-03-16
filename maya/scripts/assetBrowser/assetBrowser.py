@@ -285,7 +285,7 @@ class AssetBrowser(QtWidgets.QDialog):
 
         self.current_project = None
         if current_project_dir is not None:
-            if current_project_dir in project_list:
+            if current_project_dir in project_list and os.path.isdir(current_project_dir):
                 self.current_project = current_project_dir
         if self.current_project is None:
             self.current_project = project_list[0] if os.path.isdir(project_list[0]) else "D:/"

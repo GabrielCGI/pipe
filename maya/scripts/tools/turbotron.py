@@ -118,7 +118,7 @@ def floatSliderCreate(param):
     else:
 
 
-        cmds.floatSliderGrp( param, field=True, label=labelPretty[param],
+        cmds.floatSliderGrp(param, field=True, label=labelPretty[param],
         minValue=0, maxValue=1,sliderStep=0.01, precision=3, value=samples_value, changeCommand=lambda x:updateSampleFloat(param) )
 
     popMenuItem(param,2)

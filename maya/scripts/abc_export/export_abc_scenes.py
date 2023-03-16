@@ -138,7 +138,7 @@ def export_char_in_scene(scene_path, database_path, abc_path, nb, nb_tot, filter
             print_scene(["Exporting : " + name_num, "Version : " + next_version, "from scene : " + scene_path,
                          "Scene " + nb + " on " + nb_tot])
             abc_exported.append((name_num, next_version))
-            abc.export(abc_path, start_frame, end_frame)
+            abc.export(abc_path, start_frame, end_frame, False, "", True)
     return abc_exported
 
 
@@ -196,6 +196,7 @@ def run_export_abc_scenes(folder_type, filter_char):
 
 
 if __name__ == '__main__':
+    loadPlugin('AbcExport', quiet =True)
     export_abcs_from_scenes(sys.argv[3:], sys.argv[1], sys.argv[2])
     os.system("pause")
     print("wait a few seconds")

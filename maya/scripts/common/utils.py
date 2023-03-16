@@ -1,20 +1,24 @@
 import math
 import sys
-from pymel.core import *
+
+try:
+    from pymel.core import *
+except:
+    # Maya not found
+    pass
 
 
 # Clear a layout recusrively
 def clear_layout(layout):
     children = []
-    if layout is not None:
-        for i in range(layout.count()):
-            child = layout.itemAt(i).widget()
-            if not child:
-                clear_layout(layout.itemAt(i).layout())
-            else:
-                children.append(child)
-        for child in children:
-            child.deleteLater()
+    for i in range(layout.count()):
+        child = layout.itemAt(i).widget()
+        if not child:
+            clear_layout(layout.itemAt(i).layout())
+        else:
+            children.append(child)
+    for child in children:
+        child.deleteLater()
 
 
 def unload_packages(silent=True, packages=None):
