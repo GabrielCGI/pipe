@@ -22,11 +22,10 @@ except:
 
 # ######################################################################################################################
 
-_RANCH_SERVER = "RANCH-126"
-_RANCH_FOLDER = "ranch_cache"
+_RANCH_CACHE_FOLDER = "I:/ranch/ranch_cache"
+_LOGS_FOLDER = "I:/ranch/logs"
 _MAX_NB_THREADs = 256
 
-_LOGS_FOLDER = "I:/logs"
 _ASS_PATHS_FILE_EXTENSION = "paths"
 
 # ######################################################################################################################
@@ -45,7 +44,7 @@ class CollectorCopier:
         if match:
             disk_letter = match.group(1)
             path_without_disk_letter = match.group(2)
-            destination = os.path.join("\\\\", _RANCH_SERVER, _RANCH_FOLDER, disk_letter, path_without_disk_letter)
+            destination = os.path.join(_RANCH_CACHE_FOLDER, disk_letter, path_without_disk_letter)
             return {
                 "src": path.replace("\\", "/"),
                 "dest": destination,
@@ -67,6 +66,7 @@ class CollectorCopier:
         self.__progress_lock = threading.Lock()
         self.__output_queue = Queue()
         self.__output_enabled = False
+
     def __to_str_past_time(self, time_start, time_end):
         return time.strftime("%H:%M:%S", time.gmtime(time_end - time_start))
 
@@ -121,23 +121,23 @@ class CollectorCopier:
                 self.__output(msg, False)
             else:
                 # Allow most important threads to work before checking if a message is available
-                time.sleep(0.01)
-
+                time.sleep(0.5)
 
     # #################################################### COLLECT #####################################################
     def __get_path_with_udim(self, path):
         paths = []
         folder, filename = os.path.split(path)
-        match_udim = re.match(r"^(.*\.)[0-9]{4}(\.\w*)$", filename)
-        if match_udim:
+        match_udim = re.match(r"^(.*\.)(?:<udim>|[0-9]{4})(\.\w*)$", filename)
+        if match_udim and os.path.exists(folder):
             start = match_udim.group(1)
             ext = match_udim.group(2)
             for file in os.listdir(folder):
                 match_udim = re.match(r"^" + start + r"[0-9]{4}" + ext + r"$", file)
                 if match_udim:
                     paths.append(os.path.join(folder, file))
-        return paths if len(paths) > 0 else [path]
-
+            return paths if len(paths) > 0 else [path]
+        else:
+            return []
 
     # Retrieve all the paths used in Maya Scene
     def __retrieve_paths_in_maya(self):
@@ -192,11 +192,6 @@ class CollectorCopier:
                 if os.path.exists(dir_path):
                     self.__output(
                         "| " + str(count_path) + "/" + str(nb_tot) + " - StandIn sequence found in : " + dir_path + "/")
-                    for f in os.listdir(dir_path):
-                        if len(f) < 6 or f[-6:] != "." + _ASS_PATHS_FILE_EXTENSION:
-                            child_path = os.path.join(dir_path, f)
-                            self.__output("|    +----> " + child_path)
-                            paths.append(child_path)
                 else:
                     standin_error = True
             elif os.path.exists(path):
@@ -239,19 +234,25 @@ class CollectorCopier:
         ass_paths_count = 0
         i = 1
         ass_files = []
+        pre_ass_files = []
+        ass_regexp = r"^.*\.ass$"
         # Standin
         for standin in list_standin:
             ass_file = standin.dso.get()
             abc_layer = standin.abc_layers.get()
-            if ass_file not in ass_files:
-                ass_files.append(ass_file)
-            if abc_layer is not None and abc_layer not in ass_files:
-                ass_files.append(abc_layer)
-        # IncludeGraph
+            if ass_file is not None and len(ass_file) > 0:
+                pre_ass_files.append(ass_file)
+            if abc_layer is not None and len(abc_layer) > 0:
+                pre_ass_files.append(abc_layer)
+        # Include Graph
         for include_graph in list_include_graph:
             ass_file = include_graph.filename.get()
-            if ass_file not in ass_files:
-                ass_files.append(ass_file)
+            if ass_file is not None and len(ass_file) > 0:
+                pre_ass_files.append(ass_file)
+
+        for pre_ass_file in pre_ass_files:
+            if pre_ass_file not in ass_files and re.match(ass_regexp,pre_ass_file) and os.path.exists(pre_ass_file):
+                ass_files.append(pre_ass_file)
 
         nb_ass_files = len(ass_files)
         # Iterate through StandIn
@@ -282,29 +283,38 @@ class CollectorCopier:
 
                 path_info_file = open(paths_info_filepath, "a")
 
-                AiASSLoad(ass_file)
                 self.__output("| " + str_ass_count + " - Search in " + ass_file)
-                # Iterate through Node in StandIn that are Options or Shaders
-                iterator = AiUniverseGetNodeIterator(AI_NODE_SHADER | AI_NODE_OPTIONS)
-                while not AiNodeIteratorFinished(iterator):
-                    node = AiNodeIteratorGetNext(iterator)
-                    node_name = AiNodeGetName(node)
-                    if node_name:
-                        is_image = AiNodeIs(node, "image")
-                        is_options = AiNodeIs(node, "options")
-                        # If IMAGE Retrieve the filepath
-                        if is_image:
-                            filename = AiNodeGetStr(node, "filename")
-                            if len(filename) > 0 and filename not in relative_paths:
-                                relative_paths.append(filename)
-                        # IF OPTIONS Retrieve the texture search path
-                        elif is_options and len(texture_search_paths) == 0:
-                            texture_search_paths = AiNodeGetStr(node, "texture_searchpath")
 
-                AiNodeIteratorDestroy(iterator)
-                AiEnd()
-                if len(relative_paths) > 0:
-                    for base_path in texture_search_paths.split(";"):
+                # Open the file and read its contents
+                with open(ass_file, 'r') as f:
+                    contents = f.read()
+
+                # Define a regular expression pattern to match filenames with paths
+                pattern = r'filename\s+\"([^\"]+)\"'
+                pattern_option = r'texture_searchpath\s+\"([^\"]+)\"'
+                # Find all filenames with paths that match the pattern
+                matches = re.findall(pattern, contents)
+                options = re.findall(pattern_option, contents)
+                if len(options)>0:
+                    texture_search_paths = options[0].split(";")
+                for match in matches:
+                    if os.path.exists(match) and match not in ass_paths:
+                        ass_paths.append(match)
+                        self.__output("|    +----> " + match)
+                    else:
+                        udim_paths = self.__get_path_with_udim(match)
+                        if len(udim_paths) > 0:
+                            for udim_path in udim_paths:
+                                if os.path.exists(udim_path) and udim_path not in ass_paths:
+                                    ass_paths.append(udim_path)
+                                    self.__output("|    +----> " + udim_path)
+                                else:
+                                    relative_paths.extend(udim_paths)
+                        else:
+                            relative_paths.append(match)
+
+                if len(relative_paths) > 0 and len(texture_search_paths) > 0:
+                    for base_path in texture_search_paths:
                         # If all file processed stop the search
                         if len(relative_paths) == 0:
                             break
@@ -332,6 +342,7 @@ class CollectorCopier:
 
                 path_info_file.write(json.dumps(ass_paths))
                 path_info_file.close()
+
 
             path_info_file = open(paths_info_filepath, "r")
             ass_paths = json.loads(path_info_file.read())

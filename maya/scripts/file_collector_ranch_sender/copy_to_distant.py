@@ -4,16 +4,14 @@ import time
 import importlib
 import threading
 
-install_dir = r'C:\Users\m.jenin\Documents\marius\file_collector_ranch_sender'
-arnold_sdk_dir = r"R:\pipeline\networkInstall\arnold\Arnold-7.1.4.1-windows"
+install_dir = r'R:\pipeline\pipe\maya\scripts\file_collector_ranch_sender'
 if not sys.path.__contains__(install_dir):
     sys.path.append(install_dir)
-if not sys.path.__contains__(arnold_sdk_dir):
-    sys.path.append(arnold_sdk_dir)
 
 modules = [
     "CollectorCopier"
 ]
+
 for module in modules:
     importlib.import_module(module)
 

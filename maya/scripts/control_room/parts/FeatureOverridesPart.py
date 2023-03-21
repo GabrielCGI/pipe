@@ -5,7 +5,7 @@ from pymel.core import *
 
 
 class IgnoreFields:
-    def __init__(self, name, field_name, key_preset):
+    def __init__(self, name, field_name, key_preset=None):
         self.__name = name
         self.__field_name = field_name
         self.__key_preset = key_preset
@@ -74,8 +74,8 @@ class FeatureOverridesPart(ControlRoomPart):
     def __init__(self, control_room):
         super(FeatureOverridesPart, self).__init__(control_room, "Feature Overrides")
         self.__ignore_fields = [
+            IgnoreFields("Ignore Athmosphere", "defaultArnoldRenderOptions.ignoreAtmosphere"),
             IgnoreFields("Ignore Subdivision", "defaultArnoldRenderOptions.ignoreSubdivision", "ignore_subdivision"),
-            IgnoreFields("Ignore Athmosphere", "defaultArnoldRenderOptions.ignoreAtmosphere", "ignore_atmosphere"),
             IgnoreFields("Ignore Displacement", "defaultArnoldRenderOptions.ignoreDisplacement", "ignore_displacement"),
             IgnoreFields("Ignore Motion", "defaultArnoldRenderOptions.ignoreMotion", "ignore_motion"),
             IgnoreFields("Ignore Depth of field", "defaultArnoldRenderOptions.ignoreDof", "ignore_dof")
@@ -172,14 +172,16 @@ class FeatureOverridesPart(ControlRoomPart):
     def add_to_preset(self, part_name, preset):
         for ign_field in self.__ignore_fields:
             key, field = ign_field.get_key_preset_and_field()
-            preset.set(part_name, key, getAttr(field))
+            if key:
+                preset.set(part_name, key, getAttr(field))
         preset.set(part_name, "ignore_aovs", self.__ignore_aovs)
         preset.set(part_name, "output_denoising", getAttr("defaultArnoldRenderOptions.outputVarianceAOVs"))
 
     def apply(self, part_name, preset):
         for ign_field in self.__ignore_fields:
             key, field = ign_field.get_key_preset_and_field()
-            setAttr(field, preset.get(part_name, key))
+            if key:
+                setAttr(field, preset.get(part_name, key))
         self.__ignore_aovs = preset.get(part_name, "ignore_aovs")
         self.__ignore_aovs_action()
         setAttr("defaultArnoldRenderOptions.outputVarianceAOVs", preset.get(part_name, "output_denoising"))
