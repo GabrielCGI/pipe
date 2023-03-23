@@ -1,0 +1,5 @@
+python("import sys");
+python("sys.path.append('R:/pipeline/pipe/maya/scripts/deadline')"); 
+python("import startup_remap");
+python("startup_remap.run()");
+print "REMAP MEL HAS BEEN HERE !";

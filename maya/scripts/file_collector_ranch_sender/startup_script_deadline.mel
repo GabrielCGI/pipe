@@ -1,0 +1,5 @@
+python("import sys");
+python("sys.path.append('R:/pipeline/pipe/maya/scripts/file_collector_ranch_sender')");
+python("import startup_script_deadline");
+python("startup_script_deadline.run()");
+print "REMAP MEL HAS BEEN HERE !";

@@ -22,9 +22,9 @@ except:
 
 # ######################################################################################################################
 
-_RANCH_CACHE_FOLDER = "I:/ranch/ranch_cache"
+_RANCH_CACHE_FOLDER = "I:/ranch/ranch_cache2"
 _LOGS_FOLDER = "I:/ranch/logs"
-_MAX_NB_THREADs = 256
+_MAX_NB_THREADs = 32
 
 _ASS_PATHS_FILE_EXTENSION = "paths"
 
@@ -128,16 +128,18 @@ class CollectorCopier:
         paths = []
         folder, filename = os.path.split(path)
         match_udim = re.match(r"^(.*\.)(?:<udim>|[0-9]{4})(\.\w*)$", filename)
-        if match_udim and os.path.exists(folder):
+
+        if match_udim:
             start = match_udim.group(1)
             ext = match_udim.group(2)
-            for file in os.listdir(folder):
-                match_udim = re.match(r"^" + start + r"[0-9]{4}" + ext + r"$", file)
-                if match_udim:
-                    paths.append(os.path.join(folder, file))
-            return paths if len(paths) > 0 else [path]
+            if os.path.exists(folder):
+                for file in os.listdir(folder):
+                    match_udim = re.match(r"^" + start + r"[0-9]{4}" + ext + r"$", file)
+                    if match_udim:
+                        paths.append(os.path.join(folder, file))
+            return paths if len(paths) > 0 else []
         else:
-            return []
+            return [path] if os.path.exists(folder) else []
 
     # Retrieve all the paths used in Maya Scene
     def __retrieve_paths_in_maya(self):
@@ -275,9 +277,6 @@ class CollectorCopier:
                 if len(ass_paths) > 0:
                     self.__output("\n".join(["|    +----> " + path for path in ass_paths]))
             else:
-
-                AiBegin(AI_SESSION_BATCH)
-                AiMsgSetConsoleFlags(AI_LOG_ALL)
                 if paths_info_file_exits:
                     open(paths_info_filepath, "w").close()
 
@@ -360,37 +359,44 @@ class CollectorCopier:
 
     # Copy with datas to Ranch
     def __copy_from_data(self, data):
-        count_file_str_length = 2 * len(str(self.__datas_length)) + 1
-        str_length = self.__max_length_path + count_file_str_length + _LENGTH_PADDING
-        os.makedirs(data['folder_dest'], exist_ok=True)
         path_src = data["src"]
         path_dest = data["dest"]
         size_src = data["size"]
+        count_file_str_length = 2 * len(str(self.__datas_length)) + 1
+        str_length = self.__max_length_path + count_file_str_length + _LENGTH_PADDING
+        try:
+            os.makedirs(data['folder_dest'], exist_ok=True)
 
-        # Check whether the file need to by copied
-        do_copy = True
-        if os.path.exists(path_dest):
-            mtime_src = os.path.getmtime(path_src)
-            mtime_dest = os.path.getmtime(path_dest)
-            size_dest = os.path.getsize(path_dest)
-            if mtime_src == mtime_dest and size_dest == size_src:
-                do_copy = False
+            # Check whether the file need to by copied
+            do_copy = True
+            if os.path.exists(path_dest):
+                mtime_src = os.path.getmtime(path_src)
+                mtime_dest = os.path.getmtime(path_dest)
+                size_dest = os.path.getsize(path_dest)
+                if mtime_src == mtime_dest and size_dest == size_src:
+                    do_copy = False
 
-        if do_copy:
-            # Copy
-            shutil.copy2(path_src, path_dest)
+            if do_copy:
+                # Copy
+                shutil.copy2(path_src, path_dest)
 
-        # Output Logs
-        with self.__progress_lock:
-            self.__current_file_size += size_src
-            percent_copied = round(self.__current_file_size / self.__total_file_size * 100, 2)
-            str_percent = str(percent_copied).rjust(5) + "%"
-            str_file_count = (str(self.__current_file_nb) + "/" + str(self.__total_file_nb)).rjust(
-                count_file_str_length)
-            msg = "Copy On RANCH of" if do_copy else "File already exists"
-            complete_msg = "| " + str_percent + " - " + str_file_count + " - " + msg + " : " + path_src + " "
-            self.__output_queue.put(complete_msg.ljust(str_length, " ") + "|")
-            self.__current_file_nb += 1
+            # Output Logs
+            with self.__progress_lock:
+                self.__current_file_size += size_src
+                percent_copied = round(self.__current_file_size / self.__total_file_size * 100, 2)
+                str_percent = str(percent_copied).rjust(5) + "%"
+                str_file_count = (str(self.__current_file_nb) + "/" + str(self.__total_file_nb)).rjust(
+                    count_file_str_length)
+                msg = "Copy On RANCH of" if do_copy else "File already exists"
+                complete_msg = "| " + str_percent + " - " + str_file_count + " - " + msg + " : " + path_src + " "
+                self.__output_queue.put(complete_msg.ljust(str_length, " ") + "|")
+                self.__current_file_nb += 1
+        except Exception as e:
+            # Error while copying
+            with self.__progress_lock:
+                msg = "| error while copying "+path_src+" : " + str(e)
+                self.__output_queue.put(msg.ljust(str_length, " ") + "|")
+
 
     # Thread of copy : It takes the data of the current file and copy it. It then take the next available
     def __thread_copy_file(self):

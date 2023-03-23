@@ -16,6 +16,11 @@ def run(force_override_ass_paths_files):
         defaultButton='Yes',
         dismissString='No')
     if answer_delete == "Yes":
+        setAttr("defaultArnoldRenderOptions.procedural_searchpath", "X:;Y:;Z:;I:;B:;R:")
+        setAttr("defaultArnoldRenderOptions.texture_searchpath", "X:;Y:;Z:;I:;B:;R:")
+        setAttr("defaultArnoldRenderOptions.absoluteTexturePaths", False)
+        setAttr("defaultArnoldRenderOptions.absoluteProceduralPaths", False)
+
         print ("Start replacing by tx")
         replace_by_tx.replace_by_tx()
 
