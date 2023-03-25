@@ -131,13 +131,6 @@ class ABCExportAsset:
 
     # Export this reference in ABC in a new version
     def export(self, folder, start, end, subsamples_enabled, subsamples, euler_filter):
-        self.__optimize_scene_size()
-        self.__delete_unknown_node()
-        self.__remove_unknown_plugins()
-        self.__unlock_all_nodes()
-        self.__remove_blast_panel_error()
-        self.__fix_isg()
-
         abc_name = self.get_name_with_num()
         asset_dir_path = os.path.join(folder, abc_name)
         next_version = ABCExportAsset.next_version(asset_dir_path)
@@ -164,6 +157,8 @@ class ABCExportAsset:
         command += " -file \"%s\"" % (path)
 
         refresh(suspend=True)
+        print("JOB ABC IS :")
+        print(command)
         AbcExport(j=command)
         refresh(suspend=False)
 
@@ -172,6 +167,13 @@ class ABCExportAsset:
     def __export_light(self, version_dir_path, start, end):
         lights = ls(self.__namespace + ":*", type="light")
         if len(lights) > 0:
+            self.__optimize_scene_size()
+            self.__delete_unknown_node()
+            self.__remove_unknown_plugins()
+            self.__unlock_all_nodes()
+            self.__remove_blast_panel_error()
+            self.__fix_isg()
+
             bake_list = []
             for n in lights:
                 # Check if selected object is a child of an object

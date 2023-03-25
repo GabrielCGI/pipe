@@ -12,6 +12,9 @@ __FOLDER_TYPE = r"^anim$"  # ANIM
 
 __FILTER_CHAR = ""
 #__FILTER_CHAR = "ch_namechar"
+
+__SUBSAMPLE = ""
+# __SUBSAMPLE = "-0.125 0 0.125"
 # ######################################################################################################################
 
-export_abc_scenes.run_export_abc_scenes(__FOLDER_TYPE, __FILTER_CHAR)
+export_abc_scenes.run_export_abc_scenes(__FOLDER_TYPE, __FILTER_CHAR, __SUBSAMPLE)

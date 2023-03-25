@@ -130,8 +130,14 @@ class ABCImport(QDialog):
             pos = self.__prefs["window_pos"]
             self.__ui_pos = QPoint(pos["x"], pos["y"])
 
+    # On show window create callback
+    def showEvent(self, arg__1: QShowEvent) -> None:
+        self.__selection_callback = \
+            OpenMaya.MEventMessage.addEventCallback("SelectionChanged", self.__on_selection_changed)
+
     # Remove callbacks
     def hideEvent(self, arg__1: QCloseEvent) -> None:
+        OpenMaya.MMessage.removeCallback(self.__selection_callback)
         self.__save_prefs()
 
     # Retrieve the current project dir specified in the Illogic maya launcher
@@ -354,8 +360,6 @@ class ABCImport(QDialog):
             self.__retrieve_alone_asset_in_scene(asset)
             asset.set_import_path(os.path.dirname(file_path))
             select(asset.import_update_abc(True))
-            self.__retrieve_assets_in_scene()
-            self.__refresh_ui()
 
     # Refresh ui on new selection
     def __on_selection_changed(self, *args, **kwarrgs):
@@ -391,8 +395,6 @@ class ABCImport(QDialog):
     def __on_click_update_uvs_shaders(self, abc):
         standin_node = abc.update()
         select(standin_node)
-        self.__retrieve_assets_in_scene()
-        self.__refresh_ui()
 
     # Retrieve the abcs at the folder path.
     # If parent folder specified, retrieves abc and abc_fur

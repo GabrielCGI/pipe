@@ -107,7 +107,7 @@ def print_scene(messages):
         "\n#################################################################################################\n\n\n")
 
 
-def export_char_in_scene(scene_path, database_path, abc_path, nb, nb_tot, filter_char):
+def export_char_in_scene(scene_path, database_path, abc_path, nb, nb_tot, filter_char, subsample):
     os.system("cls")
 
     filter_char_enabled = len(filter_char) > 0
@@ -137,12 +137,12 @@ def export_char_in_scene(scene_path, database_path, abc_path, nb, nb_tot, filter
             os.system("cls")
             print_scene(["Exporting : " + name_num, "Version : " + next_version, "from scene : " + scene_path,
                          "Scene " + nb + " on " + nb_tot])
-            abc_exported.append((name_num, next_version))
-            abc.export(abc_path, start_frame, end_frame, False, "", True)
+            abc_exported.append((name_num, next_version+subsample))
+            abc.export(abc_path, start_frame, end_frame, len(subsample)>0, subsample, True)
     return abc_exported
 
 
-def export_abcs_from_scenes(list_scenes, current_project_dir, filter_char):
+def export_abcs_from_scenes(list_scenes, current_project_dir, filter_char, subsample):
     database_path = os.path.join(current_project_dir, "assets/_database")
     scene_abc_exported = {}
     nb_scenes = len(list_scenes)
@@ -156,7 +156,7 @@ def export_abcs_from_scenes(list_scenes, current_project_dir, filter_char):
                 abc_export_path = os.path.join(shot_folder, "abc")
                 os.makedirs(abc_export_path, exist_ok=True)
                 scene_abc_exported[file_path] = export_char_in_scene(file_path, database_path, abc_export_path, str(i),
-                                                                     str(nb_scenes),filter_char)
+                                                                     str(nb_scenes),filter_char, subsample)
         i += 1
 
     os.system("cls")
@@ -168,12 +168,12 @@ def export_abcs_from_scenes(list_scenes, current_project_dir, filter_char):
     print_scene(messages)
 
 
-def export_all(current_project_dir, scenes, filter_char):
+def export_all(current_project_dir, scenes, filter_char, subsample):
     subprocess.check_call(
-        [r"C:\Program Files\Autodesk\Maya2022\bin\mayapy.exe", __file__, current_project_dir, filter_char] + scenes)
+        [r"C:\Program Files\Autodesk\Maya2022\bin\mayapy.exe", __file__, current_project_dir, filter_char, subsample] + scenes)
 
 
-def run_export_abc_scenes(folder_type, filter_char):
+def run_export_abc_scenes(folder_type, filter_char, subsample):
     filter_char_enabled = len(filter_char) > 0
     current_project_dir = os.getenv("CURRENT_PROJECT_DIR")
     if current_project_dir is None:
@@ -191,12 +191,12 @@ def run_export_abc_scenes(folder_type, filter_char):
         msg = "Are you sure to export all abcs from these scenes ?\n\n" + scenes_str
     ret = QtWidgets.QMessageBox().question(None, '', msg, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
     if ret == QtWidgets.QMessageBox.Yes:
-        thread = Thread(target=export_all, args=(current_project_dir, scenes, filter_char))
+        thread = Thread(target=export_all, args=(current_project_dir, scenes, filter_char, subsample))
         thread.start()
 
 
 if __name__ == '__main__':
     loadPlugin('AbcExport', quiet =True)
-    export_abcs_from_scenes(sys.argv[3:], sys.argv[1], sys.argv[2])
+    export_abcs_from_scenes(sys.argv[4:], sys.argv[1], sys.argv[2], sys.argv[3])
     os.system("pause")
     print("wait a few seconds")

@@ -217,7 +217,7 @@ def export_arnold_graph(aiStandIn, shaders_used):
 
 def run():
     pm.setAttr("defaultArnoldRenderOptions.absoluteTexturePaths", 0)
-    pm.setAttr("defaultArnoldRenderOptions.texture_searchpath", "[DISK_I];[DISK_B];[DISK_P];[DISK_R];I:/;P:/;B:/;R:/")
+    pm.setAttr("defaultArnoldRenderOptions.texture_searchpath", "[DISK_I];[DISK_B];[DISK_P];I:;P:;B:")
     sel = pm.ls(sl=True)
     utils.convert_selected_to_tx(sel)
     abc_path, abc_name = abcExport(sel)

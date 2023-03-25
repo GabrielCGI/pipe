@@ -28,8 +28,8 @@ def run():
     cmds.evalDeferred('for plug in ["bifmeshio.mll","bifrostGraph.mll","bifrostshellnode.mll","bifrostshellnode.mll","bifrostvisplugin.mll","Turtle.mll" ]:  cmds.pluginInfo(plug, edit=True, autoload=False ) if cmds.pluginInfo(plug, query=True, autoload=True) else print("Already no autoload: "+plug) ; cmds.pluginInfo(savePluginPrefs=True)',lp=True)
 
     om.MGlobal.executeCommand("setRendererAndOverrideInModelPanel $gViewport2 arnoldViewOverride modelPanel4")
-
-    om.MGlobal.executeCommand("setRendererInModelPanel $gViewport2 modelPanel4")
+    pm.refresh()
+    pm.mel.evalDeferred("setRendererInModelPanel $gViewport2 \"modelPanel4\";")
 
     try:
         ui.deleteLater()
