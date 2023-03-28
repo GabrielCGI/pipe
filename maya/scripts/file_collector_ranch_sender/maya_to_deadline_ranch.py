@@ -10,14 +10,15 @@ def run(force_override_ass_paths_files):
     answer_delete = confirmDialog(
         title='Confirm Submit to Deadline Ranch',
         icon="question",
-        message="Do you really want to send all the data from this scene "
-                "to the RANCH server and start sending a new job to the Illogic farm ?",
-        button=['Yes', 'No'],
-        defaultButton='Yes',
-        dismissString='No')
-    if answer_delete == "Yes":
+        message="How do you want to save the scene before submitting the job ?",
+        button=['Increment and Save', 'Skip', 'Cancel'],
+        defaultButton='Skip',
+        dismissString='Cancel')
+    skip = answer_delete == "Skip"
+    increment_and_save = answer_delete == "Increment and Save"
+    if skip or increment_and_save:
         setAttr("defaultArnoldRenderOptions.procedural_searchpath", "X:/;Y:/;Z:/;I:/;B:/;R:/")
-        setAttr("defaultArnoldRenderOptions.texture_searchpath", "X:;Y:;Z:;I:;B:;R:")
+        setAttr("defaultArnoldRenderOptions.texture_searchpath", "X:;Y:;Z:;I:;B:")
         setAttr("defaultArnoldRenderOptions.absoluteTexturePaths", False)
         setAttr("defaultArnoldRenderOptions.absoluteProceduralPaths", False)
 
@@ -25,7 +26,8 @@ def run(force_override_ass_paths_files):
         replace_by_tx.replace_by_tx()
 
         # Increment and save
-        mel.eval('incrementAndSaveScene 0;')
+        if increment_and_save:
+            mel.eval('incrementAndSaveScene 0;')
 
         # Collect all the paths in the scene and copy them to RANCH
         collector_copier = CollectorCopier(force_override_ass_paths_files)

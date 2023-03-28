@@ -4,24 +4,24 @@ from pymel.core import *
 
 
 class SamplingPart(ControlRoomPart):
-    def __init__(self, control_room):
-        super(SamplingPart, self).__init__(control_room, "Sampling")
+    def __init__(self, control_room, part_name):
+        super(SamplingPart, self).__init__(control_room, "Sampling", part_name)
         self.__form_sliders = [
-            FormSlider(FormSliderType.IntSlider, "Camera (AA)",
+            FormSlider(self._control_room, FormSliderType.IntSlider, "Camera (AA)", part_name,
                        "defaultArnoldRenderOptions.AASamples", "camera_aa", 0, 10, 100),
-            FormSlider(FormSliderType.IntSlider, "Diffuse",
+            FormSlider(self._control_room, FormSliderType.IntSlider, "Diffuse", part_name,
                        "defaultArnoldRenderOptions.GIDiffuseSamples", "diffuse", 0, 10, 100),
-            FormSlider(FormSliderType.IntSlider, "Specular",
+            FormSlider(self._control_room, FormSliderType.IntSlider, "Specular", part_name,
                        "defaultArnoldRenderOptions.GISpecularSamples", "specular", 0, 10, 100),
-            FormSlider(FormSliderType.IntSlider, "Transmission",
+            FormSlider(self._control_room, FormSliderType.IntSlider, "Transmission", part_name,
                        "defaultArnoldRenderOptions.GITransmissionSamples", "transmission", 0, 10, 100),
-            FormSlider(FormSliderType.IntSlider, "SSS",
+            FormSlider(self._control_room, FormSliderType.IntSlider, "SSS", part_name,
                        "defaultArnoldRenderOptions.GISssSamples", "sss", 0, 10, 100),
-            FormSlider(FormSliderType.IntSlider, "Volume Indirect",
-                       "defaultArnoldRenderOptions.GIVolumeSamples", "indirect_vol", 0, 10, 100),
-            FormSlider(FormSliderType.IntSlider, "Ray Depth Diffuse",
+            FormSlider(self._control_room, FormSliderType.IntSlider, "Volume Indirect", part_name,
+                       "defaultArnoldRenderOptions.GIVolumeSamples", "volume_indirect", 0, 10, 100),
+            FormSlider(self._control_room, FormSliderType.IntSlider, "Ray Depth Diffuse", part_name,
                        "defaultArnoldRenderOptions.GIDiffuseDepth", "ray_depth_diffuse", 0, 16, 160),
-            FormSlider(FormSliderType.IntSlider, "Ray Depth Specular",
+            FormSlider(self._control_room, FormSliderType.IntSlider, "Ray Depth Specular", part_name,
                        "defaultArnoldRenderOptions.GISpecularDepth", "ray_depth_specular", 0, 16, 160),
         ]
         self.__ui_progressive_render_cb = None
@@ -74,7 +74,8 @@ class SamplingPart(ControlRoomPart):
     def refresh_ui(self):
         visible_layer = render_setup.instance().getVisibleRenderLayer()
         is_default_layer = visible_layer.name() == "defaultRenderLayer"
-        self.__ui_progressive_render_cb.setChecked(getAttr("defaultArnoldRenderOptions.enableProgressiveRender"))
+        progressive_render_enabled = getAttr("defaultArnoldRenderOptions.enableProgressiveRender")
+        self.__ui_progressive_render_cb.setChecked(progressive_render_enabled)
         for fs in self.__form_sliders:
             fs.refresh_ui()
 
@@ -83,8 +84,11 @@ class SamplingPart(ControlRoomPart):
         self.__action_remove_progressive_render_override.setEnabled(
             not is_default_layer and self.__progressive_render_override is not None)
 
-        stylesheet_lbl = "color:" + cr.OVERRIDE_LABEL_COLOR if self.__progressive_render_override is not None else ""
+        stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+            self._part_name, "enable_progressive_render",
+            progressive_render_enabled, self.__progressive_render_override)
         self.__ui_progressive_render_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
+        self.__retrieve_progressive_render_override()
 
     # On enable progressive render checkbox changed
     def __on_progressive_render_changed(self, state):
@@ -103,14 +107,16 @@ class SamplingPart(ControlRoomPart):
             fs.remove_callbacks()
         scriptJob(kill=self.__layer_callback)
 
-    def add_to_preset(self, part_name, preset):
+    def add_to_preset(self, preset):
+        preset.set(self._part_name, "enable_progressive_render", getAttr("defaultArnoldRenderOptions.enableProgressiveRender"))
         for fs in self.__form_sliders:
             key, field = fs.get_key_preset_and_field()
-            preset.set(part_name, key, getAttr(field))
-        preset.set(part_name, "progressive_render", getAttr("defaultArnoldRenderOptions.enableProgressiveRender"))
+            preset.set(self._part_name, key, getAttr(field))
 
-    def apply(self, part_name, preset):
+    def apply(self, preset):
+        if preset.contains(self._part_name, "enable_progressive_render"):
+            setAttr("defaultArnoldRenderOptions.enableProgressiveRender", preset.get(self._part_name, "enable_progressive_render"))
         for fs in self.__form_sliders:
             key, field = fs.get_key_preset_and_field()
-            setAttr(field, preset.get(part_name, key))
-        setAttr("defaultArnoldRenderOptions.enableProgressiveRender", preset.get(part_name, "progressive_render"))
+            if preset.contains(self._part_name, key):
+                setAttr(field, preset.get(self._part_name, key))

@@ -4,13 +4,14 @@ from pymel.core import *
 
 
 class MotionBlurPart(ControlRoomPart):
-    def __init__(self, control_room):
-        super(MotionBlurPart, self).__init__(control_room, "Motion Blur")
+    def __init__(self, control_room, part_name):
+        super(MotionBlurPart, self).__init__(control_room, "Motion Blur", part_name)
         self.__form_sliders = [
-            FormSlider(FormSliderType.IntSlider, "Keys", "defaultArnoldRenderOptions.motion_steps", "motion_blur_keys",
+            FormSlider(self._control_room, FormSliderType.IntSlider, "Keys", part_name,
+                       "defaultArnoldRenderOptions.motion_steps", "motion_blur_keys",
                        2, 30, 300),
-            FormSlider(FormSliderType.FloatSlider, "Motion Step", "defaultArnoldRenderOptions.motion_frames",
-                       "motion_blur_step", 0, 1),
+            FormSlider(self._control_room, FormSliderType.FloatSlider, "Motion Step", part_name,
+                       "defaultArnoldRenderOptions.motion_frames", "motion_blur_step", 0, 1),
         ]
         self.__ui_motion_blur_cb = None
         self.__ui_instant_shutter_cb = None
@@ -90,8 +91,10 @@ class MotionBlurPart(ControlRoomPart):
         return content
 
     def refresh_ui(self):
-        self.__ui_motion_blur_cb.setChecked(getAttr("defaultArnoldRenderOptions.motion_blur_enable"))
-        self.__ui_instant_shutter_cb.setChecked(getAttr("defaultArnoldRenderOptions.ignoreMotionBlur"))
+        motion_blur_enable = getAttr("defaultArnoldRenderOptions.motion_blur_enable")
+        ignore_motion_blur = getAttr("defaultArnoldRenderOptions.ignoreMotionBlur")
+        self.__ui_motion_blur_cb.setChecked(motion_blur_enable)
+        self.__ui_instant_shutter_cb.setChecked(ignore_motion_blur)
         for fs in self.__form_sliders:
             fs.refresh_ui()
 
@@ -106,12 +109,15 @@ class MotionBlurPart(ControlRoomPart):
         self.__action_remove_instant_shutter_override.setEnabled(
             not is_default_layer and self.__instant_shutter_override is not None)
 
-        motion_blur_stylesheet_lbl = "color:" + cr.OVERRIDE_LABEL_COLOR \
-            if self.__motion_blur_override is not None else ""
-        instant_shutter_stylesheet_lbl = "color:" + cr.OVERRIDE_LABEL_COLOR \
-            if self.__instant_shutter_override is not None else ""
+        motion_blur_stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+            self._part_name, "enable_motion_blur", motion_blur_enable, self.__motion_blur_override)
         self.__ui_motion_blur_cb.setStyleSheet("QCheckBox{" + motion_blur_stylesheet_lbl + "}")
+
+        instant_shutter_stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+            self._part_name, "instant_shutter", ignore_motion_blur, self.__instant_shutter_override)
         self.__ui_instant_shutter_cb.setStyleSheet("QCheckBox{" + instant_shutter_stylesheet_lbl + "}")
+        self.__retrieve_motion_blur_override()
+        self.__retrieve_instant_shutter_override()
 
     # On motion blur enable checkbox changed
     def __on_motion_blur_changed(self, state):
@@ -137,16 +143,19 @@ class MotionBlurPart(ControlRoomPart):
             fs.remove_callbacks()
         scriptJob(kill=self.__layer_callback)
 
-    def add_to_preset(self, part_name, preset):
+    def add_to_preset(self, preset):
+        preset.set(self._part_name, "enable_motion_blur", getAttr("defaultArnoldRenderOptions.motion_blur_enable"))
+        preset.set(self._part_name, "instant_shutter", getAttr("defaultArnoldRenderOptions.ignoreMotionBlur"))
         for fs in self.__form_sliders:
             key, field = fs.get_key_preset_and_field()
-            preset.set(part_name, key, getAttr(field))
-        preset.set(part_name, "enable", getAttr("defaultArnoldRenderOptions.motion_blur_enable"))
-        preset.set(part_name, "instant_shutter", getAttr("defaultArnoldRenderOptions.ignoreMotionBlur"))
+            preset.set(self._part_name, key, getAttr(field))
 
-    def apply(self, part_name, preset):
+    def apply(self, preset):
+        if preset.contains(self._part_name, "enable_motion_blur"):
+            setAttr("defaultArnoldRenderOptions.motion_blur_enable", preset.get(self._part_name, "enable_motion_blur"))
+        if preset.contains(self._part_name, "instant_shutter"):
+            setAttr("defaultArnoldRenderOptions.ignoreMotionBlur", preset.get(self._part_name, "instant_shutter"))
         for fs in self.__form_sliders:
             key, field = fs.get_key_preset_and_field()
-            setAttr(field, preset.get(part_name, key))
-        setAttr("defaultArnoldRenderOptions.motion_blur_enable", preset.get(part_name, "enable"))
-        setAttr("defaultArnoldRenderOptions.ignoreMotionBlur", preset.get(part_name, "instant_shutter"))
+            if preset.contains(self._part_name, key):
+                setAttr(field, preset.get(self._part_name, key))

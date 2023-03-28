@@ -128,7 +128,7 @@ class CollectorCopier:
     def __get_paths_with_udim(self, path):
         paths = []
         folder, filename = os.path.split(path)
-        match_udim = re.match(r"^(.*\.)(?:<udim>|[0-9]{4})(\.\w*)$", filename)
+        match_udim = re.match(r"^(.*)(?:<udim>|[0-9]{4})(\.\w*)$", filename)
 
         if match_udim:
             start = match_udim.group(1)

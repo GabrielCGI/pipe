@@ -15,9 +15,13 @@ _AspectRatios = {
 
 
 class ImageSizePart(ControlRoomPart):
-    def __init__(self, control_room):
-        super(ImageSizePart, self).__init__(control_room, "Image Size")
+    def __init__(self, control_room, part_name):
+        super(ImageSizePart, self).__init__(control_room, "Image Size", part_name)
         self.__cam = None
+        for cam in ls(type="camera"):
+            if cam.renderable.get():
+                self.__cam = cam
+                break
         self.__width_callback = None
         self.__height_callback = None
         self.__aspect_ratio_callback = None
@@ -26,31 +30,35 @@ class ImageSizePart(ControlRoomPart):
         self.__is_gate_opaque = False
         self.__is_gate_enabled = False
 
+        self.__ui_lbl_width = None
+        self.__ui_lbl_height = None
         self.__ui_width_edit = None
         self.__ui_height_edit = None
         self.__ui_ratio_btns = {}
         self.__ui_sd_format_btn = None
         self.__ui_hd_format_btn = None
+        self.__ui_lbl_overscan = None
         self.__ui_overscan_line_edit = None
         self.__ui_overscan_slider = None
         self.__ui_opaque_gate_cb = None
         self.__ui_enable_gate_cb = None
 
         self.__retrieve_aspect_ratio()
+        if self.__cam is not None : self.add_dynamic_callbacks()
 
     def populate(self):
         content = QVBoxLayout()
         content.setContentsMargins(4, 4, 2, 0)
         # Width and Height
         size_lyt = QHBoxLayout()
-        lbl_width = QLabel("Width")
-        size_lyt.addWidget(lbl_width)
+        self.__ui_lbl_width = QLabel("Width")
+        size_lyt.addWidget(self.__ui_lbl_width)
         self.__ui_width_edit = QLineEdit()
         self.__ui_width_edit.editingFinished.connect(self.__on_width_changed)
         self.__ui_width_edit.setContentsMargins(0, 0, 10, 0)
         size_lyt.addWidget(self.__ui_width_edit)
-        lbl_height = QLabel("Height")
-        size_lyt.addWidget(lbl_height)
+        self.__ui_lbl_height = QLabel("Height")
+        size_lyt.addWidget(self.__ui_lbl_height)
         self.__ui_height_edit = QLineEdit()
         self.__ui_height_edit.editingFinished.connect(self.__on_height_changed)
         size_lyt.addWidget(self.__ui_height_edit)
@@ -75,7 +83,7 @@ class ImageSizePart(ControlRoomPart):
 
         # Overscan
         form_lyt = QFormLayout()
-        lbl = QLabel("Overscan")
+        self.__ui_lbl_overscan = QLabel("Overscan")
         lyt = QHBoxLayout()
         self.__ui_overscan_line_edit = QLineEdit()
         min = 0
@@ -92,7 +100,7 @@ class ImageSizePart(ControlRoomPart):
         self.__ui_overscan_slider.valueChanged.connect(self.__on_slider_overscan_changed)
         lyt.addWidget(self.__ui_overscan_line_edit, 1)
         lyt.addWidget(self.__ui_overscan_slider, 3)
-        form_lyt.addRow(lbl, lyt)
+        form_lyt.addRow(self.__ui_lbl_overscan, lyt)
 
         # Gate
         camera_gate_lyt = QHBoxLayout()
@@ -172,8 +180,17 @@ class ImageSizePart(ControlRoomPart):
 
     def refresh_ui(self):
         width_retrieved = getAttr("defaultResolution.width")
+        stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+            self._part_name, "width", width_retrieved)
+        self.__ui_lbl_width.setStyleSheet("QLabel{"+stylesheet_lbl+"}")
         self.__ui_width_edit.setText(str(width_retrieved))
-        self.__ui_height_edit.setText(str(getAttr("defaultResolution.height")))
+
+        height_retrieved = getAttr("defaultResolution.height")
+        stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+            self._part_name, "height", height_retrieved)
+        self.__ui_lbl_height.setStyleSheet("QLabel{"+stylesheet_lbl+"}")
+        self.__ui_height_edit.setText(str(height_retrieved))
+
         stylesheet_selected = "background-color:#2C2C2C"
 
         for name, btn in self.__ui_ratio_btns.items():
@@ -189,9 +206,20 @@ class ImageSizePart(ControlRoomPart):
         self.__ui_hd_format_btn.setStyleSheet(stylesheet_selected if hd_selected else "")
         if self.__cam is not None:
             overscan = self.__cam.overscan.get()
+            stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                self._part_name, "overscan", overscan)
+            self.__ui_lbl_overscan.setStyleSheet("QLabel{"+stylesheet_lbl+"}")
             self.__ui_overscan_slider.setValue(overscan * 1000)
             self.__ui_overscan_line_edit.setText(str(overscan))
+
+        stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+            self._part_name, "enable_gate", self.__is_gate_enabled)
+        self.__ui_enable_gate_cb.setStyleSheet("QCheckBox{"+stylesheet_lbl+"}")
         self.__ui_enable_gate_cb.setChecked(self.__is_gate_enabled)
+
+        stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+            self._part_name, "opaque_gate", self.__is_gate_opaque)
+        self.__ui_opaque_gate_cb.setStyleSheet("QCheckBox{"+stylesheet_lbl+"}")
         self.__ui_opaque_gate_cb.setChecked(self.__is_gate_opaque)
 
     # On checkbox gate enable changed
@@ -249,31 +277,28 @@ class ImageSizePart(ControlRoomPart):
             self.__is_gate_enabled = self.__cam.displayResolution.get()
             self.__is_gate_opaque = self.__cam.displayGateMaskOpacity.get() == 1.0
 
-    def add_to_preset(self, part_name, preset):
-        preset.set(part_name, "width", getAttr("defaultResolution.width"))
-        preset.set(part_name, "height", getAttr("defaultResolution.height"))
+    def add_to_preset(self, preset):
+        preset.set(self._part_name, "width", getAttr("defaultResolution.width"))
+        preset.set(self._part_name, "height", getAttr("defaultResolution.height"))
         if self.__cam is not None:
-            preset.set(part_name, "overscan", self.__cam.overscan.get())
-            preset.set(part_name, "opacity_gate", self.__is_gate_opaque)
-            preset.set(part_name, "gate_enabled", self.__is_gate_enabled)
+            preset.set(self._part_name, "overscan", self.__cam.overscan.get())
+            preset.set(self._part_name, "opaque_gate", self.__is_gate_opaque)
+            preset.set(self._part_name, "enable_gate", self.__is_gate_enabled)
 
-    def apply(self, part_name, preset):
-        width = preset.get(part_name, "width")
-        height = preset.get(part_name, "height")
-        setAttr("defaultResolution.width", width)
-        setAttr("defaultResolution.height", height)
-        setAttr("defaultResolution.deviceAspectRatio", width / height)
+    def apply(self, preset):
+        if preset.contains(self._part_name, "width"):
+            width = preset.get(self._part_name, "width")
+            setAttr("defaultResolution.width", width)
+        if preset.contains(self._part_name, "height"):
+            height = preset.get(self._part_name, "height")
+            setAttr("defaultResolution.height", height)
+        setAttr("defaultResolution.deviceAspectRatio", getAttr("defaultResolution.width") / getAttr("defaultResolution.height"))
         self.__retrieve_aspect_ratio()
         if self.__cam is not None:
-            self.__cam.overscan.set(preset.get(part_name, "overscan"))
-            self.__is_gate_opaque = preset.get(part_name, "opacity_gate") == 1
-            self.__is_gate_enabled = preset.get(part_name, "gate_enabled")
+            if preset.contains(self._part_name, "overscan"):
+                self.__cam.overscan.set(preset.get(self._part_name, "overscan"))
+            if preset.contains(self._part_name, "opaque_gate"):
+                self.__is_gate_opaque = preset.get(self._part_name, "opaque_gate") == 1
+            if preset.contains(self._part_name, "enable_gate"):
+                self.__is_gate_enabled = preset.get(self._part_name, "enable_gate")
             self.__update_gate_attr()
-
-    # On cam changed retrieve datas and refresh callbacks and UI
-    def cam_changed(self, cam):
-        self.__cam = cam
-        self.__retrieve_gate_attr()
-        self.remove_dynamic_callbacks()
-        self.add_dynamic_callbacks()
-        self.refresh_ui()

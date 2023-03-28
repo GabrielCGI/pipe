@@ -4,13 +4,13 @@ from pymel.core import *
 
 
 class AdaptiveSamplingPart(ControlRoomPart):
-    def __init__(self, control_room):
-        super(AdaptiveSamplingPart, self).__init__(control_room, "Adaptive Sampling")
+    def __init__(self, control_room, part_name):
+        super(AdaptiveSamplingPart, self).__init__(control_room, "Adaptive Sampling", part_name)
         self.__form_sliders = [
-            FormSlider(FormSliderType.IntSlider, "Max Camera (AA)", "defaultArnoldRenderOptions.AASamplesMax",
-                       "camera_aa", 0, 20, 200),
-            FormSlider(FormSliderType.FloatSlider, "Adaptive Treshold",
-                       "defaultArnoldRenderOptions.AAAdaptiveThreshold", "diffuse", 0, 1),
+            FormSlider(self._control_room, FormSliderType.IntSlider, "Max Camera (AA)", part_name,
+                       "defaultArnoldRenderOptions.AASamplesMax","max_camera_aa", 0, 20, 200),
+            FormSlider(self._control_room, FormSliderType.FloatSlider, "Adaptive Treshold", part_name,
+                       "defaultArnoldRenderOptions.AAAdaptiveThreshold", "adaptive_treshold", 0, 1),
         ]
         self.__ui_enable_cb = None
         self.__enable_callback = None
@@ -59,7 +59,8 @@ class AdaptiveSamplingPart(ControlRoomPart):
         return content
 
     def refresh_ui(self):
-        self.__ui_enable_cb.setChecked(getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling"))
+        adaptive_sampling_enabled = getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling")
+        self.__ui_enable_cb.setChecked(adaptive_sampling_enabled)
         for fs in self.__form_sliders:
             fs.refresh_ui()
 
@@ -70,8 +71,11 @@ class AdaptiveSamplingPart(ControlRoomPart):
         self.__action_remove_adaptive_sampling_override.setEnabled(
             not is_default_layer and self.__adaptive_sampling_override is not None)
 
-        stylesheet_lbl = "color:" + cr.OVERRIDE_LABEL_COLOR if self.__adaptive_sampling_override is not None else ""
+        stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+            self._part_name, "enable_adaptive_sampling",
+            adaptive_sampling_enabled, self.__adaptive_sampling_override)
         self.__ui_enable_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
+        self.__retrieve_adaptive_sampling_override()
 
     # On checkbox enable adaptive sampling changed
     def __on_enable_changed(self, state):
@@ -90,14 +94,16 @@ class AdaptiveSamplingPart(ControlRoomPart):
             fs.remove_callbacks()
         scriptJob(kill=self.__layer_callback)
 
-    def add_to_preset(self, part_name, preset):
+    def add_to_preset(self, preset):
+        preset.set(self._part_name, "enable_adaptive_sampling", getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling"))
         for fs in self.__form_sliders:
             key, field = fs.get_key_preset_and_field()
-            preset.set(part_name, key, getAttr(field))
-        preset.set(part_name, "enable", getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling"))
+            preset.set(self._part_name, key, getAttr(field))
 
-    def apply(self, part_name, preset):
+    def apply(self, preset):
+        if preset.contains(self._part_name, "enable_adaptive_sampling"):
+            setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling", preset.get(self._part_name, "enable_adaptive_sampling"))
         for fs in self.__form_sliders:
             key, field = fs.get_key_preset_and_field()
-            setAttr(field, preset.get(part_name, key))
-        setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling", preset.get(part_name, "enable"))
+            if preset.contains(self._part_name, key):
+                setAttr(field, preset.get(self._part_name, key))

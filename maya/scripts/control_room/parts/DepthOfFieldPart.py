@@ -1,17 +1,24 @@
+import ControlRoom as cr
+from ControlRoom import *
 from ControlRoomPart import *
 from pymel.core import *
 
 
 class DepthOfFieldPart(ControlRoomPart):
-    def __init__(self, control_room):
-        super(DepthOfFieldPart, self).__init__(control_room, "Depth of Field")
+    def __init__(self, control_room, part_name):
+        super(DepthOfFieldPart, self).__init__(control_room, "Depth of Field", part_name)
         self.__no_refresh = False
         self.__cam = None
+        for cam in ls(type="camera"):
+            if cam.renderable.get():
+                self.__cam = cam
+                break
         self.__ui_dof_cb = None
         self.__ui_lbl_fstop = None
         self.__ui_line_edit_fstop = None
         self.__camera_dof_callback = None
         self.__camera_fstop_callback = None
+        if self.__cam is not None : self.add_dynamic_callbacks()
 
     def populate(self):
         content = QHBoxLayout()
@@ -38,10 +45,19 @@ class DepthOfFieldPart(ControlRoomPart):
     def refresh_ui(self):
         if self.__cam is not None and not self.__no_refresh:
             enabled = self.__cam.depthOfField.get()
+
+            stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                self._part_name, "depth_of_field", enabled)
+            self.__ui_dof_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
             self.__ui_dof_cb.setChecked(enabled)
+
+            f_stop = round(self.__cam.fStop.get(), 3)
+            stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                self._part_name, "f_stop", f_stop)
             self.__ui_lbl_fstop.setEnabled(enabled)
+            self.__ui_lbl_fstop.setStyleSheet("QLabel{" + stylesheet_lbl + "}")
             self.__ui_line_edit_fstop.setEnabled(enabled)
-            self.__ui_line_edit_fstop.setText(str(round(self.__cam.fStop.get(), 3)))
+            self.__ui_line_edit_fstop.setText(str(f_stop))
 
     # On checkbox Depth of Field changed
     def __on_dof_changed(self, state):
@@ -56,13 +72,6 @@ class DepthOfFieldPart(ControlRoomPart):
             self.__no_refresh = True
             self.__cam.fStop.set(float(self.__ui_line_edit_fstop.text()))
             self.__no_refresh = False
-
-    # On camera changed refresh the callbacks and the UI
-    def cam_changed(self, cam):
-        self.__cam = cam
-        self.remove_callbacks()
-        self.add_dynamic_callbacks()
-        self.refresh_ui()
 
     def add_callbacks(self):
         # Nothing
@@ -85,12 +94,14 @@ class DepthOfFieldPart(ControlRoomPart):
             scriptJob(kill=self.__camera_fstop_callback)
             self.__camera_fstop_callback = None
 
-    def add_to_preset(self, part_name, preset):
+    def add_to_preset(self, preset):
         if self.__cam is not None:
-            preset.set(part_name, "depthOfField", self.__cam.depthOfField.get())
-            preset.set(part_name, "fStop", self.__cam.fStop.get())
+            preset.set(self._part_name, "depth_of_field", self.__cam.depthOfField.get())
+            preset.set(self._part_name, "f_stop", self.__cam.fStop.get())
 
-    def apply(self, part_name, preset):
+    def apply(self, preset):
         if self.__cam is not None:
-            self.__cam.depthOfField.set(preset.get(part_name, "depthOfField"))
-            self.__cam.fStop.set(preset.get(part_name, "fStop"))
+            if preset.contains(self._part_name, "depth_of_field"):
+                self.__cam.depthOfField.set(preset.get(self._part_name, "depth_of_field"))
+            if preset.contains(self._part_name, "f_stop"):
+                self.__cam.fStop.set(preset.get(self._part_name, "f_stop"))
