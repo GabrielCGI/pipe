@@ -245,7 +245,7 @@ def cleanAsset(asset):
 
     # Textures search path
     pm.setAttr("defaultArnoldRenderOptions.absoluteTexturePaths", 0)
-    pm.setAttr("defaultArnoldRenderOptions.texture_searchpath", "[DISK_I];[DISK_B];[DISK_P];I:/;P:/;B:/")
+    pm.setAttr("defaultArnoldRenderOptions.texture_searchpath", "[DISK_I];[DISK_B];[DISK_P];I:;P:;B:")
 
     asset.maya.visibility.set(asset_visibility_state)
     asset_clean = Asset(asset_copy)

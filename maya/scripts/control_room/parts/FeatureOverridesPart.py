@@ -15,6 +15,7 @@ class IgnoreFields:
         self.__callback = None
         self.__layer_callback = None
         self.__override = None
+        self.__preset_hovered = False
         self.__action_add_override = QAction(text="Add Override")
         self.__action_add_override.triggered.connect(self.__create_override)
         self.__action_remove_override = QAction(text="Remove Override")
@@ -38,7 +39,8 @@ class IgnoreFields:
 
     # On checkbox changed
     def __on_state_changed(self, state):
-        setAttr(self.__field_name, state == 2)
+        if not self.__preset_hovered:
+            setAttr(self.__field_name, state == 2)
 
     # Getter of the key preset and the field
     def get_key_preset_and_field(self):
@@ -58,7 +60,15 @@ class IgnoreFields:
         visible_layer = render_setup.instance().getVisibleRenderLayer()
         is_default_layer = visible_layer.name() == "defaultRenderLayer"
         val = getAttr(self.__field_name)
-        self.__checkbox.setChecked(val)
+
+        hovered_preset = self.__control_room.get_hovered_preset()
+        if hovered_preset and hovered_preset.contains(self.__part_name, self.__key_preset):
+            self.__preset_hovered = True
+            self.__checkbox.setChecked(hovered_preset.get(self.__part_name, self.__key_preset))
+            self.__preset_hovered = False
+        else:
+            self.__checkbox.setChecked(val)
+
         self.__action_add_override.setEnabled(not is_default_layer and self.__override is None)
         self.__action_remove_override.setEnabled(not is_default_layer and self.__override is not None)
 
@@ -148,8 +158,17 @@ class FeatureOverridesPart(ControlRoomPart):
         stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
             self._part_name, "ignore_aovs", self.__ignore_aovs)
         self.__ui_ignore_aovs_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
-        self.__ui_ignore_aovs_cb.setChecked(self.__ignore_aovs)
-        self.__ui_ignore_aovs_cb.setText("Ignore AOVs [" + str(nb_enabled_aovs) + "/" + str(nb_aovs) + "]")
+
+        hovered_preset = self._control_room.get_hovered_preset()
+        if hovered_preset and hovered_preset.contains(self._part_name, "ignore_aovs"):
+            self._preset_hovered = True
+            checked = hovered_preset.get(self._part_name, "ignore_aovs")
+            self.__ui_ignore_aovs_cb.setChecked(checked)
+            self.__ui_ignore_aovs_cb.setText("Ignore AOVs [" + str(0 if checked else nb_aovs) + "/" + str(nb_aovs) + "]")
+            self._preset_hovered = False
+        else:
+            self.__ui_ignore_aovs_cb.setChecked(self.__ignore_aovs)
+            self.__ui_ignore_aovs_cb.setText("Ignore AOVs [" + str(nb_enabled_aovs) + "/" + str(nb_aovs) + "]")
 
     # Refresh the output denoising aov field
     def __refresh_output_denoising_aov(self):
@@ -157,13 +176,21 @@ class FeatureOverridesPart(ControlRoomPart):
         stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
             self._part_name, "output_denoising", checked)
         self.__ui_output_denoising_aovs_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
-        self.__ui_output_denoising_aovs_cb.setChecked(checked)
+
+        hovered_preset = self._control_room.get_hovered_preset()
+        if hovered_preset and hovered_preset.contains(self._part_name, "output_denoising"):
+            self._preset_hovered = True
+            self.__ui_output_denoising_aovs_cb.setChecked(hovered_preset.get(self._part_name, "output_denoising"))
+            self._preset_hovered = False
+        else:
+            self.__ui_output_denoising_aovs_cb.setChecked(checked)
 
     # On ignore aov checkbox changed
     def __on_state_changed_ignore_aovs(self, state):
-        self.__ignore_aovs = state == 2
-        self.__ignore_aovs_action()
-        self.__refresh_ignore_aov()
+        if not self._preset_hovered:
+            self.__ignore_aovs = state == 2
+            self.__ignore_aovs_action()
+            self.__refresh_ignore_aov()
 
     # Refresh the state of AOVs
     def __ignore_aovs_action(self):
@@ -173,22 +200,23 @@ class FeatureOverridesPart(ControlRoomPart):
 
     # On output denoising aov checkbox changed
     def __on_state_changed_output_denoising_aovs(self, state):
-        enabled = state == 2
-        ls("defaultArnoldRenderOptions")[0].outputVarianceAOVs.set(enabled)
-        if objExists("defaultArnoldDriver"):
-            multipart = True
-            if enabled:
-                multipart = False
-            else:
-                cameras = ls(type="camera")
-                for cam in cameras:
-                    if cam.ai_translator.get() == "lentil_camera":
-                        multipart = False
-                        break
-            half_driver = ls("defaultArnoldDriver", type="aiAOVDriver")[0]
-            half_driver.multipart.set(multipart)
+        if not self._preset_hovered:
+            enabled = state == 2
+            ls("defaultArnoldRenderOptions")[0].outputVarianceAOVs.set(enabled)
+            if objExists("defaultArnoldDriver"):
+                multipart = True
+                if enabled:
+                    multipart = False
+                else:
+                    cameras = ls(type="camera")
+                    for cam in cameras:
+                        if cam.ai_translator.get() == "lentil_camera":
+                            multipart = False
+                            break
+                half_driver = ls("defaultArnoldDriver", type="aiAOVDriver")[0]
+                half_driver.multipart.set(multipart)
 
-        self.__refresh_output_denoising_aov()
+            self.__refresh_output_denoising_aov()
 
     def add_callbacks(self):
         self.__arnold_render_callback = scriptJob(

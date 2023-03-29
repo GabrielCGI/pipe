@@ -75,7 +75,15 @@ class SamplingPart(ControlRoomPart):
         visible_layer = render_setup.instance().getVisibleRenderLayer()
         is_default_layer = visible_layer.name() == "defaultRenderLayer"
         progressive_render_enabled = getAttr("defaultArnoldRenderOptions.enableProgressiveRender")
-        self.__ui_progressive_render_cb.setChecked(progressive_render_enabled)
+
+        hovered_preset = self._control_room.get_hovered_preset()
+        if hovered_preset and hovered_preset.contains(self._part_name, "enable_progressive_render"):
+            self._preset_hovered = True
+            self.__ui_progressive_render_cb.setChecked(hovered_preset.get(self._part_name, "enable_progressive_render"))
+            self._preset_hovered = False
+        else:
+            self.__ui_progressive_render_cb.setChecked(progressive_render_enabled)
+
         for fs in self.__form_sliders:
             fs.refresh_ui()
 
@@ -92,7 +100,8 @@ class SamplingPart(ControlRoomPart):
 
     # On enable progressive render checkbox changed
     def __on_progressive_render_changed(self, state):
-        setAttr("defaultArnoldRenderOptions.enableProgressiveRender", state == 2)
+        if not self._preset_hovered:
+            setAttr("defaultArnoldRenderOptions.enableProgressiveRender", state == 2)
 
     def add_callbacks(self):
         self.__progressive_render_callback = scriptJob(

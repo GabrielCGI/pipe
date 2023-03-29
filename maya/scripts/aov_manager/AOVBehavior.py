@@ -24,6 +24,13 @@ class HalfPrecisionClosestBehavior(AOVBehavior):
         connectAttr(half_driver.name() + ".message", "aiAOV_" + aov_name + ".outputs[0].driver", f=True)
         connectAttr(closest_filter + ".message", "aiAOV_" + aov_name + '.outputs[0].filter', f=True)
 
+class FullPrecisionClosestBehavior(AOVBehavior):
+    def connect_driver_filter(self, aov_name, output_denoising):
+        full_driver = ls("aov_full_driver", type="aiAOVDriver")[0]
+        closest_filter = createNode("aiAOVFilter")
+        closest_filter.aiTranslator.set("closest")
+        connectAttr(full_driver.name() + ".message", "aiAOV_" + aov_name + ".outputs[0].driver", f=True)
+        connectAttr(closest_filter + ".message", "aiAOV_" + aov_name + '.outputs[0].filter', f=True)
 
 class FullPrecisionBehavior(AOVBehavior):
     def connect_driver_filter(self, aov_name, output_denoising):

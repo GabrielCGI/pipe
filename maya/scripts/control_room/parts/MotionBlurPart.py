@@ -8,8 +8,7 @@ class MotionBlurPart(ControlRoomPart):
         super(MotionBlurPart, self).__init__(control_room, "Motion Blur", part_name)
         self.__form_sliders = [
             FormSlider(self._control_room, FormSliderType.IntSlider, "Keys", part_name,
-                       "defaultArnoldRenderOptions.motion_steps", "motion_blur_keys",
-                       2, 30, 300),
+                       "defaultArnoldRenderOptions.motion_steps", "motion_blur_keys", 2, 30, 300),
             FormSlider(self._control_room, FormSliderType.FloatSlider, "Motion Step", part_name,
                        "defaultArnoldRenderOptions.motion_frames", "motion_blur_step", 0, 1),
         ]
@@ -93,8 +92,22 @@ class MotionBlurPart(ControlRoomPart):
     def refresh_ui(self):
         motion_blur_enable = getAttr("defaultArnoldRenderOptions.motion_blur_enable")
         ignore_motion_blur = getAttr("defaultArnoldRenderOptions.ignoreMotionBlur")
-        self.__ui_motion_blur_cb.setChecked(motion_blur_enable)
-        self.__ui_instant_shutter_cb.setChecked(ignore_motion_blur)
+
+        hovered_preset = self._control_room.get_hovered_preset()
+        if hovered_preset and hovered_preset.contains(self._part_name, "enable_motion_blur"):
+            self._preset_hovered = True
+            self.__ui_motion_blur_cb.setChecked(hovered_preset.get(self._part_name, "enable_motion_blur"))
+            self._preset_hovered = False
+        else:
+            self.__ui_motion_blur_cb.setChecked(motion_blur_enable)
+
+        if hovered_preset and hovered_preset.contains(self._part_name, "instant_shutter"):
+            self._preset_hovered = True
+            self.__ui_instant_shutter_cb.setChecked(hovered_preset.get(self._part_name, "instant_shutter"))
+            self._preset_hovered = False
+        else:
+            self.__ui_instant_shutter_cb.setChecked(ignore_motion_blur)
+
         for fs in self.__form_sliders:
             fs.refresh_ui()
 
@@ -121,11 +134,13 @@ class MotionBlurPart(ControlRoomPart):
 
     # On motion blur enable checkbox changed
     def __on_motion_blur_changed(self, state):
-        setAttr("defaultArnoldRenderOptions.motion_blur_enable", state == 2)
+        if not self._preset_hovered:
+            setAttr("defaultArnoldRenderOptions.motion_blur_enable", state == 2)
 
     # On instant shutter checkbox changed
     def __on_instant_shutter_changed(self, state):
-        setAttr("defaultArnoldRenderOptions.ignoreMotionBlur", state == 2)
+        if not self._preset_hovered:
+            setAttr("defaultArnoldRenderOptions.ignoreMotionBlur", state == 2)
 
     def add_callbacks(self):
         self.__motion_blur_callback = scriptJob(

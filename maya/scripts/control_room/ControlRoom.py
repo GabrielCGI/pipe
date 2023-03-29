@@ -193,6 +193,9 @@ class ControlRoom(QDialog):
             QApplication.setOverrideCursor(Qt.WhatsThisCursor)
         else:
             QApplication.restoreOverrideCursor()
+
+    def get_hovered_preset(self):
+        return self.__hovered_preset
     def get_stylesheet_color_for_field(self, part_name, field_name, val, override=None):
         if self.__hovered_preset and self.__hovered_preset.contains(part_name, field_name):
             if self.__hovered_preset.get(part_name, field_name) != val:

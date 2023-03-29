@@ -60,7 +60,6 @@ class AdaptiveSamplingPart(ControlRoomPart):
 
     def refresh_ui(self):
         adaptive_sampling_enabled = getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling")
-        self.__ui_enable_cb.setChecked(adaptive_sampling_enabled)
         for fs in self.__form_sliders:
             fs.refresh_ui()
 
@@ -74,12 +73,22 @@ class AdaptiveSamplingPart(ControlRoomPart):
         stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
             self._part_name, "enable_adaptive_sampling",
             adaptive_sampling_enabled, self.__adaptive_sampling_override)
+
+        hovered_preset = self._control_room.get_hovered_preset()
+        if hovered_preset and hovered_preset.contains(self._part_name, "enable_adaptive_sampling"):
+            self._preset_hovered = True
+            self.__ui_enable_cb.setChecked(hovered_preset.get(self._part_name, "enable_adaptive_sampling"))
+            self._preset_hovered = False
+        else:
+            self.__ui_enable_cb.setChecked(adaptive_sampling_enabled)
+
         self.__ui_enable_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
         self.__retrieve_adaptive_sampling_override()
 
     # On checkbox enable adaptive sampling changed
     def __on_enable_changed(self, state):
-        setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling", state == 2)
+        if not self._preset_hovered:
+            setAttr("defaultArnoldRenderOptions.enableAdaptiveSampling", state == 2)
 
     def add_callbacks(self):
         self.__enable_callback = scriptJob(
