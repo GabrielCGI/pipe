@@ -1,7 +1,7 @@
 import os
 import re
 from pymel.core import *
-
+from standin_utils import *
 
 class Standin:
     def __init__(self, standin):
@@ -11,46 +11,23 @@ class Standin:
         self.__versions = {}
         self.__active_variant = ""
         self.__active_version = None
-        self.parse()
+        self.__parse_valid = False
+        self.__parse()
 
     # Retrieve all the datas of the standin
-    def parse(self):
-        # object name
-        standin_trsf = self.__standin.getParent()
-        trsf_name = standin_trsf.name()
-        self.__object_name = trsf_name
+    def __parse(self):
+        parsed_data = parse_standin(self.__standin)
+        self.__object_name = parsed_data["object_name"]
+        self.__parse_valid = parsed_data["valid"]
+        if self.__parse_valid:
+            self.__standin_name = parsed_data["standin_name"]
+            self.__publish_ass_dir = parsed_data["publish_ass_dir"]
+            self.__active_variant = parsed_data["active_variant"]
+            self.__active_version = parsed_data["active_version"]
+            self.__versions = parsed_data["standin_versions"]
 
-        # standin name
-        standin_file_path = self.__standin.dso.get()
-        if not re.match(r".*\.ass", standin_file_path):
-            return False
-        standin_file_name_ext = os.path.basename(standin_file_path)
-        standin_file_name = os.path.splitext(standin_file_name_ext)[0]
-        self.__standin_name = re.sub("_" + standin_file_name.split('_')[-1], '', standin_file_name)
-
-        # active variant and version
-        path_version_dir = os.path.dirname(standin_file_path)
-        path_variant_dir = os.path.dirname(path_version_dir)
-        self.__publis_ass_dir = os.path.dirname(path_variant_dir)
-        variant = os.path.basename(path_variant_dir)
-        self.__active_variant = variant.split('_')[-1]
-        self.__active_version = os.path.basename(path_version_dir)
-
-        # variants and versions
-        self.__versions.clear()
-        path_asset_dir = os.path.dirname(path_variant_dir)
-        for variant in os.listdir(path_asset_dir):
-            variant_dir = path_asset_dir + "/" + variant
-            if os.path.isdir(variant_dir):
-                self.__versions[variant.split('_')[-1]] = []
-                for version in os.listdir(variant_dir):
-                    version_dir = variant_dir + "/" + version
-                    if os.path.isdir(version_dir):
-                        self.__versions[variant.split('_')[-1]].append((version, version_dir))
-
-        for variant in self.__versions.keys():
-            self.__versions[variant] = sorted(self.__versions[variant], reverse=True)
-        return True
+    def is_valid(self):
+        return self.__parse_valid
 
     # Getter of object name
     def get_object_name(self):
@@ -84,7 +61,7 @@ class Standin:
     def set_active_variant_version(self, variant, version):
         if self.__active_variant != variant or self.__active_version != version:
             if len(variant) > 0 and len(version) > 0:
-                version_file = self.__publis_ass_dir + "/" + self.__standin_name + "_" + variant + "/" + version + "/" + \
+                version_file = self.__publish_ass_dir + "/" + self.__standin_name + "_" + variant + "/" + version + "/" + \
                                self.__standin_name + "_" + variant + ".ass"
                 if os.path.isfile(version_file):
                     self.__standin.dso.set(version_file)

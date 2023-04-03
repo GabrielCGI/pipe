@@ -43,36 +43,39 @@ class DepthOfFieldPart(ControlRoomPart):
         return content
 
     def refresh_ui(self):
-        dof_checked = False
-        if self.__cam is not None and not self.__no_refresh:
-            dof_checked = self.__cam.depthOfField.get()
+        try:
+            dof_checked = False
+            if self.__cam is not None and not self.__no_refresh:
+                dof_checked = self.__cam.depthOfField.get()
 
-            stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
-                self._part_name, "depth_of_field", dof_checked)
-            self.__ui_dof_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
+                stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                    self._part_name, "depth_of_field", dof_checked)
+                self.__ui_dof_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
 
-            hovered_preset = self._control_room.get_hovered_preset()
-            if hovered_preset and hovered_preset.contains(self._part_name, "depth_of_field"):
-                self._preset_hovered = True
-                self.__ui_dof_cb.setChecked(hovered_preset.get(self._part_name, "depth_of_field"))
-                self._preset_hovered = False
-            else:
-                self.__ui_dof_cb.setChecked(dof_checked)
+                hovered_preset = self._control_room.get_hovered_preset()
+                if hovered_preset and hovered_preset.contains(self._part_name, "depth_of_field"):
+                    self._preset_hovered = True
+                    self.__ui_dof_cb.setChecked(hovered_preset.get(self._part_name, "depth_of_field"))
+                    self._preset_hovered = False
+                else:
+                    self.__ui_dof_cb.setChecked(dof_checked)
 
-            f_stop = round(self.__cam.fStop.get(), 3)
-            stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
-                self._part_name, "f_stop", f_stop)
-            self.__ui_lbl_fstop.setStyleSheet("QLabel{" + stylesheet_lbl + "}")
-            self.__ui_line_edit_fstop.setEnabled(dof_checked)
+                f_stop = round(self.__cam.fStop.get(), 3)
+                stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                    self._part_name, "f_stop", f_stop)
+                self.__ui_lbl_fstop.setStyleSheet("QLabel{" + stylesheet_lbl + "}")
+                self.__ui_line_edit_fstop.setEnabled(dof_checked)
 
-            if hovered_preset and hovered_preset.contains(self._part_name, "f_stop"):
-                self._preset_hovered = True
-                self.__ui_line_edit_fstop.setText(str(hovered_preset.get(self._part_name, "f_stop")))
-                self._preset_hovered = False
-            else:
-                self.__ui_line_edit_fstop.setText(str(f_stop))
-        self.__ui_dof_cb.setEnabled(self.__cam is not None and not self.__cam.depthOfField.isLocked())
-        self.__ui_line_edit_fstop.setEnabled(self.__cam is not None and dof_checked and not self.__cam.fStop.isLocked())
+                if hovered_preset and hovered_preset.contains(self._part_name, "f_stop"):
+                    self._preset_hovered = True
+                    self.__ui_line_edit_fstop.setText(str(hovered_preset.get(self._part_name, "f_stop")))
+                    self._preset_hovered = False
+                else:
+                    self.__ui_line_edit_fstop.setText(str(f_stop))
+            self.__ui_dof_cb.setEnabled(self.__cam is not None and not self.__cam.depthOfField.isLocked())
+            self.__ui_line_edit_fstop.setEnabled(self.__cam is not None and dof_checked and not self.__cam.fStop.isLocked())
+        except:
+            pass
 
     # On checkbox Depth of Field changed
     def __on_dof_changed(self, state):

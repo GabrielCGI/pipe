@@ -36,15 +36,28 @@ _FILE_NAME_PREFS = "abc_export"
 main_window = omui.MQtUtil.mainWindow()
 class ABCExport(QDialog):
 
-    # Get the directory parent of the scene
+    # Get the abc directory
     @staticmethod
-    def __get_dir_name():
+    def __get_abc_dir(max_recursion):
+        def check_dir_recursive(count, dirpath):
+            for child_dirname in os.listdir(dirpath):
+                child_dirpath = os.path.join(dirpath, child_dirname)
+                if os.path.isdir(child_dirpath) and child_dirname == "abc":
+                    return child_dirpath.replace("\\","/")
+            if count >= max_recursion:
+                return None
+            next_dirpath = os.path.dirname(dirpath)
+            if not os.path.exists(next_dirpath):
+                return None
+            return check_dir_recursive(count+1, next_dirpath)
+
         scene_name = sceneName()
         if len(scene_name) > 0:
-            dirname = os.path.dirname(os.path.dirname(scene_name))
+            dirpath = os.path.dirname(scene_name)
+            abc_parent_dir = check_dir_recursive(1, dirpath)
         else:
-            dirname = None
-        return dirname
+            abc_parent_dir = None
+        return abc_parent_dir
 
     # Test if a folder is an abc folder and if it exists
     @staticmethod
@@ -67,7 +80,6 @@ class ABCExport(QDialog):
     def __init__(self, prnt=wrapInstance(int(main_window), QWidget) if main_window is not None else None):
         super(ABCExport, self).__init__(prnt)
 
-        print("LOAD ABCEXPORT")
         loadPlugin('AbcExport', quiet =True)
 
         # Common Preferences (common preferences on all tools)
@@ -109,10 +121,15 @@ class ABCExport(QDialog):
         self.__create_ui()
         self.__refresh_ui()
 
+        self.__retrieve_folder()
+
     # Don't show the window if the database hasn't been found
     def show(self) -> None:
         if self.__database_path is not None:
             super(ABCExport, self).show()
+
+    def __retrieve_folder(self):
+        self.__ui_folder_path.setText(ABCExport.__get_abc_dir(4))
 
     # Retrieve the database folder
     def __retrieve_database_dir(self):
@@ -324,8 +341,11 @@ class ABCExport(QDialog):
 
     # Browse a new abc folder
     def __browse_folder(self):
-        dirname = ABCExport.__get_dir_name()
+        dirname = ABCExport.__get_abc_dir(4)
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select ABC Directory", dirname)
+        self.__set_folder(folder_path)
+
+    def __set_folder(self, folder_path):
         if re.match(r".*/abc(?:/|\\)?$", folder_path) and folder_path != self.__folder_path:
             self.__ui_folder_path.setText(folder_path)
 

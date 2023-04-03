@@ -72,31 +72,34 @@ class SamplingPart(ControlRoomPart):
         return content
 
     def refresh_ui(self):
-        visible_layer = render_setup.instance().getVisibleRenderLayer()
-        is_default_layer = visible_layer.name() == "defaultRenderLayer"
-        progressive_render_enabled = getAttr("defaultArnoldRenderOptions.enableProgressiveRender")
+        try:
+            visible_layer = render_setup.instance().getVisibleRenderLayer()
+            is_default_layer = visible_layer.name() == "defaultRenderLayer"
+            progressive_render_enabled = getAttr("defaultArnoldRenderOptions.enableProgressiveRender")
 
-        hovered_preset = self._control_room.get_hovered_preset()
-        if hovered_preset and hovered_preset.contains(self._part_name, "enable_progressive_render"):
-            self._preset_hovered = True
-            self.__ui_progressive_render_cb.setChecked(hovered_preset.get(self._part_name, "enable_progressive_render"))
-            self._preset_hovered = False
-        else:
-            self.__ui_progressive_render_cb.setChecked(progressive_render_enabled)
+            hovered_preset = self._control_room.get_hovered_preset()
+            if hovered_preset and hovered_preset.contains(self._part_name, "enable_progressive_render"):
+                self._preset_hovered = True
+                self.__ui_progressive_render_cb.setChecked(hovered_preset.get(self._part_name, "enable_progressive_render"))
+                self._preset_hovered = False
+            else:
+                self.__ui_progressive_render_cb.setChecked(progressive_render_enabled)
 
-        for fs in self.__form_sliders:
-            fs.refresh_ui()
+            for fs in self.__form_sliders:
+                fs.refresh_ui()
 
-        self.__action_add_progressive_render_override.setEnabled(
-            not is_default_layer and self.__progressive_render_override is None)
-        self.__action_remove_progressive_render_override.setEnabled(
-            not is_default_layer and self.__progressive_render_override is not None)
+            self.__action_add_progressive_render_override.setEnabled(
+                not is_default_layer and self.__progressive_render_override is None)
+            self.__action_remove_progressive_render_override.setEnabled(
+                not is_default_layer and self.__progressive_render_override is not None)
 
-        stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
-            self._part_name, "enable_progressive_render",
-            progressive_render_enabled, self.__progressive_render_override)
-        self.__ui_progressive_render_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
-        self.__retrieve_progressive_render_override()
+            stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                self._part_name, "enable_progressive_render",
+                progressive_render_enabled, self.__progressive_render_override)
+            self.__ui_progressive_render_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
+            self.__retrieve_progressive_render_override()
+        except:
+            pass
 
     # On enable progressive render checkbox changed
     def __on_progressive_render_changed(self, state):

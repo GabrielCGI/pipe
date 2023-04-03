@@ -120,28 +120,39 @@ class AssetLoader(QtWidgets.QDialog):
 
     # Retrieve the standins
     def __retrieve_standins(self):
-        selection = ls(selection=True)
         self.__standins.clear()
-        standins = {}
-        for sel in selection:
-            if objectType(sel, isType="aiStandIn"):
-                # Standin found
-                standins[sel.name()] = Standin(sel)
-            elif objectType(sel, isType="transform"):
-                prt = sel.getParent()
-                if prt is not None and objectType(prt, isType="transform"):
-                    shape = prt.getShape()
-                    if shape is not None and objectType(shape, isType="aiStandIn"):
-                        # Proxy of Standin found
-                        standins[shape.name()] = Standin(shape)
 
-            for rel in listRelatives(sel, allDescendents=True, type="aiStandIn"):
-                standins[rel.name()] = Standin(rel)
+        selection = ls(selection=True)
+        if len(selection)>0:
+            standins = {}
+            for sel in selection:
+                if objectType(sel, isType="aiStandIn"):
+                    # Standin found
+                    standins[sel.name()] = Standin(sel)
+                elif objectType(sel, isType="transform"):
+                    prt = sel.getParent()
+                    if prt is not None and objectType(prt, isType="transform"):
+                        shape = prt.getShape()
+                        if shape is not None and objectType(shape, isType="aiStandIn"):
+                            # Proxy of Standin found
+                            standins[shape.name()] = Standin(shape)
 
-        for name, standin in standins.items():
-            if standin.parse():
-                self.__standins[name] = standin
+                for rel in listRelatives(sel, allDescendents=True, type="aiStandIn"):
+                    standins[rel.name()] = Standin(rel)
+
+            for name, standin in standins.items():
+                if standin.is_valid():
+                    self.__standins[name] = standin
+        else:
+            standins = ls(type="aiStandIn")
+            for standin in standins:
+                standin_inst = Standin(standin)
+                if standin_inst.is_valid() and not standin_inst.is_up_to_date():
+                    self.__standins[standin.name()] = standin_inst
+
         self.__standins = dict(sorted(self.__standins.items()))
+
+
 
     # Create the ui
     def __create_ui(self):

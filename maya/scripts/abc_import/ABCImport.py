@@ -32,15 +32,29 @@ _FILE_NAME_PREFS = "abc_import"
 
 
 class ABCImport(QDialog):
-    # Get the directory parent of the scene
+    # Get the directory parent of the abc folders
     @staticmethod
-    def __get_dir_name():
+    def __get_abc_parent_dir(max_recursion):
+        folder_name_target = ["abc", "abc_fur"]
+        def check_dir_recursive(count, dirpath):
+            for child_dirname in os.listdir(dirpath):
+                child_dirpath = os.path.join(dirpath, child_dirname)
+                if os.path.isdir(child_dirpath) and child_dirname in folder_name_target:
+                    return dirpath.replace("\\", "/")
+            if count >= max_recursion:
+                return None
+            next_dirpath = os.path.dirname(dirpath)
+            if not os.path.exists(next_dirpath):
+                return None
+            return check_dir_recursive(count + 1, next_dirpath)
+
         scene_name = sceneName()
         if len(scene_name) > 0:
-            dirname = os.path.dirname(os.path.dirname(scene_name))
+            dirpath = os.path.dirname(scene_name)
+            abc_parent_dir = check_dir_recursive(1, dirpath)
         else:
-            dirname = None
-        return dirname
+            abc_parent_dir = None
+        return abc_parent_dir
 
     # Test if a folder is correct to be a container of abcs
     @staticmethod
@@ -83,7 +97,7 @@ class ABCImport(QDialog):
         self.__prefs = Prefs(_FILE_NAME_PREFS)
 
         # Model attributes
-        dirname = ABCImport.__get_dir_name()
+        dirname = ABCImport.__get_abc_parent_dir(4)
         self.__folder_path = dirname if dirname is not None else ""
         self.__update_uvs_shaders = True
         self.__abcs = []
@@ -336,15 +350,13 @@ class ABCImport(QDialog):
 
     # Browse a new folder path
     def __browse_folder(self):
-        dirname = ABCImport.__get_dir_name()
-        folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select ABC Directory", dirname)
+        folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select ABC Directory", self.__folder_path)
         if ABCImport.__is_correct_folder(folder_path) and folder_path != self.__folder_path:
             self.__ui_folder_path.setText(folder_path)
 
     # Browse an abc file and import it
     def __browse_import_abc_file(self):
-        dirname = ABCImport.__get_dir_name()
-        file_path = QtWidgets.QFileDialog.getOpenFileName(self, "Select ABC File to Import", dirname, "ABC (*.abc)")[0]
+        file_path = QtWidgets.QFileDialog.getOpenFileName(self, "Select ABC File to Import", self.__folder_path, "ABC (*.abc)")[0]
         match = re.match(r"^.*[/\\](?:(.*)(?:_[a-zA-Z]+(?:\.[0-9]+)?)|(.*))\.abc$", file_path)
         if match:
             if match.group(1) is None:

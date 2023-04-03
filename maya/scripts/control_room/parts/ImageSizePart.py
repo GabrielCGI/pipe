@@ -180,91 +180,94 @@ class ImageSizePart(ControlRoomPart):
             self.__cam.displayResolution.set(self.__is_gate_enabled)
 
     def refresh_ui(self):
-        width_retrieved = getAttr("defaultResolution.width")
-        stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
-            self._part_name, "width", width_retrieved)
-        if self.__ui_lbl_width is not None:
+        try:
+            width_retrieved = getAttr("defaultResolution.width")
+            stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                self._part_name, "width", width_retrieved)
+
             self.__ui_lbl_width.setStyleSheet("QLabel{"+stylesheet_lbl+"}")
 
-        hovered_preset = self._control_room.get_hovered_preset()
-        if hovered_preset and hovered_preset.contains(self._part_name, "width"):
-            self._preset_hovered = True
-            width_displayed = hovered_preset.get(self._part_name, "width")
-            self.__ui_width_edit.setText(str(width_displayed))
-            self._preset_hovered = False
-        else:
-            width_displayed = width_retrieved
-            self.__ui_width_edit.setText(str(width_retrieved))
-
-        height_retrieved = getAttr("defaultResolution.height")
-        stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
-            self._part_name, "height", height_retrieved)
-        self.__ui_lbl_height.setStyleSheet("QLabel{"+stylesheet_lbl+"}")
-        if hovered_preset and hovered_preset.contains(self._part_name, "height"):
-            self._preset_hovered = True
-            height_displayed = hovered_preset.get(self._part_name, "height")
-            self.__ui_height_edit.setText(str(height_displayed))
-            self._preset_hovered = False
-        else:
-            height_displayed = height_retrieved
-            self.__ui_height_edit.setText(str(height_retrieved))
-
-        aspect_ratio_displayed = width_displayed / height_displayed
-
-        stylesheet_selected = "background-color:#2C2C2C"
-
-        for name, btn in self.__ui_ratio_btns.items():
-            if hovered_preset:
-                is_ratio_selected = abs(_AspectRatios[name]["ratio"] - aspect_ratio_displayed) < 0.001
-            else:
-                is_ratio_selected = name == self.__ratio_selected
-            btn.setStyleSheet(stylesheet_selected if is_ratio_selected else "")
-
-        is_ratio_found = self.__ratio_selected is not None
-        self.__ui_sd_format_btn.setEnabled(is_ratio_found)
-        self.__ui_hd_format_btn.setEnabled(is_ratio_found)
-        sd_selected = is_ratio_found and width_displayed == _AspectRatios[self.__ratio_selected]["SD"]
-        hd_selected = is_ratio_found and width_displayed == _AspectRatios[self.__ratio_selected]["HD"]
-        self.__ui_sd_format_btn.setStyleSheet(stylesheet_selected if sd_selected else "")
-        self.__ui_hd_format_btn.setStyleSheet(stylesheet_selected if hd_selected else "")
-        if self.__cam is not None:
-            overscan = self.__cam.overscan.get()
-            stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
-                self._part_name, "overscan", overscan)
-            self.__ui_lbl_overscan.setStyleSheet("QLabel{"+stylesheet_lbl+"}")
-
-            if hovered_preset and hovered_preset.contains(self._part_name, "overscan"):
+            hovered_preset = self._control_room.get_hovered_preset()
+            if hovered_preset and hovered_preset.contains(self._part_name, "width"):
                 self._preset_hovered = True
-                overscan_displayed = hovered_preset.get(self._part_name, "overscan")
-                self.__ui_overscan_slider.setValue(overscan_displayed * 1000)
+                width_displayed = hovered_preset.get(self._part_name, "width")
+                self.__ui_width_edit.setText(str(width_displayed))
                 self._preset_hovered = False
             else:
-                self.__ui_overscan_slider.setValue(overscan * 1000)
+                width_displayed = width_retrieved
+                self.__ui_width_edit.setText(str(width_retrieved))
 
-        self.__ui_overscan_slider.setEnabled(self.__cam is not None and not self.__cam.overscan.isLocked())
-        self.__ui_enable_gate_cb.setEnabled(self.__cam is not None and not self.__cam.displayResolution.isLocked())
-        self.__ui_opaque_gate_cb.setEnabled(self.__cam is not None and not self.__cam.displayGateMaskOpacity.isLocked()
-                                            and not self.__cam.displayGateMaskColor.isLocked())
+            height_retrieved = getAttr("defaultResolution.height")
+            stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                self._part_name, "height", height_retrieved)
+            self.__ui_lbl_height.setStyleSheet("QLabel{"+stylesheet_lbl+"}")
+            if hovered_preset and hovered_preset.contains(self._part_name, "height"):
+                self._preset_hovered = True
+                height_displayed = hovered_preset.get(self._part_name, "height")
+                self.__ui_height_edit.setText(str(height_displayed))
+                self._preset_hovered = False
+            else:
+                height_displayed = height_retrieved
+                self.__ui_height_edit.setText(str(height_retrieved))
 
-        stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
-            self._part_name, "enable_gate", self.__is_gate_enabled)
-        self.__ui_enable_gate_cb.setStyleSheet("QCheckBox{"+stylesheet_lbl+"}")
-        if hovered_preset and hovered_preset.contains(self._part_name, "enable_gate"):
-            self._preset_hovered = True
-            self.__ui_enable_gate_cb.setChecked(hovered_preset.get(self._part_name, "enable_gate"))
-            self._preset_hovered = False
-        else:
-            self.__ui_enable_gate_cb.setChecked(self.__is_gate_enabled)
+            aspect_ratio_displayed = width_displayed / height_displayed
 
-        stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
-            self._part_name, "opaque_gate", self.__is_gate_opaque)
-        self.__ui_opaque_gate_cb.setStyleSheet("QCheckBox{"+stylesheet_lbl+"}")
-        if hovered_preset and hovered_preset.contains(self._part_name, "opaque_gate"):
-            self._preset_hovered = True
-            self.__ui_opaque_gate_cb.setChecked(hovered_preset.get(self._part_name, "opaque_gate"))
-            self._preset_hovered = False
-        else:
-            self.__ui_opaque_gate_cb.setChecked(self.__is_gate_opaque)
+            stylesheet_selected = "background-color:#2C2C2C"
+
+            for name, btn in self.__ui_ratio_btns.items():
+                if hovered_preset:
+                    is_ratio_selected = abs(_AspectRatios[name]["ratio"] - aspect_ratio_displayed) < 0.001
+                else:
+                    is_ratio_selected = name == self.__ratio_selected
+                btn.setStyleSheet(stylesheet_selected if is_ratio_selected else "")
+
+            is_ratio_found = self.__ratio_selected is not None
+            self.__ui_sd_format_btn.setEnabled(is_ratio_found)
+            self.__ui_hd_format_btn.setEnabled(is_ratio_found)
+            sd_selected = is_ratio_found and width_displayed == _AspectRatios[self.__ratio_selected]["SD"]
+            hd_selected = is_ratio_found and width_displayed == _AspectRatios[self.__ratio_selected]["HD"]
+            self.__ui_sd_format_btn.setStyleSheet(stylesheet_selected if sd_selected else "")
+            self.__ui_hd_format_btn.setStyleSheet(stylesheet_selected if hd_selected else "")
+            if self.__cam is not None:
+                overscan = self.__cam.overscan.get()
+                stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                    self._part_name, "overscan", overscan)
+                self.__ui_lbl_overscan.setStyleSheet("QLabel{"+stylesheet_lbl+"}")
+
+                if hovered_preset and hovered_preset.contains(self._part_name, "overscan"):
+                    self._preset_hovered = True
+                    overscan_displayed = hovered_preset.get(self._part_name, "overscan")
+                    self.__ui_overscan_slider.setValue(overscan_displayed * 1000)
+                    self._preset_hovered = False
+                else:
+                    self.__ui_overscan_slider.setValue(overscan * 1000)
+
+            self.__ui_overscan_slider.setEnabled(self.__cam is not None and not self.__cam.overscan.isLocked())
+            self.__ui_enable_gate_cb.setEnabled(self.__cam is not None and not self.__cam.displayResolution.isLocked())
+            self.__ui_opaque_gate_cb.setEnabled(self.__cam is not None and not self.__cam.displayGateMaskOpacity.isLocked()
+                                                and not self.__cam.displayGateMaskColor.isLocked())
+
+            stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                self._part_name, "enable_gate", self.__is_gate_enabled)
+            self.__ui_enable_gate_cb.setStyleSheet("QCheckBox{"+stylesheet_lbl+"}")
+            if hovered_preset and hovered_preset.contains(self._part_name, "enable_gate"):
+                self._preset_hovered = True
+                self.__ui_enable_gate_cb.setChecked(hovered_preset.get(self._part_name, "enable_gate"))
+                self._preset_hovered = False
+            else:
+                self.__ui_enable_gate_cb.setChecked(self.__is_gate_enabled)
+
+            stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                self._part_name, "opaque_gate", self.__is_gate_opaque)
+            self.__ui_opaque_gate_cb.setStyleSheet("QCheckBox{"+stylesheet_lbl+"}")
+            if hovered_preset and hovered_preset.contains(self._part_name, "opaque_gate"):
+                self._preset_hovered = True
+                self.__ui_opaque_gate_cb.setChecked(hovered_preset.get(self._part_name, "opaque_gate"))
+                self._preset_hovered = False
+            else:
+                self.__ui_opaque_gate_cb.setChecked(self.__is_gate_opaque)
+        except:
+            pass
 
     # On checkbox gate enable changed
     def __on_gate_enable_changed(self, state):
@@ -296,8 +299,10 @@ class ImageSizePart(ControlRoomPart):
         self.refresh_ui()
 
     def add_callbacks(self):
-        self.__width_callback = scriptJob(attributeChange=["defaultResolution.width", self.__callback])
-        self.__height_callback = scriptJob(attributeChange=["defaultResolution.height", self.__callback])
+        self.__width_callback = scriptJob(
+            attributeChange=["defaultResolution.width", self.__callback])
+        self.__height_callback = scriptJob(
+            attributeChange=["defaultResolution.height", self.__callback])
         self.__aspect_ratio_callback = scriptJob(
             attributeChange=["defaultResolution.deviceAspectRatio", self.__callback])
 
@@ -305,7 +310,7 @@ class ImageSizePart(ControlRoomPart):
     def add_dynamic_callbacks(self):
         if self.__cam is not None:
             self.__overscan_callback = scriptJob(
-                attributeChange=[self.__cam + '.overscan', self.refresh_ui])
+                attributeChange=[self.__cam + '.overscan', self.__callback])
 
     def remove_callbacks(self):
         scriptJob(kill=self.__width_callback)

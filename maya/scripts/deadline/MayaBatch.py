@@ -153,6 +153,7 @@ class MayaBatchPlugin(DeadlinePlugin):
         "Render failed",
         "could not get a license",
         "Could not obtain a license",
+        "aborting render because the abort_on_license_fail option was enabled",
         "This scene does not have any renderable cameras",
         "Warning: The post-processing failed while attempting to rename file",
         "Error: Failed to open IFF file for reading",
@@ -180,6 +181,8 @@ class MayaBatchPlugin(DeadlinePlugin):
         "Error: R12001",
         "ERROR pgLicenseCheck",
         ( "Error: Camera", "does not exist" ),
+        ( "[texturesys]", "unspecified OIIO error" ),
+        ( "[texturesys]", "Read error at row    " ),
         ( "Error: The attribute", "was locked in a referenced file, and cannot be unlocked." ),
         ( "Error: Cannot find file ", " for source statement." ),
         ( "error 101003:", "can't create file" ),
@@ -1401,7 +1404,7 @@ class MayaBatchPlugin(DeadlinePlugin):
         #this call is currently a work around because Maya's dirmap is failing to pathmap any file paths that include tokens.
         #When this is fixed in maya we can add a version check.
         scriptBuilder.AppendLine( 'catch( remapNodeFilePathsWithTokens( "file", "fileTextureName", true ) );' )
-        scriptBuilder.AppendLine( 'catch( remapNodeFilePathsWithTokens( "aiStandIn", "dso", false ) );' )
+        scriptBuilder.AppendLine( 'catch( remapNodeFilePathsWithTokens( "aiStandIn", "dso", true ) );' )
         #Dirmap does not map OpenColorIO Files so we have to handle this separately.
         scriptBuilder.AppendLine( "catch( mapOpenColorIOFile( " + ( "1" if self.EnableOpenColorIO else "0" ) + " ) );" )
 
@@ -2573,7 +2576,9 @@ class MayaBatchProcess (ManagedProcess):
         if self.Renderer == "arnold" or self.Renderer == "arnoldexport":
             self.AddStdoutHandlerCallback( r"Plug-in, \"mtoa\", was not found on MAYA_PLUG_IN_PATH" ).HandleCallback += self.HandleFatalError
             self.AddStdoutHandlerCallback( r"\[mtoa\] Failed batch render" ).HandleCallback += self.HandleFatalError
+            self.AddStdoutHandlerCallback( r"aborting render because the abort_on_license_fail option was enabled" ).HandleCallback += self.HandleFatalError
             self.AddStdoutHandlerCallback( "render done" ).HandleCallback += self.HandleProgressMessage2
+
 
         if self.Renderer == "octanerender":
             self.AddStdoutHandlerCallback( r"Octane: starting animation of frame" ).HandleCallback += self.HandleOctaneStartFrame

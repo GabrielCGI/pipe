@@ -57,25 +57,28 @@ class IgnoreFields:
 
     # Refresh the checkbox
     def refresh_checkbox(self):
-        visible_layer = render_setup.instance().getVisibleRenderLayer()
-        is_default_layer = visible_layer.name() == "defaultRenderLayer"
-        val = getAttr(self.__field_name)
+        try:
+            visible_layer = render_setup.instance().getVisibleRenderLayer()
+            is_default_layer = visible_layer.name() == "defaultRenderLayer"
+            val = getAttr(self.__field_name)
 
-        hovered_preset = self.__control_room.get_hovered_preset()
-        if hovered_preset and hovered_preset.contains(self.__part_name, self.__key_preset):
-            self.__preset_hovered = True
-            self.__checkbox.setChecked(hovered_preset.get(self.__part_name, self.__key_preset))
-            self.__preset_hovered = False
-        else:
-            self.__checkbox.setChecked(val)
+            hovered_preset = self.__control_room.get_hovered_preset()
+            if hovered_preset and hovered_preset.contains(self.__part_name, self.__key_preset):
+                self.__preset_hovered = True
+                self.__checkbox.setChecked(hovered_preset.get(self.__part_name, self.__key_preset))
+                self.__preset_hovered = False
+            else:
+                self.__checkbox.setChecked(val)
 
-        self.__action_add_override.setEnabled(not is_default_layer and self.__override is None)
-        self.__action_remove_override.setEnabled(not is_default_layer and self.__override is not None)
+            self.__action_add_override.setEnabled(not is_default_layer and self.__override is None)
+            self.__action_remove_override.setEnabled(not is_default_layer and self.__override is not None)
 
-        stylesheet_lbl = self.__control_room.get_stylesheet_color_for_field(self.__part_name, self.__key_preset, val, self.__override)
-        self.__checkbox.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
+            stylesheet_lbl = self.__control_room.get_stylesheet_color_for_field(self.__part_name, self.__key_preset, val, self.__override)
+            self.__checkbox.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
 
-        self.__retrieve_override()
+            self.__retrieve_override()
+        except:
+            pass
 
     def add_callback(self):
         self.__callback = scriptJob(attributeChange=[self.__field_name, self.refresh_checkbox])
@@ -139,9 +142,12 @@ class FeatureOverridesPart(ControlRoomPart):
         return content
 
     def refresh_ui(self):
-        self.__refresh_ignore_fields()
-        self.__refresh_ignore_aov()
-        self.__refresh_output_denoising_aov()
+        try:
+            self.__refresh_ignore_fields()
+            self.__refresh_ignore_aov()
+            self.__refresh_output_denoising_aov()
+        except:
+            pass
 
     # Refresh all the ignore fields
     def __refresh_ignore_fields(self):

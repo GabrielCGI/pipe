@@ -59,31 +59,34 @@ class AdaptiveSamplingPart(ControlRoomPart):
         return content
 
     def refresh_ui(self):
-        adaptive_sampling_enabled = getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling")
-        for fs in self.__form_sliders:
-            fs.refresh_ui()
+        try:
+            adaptive_sampling_enabled = getAttr("defaultArnoldRenderOptions.enableAdaptiveSampling")
+            for fs in self.__form_sliders:
+                fs.refresh_ui()
 
-        visible_layer = render_setup.instance().getVisibleRenderLayer()
-        is_default_layer = visible_layer.name() == "defaultRenderLayer"
-        self.__action_add_adaptive_sampling_override.setEnabled(
-            not is_default_layer and self.__adaptive_sampling_override is None)
-        self.__action_remove_adaptive_sampling_override.setEnabled(
-            not is_default_layer and self.__adaptive_sampling_override is not None)
+            visible_layer = render_setup.instance().getVisibleRenderLayer()
+            is_default_layer = visible_layer.name() == "defaultRenderLayer"
+            self.__action_add_adaptive_sampling_override.setEnabled(
+                not is_default_layer and self.__adaptive_sampling_override is None)
+            self.__action_remove_adaptive_sampling_override.setEnabled(
+                not is_default_layer and self.__adaptive_sampling_override is not None)
 
-        stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
-            self._part_name, "enable_adaptive_sampling",
-            adaptive_sampling_enabled, self.__adaptive_sampling_override)
+            stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                self._part_name, "enable_adaptive_sampling",
+                adaptive_sampling_enabled, self.__adaptive_sampling_override)
 
-        hovered_preset = self._control_room.get_hovered_preset()
-        if hovered_preset and hovered_preset.contains(self._part_name, "enable_adaptive_sampling"):
-            self._preset_hovered = True
-            self.__ui_enable_cb.setChecked(hovered_preset.get(self._part_name, "enable_adaptive_sampling"))
-            self._preset_hovered = False
-        else:
-            self.__ui_enable_cb.setChecked(adaptive_sampling_enabled)
+            hovered_preset = self._control_room.get_hovered_preset()
+            if hovered_preset and hovered_preset.contains(self._part_name, "enable_adaptive_sampling"):
+                self._preset_hovered = True
+                self.__ui_enable_cb.setChecked(hovered_preset.get(self._part_name, "enable_adaptive_sampling"))
+                self._preset_hovered = False
+            else:
+                self.__ui_enable_cb.setChecked(adaptive_sampling_enabled)
 
-        self.__ui_enable_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
-        self.__retrieve_adaptive_sampling_override()
+            self.__ui_enable_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
+            self.__retrieve_adaptive_sampling_override()
+        except:
+            pass
 
     # On checkbox enable adaptive sampling changed
     def __on_enable_changed(self, state):

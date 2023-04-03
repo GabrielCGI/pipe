@@ -128,8 +128,10 @@ class CollectorCopier:
     def __get_paths_with_udim(self, path):
         paths = []
         folder, filename = os.path.split(path)
-        match_udim = re.match(r"^(.*)(?:<udim>|[0-9]{4})(\.\w*)$", filename)
+        if not os.path.exists(folder):
+            return []
 
+        match_udim = re.match(r"^(.*)(?:<udim>|[0-9]{4})(\.\w*)$", filename)
         if match_udim:
             start = match_udim.group(1)
             ext = match_udim.group(2)
@@ -140,32 +142,27 @@ class CollectorCopier:
                         paths.append(os.path.join(folder, file))
             return paths if len(paths) > 0 else []
         else:
-            return [path] if os.path.exists(folder) else []
+            return [path] if os.path.exists(path) else []
 
-    # Retrieve the paths in a FileNode, An AiImage, a StandIn or a Reference
+    # Retrieve the paths dependent of a path (can be relative or absolute and an UDIM)
     # Check the UDIMS and if the path is relative
-    def __retrieve_path_in_elem(self, count_path, nb_tot, path, type, field, check_relative_path=True):
+    def __retrieve_dependent_paths(self, path, check_relative_path=True):
         paths = []
-        if os.path.exists(path):
+        folder = os.path.dirname(path)
+        if os.path.exists(folder):
             # Get all the paths if udim or only the current path
             paths_found = self.__get_paths_with_udim(path)
             for path in paths_found:
-                self.__output(
-                    "| " + str(count_path) + "/" + str(nb_tot) + " - " + type + " " + field + " found : " + path)
-                paths.append(path)
+                if path not in paths:
+                    paths.append(path)
         else:
             if check_relative_path:
                 for disk in _RELATIVE_SEARCH_DISK:
                     path_with_disk = os.path.join(disk, path)
-                    paths_found = self.__retrieve_path_in_elem(count_path, nb_tot, path_with_disk, type, field, False)
+                    paths_found = self.__retrieve_dependent_paths(path_with_disk, False)
                     if len(paths_found) > 0:
                         paths = paths_found
                         break
-
-        if len(paths) == 0 and check_relative_path:
-            self.__output(
-                "| " + str(count_path) + "/" + str(
-                    nb_tot) + " - Error " + type + " " + field + " do not exists : " + path)
         return paths
 
     # Retrieve all the paths used in Maya Scene
@@ -184,25 +181,54 @@ class CollectorCopier:
         if len(list_files) > 0: self.__output("| ----- Retrieve paths in FileNodes")
         for file in list_files:
             path = file.fileTextureName.get()
-            paths.extend(self.__retrieve_path_in_elem(count_path, nb_tot, path, "FileNode", "texture path"))
+            filenode_paths = self.__retrieve_dependent_paths(path)
+            if len(filenode_paths)==0:
+                self.__output("| " + str(count_path) + "/" + str(nb_tot) +
+                              " - Error FileNode texture path do not exists : " + path)
+            for fn_path in filenode_paths:
+                self.__output("| " + str(count_path) + "/" + str(nb_tot) + " - FileNode texture path found : " + fn_path)
+                paths.append(fn_path)
             count_path += 1
         # IMAGES
         if len(list_images) > 0: self.__output("| ----- Retrieve paths in Images")
         for image in list_images:
             path = image.filename.get()
-            paths.extend(self.__retrieve_path_in_elem(count_path, nb_tot, path, "Image", "path"))
+            image_paths = self.__retrieve_dependent_paths(path)
+            if len(image_paths)==0:
+                self.__output("| " + str(count_path) + "/" + str(nb_tot) +
+                              " - Error Image path do not exists : " + path)
+            for img_path in image_paths:
+                self.__output("| " + str(count_path) + "/" + str(nb_tot) + " - Image path found : " + img_path)
+                paths.append(img_path)
             count_path += 1
         # STANDINS
         if len(list_standins) > 0: self.__output("| ----- Retrieve paths in StandIns")
         for standin in list_standins:
             path = standin.dso.get()
-            paths.extend(self.__retrieve_path_in_elem(count_path, nb_tot, path, "StandIn", "dso"))
+            standin_paths = self.__retrieve_dependent_paths(path)
+            if len(standin_paths)==0:
+                self.__output("| " + str(count_path) + "/" + str(nb_tot) +
+                              " - Error StandIn dso do not exists : " + path)
+            for sdin_path in standin_paths:
+                self.__output("| " + str(count_path) + "/" + str(nb_tot) + " - StandIn dso found : " + sdin_path)
+                paths.append(sdin_path)
             count_path += 1
         # REFERENCES
         if len(list_refs) > 0: self.__output("| ----- Retrieve paths in References")
         for ref in list_refs:
-            path = referenceQuery(ref, filename=True)
-            paths.extend(self.__retrieve_path_in_elem(count_path, nb_tot, path, "Reference", "path"))
+            try:
+                path = referenceQuery(ref, filename=True)
+            except Exception:
+                self.__output("| " + str(count_path) + "/" + str(nb_tot) +
+                              " - Error Reference node not associated to reference file : " + ref)
+                continue
+            reference_paths = self.__retrieve_dependent_paths(path)
+            if len(reference_paths)==0:
+                self.__output("| " + str(count_path) + "/" + str(nb_tot) +
+                              " - Error Reference path do not exists : " + path)
+            for ref_path in reference_paths:
+                self.__output("| " + str(count_path) + "/" + str(nb_tot) + " - Reference path found : " + ref_path)
+                paths.append(ref_path)
             count_path += 1
 
         # Add to the datas
@@ -292,7 +318,7 @@ class CollectorCopier:
                         ass_paths.append(match)
                         self.__output("|    +----> " + match)
                     else:
-                        udim_paths = self.__get_paths_with_udim(match)
+                        udim_paths = self.__retrieve_dependent_paths(match)
                         if len(udim_paths) > 0:
                             for udim_path in udim_paths:
                                 if os.path.exists(udim_path) and udim_path not in ass_paths:
@@ -528,14 +554,14 @@ class CollectorCopier:
         # MAYA PATHS
         self.__retrieve_paths_in_maya()
         # ASS PATHS
-        self.__retrieve_ass_paths()
+        # self.__retrieve_ass_paths()
 
         # COPY
-        self.__store_datas()
-        dirname = os.path.dirname(__file__)
-        si = subprocess.STARTUPINFO()
-        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        subprocess.Popen(["python", os.path.join(dirname, "copy_to_distant.py"), self.__data_file_name], startupinfo=si)
+        # self.__store_datas()
+        # dirname = os.path.dirname(__file__)
+        # si = subprocess.STARTUPINFO()
+        # si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        # subprocess.Popen(["python", os.path.join(dirname, "copy_to_distant.py"), self.__data_file_name], startupinfo=si)
 
         self.__stop_log()
 

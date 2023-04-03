@@ -36,7 +36,6 @@ class PresetFilterDialog(QDialog):
         # Makes the object get deleted from memory, not just hidden, when it is closed.
         self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-        # Create the layout, linking it to actions and refresh the display
         self.__create_ui()
         self.__refresh_ui()
 
@@ -70,36 +69,39 @@ class PresetFilterDialog(QDialog):
 
     # Refresh the ui according to the model attribute
     def __refresh_ui(self):
-        self.__ui_list_fields.clear()
-        first = True
-        for part, fields in self.__preset.items():
-            if not first:
-                item = QtWidgets.QListWidgetItem()
-                sep = QFrame()
-                sep.setFrameShape(QFrame.HLine)
-                sep.setFrameShadow(QFrame.Sunken)
-                item.setFlags(Qt.NoItemFlags)
-                self.__ui_list_fields.addItem(item)
-                self.__ui_list_fields.setItemWidget(item, sep)
-            for field_name, value in fields.items():
-                if type(value) is float:
-                    value = round(value, 3)
-                item = QtWidgets.QListWidgetItem()
-                item.setData(Qt.UserRole, {"part": part, "field": field_name})
-                widget_preset = QWidget()
-                widget_preset.setStyleSheet("this{border: 1px solid red }")
-                lyt = QHBoxLayout(widget_preset)
-                lyt.setContentsMargins(2, 2, 2, 2)
-                lyt.addWidget(QLabel(field_name), 2, alignment=Qt.AlignVCenter)
-                lyt.addWidget(QLabel(str(value)), 1, alignment=Qt.AlignVCenter)
+        try:
+            self.__ui_list_fields.clear()
+            first = True
+            for part, fields in self.__preset.items():
+                if not first:
+                    item = QtWidgets.QListWidgetItem()
+                    sep = QFrame()
+                    sep.setFrameShape(QFrame.HLine)
+                    sep.setFrameShadow(QFrame.Sunken)
+                    item.setFlags(Qt.NoItemFlags)
+                    self.__ui_list_fields.addItem(item)
+                    self.__ui_list_fields.setItemWidget(item, sep)
+                for field_name, value in fields.items():
+                    if type(value) is float:
+                        value = round(value, 3)
+                    item = QtWidgets.QListWidgetItem()
+                    item.setData(Qt.UserRole, {"part": part, "field": field_name})
+                    widget_preset = QWidget()
+                    widget_preset.setStyleSheet("this{border: 1px solid red }")
+                    lyt = QHBoxLayout(widget_preset)
+                    lyt.setContentsMargins(2, 2, 2, 2)
+                    lyt.addWidget(QLabel(field_name), 2, alignment=Qt.AlignVCenter)
+                    lyt.addWidget(QLabel(str(value)), 1, alignment=Qt.AlignVCenter)
 
-                widget_preset.setLayout(lyt)
-                item.setSizeHint(widget_preset.sizeHint())
+                    widget_preset.setLayout(lyt)
+                    item.setSizeHint(widget_preset.sizeHint())
 
-                self.__ui_list_fields.addItem(item)
-                self.__ui_list_fields.setItemWidget(item, widget_preset)
-            first = False
-        self.__refresh_btn()
+                    self.__ui_list_fields.addItem(item)
+                    self.__ui_list_fields.setItemWidget(item, widget_preset)
+                first = False
+            self.__refresh_btn()
+        except:
+            pass
 
     def __refresh_btn(self):
         self.__ui_submit_btn.setEnabled(len(self.__fields_selected)>0)
@@ -145,80 +147,83 @@ class PresetsPart(ControlRoomPart):
         return self.__ui_presets_lyt
 
     def refresh_ui(self):
-        self.__event_filters.clear()
-        if self.__spacer is not None:
-            self.__ui_presets_lyt.removeItem(self.__spacer)
-        clear_layout(self.__ui_presets_lyt)
-        preset_manager = PresetManager.get_instance()
-        presets = preset_manager.get_presets()
-        default_presets = preset_manager.get_default_presets()
+        try:
+            self.__event_filters.clear()
+            if self.__spacer is not None:
+                self.__ui_presets_lyt.removeItem(self.__spacer)
+            clear_layout(self.__ui_presets_lyt)
+            preset_manager = PresetManager.get_instance()
+            presets = preset_manager.get_presets()
+            default_presets = preset_manager.get_default_presets()
 
-        presets_tuples = [(p, True) for p in default_presets] + [(p, False) for p in presets]
+            presets_tuples = [(p, True) for p in default_presets] + [(p, False) for p in presets]
 
-        index = 0
+            index = 0
 
-        icon_size = QtCore.QSize(16, 16)
-        icon_container_size = QtCore.QSize(24, 24)
+            icon_size = QtCore.QSize(16, 16)
+            icon_container_size = QtCore.QSize(24, 24)
 
-        for preset, is_default in presets_tuples:
-            event_filter = EventFilterPreset(self._control_room, preset)
-            self.__event_filters.append(event_filter)
-            # Card
-            widget_preset = QWidget()
-            widget_preset.installEventFilter(event_filter)
-            widget_preset.setMinimumWidth(120)
-            widget_preset.setStyleSheet(".QWidget{background:#383838; border-radius:4px}")
-            lyt_preset = QVBoxLayout(widget_preset)
-            lyt_preset.setSpacing(10)
-            # Label
-            lbl_name_preset = QLabel(preset.get_name())
-            lbl_name_preset.setStyleSheet("font-weight:bold")
-            lyt_preset.addWidget(lbl_name_preset, alignment=Qt.AlignCenter)
-            # Actions
-            lyt_actions = QHBoxLayout()
-            lyt_actions.setSpacing(5)
-            lyt_actions.setAlignment(Qt.AlignCenter)
-            lyt_preset.addLayout(lyt_actions)
-            # Apply button
-            apply_btn = QPushButton()
-            apply_btn.setIconSize(QtCore.QSize(18, 18))
-            apply_btn.setFixedSize(icon_container_size)
-            apply_btn.setIcon(QIcon(QPixmap(os.path.join(self.__asset_path, "apply.png"))))
-            apply_btn.clicked.connect(partial(self.__apply_preset, preset))
-            lyt_actions.addWidget(apply_btn)
-            # Delete btn
-            delete_btn = QPushButton()
-            delete_btn.setIconSize(icon_size)
-            delete_btn.setFixedSize(icon_container_size)
-            delete_btn.setIcon(QIcon(QPixmap(os.path.join(self.__asset_path, "delete.png"))))
-            if is_default:
-                delete_btn.setEnabled(False)
-                delete_btn.setToolTip("Default presets can't be removed")
+            for preset, is_default in presets_tuples:
+                event_filter = EventFilterPreset(self._control_room, preset)
+                self.__event_filters.append(event_filter)
+                # Card
+                widget_preset = QWidget()
+                widget_preset.installEventFilter(event_filter)
+                widget_preset.setMinimumWidth(120)
+                widget_preset.setStyleSheet(".QWidget{background:#383838; border-radius:4px}")
+                lyt_preset = QVBoxLayout(widget_preset)
+                lyt_preset.setSpacing(10)
+                # Label
+                lbl_name_preset = QLabel(preset.get_name())
+                lbl_name_preset.setStyleSheet("font-weight:bold")
+                lyt_preset.addWidget(lbl_name_preset, alignment=Qt.AlignCenter)
+                # Actions
+                lyt_actions = QHBoxLayout()
+                lyt_actions.setSpacing(5)
+                lyt_actions.setAlignment(Qt.AlignCenter)
+                lyt_preset.addLayout(lyt_actions)
+                # Apply button
+                apply_btn = QPushButton()
+                apply_btn.setIconSize(QtCore.QSize(18, 18))
+                apply_btn.setFixedSize(icon_container_size)
+                apply_btn.setIcon(QIcon(QPixmap(os.path.join(self.__asset_path, "apply.png"))))
+                apply_btn.clicked.connect(partial(self.__apply_preset, preset))
+                lyt_actions.addWidget(apply_btn)
+                # Delete btn
+                delete_btn = QPushButton()
+                delete_btn.setIconSize(icon_size)
+                delete_btn.setFixedSize(icon_container_size)
+                delete_btn.setIcon(QIcon(QPixmap(os.path.join(self.__asset_path, "delete.png"))))
+                if is_default:
+                    delete_btn.setEnabled(False)
+                    delete_btn.setToolTip("Default presets can't be removed")
+                else:
+                    delete_btn.clicked.connect(partial(self.__delete_preset, preset))
+                lyt_actions.addWidget(delete_btn)
+                self.__ui_presets_lyt.insertWidget(index, widget_preset, 1)
+                index += 1
+
+            if index < _NBMAX_PRESET:
+                # New Preset Button
+                add_preset_btn = QPushButton("New Preset")
+                add_preset_btn.setStyleSheet("margin:0px 20px")
+                # if index == 0:
+                #     add_preset_btn.setStyleSheet("padding: 3px;margin-top:18px")
+                add_preset_btn.setIconSize(QtCore.QSize(18, 18))
+                add_preset_btn.setIcon(QIcon(QPixmap(os.path.join(self.__asset_path, "add.png"))))
+                add_preset_btn.clicked.connect(partial(self.__generate_new_preset))
+                self.__ui_presets_lyt.insertWidget(index, add_preset_btn, 1, Qt.AlignCenter)
+                index += 1
+
+            if index < _NBMAX_PRESET:
+                # Spacer
+                self.__spacer = QSpacerItem(0, 0)
+                self.__ui_presets_lyt.insertItem(index, self.__spacer)
+                self.__ui_presets_lyt.setStretch(index, _NBMAX_PRESET - index)
             else:
-                delete_btn.clicked.connect(partial(self.__delete_preset, preset))
-            lyt_actions.addWidget(delete_btn)
-            self.__ui_presets_lyt.insertWidget(index, widget_preset, 1)
-            index += 1
-
-        if index < _NBMAX_PRESET:
-            # New Preset Button
-            add_preset_btn = QPushButton("New Preset")
-            add_preset_btn.setStyleSheet("margin:0px 20px")
-            # if index == 0:
-            #     add_preset_btn.setStyleSheet("padding: 3px;margin-top:18px")
-            add_preset_btn.setIconSize(QtCore.QSize(18, 18))
-            add_preset_btn.setIcon(QIcon(QPixmap(os.path.join(self.__asset_path, "add.png"))))
-            add_preset_btn.clicked.connect(partial(self.__generate_new_preset))
-            self.__ui_presets_lyt.insertWidget(index, add_preset_btn, 1, Qt.AlignCenter)
-            index += 1
-
-        if index < _NBMAX_PRESET:
-            # Spacer
-            self.__spacer = QSpacerItem(0, 0)
-            self.__ui_presets_lyt.insertItem(index, self.__spacer)
-            self.__ui_presets_lyt.setStretch(index, _NBMAX_PRESET - index)
-        else:
-            self.__spacer = None
+                self.__spacer = None
+        except:
+            pass
 
     # Generate a new preset
     def __generate_new_preset(self):

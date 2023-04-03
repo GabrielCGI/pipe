@@ -317,11 +317,6 @@ class ABCImportFur(ABCImportAsset):
         set_shader.out >> standin_node.operators[0]
         return standin_node
 
-    # `	"ch_ravenA_00_fur"
-    # `	ch_ravenA_00_fur
-    # `	shape_ch_ravenA_00_fur
-    # I:/battlestar_2206/shots/turn/panda/abc_fur/panda_fur.abc\panda_fur.abc
-    # I:/battlestar_2206/shots/turn/panda/abc_fur/ch_panda_00/0001/ch_panda_00_fur.abc
     def import_update_abc(self, do_update_uvs_shaders):
         is_import = self._actual_standin is None
 

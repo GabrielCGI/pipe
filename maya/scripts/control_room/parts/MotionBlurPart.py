@@ -90,47 +90,50 @@ class MotionBlurPart(ControlRoomPart):
         return content
 
     def refresh_ui(self):
-        motion_blur_enable = getAttr("defaultArnoldRenderOptions.motion_blur_enable")
-        ignore_motion_blur = getAttr("defaultArnoldRenderOptions.ignoreMotionBlur")
+        try:
+            motion_blur_enable  = getAttr("defaultArnoldRenderOptions.motion_blur_enable")
+            ignore_motion_blur = getAttr("defaultArnoldRenderOptions.ignoreMotionBlur")
 
-        hovered_preset = self._control_room.get_hovered_preset()
-        if hovered_preset and hovered_preset.contains(self._part_name, "enable_motion_blur"):
-            self._preset_hovered = True
-            self.__ui_motion_blur_cb.setChecked(hovered_preset.get(self._part_name, "enable_motion_blur"))
-            self._preset_hovered = False
-        else:
-            self.__ui_motion_blur_cb.setChecked(motion_blur_enable)
+            hovered_preset = self._control_room.get_hovered_preset()
+            if hovered_preset and hovered_preset.contains(self._part_name, "enable_motion_blur"):
+                self._preset_hovered = True
+                self.__ui_motion_blur_cb.setChecked(hovered_preset.get(self._part_name, "enable_motion_blur"))
+                self._preset_hovered = False
+            else:
+                self.__ui_motion_blur_cb.setChecked(motion_blur_enable)
 
-        if hovered_preset and hovered_preset.contains(self._part_name, "instant_shutter"):
-            self._preset_hovered = True
-            self.__ui_instant_shutter_cb.setChecked(hovered_preset.get(self._part_name, "instant_shutter"))
-            self._preset_hovered = False
-        else:
-            self.__ui_instant_shutter_cb.setChecked(ignore_motion_blur)
+            if hovered_preset and hovered_preset.contains(self._part_name, "instant_shutter"):
+                self._preset_hovered = True
+                self.__ui_instant_shutter_cb.setChecked(hovered_preset.get(self._part_name, "instant_shutter"))
+                self._preset_hovered = False
+            else:
+                self.__ui_instant_shutter_cb.setChecked(ignore_motion_blur)
 
-        for fs in self.__form_sliders:
-            fs.refresh_ui()
+            for fs in self.__form_sliders:
+                fs.refresh_ui()
 
-        visible_layer = render_setup.instance().getVisibleRenderLayer()
-        is_default_layer = visible_layer.name() == "defaultRenderLayer"
-        self.__action_add_motion_blur_override.setEnabled(
-            not is_default_layer and self.__motion_blur_override is None)
-        self.__action_remove_motion_blur_override.setEnabled(
-            not is_default_layer and self.__motion_blur_override is not None)
-        self.__action_add_instant_shutter_override.setEnabled(
-            not is_default_layer and self.__instant_shutter_override is None)
-        self.__action_remove_instant_shutter_override.setEnabled(
-            not is_default_layer and self.__instant_shutter_override is not None)
+            visible_layer = render_setup.instance().getVisibleRenderLayer()
+            is_default_layer = visible_layer.name() == "defaultRenderLayer"
+            self.__action_add_motion_blur_override.setEnabled(
+                not is_default_layer and self.__motion_blur_override is None)
+            self.__action_remove_motion_blur_override.setEnabled(
+                not is_default_layer and self.__motion_blur_override is not None)
+            self.__action_add_instant_shutter_override.setEnabled(
+                not is_default_layer and self.__instant_shutter_override is None)
+            self.__action_remove_instant_shutter_override.setEnabled(
+                not is_default_layer and self.__instant_shutter_override is not None)
 
-        motion_blur_stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
-            self._part_name, "enable_motion_blur", motion_blur_enable, self.__motion_blur_override)
-        self.__ui_motion_blur_cb.setStyleSheet("QCheckBox{" + motion_blur_stylesheet_lbl + "}")
+            motion_blur_stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                self._part_name, "enable_motion_blur", motion_blur_enable, self.__motion_blur_override)
+            self.__ui_motion_blur_cb.setStyleSheet("QCheckBox{" + motion_blur_stylesheet_lbl + "}")
 
-        instant_shutter_stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
-            self._part_name, "instant_shutter", ignore_motion_blur, self.__instant_shutter_override)
-        self.__ui_instant_shutter_cb.setStyleSheet("QCheckBox{" + instant_shutter_stylesheet_lbl + "}")
-        self.__retrieve_motion_blur_override()
-        self.__retrieve_instant_shutter_override()
+            instant_shutter_stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
+                self._part_name, "instant_shutter", ignore_motion_blur, self.__instant_shutter_override)
+            self.__ui_instant_shutter_cb.setStyleSheet("QCheckBox{" + instant_shutter_stylesheet_lbl + "}")
+            self.__retrieve_motion_blur_override()
+            self.__retrieve_instant_shutter_override()
+        except:
+            pass
 
     # On motion blur enable checkbox changed
     def __on_motion_blur_changed(self, state):
