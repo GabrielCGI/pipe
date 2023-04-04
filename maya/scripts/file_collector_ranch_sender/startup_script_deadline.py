@@ -15,18 +15,30 @@ DISK_PATHS = {
 def __repath_references():
     list_refs = ls(references=True)
     for ref in list_refs:
+        # Take only the ref loaded
+        if not ref.isLoaded():
+            continue
+        # Repath only the ref having a path that exists locally
         path = referenceQuery(ref, filename=True)
-        if os.path.exists(path):
-            match = re.match(r"^([\w:]*)[\\\/](.*\w)$", path)
-            if match:
-                disk = match.group(1)
-                if disk in DISK_PATHS:
-                    relative_path = match.group(2)
-                    new_path = os.path.join(DISK_PATHS[disk], relative_path)
-                    if os.path.exists(new_path):
-                        file_ref = FileReference(ref)
-                        file_ref.replaceWith(new_path)
-                        mel.eval(r'print "| Repath ref '+path+' by '+new_path.replace("\\","/")+'\\n";')
+        if not os.path.exists(path):
+            continue
+        # The path must match
+        match = re.match(r"^(.:)[\\\/](.*\w)$", path)
+        if not match:
+            continue
+        # The path must have a DISK known
+        disk = match.group(1)
+        if disk not in DISK_PATHS:
+            continue
+        # The new path should exists on the RANCH to be repath
+        relative_path = match.group(2)
+        new_path = os.path.join(DISK_PATHS[disk], relative_path)
+        if not os.path.exists(new_path):
+            continue
+        # Repath the reference
+        file_ref = FileReference(ref)
+        file_ref.replaceWith(new_path)
+        mel.eval(r'print "| Repath ref ' + path + ' by ' + new_path.replace("\\", "/") + '\\n";')
 
 
 # # Get the path data from a File, an AiImage or a StandIn
@@ -71,10 +83,11 @@ def __repath_references():
 
 
 def run():
-    # If on a RANCH we repath reference to the RANCH path and change all path of Files, Images and StandIns to relative
-    if os.environ['COMPUTERNAME'].startswith('RANCH'):
-        mel.eval('print "+-- Illogic path mapping Reference because computer is RANCH\\n";')
-        __repath_references()
-    else:
-        # If on LOCAL the repath are not run
-        mel.eval('print "--- Illogic no path mapping because computer is LOCAL\\n";')
+    pass
+    # # If on a RANCH we repath reference to the RANCH path and change all path of Files, Images and StandIns to relative
+    # if os.environ['COMPUTERNAME'].startswith('RANCH'):
+    #     mel.eval('print "+-- Illogic path mapping Reference because computer is RANCH\\n";')
+    #     #__repath_references() #il y a tjr un pb avec le repath des references. Si il y a des nested references, Les references enfants se reload quand même.
+    # else:
+    #     # If on LOCAL the repath are not run
+    #     mel.eval('print "--- Illogic no path mapping because computer is LOCAL\\n";')

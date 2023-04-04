@@ -88,8 +88,8 @@ class ABCExport(QDialog):
         self.__prefs = Prefs(_FILE_NAME_PREFS)
 
         # Model attributes
-        self.__start_frame = int(playbackOptions(min=True, query=True))
-        self.__end_frame = int(playbackOptions(max=True, query=True))
+        self.__start_frame = int(playbackOptions(min=True, query=True)) - 5
+        self.__end_frame = int(playbackOptions(max=True, query=True)) + 5
         self.__enable_subsamples = False
         self.__subsamples = "-0.125 0 0.125"
         self.__euler_filter = True
