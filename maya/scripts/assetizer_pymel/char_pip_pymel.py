@@ -211,7 +211,7 @@ def export_arnold_graph(aiStandIn, shaders_used):
     print(path)
     look = pm.listConnections(aiStandIn + ".operators")
     export_list = look + shaders_used
-    pm.other.arnoldExportAss(export_list, f=path, s=True, asciiAss=True, mask=4112, lightLinks=0, shadowLinks=0,
+    pm.other.arnoldExportAss(export_list, f=path, s=True, asciiAss=True, mask=6160, lightLinks=0, shadowLinks=0,
                              fullPath=0)
 
 
