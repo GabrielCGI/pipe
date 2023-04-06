@@ -175,6 +175,41 @@ def abcExport(sel):
     pm.AbcExport(j=job)
     return abc_path, abc_name
 
+def check_color_sets(color_set_name):
+    # Get the selected objects
+    selected_objects = pm.selected()
+
+    # Iterate through the selected objects
+    for obj in selected_objects:
+        # Get the shapes of the object and its children
+        shapes = obj.getShapes(noIntermediate=True) + pm.listRelatives(obj, allDescendents=True, type='mesh', noIntermediate=True)
+
+        # Iterate through the shapes
+        for shape in shapes:
+            # Get the color sets of the shape
+            color_sets = pm.polyColorSet(shape, query=True, allColorSets=True)
+
+            # Check if any color sets are present
+            if color_sets:
+                # Iterate through the color sets
+                for color_set in color_sets:
+                    # Show a pop-up window if the color set name is not the provided color set name
+                    if color_set != color_set_name:
+                        response = pm.confirmDialog(
+                            title='Warning',
+                            message="Shape '{}' has a color set named '{}' which is different from '{}'. Continue?".format(shape, color_set, color_set_name),
+                            button=['Continue', 'Cancel'],
+                            defaultButton='Continue',
+                            cancelButton='Cancel',
+                            dismissString='Cancel'
+                        )
+
+                        if response == 'Cancel':
+                            pm.error("Aborted by user")
+                            return
+                    print("Color set found: {} {}".format(color_set_name, shape))
+    print("All color sets are good")
+
 
 def create_standIn(abc_path, abc_name):
     aiStandIn = pm.createNode("aiStandIn", n=abc_name.split(".")[0] + "Shape")
@@ -216,6 +251,7 @@ def export_arnold_graph(aiStandIn, shaders_used):
 
 
 def run():
+    check_color_sets("Pref")
     pm.setAttr("defaultArnoldRenderOptions.absoluteTexturePaths", 0)
     pm.setAttr("defaultArnoldRenderOptions.texture_searchpath", "[DISK_I];[DISK_B];[DISK_P];I:;P:;B:")
     sel = pm.ls(sl=True)
