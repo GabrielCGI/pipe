@@ -554,14 +554,14 @@ class CollectorCopier:
         # MAYA PATHS
         self.__retrieve_paths_in_maya()
         # ASS PATHS
-        # self.__retrieve_ass_paths()
+        self.__retrieve_ass_paths()
 
         # COPY
-        # self.__store_datas()
-        # dirname = os.path.dirname(__file__)
-        # si = subprocess.STARTUPINFO()
-        # si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        # subprocess.Popen(["python", os.path.join(dirname, "copy_to_distant.py"), self.__data_file_name], startupinfo=si)
+        self.__store_datas()
+        dirname = os.path.dirname(__file__)
+        si = subprocess.STARTUPINFO()
+        si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
+        subprocess.Popen(["python", os.path.join(dirname, "copy_to_distant.py"), self.__data_file_name], startupinfo=si)
 
         self.__stop_log()
 
