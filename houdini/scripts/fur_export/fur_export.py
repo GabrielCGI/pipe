@@ -1,6 +1,7 @@
 import hou
 import re
 import os
+import time
 import importlib
 import warnings
 import _alembic_hom_extensions as ahe
@@ -166,6 +167,7 @@ def run(current_project_dir, char_dict, options, log_file_folder):
         ret = QtWidgets.QMessageBox().question(None, '', msg, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
         # Check if dialog has been confirmed
         if ret != QtWidgets.QMessageBox.Yes:
+            print_log("Export cancelled", log_file)
             return
 
         for shot_path, abcs_data in abcs.items():
@@ -173,16 +175,29 @@ def run(current_project_dir, char_dict, options, log_file_folder):
             print_log(msg, log_file)
             for abc_data in abcs_data:
                 char_name = abc_data[0]
+                fur_version = abc_data[1]
                 abc_path = abc_data[2]
                 otl = abc_data[3]
+                time_log = "Time        : " + time.strftime("%d-%m-%Y %H:%M:%S")
                 # Create the fur Node
                 fur = create_fur(abc_path, otl)
                 # Apply Options to the fur
                 set_params(fur, options, abc_path)
                 # Export the fur
                 print_log("| Exporting " + char_name, log_file)
-                new_export_path = export_fur(shot_path, char_name, fur)
+                new_export_path = export_fur(shot_path, char_name, fur).replace("\\", "/")
                 print_log("|      +---> " + new_export_path, log_file)
+                # Logs
+                log_fur_path = os.path.join(
+                    os.path.dirname(new_export_path), "export_"+time.strftime("%d_%m_%Y")+".log").replace("\\", "/")
+                time_log += " --> " + time.strftime("%H:%M:%S") + "\n"
+                char_log = "Char        : " + char_name + "\n"
+                version_log = "Fur Version : " + str(fur_version) + "\n"
+                abc_path_log = "ABC Path    : " + abc_path + "\n"
+                export_path_log = "Export Path : " + new_export_path + "\n"
+                with open(log_fur_path, "w") as log_fur_file:
+                    log_fur_file.write(time_log + export_path_log + char_log + version_log + abc_path_log)
+
                 # Delete the fur Node
                 fur.destroy()
             print_log("+" + (len(msg) - 1) * "-" + "\n", log_file)

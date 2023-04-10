@@ -1,4 +1,5 @@
 import os
+import time
 import logging
 from pymel.core import *
 
@@ -137,12 +138,12 @@ class ABCExportAsset:
         version_dir_path = os.path.join(asset_dir_path, str(next_version).zfill(4))
         path = os.path.join(version_dir_path, abc_name + ".abc")
         path = path.replace("\\", "/")
-
-        os.makedirs(version_dir_path, exist_ok=True)
+        log_path = os.path.join(version_dir_path, "export_"+time.strftime("%d_%m_%Y")+".log")
+        log_path = log_path.replace("\\", "/")
 
         command = "-frameRange %s %s" % (start, end)
         if subsamples_enabled:
-            command +=" -step 1.0"
+            command += " -step 1.0"
             for frame in subsamples.split(" "):
                 command += " -frameRelativeSample " + frame
 
@@ -156,13 +157,24 @@ class ABCExportAsset:
             command += " -root %s" % geo
         command += " -file \"%s\"" % (path)
 
+        time_log = "Time    : " + time.strftime("%d-%m-%Y %H:%M:%S")
+
+        os.makedirs(version_dir_path, exist_ok=True)
         refresh(suspend=True)
-        print("JOB ABC IS :")
-        print(command)
         AbcExport(j=command)
         refresh(suspend=False)
 
         self.__export_light(version_dir_path, start, end)
+
+        # Logs
+        time_log += " --> " + time.strftime("%H:%M:%S")+"\n"
+        char_log = "Char    : " + abc_name+"\n"
+        version_log = "Version : " + str(next_version).zfill(4)+"\n"
+        export_path_log = "Path    : " + path+"\n"
+        scene_name = str(sceneName())
+        source_scene_log = "Scene   : " + scene_name if len(scene_name) > 0 else "untitled"+"\n"
+        with open(log_path, "w") as log_file:
+            log_file.write(time_log+export_path_log+char_log+version_log+source_scene_log)
 
     def __export_light(self, version_dir_path, start, end):
         lights = ls(self.__namespace + ":*", type="light")

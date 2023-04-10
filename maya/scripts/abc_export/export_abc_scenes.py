@@ -99,11 +99,10 @@ def list_scenes(current_project_dir, folder_type):
 
 
 def print_scene(log_file, messages):
-    str_msg = "\n#################################################################################################\n\n"
+    str_msg = "+------------------------------------------------------------------------------------------------\n"
     for m in messages:
-        str_msg+=m+"\n"
-    str_msg+=\
-        "\n#################################################################################################\n\n\n\n"
+        str_msg+="| "+m+"\n"
+    str_msg+= "+------------------------------------------------------------------------------------------------\n\n"
     print(str_msg)
     log_file.write(str_msg)
 
@@ -134,7 +133,7 @@ def export_char_in_scene(scene_path, database_path, abc_path, nb, nb_tot, filter
         if not filter_char_enabled or filter_char == abc.get_name():
             name_num = abc.get_name_with_num()
             asset_dir_path = os.path.join(abc_path, name_num)
-            next_version = str(ABCExportAsset.next_version(asset_dir_path))
+            next_version = str(ABCExportAsset.next_version(asset_dir_path)).zfill(4)
             os.system("cls")
             print_scene(log_file, ["Exporting : " + name_num, "Version : " + next_version, "from scene : " + scene_path,
                          "Scene " + nb + " on " + nb_tot])
@@ -149,6 +148,7 @@ def export_char_in_scene(scene_path, database_path, abc_path, nb, nb_tot, filter
 def export_abcs_from_scenes(list_scenes, current_project_dir, filter_char, subsample, log_file_folder):
     database_path = os.path.join(current_project_dir, "assets/_database")
     scene_abc_exported = {}
+    scene_abc_empty = []
     nb_scenes = len(list_scenes)
     # Get the next log version
     version = 0
@@ -173,20 +173,34 @@ def export_abcs_from_scenes(list_scenes, current_project_dir, filter_char, subsa
                     shot_folder = match.group(1)
                     abc_export_path = os.path.join(shot_folder, "abc")
                     os.makedirs(abc_export_path, exist_ok=True)
-                    scene_abc_exported[file_path] = \
-                        export_char_in_scene(file_path, database_path, abc_export_path, str(i), str(nb_scenes),
-                                             filter_char, subsample, log_file)
+                    abc_exported = export_char_in_scene(file_path, database_path, abc_export_path,
+                                                        str(i), str(nb_scenes),filter_char, subsample, log_file)
+                    if len(abc_exported) > 0:
+                        scene_abc_exported[file_path] = abc_exported
+                    else:
+                        scene_abc_empty.append(file_path)
             i += 1
 
         os.system("cls")
-        messages = ["ABC Exported by scene :"]
-        for scene_path, abcs in scene_abc_exported.items():
-            messages.append("\n" + scene_path + " :")
-            for abc, version in abcs:
-                messages.append("\t" + abc + " [" + version + "]")
-
-        print_scene(log_file, messages)
-
+        scene_exported_filled = len(scene_abc_exported) >0
+        scene_empty_filled = len(scene_abc_empty) >0
+        if scene_exported_filled or scene_empty_filled:
+            messages = []
+            if scene_empty_filled:
+                messages.append("ABC scene without exports:")
+                for scene_path in scene_abc_empty:
+                    messages.append(scene_path)
+                if scene_exported_filled:
+                    messages.append("\n")
+            if scene_exported_filled:
+                messages.append("ABC Exported by scene :")
+                for scene_path, abcs in scene_abc_exported.items():
+                    messages.extend(["",scene_path + " :"])
+                    for abc, version in abcs:
+                        messages.append("\t" + abc + " [" + version + "]")
+            print_scene(log_file, messages)
+        else:
+            print_scene(log_file, "Nothing have been exported")
 
 def export_all(current_project_dir, scenes, filter_char, subsample, log_file_folder):
     subprocess.check_call(

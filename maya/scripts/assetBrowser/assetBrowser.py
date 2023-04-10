@@ -613,10 +613,11 @@ class AssetBrowser(QtWidgets.QDialog):
     def open_scene_clicked(self):
         path, namespace = self.build_path_scene()
         if path.endswith(".ma") or path.endswith(".mb"):
-            cmds.file(path, open=True, force=True)
+            confirmed = cmds.confirmDialog(title="Open Scene", message=f"Are you sure you want to open {path}?", button=["Yes", "No"], defaultButton="Yes", cancelButton="No", dismissString="No")
+            if confirmed == "Yes":
+                cmds.file(path, open=True, force=True)
         else:
-            print("Not a maya scene !")
-
+            print("Not a Maya scene!")
 """
 
 try:
