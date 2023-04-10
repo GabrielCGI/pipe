@@ -1,6 +1,6 @@
 import os
 import pymel.core as pm
-
+import re
 def create_output_paths(texture_path, color_space, render_color_space):
     texture_path = os.path.normpath(texture_path)
     dir_path, file_ext = os.path.splitext(texture_path)
@@ -53,10 +53,6 @@ def replace_to_tx(image_node):
 
     print(f"Replace {texture_path} -> {updated_path}")
 
-def process_all_tx():
-    texture_nodes = pm.ls(type=['file', 'aiImage'])
-    for node in texture_nodes:
-        replace_to_tx(node)
 
 def find_original_image_file(tx_path):
     possible_extensions = ['.jpg', '.png', '.tiff', '.exr', '.tif']
@@ -104,7 +100,12 @@ def replace_by_original(image_node):
     print(f"Replace {texture_path} -> {original_file_path}")
 
 # To test the function
-def process_all_original():
+def all_to_original():
     texture_nodes = pm.ls(type=['file', 'aiImage'])
     for node in texture_nodes:
         replace_by_original(node)
+
+def all_to_tx():
+    texture_nodes = pm.ls(type=['file', 'aiImage'])
+    for node in texture_nodes:
+        replace_to_tx(node)

@@ -1,5 +1,5 @@
 import pymel.core as pm
-import utils_pymel as utils
+import utils_pymel2 as utils
 import secrets
 import re
 import os

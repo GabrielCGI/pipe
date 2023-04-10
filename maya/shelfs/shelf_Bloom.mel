@@ -614,7 +614,7 @@ global proc shelf_Bloom () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import replace_by_tx\n\nreplace_by_tx.replace_by_tx()" 
+        -command "import replace_by_tx2\n\nreplace_by_tx2.all_to_tx()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -649,7 +649,7 @@ global proc shelf_Bloom () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import replace_by_tx\n\nreplace_by_tx.replace_by_original()" 
+        -command "import replace_by_tx2\n\nreplace_by_tx2.all_to_original()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

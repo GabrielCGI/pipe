@@ -1,7 +1,7 @@
 import maya.cmds as cmds
 import pymel.core as pm
 import os
-import utils_pymel as utils
+import utils_pymel2 as utils
 import importlib
 from pymel.core import *
 

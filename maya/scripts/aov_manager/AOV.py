@@ -103,7 +103,7 @@ class EmissionIndirectAOV(AOV):
 
     def create_aov(self, output_denoising):
         super(EmissionIndirectAOV, self).create_aov(output_denoising)
-        setAttr("aiAOV_" + self._aov.name + ".lightPathExpression", "C<R>.*O")
+        setAttr("aiAOV_" + self._aov.name + ".lightPathExpression", "C[DSV].*O")
 
 
 class EmissionOSLAOV(AOV):
@@ -112,7 +112,7 @@ class EmissionOSLAOV(AOV):
 
     def create_aov(self, output_denoising):
         super(EmissionOSLAOV, self).create_aov(output_denoising)
-        setAttr("aiAOV_" + self._aov.name + ".lightPathExpression", "C<R><O.'customEmit'>")
+        setAttr("aiAOV_" + self._aov.name + ".lightPathExpression", "C[DSV].*<O.'customEmit'>")
 
 
 class LightGroupAOV(AOV):
