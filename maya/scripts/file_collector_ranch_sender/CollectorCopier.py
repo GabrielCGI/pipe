@@ -24,7 +24,7 @@ except:
 
 _RANCH_CACHE_FOLDER = "I:/ranch/ranch_cache2"
 _LOGS_FOLDER = "I:/ranch/logs"
-_MAX_NB_THREADs = 32
+_MAX_NB_THREADs = 6
 
 _ASS_PATHS_FILE_EXTENSION = "paths"
 

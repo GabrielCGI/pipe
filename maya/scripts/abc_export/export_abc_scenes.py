@@ -200,7 +200,7 @@ def export_abcs_from_scenes(list_scenes, current_project_dir, filter_char, subsa
                         messages.append("\t" + abc + " [" + version + "]")
             print_scene(log_file, messages)
         else:
-            print_scene(log_file, "Nothing have been exported")
+            print_scene(log_file, ["Nothing have been exported"])
 
 def export_all(current_project_dir, scenes, filter_char, subsample, log_file_folder):
     subprocess.check_call(

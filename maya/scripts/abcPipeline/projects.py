@@ -44,6 +44,12 @@ projectsData ={
             "path": "I:\\swarovski_2301",
             "assetsDir": "I:\\swarovski_2301\\assets",
             "assetsDbDir": "I:\\swarovski_2301\\assets\\database",
+        },
+    "clarins_2301":
+        {
+            "path": "I:\\clarins_2301",
+            "assetsDir": "I:\\clarins_2301\\assets",
+            "assetsDbDir": "I:\\clarins_2301\\assets\\_database",
         }
 
 }

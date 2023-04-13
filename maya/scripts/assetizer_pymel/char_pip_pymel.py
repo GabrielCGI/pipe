@@ -169,7 +169,7 @@ def abcExport(sel):
     geo_string_to_export = " -root ".join(geo_list_to_export)
     print("geo strin")
     print (geo_string_to_export)
-    job = '-frameRange 1 1 -stripNamespaces -uvWrite -writeColorSets -worldSpace -writeFaceSets -writeVisibility -dataFormat ogawa -root %s -file "%s"' % (
+    job = '-frameRange 1 1 -stripNamespaces -uvWrite -writeColorSets -worldSpace -writeFaceSets -dataFormat ogawa -root %s -file "%s"' % (
     geo_string_to_export, abc_path)
 
     pm.AbcExport(j=job)
