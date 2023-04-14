@@ -2,7 +2,7 @@ import os
 import re
 
 try:
-    import pymel.core as pm
+    from pymel.core import *
 except:
     # Maya not found
     pass
