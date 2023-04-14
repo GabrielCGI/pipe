@@ -58,10 +58,10 @@ def print_var(*vs, empty_tab=False):
 
 def __print_var_aux(v, tabulation, tabs=0, v_in_dict=False):
     if type(v) is dict:
-        if v_in_dict: print("")
         if len(v) == 0:
             print("{}")
         else:
+            if v_in_dict: print("")
             print(tabs * tabulation + "{")
             for key, elems in v.items():
                 print((tabs + 1) * tabulation + __get_val(key) + " : ", end="")
@@ -83,7 +83,6 @@ def __print_var_aux(v, tabulation, tabs=0, v_in_dict=False):
                 __print_var_aux(elem_list, tabulation, tabs + 1, False)
             print(tabs * tabulation + char_end)
     else:
-
         tabs_str = "" if v_in_dict else tabs * tabulation
         try:
             print(tabs_str + __get_val(v))

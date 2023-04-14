@@ -39,6 +39,10 @@ class ABCImportAsset(ABC):
     def get_name(self):
         return self._name
 
+    # Getter of the name
+    def _get_char_name(self):
+        return self._name[:-len(self._name.split("_")[-1]) - 1]
+
     # Getter of the versions
     def get_versions(self):
         return self.__versions
@@ -97,7 +101,7 @@ class ABCImportAsset(ABC):
 class ABCImportAnim(ABCImportAsset):
     # Getter of the mod files of the anim
     def __get_mod_files(self):
-        abc_char_name = self._name[:-len(self._name.split("_")[-1]) - 1]
+        abc_char_name = self._get_char_name()
         assets_folder = os.path.join(self._current_project_dir, "assets")
         mod_folder = assets_folder + "\\" + abc_char_name + "\\abc\\"
         mod_files = []
@@ -140,7 +144,7 @@ class ABCImportAnim(ABCImportAsset):
 
     # Getter of the operator files of the anim
     def __get_operator_files(self):
-        abc_char_name = self._name[:-len(self._name.split("_")[-1]) - 1]
+        abc_char_name = self._get_char_name()
         assets_folder = os.path.join(self._current_project_dir, "assets")
         operator_folder = assets_folder + "\\" + abc_char_name + "\\publish"
         operator_files = []
@@ -194,6 +198,16 @@ class ABCImportAnim(ABCImportAsset):
             set_shader = createNode("aiIncludeGraph", n="aiIncludeGraph_" + name)
         set_shader.filename.set(operator_file_path)
         set_shader.out >> standin_node.operators[0]
+
+        override_operator_filepath = \
+            os.path.join(os.path.dirname(operator_file_path), self._get_char_name() + "_override.ass")
+        if os.path.exists(override_operator_filepath):
+            if len(include_graphs) > 1:
+                override_include_graph = include_graphs[1]
+            else:
+                override_include_graph = createNode("aiIncludeGraph", n="aiIncludeGraph_override_" + name)
+            override_include_graph.filename.set(override_operator_filepath)
+            override_include_graph.out >> standin_node.operators[1]
         return standin_node
 
     def import_update_abc(self, do_update_uvs_shaders):

@@ -1,6 +1,6 @@
 import importlib
 import maya.mel as mel
-from pymel.core import *
+import pymel.core import *
 from standin_utils import *
 import replace_by_tx
 import CollectorCopier

@@ -1,0 +1,25 @@
+import pymel.core as pm
+
+# Get the selected objects
+selected_objects = pm.selected()
+
+if len(selected_objects) < 2:
+    pm.warning("Please select at least two objects.")
+else:
+    source_msh = selected_objects[0].getShape()
+    target_msh = selected_objects[1].getShape()
+
+    # Find the skinCluster of the source mesh
+    source_skin_cluster = pm.ls(pm.listHistory(source_msh, pdo=True), type='skinCluster')[0]
+
+    # Find the joints influencing the source mesh
+    source_joints = source_skin_cluster.influenceObjects()
+    print(source_joints)
+
+    # Create a new skinCluster on the target mesh with the same joints
+    target_skin_cluster = pm.skinCluster(source_joints, target_msh, tsb=True, mi=4, dr=4)
+
+    # Copy skin weights from the source mesh to the target mesh
+    pm.copySkinWeights(ss=source_skin_cluster, ds=target_skin_cluster, noMirror=True, surfaceAssociation="closestPoint", influenceAssociation=("name", "label"))
+
+    print("Skin weights successfully copied from {} to {}.".format(source_msh, target_msh))
