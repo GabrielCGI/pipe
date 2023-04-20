@@ -36,7 +36,7 @@ def run(force_override_ass_paths_files):
             msg += str(standin_data[0]) + " : \n        actual : " + str(standin_data[1]) + \
                 "\n        latest : " + str(standin_data[2]) + "\n"
         msg += "\nYou should update them with the Asset Loader.\nDo you want to continue ?"
-        answer_out_of_date_standins = confirmDialog(
+        answer_out_of_date_standins = pm.confirmDialog(
             title='Out of date StandIn(s)',
             icon="question",
             message=msg,
@@ -47,7 +47,7 @@ def run(force_override_ass_paths_files):
         if answer_out_of_date_standins != "Continue":
             return
 
-    answer_submit = confirmDialog(
+    answer_submit = pm.confirmDialog(
         title='Confirm Submit to Deadline Ranch',
         icon="question",
         message="How do you want to save the scene before submitting the job ?",

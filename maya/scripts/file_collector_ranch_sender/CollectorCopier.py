@@ -15,7 +15,7 @@ from arnold import *
 from utils import *
 
 try:
-    from pymel.all import *
+    import pymel.all as pm
 except:
     # Maya not found
     pass
@@ -171,10 +171,10 @@ class CollectorCopier:
         self.__output("\n+- Start retrieve all the paths in Maya -----")
         count_path = 1
         # Get FileNodes, AiImages, AiStandins and References
-        list_files = ls(type="file")
-        list_images = ls(type="aiImage")
-        list_standins = ls(type='aiStandIn')
-        list_refs = ls(references=True)
+        list_files = pm.ls(type="file")
+        list_images = pm.ls(type="aiImage")
+        list_standins = pm.ls(type='aiStandIn')
+        list_refs = pm.ls(references=True)
         nb_tot = len(list_files) + len(list_images) + len(list_standins) + len(list_refs)
         paths = []
         # FILES
@@ -217,7 +217,7 @@ class CollectorCopier:
         if len(list_refs) > 0: self.__output("| ----- Retrieve paths in References")
         for ref in list_refs:
             try:
-                path = referenceQuery(ref, filename=True)
+                path = pm.referenceQuery(ref, filename=True)
             except Exception:
                 self.__output("| " + str(count_path) + "/" + str(nb_tot) +
                               " - Error Reference node not associated to reference file : " + ref)
@@ -245,8 +245,8 @@ class CollectorCopier:
     def __retrieve_ass_paths(self):
         time_start = time.time()
         self.__output("\n+- Start retrieve all the paths in ASS files -----")
-        list_standin = ls(type='aiStandIn')
-        list_include_graph = ls(type='aiIncludeGraph')
+        list_standin = pm.ls(type='aiStandIn')
+        list_include_graph = pm.ls(type='aiIncludeGraph')
         ass_paths_count = 0
         i = 1
         ass_files = []
@@ -438,13 +438,13 @@ class CollectorCopier:
 
         # Sort the files according to their size to be more efficient.
         # Ex :
-        # Thread1 ---------------- | ------------ | --------
+        # Thread1 ------------------- | ------------ | --------
         # Thread2 --------------- | ----------- | ------- | ---
         # Thread3 ------------- | --------- | ------ | ---- | -
         #                Better than :
         # Thread1 - | ------ | --------- | -------------
         # Thread2 --- | ------- | ----------- | ---------------
-        # Thread3 ---- | -------- | ------------ | ----------------
+        # Thread3 ---- | -------- | ------------ | -------------------
         self.__datas.sort(key=lambda x: x.get("size"), reverse=True)
 
         # Init datas and copy attributes
@@ -539,7 +539,7 @@ class CollectorCopier:
     # Run Collector and Copier to Ranch
     def run_collect(self):
         self.__datas.clear()
-        self.__scene_path = sceneName()
+        self.__scene_path = pm.sceneName()
 
         if len(self.__scene_path) == 0:
             print("----- SCENE NOT FOUND -----")

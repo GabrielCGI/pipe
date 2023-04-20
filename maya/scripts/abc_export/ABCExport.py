@@ -3,8 +3,9 @@ from functools import partial
 
 import sys
 import json
+import re
 
-from pymel.core import *
+import pymel.core as pm
 import maya.OpenMayaUI as omui
 
 from PySide2 import QtCore
@@ -51,7 +52,7 @@ class ABCExport(QDialog):
                 return None
             return check_dir_recursive(count+1, next_dirpath)
 
-        scene_name = sceneName()
+        scene_name = pm.sceneName()
         if len(scene_name) > 0:
             dirpath = os.path.dirname(scene_name)
             abc_parent_dir = check_dir_recursive(1, dirpath)
@@ -80,7 +81,7 @@ class ABCExport(QDialog):
     def __init__(self, prnt=wrapInstance(int(main_window), QWidget) if main_window is not None else None):
         super(ABCExport, self).__init__(prnt)
 
-        loadPlugin('AbcExport', quiet =True)
+        pm.loadPlugin('AbcExport', quiet =True)
 
         # Common Preferences (common preferences on all tools)
         self.__common_prefs = Prefs()
@@ -88,8 +89,8 @@ class ABCExport(QDialog):
         self.__prefs = Prefs(_FILE_NAME_PREFS)
 
         # Model attributes
-        self.__start_frame = int(playbackOptions(min=True, query=True)) - 5
-        self.__end_frame = int(playbackOptions(max=True, query=True)) + 5
+        self.__start_frame = int(pm.playbackOptions(min=True, query=True)) - 5
+        self.__end_frame = int(pm.playbackOptions(max=True, query=True)) + 5
         self.__enable_subsamples = False
         self.__subsamples = "-0.125 0 0.125"
         self.__euler_filter = True
@@ -379,7 +380,6 @@ class ABCExport(QDialog):
     # Retrieve the subsamples
     def __on_subsamples_edited(self):
         self.__subsamples = self.__ui_subsamples.text()
-        print_var(self.__subsamples)
 
     def __on_subsample_enable_change(self, state):
         self.__enable_subsamples = state == 2
@@ -406,7 +406,7 @@ class ABCExport(QDialog):
         new_geos = []
         for g in geos:
             geo_ns_replaced = g.replace(g.split(":")[0], namespace_found)
-            if objExists(geo_ns_replaced):
+            if pm.objExists(geo_ns_replaced):
                 new_geos.append(geo_ns_replaced)
         return new_geos
 
@@ -417,19 +417,21 @@ class ABCExport(QDialog):
         abcs = []
         abcs_by_name = {}
         existing_assets = ABCExport.get_database(database_path)
-        references = listReferences()
-        namespaces = namespaceInfo(listOnlyNamespaces=True, recurse=True)
+        references = pm.listReferences()
+        namespaces = pm.namespaceInfo(listOnlyNamespaces=True, recurse=True)
         assets_found = {}
         # Retrieve all the rigging in references
         for ref in references:
             match = re.match(r".*\/(.+)_rigging[a-zA-Z_\.]*[0-9]{3,4}\.m[ab]", ref.unresolvedPath())
             if match:
                 assets_found[ref.fullNamespace] = match.groups()[0]
+
         # Retrieve all the rigging in namespaces
         for ns in namespaces:
-            match = re.match(r"(.+)_rigging[a-zA-Z_\.]*[0-9]{3,4}$", ns)
+            match = re.match(r"(?:(.+)_rigging[a-zA-Z_\.]*[0-9]{3,4}|(.+))$", ns)
             if match:
-                assets_found[ns] = match.groups()[0]
+                match_1 = match.groups()[0]
+                assets_found[ns] = match_1 if match_1 is not None else match.groups()[1]
 
         for namespace, name in assets_found.items():
             name_found = None
@@ -449,7 +451,7 @@ class ABCExport(QDialog):
                     valid = False
                 else:
                     for geo in geos:
-                        if len(ls(geo)) > 1:
+                        if len(pm.ls(geo)) > 1:
                             valid = False
                             break
                 if valid:

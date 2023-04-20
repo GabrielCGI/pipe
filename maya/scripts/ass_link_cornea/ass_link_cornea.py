@@ -1,7 +1,7 @@
 import os
 import sys
 import re
-from pymel.core import *
+import pymel.core as pm
 import maya.cmds as cmds
 from shiboken2 import wrapInstance
 
@@ -10,7 +10,7 @@ from cornea_by_char import *
 
 def __retrieve_datas(cornea_dict):
     # Selection
-    selection = ls(selection=True)
+    selection = pm.ls(selection=True)
     if len(selection) < 2:
         print_warning("Select atleast a light and an asset standin")
         return
@@ -32,7 +32,7 @@ def __retrieve_datas(cornea_dict):
     else:
         cornea_shapes = cornea_dict[match.group(1)]
 
-    lights = listRelatives(selection[:-1], fullPath=True)
+    lights = pm.listRelatives(selection[:-1], fullPath=True)
     return shape, cornea_shapes, lights
 
 
@@ -45,17 +45,17 @@ def __light_link_cornea(shape, cornea_shapes, lights):
     # Corneas Expresion
     corneas_expression = "*" if cornea_shapes is None else "*"+ "* or *".join(cornea_shapes)+"*"
     # AiSetParameter
-    ai_set_parameter = createNode("aiSetParameter")
+    ai_set_parameter = pm.createNode("aiSetParameter")
     # Light group
-    setAttr(ai_set_parameter + ".assignment[0]", "light_group=" + light_expression, type="string")
-    setAttr(ai_set_parameter + ".selection", corneas_expression, type="string")
-    setAttr(ai_set_parameter + ".assignment[1]", "bool use_light_group=True", type="string")
+    pm.setAttr(ai_set_parameter + ".assignment[0]", "light_group=" + light_expression, type="string")
+    pm.setAttr(ai_set_parameter + ".selection", corneas_expression, type="string")
+    pm.setAttr(ai_set_parameter + ".assignment[1]", "bool use_light_group=True", type="string")
     # Shadow Group
-    setAttr(ai_set_parameter + ".assignment[2]", "shadow_group=" + light_expression, type="string")
-    setAttr(ai_set_parameter + ".selection", corneas_expression, type="string")
-    setAttr(ai_set_parameter + ".assignment[3]", "bool use_shadow_group=True", type="string")
+    pm.setAttr(ai_set_parameter + ".assignment[2]", "shadow_group=" + light_expression, type="string")
+    pm.setAttr(ai_set_parameter + ".selection", corneas_expression, type="string")
+    pm.setAttr(ai_set_parameter + ".assignment[3]", "bool use_shadow_group=True", type="string")
     # Connect
-    connectAttr(ai_set_parameter+".out",shape+".operators[30]", f=True)
+    pm.connectAttr(ai_set_parameter+".out",shape+".operators[30]", f=True)
 
 
 def run():

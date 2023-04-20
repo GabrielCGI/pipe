@@ -8,7 +8,7 @@ import subprocess
 
 import sys
 
-from pymel.core import *
+import pymel.core as pm
 import maya.OpenMayaUI as omui
 
 from PySide2 import QtCore
@@ -228,8 +228,8 @@ class MAIrus(QDialog):
             self.__ui_mAIrus_state_lbl.setText("Waiting input request")
         elif self.__mAIrus_state == MAIrusState.COMPUTING:
             # Blinking if computing
-            weight_border = int((time.time() % (_INTERVAL_COMPUTING*2))/_INTERVAL_COMPUTING)
-            self.__ui_mAIrus_state_lbl.setStyleSheet("border:"+str(weight_border)+"px solid " + _COMPUTING_COLOR)
+            weight_border = int((time.time() % (_INTERVAL_COMPUTING * 2)) / _INTERVAL_COMPUTING)
+            self.__ui_mAIrus_state_lbl.setStyleSheet("border:" + str(weight_border) + "px solid " + _COMPUTING_COLOR)
             self.__ui_mAIrus_state_lbl.setText("Computing response")
             threading.Timer(_INTERVAL_COMPUTING, self.__refresh_mairus_state).start()
         elif self.__mAIrus_state == MAIrusState.OUTPUTING_SUCCESS:

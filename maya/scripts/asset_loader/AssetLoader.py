@@ -3,7 +3,7 @@ from functools import partial
 
 import sys
 
-from pymel.core import *
+import pymel.core as pm
 import maya.OpenMayaUI as omui
 
 from PySide2 import QtCore
@@ -114,7 +114,7 @@ class AssetLoader(QtWidgets.QDialog):
     def __test_trsf_has_standin(trsf):
         if trsf is not None:
             shape = trsf.getShape()
-            if shape is not None and objectType(shape, isType="aiStandIn"):
+            if shape is not None and pm.objectType(shape, isType="aiStandIn"):
                 return True
         return False
 
@@ -122,29 +122,29 @@ class AssetLoader(QtWidgets.QDialog):
     def __retrieve_standins(self):
         self.__standins.clear()
 
-        selection = ls(selection=True)
+        selection = pm.ls(selection=True)
         if len(selection)>0:
             standins = {}
             for sel in selection:
-                if objectType(sel, isType="aiStandIn"):
+                if pm.objectType(sel, isType="aiStandIn"):
                     # Standin found
                     standins[sel.name()] = Standin(sel)
-                elif objectType(sel, isType="transform"):
+                elif pm.objectType(sel, isType="transform"):
                     prt = sel.getParent()
-                    if prt is not None and objectType(prt, isType="transform"):
+                    if prt is not None and pm.objectType(prt, isType="transform"):
                         shape = prt.getShape()
-                        if shape is not None and objectType(shape, isType="aiStandIn"):
+                        if shape is not None and pm.objectType(shape, isType="aiStandIn"):
                             # Proxy of Standin found
                             standins[shape.name()] = Standin(shape)
 
-                for rel in listRelatives(sel, allDescendents=True, type="aiStandIn"):
+                for rel in pm.listRelatives(sel, allDescendents=True, type="aiStandIn"):
                     standins[rel.name()] = Standin(rel)
 
             for name, standin in standins.items():
                 if standin.is_valid():
                     self.__standins[name] = standin
         else:
-            standins = ls(type="aiStandIn")
+            standins = pm.ls(type="aiStandIn")
             for standin in standins:
                 standin_inst = Standin(standin)
                 if standin_inst.is_valid() and not standin_inst.is_up_to_date():
@@ -203,7 +203,7 @@ class AssetLoader(QtWidgets.QDialog):
         self.__ui_variant_list = QListWidget()
         self.__ui_variant_list.setSpacing(2)
         self.__ui_variant_list.setStyleSheet("font-size:14px")
-        self.__ui_variant_list.itemSelectionChanged.connect(self.__refresh_btn)
+        self.__ui_variant_list.itemSelectionChanged.connect(self.__on_variant_selected_changed)
         right_lists_layout.addWidget(self.__ui_variant_list, 3)
         # ML.1.4.1.2 : Version List
         self.__ui_version_list = QListWidget()
@@ -362,13 +362,18 @@ class AssetLoader(QtWidgets.QDialog):
         self.__ui_version_list.setEnabled(self.__variants_and_versions_enabled)
         if self.__variants_and_versions_enabled:
             standin = self.__sel_standins[0]
-            variants_and_versios = standin.get_versions()
-            versions_active_variant = variants_and_versios[standin.get_active_variant()]
+            variants_and_versions = standin.get_versions()
+            active_variant = standin.get_active_variant()
+            try:
+                selected_variant = self.__ui_variant_list.selectedItems()[0].text()
+            except:
+                return
+            versions_active_variant = variants_and_versions[selected_variant]
             active_version = standin.get_active_version()
             for version in versions_active_variant:
                 version_list_widget = QListWidgetItem(version[0])
                 self.__ui_version_list.addItem(version_list_widget)
-                if active_version == version[0]:
+                if active_variant == selected_variant and active_version == version[0]:
                     self.__ui_version_list.setItemSelected(version_list_widget, True)
                     version_list_widget.setTextColor(QColor(0, 255, 255).rgba())
 
@@ -398,7 +403,8 @@ class AssetLoader(QtWidgets.QDialog):
                 set_version = True
 
         self.__ui_update_to_last_btn.setEnabled(up_to_date)
-        self.__ui_submit_version_btn.setEnabled(self.__variants_and_versions_enabled and set_version)
+        self.__ui_submit_version_btn.setEnabled(self.__variants_and_versions_enabled and set_version and
+                                                len(version_items) > 0)
 
         self.__ui_to_sd_btn.setEnabled(has_sd)
         self.__ui_to_hd_btn.setEnabled(has_hd)
@@ -415,6 +421,10 @@ class AssetLoader(QtWidgets.QDialog):
             self.__refresh_variants_list()
             self.__refresh_versions_list()
             self.__refresh_btn()
+
+    def __on_variant_selected_changed(self):
+        self.__refresh_btn()
+        self.__refresh_versions_list()
 
     # Select all the standins that are out of dates
     def __select_all_ood(self):

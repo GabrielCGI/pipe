@@ -1,6 +1,6 @@
 import os
 import re
-from pymel.core import *
+import pymel.core as pm
 from standin_utils import *
 
 class Standin:
@@ -112,14 +112,14 @@ class Standin:
         name_space = name + "_00"
         namespace_for_creation = name_space.replace(".", "_")
 
-        refNode = system.createReference(maya_path, namespace=namespace_for_creation)
-        nodes = FileReference.nodes(refNode)
+        refNode = pm.system.createReference(maya_path, namespace=namespace_for_creation)
+        nodes = pm.FileReference.nodes(refNode)
         transform = self.__standin.getParent()
         trsf_parent = transform.getParent()
         if trsf_parent:
-            group(nodes[0], parent=trsf_parent)
+            pm.group(nodes[0], parent=trsf_parent)
 
-        m = xform(transform, matrix=True, query=True)
-        xform(nodes[0], matrix=m)
+        m = pm.xform(transform, matrix=True, query=True)
+        pm.xform(nodes[0], matrix=m)
 
         transform.visibility.set(False)

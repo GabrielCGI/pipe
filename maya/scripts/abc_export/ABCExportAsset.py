@@ -1,7 +1,7 @@
 import os
 import time
 import logging
-from pymel.core import *
+import pymel.core as pm
 
 try:
     from utils import *
@@ -14,8 +14,8 @@ class ABCExportAsset:
     @staticmethod
     def __optimize_scene_size():
         print("\nvvvvvvvvvvvvvvvv Optimize Scene Size vvvvvvvvvvvvvvvv")
-        mel.source('cleanUpScene')
-        mel.scOpt_performOneCleanup({
+        pm.mel.source('cleanUpScene')
+        pm.mel.scOpt_performOneCleanup({
             "nurbsSrfOption",
             "setsOption",
             "transformOption",
@@ -39,10 +39,10 @@ class ABCExportAsset:
     @staticmethod
     def __delete_unknown_node():
         print("\nvvvvvvvvvvvvvvv Delete Unknown Nodes vvvvvvvvvvvvvvvv")
-        unknown = ls(type="unknown")
+        unknown = pm.ls(type="unknown")
         if unknown:
             print("Removing:" + unknown)
-            delete(unknown)
+            pm.delete(unknown)
         else:
             print("No unknown nodes found")
         print("^^^^^^^^^^^^^^^ Delete Unknown Nodes ^^^^^^^^^^^^^^^^\n")
@@ -50,12 +50,12 @@ class ABCExportAsset:
     @staticmethod
     def __remove_unknown_plugins():
         print("\nvvvvvvvvvvvvvv Remove Unknown Plugins vvvvvvvvvvvvvvv")
-        old_plug = cmds.unknownPlugin(query=True, list=True)
+        old_plug = pm.unknownPlugin(query=True, list=True)
         if old_plug:
             for plug in old_plug:
                 print("Removing:" + plug)
                 try:
-                    cmds.unknownPlugin(plug, remove=True)
+                    pm.unknownPlugin(plug, remove=True)
                 except Exception as e:
                     print(e)
         else:
@@ -65,29 +65,29 @@ class ABCExportAsset:
     @staticmethod
     def __unlock_all_nodes():
         print("\n------------------ Unlock All Nodes -----------------\n")
-        all_nodes = ls()
+        all_nodes = pm.ls()
         if all_nodes:
             for node in all_nodes:
-                lockNode(node, l=False)
+                pm.lockNode(node, l=False)
 
     @staticmethod
     def __remove_blast_panel_error():
         print("\n------------ Remove CgAbBlastPanel Error ------------\n")
-        for model_panel in getPanel(typ="modelPanel"):
+        for model_panel in pm.getPanel(typ="modelPanel"):
             # Get callback of the model editor
-            callback = modelEditor(model_panel, query=True, editorChanged=True)
+            callback = pm.modelEditor(model_panel, query=True, editorChanged=True)
             # If the callback is the erroneous `CgAbBlastPanelOptChangeCallback`
             if callback == "CgAbBlastPanelOptChangeCallback":
                 # Remove the callbacks from the editor
-                modelEditor(model_panel, edit=True, editorChanged="")
-        if objExists("uiConfigurationScriptNode"):
-            delete("uiConfigurationScriptNode")
+                pm.modelEditor(model_panel, edit=True, editorChanged="")
+        if pm.objExists("uiConfigurationScriptNode"):
+            pm.delete("uiConfigurationScriptNode")
 
     @staticmethod
     def __fix_isg():
         print("\n-------------- Fix initialShadingGroup --------------\n")
-        lockNode('initialShadingGroup', lock=0, lockUnpublished=0)
-        lockNode('initialParticleSE', lock=0, lockUnpublished=0)
+        pm.lockNode('initialShadingGroup', lock=0, lockUnpublished=0)
+        pm.lockNode('initialParticleSE', lock=0, lockUnpublished=0)
 
     # Get the next version (version when the ABC will be exported)
     @staticmethod
@@ -100,7 +100,7 @@ class ABCExportAsset:
                         v = int(f)
                         if v > version:
                             version = v
-                    except Typeerror:
+                    except TypeError:
                         pass
         path = os.path.join(folder, str(version).zfill(4))
         while os.path.exists(path):
@@ -160,9 +160,9 @@ class ABCExportAsset:
         time_log = "Time    : " + time.strftime("%d-%m-%Y %H:%M:%S")
 
         os.makedirs(version_dir_path, exist_ok=True)
-        refresh(suspend=True)
-        AbcExport(j=command)
-        refresh(suspend=False)
+        pm.refresh(suspend=True)
+        pm.AbcExport(j=command)
+        pm.refresh(suspend=False)
 
         self.__export_light(version_dir_path, start, end)
 
@@ -171,13 +171,13 @@ class ABCExportAsset:
         char_log = "Char    : " + abc_name+"\n"
         version_log = "Version : " + str(next_version).zfill(4)+"\n"
         export_path_log = "Path    : " + path+"\n"
-        scene_name = str(sceneName())
+        scene_name = str(pm.sceneName())
         source_scene_log = "Scene   : " + scene_name if len(scene_name) > 0 else "untitled"+"\n"
         with open(log_path, "w") as log_file:
             log_file.write(time_log+export_path_log+char_log+version_log+source_scene_log)
 
     def __export_light(self, version_dir_path, start, end):
-        lights = ls(self.__namespace + ":*", type="light")
+        lights = pm.ls(self.__namespace + ":*", type="light")
         if len(lights) > 0:
             self.__optimize_scene_size()
             self.__delete_unknown_node()
@@ -189,33 +189,33 @@ class ABCExportAsset:
             bake_list = []
             for n in lights:
                 # Check if selected object is a child of an object
-                par = listRelatives(n, parent=True)
+                par = pm.listRelatives(n, parent=True)
                 if par is not None:
                     name_export = n.split(':')[-1].strip("Shape")
                     # Duplicate object
-                    dupl_obj = duplicate(n, name=name_export, rc=True, rr=True)
+                    dupl_obj = pm.duplicate(n, name=name_export, rc=True, rr=True)
 
                     # Delete duplicated children
-                    children_td = listRelatives(dupl_obj, c=True, pa=True)[1:]
+                    children_td = pm.listRelatives(dupl_obj, c=True, pa=True)[1:]
                     for c in children_td:
                         delete(c)
 
                     # Unparent object, Add constraints and append it to bake List
-                    to_bake = parent(dupl_obj, w=True)
+                    to_bake = pm.parent(dupl_obj, w=True)
                     bake_list.append(to_bake)
-                    parentConstraint(n, to_bake, mo=False)
-                    scaleConstraint(n, to_bake, mo=False)
+                    pm.parentConstraint(n, to_bake, mo=False)
+                    pm.scaleConstraint(n, to_bake, mo=False)
 
             # Bake animation and delete constraints
             for i in bake_list:
-                bakeResults(i, t=(start, end))
-                delete(i[0], constraints=True)
+                pm.bakeResults(i, t=(start, end))
+                pm.delete(i[0], constraints=True)
 
             abc_name = self.get_name_with_num()
             path = os.path.join(version_dir_path, abc_name + "_light.abc")
             path = path.replace("\\", "/")
-            select(bake_list)
-            exportSelected(path, type="mayaAscii")
+            pm.select(bake_list)
+            pm.exportSelected(path, type="mayaAscii")
 
             for i in bake_list:
-                delete(i)
+                pm.delete(i)

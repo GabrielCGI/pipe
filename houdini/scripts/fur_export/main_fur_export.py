@@ -2,7 +2,7 @@ import sys
 import re
 import json
 import importlib
-install_dir = r'I:\tmp\fur_export'
+install_dir = r'R:\pipeline\pipe\houdini\scripts\fur_export'
 if not sys.path.__contains__(install_dir): sys.path.append(install_dir)
 utils_dir = r'R:\pipeline\pipe\maya\scripts\common'
 if not sys.path.__contains__(utils_dir): sys.path.append(utils_dir)
@@ -25,9 +25,9 @@ __OPTIONS = {
     "shutter": (-0.15, 0.15)
 }
 
-__CHAR_DICT_PATH = r'I:\tmp\fur_export\char_dict.json'
+__CHAR_DICT_PATH = r'R:\pipeline\pipe\houdini\scripts\fur_export\char_dict.json'
 
-__LOG_FILE_FOLDER = r'I:\tmp\log\fur_export'
+__LOG_FILE_FOLDER = r'R:\pipeline\pipe\houdini\scripts\fur_export\log'
 
 # ######################################################################################################################
 

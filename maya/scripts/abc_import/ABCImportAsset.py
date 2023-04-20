@@ -3,7 +3,7 @@ import re
 from abc import *
 from enum import Enum
 
-from pymel.core import *
+import pymel.core as pm
 
 from utils import *
 
@@ -84,7 +84,7 @@ class ABCImportAsset(ABC):
 
     @staticmethod
     def _configure_standin(standin_node):
-        current_unit = currentUnit(time=True, query=True)
+        current_unit = pm.currentUnit(time=True, query=True)
         unit_to_fps = {
             "game": 15,
             "film": 24,
@@ -117,7 +117,7 @@ class ABCImportAnim(ABCImportAsset):
     def __is_mod_up_to_date(self):
         # Test if mod is up to date
         mod_files = self.__get_mod_files()
-        standin_node = listRelatives(self._actual_standin, parent=True)[0]
+        standin_node = pm.listRelatives(self._actual_standin, parent=True)[0]
         actual_mod_path = standin_node.dso.get()
         if len(mod_files) == 0 or actual_mod_path is None:
             return False
@@ -137,7 +137,7 @@ class ABCImportAnim(ABCImportAsset):
         try:
             mod_files = self.__get_mod_files()
             mod_file_path = mod_files[0]
-            standin_node = listRelatives(self._actual_standin, parent=True)[0]
+            standin_node = pm.listRelatives(self._actual_standin, parent=True)[0]
             standin_node.dso.set(mod_file_path)
         except:
             print_warning("No mod files found for " + self.get_name(), char_filler='-')
@@ -162,7 +162,7 @@ class ABCImportAnim(ABCImportAsset):
         operator_files = self.__get_operator_files()
         if len(operator_files) == 0:
             return False
-        include_graphs = listConnections(self._actual_standin, type="aiIncludeGraph")
+        include_graphs = pm.listConnections(self._actual_standin, type="aiIncludeGraph")
         if len(include_graphs) == 0:
             return False
         set_shader = include_graphs[0]
@@ -179,7 +179,7 @@ class ABCImportAnim(ABCImportAsset):
 
     # Update shader
     def __update_operator(self):
-        standin_node = listRelatives(self._actual_standin, parent=True)[0]
+        standin_node = pm.listRelatives(self._actual_standin, parent=True)[0]
 
         name = self.get_name()
         # OPERATOR (SHADER)
@@ -190,12 +190,12 @@ class ABCImportAnim(ABCImportAsset):
             print_warning("No operator files found for " + name, char_filler='-')
             return standin_node
 
-        include_graphs = listConnections(self._actual_standin, type="aiIncludeGraph")
+        include_graphs = pm.listConnections(self._actual_standin, type="aiIncludeGraph")
         # If include graph exists we retrieve it instead of creating one
         if len(include_graphs) > 0:
             set_shader = include_graphs[0]
         else:
-            set_shader = createNode("aiIncludeGraph", n="aiIncludeGraph_" + name)
+            set_shader = pm.createNode("aiIncludeGraph", n="aiIncludeGraph_" + name)
         set_shader.filename.set(operator_file_path)
         set_shader.out >> standin_node.operators[0]
 
@@ -205,7 +205,7 @@ class ABCImportAnim(ABCImportAsset):
             if len(include_graphs) > 1:
                 override_include_graph = include_graphs[1]
             else:
-                override_include_graph = createNode("aiIncludeGraph", n="aiIncludeGraph_override_" + name)
+                override_include_graph = pm.createNode("aiIncludeGraph", n="aiIncludeGraph_override_" + name)
             override_include_graph.filename.set(override_operator_filepath)
             override_include_graph.out >> standin_node.operators[1]
         return standin_node
@@ -216,11 +216,11 @@ class ABCImportAnim(ABCImportAsset):
         name = self.get_name()
         # If import we create the standin
         if is_import:
-            self._actual_standin = createNode("aiStandIn", n="shape_" + name)
-            standin_node = listRelatives(self._actual_standin, parent=True)[0]
-            standin_node = rename(standin_node, name)
+            self._actual_standin = pm.createNode("aiStandIn", n="shape_" + name)
+            standin_node = pm.listRelatives(self._actual_standin, parent=True)[0]
+            standin_node = pm.rename(standin_node, name)
         else:
-            standin_node = listRelatives(self._actual_standin, parent=True)[0]
+            standin_node = pm.listRelatives(self._actual_standin, parent=True)[0]
 
         abc_filename = name + ".abc"
         abc_filepath = os.path.join(self._import_path, abc_filename)
@@ -234,14 +234,14 @@ class ABCImportAnim(ABCImportAsset):
         # Update anim lights or create one
         if os.path.exists(light_filepath):
             found = False
-            for ref in listReferences():
+            for ref in pm.listReferences():
                 match = re.match(r".*[\\/]" + name + "_light\.m[ab]", ref.unresolvedPath())
                 if match:
                     ref.replaceWith(light_filepath)
                     found = True
                     break
             if not found:
-                createReference(light_filepath, defaultNamespace=True)
+                pm.createReference(light_filepath, defaultNamespace=True)
 
         if is_import or do_update_uvs_shaders:
             self.update()
@@ -294,7 +294,7 @@ class ABCImportFur(ABCImportAsset):
         operator_files = self.__get_operator_files()
         if len(operator_files) == 0:
             return False
-        include_graphs = listConnections(self._actual_standin, type="aiIncludeGraph")
+        include_graphs = pm.listConnections(self._actual_standin, type="aiIncludeGraph")
         if len(include_graphs) == 0:
             return False
         set_shader = include_graphs[0]
@@ -311,7 +311,7 @@ class ABCImportFur(ABCImportAsset):
 
     # Update shaders
     def __update_operator(self):
-        standin_node = listRelatives(self._actual_standin, parent=True)[0]
+        standin_node = pm.listRelatives(self._actual_standin, parent=True)[0]
 
         name = self.get_name()
         # OPERATOR (SHADER)
@@ -321,12 +321,12 @@ class ABCImportFur(ABCImportAsset):
         except:
             print_warning("No operator files found for " + name, char_filler='-')
             return standin_node
-        include_graphs = listConnections(self._actual_standin, type="aiIncludeGraph")
+        include_graphs = pm.listConnections(self._actual_standin, type="aiIncludeGraph")
         # If include graph exists we retrieve it instead of creating one
         if len(include_graphs) > 0:
             set_shader = include_graphs[0]
         else:
-            set_shader = createNode("aiIncludeGraph", n="aiIncludeGraph_" + name)
+            set_shader = pm.createNode("aiIncludeGraph", n="aiIncludeGraph_" + name)
         set_shader.filename.set(operator_file_path)
         set_shader.out >> standin_node.operators[0]
         return standin_node
@@ -346,11 +346,11 @@ class ABCImportFur(ABCImportAsset):
         if dso is not None:
             # If import we create the standin
             if is_import:
-                self._actual_standin = createNode("aiStandIn", n="shape_" + name)
-                standin_node = listRelatives(self._actual_standin, parent=True)[0]
-                standin_node = rename(standin_node, name)
+                self._actual_standin = pm.createNode("aiStandIn", n="shape_" + name)
+                standin_node = pm.listRelatives(self._actual_standin, parent=True)[0]
+                standin_node = pm.rename(standin_node, name)
             else:
-                standin_node = listRelatives(self._actual_standin, parent=True)[0]
+                standin_node = pm.listRelatives(self._actual_standin, parent=True)[0]
 
             standin_node.dso.set(os.path.join(self._import_path, dso))
             standin_node.mode.set(4)

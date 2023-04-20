@@ -3,7 +3,7 @@ from functools import partial
 
 import sys
 
-from pymel.core import *
+import pymel.core as pm
 import maya.OpenMayaUI as omui
 
 from PySide2 import QtCore
@@ -48,7 +48,7 @@ class ABCImport(QDialog):
                 return None
             return check_dir_recursive(count + 1, next_dirpath)
 
-        scene_name = sceneName()
+        scene_name = pm.sceneName()
         if len(scene_name) > 0:
             dirpath = os.path.dirname(scene_name)
             abc_parent_dir = check_dir_recursive(1, dirpath)
@@ -312,11 +312,11 @@ class ABCImport(QDialog):
             name_item = QTableWidgetItem(name)
             name_item.setData(Qt.UserRole, abc)
             self.__ui_abcs_table.setItem(row_index, 1, name_item)
-            if state == 2:
+            if state == ABCState.New:
                 self.__ui_abcs_table.setSpan(row_index, 1, 1, 2)
 
             # Actual version
-            if state != 2:
+            if state != ABCState.New:
                 version_item = QTableWidgetItem(abc.get_actual_version())
                 version_item.setData(Qt.UserRole, abc)
                 version_item.setTextAlignment(Qt.AlignCenter)
@@ -333,7 +333,7 @@ class ABCImport(QDialog):
                 import_version_combobox.setCurrentText(os.path.basename(anim_import_version))
 
             # Action
-            if state != 2:
+            if state != ABCState.New:
                 action_btn = QPushButton("Update")
                 action_btn.setStyleSheet("margin:3px")
                 action_btn.clicked.connect(partial(self.__on_click_update_uvs_shaders, abc))
@@ -365,7 +365,7 @@ class ABCImport(QDialog):
                 asset = ABCImportFur(match.group(1), self.__current_project_dir)
             self.__retrieve_alone_asset_in_scene(asset)
             asset.set_import_path(os.path.dirname(file_path))
-            select(asset.import_update_abc(True))
+            pm.select(asset.import_update_abc(True))
             self.__retrieve_assets_in_scene()
             self.__refresh_ui()
 
@@ -402,7 +402,7 @@ class ABCImport(QDialog):
     # Update the abc on click
     def __on_click_update_uvs_shaders(self, abc):
         standin_node = abc.update()
-        select(standin_node)
+        pm.select(standin_node)
         self.__retrieve_assets_in_scene()
         self.__refresh_ui()
 
@@ -455,10 +455,10 @@ class ABCImport(QDialog):
     # It can retrieve abc_fur having the abc file in the dso or
     # it can retrieve abc having the abc file in the abc_layer
     def __retrieve_alone_asset_in_scene(self, abc):
-        standins = ls(type="aiStandIn")
+        standins = pm.ls(type="aiStandIn")
         abc_name = abc.get_name()
         for standin in standins:
-            standin_node = listRelatives(standin, parent=True)[0]
+            standin_node = pm.listRelatives(standin, parent=True)[0]
             dso = standin.dso.get()
             # Check dso
             if dso is not None:
@@ -479,12 +479,12 @@ class ABCImport(QDialog):
     # It can retrieve abc_fur having the abc file in the dso or
     # it can retrieve abc having the abc file in the abc_layer
     def __retrieve_assets_in_scene(self):
-        standins = ls(type="aiStandIn")
+        standins = pm.ls(type="aiStandIn")
         standins_datas = {}
         if len(self.__abcs) == 0:
             return
         for standin in standins:
-            standin_node = listRelatives(standin, parent=True)[0]
+            standin_node = pm.listRelatives(standin, parent=True)[0]
             dso = standin.dso.get()
             added = False
             # Check dso
@@ -518,6 +518,6 @@ class ABCImport(QDialog):
         standin_nodes = []
         for abc in self.__selected_abcs:
             standin_nodes.append(abc.import_update_abc(self.__update_uvs_shaders))
-        select(standin_nodes)
+        pm.select(standin_nodes)
         self.__retrieve_assets_in_scene()
         self.__refresh_ui()

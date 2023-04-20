@@ -5,8 +5,8 @@ import importlib
 import subprocess
 from threading import Thread
 
-from pymel.core import *
-from pymel.all import *
+import pymel.core as pm
+import pymel.all as pmall
 
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -25,18 +25,18 @@ from ABCExport import *
 
 
 def export_set(frame):
-    scene_name = sceneName()
-    if len(scene_name) > 0 and len(ls("_____SET_____")) > 0:
+    scene_name = pm.sceneName()
+    if len(scene_name) > 0 and len(pm.ls("_____SET_____")) > 0:
         path = ".".join(scene_name.split(".")[:-1]) + "_set.abc"
-        refresh(suspend=True)
-        AbcExport(j="-frameRange %s %s -writeVisibility -worldSpace -dataFormat ogawa -root "
+        pm.refresh(suspend=True)
+        pm.AbcExport(j="-frameRange %s %s -writeVisibility -worldSpace -dataFormat ogawa -root "
                     "|_____SET_____ -file \"%s\"" % (frame, frame, path))
-        refresh(suspend=False)
+        pm.refresh(suspend=False)
 
 
 def export_cam(start_frame, end_frame):
-    scene_name = sceneName()
-    cams = ls("*:rendercam")
+    scene_name = pm.sceneName()
+    cams = pm.ls("*:rendercam")
     if len(scene_name) > 0 and len(cams) > 0:
         match = re.match(r"^(.*[\\/]shots[\\/][a-zA-Z0-9_-]*)\/.*$", scene_name)
         if match:
@@ -55,10 +55,10 @@ def export_cam(start_frame, end_frame):
 
             cam_file_path = os.path.join(cam_folder,  "cam."+ str(version_max).zfill(3) + ".abc").replace("\\","/")
             name = cams[0].longName()
-            refresh(suspend=True)
-            AbcExport(j="-frameRange %s %s -writeVisibility -worldSpace -dataFormat ogawa -root "
+            pm.refresh(suspend=True)
+            pm.AbcExport(j="-frameRange %s %s -writeVisibility -worldSpace -dataFormat ogawa -root "
                         "%s -file \"%s\"" % (start_frame, end_frame, name, cam_file_path))
-            refresh(suspend=False)
+            pm.refresh(suspend=False)
 
 
 def list_scenes(current_project_dir, folder_type):
@@ -113,11 +113,11 @@ def export_char_in_scene(scene_path, database_path, abc_path, nb, nb_tot, filter
     filter_char_enabled = len(filter_char) > 0
 
     print_scene(log_file, ["Opening the scene : " + scene_path])
-    openFile(scene_path, force=True)
+    pm.openFile(scene_path, force=True)
 
     abcs = ABCExport.retrieve_abcs(database_path)
-    start_frame = int(playbackOptions(min=True, query=True)) - 5
-    end_frame = int(playbackOptions(max=True, query=True)) + 5
+    start_frame = int(pm.playbackOptions(min=True, query=True)) - 5
+    end_frame = int(pm.playbackOptions(max=True, query=True)) + 5
 
     if not filter_char_enabled:
         os.system("cls")
@@ -231,7 +231,7 @@ def run_export_abc_scenes(folder_type, filter_char, subsample, log_file_folder):
 
 
 if __name__ == '__main__':
-    loadPlugin('AbcExport', quiet =True)
+    pm.loadPlugin('AbcExport', quiet =True)
     export_abcs_from_scenes(sys.argv[5:], sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
     os.system("pause")
     print("wait a few seconds")
