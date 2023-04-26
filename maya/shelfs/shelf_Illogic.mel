@@ -218,6 +218,40 @@ global proc shelf_Illogic () {
         -manage 1
         -visible 1
         -preventOverride 0
+        -annotation "Look Loader" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Look Loader" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/look_loader.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/look_loader.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import sys\nimport importlib\n\ninstall_dir = r\"R:\\pipeline\\pipe\\maya\\scripts\\look_loader\"\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\nmodules = [\n    \"standin_utils\",\n    \"LookStandin\",\n    \"LookLoader\"\n]\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\nfrom LookLoader import *\n\ntry:\n    look_loader.close()\nexcept:\n    pass\nlook_loader = LookLoader()\nlook_loader.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
         -annotation "Character Publisher" 
         -enableBackground 0
         -backgroundColor 0 0 0 

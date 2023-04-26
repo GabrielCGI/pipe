@@ -83,6 +83,41 @@ class ABCImportAsset(ABC):
         pass
 
     @staticmethod
+    def _get_free_operator_slot(standin):
+        index = 0
+        while True:
+            if pm.getAttr(standin + ".operators[" + str(index) + "]") is None:
+                return index
+            index += 1
+    @staticmethod
+    def _retrieve_default_operator_index(standin, char_name):
+        nb_operators = len(standin.operators.get())
+        index = 0
+        operators_flagged = 0
+        while operators_flagged < nb_operators:
+            operator = pm.getAttr(standin + ".operators[" + str(index) + "]")
+            if operator is not None:
+                operators_flagged += 1
+                if re.match(r"^" + char_name + r"_operator\.v[0-9]{3}\.ass$",os.path.basename(operator.filename.get())):
+                    return index
+            index += 1
+        return -1
+
+    @staticmethod
+    def _retrieve_override_operator_index(standin, char_name):
+        nb_operators = len(standin.operators.get())
+        index = 0
+        operators_flagged = 0
+        while operators_flagged < nb_operators:
+            operator = pm.getAttr(standin + ".operators[" + str(index) + "]")
+            if operator is not None:
+                operators_flagged += 1
+                if re.match(r"^" + char_name + r"_override\.ass$",os.path.basename(operator.filename.get())):
+                    return index
+            index += 1
+        return -1
+
+    @staticmethod
     def _configure_standin(standin_node):
         current_unit = pm.currentUnit(time=True, query=True)
         unit_to_fps = {
@@ -156,17 +191,36 @@ class ABCImportAnim(ABCImportAsset):
             operator_files = sorted(operator_files, reverse=True)
         return operator_files
 
+    # Getter of the override operator file of the anim
+    def __get_override_operator_file(self):
+        abc_char_name = self._get_char_name()
+        assets_folder = os.path.join(self._current_project_dir, "assets")
+        operator_folder = assets_folder + "\\" + abc_char_name + "\\publish"
+        if os.path.isdir(operator_folder):
+            for file in os.listdir(operator_folder):
+                file_path = os.path.join(operator_folder, file)
+                if os.path.isfile(file_path) and re.match(r"^.*override\.ass$", file, re.IGNORECASE):
+                    return file_path
+        return None
+
     # Getter of whether the abc has his shaders up to date
     def __is_operator_up_to_date(self):
+        standin_node = pm.listRelatives(self._actual_standin, parent=True)[0]
+        char_name = self._get_char_name()
         # Test if operator is up to date
         operator_files = self.__get_operator_files()
+        override_operator_file = self.__get_override_operator_file()
         if len(operator_files) == 0:
             return False
         include_graphs = pm.listConnections(self._actual_standin, type="aiIncludeGraph")
         if len(include_graphs) == 0:
             return False
-        set_shader = include_graphs[0]
-        actual_operator_path = set_shader.filename.get()
+        # Default Operator
+        default_operator_index = ABCImportAsset._retrieve_default_operator_index(standin_node, char_name)
+        if default_operator_index is -1:
+            return False
+        default_operator = pm.getAttr(standin_node+".operators["+str(default_operator_index)+"]")
+        actual_operator_path = default_operator.filename.get()
         operator_regexp = r".*operator\.v([0-9]+)\.ass"
         operator_match = re.match(operator_regexp, operator_files[0])
         operator_match_actual = re.match(operator_regexp, actual_operator_path)
@@ -175,6 +229,15 @@ class ABCImportAnim(ABCImportAsset):
             actual_version_num = int(operator_match_actual.group(1))
             if last_version_num > actual_version_num:
                 return False
+
+        # Override Operator
+        override_operator_index = ABCImportAsset._retrieve_override_operator_index(standin_node, char_name)
+        if override_operator_file is not None:
+            if override_operator_index is -1:
+                return False
+            override_operator = pm.getAttr(standin_node+".operators["+str(override_operator_index)+"]")
+            if override_operator_file != override_operator.filename.get():
+                return False
         return True
 
     # Update shader
@@ -182,6 +245,7 @@ class ABCImportAnim(ABCImportAsset):
         standin_node = pm.listRelatives(self._actual_standin, parent=True)[0]
 
         name = self.get_name()
+        char_name = self._get_char_name()
         # OPERATOR (SHADER)
         try:
             operator_files = self.__get_operator_files()
@@ -190,24 +254,28 @@ class ABCImportAnim(ABCImportAsset):
             print_warning("No operator files found for " + name, char_filler='-')
             return standin_node
 
-        include_graphs = pm.listConnections(self._actual_standin, type="aiIncludeGraph")
+        default_operator_index = ABCImportAsset._retrieve_default_operator_index(standin_node,char_name)
         # If include graph exists we retrieve it instead of creating one
-        if len(include_graphs) > 0:
-            set_shader = include_graphs[0]
+        if default_operator_index == -1:
+            default_operator_index = ABCImportAsset._get_free_operator_slot(standin_node)
+            default_operator = pm.createNode("aiIncludeGraph", n="aiIncludeGraph_" + name)
         else:
-            set_shader = pm.createNode("aiIncludeGraph", n="aiIncludeGraph_" + name)
-        set_shader.filename.set(operator_file_path)
-        set_shader.out >> standin_node.operators[0]
+            default_operator = pm.getAttr(standin_node+".operators["+str(default_operator_index)+"]")
+        default_operator.filename.set(operator_file_path)
+        default_operator.out >> standin_node.operators[default_operator_index]
 
         override_operator_filepath = \
             os.path.join(os.path.dirname(operator_file_path), self._get_char_name() + "_override.ass")
         if os.path.exists(override_operator_filepath):
-            if len(include_graphs) > 1:
-                override_include_graph = include_graphs[1]
+
+            override_operator_index = ABCImportAsset._retrieve_override_operator_index(standin_node,char_name)
+            if override_operator_index == -1:
+                override_operator_index = ABCImportAsset._get_free_operator_slot(standin_node)
+                override_operator = pm.createNode("aiIncludeGraph", n="aiIncludeGraph_" + name)
             else:
-                override_include_graph = pm.createNode("aiIncludeGraph", n="aiIncludeGraph_override_" + name)
-            override_include_graph.filename.set(override_operator_filepath)
-            override_include_graph.out >> standin_node.operators[1]
+                override_operator = pm.getAttr(standin_node+".operators["+str(override_operator_index)+"]")
+            override_operator.filename.set(override_operator_filepath)
+            override_operator.out >> standin_node.operators[override_operator_index]
         return standin_node
 
     def import_update_abc(self, do_update_uvs_shaders):
@@ -321,14 +389,16 @@ class ABCImportFur(ABCImportAsset):
         except:
             print_warning("No operator files found for " + name, char_filler='-')
             return standin_node
-        include_graphs = pm.listConnections(self._actual_standin, type="aiIncludeGraph")
+
+        default_operator_index = ABCImportAsset._retrieve_default_operator_index(standin_node,char_name)
         # If include graph exists we retrieve it instead of creating one
-        if len(include_graphs) > 0:
-            set_shader = include_graphs[0]
+        if default_operator_index == -1:
+            default_operator_index = ABCImportAsset._get_free_operator_slot(standin_node)
+            default_operator = pm.createNode("aiIncludeGraph", n="aiIncludeGraph_" + name)
         else:
-            set_shader = pm.createNode("aiIncludeGraph", n="aiIncludeGraph_" + name)
-        set_shader.filename.set(operator_file_path)
-        set_shader.out >> standin_node.operators[0]
+            default_operator = pm.getAttr(standin_node+".operators["+str(default_operator_index)+"]")
+        default_operator.filename.set(operator_file_path)
+        default_operator.out >> standin_node.operators[default_operator_index]
         return standin_node
 
     def import_update_abc(self, do_update_uvs_shaders):
