@@ -1,4 +1,5 @@
 import os
+import re
 from functools import partial
 
 import sys
@@ -23,7 +24,6 @@ from AOV import *
 from AOVBehavior import *
 from Prefs import *
 
-import re
 ########################################################################################################################
 
 _FILE_NAME_PREFS = "aov_manager"
@@ -70,10 +70,10 @@ AOVS = {
         "occlusion", SECOND_AOV_ORDER_GROUP),
     "motionvector": DefaultAOV(
         "motionvector", SECOND_AOV_ORDER_GROUP, [FullPrecisionClosestBehavior()]),
-    "motionVectorBlur": MotionVectorBlurGaussianAOV(
-        "motionVectorBlur", SECOND_AOV_ORDER_GROUP),
-    "motionVectorBlurClosest": MotionVectorBlurClosestAOV(
-        "motionVectorBlurClosest", SECOND_AOV_ORDER_GROUP),
+    # "motionVectorBlur": MotionVectorBlurGaussianAOV(
+    #     "motionVectorBlur", SECOND_AOV_ORDER_GROUP),
+    # "motionVectorBlurClosest": MotionVectorBlurClosestAOV(
+    #     "motionVectorBlurClosest", SECOND_AOV_ORDER_GROUP),
     "direct": DefaultAOV(
         "direct", THIRD_AOV_ORDER_GROUP, [HalfPrecisionBehavior(), AOVVarianceBehavior()]),
     "indirect": DefaultAOV(
@@ -155,7 +155,7 @@ class AOVManager(QDialog):
         if "window_pos" in self.__prefs:
             pos = self.__prefs["window_pos"]
             self.__ui_pos = QPoint(pos["x"],pos["y"])
-
+            
     def test_arnold_renderer(self):
         arnold_renderer_loaded = pm.objExists("defaultArnoldDriver")
         if not arnold_renderer_loaded:

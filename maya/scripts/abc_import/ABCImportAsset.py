@@ -98,8 +98,9 @@ class ABCImportAsset(ABC):
             operator = pm.getAttr(standin + ".operators[" + str(index) + "]")
             if operator is not None:
                 operators_flagged += 1
-                if re.match(r"^" + char_name + r"_operator\.v[0-9]{3}\.ass$",os.path.basename(operator.filename.get())):
-                    return index
+                if pm.objectType(operator, isType='aiIncludeGraph'):
+                    if re.match(r"^" + char_name + r"_operator\.v[0-9]{3}\.ass$",os.path.basename(operator.filename.get())):
+                        return index
             index += 1
         return -1
 
@@ -112,8 +113,9 @@ class ABCImportAsset(ABC):
             operator = pm.getAttr(standin + ".operators[" + str(index) + "]")
             if operator is not None:
                 operators_flagged += 1
-                if re.match(r"^" + char_name + r"_override\.ass$",os.path.basename(operator.filename.get())):
-                    return index
+                if pm.objectType(operator, isType='aiIncludeGraph'):
+                    if re.match(r"^" + char_name + r"_override\.ass$",os.path.basename(operator.filename.get())):
+                        return index
             index += 1
         return -1
 
