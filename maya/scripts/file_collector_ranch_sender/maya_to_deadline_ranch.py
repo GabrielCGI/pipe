@@ -1,10 +1,10 @@
 import importlib
 import maya.mel as mel
 import pymel.core as pm
-from standin_utils import *
+from common.standin_utils import *
 import replace_by_tx
-import CollectorCopier
-from CollectorCopier import *
+import file_collector_ranch_sender.CollectorCopier
+from file_collector_ranch_sender.CollectorCopier import *
 
 
 def get_out_of_date_standins():

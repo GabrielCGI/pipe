@@ -18,14 +18,14 @@ from PySide2.QtGui import *
 from shiboken2 import wrapInstance
 
 try:
-    from utils import *
-    from Prefs import *
+    from common.utils import *
+    from common.Prefs import *
 except:
     pass
 
 import maya.OpenMaya as OpenMaya
 
-from ABCExportAsset import *
+from .ABCExportAsset import *
 
 # ######################################################################################################################
 
@@ -425,13 +425,11 @@ class ABCExport(QDialog):
             match = re.match(r".*\/(.+)_rigging[a-zA-Z_\.]*[0-9]{3,4}\.m[ab]", ref.unresolvedPath())
             if match:
                 assets_found[ref.fullNamespace] = match.groups()[0]
-
         # Retrieve all the rigging in namespaces
         for ns in namespaces:
-            match = re.match(r"(?:(.+)_rigging[a-zA-Z_\.]*[0-9]{3,4}|(.+))$", ns)
+            match = re.match(r"(.+)_rigging[a-zA-Z_\.]*[0-9]{3,4}$", ns)
             if match:
-                match_1 = match.groups()[0]
-                assets_found[ns] = match_1 if match_1 is not None else match.groups()[1]
+                assets_found[ns] = match.groups()[0]
 
         for namespace, name in assets_found.items():
             name_found = None

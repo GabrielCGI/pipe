@@ -15,13 +15,8 @@ from PySide2.QtWidgets import *
 from PySide2.QtCore import *
 from PySide2.QtGui import *
 
-modules = ["ABCExport", "ABCExportAsset"]
-from utils import *
-
-unload_packages(silent=True, packages=modules)
-for module in modules: importlib.import_module(module)
-
-from ABCExport import *
+from common.utils import *
+from .ABCExport import *
 
 
 def export_set(frame):

@@ -33,7 +33,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nimport importlib\n\ninstall_dir = \"R:/pipeline/pipe/maya/scripts/bug_out_bag\"\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\nmodules = [\n    \"BobApp\",\n    \"BobElement\",\n    \"BobCategory\",\n    \"BobTool\",\n    \"BobCollapsibleWidget\",\n    # Tool Models\n    \"tool_models.ActionTool\",\n    \"tool_models.MultipleActionTool\",\n    \"tool_models.RoutineTool\",\n    # Tool Instance Templates\n    \"tool_instances.ActionTemplateTool\",\n    \"tool_instances.MultipleActionTemplateTool\",\n    \"tool_instances.RoutineTemplateTool\",\n    # Tool Instances\n    \"tool_instances.LockTool\",\n    \"tool_instances.CleanFreezeTool\",\n    \"tool_instances.CleanerTool\",\n    \"tool_instances.TextureCheckTool\",\n\t\"tool_instances.ShaderTransfer\",\n\t\"tool_instances.RestPosToVertexColorTool\",\n\t\"tool_instances.DeleteOrigTool\",\n\t\"tool_instances.UVCopierTool\",\n\t\"tool_instances.ShapeRenamerTool\",\n\t\"tool_instances.SplineStepTool\",\n\t\"tool_instances.OverrideKillerTool\",\n\t\"tool_instances.ShadingGroupRenamer\",\n\t\"tool_instances.HierarchyCheckTool\",\n\t\"tool_instances.CharacterTimeSetTool\",\n]\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\nfrom BobApp import *\n\ntry:\n    bob.close()\nexcept:\n    pass\nbob = BobApp()\nbob.show()\n" 
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"bug_out_bag\")\nimportlib.import_module(\"bug_out_bag\")\nfrom bug_out_bag.BobApp import BobApp\ntry:\n    bob.close()\nexcept:\n    pass\nbob = BobApp()\nbob.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -67,7 +67,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nimport importlib\n\ninstall_dir = \"R:/pipeline/pipe/maya/scripts/control_room\"\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\nmodules = [\n    \"ControlRoom\",\n    \"Preset\",\n    \"PresetManager\",\n    \"FormSlider\",\n    \"parts.FeatureOverridesPart\",\n    \"parts.DepthOfFieldPart\",\n    \"parts.MotionBlurPart\",\n    \"parts.ImageSizePart\",\n    \"parts.SamplingPart\",\n    \"parts.AdaptiveSamplingPart\",\n    \"parts.PresetsPart\",\n]\n\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\n\nfrom ControlRoom import *\n\ntry:\n    control_room.close()\nexcept:\n    pass\ncontrol_room = ControlRoom()\ncontrol_room.show()\n" 
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"control_room\")\nimportlib.import_module(\"control_room\")\nfrom control_room.ControlRoom import ControlRoom\ntry:\n    control_room.close()\nexcept:\n    pass\ncontrol_room = ControlRoom()\ncontrol_room.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -101,7 +101,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nimport importlib\nimport maya.cmds as cmds\nimport collectMayaScene\nimportlib.reload(collectMayaScene)\nimport replace_by_tx\nimport maya.mel as mel\n\n################################################################################################\n\n# Force deletion and creation of a new file \".paths\" next to ABCs to track path dependencies\n__FORCE_OVERRIDE_ASS_PATHS_FILES = False\n\n################################################################################################\n\ninstall_dir = r'R:\\pipeline\\pipe\\maya\\scripts\\file_collector_ranch_sender'\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\nmodules = [\n   \"maya_to_deadline_ranch\",\n    \"CollectorCopier\"\n]\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\nimport maya_to_deadline_ranch\nmaya_to_deadline_ranch.run(__FORCE_OVERRIDE_ASS_PATHS_FILES)" 
+        -command "import importlib\nimport replace_by_tx\n\nfrom common import utils\nutils.unload_packages(silent=True, package=\"file_collector_ranch_sender\")\nimportlib.import_module(\"file_collector_ranch_sender\")\nfrom file_collector_ranch_sender import maya_to_deadline_ranch\n\n################################################################################################\n\n# Force deletion and creation of a new file \".paths\" next to ABCs to track path dependencies\n__FORCE_OVERRIDE_ASS_PATHS_FILES = False\n\n################################################################################################\n\nmaya_to_deadline_ranch.run(__FORCE_OVERRIDE_ASS_PATHS_FILES)" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -169,7 +169,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nimport importlib\n\ninstall_dir = \"R:/pipeline/pipe/maya/scripts/abc_export\"\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\nmodules = [\n    \"ABCExport\",\n    \"ABCExportAsset\",\n]\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\n\nfrom ABCExport import *\n\ntry:\n    abc_export.close()\nexcept:\n    pass\nabc_export = ABCExport()\nabc_export.show()\n" 
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"abc_export\")\nimportlib.import_module(\"abc_export\")\nfrom abc_export.ABCExport import ABCExport\ntry:\n    abc_export.close()\nexcept:\n    pass\nabc_export = ABCExport()\nabc_export.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -203,7 +203,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nimport importlib\n\ninstall_dir = \"R:/pipeline/pipe/maya/scripts/abc_import\"\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\nmodules = [\n    \"ABCImport\",\n    \"ABCImportAsset\"\n]\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\nfrom ABCImport import *\n\ntry:\n    abc_import.close()\nexcept:\n    pass\nabc_import = ABCImport()\nabc_import.show()\n" 
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"abc_import\")\nimportlib.import_module(\"abc_import\")\nfrom abc_import.ABCImport import ABCImport\ntry:\n    abc_import.close()\nexcept:\n    pass\nabc_import = ABCImport()\nabc_import.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -237,7 +237,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nimport importlib\n\ninstall_dir = r\"R:\\pipeline\\pipe\\maya\\scripts\\look_loader\"\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\nmodules = [\n    \"standin_utils\",\n    \"LookStandin\",\n    \"LookLoader\"\n]\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\nfrom LookLoader import *\n\ntry:\n    look_loader.close()\nexcept:\n    pass\nlook_loader = LookLoader()\nlook_loader.show()\n" 
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"look_loader\")\nimportlib.import_module(\"look_loader\")\nfrom look_loader.LookLoader import LookLoader\ntry:\n    look_loader.close()\nexcept:\n    pass\nlook_loader = LookLoader()\nlook_loader.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -271,7 +271,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nimport importlib\n\ninstall_dir = r\"R:\\pipeline\\pipe\\maya\\scripts\\character_publisher\"\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\nmodules = [\n    \"CharacterPublisher\"\n]\n\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\nfrom CharacterPublisher import *\n\ntry:\n    character_publisher.close()\nexcept:\n    pass\ncharacter_publisher = CharacterPublisher()\ncharacter_publisher.show()" 
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"character_publisher\")\nimportlib.import_module(\"character_publisher\")\nfrom character_publisher.CharacterPublisher import CharacterPublisher\ntry:\n    char_publisher.close()\nexcept:\n    pass\nchar_publisher = CharacterPublisher()\nchar_publisher.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -373,7 +373,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\n\ninstall_dir = 'R:/pipeline/pipe/maya/scripts/asset_loader'\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\nimport AssetLoader\nfrom AssetLoader import *\nfrom utils import *\n\nunload_packages(silent=True, packages=[\"AssetLoader\",\"Standin\"])\n\ntry:\n    app.close()\nexcept:\n    pass\napp = AssetLoader()\napp.show()\n" 
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"asset_loader\")\nimportlib.import_module(\"asset_loader\")\nfrom asset_loader.AssetLoader import AssetLoader\ntry:\n    app.close()\nexcept:\n    pass\napp = AssetLoader()\napp.show()\n\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -407,7 +407,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nimport importlib\n\ninstall_dir = 'R:/pipeline/pipe/maya/scripts/aov_manager'\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\nmodules = [\"AOVManager\", \"AOVBehavior\", \"AOV\"]\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\nfrom AOVManager import *\n\ntry:\n    aov_manager.close()\nexcept:\n    pass\naov_manager = AOVManager()\naov_manager.show()\n\n" 
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"aov_manager\")\nimportlib.import_module(\"aov_manager\")\nfrom aov_manager.AOVManager import AOVManager\ntry:\n    aov_manager.close()\nexcept:\n    pass\naov_manager = AOVManager()\naov_manager.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -441,7 +441,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\n\ninstall_dir = 'R:/pipeline/pipe/maya/scripts/shader_maker'\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\nimport ShaderMaker\nfrom ShaderMaker import *\n\nunload_packages(silent=True, packages=[\"ShaderMaker\", \"Shader\", \"IdealFlowLayout\"])\n\ntry:\n    shader_maker.close()\nexcept:\n    pass\nshader_maker = ShaderMaker()\nshader_maker.show()\n" 
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"shader_maker\")\nimportlib.import_module(\"shader_maker\")\nfrom shader_maker.ShaderMaker import ShaderMaker\ntry:\n    shader_maker.close()\nexcept:\n    pass\nshader_maker = ShaderMaker()\nshader_maker.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -475,7 +475,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import importlib\n\nmodules = [\"lights_texture_picker\"]\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\nfrom lights_texture_picker import *\n\ntry:\n    ltp.close()\nexcept:\n    pass\nltp = LightTexturePicker()\nltp.show()\n\n" 
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"lights_texture_picker\")\nimportlib.import_module(\"lights_texture_picker\")\nfrom lights_texture_picker.LightTexturePicker import LightTexturePicker\ntry:\n    ltp.close()\nexcept:\n    pass\nltp = LightTexturePicker()\nltp.show()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -509,7 +509,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nimport importlib\n\ninstall_dir = r\"R:\\pipeline\\pipe\\maya\\scripts\\style_dreamer\"\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\n# ##################################################################################################################\n\n__SERVER_HOST = \"https://1986f112becbbe7941.gradio.live\"\n\n# ##################################################################################################################\n\nmodules = [\n    \"StyleDreamer\",\n    \"StyleVisualizer\",\n    \"SDSlider\",\n    \"ControlNetManager\",\n    \"DepthDetail\",\n]\n\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\nfrom StyleDreamer import *\n\ntry:\n    style_dreamer.close()\nexcept:\n    pass\nstyle_dreamer = StyleDreamer(__SERVER_HOST)\nstyle_dreamer.show()\n" 
+        -command "import importlib\nfrom common import utils\nutils.unload_packages(silent=True, package=\"style_dreamer\")\nimportlib.import_module(\"style_dreamer\")\nfrom style_dreamer.StyleDreamer import StyleDreamer\ntry:\n    style_dreamer.close()\nexcept:\n    pass\n\n# ##################################################################################################################\n\n__SERVER_HOST = \"https://3f19e42736153e58ab.gradio.live\"\n\n# ##################################################################################################################\n\nstyle_dreamer = StyleDreamer(__SERVER_HOST)\nstyle_dreamer.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -543,7 +543,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nimport importlib\n\ninstall_dir = r\"R:\\pipeline\\pipe\\maya\\scripts\\mAIrus\"\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\n# ##################################################################################################################\n\n__PATH_TO_OPENAI_KEY = r\"R:\\pipeline\\networkInstall\\openai\\openai_key\"\n\n# ##################################################################################################################\n\nmodules = [\n    \"MAIrus\",\n    \"Model\",\n]\n\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\n\nfrom MAIrus import *\n\ntry:\n    mAIrus.close()\nexcept:\n    pass\nmAIrus = MAIrus(__PATH_TO_OPENAI_KEY)\nmAIrus.show()\n" 
+        -command "import importlib\n\nfrom common import utils\nutils.unload_packages(silent=True, package=\"mAIrus\")\nimportlib.import_module(\"mAIrus\")\nfrom mAIrus.MAIrus import MAIrus\ntry:\n    mAIrus_tool.close()\nexcept:\n    pass\n\n# ##################################################################################################################\n\n__PATH_TO_OPENAI_KEY = r\"R:\\pipeline\\networkInstall\\openai\\openai_key\"\n\n# ##################################################################################################################\n\nmAIrus_tool = MAIrus(__PATH_TO_OPENAI_KEY)\nmAIrus_tool.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -577,7 +577,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nimport importlib\ninstall_dir = 'R:/pipeline/pipe/maya/scripts/studio'\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\nmodules = [\n    \"studio_loader\"\n]\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\nimport studio_loader\n\nstudio_loader.run()\n" 
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"studio\")\nimportlib.import_module(\"studio\")\nfrom studio import studio_loader\nstudio_loader.run()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -611,7 +611,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import sys\nimport importlib\n\ninstall_dir = 'R:/pipeline/pipe/maya/scripts/ass_link_cornea'\nif not sys.path.__contains__(install_dir):\n    sys.path.append(install_dir)\n\nmodules = [\n    \"ass_link_cornea\",\n    \"cornea_by_char\"\n]\n\nfrom utils import *\nunload_packages(silent=True, packages=modules)\n\nfor module in modules:\n    importlib.import_module(module)\n\nimport ass_link_cornea\n\nass_link_cornea.run()\n" 
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"ass_link_cornea\")\nimportlib.import_module(\"ass_link_cornea\")\nfrom ass_link_cornea import ass_link_cornea\nass_link_cornea.run()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

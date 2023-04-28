@@ -4,7 +4,7 @@ import logging
 import pymel.core as pm
 
 try:
-    from utils import *
+    from common.utils import *
 except:
     pass
 

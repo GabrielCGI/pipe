@@ -40,7 +40,7 @@ rem SET ARNOLD_PLUGIN_PATH=%ARNOLD_PLUGIN_PATH%;%NETWORK_INSTALL%\Yeti-v4.1.1_Ma
 rem SET peregrinel_LICENSE=54132@192.168.0.100
 
 rem \---- Scripts
-SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\common;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings;%SCRIPT_MAYA%\shaderTransferTool;%NETWORK_INSTALL%\script
+SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings;%SCRIPT_MAYA%\shaderTransferTool;%NETWORK_INSTALL%\script
 
 rem \---- Color
 rem \---- SET OCIO=<MAYA_RESOURCES>\OCIO-configs\Maya2022-default\config.ocio

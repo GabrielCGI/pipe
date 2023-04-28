@@ -1,8 +1,6 @@
 import importlib
 import sys
-install_dir = 'R:/pipeline/pipe/maya/scripts/abc_export'
-if not sys.path.__contains__(install_dir): sys.path.append(install_dir)
-import export_abc_scenes
+import abc_export.export_abc_scenes
 importlib.reload(export_abc_scenes)
 
 # ######################################################################################################################

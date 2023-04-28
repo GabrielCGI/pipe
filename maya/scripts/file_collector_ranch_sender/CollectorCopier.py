@@ -12,7 +12,7 @@ import sys
 
 from arnold import *
 
-from utils import *
+from common.utils import *
 
 try:
     import pymel.all as pm

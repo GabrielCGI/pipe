@@ -5,7 +5,7 @@ from enum import Enum
 
 import pymel.core as pm
 
-from utils import *
+from common.utils import *
 
 
 # ABC State in the scene
@@ -384,6 +384,7 @@ class ABCImportFur(ABCImportAsset):
         standin_node = pm.listRelatives(self._actual_standin, parent=True)[0]
 
         name = self.get_name()
+        char_name = self._get_char_name()
         # OPERATOR (SHADER)
         try:
             operator_files = self.__get_operator_files()

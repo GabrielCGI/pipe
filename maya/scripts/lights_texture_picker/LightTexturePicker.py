@@ -24,10 +24,9 @@ light_texture = namedtuple("light_texture", "id title image")
 # Delegate class for the TableView
 class LightTextureDelegate(QtWidgets.QStyledItemDelegate):
 
-    def __init__(self, padding=5, size=100):
+    def __init__(self, padding=5):
         super().__init__()
         self.__padding = padding
-        self.__size = size
 
     def paint(self, painter, option, index):
         # data is our light_texture object
@@ -53,7 +52,7 @@ class LightTextureDelegate(QtWidgets.QStyledItemDelegate):
 
     def sizeHint(self, option, index):
         # All items the same size.
-        return QtCore.QSize(self.__size, self.__size)
+        return QtCore.QSize(100, 100)
 
 
 # Model class for the TableView
@@ -147,7 +146,6 @@ class LightTexturePicker(QtWidgets.QDialog):
                         cmds.disconnectAttr(conn, attr_light)
                 # Connect the new texture
                 cmds.connectAttr(render_node + '.outColor', light + '.color')
-                cmds.setAttr(light+".ai_translator","quad", type="string")
 
     # Remove the texture of lights
     def remove_textures(self):
@@ -230,8 +228,8 @@ class LightTexturePicker(QtWidgets.QDialog):
         self.__ui_texture_table_widget.setGridStyle(QtCore.Qt.NoPen)
         self.__ui_texture_table_widget.setSelectionMode(QtWidgets.QAbstractItemView.SingleSelection)
         # Create Delegate and Model
-        delegate = LightTextureDelegate(padding=3, size=92)
-        model = LightTextureModel(column=10)
+        delegate = LightTextureDelegate(padding=5)
+        model = LightTextureModel(column=4)
         self.__ui_texture_table_widget.setItemDelegate(delegate)
         self.__ui_texture_table_widget.setModel(model)
         for n, f in enumerate(listdir(self.TEXTURE_PATH)):

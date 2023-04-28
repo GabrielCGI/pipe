@@ -24,7 +24,7 @@ SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons\clarins_icon;%PIPELINE_DIR_MAYA%\icons
 
 rem \---- ARNOLD SETUP
 
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.2.1.0\maya2022;
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.2.1.1\maya2022;
 
 rem \ MAYA SECURITY TOOL
 SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;R:\pipeline\networkInstall\MayaScanner;
@@ -33,7 +33,7 @@ rem \ BRAVE RABBIT PLACER TOOL
 SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;R:\pipeline\networkInstall\placeReflection_braveRabbit;
 
 rem \---- Scripts
-SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\common;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings\battlestar;%SCRIPT_MAYA%\shaderTransferTool;%SCRIPT_MAYA%\assetBrowser;%NETWORK_INSTALL%\python_lib;%NETWORK_INSTALL%\script;%SCRIPT_MAYA%\assetizer_pymel
+SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings\battlestar;%SCRIPT_MAYA%\shaderTransferTool;%SCRIPT_MAYA%\assetBrowser;%NETWORK_INSTALL%\python_lib;%NETWORK_INSTALL%\script;%SCRIPT_MAYA%\assetizer_pymel
 
 
 rem \---- Color

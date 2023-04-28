@@ -1,8 +1,9 @@
 import threading
 import openai
 from abc import *
-from utils import *
+from common.utils import *
 from PySide2.QtCore import *
+
 
 class Model(ABC):
     @abstractmethod
@@ -89,6 +90,7 @@ class ChatGPT3(Model):
             top_p=self._top_p,
         )
         return request_response.choices[0].text.strip(" \n")
+
 
 # Request executed on a distinct thread
 class Request(QThread):

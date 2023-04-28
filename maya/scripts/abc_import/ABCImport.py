@@ -15,13 +15,13 @@ from PySide2.QtGui import *
 
 from shiboken2 import wrapInstance
 
-from utils import *
+from common.utils import *
 
-from Prefs import *
+from common.Prefs import *
 
 import maya.OpenMaya as OpenMaya
 
-from ABCImportAsset import *
+from .ABCImportAsset import *
 
 # ######################################################################################################################
 

@@ -33,7 +33,7 @@ rem \ BRAVE RABBIT PLACER TOOL
 SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;R:\pipeline\networkInstall\placeReflection_braveRabbit;
 
 rem \---- Scripts
-SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%\common;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings\battlestar;%SCRIPT_MAYA%\shaderTransferTool;%SCRIPT_MAYA%\assetBrowser;%NETWORK_INSTALL%\script;%SCRIPT_MAYA%\assetizer_pymel
+SET PYTHONPATH=%PYTHONPATH%;%SCRIPT_MAYA%;%SCRIPT_MAYA%\abcPipeline;%SCRIPT_MAYA%\scene;%SCRIPT_MAYA%\tools;%SCRIPT_MAYA%\startupSettings\battlestar;%SCRIPT_MAYA%\shaderTransferTool;%SCRIPT_MAYA%\assetBrowser;%NETWORK_INSTALL%\script;%SCRIPT_MAYA%\assetizer_pymel
 
 
 rem \---- Color

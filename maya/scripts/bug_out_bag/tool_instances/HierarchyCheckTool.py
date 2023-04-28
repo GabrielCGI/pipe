@@ -5,8 +5,8 @@ from functools import partial
 
 import maya.OpenMayaUI as omui
 
-from tool_models.ActionTool import *
-from utils import *
+from ..tool_models.ActionTool import *
+from common.utils import *
 
 
 class HierarchyCheckVisualizeer(QDialog):
@@ -107,7 +107,7 @@ class HierarchyCheckTool(ActionTool):
 
     @staticmethod
     def trim_name(name):
-        return re.match("^(?:.*:)?(?:.*|)(.*)?$",name).group(1)
+        return re.match("^(?:.*:)?(?:.*\|)?(\w+)$",name).group(1)
 
     def _action(self):
         def check_if_same_objects(obj_1, obj_2):

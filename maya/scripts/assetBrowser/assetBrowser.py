@@ -30,7 +30,7 @@ import subprocess
 import time
 from datetime import datetime
 import fnmatch
-from Prefs import Prefs
+from common.Prefs import Prefs
 #TO DO: packageClass()
 #CONNECT BUTTON
 

@@ -1,7 +1,7 @@
 import os
 import re
 import pymel.core as pm
-from standin_utils import *
+from common.standin_utils import *
 
 class Standin:
     def __init__(self, standin):

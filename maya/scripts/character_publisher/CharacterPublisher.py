@@ -16,9 +16,9 @@ from PySide2.QtGui import *
 
 from shiboken2 import wrapInstance
 
-from utils import *
+from common.utils import *
 
-from Prefs import *
+from common.Prefs import *
 
 import maya.OpenMaya as OpenMaya
 
@@ -466,6 +466,7 @@ class CharacterPublisher(QDialog):
 
             # CATCLARK
             sss_set_name = m.ai_sss_setname.get()
+            trace_sets = m.aiTraceSets.get()
             ai_disp_height = m.aiDispHeight.get()
             casts_shadows = m.castsShadows.get()
             cat_clark_type = m.aiSubdivType.get()
@@ -476,6 +477,10 @@ class CharacterPublisher(QDialog):
             if sss_set_name != "":
                 pm.setAttr(set_shader + ".assignment[5]", "string ai_sss_setname=\"%s\"" % (sss_set_name),
                            type="string")
+            if trace_sets != "":
+                pm.setAttr(set_shader + ".assignment[8]", "string aiTraceSets=\"%s\"" % (trace_sets),
+                           type="string")
+
             if casts_shadows == 0:
                 pm.setAttr(set_shader + ".assignment[6]", "visibility=253", type="string")
             if ai_disp_height != 1:

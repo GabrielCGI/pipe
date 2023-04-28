@@ -11,14 +11,14 @@ import threading
 from functools import partial
 
 import pymel.core as pm
-from utils import *
+from common.utils import *
 import mtoa.aovs as aovs
 
-from StyleDreamer import *
-from StyleVisualizer import *
+from .StyleDreamer import *
+from .StyleVisualizer import *
 
 
-class ControlNetManager():
+class ControlNetManager:
 
     # Set Features Overrides parameters (needed for render)
     @staticmethod
@@ -198,6 +198,10 @@ class ControlNetManager():
         self.__request_dream_callback = CallbackThread(self.__on_request_dream_finished)
         self.__request_eta_callback = CallbackThread(self.__on_request_eta_finished)
         self.__request_eta_run = CallbackThread(self.__run_observer_eta)
+
+    # Getter of the render directory
+    def get_render_dir(self):
+        return self.__render_dir
 
     # Set the Output parameters (needed for render)
     def __set_output_params(self):
@@ -458,6 +462,7 @@ class ControlNetManager():
 
     # Prepare for a render
     def prepare_cn_render(self):
+        pm.loadPlugin("lookdevKit.mll")
         ControlNetManager.__remove_render_layer()
         ControlNetManager.__set_features_overrides()
         self.__set_output_params()

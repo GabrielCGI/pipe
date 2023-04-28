@@ -5,8 +5,8 @@ import pymel.core as pm
 import maya.cmds as cmds
 from shiboken2 import wrapInstance
 
-from utils import *
-from cornea_by_char import *
+from common.utils import *
+from .cornea_by_char import *
 
 def __retrieve_datas(cornea_dict):
     # Selection

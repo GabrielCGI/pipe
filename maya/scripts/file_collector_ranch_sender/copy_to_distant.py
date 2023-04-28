@@ -1,22 +1,9 @@
-import sys
-import os
-import time
 import importlib
-import threading
+from common import utils
 
-install_dir = r'R:\pipeline\pipe\maya\scripts\file_collector_ranch_sender'
-if not sys.path.__contains__(install_dir):
-    sys.path.append(install_dir)
-
-modules = [
-    "CollectorCopier"
-]
-
-for module in modules:
-    importlib.import_module(module)
-
+utils.unload_packages(silent=True, package="file_collector_ranch_sender")
+importlib.import_module("file_collector_ranch_sender")
 import CollectorCopier
-from CollectorCopier import *
-
+from file_collector_ranch_sender.CollectorCopier import CollectorCopier
 collector_copier = CollectorCopier()
 collector_copier.run_copy(sys.argv[1])

@@ -16,10 +16,10 @@ from PySide2.QtGui import *
 
 from shiboken2 import wrapInstance
 
-import utils
+import common.utils
 
-from Prefs import *
-from Standin import *
+from common.Prefs import *
+from .Standin import *
 
 import maya.OpenMaya as OpenMaya
 
