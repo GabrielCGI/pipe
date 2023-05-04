@@ -490,6 +490,40 @@ global proc shelf_Illogic () {
         -manage 1
         -visible 1
         -preventOverride 0
+        -annotation "Unknown Plugin Scanner" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Unknown Plugin Scanner" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/unknown_plugin_scanner.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/unknown_plugin_scanner.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"unknown_plugin_scanner\")\nimportlib.import_module(\"unknown_plugin_scanner\")\n\nfrom unknown_plugin_scanner.UnknownPluginScanner import UnknownPluginScanner\ntry:\n    unknown_plugin_scanner.close()\nexcept:\n    pass\nunknown_plugin_scanner = UnknownPluginScanner()\nunknown_plugin_scanner.show()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
         -annotation "Style Dreamer" 
         -enableBackground 0
         -backgroundColor 0 0 0 

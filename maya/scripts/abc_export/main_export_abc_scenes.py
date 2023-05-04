@@ -1,6 +1,6 @@
 import importlib
 import sys
-import abc_export.export_abc_scenes
+import abc_export.export_abc_scenes as export_abc_scenes
 importlib.reload(export_abc_scenes)
 
 # ######################################################################################################################

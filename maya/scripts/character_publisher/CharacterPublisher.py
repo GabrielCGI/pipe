@@ -478,7 +478,7 @@ class CharacterPublisher(QDialog):
                 pm.setAttr(set_shader + ".assignment[5]", "string ai_sss_setname=\"%s\"" % (sss_set_name),
                            type="string")
             if trace_sets != "":
-                pm.setAttr(set_shader + ".assignment[8]", "string aiTraceSets=\"%s\"" % (trace_sets),
+                pm.setAttr(set_shader + ".assignment[8]", "string trace_sets=\"%s\"" % (trace_sets),
                            type="string")
 
             if casts_shadows == 0:

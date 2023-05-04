@@ -16,7 +16,7 @@ from PySide2.QtCore import *
 from PySide2.QtGui import *
 
 from common.utils import *
-from .ABCExport import *
+from abc_export.ABCExport import *
 
 
 def export_set(frame):
