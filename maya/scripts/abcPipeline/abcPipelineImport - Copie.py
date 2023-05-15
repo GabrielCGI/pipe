@@ -35,9 +35,7 @@ def create_char_standin(anim_abc_path,abc_char_name, mod_folder, operator_folder
     print("mod file           \t", mod_file_path)
     print("operator file      \t", operator_file_path)
 
-    version = anim_abc_path.split("_")[-1].split(".")[0] 
-    print("ABC VERSION:"+version)
-    standin_name = abc_char_name + "_"+version
+    standin_name = abc_char_name + "_00"
     standin_shape_name = standin_name + "Shape"
 
     if cmds.objExists(standin_name):

@@ -1,0 +1,33 @@
+{
+  "name": "Unpack Mode 1",
+  "layers": [
+    {
+      "name": "CHARS",
+      "rule": "^CHARS$",
+      "options": {"color": [150, 55, 55]}
+    }
+  ],
+  "shuffle": {
+    "shuffle_mode": "PlusShuffleMode",
+    "shuffle_layer": ["CHARS", "BG"]
+  },
+  "merge": {
+    "rules": [
+      [
+        {
+          "a": "CHARS",
+          "b": "BG",
+          "operation": "over",
+          "result": "CHARS_OVER_BG"
+        }
+      ],
+      [
+        {
+          "a": "ATHMO",
+          "b": "CHARS_OVER_BG",
+          "operation": "plus"
+        }
+      ]
+    ]
+  }
+}

@@ -24,7 +24,7 @@ except:
 
 _RANCH_CACHE_FOLDER = "I:/ranch/ranch_cache2"
 _LOGS_FOLDER = "I:/ranch/logs"
-_MAX_NB_THREADs = 16
+_MAX_NB_THREADs = 8
 
 _ASS_PATHS_FILE_EXTENSION = "paths"
 
@@ -42,6 +42,8 @@ class CollectorCopier:
     # Generate the dict data for a path
     @staticmethod
     def __generate_data_for_path(path):
+        if not os.path.exists(path):
+            return None
         match = re.match(r"^([A-Z]):[\\/](.*)$", path)
         if match:
             disk_letter = match.group(1)

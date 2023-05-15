@@ -104,6 +104,7 @@ class ABCImport(QDialog):
         self.__selected_abcs = []
 
         self.__retrieve_current_project_dir()
+        self.__look_factory = LookFactory(self.__current_project_dir)
         self.__retrieve_abcs()
 
         # UI attributes
@@ -212,7 +213,7 @@ class ABCImport(QDialog):
         self.__ui_abcs_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.__ui_abcs_table.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.__ui_abcs_table.setHorizontalHeaderLabels(
-            ["State", "Asset name", "Actual version", "Import version", "Update look"])
+            ["State", "Asset name", "Actual version", "Import version", "Look"])
         horizontal_header = self.__ui_abcs_table.horizontalHeader()
         horizontal_header.setSectionResizeMode(0, QHeaderView.ResizeToContents)
         horizontal_header.setSectionResizeMode(1, QHeaderView.Stretch)
@@ -224,7 +225,7 @@ class ABCImport(QDialog):
         main_lyt.addWidget(self.__ui_abcs_table)
 
         # Update UV and Shader checkbox
-        self.__ui_update_uvs_shaders = QCheckBox("Update UVs and Shaders")
+        self.__ui_update_uvs_shaders = QCheckBox("Set last Look")
         self.__ui_update_uvs_shaders.setChecked(self.__update_uvs_shaders)
         self.__ui_update_uvs_shaders.stateChanged.connect(self.__on_checked_update_uvs_shaders)
         main_lyt.addWidget(self.__ui_update_uvs_shaders, 0, Qt.AlignHCenter)
@@ -334,11 +335,22 @@ class ABCImport(QDialog):
 
             # Action
             if state != ABCState.New:
-                action_btn = QPushButton("Update")
-                action_btn.setStyleSheet("margin:3px")
-                action_btn.clicked.connect(partial(self.__on_click_update_uvs_shaders, abc))
-                action_btn.setEnabled(not abc.is_up_to_date())
-                self.__ui_abcs_table.setCellWidget(row_index, 4, action_btn)
+                if not abc.is_look_up_to_date():
+                    pixmap = QPixmap(asset_dir + abc.get_icon_filename(state))
+                    look_icon_widget = QLabel()
+                    look_icon_widget.setFixedSize(QSize(22, 22))
+                    look_icon_widget.setScaledContents(True)
+                    look_icon_widget.setPixmap(pixmap)
+                    look_icon_widget.setToolTip("Look out of date")
+                    pixmap = QPixmap(asset_dir + "look.png")
+                    look_icon_widget.setPixmap(pixmap)
+                    container_look_icon_widget = QWidget()
+                    layout_container_look_icon_widget = QVBoxLayout(container_look_icon_widget)
+                    layout_container_look_icon_widget.setContentsMargins(0, 0, 0, 0)
+                    layout_container_look_icon_widget.addWidget(look_icon_widget)
+                    layout_container_look_icon_widget.setAlignment(Qt.AlignCenter)
+                    container_look_icon_widget.setLayout(layout_container_look_icon_widget)
+                    self.__ui_abcs_table.setCellWidget(row_index, 4, container_look_icon_widget)
 
             row_index += 1
 
@@ -360,9 +372,9 @@ class ABCImport(QDialog):
         match = re.match(r"^.*[/\\](?:(.*)(?:_[a-zA-Z]+(?:\.[0-9]+)?)|(.*))\.abc$", file_path)
         if match:
             if match.group(1) is None:
-                asset = ABCImportAnim(match.group(2), self.__current_project_dir)
+                asset = ABCImportAnim(match.group(2), self.__current_project_dir, self.__look_factory)
             else:
-                asset = ABCImportFur(match.group(1), self.__current_project_dir)
+                asset = ABCImportFur(match.group(1), self.__current_project_dir, self.__look_factory)
             self.__retrieve_alone_asset_in_scene(asset)
             asset.set_import_path(os.path.dirname(file_path))
             pm.select(asset.import_update_abc(True))
@@ -398,13 +410,6 @@ class ABCImport(QDialog):
         abc = self.__ui_abcs_table.item(row_index, 1).data(Qt.UserRole)
         version_path = self.__ui_abcs_table.cellWidget(row_index, 3).model().item(cb_index).data(Qt.UserRole)
         abc.set_import_path(version_path)
-
-    # Update the abc on click
-    def __on_click_update_uvs_shaders(self, abc):
-        standin_node = abc.update()
-        pm.select(standin_node)
-        self.__retrieve_assets_in_scene()
-        self.__refresh_ui()
 
     # Retrieve the abcs at the folder path.
     # If parent folder specified, retrieves abc and abc_fur
@@ -446,9 +451,9 @@ class ABCImport(QDialog):
                                     break
                     if len(anim_versions) > 0:
                         if is_anim_folder:
-                            asset = ABCImportAnim(asset_folder, self.__current_project_dir, anim_versions)
+                            asset = ABCImportAnim(asset_folder, self.__current_project_dir, self.__look_factory, anim_versions)
                         else:
-                            asset = ABCImportFur(asset_folder, self.__current_project_dir, anim_versions)
+                            asset = ABCImportFur(asset_folder, self.__current_project_dir, self.__look_factory, anim_versions)
                         self.__abcs.append(asset)
 
     # Retrieve one alone asset in scene

@@ -4,6 +4,7 @@ import time
 
 reader = app.createReader(input_file)
 writer = app.createWriter(output_file)
+reader.getParam("onMissingFrame").setValue(2)
 codec = writer.getParam("codecShortName")
 codec.setValue("libopenh264")
 premult = writer.getParam("inputPremult")
