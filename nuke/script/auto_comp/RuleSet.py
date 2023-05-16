@@ -89,6 +89,7 @@ class Relation:
         # merge_node.setInput(1, var_a.get_node())
         # merge_node.setInput(0, var_b.get_node())
         merge_node = nuke.nodes.Merge(operation=str(self.__operation), inputs=[var_b.get_node(), var_a.get_node()])
+        merge_node.setName(self.__name_a+"_"+self.__operation+"_"+self.__name_b)
         if self.__result_name is None:
             return None
         return Variable(self.__result_name, merge_node)

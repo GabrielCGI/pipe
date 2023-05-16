@@ -8,11 +8,18 @@ from .LayoutManager import LayoutManager
 # ######################################################################################################################
 
 _PREFIX_POSTAGE = "postage_"
+_PREFIX_UTILITY = "utility_"
+_PREFIX_UTILITY_MERGE = "utility_merge_"
 _BACKDROP_INPUTS = "INPUTS"
-_BACKDROP_LAYER_INPUTS = "READ"
+BACKDROP_LAYER = "LAYER"
+_BACKDROP_LAYER_READS = "READ"
+
+_BACKDROP_LAYER_READS_FONT_SIZE = 30
 _BACKDROP_INPUTS_COLOR = (194, 100, 120)
 _BACKDROP_LAYER_READ_COLOR = (115, 150, 190)
 _DEFAULT_LAYER_COLOR = (40,90,150)
+_LAYER_READ_DISTANCE = 4
+_LAYER_POSTAGE_DISTANCE = 15
 
 # ######################################################################################################################
 
@@ -87,6 +94,8 @@ class UnpackMode:
     def __scan_layers(self, shot_path):
         render_path = os.path.join(shot_path, "render_out")
         render_path, os.path.isdir(render_path)
+        read_nodes = []
+        postage_nodes = []
         for render_layer in os.listdir(render_path):
             layer_path = os.path.join(render_path, render_layer)
             if not os.path.isdir(layer_path):
@@ -104,12 +113,15 @@ class UnpackMode:
 
             name = start_var.get_name()
             read_node, postage_stamp = UnpackMode.__create_read_with_postage(name,seq_path,start_frame,end_frame)
+            postage_nodes.append(postage_stamp)
             to_inputs_backdrop = [read_node]
             to_layer_inputs_backdrop = [postage_stamp]
             if utility_path is not None:
                 utility_read_node, utility_postage_stamp = \
-                    UnpackMode.__create_read_with_postage("utility_"+name,utility_path,start_frame,end_frame)
+                    UnpackMode.__create_read_with_postage(_PREFIX_UTILITY+name,utility_path,start_frame,end_frame)
                 merge_node = nuke.nodes.Merge(operation="over", also_merge="all", inputs=[utility_postage_stamp, postage_stamp])
+                merge_node.setName(_PREFIX_UTILITY_MERGE+name)
+                read_nodes.append((read_node,utility_read_node))
                 # merge_node = nuke.createNode("Merge") #TODO remove
                 # merge_node["operation"].setValue("over")
                 # merge_node["also_merge"].setValue("all")
@@ -123,10 +135,12 @@ class UnpackMode:
                 self.__layout_manager.add_node_layout_relation(postage_stamp, merge_node)
                 self.__layout_manager.add_node_layout_relation(merge_node, utility_postage_stamp, LayoutManager.POS_TOP)
             else:
+                read_nodes.append((read_node))
                 start_var.set_node(postage_stamp)
 
             input_layer_bd_longname = ".".join([_BACKDROP_INPUTS,render_layer])
-            layer_read_bd_longname = ".".join([render_layer,_BACKDROP_LAYER_INPUTS])
+            layer_bd_longname = ".".join([BACKDROP_LAYER, render_layer])
+            layer_read_bd_longname = ".".join([layer_bd_longname,_BACKDROP_LAYER_READS])
             color = start_var.get_option("color")
             if color is None : color = _DEFAULT_LAYER_COLOR
 
@@ -134,28 +148,46 @@ class UnpackMode:
             self.__layout_manager.add_backdrop_option(_BACKDROP_INPUTS, "color", _BACKDROP_INPUTS_COLOR)
             # INPUTS.LAYER
             self.__layout_manager.add_nodes_to_backdrop(input_layer_bd_longname,to_inputs_backdrop)
-            # self.__layout_manager.add_backdrop_option(input_layer_bd_longname,"font_size",20)
+            self.__layout_manager.add_backdrop_option(input_layer_bd_longname,"font_size",_BACKDROP_LAYER_READS_FONT_SIZE)
             self.__layout_manager.add_backdrop_option(input_layer_bd_longname,"color", color)
-            # LAYER
-            self.__layout_manager.add_backdrop_option(render_layer,"color", color)
-            # LAYER.READ
+            # LAYERS
+            self.__layout_manager.add_backdrop_option(BACKDROP_LAYER, "display", False)
+            # LAYERS.LAYER_instance
+            self.__layout_manager.add_backdrop_option(layer_bd_longname,"color", color)
+            # LAYERS.LAYER_instance.READ
             self.__layout_manager.add_nodes_to_backdrop(layer_read_bd_longname,to_layer_inputs_backdrop)
-            # self.__layout_manager.add_backdrop_option(layer_read_bd_longname,"font_size",20)
+            self.__layout_manager.add_backdrop_option(layer_read_bd_longname,"font_size",_BACKDROP_LAYER_READS_FONT_SIZE)
             self.__layout_manager.add_backdrop_option(layer_read_bd_longname,"color", _BACKDROP_LAYER_READ_COLOR)
 
-            # self.__layout_manager.add_backdrop_layout_relation(_BACKDROP_INPUTS, render_layer, LayoutManager.POS_TOP)
+            self.__layout_manager.add_top_level_backdrop_layout_relation(_BACKDROP_INPUTS, BACKDROP_LAYER,
+                                                                         LayoutManager.POS_BOTTOM_LEFT)
 
             # Add the start_var to the active variable (for the merge part)
             self.__var_set.active_var(start_var)
+
+        last = None
+        for read_node in read_nodes:
+            read = read_node[0]
+            if last is not None:
+                self.__layout_manager.add_node_layout_relation(last, read, LayoutManager.POS_RIGHT, _LAYER_READ_DISTANCE)
+            if len(read_node)==2:
+                last = read_node[1]
+            else:
+                last = read
+
+        curr = postage_nodes[0]
+        for postage_node in postage_nodes[1:]:
+            self.__layout_manager.add_node_layout_relation(curr, postage_node, LayoutManager.POS_BOTTOM, _LAYER_POSTAGE_DISTANCE)
+            curr  = postage_node
 
 
     def unpack(self, shot_path):
         # Retrieve Layers and create Start Var (Read nodes)
         self.__scan_layers(shot_path)
         # Shuffle those layers if needed
-        # self.__shuffle_mode.run()
+        self.__shuffle_mode.run()
         # Merge all the nodes with right rules
-        self.__merge_mode.run()
+        # self.__merge_mode.run()
         # Organize all the nodes
         self.__layout_manager.build_layout_node_graph()
         # Organize all the backdrops

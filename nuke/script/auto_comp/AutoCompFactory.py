@@ -43,7 +43,7 @@ class AutoCompFactory:
         # Shuffle
         shuffle_data = rule_set_data[_SHUFFLE_KEY]
         if _SHUFFLE_MODE_KEY not in shuffle_data or _SHUFFLE_LAYER_KEY not in shuffle_data: return None
-        shuffle_mode = eval(shuffle_data[_SHUFFLE_MODE_KEY])(shuffle_data[_SHUFFLE_LAYER_KEY])
+        shuffle_mode = eval(shuffle_data[_SHUFFLE_MODE_KEY])(shuffle_data[_SHUFFLE_LAYER_KEY],layout_manager)
         # Variable Set
         var_set = AutoCompFactory.__get_start_vars(rule_set_data[_LAYERS_KEY])
         if var_set is None: return None

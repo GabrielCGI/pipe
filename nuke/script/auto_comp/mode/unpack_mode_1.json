@@ -5,6 +5,16 @@
       "name": "CHARS",
       "rule": "^CHARS$",
       "options": {"color": [150, 55, 55]}
+    },
+    {
+      "name": "BG",
+      "rule": "^BG$",
+      "options": {"color": [55, 55, 150]}
+    },
+    {
+      "name": "ATHMO",
+      "rule": "^ATHMO$",
+      "options": {"color": [55, 150, 115]}
     }
   ],
   "shuffle": {
