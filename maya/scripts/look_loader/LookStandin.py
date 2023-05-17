@@ -183,9 +183,14 @@ class LookAsset(LookStandin):
         if os.path.isdir(uv_folder):
             for file in os.listdir(uv_folder):
                 file_path = os.path.join(uv_folder, file)
+                print("LOG: %s"%file_path)
                 match = re.match(r".*mod(?:\.v([0-9]{3}))?\.abc", file, re.IGNORECASE)
                 if os.path.isfile(file_path) and match:
-                    uvs.append((int(match.group(1)), file_path))
+                    try:
+                        uvs.append((int(match.group(1)), file_path))
+                    except:
+                        print("INT MATCH GROUP FAILED")
+
             uvs = sorted(uvs, reverse=True)
         return uvs
 
