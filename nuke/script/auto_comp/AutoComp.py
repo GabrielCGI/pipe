@@ -15,9 +15,6 @@ from common.utils import *
 from common.Prefs import *
 import nuke
 from nukescripts import panels
-from .UnpackMode import UnpackMode
-from .ShuffleMode import PlusShuffleMode
-from .MergeMode import MergeMode
 from .AutoCompFactory import AutoCompFactory
 
 # ######################################################################################################################
@@ -45,10 +42,11 @@ class AutoComp(QWidget):
         self.__prefs = Prefs(_FILE_NAME_PREFS)
 
         # Model attributes
-        self.__shot_path = r"I:\tmp\marius" #TODO remove
+        self.__shot_path = r"I:\battlestar_2206\shots\lordsMobile_shot050" #TODO remove
         # self.__shot_path = ""
         self.__unpack_modes=[]
         self.__selected_unpack_mode=None
+        self.__selected_layer=None
 
         self.__retrieve_unpack_modes(_UNPACK_MODES_DIR)
 
@@ -60,8 +58,9 @@ class AutoComp(QWidget):
         self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width, self.__ui_height) / 2
 
         self.__retrieve_prefs()
-        if self.__selected_unpack_mode is None and len(self.__unpack_modes)>0:
-            self.__selected_unpack_mode = self.__unpack_modes[0]
+        self.__retrieve_selected_unpack_mode()
+
+        self.__scan_layers()
 
         # name the window
         self.setWindowTitle("AutoComp")
@@ -85,6 +84,9 @@ class AutoComp(QWidget):
 
     # Retrieve preferences
     def __retrieve_prefs(self):
+        self.__retrieve_unpack_mode_prefs()
+
+    def __retrieve_unpack_mode_prefs(self):
         if "unpack_mode" in self.__prefs:
             sel_unpack_mode_name = self.__prefs["unpack_mode"]
             for unpack_mode in self.__unpack_modes:
@@ -103,6 +105,10 @@ class AutoComp(QWidget):
             unpack_mode = AutoCompFactory.get_unpack_mode(unpack_mode_filepath)
             if unpack_mode is not None:
                 self.__unpack_modes.append(unpack_mode)
+
+    def __retrieve_selected_unpack_mode(self):
+        if self.__selected_unpack_mode is None and len(self.__unpack_modes) > 0:
+            self.__selected_unpack_mode = self.__unpack_modes[0]
 
 
     # Create the ui
@@ -158,28 +164,36 @@ class AutoComp(QWidget):
         self.__ui_unpack_mode.currentIndexChanged.connect(self.__on_unpack_mode_changed)
         unpack_mode_lyt.addWidget(self.__ui_unpack_mode)
 
-
-        rule_set_lyt = QHBoxLayout()
-        rule_set_lyt.setAlignment(Qt.AlignLeft)
+        rule_set_lyt = QGridLayout()
         rule_set_lyt.setSpacing(5)
+        rule_set_lyt.setColumnStretch(0, 1)
+        rule_set_lyt.setColumnStretch(1, 2)
         main_lyt.addLayout(rule_set_lyt)
 
         self.__ui_start_vars_list = QListWidget()
         self.__ui_start_vars_list.setSpacing(2)
-        self.__ui_start_vars_list.setSelectionMode(QAbstractItemView.NoSelection)
+        self.__ui_start_vars_list.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.__ui_start_vars_list.currentItemChanged.connect(self.__on_layer_selected)
         self.__ui_start_vars_list.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Minimum)
-        rule_set_lyt.addWidget(self.__ui_start_vars_list)
+        rule_set_lyt.addWidget(self.__ui_start_vars_list,0,0)
 
         self.__ui_relations_list = QListWidget()
         self.__ui_relations_list.setSpacing(2)
         self.__ui_relations_list.setSelectionMode(QAbstractItemView.NoSelection)
         self.__ui_relations_list.setSizePolicy(QSizePolicy.Expanding,QSizePolicy.Minimum)
-        rule_set_lyt.addWidget(self.__ui_relations_list)
+        rule_set_lyt.addWidget(self.__ui_relations_list,0,1)
 
         self.__ui_autocomp_btn = QPushButton("AutoComp")
         self.__ui_autocomp_btn.setFixedHeight(30)
         self.__ui_autocomp_btn.clicked.connect(self.__unpack)
-        main_lyt.addWidget(self.__ui_autocomp_btn)
+        rule_set_lyt.addWidget(self.__ui_autocomp_btn,1,0,1,3)
+
+        self.__ui_shuffle_btn = QPushButton("Shuffle selected layer")
+        self.__ui_shuffle_btn.setFixedHeight(30)
+        self.__ui_shuffle_btn.clicked.connect(self.__shuffle_layer)
+        rule_set_lyt.addWidget(self.__ui_shuffle_btn,2,0,1,3)
+
+        main_lyt.addLayout(rule_set_lyt)
 
     # Refresh the ui according to the model attribute
     def __refresh_ui(self):
@@ -189,6 +203,15 @@ class AutoComp(QWidget):
         self.__refresh_relations_list()
 
     def __refresh_btn(self):
+        self.__refresh_shuffle_btn()
+        self.__refresh_autocomp_btn()
+
+    def __refresh_shuffle_btn(self):
+        self.__ui_shuffle_btn.setEnabled(
+            self.__selected_layer is not None and self.__selected_unpack_mode is not None and
+            os.path.isdir(os.path.join(self.__shot_path, "render_out")))
+
+    def __refresh_autocomp_btn(self):
         self.__ui_autocomp_btn.setEnabled(
             self.__selected_unpack_mode is not None and os.path.isdir(os.path.join(self.__shot_path, "render_out")))
 
@@ -200,17 +223,21 @@ class AutoComp(QWidget):
     def __refresh_start_vars_list(self):
         self.__ui_start_vars_list.clear()
         if self.__selected_unpack_mode is not None:
-            start_vars_str = [str(var) for var in self.__selected_unpack_mode.get_var_set().get_start_vars()]
-            for var_str in start_vars_str:
-                self.__ui_start_vars_list.addItem(QListWidgetItem(var_str))
+            start_vars = [var for var in self.__selected_unpack_mode.get_var_set().get_start_vars()]
+            for var in start_vars:
+                var_str = str(var)
+                item = QListWidgetItem(var_str)
+                item.setData(Qt.UserRole, var)
+                self.__ui_start_vars_list.addItem(item)
+                if not self.__selected_unpack_mode.layer_is_scanned(var_str):
+                    item.setFlags(Qt.NoItemFlags)
 
     def __refresh_relations_list(self):
         self.__ui_relations_list.clear()
         if self.__selected_unpack_mode is not None:
-            relations_str=[]
-            for rel_order_data in self.__selected_unpack_mode.get_merge_mode().get_relations():
-                for rel in rel_order_data:
-                    relations_str.append(str(rel))
+            relations_str = []
+            for rel in self.__selected_unpack_mode.get_merge_mode().get_relations():
+                relations_str.append(str(rel))
             for rel_str in relations_str:
                 self.__ui_relations_list.addItem(QListWidgetItem(rel_str))
 
@@ -229,12 +256,39 @@ class AutoComp(QWidget):
     # Retrieve the folder path on folder linedit change
     def __on_folder_changed(self):
         self.__shot_path = self.__ui_shot_path.text()
+        self.__scan_layers()
         self.__refresh_btn()
 
     def __on_unpack_mode_changed(self, index):
         self.__selected_unpack_mode = self.__ui_unpack_mode.itemData(index, Qt.UserRole)
+        self.__scan_layers()
         self.__refresh_start_vars_list()
         self.__refresh_relations_list()
+        self.__selected_layer = None
+        self.__refresh_shuffle_btn()
+
+    def __on_layer_selected(self, current):
+        self.__selected_layer = current.data(Qt.UserRole)
+        self.__refresh_shuffle_btn()
+
+    def __scan_layers(self):
+        if self.__selected_unpack_mode is not None:
+            self.__selected_unpack_mode.scan_layers(self.__shot_path)
+
+    def __reinit_auto_comp(self):
+        self.__retrieve_unpack_modes(_UNPACK_MODES_DIR)
+        self.__retrieve_unpack_mode_prefs()
+        self.__retrieve_selected_unpack_mode()
+        self.__scan_layers()
+
+    def __shuffle_layer(self):
+        unpack_mode = AutoCompFactory.get_simple_shuffle_layer_mode(
+            self.__selected_unpack_mode.get_config_path(), self.__selected_layer.get_name())
+        unpack_mode.scan_layers(self.__shot_path)
+        unpack_mode.unpack(self.__shot_path)
+        self.__reinit_auto_comp()
 
     def __unpack(self):
+        self.__prefs["unpack_mode"] = self.__selected_unpack_mode.get_name()
         self.__selected_unpack_mode.unpack(self.__shot_path)
+        self.__reinit_auto_comp()

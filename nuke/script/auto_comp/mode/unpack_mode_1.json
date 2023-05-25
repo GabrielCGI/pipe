@@ -2,14 +2,14 @@
   "name": "Unpack Mode 1",
   "layers": [
     {
-      "name": "CHARS",
-      "rule": "^CHARS$",
-      "options": {"color": [150, 55, 55]}
-    },
-    {
       "name": "BG",
       "rule": "^BG$",
       "options": {"color": [55, 55, 150]}
+    },
+    {
+      "name": "CHARS",
+      "rule": "^CHARS$",
+      "options": {"color": [150, 55, 55]}
     },
     {
       "name": "ATHMO",
@@ -18,26 +18,22 @@
     }
   ],
   "shuffle": {
-    "shuffle_mode": "PlusShuffleMode",
-    "shuffle_layer": ["CHARS", "BG"]
+    "shuffle_layer": ["CHARS", "BG"],
+    "color": [175, 108, 155]
   },
   "merge": {
     "rules": [
-      [
-        {
-          "a": "CHARS",
-          "b": "BG",
-          "operation": "over",
-          "result": "CHARS_OVER_BG"
-        }
-      ],
-      [
-        {
-          "a": "ATHMO",
-          "b": "CHARS_OVER_BG",
-          "operation": "plus"
-        }
-      ]
+      {
+        "a": "CHARS",
+        "b": "BG",
+        "operation": "over",
+        "result": "CHARS_OVER_BG"
+      },
+      {
+        "a": "ATHMO",
+        "b": "CHARS_OVER_BG",
+        "operation": "plus"
+      }
     ]
   }
 }

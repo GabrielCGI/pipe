@@ -28,9 +28,10 @@ class VariablesSet:
 
 # Can a Start Variable or the result of a valid Relation
 class Variable:
-    def __init__(self, name, node):
+    def __init__(self, name, node, step=0):
         self.__name = name
         self._node = node
+        self.__step = step
 
     def get_name(self):
         return self.__name
@@ -38,18 +39,28 @@ class Variable:
     def get_node(self):
         return self._node
 
+    def get_step(self):
+        return self.__step
+
+    def set_node(self, node):
+        self._node = node
+
     def __str__(self):
         return self.__name
 
 
 class StartVariable(Variable):
-    def __init__(self, name, rule,options):
+    def __init__(self, name, rule, order, options):
         Variable.__init__(self, name, None)
         self.__rule = rule
+        self.__order = order
         self.__options = options
 
     def get_rule(self):
         return self.__rule
+
+    def get_order(self):
+        return self.__order
 
     def get_option(self, option):
         if option not in self.__options:
@@ -59,16 +70,12 @@ class StartVariable(Variable):
     def is_rule_valid(self, path):
         return re.match(self.__rule, path) is not None
 
-    def set_node(self, node):
-        self._node = node
-
 
 class Relation:
-    def __init__(self, name_a, name_b, operation, order=0, result_name=None):
+    def __init__(self, name_a, name_b, operation, result_name=None):
         self.__name_a = name_a
         self.__name_b = name_b
         self.__operation = operation
-        self.__order = order
         self.__result_name = result_name
 
     def __str__(self):
@@ -83,13 +90,13 @@ class Relation:
     def is_valid_for_b(self, var):
         return self.__name_b == var.get_name()
 
+    def get_operation(self):
+        return self.__operation
+
     def process(self, var_a, var_b):
-        # merge_node = nuke.createNode("Merge2") #TODO remove
-        # merge_node["operation"].setValue(str(self.__operation))
-        # merge_node.setInput(1, var_a.get_node())
-        # merge_node.setInput(0, var_b.get_node())
         merge_node = nuke.nodes.Merge(operation=str(self.__operation), inputs=[var_b.get_node(), var_a.get_node()])
         merge_node.setName(self.__name_a+"_"+self.__operation+"_"+self.__name_b)
+        step = max(var_a.get_step(),var_b.get_step())+1
         if self.__result_name is None:
-            return None
-        return Variable(self.__result_name, merge_node)
+            return Variable("", merge_node, step)
+        return Variable(self.__result_name, merge_node, step)

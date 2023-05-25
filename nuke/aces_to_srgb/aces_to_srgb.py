@@ -45,7 +45,8 @@ def aces_to_srgb(folder):
         # Connect the writer to the reader
         writer.connectInput(0, reader)
         # Render
-        app.render(writer, range_0, range_1)
+        print ("render:  %s %s %s"%(writer,range_0,range_1))
+        #app.render(writer, range_0, range_1) NO NEED TO CALL THE RENDER ! THE WRITE AUTO EXECUTE
     except Exception as e:
         print(str(e))
         os.system("pause")

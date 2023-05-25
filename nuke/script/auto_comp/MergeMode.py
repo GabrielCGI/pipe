@@ -1,8 +1,20 @@
+import nuke
 from common.utils import *
+from .LayoutManager import LayoutManager
+from .UnpackMode import BACKDROP_MERGE
+
+
+# ######################################################################################################################
+
+_PREFIX_DOT = "dot_"
+_DISTANCE_STEP_MERGE = 1
+
+# ######################################################################################################################
 
 
 class MergeMode:
-    def __init__(self, relations):
+    def __init__(self, relations, layout_manager):
+        self.__layout_manager = layout_manager
         self.__var_set = None
         self.__relations = relations
 
@@ -15,28 +27,38 @@ class MergeMode:
     def run(self):
         if self.__var_set is None:
             return
-        for rel_order_data in self.__relations:
-            vars_used = []
-            vars_created = []
-            for rel in rel_order_data:
-                vars_a = []
-                vars_b = []
-                active_vars = self.__var_set.get_active_vars()
-                for var in active_vars:
-                    if rel.is_valid_for_a(var):
-                        vars_a.append(var)
-                    elif rel.is_valid_for_b(var):
-                        vars_b.append(var)
-                if len(vars_a) == 0 or len(vars_b) == 0:
-                    continue
-                for var_a in vars_a:
-                    for var_b in vars_b:
-                        result_var = rel.process(var_a, var_b)
-                        if result_var is not None:
-                            vars_created.append(result_var)
-                vars_used.extend(vars_a)
-                vars_used.extend(vars_b)
-            for var_used in vars_used:
-                self.__var_set.active_var(var_used, False)
-            for var_created in vars_created:
-                self.__var_set.active_var(var_created, True)
+
+        for rel in self.__relations:
+            active_vars = self.__var_set.get_active_vars()
+            var_a = None
+            var_b = None
+            for var in active_vars:
+                if rel.is_valid_for_a(var) and var_a is None:
+                    var_a= var
+                elif rel.is_valid_for_b(var) and var_b is None:
+                    var_b= var
+            if var_a is None or var_b is None:
+                continue
+
+            node_a = var_a.get_node()
+            node_b = var_b.get_node()
+            dot_node = nuke.nodes.Dot(name=_PREFIX_DOT + var_a.get_name() + rel.get_operation()+ var_b.get_name(),
+                                      inputs=[node_b])
+            self.__layout_manager.add_nodes_to_backdrop(BACKDROP_MERGE, [dot_node])
+            var_b.set_node(dot_node)
+            result_var = rel.process(var_a, var_b)
+
+            result_var_step = result_var.get_step()
+            result_node = result_var.get_node()
+
+            self.__layout_manager.add_nodes_to_backdrop(BACKDROP_MERGE, [result_node])
+
+            self.__layout_manager.add_node_layout_relation(node_b, dot_node,
+                                                           LayoutManager.POS_RIGHT,
+                                                           result_var_step - var_b.get_step() * _DISTANCE_STEP_MERGE)
+            self.__layout_manager.add_node_layout_relation(node_a, result_var.get_node(),
+                                                           LayoutManager.POS_RIGHT,
+                                                           result_var_step - var_a.get_step() * _DISTANCE_STEP_MERGE)
+            self.__var_set.active_var(var_a, False)
+            self.__var_set.active_var(var_b, False)
+            self.__var_set.active_var(result_var, True)

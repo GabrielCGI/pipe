@@ -10,8 +10,8 @@ _DEFAULT_LAYOUT_BACKDROP = "v"
 
 _NODE_WIDTH = 80
 _NODE_HEIGHT = 66
-_BASE_DISTANCE_NODES = 30
-_BASE_DISTANCE_BACKDROPS = 50
+_BASE_DISTANCE = 120
+
 
 # ######################################################################################################################
 
@@ -42,8 +42,14 @@ class LayoutManager:
             "options": {},
             "visited": False}
 
-    @staticmethod
-    def __get_bbox_graph():
+    def __init__(self):
+        self.__backdrops_data = LayoutManager.__get_init_backdrop_data("", None)
+        self.__nodes_layout_data = {}
+        self.__backdrops_layout_data = {}
+        self.__current_workspace_y = None
+        self.__bbox_graph = 0, 0, 0, 0
+
+    def get_current_bbox_graph(self):
         nodes = nuke.allNodes(recurseGroups=True)
         if len(nodes) == 0: return 0, 0, 0, 0
         min_x = float('inf')
@@ -59,13 +65,7 @@ class LayoutManager:
             min_y = min(min_y, y)
             max_x = max(max_x, x + width)
             max_y = max(max_y, y + height)
-        return min_x, min_y, max_x, max_y
-
-    def __init__(self):
-        self.__backdrops_data = LayoutManager.__get_init_backdrop_data("", None)
-        self.__nodes_layout_data = {}
-        self.__backdrops_layout_data = {}
-        self.__current_workspace_y = None
+        self.__bbox_graph = min_x, min_y, max_x, max_y
 
     def __backdrop_data(self, backdrop_longname):
         backdrop_shortnames = backdrop_longname.split(".")
@@ -95,19 +95,19 @@ class LayoutManager:
         current_bd["options"][option] = value
 
     def add_top_level_backdrop_layout_relation(self, rel_backdrop_longname, backdrop_longname, position=POS_RIGHT,
-                                     alignment=ALIGN_CENTER, mult_distance=1):
+                                               alignment=ALIGN_CENTER, mult_distance=1):
         self.__backdrops_layout_data[backdrop_longname] = {
             "base_backdrop": rel_backdrop_longname,
             "position": position,
             "alignment": alignment,
-            "distance": mult_distance * _BASE_DISTANCE_BACKDROPS,
+            "distance": mult_distance * _BASE_DISTANCE,
         }
 
     def add_node_layout_relation(self, base_node, node_to_place, position=POS_RIGHT, mult_distance=1):
         self.__nodes_layout_data[node_to_place] = {
             "base_node": base_node,
             "position": position,
-            "distance": mult_distance * _BASE_DISTANCE_NODES,
+            "distance": mult_distance * _BASE_DISTANCE,
             "visited": False
         }
 
@@ -126,33 +126,32 @@ class LayoutManager:
                 base_node_y = base_node.ypos()
                 base_node_w = base_node.screenWidth()
                 base_node_h = base_node.screenHeight()
+
+                base_node_cx = base_node_x + base_node_w / 2.0
+                base_node_cy = base_node_y + base_node_h / 2.0
                 if position in [LayoutManager.POS_TOP, LayoutManager.POS_BOTTOM]:
-                    node_to_place_x = base_node_x + (base_node_w - node_to_place.screenWidth()) / 2
-                else:
-                    x_padding = (_NODE_WIDTH - base_node_w) / 2
-                    if position in [LayoutManager.POS_TOP_RIGHT, LayoutManager.POS_RIGHT,
-                                    LayoutManager.POS_BOTTOM_RIGHT]:
-                        node_to_place_x = base_node_x + x_padding + base_node_w + distance
-                    else:  # POS_BOTTOM_LEFT, POS_LEFT, POS_TOP_LEFT
-                        node_to_place_x = base_node_x - x_padding - _NODE_WIDTH - distance
+                    node_to_place_x = base_node_cx
+                elif position in [LayoutManager.POS_TOP_RIGHT, LayoutManager.POS_RIGHT, LayoutManager.POS_BOTTOM_RIGHT]:
+                    node_to_place_x = base_node_cx + distance
+                else:  # POS_BOTTOM_LEFT, POS_LEFT, POS_TOP_LEFT
+                    node_to_place_x = base_node_cx - distance
 
                 if position in [LayoutManager.POS_RIGHT, LayoutManager.POS_LEFT]:
-                    node_to_place_y = base_node_y + (base_node_h - node_to_place.screenHeight()) / 2
-                else:
-                    y_padding = (_NODE_HEIGHT - base_node_h) / 2
-                    if position in [LayoutManager.POS_TOP, LayoutManager.POS_TOP_RIGHT, LayoutManager.POS_TOP_LEFT]:
-                        node_to_place_y = base_node_y - y_padding - _NODE_HEIGHT - distance
-                    else:  # POS_BOTTOM_RIGHT, POS_BOTTOM, POS_BOTTOM_LEFT
-                        node_to_place_y = base_node_y + y_padding + base_node_h + distance
-                node_to_place.setXpos(node_to_place_x)
-                node_to_place.setYpos(node_to_place_y)
+                    node_to_place_y = base_node_cy
+                elif position in [LayoutManager.POS_TOP, LayoutManager.POS_TOP_RIGHT, LayoutManager.POS_TOP_LEFT]:
+                    node_to_place_y = base_node_cy - distance
+                else:  # POS_BOTTOM_RIGHT, POS_BOTTOM, POS_BOTTOM_LEFT
+                    node_to_place_y = base_node_cy + distance
+                node_to_place_x -= node_to_place.screenWidth() / 2.0
+                node_to_place_y -= node_to_place.screenHeight() / 2.0
+                node_to_place.setXpos(int(node_to_place_x))
+                node_to_place.setYpos(int(node_to_place_y))
             else:
                 node_to_place.setXpos(0)
                 node_to_place.setYpos(0)
 
         for node in self.__nodes_layout_data.keys():
-            node.screenWidth()
-            node.screenHeight()
+            node.screenWidth(), node.screenHeight()
             __build_layout_node_graph_aux(node)
 
     def __compute_build_layout_backdrops(self):
@@ -162,23 +161,17 @@ class LayoutManager:
             options = bd_data["options"]
             not_displayed = "display" in options and not options["display"]
             font_size = options["font_size"] if "font_size" in options else _DEFAULT_FONT_SIZE_BACKDROP
-
+            margin_left = options["margin_left"] if "margin_left" in options else _MARGIN_BACKDROP[0]
+            margin_top = options["margin_top"] if "margin_top" in options else _MARGIN_BACKDROP[1]
+            margin_right = options["margin_right"] if "margin_right" in options else _MARGIN_BACKDROP[2]
+            margin_bottom = options["margin_bottom"] if "margin_bottom" in options else _MARGIN_BACKDROP[3]
             if len(backdrops) == 0 and len(nodes) == 0:
                 if not_displayed:
-                    bd_x = 0
-                    bd_y = 0
-                    bd_x2 = 0
-                    bd_y2 = 0
+                    bd_x = bd_y = bd_x2 = bd_y2 = 0
                 else:
-                    bd_x = _MARGIN_BACKDROP[0]
-                    bd_y = _MARGIN_BACKDROP[1] + font_size
-                    bd_x2 = _MARGIN_BACKDROP[2]
-                    bd_y2 = _MARGIN_BACKDROP[3]
+                    bd_x, bd_y, bd_x2, bd_y2 = margin_left, margin_top, margin_right, margin_bottom
             else:
-                bd_x = None
-                bd_y = None
-                bd_x2 = None
-                bd_y2 = None
+                bd_x = bd_y = bd_x2 = bd_y2 = None
                 # NODES
                 for node in nodes:
                     n_x = node.xpos()
@@ -199,10 +192,10 @@ class LayoutManager:
                     if bd_x2 < child_bd_x2 or bd_x2 is None: bd_x2 = child_bd_x2
                     if bd_y2 < child_bd_y2 or bd_y2 is None: bd_y2 = child_bd_y2
                 if not not_displayed:
-                    bd_x -= _MARGIN_BACKDROP[0]
-                    bd_y -= _MARGIN_BACKDROP[1] + font_size
-                    bd_x2 += _MARGIN_BACKDROP[2]
-                    bd_y2 += _MARGIN_BACKDROP[3]
+                    bd_x -= margin_left
+                    bd_y -= margin_top + font_size
+                    bd_x2 += margin_right
+                    bd_y2 += margin_bottom
             bd_w = bd_x2 - bd_x
             bd_h = bd_y2 - bd_y
             bd_data["layout_data"] = {
@@ -237,14 +230,10 @@ class LayoutManager:
 
             bd_layout_data = bd_data["layout_data"]
             base_bd_layout_data = base_bd_data["layout_data"]
-            bd_x = bd_layout_data["xpos"]
-            bd_y = bd_layout_data["ypos"]
-            bd_w = bd_layout_data["width"]
-            bd_h = bd_layout_data["height"]
-            base_bd_x = base_bd_layout_data["xpos"]
-            base_bd_y = base_bd_layout_data["ypos"]
-            base_bd_w = base_bd_layout_data["width"]
-            base_bd_h = base_bd_layout_data["height"]
+            bd_x, bd_y = bd_layout_data["xpos"], bd_layout_data["ypos"]
+            bd_w, bd_h = bd_layout_data["width"], bd_layout_data["height"]
+            base_bd_x, base_bd_y = base_bd_layout_data["xpos"], base_bd_layout_data["ypos"]
+            base_bd_w, base_bd_h = base_bd_layout_data["width"], base_bd_layout_data["height"]
 
             position = bd_lyt_data["position"]
             distance = bd_lyt_data["distance"]
@@ -253,35 +242,48 @@ class LayoutManager:
                 factor_align = 0
             elif alignment is LayoutManager.ALIGN_END:
                 factor_align = 1
-            else: # ALIGN_CENTER
+            else:  # ALIGN_CENTER
                 factor_align = 1.0 / 2
+
             if position in [LayoutManager.POS_TOP, LayoutManager.POS_BOTTOM]:
                 new_x = base_bd_x + (base_bd_w - bd_w) * factor_align
-            else:
-                if position in [LayoutManager.POS_TOP_RIGHT, LayoutManager.POS_RIGHT,
-                                LayoutManager.POS_BOTTOM_RIGHT]:
-                    new_x = base_bd_x + base_bd_w + distance
-                else:  # POS_BOTTOM_LEFT, POS_LEFT, POS_TOP_LEFT
-                    new_x = base_bd_x - bd_w - distance
+            elif position in [LayoutManager.POS_TOP_RIGHT, LayoutManager.POS_RIGHT, LayoutManager.POS_BOTTOM_RIGHT]:
+                new_x = base_bd_x + base_bd_w + distance
+            else:  # POS_BOTTOM_LEFT, POS_LEFT, POS_TOP_LEFT
+                new_x = base_bd_x - bd_w - distance
 
             if position in [LayoutManager.POS_RIGHT, LayoutManager.POS_LEFT]:
                 new_y = base_bd_y + (base_bd_h - bd_h) * factor_align
-            else:
-                if position in [LayoutManager.POS_TOP, LayoutManager.POS_TOP_RIGHT, LayoutManager.POS_TOP_LEFT]:
-                    new_y = base_bd_y - bd_h - distance
-                else:  # POS_BOTTOM_RIGHT, POS_BOTTOM, POS_BOTTOM_LEFT
-                    new_y = base_bd_y + base_bd_h + distance
+            elif position in [LayoutManager.POS_TOP, LayoutManager.POS_TOP_RIGHT, LayoutManager.POS_TOP_LEFT]:
+                new_y = base_bd_y - bd_h - distance
+            else:  # POS_BOTTOM_RIGHT, POS_BOTTOM, POS_BOTTOM_LEFT
+                new_y = base_bd_y + base_bd_h + distance
 
             __translate_backdrop(new_x - bd_x, new_y - bd_y, bd_data)
 
         for bd_longname, bd_lyt_data in self.__backdrops_layout_data.items():
             __compute_backdrops_relation_aux(bd_longname, bd_lyt_data)
 
+        bbox_x, bbox_y, bbox_x2, bbox_y2 = self.__bbox_graph
+
+        tr_x = 0
+        if bbox_x2 - bbox_x != 0:
+            for bd_data in self.__backdrops_data["backdrops"].values():
+                layout_data = bd_data["layout_data"]
+                xpos, ypos = layout_data["xpos"], layout_data["ypos"]
+                xpos2, ypos2 = xpos + layout_data["width"], ypos + layout_data["height"]
+                if xpos < bbox_x2 and xpos2 > bbox_x and ypos < bbox_y2 and ypos2 > bbox_y:
+                    new_tr_x = bbox_x2 - xpos
+                    if new_tr_x > tr_x: tr_x = new_tr_x
+
+            if tr_x != 0:
+                print(tr_x)
+                for bd_data in self.__backdrops_data["backdrops"].values():
+                    __translate_backdrop(tr_x, 0, bd_data)
+
     def build_layout_backdrops(self):
         def __build_backdrop_node(backdrop_name, backdrop_data, z_order):
-            # nodes = backdrop_data["nodes"]
             for child_bd_name, child_bd_data in backdrop_data["backdrops"].items():
-                # nodes.append(__build_backdrop(child_bd_name, child_bd_data, z_order + 1))
                 __build_backdrop_node(child_bd_name, child_bd_data, z_order + 1)
             if "layout_data" not in backdrop_data:
                 return
@@ -302,3 +304,6 @@ class LayoutManager:
         self.__compute_build_layout_backdrops()
         self.__compute_top_level_backdrops_relation()
         __build_backdrop_node("", self.__backdrops_data, 0)
+
+    def translate_graph_created(self):
+        pass

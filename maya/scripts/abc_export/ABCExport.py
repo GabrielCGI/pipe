@@ -422,12 +422,12 @@ class ABCExport(QDialog):
         assets_found = {}
         # Retrieve all the rigging in references
         for ref in references:
-            match = re.match(r".*\/(.+)_rigging[a-zA-Z_\.]*[0-9]{3,4}\.m[ab]", ref.unresolvedPath())
+            match = re.match(r".*\/(.+)_[a-zA-Z_\.]+[0-9]{3,4}\.m[ab]", ref.unresolvedPath())
             if match:
                 assets_found[ref.fullNamespace] = match.groups()[0]
         # Retrieve all the rigging in namespaces
         for ns in namespaces:
-            match = re.match(r"(.+)_rigging[a-zA-Z_\.]*[0-9]{3,4}$", ns)
+            match = re.match(r"(.+)_[a-zA-Z_\.]+[0-9]{3,4}$", ns)
             if match:
                 assets_found[ns] = match.groups()[0]
 
