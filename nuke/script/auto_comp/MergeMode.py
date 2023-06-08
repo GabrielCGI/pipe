@@ -18,30 +18,36 @@ class MergeMode:
         self.__var_set = None
         self.__relations = relations
 
+    # Setter of the variable set
     def set_var_set(self, var_set):
         self.__var_set = var_set
 
+    # Getter of the  raltions
     def get_relations(self):
         return self.__relations
 
+    # Run the Merge
     def run(self):
         if self.__var_set is None:
             return
-
+        # Iterate through relations
         for rel in self.__relations:
             active_vars = self.__var_set.get_active_vars()
             var_a = None
             var_b = None
+            # Retrieve the variables needed to compute the relation
             for var in active_vars:
                 if rel.is_valid_for_a(var) and var_a is None:
                     var_a= var
                 elif rel.is_valid_for_b(var) and var_b is None:
                     var_b= var
+            # Abort if variable not found
             if var_a is None or var_b is None:
                 continue
 
             node_a = var_a.get_node()
             node_b = var_b.get_node()
+            # Create the graph layout
             dot_node = nuke.nodes.Dot(name=_PREFIX_DOT + var_a.get_name() + rel.get_operation()+ var_b.get_name(),
                                       inputs=[node_b])
             self.__layout_manager.add_nodes_to_backdrop(BACKDROP_MERGE, [dot_node])
@@ -59,6 +65,7 @@ class MergeMode:
             self.__layout_manager.add_node_layout_relation(node_a, result_var.get_node(),
                                                            LayoutManager.POS_RIGHT,
                                                            result_var_step - var_a.get_step() * _DISTANCE_STEP_MERGE)
+            # Set used var to inactive and the new var created to active
             self.__var_set.active_var(var_a, False)
             self.__var_set.active_var(var_b, False)
             self.__var_set.active_var(result_var, True)

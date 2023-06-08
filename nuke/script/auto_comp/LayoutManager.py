@@ -31,6 +31,7 @@ class LayoutManager:
     ALIGN_CENTER = 2
     ALIGN_END = 3
 
+    # Get initialization data of a backdrop
     @staticmethod
     def __get_init_backdrop_data(long_name, parent_long_name):
         return {
@@ -49,7 +50,8 @@ class LayoutManager:
         self.__current_workspace_y = None
         self.__bbox_graph = 0, 0, 0, 0
 
-    def get_current_bbox_graph(self):
+    # Compute the bounding box of the graph to know where to place new graph
+    def compute_current_bbox_graph(self):
         nodes = nuke.allNodes(recurseGroups=True)
         if len(nodes) == 0: return 0, 0, 0, 0
         min_x = float('inf')
@@ -67,6 +69,7 @@ class LayoutManager:
             max_y = max(max_y, y + height)
         self.__bbox_graph = min_x, min_y, max_x, max_y
 
+    # Get the backdrop data of the backdrop
     def __backdrop_data(self, backdrop_longname):
         backdrop_shortnames = backdrop_longname.split(".")
         nb_bd = len(backdrop_shortnames)
@@ -82,6 +85,7 @@ class LayoutManager:
                 return current_bd
         return None
 
+    # Add nodes to a backdrop
     def add_nodes_to_backdrop(self, backdrop_longname, nodes=None):
         if nodes is None:
             nodes = []
@@ -90,10 +94,12 @@ class LayoutManager:
             if node not in current_bd["nodes"]:
                 current_bd["nodes"].append(node)
 
+    # Add or edit a backdrop option
     def add_backdrop_option(self, backdrop_longname, option, value):
         current_bd = self.__backdrop_data(backdrop_longname)
         current_bd["options"][option] = value
 
+    # Add relation between backdrop (only possible with top level backdrops)
     def add_top_level_backdrop_layout_relation(self, rel_backdrop_longname, backdrop_longname, position=POS_RIGHT,
                                                alignment=ALIGN_CENTER, mult_distance=1):
         self.__backdrops_layout_data[backdrop_longname] = {
@@ -103,6 +109,7 @@ class LayoutManager:
             "distance": mult_distance * _BASE_DISTANCE,
         }
 
+    # Add node relation
     def add_node_layout_relation(self, base_node, node_to_place, position=POS_RIGHT, mult_distance=1):
         self.__nodes_layout_data[node_to_place] = {
             "base_node": base_node,
@@ -111,6 +118,7 @@ class LayoutManager:
             "visited": False
         }
 
+    # Build the layout of nodes
     def build_layout_node_graph(self):
         def __build_layout_node_graph_aux(node_to_place):
             if node_to_place in self.__nodes_layout_data:
@@ -119,6 +127,7 @@ class LayoutManager:
                     return
                 lyt_rel["visited"] = True
                 base_node = lyt_rel["base_node"]
+                # Call recursively the parent node
                 __build_layout_node_graph_aux(base_node)
                 position = lyt_rel["position"]
                 distance = lyt_rel["distance"]
@@ -127,6 +136,7 @@ class LayoutManager:
                 base_node_w = base_node.screenWidth()
                 base_node_h = base_node.screenHeight()
 
+                # Get bounding of base node and compute the position of the node to place
                 base_node_cx = base_node_x + base_node_w / 2.0
                 base_node_cy = base_node_y + base_node_h / 2.0
                 if position in [LayoutManager.POS_TOP, LayoutManager.POS_BOTTOM]:
@@ -147,6 +157,7 @@ class LayoutManager:
                 node_to_place.setXpos(int(node_to_place_x))
                 node_to_place.setYpos(int(node_to_place_y))
             else:
+                # If node not positionned set it to 0-0
                 node_to_place.setXpos(0)
                 node_to_place.setYpos(0)
 
@@ -154,22 +165,25 @@ class LayoutManager:
             node.screenWidth(), node.screenHeight()
             __build_layout_node_graph_aux(node)
 
+    # Compute layout backdrops
     def __compute_build_layout_backdrops(self):
         def __compute_build_layout_backdrop(bd_data):
             backdrops = bd_data["backdrops"]
             nodes = bd_data["nodes"]
+            # Retrieve all the options
             options = bd_data["options"]
-            not_displayed = "display" in options and not options["display"]
+            displayed = "color" in options
             font_size = options["font_size"] if "font_size" in options else _DEFAULT_FONT_SIZE_BACKDROP
             margin_left = options["margin_left"] if "margin_left" in options else _MARGIN_BACKDROP[0]
             margin_top = options["margin_top"] if "margin_top" in options else _MARGIN_BACKDROP[1]
             margin_right = options["margin_right"] if "margin_right" in options else _MARGIN_BACKDROP[2]
             margin_bottom = options["margin_bottom"] if "margin_bottom" in options else _MARGIN_BACKDROP[3]
             if len(backdrops) == 0 and len(nodes) == 0:
-                if not_displayed:
-                    bd_x = bd_y = bd_x2 = bd_y2 = 0
-                else:
+                # Empty Backdrop
+                if displayed:
                     bd_x, bd_y, bd_x2, bd_y2 = margin_left, margin_top, margin_right, margin_bottom
+                else:
+                    bd_x = bd_y = bd_x2 = bd_y2 = 0
             else:
                 bd_x = bd_y = bd_x2 = bd_y2 = None
                 # NODES
@@ -184,20 +198,29 @@ class LayoutManager:
                     if bd_y2 < n_y2 or bd_y2 is None: bd_y2 = n_y2
                 # CHILDREN BACKDROPS
                 for child_bd_data in backdrops.values():
-                    child_bd_x, child_bd_y, child_bd_w, child_bd_h = __compute_build_layout_backdrop(child_bd_data)
+                    # Call recursively to compute the backdrop layout
+                    data_child_bd_layout_backdrop = __compute_build_layout_backdrop(child_bd_data)
+                    if data_child_bd_layout_backdrop is None:
+                        continue
+                    child_bd_x, child_bd_y, child_bd_w, child_bd_h = data_child_bd_layout_backdrop
                     child_bd_x2 = child_bd_x + child_bd_w
                     child_bd_y2 = child_bd_y + child_bd_h
                     if bd_x > child_bd_x or bd_x is None: bd_x = child_bd_x
                     if bd_y > child_bd_y or bd_y is None: bd_y = child_bd_y
                     if bd_x2 < child_bd_x2 or bd_x2 is None: bd_x2 = child_bd_x2
                     if bd_y2 < child_bd_y2 or bd_y2 is None: bd_y2 = child_bd_y2
-                if not not_displayed:
+                if displayed:
+                    # If has a display then add the margins
                     bd_x -= margin_left
                     bd_y -= margin_top + font_size
                     bd_x2 += margin_right
                     bd_y2 += margin_bottom
             bd_w = bd_x2 - bd_x
             bd_h = bd_y2 - bd_y
+            # If Width or Height is 0 then abort
+            if bd_w <= 0 or bd_h <= 0:
+                print_var(bd_w, bd_h, bd_data["long_name"], len(backdrops), len(nodes))
+                return None
             bd_data["layout_data"] = {
                 "width": bd_w,
                 "height": bd_h,
@@ -209,10 +232,15 @@ class LayoutManager:
         for bd_data in self.__backdrops_data["backdrops"].values():
             __compute_build_layout_backdrop(bd_data)
 
+    # Compute relation between top level backdrops
     def __compute_top_level_backdrops_relation(self):
+        # Translate the backdrop and all the content of it
         def __translate_backdrop(tr_x, tr_y, bd_data):
             backdrops = bd_data["backdrops"]
             nodes = bd_data["nodes"]
+            if "layout_data" not in bd_data: #TODO remove
+                return
+
             bd_data["layout_data"]["xpos"] += tr_x
             bd_data["layout_data"]["ypos"] += tr_y
             for child_bd_data in backdrops.values():
@@ -235,6 +263,8 @@ class LayoutManager:
             base_bd_x, base_bd_y = base_bd_layout_data["xpos"], base_bd_layout_data["ypos"]
             base_bd_w, base_bd_h = base_bd_layout_data["width"], base_bd_layout_data["height"]
 
+            # Compute the position of the backdrop according to the position, distance and alignment
+            # from the base backdrot
             position = bd_lyt_data["position"]
             distance = bd_lyt_data["distance"]
             alignment = bd_lyt_data["alignment"]
@@ -259,13 +289,15 @@ class LayoutManager:
             else:  # POS_BOTTOM_RIGHT, POS_BOTTOM, POS_BOTTOM_LEFT
                 new_y = base_bd_y + base_bd_h + distance
 
+            # Translate the backdrop
             __translate_backdrop(new_x - bd_x, new_y - bd_y, bd_data)
 
+        # Compute the relations between top level backdrops and translate them
         for bd_longname, bd_lyt_data in self.__backdrops_layout_data.items():
             __compute_backdrops_relation_aux(bd_longname, bd_lyt_data)
 
         bbox_x, bbox_y, bbox_x2, bbox_y2 = self.__bbox_graph
-
+        # Translate all the backdrops if the previous graph nodes are colliding with the new graph
         tr_x = 0
         if bbox_x2 - bbox_x != 0:
             for bd_data in self.__backdrops_data["backdrops"].values():
@@ -277,22 +309,22 @@ class LayoutManager:
                     if new_tr_x > tr_x: tr_x = new_tr_x
 
             if tr_x != 0:
-                print(tr_x)
                 for bd_data in self.__backdrops_data["backdrops"].values():
                     __translate_backdrop(tr_x, 0, bd_data)
 
+    # Build the backdrops layout
     def build_layout_backdrops(self):
-        def __build_backdrop_node(backdrop_name, backdrop_data, z_order):
+        def __build_backdrop_aux(backdrop_name, backdrop_data, z_order):
             for child_bd_name, child_bd_data in backdrop_data["backdrops"].items():
-                __build_backdrop_node(child_bd_name, child_bd_data, z_order + 1)
+                __build_backdrop_aux(child_bd_name, child_bd_data, z_order + 1)
             if "layout_data" not in backdrop_data:
                 return
             layout_data = backdrop_data["layout_data"]
             options = backdrop_data["options"]
-            if "display" in options and not options["display"]:
+            if "color" not in options:
                 return
             font_size = options["font_size"] if "font_size" in options else _DEFAULT_FONT_SIZE_BACKDROP
-            color = options["color"] if "color" in options else _DEFAULT_COLOR_BACKDROP
+            color = options["color"]
             return nuke.nodes.BackdropNode(name=backdrop_name,
                                            xpos=int(layout_data["xpos"]), ypos=int(layout_data["ypos"]),
                                            bdwidth=layout_data["width"], bdheight=layout_data["height"],
@@ -301,9 +333,9 @@ class LayoutManager:
                                            note_font_size=font_size,
                                            tile_color=(color[0] << 24) | (color[1] << 16) | (color[2] << 8) | 255)
 
+        # Compute the backdrops layout
         self.__compute_build_layout_backdrops()
+        # Compute Top level backdrop relation
         self.__compute_top_level_backdrops_relation()
-        __build_backdrop_node("", self.__backdrops_data, 0)
-
-    def translate_graph_created(self):
-        pass
+        # Create the backdrop thanks to layout computed from last function
+        __build_backdrop_aux("", self.__backdrops_data, 0)

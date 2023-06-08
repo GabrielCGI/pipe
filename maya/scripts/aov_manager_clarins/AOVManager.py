@@ -155,7 +155,7 @@ class AOVManager(QDialog):
         if "window_pos" in self.__prefs:
             pos = self.__prefs["window_pos"]
             self.__ui_pos = QPoint(pos["x"],pos["y"])
-            
+
     def test_arnold_renderer(self):
         arnold_renderer_loaded = pm.objExists("defaultArnoldDriver")
         if not arnold_renderer_loaded:
@@ -198,7 +198,7 @@ class AOVManager(QDialog):
             variance_driver = pm.createNode('aiAOVDriver', name="variance_driver")
         variance_driver.halfPrecision.set(1)
         variance_driver.mergeAOVs.set(0)
-        variance_driver.prefix.set("<RenderLayer>/<Scene>/<RenderPass>/<Scene>_<RenderLayer>_<RenderPass>")
+        variance_driver.prefix.set("<RenderLayer>/<Scene>/<RenderPass>/<RenderLayer>_<RenderPass>")
 
         # Full Driver
         if pm.objExists("aov_full_driver"):
@@ -208,7 +208,7 @@ class AOVManager(QDialog):
         full_driver.halfPrecision.set(0)
         full_driver.mergeAOVs.set(0)
         full_driver.multipart.set(1)
-        full_driver.prefix.set("<RenderLayer>/<Scene>/<RenderPass>/<Scene>_<RenderLayer>_<RenderPass>")
+        full_driver.prefix.set("<RenderLayer>/<Scene>/<RenderPass>/<RenderLayer>_<RenderPass>")
 
         # Half Driver
         if pm.objExists("defaultArnoldDriver"):
@@ -223,7 +223,7 @@ class AOVManager(QDialog):
         half_driver.halfPrecision.set(1)
 
         if pm.objExists("defaultRenderGlobals"):
-            pm.ls("defaultRenderGlobals")[0].imageFilePrefix.set("<RenderLayer>/<Scene>/<RenderPass>/<Scene>_<RenderLayer>_<RenderPass>")
+            pm.ls("defaultRenderGlobals")[0].imageFilePrefix.set("<RenderLayer>/<Scene>/<RenderPass>/<RenderLayer>_<RenderPass>")
         if pm.objExists("defaultArnoldRenderOptions"):
             pm.ls("defaultArnoldRenderOptions")[0].outputVarianceAOVs.set(self.__output_denoising)
 

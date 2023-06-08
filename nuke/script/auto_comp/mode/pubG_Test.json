@@ -1,19 +1,19 @@
 {
-  "name": "Unpack Mode 2",
+  "name": "pubG_Test",
   "layers": [
     {
-      "name": "BG",
-      "rule": "^BG|ENVIRO$",
+      "name": "ENVIRO",
+      "rule": "^ENVIRO$",
       "options": {"color": [55, 55, 150]}
     },
     {
-      "name": "FG",
-      "rule": "^FG$",
+      "name": "CHARA",
+      "rule": "^CHARA$",
       "options": {"color": [140, 50, 125]}
     },
     {
       "name": "SMOKE",
-      "rule": "^SMOKE$",
+      "rule": "^FX_smoke$",
       "options": {"color": [55, 150, 115]}
     },
     {
@@ -23,25 +23,25 @@
     }
   ],
   "shuffle": {
-    "shuffle_layer": ["BG", "FG", "SMOKE"]
+    "shuffle_layer": ["ENVIRO", "CHARA", "SMOKE", "ATMO"]
   },
   "merge": {
     "rules": [
       {
-        "a": "FG",
-        "b": "BG",
+        "a": "CHARA",
+        "b": "ENVIRO",
         "operation": "over",
-        "result": "FG_OVER_BG"
+        "result": "RES1"
       },
       {
         "a": "SMOKE",
-        "b": "FG_OVER_BG",
+        "b": "RES1",
         "operation": "over",
-        "result": "SMOKE_OVER_FG_BG"
+        "result": "RES2"
       },
       {
         "a": "ATMO",
-        "b": "SMOKE_OVER_FG_BG",
+        "b": "RES2",
         "operation": "plus"
       }
     ]

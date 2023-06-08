@@ -14,11 +14,11 @@ _BACKDROP_INPUTS = "INPUTS"
 BACKDROP_LAYER = "LAYER"
 BACKDROP_MERGE = "MERGE"
 _BACKDROP_LAYER_READS = "READ"
+BACKDROP_LAYER_SHUFFLE = "SHUFFLE"
 
 _BACKDROP_LAYER_READS_FONT_SIZE = 30
-_BACKDROP_INPUTS_COLOR = (194, 100, 120)
-_BACKDROP_LAYER_READ_COLOR = (115, 150, 190)
-_DEFAULT_LAYER_COLOR = (40, 90, 150)
+_BACKDROP_INPUTS_COLOR = (120, 120, 120)
+DEFAULT_LAYER_COLOR = (40, 90, 150)
 _INPUTS_LAYER_DISTANCE = 1.5
 _LAYER_READ_DISTANCE = 1.8
 _LAYER_POSTAGE_DISTANCE = 6
@@ -28,6 +28,21 @@ _LAYER_POSTAGE_DISTANCE = 6
 
 class UnpackMode:
 
+    # Get a lightened version of the input color
+    @staticmethod
+    def __ligthen_color(r, g, b):
+        ligthen_ratio = 0.3
+        return int(r + (255 - r) * ligthen_ratio), int(g + (255 - g) * ligthen_ratio), \
+               int(b + (255 - b) * ligthen_ratio)
+
+    # Get a darkened version of the input color
+    @staticmethod
+    def __darken_color(r, g, b):
+        darken_ratio = 0.3
+
+        return int(r * (1-darken_ratio)), int(g *(1-darken_ratio)), int(b *(1-darken_ratio))
+
+    # Get the last sequence and utility sequence of a layer
     @staticmethod
     def __get_last_seq_from_layer(layer_path):
         for seq_name in reversed(os.listdir(layer_path)):
@@ -53,6 +68,7 @@ class UnpackMode:
                     return seq_path, utility_path, start_frame, end_frame
         return None
 
+    # Create a read node with a postage stamp node
     @staticmethod
     def __create_read_with_postage(name, seq_path, start_frame, end_frame):
         read_node = nuke.nodes.Read(name=name, file=seq_path, first=start_frame, last=end_frame)
@@ -71,21 +87,27 @@ class UnpackMode:
         self.__shuffle_mode.set_var_set(self.__var_set)
         self.__merge_mode.set_var_set(self.__var_set)
 
+    # Getter if the Unpack mode name
     def get_name(self):
         return self.__name
 
+    # Getter if the Unpack mode config path
     def get_config_path(self):
         return self.__config_path
 
+    # Getter if the Unpack mode variable set
     def get_var_set(self):
         return self.__var_set
 
+    # Getter if the Unpack mode Shuffle mode
     def get_shuffle_mode(self):
         return self.__shuffle_mode
 
+    # Getter if the Unpack mode Merge Mode
     def get_merge_mode(self):
         return self.__merge_mode
 
+    # Getter of whether the Unpack Mode is valid or not (Shuffle and Merge not None)
     def is_valid(self):
         return self.__shuffle_mode is not None and self.__merge_mode is not None
 
@@ -93,28 +115,41 @@ class UnpackMode:
     def scan_layers(self, shot_path):
         if not os.path.isdir(shot_path):
             return
-        render_path = os.path.join(shot_path, "render_out")
+        if shot_path.endswith("render_out"):
+            render_path = shot_path
+        else:
+            render_path = os.path.join(shot_path, "render_out")
+        if not os.path.isdir(render_path):
+            return
         self.__start_vars_and_layer = []
         for render_layer in os.listdir(render_path):
             # Verify that the layer is in the variable
             start_var = self.__var_set.get_start_variable_valid_for(render_layer)
             if start_var is None:
                 continue
-            self.__start_vars_and_layer.append((start_var,render_layer))
+            self.__start_vars_and_layer.append((start_var, render_layer))
         self.__start_vars_and_layer.sort(key=lambda x: x[0].get_order())
 
-    def layer_is_scanned(self, layer):
+    # Getter of whether the layer is scanned or not
+    def is_layer_scanned(self, layer):
         for start_var, render_layer in self.__start_vars_and_layer:
-            if start_var.get_name() == layer:
+            if start_var.is_rule_valid(layer):
+                return start_var
+        return False
+
+    # Getter of whether the layer is scanned or not
+    def is_layer_name_scanned(self, layer_name):
+        for start_var, render_layer in self.__start_vars_and_layer:
+            if start_var.get_name() == layer_name:
                 return True
         return False
 
-    # Retrieve the layers in the shot corresponding to the variable in ruleset
+    # Retrieve the layers, create the read node, postages and setup layout options
     def __unpack_layers(self, shot_path):
         render_path = os.path.join(shot_path, "render_out")
         read_nodes = []
         postage_nodes = []
-
+        # for each layer
         for start_var, render_layer in self.__start_vars_and_layer:
             layer_path = os.path.join(render_path, render_layer)
             if not os.path.isdir(layer_path):
@@ -130,6 +165,7 @@ class UnpackMode:
             postage_nodes.append(postage_stamp)
             to_inputs_backdrop = [read_node]
             to_layer_inputs_backdrop = [postage_stamp]
+            # If Utility exists compute it and connect it
             if utility_path is not None:
                 utility_read_node, utility_postage_stamp = \
                     UnpackMode.__create_read_with_postage(_PREFIX_UTILITY + name, utility_path, start_frame, end_frame)
@@ -149,11 +185,15 @@ class UnpackMode:
                 read_nodes.append((read_node))
                 start_var.set_node(postage_stamp)
 
-            input_layer_bd_longname = ".".join([_BACKDROP_INPUTS, render_layer])
-            layer_bd_longname = ".".join([BACKDROP_LAYER, render_layer])
+            # Get the Backdrops name
+            input_layer_bd_longname = ".".join([_BACKDROP_INPUTS, name])
+            layer_bd_longname = ".".join([BACKDROP_LAYER, name])
             layer_read_bd_longname = ".".join([layer_bd_longname, _BACKDROP_LAYER_READS])
+            layer_shuffle_bd_longname = ".".join([layer_bd_longname, BACKDROP_LAYER_SHUFFLE])
             color = start_var.get_option("color")
-            if color is None: color = _DEFAULT_LAYER_COLOR
+            if color is None: color = DEFAULT_LAYER_COLOR
+
+            # Generate BackDrops options (color, font_size)
 
             # INPUTS.LAYER
             self.__layout_manager.add_nodes_to_backdrop(input_layer_bd_longname, to_inputs_backdrop)
@@ -166,23 +206,25 @@ class UnpackMode:
             self.__layout_manager.add_nodes_to_backdrop(layer_read_bd_longname, to_layer_inputs_backdrop)
             self.__layout_manager.add_backdrop_option(layer_read_bd_longname, "font_size",
                                                       _BACKDROP_LAYER_READS_FONT_SIZE)
-            self.__layout_manager.add_backdrop_option(layer_read_bd_longname, "color", _BACKDROP_LAYER_READ_COLOR)
+            self.__layout_manager.add_backdrop_option(layer_read_bd_longname, "color",
+                                                      UnpackMode.__darken_color(*color))
 
             self.__layout_manager.add_top_level_backdrop_layout_relation(BACKDROP_LAYER, _BACKDROP_INPUTS,
                                                                          LayoutManager.POS_TOP,
                                                                          LayoutManager.ALIGN_START,
                                                                          _INPUTS_LAYER_DISTANCE)
 
+            # LAYERS.LAYER_instance.SHUFFLE
+            self.__layout_manager.add_backdrop_option(layer_shuffle_bd_longname, "color",
+                                                      UnpackMode.__ligthen_color(*color))
+
             # Add the start_var to the active variable (for the merge part)
             self.__var_set.active_var(start_var)
 
         # INPUTS
         self.__layout_manager.add_backdrop_option(_BACKDROP_INPUTS, "color", _BACKDROP_INPUTS_COLOR)
-        # LAYERS
-        self.__layout_manager.add_backdrop_option(BACKDROP_LAYER, "display", False)
-        # MERGE
-        self.__layout_manager.add_backdrop_option(BACKDROP_MERGE, "display", False)
 
+        # Add layout relations
         last = None
         for read_node in read_nodes:
             read = read_node[0]
@@ -200,11 +242,12 @@ class UnpackMode:
                                                            _LAYER_POSTAGE_DISTANCE)
             curr = postage_node
 
+    # Run the AutoCOmp by unpacking layers, shuffling them, merging the outputs and building all the layouts
     def unpack(self, shot_path):
         if len(self.__start_vars_and_layer) == 0:
             return
         # Retrieve the bounding box of the current graph to place correctly incoming graph
-        self.__layout_manager.get_current_bbox_graph()
+        self.__layout_manager.compute_current_bbox_graph()
         # Retrieve Layers and create Start Var (Read nodes)
         self.__unpack_layers(shot_path)
         # Shuffle those layers if needed
@@ -215,5 +258,3 @@ class UnpackMode:
         self.__layout_manager.build_layout_node_graph()
         # Organize all the backdrops
         self.__layout_manager.build_layout_backdrops()
-        # Place correctly created graph to prevent from overlapping
-        self.__layout_manager.translate_graph_created()

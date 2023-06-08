@@ -9,7 +9,7 @@
     {
       "name": "CHARS",
       "rule": "^CHARS$",
-      "options": {"color": [150, 55, 55]}
+      "options": {"color": [140, 50, 125]}
     },
     {
       "name": "ATHMO",
@@ -18,8 +18,7 @@
     }
   ],
   "shuffle": {
-    "shuffle_layer": ["CHARS", "BG"],
-    "color": [175, 108, 155]
+    "shuffle_layer": ["CHARS", "BG"]
   },
   "merge": {
     "rules": [

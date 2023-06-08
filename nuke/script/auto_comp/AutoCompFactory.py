@@ -1,10 +1,11 @@
 import json
 import os.path
+import re
 
 from common.utils import *
-from .ShuffleMode import ShuffleMode
+from .ShuffleMode import ShuffleMode, ShuffleChannelMode
 from .MergeMode import MergeMode
-from .UnpackMode import UnpackMode
+from .UnpackMode import UnpackMode, DEFAULT_LAYER_COLOR
 from .LayoutManager import LayoutManager
 from .RuleSet import VariablesSet, Variable, StartVariable, Relation
 
@@ -51,21 +52,43 @@ class AutoCompFactory:
 
     # Create an Unpack Mode to shuffle only one layer
     @staticmethod
-    def get_simple_shuffle_layer_mode(path, layer):
+    def shuffle_layer(path, shot_path, layers):
         layout_manager = LayoutManager()
         # Parse Rule Set
         rule_set_data = AutoCompFactory.__parse_rule_set(path)
         if _SHUFFLE_KEY not in rule_set_data or _LAYERS_KEY not in rule_set_data or \
                 _MERGE_KEY not in rule_set_data or _NAME_KEY not in rule_set_data: return None
         # Shuffle
-        shuffle_mode = ShuffleMode(layout_manager, rule_set_data[_SHUFFLE_KEY])
+        shuffle_mode = ShuffleMode(layout_manager)
         # Variable Set
-        var_set = AutoCompFactory.__get_var_set(rule_set_data[_LAYERS_KEY], layer)
+        var_set = AutoCompFactory.__get_var_set(rule_set_data[_LAYERS_KEY], layers)
         if var_set is None: return None
         # Relations
         merge_mode = AutoCompFactory.__get_merge_mode({_MERGE_RULES_KEY: []}, layout_manager)
         if merge_mode is None: return None
-        return UnpackMode(path, rule_set_data[_NAME_KEY], var_set, shuffle_mode, merge_mode, layout_manager)
+        unpack_mode = UnpackMode(path, rule_set_data[_NAME_KEY],
+                                 var_set, shuffle_mode, MergeMode([], layout_manager), layout_manager)
+        unpack_mode.scan_layers(shot_path)
+        unpack_mode.unpack(shot_path)
+
+    # Create an Unpack Mode to shuffle channels of a layer
+    @staticmethod
+    def shuffle_channel_mode(read_node, channels):
+        layout_manager = LayoutManager()
+        # Shuffle
+        shuffle_mode = ShuffleChannelMode(channels, layout_manager)
+        var_set = VariablesSet([])
+        var_set.active_var(Variable(read_node.name(), read_node))
+        shuffle_mode.set_var_set(var_set)
+
+        # Retrieve the bounding box of the current graph to place correctly incoming graph
+        layout_manager.compute_current_bbox_graph()
+        # Shuffle those layers if needed
+        shuffle_mode.run(True)
+        # Organize all the nodes
+        layout_manager.build_layout_node_graph()
+        # Organize all the backdrops
+        layout_manager.build_layout_backdrops()
 
     @staticmethod
     def __parse_rule_set(path):
@@ -77,9 +100,11 @@ class AutoCompFactory:
             print("Error while parsing " + path + " :\n" + str(e))
             return None
 
+    # Get the Variable Set according to the layers config data
     @staticmethod
-    def __get_var_set(start_vars_data, layer_filter=None):
+    def __get_var_set(start_vars_data, layer_filter_arr=None):
         start_vars = []
+        order=0
         # Scan for start variables
         for order, start_var_data in enumerate(start_vars_data):
             # Ignore if start variable has not name or rule
@@ -87,14 +112,31 @@ class AutoCompFactory:
                     _LAYERS_RULE_KEY not in start_var_data or \
                     _LAYERS_OPTIONS_KEY not in start_var_data:
                 continue
-            name = start_var_data[_LAYERS_NAME_KEY]
-            if layer_filter is not None and name != layer_filter:
-                continue
+            rule = start_var_data[_LAYERS_RULE_KEY]
+            if layer_filter_arr is not None:
+                layer_caught = None
+                for layer_filter in layer_filter_arr:
+                    if re.match(rule,layer_filter):
+                        layer_caught = layer_filter
+                        break
+                if layer_caught is not None:
+                    layer_filter_arr.remove(layer_caught)
+                else: continue
             start_vars.append(
                 StartVariable(start_var_data[_LAYERS_NAME_KEY],
-                              start_var_data[_LAYERS_RULE_KEY],
+                              rule,
                               order,
                               start_var_data[_LAYERS_OPTIONS_KEY]))
+
+        if layer_filter_arr is not None:
+            for layer in layer_filter_arr:
+                order+=1
+                start_vars.append(
+                    StartVariable(layer,
+                                  r"^"+layer+r"$",
+                                  order,
+                                  {"color": DEFAULT_LAYER_COLOR}))
+
         # Error if no start variables
         if len(start_vars) == 0:
             return None

@@ -83,6 +83,8 @@ class NukeScanner:
         self.__retrieve_shot()
         if self.__shot_dir is not None:
             self.__retrieve_files()
+        else:
+            print("SHOT DIR NOT FOUND")
 
     def __retrieve_shot(self):
         self.__compo_filepath = nuke.root()['name'].value().replace("\\", "/")
@@ -93,6 +95,7 @@ class NukeScanner:
             self.__shot_dir = None
 
     def __retrieve_files(self):
+        print("RETRIEVE FILES LAUNCHED")
         read_nodes = nuke.allNodes("Read")
         for node in read_nodes:
             file_path = node["file"].value()
@@ -103,8 +106,10 @@ class NukeScanner:
             if folder in self.__folders:
                 continue
             self.__folders.append(folder)
+        print("RETRIEVE FILES ENDED")
 
     def __check_folder_recursive(self, folder, check_folder=True):
+        print("CHECK FOLDER RECURSIVE ",folder)
         not_used_folders = []
         is_used = True if not check_folder else folder.replace("\\", "/") in self.__folders
         for child in os.listdir(folder):
@@ -121,11 +126,13 @@ class NukeScanner:
             return is_used, not_used_folders
 
     def run(self):
+        print("RUN")
         if self.__shot_dir is not None:
             render_out_folder = self.__shot_dir + "/render_out"
             is_used, folders_to_delete = self.__check_folder_recursive(render_out_folder, False)
             dict_rename_folders = {}
             for folder_path in folders_to_delete:
+                print(folder_path)
                 folder_path= folder_path.replace("\\", "/")
                 dirname, basename = os.path.split(folder_path)
                 if not basename.startswith(_PREFIX_TO_DELETE):
@@ -137,3 +144,5 @@ class NukeScanner:
                     for folder_path,new_path in dict_rename_folders.items():
                         os.rename(folder_path, new_path)
                         print(folder_path + "\n\t--> " + new_path)
+            else:
+                print("NOTHING TO DELETE")

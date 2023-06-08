@@ -20,7 +20,7 @@ class Prefs:
     def __init__(self, file_name=_COMMON_FILE):
         if type(file_name) != str:
             raise TypeError("Project name must be a string")
-
+        
         path_home = os.path.expanduser("~")
         self.__path_prefs = path_home + "/" + _FOLDER_PREFS
         self.__file_path = self.__path_prefs + "/" + file_name

@@ -401,63 +401,62 @@ class ABCExport(QDialog):
 
     # Retrieve all the geos of an asset in the scene
     @staticmethod
-    def list_existing_geos(database, name, namespace_found):
+    def list_existing_geos(database, name, namespace):
         geos = database[name]["geo"]
         new_geos = []
         for g in geos:
-            geo_ns_replaced = g.replace(g.split(":")[0], namespace_found)
+            geo_ns_replaced = g.replace(g.split(":")[0], namespace)
             if pm.objExists(geo_ns_replaced):
                 new_geos.append(geo_ns_replaced)
         return new_geos
 
-        # Retrieve all the abcs existing in the scene and build the list of abc
-
+    # Retrieve all the abcs existing in the scene and build the list of abc
     @staticmethod
     def retrieve_abcs(database_path):
         abcs = []
         abcs_by_name = {}
-        existing_assets = ABCExport.get_database(database_path)
+        existing_assets = dict(sorted(ABCExport.get_database(database_path).items(),
+                                      reverse=True, key=lambda item: item[1]["name"]))
+
         references = pm.listReferences()
         namespaces = pm.namespaceInfo(listOnlyNamespaces=True, recurse=True)
         assets_found = {}
-        # Retrieve all the rigging in references
-        for ref in references:
-            match = re.match(r".*\/(.+)_[a-zA-Z_\.]+[0-9]{3,4}\.m[ab]", ref.unresolvedPath())
-            if match:
-                assets_found[ref.fullNamespace] = match.groups()[0]
-        # Retrieve all the rigging in namespaces
-        for ns in namespaces:
-            match = re.match(r"(.+)_[a-zA-Z_\.]+[0-9]{3,4}$", ns)
-            if match:
-                assets_found[ns] = match.groups()[0]
 
-        for namespace, name in assets_found.items():
-            name_found = None
-            namespace_found = None
-            # Retrieve all the rigging found in database
-            for name_existing in existing_assets.keys():
-                if name_existing == name:
-                    name_found = name
-                    namespace_found = namespace
-                    break
+        # Iterate throught characters in the database
+        for name_char, data_char in existing_assets.items():
+            # Retrieve if the namespace contains the current chara name
+            for ns in namespaces:
+                if name_char not in ns: continue
+                assets_found[ns] = name_char
+            # Retrieve if the reference path contains the current chara name
+            for ref in references:
+                basename = os.path.basename(ref.unresolvedPath())
+                if name_char not in basename: continue
+                namespace = ref.fullNamespace
+                if namespace not in assets_found:
+                    print(namespace, name_char)
+                    assets_found[namespace] = name_char
 
+        # Detect if the geos exists in the scene
+        for namespace, name_char in assets_found.items():
+            if name_char is None: continue
             # Create all the ABCs if they have geos
-            if name_found is not None:
-                geos = ABCExport.list_existing_geos(existing_assets, name_found, namespace_found)
-                valid = True
-                if not geos:
-                    valid = False
-                else:
-                    for geo in geos:
-                        if len(pm.ls(geo)) > 1:
-                            valid = False
-                            break
-                if valid:
-                    if name_found not in abcs_by_name:
-                        abcs_by_name[name_found] = []
-                    abcs_by_name[name_found].append(ABCExportAsset(name_found, namespace_found, geos))
+            geos = ABCExport.list_existing_geos(existing_assets, name_char, namespace)
+            valid = True
+            if not geos:
+                valid = False
+            else:
+                for geo in geos:
+                    if len(pm.ls(geo)) > 1:
+                        valid = False
+                        break
+            if not valid: continue
+            if name_char not in abcs_by_name:
+                abcs_by_name[name_char] = []
+            abcs_by_name[name_char].append(ABCExportAsset(name_char, namespace, geos))
 
-        # If many abcs with the same name, we change their num to defferenciate them
+        # If many abcs with the same name, we change their num to differenciate them
+        # Ex: ch_chara_00, ch_chara_01, ...
         for name_existing, abcs_existing in abcs_by_name.items():
             if len(abcs_existing) > 1:
                 i = 0
