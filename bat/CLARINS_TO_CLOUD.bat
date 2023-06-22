@@ -34,19 +34,14 @@ if exist "%dirfilepath%" (
   exit /b
 )
 
-set /p create=Do you want to create previous missing directories? [y/n]
 
-if /i "%create%"=="y" (
-    rem Create the directory
-    echo Create the directory %dirfilepath%
-    mkdir "%dirfilepath%"
-    rem Copy the file to the new path
-    call :copy_fct "%filepath%" "%newpath%" %isfile%
-) else (
-    echo Aborting execution.
-)
-
-pause
+rem Create the directory
+echo Create the directory %dirfilepath%
+mkdir "%dirfilepath%"
+rem Copy the file to the new path
+call :copy_fct "%filepath%" "%newpath%" %isfile%
+echo Succes !
+timeout 10
 exit /b
 
 :getPath

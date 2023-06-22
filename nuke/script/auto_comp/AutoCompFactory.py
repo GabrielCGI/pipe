@@ -16,7 +16,9 @@ _NAME_KEY = "name"
 _LAYERS_KEY = "layers"
 _LAYERS_NAME_KEY = "name"
 _LAYERS_RULE_KEY = "rule"
+_LAYERS_ALIASES_KEY = "aliases"
 _LAYERS_OPTIONS_KEY = "options"
+_LAYERS_GROUP_OPERATION_KEY = "group_operation"
 _SHUFFLE_KEY = "shuffle"
 _SHUFFLE_OPTIONS_KEY = "options"
 _MERGE_KEY = "merge"
@@ -61,14 +63,14 @@ class AutoCompFactory:
         # Shuffle
         shuffle_mode = ShuffleMode(layout_manager)
         # Variable Set
-        var_set = AutoCompFactory.__get_var_set(rule_set_data[_LAYERS_KEY], layers)
+        var_set = AutoCompFactory.__get_var_set(rule_set_data[_LAYERS_KEY], layers[:])
         if var_set is None: return None
         # Relations
         merge_mode = AutoCompFactory.__get_merge_mode({_MERGE_RULES_KEY: []}, layout_manager)
         if merge_mode is None: return None
         unpack_mode = UnpackMode(path, rule_set_data[_NAME_KEY],
                                  var_set, shuffle_mode, MergeMode([], layout_manager), layout_manager)
-        unpack_mode.scan_layers(shot_path)
+        unpack_mode.scan_layers(shot_path, layers)
         unpack_mode.unpack(shot_path)
 
     # Create an Unpack Mode to shuffle channels of a layer
@@ -78,7 +80,11 @@ class AutoCompFactory:
         # Shuffle
         shuffle_mode = ShuffleChannelMode(channels, layout_manager)
         var_set = VariablesSet([])
-        var_set.active_var(Variable(read_node.name(), read_node))
+        # name, layer, rule, aliases, order, options, group_operation
+        read_name = read_node.name()
+        start_var = StartVariable(read_name,read_name)
+        start_var.set_node(read_node)
+        var_set.active_var(start_var)
         shuffle_mode.set_var_set(var_set)
 
         # Retrieve the bounding box of the current graph to place correctly incoming graph
@@ -110,11 +116,11 @@ class AutoCompFactory:
             # Ignore if start variable has not name or rule
             if _LAYERS_NAME_KEY not in start_var_data or \
                     _LAYERS_RULE_KEY not in start_var_data or \
-                    _LAYERS_OPTIONS_KEY not in start_var_data:
+                    _LAYERS_OPTIONS_KEY not in start_var_data :
                 continue
             rule = start_var_data[_LAYERS_RULE_KEY]
+            layer_caught = None
             if layer_filter_arr is not None:
-                layer_caught = None
                 for layer_filter in layer_filter_arr:
                     if re.match(rule,layer_filter):
                         layer_caught = layer_filter
@@ -122,20 +128,30 @@ class AutoCompFactory:
                 if layer_caught is not None:
                     layer_filter_arr.remove(layer_caught)
                 else: continue
+
+            aliases = start_var_data[_LAYERS_ALIASES_KEY] if _LAYERS_ALIASES_KEY in start_var_data else []
+            group_operation = start_var_data[_LAYERS_GROUP_OPERATION_KEY] \
+                if _LAYERS_GROUP_OPERATION_KEY in start_var_data else None
             start_vars.append(
                 StartVariable(start_var_data[_LAYERS_NAME_KEY],
+                              layer_caught,
                               rule,
+                              aliases,
                               order,
-                              start_var_data[_LAYERS_OPTIONS_KEY]))
+                              start_var_data[_LAYERS_OPTIONS_KEY],
+                              group_operation))
 
         if layer_filter_arr is not None:
             for layer in layer_filter_arr:
                 order+=1
                 start_vars.append(
                     StartVariable(layer,
+                                  layer,
                                   r"^"+layer+r"$",
+                                  [],
                                   order,
-                                  {"color": DEFAULT_LAYER_COLOR}))
+                                  {"color": DEFAULT_LAYER_COLOR},
+                                  None))
 
         # Error if no start variables
         if len(start_vars) == 0:

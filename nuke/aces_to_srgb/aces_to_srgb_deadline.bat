@@ -1,4 +1,6 @@
 echo off
+echo %1
+
 
 set folder=%1
 set folder=%folder:\=/%

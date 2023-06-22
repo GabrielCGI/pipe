@@ -4,6 +4,7 @@ import nuke
 import nukescripts
 from common.utils import *
 from .LayoutManager import LayoutManager
+from .RuleSet import StartVariable
 
 # ######################################################################################################################
 
@@ -44,7 +45,9 @@ class UnpackMode:
 
     # Get the last sequence and utility sequence of a layer
     @staticmethod
-    def __get_last_seq_from_layer(layer_path):
+    def get_last_seq_from_layer(layer_path):
+        if not os.path.isdir(layer_path):
+            return None
         for seq_name in reversed(os.listdir(layer_path)):
             seq_dir_path = os.path.join(layer_path, seq_name)
             if os.path.isdir(seq_dir_path):
@@ -80,7 +83,7 @@ class UnpackMode:
         self.__name = name
         self.__config_path = config_path
         self.__var_set = var_set
-        self.__start_vars_and_layer = []
+        self.__start_vars_to_unpack = []
         self.__layout_manager = layout_manager
         self.__shuffle_mode = shuffle_mode
         self.__merge_mode = merge_mode
@@ -112,7 +115,7 @@ class UnpackMode:
         return self.__shuffle_mode is not None and self.__merge_mode is not None
 
     # Retrieve the layers in the shot corresponding to the variable in ruleset
-    def scan_layers(self, shot_path):
+    def scan_layers(self, shot_path, layer_filter_arr =None):
         if not os.path.isdir(shot_path):
             return
         if shot_path.endswith("render_out"):
@@ -121,25 +124,33 @@ class UnpackMode:
             render_path = os.path.join(shot_path, "render_out")
         if not os.path.isdir(render_path):
             return
-        self.__start_vars_and_layer = []
+        self.__start_vars_to_unpack = []
+        layer_type_taken = []
         for render_layer in os.listdir(render_path):
+            if layer_filter_arr is not None and render_layer not in layer_filter_arr: continue
             # Verify that the layer is in the variable
             start_var = self.__var_set.get_start_variable_valid_for(render_layer)
-            if start_var is None:
-                continue
-            self.__start_vars_and_layer.append((start_var, render_layer))
-        self.__start_vars_and_layer.sort(key=lambda x: x[0].get_order())
+            if start_var is None: continue
+            layer_type = start_var.get_name()
+            if layer_type in layer_type_taken:
+                start_var = StartVariable.copy(start_var)
+            else:
+                layer_type_taken.append(layer_type)
+            start_var.set_layer(render_layer)
+            self.__start_vars_to_unpack.append(start_var)
+        self.__start_vars_to_unpack.sort(key=lambda x: x.get_order())
 
     # Getter of whether the layer is scanned or not
     def is_layer_scanned(self, layer):
-        for start_var, render_layer in self.__start_vars_and_layer:
-            if start_var.is_rule_valid(layer):
+        for start_var in self.__start_vars_to_unpack:
+            # if start_var.is_rule_valid(layer):
+            if start_var.get_layer() == layer:
                 return start_var
         return False
 
     # Getter of whether the layer is scanned or not
     def is_layer_name_scanned(self, layer_name):
-        for start_var, render_layer in self.__start_vars_and_layer:
+        for start_var in self.__start_vars_to_unpack:
             if start_var.get_name() == layer_name:
                 return True
         return False
@@ -150,28 +161,29 @@ class UnpackMode:
         read_nodes = []
         postage_nodes = []
         # for each layer
-        for start_var, render_layer in self.__start_vars_and_layer:
+        for start_var in self.__start_vars_to_unpack:
+            render_layer = start_var.get_layer()
             layer_path = os.path.join(render_path, render_layer)
             if not os.path.isdir(layer_path):
                 continue
             # Get the last sequence for the layer
-            seq_data = UnpackMode.__get_last_seq_from_layer(layer_path)
+            seq_data = UnpackMode.get_last_seq_from_layer(layer_path)
             if seq_data is None:
                 continue
             seq_path, utility_path, start_frame, end_frame = seq_data
 
             name = start_var.get_name()
-            read_node, postage_stamp = UnpackMode.__create_read_with_postage(name, seq_path, start_frame, end_frame)
+            read_node, postage_stamp = UnpackMode.__create_read_with_postage(render_layer, seq_path, start_frame, end_frame)
             postage_nodes.append(postage_stamp)
             to_inputs_backdrop = [read_node]
             to_layer_inputs_backdrop = [postage_stamp]
             # If Utility exists compute it and connect it
             if utility_path is not None:
                 utility_read_node, utility_postage_stamp = \
-                    UnpackMode.__create_read_with_postage(_PREFIX_UTILITY + name, utility_path, start_frame, end_frame)
+                    UnpackMode.__create_read_with_postage(_PREFIX_UTILITY + render_layer, utility_path, start_frame, end_frame)
                 merge_node = nuke.nodes.Merge(operation="over", also_merge="all",
                                               inputs=[utility_postage_stamp, postage_stamp])
-                merge_node.setName(_PREFIX_UTILITY_MERGE + name)
+                merge_node.setName(_PREFIX_UTILITY_MERGE + render_layer)
                 read_nodes.append((read_node, utility_read_node))
 
                 to_inputs_backdrop.append(utility_read_node)
@@ -186,8 +198,8 @@ class UnpackMode:
                 start_var.set_node(postage_stamp)
 
             # Get the Backdrops name
-            input_layer_bd_longname = ".".join([_BACKDROP_INPUTS, name])
-            layer_bd_longname = ".".join([BACKDROP_LAYER, name])
+            input_layer_bd_longname = ".".join([_BACKDROP_INPUTS, render_layer])
+            layer_bd_longname = ".".join([BACKDROP_LAYER, render_layer])
             layer_read_bd_longname = ".".join([layer_bd_longname, _BACKDROP_LAYER_READS])
             layer_shuffle_bd_longname = ".".join([layer_bd_longname, BACKDROP_LAYER_SHUFFLE])
             color = start_var.get_option("color")
@@ -244,8 +256,7 @@ class UnpackMode:
 
     # Run the AutoCOmp by unpacking layers, shuffling them, merging the outputs and building all the layouts
     def unpack(self, shot_path):
-        if len(self.__start_vars_and_layer) == 0:
-            return
+        if len(self.__start_vars_to_unpack) == 0: return
         # Retrieve the bounding box of the current graph to place correctly incoming graph
         self.__layout_manager.compute_current_bbox_graph()
         # Retrieve Layers and create Start Var (Read nodes)

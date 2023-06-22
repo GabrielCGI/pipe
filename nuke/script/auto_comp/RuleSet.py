@@ -1,6 +1,6 @@
 import re
 import nuke
-
+from common.utils import *
 
 class VariablesSet:
     def __init__(self, rule_vars):
@@ -30,9 +30,10 @@ class VariablesSet:
             self.__active_vars.remove(var)
 
 class Variable:
-    def __init__(self, name, node, step=0):
+    def __init__(self, name, node, aliases=None, step=0):
         self.__name = name
         self._node = node
+        self.__aliases = [] if aliases is None else aliases
         self.__step = step
 
     # Getter of the name of the variable
@@ -42,6 +43,10 @@ class Variable:
     # Getter of the node of the variable
     def get_node(self):
         return self._node
+
+    # Getter of the aliases of the variable
+    def get_aliases(self):
+        return self.__aliases
 
     # Getter of the step of the variable (needed when the merge section is running to know the layout order)
     def get_step(self):
@@ -57,17 +62,44 @@ class Variable:
 
 
 class StartVariable(Variable):
-    def __init__(self, name, rule, order, options):
-        Variable.__init__(self, name, None)
-        self.__rule = rule
-        self.__order = order
-        self.__options = options
 
-    # Get the order of the start variable
+    @staticmethod
+    def copy(start_var):
+        return StartVariable(
+            start_var.get_name(),
+            start_var.__layer,
+            start_var.__rule,
+            start_var.get_aliases(),
+            start_var.__order,
+            start_var.__options,
+            start_var.__group_operation
+        )
+
+    def __init__(self, name, layer, rule = "", aliases = None, order=0, options=None, group_operation ="over"):
+        Variable.__init__(self, name, None, aliases)
+        self.__rule = rule
+        self.__layer = layer
+        self.__order = order
+        self.__options = {} if options is None else options
+        self.__group_operation = group_operation
+
+    # Getter of the group_operation of the start variable
+    def get_group_operation(self):
+        return self.__group_operation
+
+    # Getter of the order of the start variable
     def get_order(self):
         return self.__order
 
-    # Get the option of the start variable
+    # Getter of the layer of the start variable
+    def get_layer(self):
+        return self.__layer
+
+    # Setter of the layer of the start variable
+    def set_layer(self, layer):
+        self.__layer = layer
+
+    # Getter of the option of the start variable
     def get_option(self, option):
         if option not in self.__options:
             return None
@@ -100,6 +132,14 @@ class Relation:
     def is_valid_for_b(self, var):
         return self.__name_b == var.get_name()
 
+    # Check if the variable has an alias valid for the relation A variable
+    def alias_is_valid_for_a(self, var):
+        return self.__name_a in var.get_aliases()
+
+    # Check if the variable has an alias valid for the relation B variable
+    def alias_is_valid_for_b(self, var):
+        return self.__name_b in var.get_aliases()
+
     # Getter of the merge operation
     def get_operation(self):
         return self.__operation
@@ -110,5 +150,5 @@ class Relation:
         merge_node.setName(self.__name_a+"_"+self.__operation+"_"+self.__name_b)
         step = max(var_a.get_step(),var_b.get_step())+1
         if self.__result_name is None:
-            return Variable("", merge_node, step)
-        return Variable(self.__result_name, merge_node, step)
+            return Variable("", merge_node, [], step)
+        return Variable(self.__result_name, merge_node, [], step)

@@ -10,7 +10,7 @@ else:
     raise Exception("This is an error message")
 
 path =sys.argv[1]
-render_layer = ["beauty","moustache_mask","contour","mask_moustache"]
+render_layer = ["beauty","moustache_mask","contour","contours","mask_moustache"]
 
 for layer in render_layer:
     layer_path = os.path.join(path,layer,"srgb")
@@ -40,7 +40,7 @@ for layer in render_layer:
         # Rename the directory
         print("RENAMING: " +  new_file_name)
         os.rename(dest_path, new_dir_path)
-    print("START COPY"")
+    print("START COPY")
     shutil.copytree(layer_path, dest_path)
     print("END COPY")
     print("_______________________________")

@@ -1,0 +1,71 @@
+{
+  "name": "Classic Mode",
+  "layers": [
+    {
+      "name": "BACKGROUND",
+      "rule": "^BG|ENVIRO|MAIN$",
+      "group_operation": "over",
+      "aliases": ["CURRENT"],
+      "options": {"color": [55, 55, 150]}
+    },
+    {
+      "name": "FOREGROUND",
+      "rule": "^FG$",
+      "group_operation": "over",
+      "aliases": ["CURRENT"],
+      "options": {"color": [140, 50, 125]}
+    },
+    {
+      "name": "CHARACTER",
+      "rule": "^CHAR[AS]?$",
+      "group_operation": "over",
+      "aliases": ["CURRENT"],
+      "options": {"color": [140, 50, 125]}
+    },
+    {
+      "name": "FX",
+      "rule": "^FX_*|SMOKE$",
+      "group_operation": "over",
+      "aliases": ["CURRENT"],
+      "options": {"color": [55, 150, 115]}
+    },
+    {
+      "name": "ATMO",
+      "rule": "^ATMO$",
+      "group_operation": "over",
+      "options": {"color": [145, 150, 95]}
+    }
+  ],
+  "shuffle": {
+    "shuffle_layer": [
+      "BACKGROUND", "CHARACTER", "FOREGROUND", "FX"
+    ]
+  },
+  "merge": {
+    "rules": [
+      {
+        "a": "FOREGROUND",
+        "b": "CURRENT",
+        "operation": "over",
+        "result": "CURRENT"
+      },
+      {
+        "a": "CHARACTER",
+        "b": "CURRENT",
+        "operation": "over",
+        "result": "CURRENT"
+      },
+      {
+        "a": "FX",
+        "b": "CURRENT",
+        "operation": "over",
+        "result": "CURRENT"
+      },
+      {
+        "a": "ATMO",
+        "b": "CURRENT",
+        "operation": "plus"
+      }
+    ]
+  }
+}

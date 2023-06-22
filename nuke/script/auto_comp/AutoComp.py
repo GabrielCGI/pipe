@@ -18,6 +18,7 @@ import nuke
 from nukescripts import panels
 from .AutoCompFactory import AutoCompFactory
 from .ShuffleMode import ShuffleMode
+from .UnpackMode import UnpackMode
 
 # ######################################################################################################################
 
@@ -214,35 +215,37 @@ class AutoComp(QWidget):
         self.__ui_unpack_mode.currentIndexChanged.connect(self.__on_unpack_mode_changed)
         unpack_mode_lyt.addWidget(self.__ui_unpack_mode)
 
-        rule_set_lyt = QHBoxLayout()
-        rule_set_lyt.setSpacing(5)
-        shot_to_autocomp_lyt.addLayout(rule_set_lyt)
+        content_shot_autocomp_lyt = QGridLayout()
+        content_shot_autocomp_lyt.setSpacing(5)
+        shot_to_autocomp_lyt.addLayout(content_shot_autocomp_lyt)
+
+        content_shot_autocomp_lyt.addWidget(QLabel("Layer found [Layer Type]"),0,1)
+        content_shot_autocomp_lyt.addWidget(QLabel("Layer Types"),0,0)
 
         self.__ui_start_vars_list = QListWidget()
+        self.__ui_start_vars_list.setStyleSheet("QListWidget::item{padding: 3px;}")
         self.__ui_start_vars_list.setSelectionMode(QAbstractItemView.NoSelection)
         self.__ui_start_vars_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        rule_set_lyt.addWidget(self.__ui_start_vars_list)
+        content_shot_autocomp_lyt.addWidget(self.__ui_start_vars_list,1,0)
 
         self.__ui_layers_list = QListWidget()
+        self.__ui_layers_list.setStyleSheet("QListWidget::item{padding: 3px;}")
         self.__ui_layers_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.__ui_layers_list.itemSelectionChanged.connect(self.__on_layer_selected)
         self.__ui_layers_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
-        rule_set_lyt.addWidget(self.__ui_layers_list)
+        content_shot_autocomp_lyt.addWidget(self.__ui_layers_list,1,1)
 
 
-        btn_autocomp_lyt = QHBoxLayout()
-        btn_autocomp_lyt.setSpacing(5)
         self.__ui_autocomp_btn = QPushButton("AutoComp")
         self.__ui_autocomp_btn.setFixedHeight(25)
         self.__ui_autocomp_btn.clicked.connect(self.__unpack)
-        btn_autocomp_lyt.addWidget(self.__ui_autocomp_btn)
+        content_shot_autocomp_lyt.addWidget(self.__ui_autocomp_btn, 2, 0)
 
         self.__ui_shuffle_layer_btn = QPushButton("Shuffle selected layer")
         self.__ui_shuffle_layer_btn.setFixedHeight(25)
         self.__ui_shuffle_layer_btn.clicked.connect(self.__shuffle_layer)
-        btn_autocomp_lyt.addWidget(self.__ui_shuffle_layer_btn)
+        content_shot_autocomp_lyt.addWidget(self.__ui_shuffle_layer_btn,2,1)
 
-        shot_to_autocomp_lyt.addLayout(btn_autocomp_lyt)
 
         # SHUFFLE READ CHANNEL PART
 
@@ -338,27 +341,35 @@ class AutoComp(QWidget):
     # Refresh the layer start var list of the current mode
     def __refresh_layers_list(self):
         self.__ui_layers_list.clear()
-        if not os.path.isdir(self.__shot_path):
-            return
+        # Check existence shot path
+        if not os.path.isdir(self.__shot_path): return
+
         if self.__shot_path.endswith("render_out"):
             render_path = self.__shot_path
         else:
             render_path = os.path.join(self.__shot_path, "render_out")
-        if not os.path.isdir(render_path):
-            return
-        if self.__selected_unpack_mode is not None:
-            for render_layer in os.listdir(render_path):
-                item = QListWidgetItem()
-                start_var = self.__selected_unpack_mode.is_layer_scanned(render_layer)
-                if not start_var:
-                    name = render_layer
-                    item.setTextColor(QColor(170,170,255))
-                else:
-                    name = render_layer + "   ["+start_var.get_name()+"]"
 
-                item.setData(Qt.UserRole, render_layer)
-                item.setText(name)
-                self.__ui_layers_list.addItem(item)
+        # Check existence render path
+        if not os.path.isdir(render_path): return
+
+        # Check Unpack Mode valid
+        if self.__selected_unpack_mode is None: return
+
+        for render_layer in os.listdir(render_path):
+            item = QListWidgetItem()
+            # Check layer folder contains shot
+            if UnpackMode.get_last_seq_from_layer(os.path.join(render_path, render_layer)) is None: continue
+            start_var = self.__selected_unpack_mode.is_layer_scanned(render_layer)
+            # Determine if known layer or unknown
+            if not start_var:
+                name = render_layer
+                item.setTextColor(QColor(170,170,255))
+            else:
+                name = render_layer + "   ["+start_var.get_name()+"]"
+
+            item.setData(Qt.UserRole, render_layer)
+            item.setText(name)
+            self.__ui_layers_list.addItem(item)
 
     # Refresh the layer start var list of the current mode
     def __refresh_start_vars_list(self):
@@ -372,7 +383,7 @@ class AutoComp(QWidget):
                 item.setText(var_str)
                 self.__ui_start_vars_list.addItem(item)
                 if not self.__selected_unpack_mode.is_layer_name_scanned(var_str):
-                    item.setFlags(Qt.NoItemFlags)
+                    item.setTextColor(QColor(150,150,150))
 
     # Refresh the channel list of the selected read node
     def __refresh_read_node_ui(self):

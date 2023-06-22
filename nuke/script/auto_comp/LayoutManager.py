@@ -219,7 +219,6 @@ class LayoutManager:
             bd_h = bd_y2 - bd_y
             # If Width or Height is 0 then abort
             if bd_w <= 0 or bd_h <= 0:
-                print_var(bd_w, bd_h, bd_data["long_name"], len(backdrops), len(nodes))
                 return None
             bd_data["layout_data"] = {
                 "width": bd_w,
