@@ -20,6 +20,11 @@ from abc_export.ABCExport import *
 
 
 def export_set(frame):
+    """
+    Export the set
+    :param frame
+    :return:
+    """
     scene_name = pm.sceneName()
     if len(scene_name) > 0 and len(pm.ls("_____SET_____")) > 0:
         path = ".".join(scene_name.split(".")[:-1]) + "_set.abc"
@@ -30,6 +35,12 @@ def export_set(frame):
 
 
 def export_cam(start_frame, end_frame):
+    """
+    Export the cam
+    :param start_frame
+    :param end_frame
+    :return:
+    """
     scene_name = pm.sceneName()
     cams = pm.ls("*:rendercam")
     if len(scene_name) > 0 and len(cams) > 0:
@@ -57,6 +68,12 @@ def export_cam(start_frame, end_frame):
 
 
 def list_scenes(current_project_dir, folder_type):
+    """
+    List the last scenes from the current project dir that match the wanted folder type
+    :param current_project_dir
+    :param folder_type
+    :return:
+    """
     file_dialog = QFileDialog()
     file_dialog.setDirectory(current_project_dir)
     file_dialog.setFileMode(QFileDialog.DirectoryOnly)
@@ -94,6 +111,12 @@ def list_scenes(current_project_dir, folder_type):
 
 
 def print_scene(log_file, messages):
+    """
+    Print in a log_file the messages
+    :param log_file
+    :param messages
+    :return:
+    """
     str_msg = "+------------------------------------------------------------------------------------------------\n"
     for m in messages:
         str_msg+="| "+m+"\n"
@@ -102,7 +125,19 @@ def print_scene(log_file, messages):
     log_file.write(str_msg)
 
 
-def export_char_in_scene(scene_path, database_path, abc_path, nb, nb_tot, filter_char, subsample, log_file):
+def export_chars_in_scene(scene_path, database_path, abc_path, nb, nb_tot, filter_char, subsample, log_file):
+    """
+    Export characters from the scene
+    :param scene_path
+    :param database_path
+    :param abc_path
+    :param nb
+    :param nb_tot
+    :param filter_char: filter to export a specific character
+    :param subsample:
+    :param log_file:
+    :return:
+    """
     os.system("cls")
 
     filter_char_enabled = len(filter_char) > 0
@@ -124,7 +159,9 @@ def export_char_in_scene(scene_path, database_path, abc_path, nb, nb_tot, filter
         export_cam(start_frame, end_frame)
 
     abc_exported = []
+    # For each character
     for abc in abcs:
+        # Filter the character if needed
         if not filter_char_enabled or filter_char == abc.get_name():
             name_num = abc.get_name_with_num()
             asset_dir_path = os.path.join(abc_path, name_num)
@@ -134,6 +171,7 @@ def export_char_in_scene(scene_path, database_path, abc_path, nb, nb_tot, filter
                          "Scene " + nb + " on " + nb_tot])
             abc_exported.append((name_num, next_version))
             try:
+                # Export the character
                 abc.export(abc_path, start_frame, end_frame, len(subsample)>0, subsample, True)
             except Exception as e:
                 log_file.write(str(e))
@@ -141,6 +179,15 @@ def export_char_in_scene(scene_path, database_path, abc_path, nb, nb_tot, filter
 
 
 def export_abcs_from_scenes(list_scenes, current_project_dir, filter_char, subsample, log_file_folder):
+    """
+    Export abcs from scenes
+    :param list_scenes
+    :param current_project_dir
+    :param filter_char: filter to export a specific character
+    :param subsample
+    :param log_file_folder
+    :return:
+    """
     database_path = os.path.join(current_project_dir, "assets/_database")
     scene_abc_exported = {}
     scene_abc_empty = []
@@ -161,6 +208,7 @@ def export_abcs_from_scenes(list_scenes, current_project_dir, filter_char, subsa
 
     i = 1
     with open(log_file_path, "a") as log_file:
+        # For each scenes
         for file_path in list_scenes:
             if os.path.isfile(file_path):
                 match = re.match(r"^(" + current_project_dir + r"\/shots\/[a-zA-Z0-9_\- \.]+)\/.*$", file_path)
@@ -168,7 +216,8 @@ def export_abcs_from_scenes(list_scenes, current_project_dir, filter_char, subsa
                     shot_folder = match.group(1)
                     abc_export_path = os.path.join(shot_folder, "abc")
                     os.makedirs(abc_export_path, exist_ok=True)
-                    abc_exported = export_char_in_scene(file_path, database_path, abc_export_path,
+                    # Export characters from the current scene
+                    abc_exported = export_chars_in_scene(file_path, database_path, abc_export_path,
                                                         str(i), str(nb_scenes),filter_char, subsample, log_file)
                     if len(abc_exported) > 0:
                         scene_abc_exported[file_path] = abc_exported
@@ -176,6 +225,7 @@ def export_abcs_from_scenes(list_scenes, current_project_dir, filter_char, subsa
                         scene_abc_empty.append(file_path)
             i += 1
 
+        # Export recap
         os.system("cls")
         scene_exported_filled = len(scene_abc_exported) >0
         scene_empty_filled = len(scene_abc_empty) >0
@@ -198,34 +248,55 @@ def export_abcs_from_scenes(list_scenes, current_project_dir, filter_char, subsa
             print_scene(log_file, ["Nothing have been exported"])
 
 def export_all(current_project_dir, scenes, filter_char, subsample, log_file_folder):
+    """
+    Launch in a subprocess the export
+    :param current_project_dir
+    :param scenes
+    :param filter_char: filter to export a specific character
+    :param subsample
+    :param log_file_folder
+    :return:
+    """
     subprocess.check_call(
         [r"C:\Program Files\Autodesk\Maya2022\bin\mayapy.exe", __file__, current_project_dir,
          filter_char, subsample, log_file_folder] + scenes)
 
 
 def run_export_abc_scenes(folder_type, filter_char, subsample, log_file_folder):
+    """
+    Launch the export abcs scenes
+    :param folder_type
+    :param filter_char: filter to export a specific character
+    :param subsample
+    :param log_file_folder
+    :return:
+    """
     filter_char_enabled = len(filter_char) > 0
     current_project_dir = os.getenv("CURRENT_PROJECT_DIR")
+    # Check for the current project dir
     if current_project_dir is None:
         print_warning("CURRENT_PROJECT_DIR has not been found")
         return
     scenes = list_scenes(current_project_dir, folder_type)
+    # Check for the scenes
     if len(scenes) == 0:
         print_warning("No scene found")
         return
     scenes_cpd_stripped = [s.replace(current_project_dir, "") for s in scenes]
     scenes_str = "\n".join(scenes_cpd_stripped)
+    # Preventing message
     if filter_char_enabled:
         msg = "Are you sure to export all "+filter_char+" from these scenes ?\n\n" + scenes_str
     else:
         msg = "Are you sure to export all abcs from these scenes ?\n\n" + scenes_str
     ret = QtWidgets.QMessageBox().question(None, '', msg, QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No)
+    # Launch the export
     if ret == QtWidgets.QMessageBox.Yes:
         thread = Thread(target=export_all, args=(current_project_dir, scenes, filter_char, subsample, log_file_folder))
         thread.start()
 
-
 if __name__ == '__main__':
+    # Launch with command parameters from the subprocess the function that export abcs scenes
     pm.loadPlugin('AbcExport', quiet =True)
     export_abcs_from_scenes(sys.argv[5:], sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
     os.system("pause")

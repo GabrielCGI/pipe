@@ -1,12 +1,16 @@
 from ..tool_models.ActionTool import *
 
 
-class ShadingGroupRenamer(ActionTool):
+class ShadingGroupRenamerTool(ActionTool):
     def __init__(self):
         super().__init__(name="Shading Group Renamer",pref_name="shading_group_renamer",
                          description="Rename Shading Group from Surface Shader", button_text="Rename")
 
     def _action(self):
+        """
+        Rename all the shading groups with a proper name
+        :return:
+        """
         # Get all shading groups in the scene
         shading_groups = pm.ls(type='shadingEngine')
 

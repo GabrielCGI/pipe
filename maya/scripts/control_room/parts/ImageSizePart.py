@@ -16,6 +16,11 @@ _AspectRatios = {
 
 class ImageSizePart(ControlRoomPart):
     def __init__(self, control_room, part_name):
+        """
+        Constructor
+        :param control_room
+        :param part_name
+        """
         super(ImageSizePart, self).__init__(control_room, "Image Size", part_name)
         self.__cam = None
         for cam in pm.ls(type="camera"):
@@ -47,6 +52,10 @@ class ImageSizePart(ControlRoomPart):
         if self.__cam is not None : self.add_dynamic_callbacks()
 
     def populate(self):
+        """
+        Generate the UI content of the ImageSizePart
+        :return: content
+        """
         content = QVBoxLayout()
         content.setContentsMargins(4, 4, 2, 0)
         # Width and Height
@@ -118,13 +127,20 @@ class ImageSizePart(ControlRoomPart):
         content.addLayout(camera_gate_lyt)
         return content
 
-    # On line edit Overscan changed
     def __on_overscan_changed(self):
+        """
+        On line edit Overscan changed set the value to the camera
+        :return:
+        """
         if self.__cam is not None and not self._preset_hovered:
             self.__cam.overscan.set(float(self.__ui_overscan_line_edit.text()))
 
-    # On slider Overscan changed
     def __on_slider_overscan_changed(self, value):
+        """
+        On slider Overscan changed set the value to the camera
+        :param value
+        :return:
+        """
         if self.__cam is not None and not self.__cam.overscan.isLocked() and not self.__cam.overscan.isConnected():
             value = value / 1000
             if value > 0:
@@ -132,8 +148,12 @@ class ImageSizePart(ControlRoomPart):
                 if not self._preset_hovered:
                     self.__cam.overscan.set(value)
 
-    # On click on an aspect ratio button
     def __on_click_ratio_btn(self, ratio):
+        """
+        On click on an aspect ratio button change the aspect ratio and some fields
+        :param ratio:
+        :return:
+        """
         if self.__ratio_selected == ratio:
             self.__ratio_selected = None
         else:
@@ -143,28 +163,41 @@ class ImageSizePart(ControlRoomPart):
             self.__retrieve_aspect_ratio()
         self.refresh_ui()
 
-    # On click on a format button (SD and HD)
     def __on_click_format_btn(self, format):
+        """
+        On click on a format button (SD and HD) set some fields
+        :param format
+        :return:
+        """
         width = _AspectRatios[self.__ratio_selected][format]
         pm.setAttr("defaultResolution.width", width)
         self.__update_height()
         self.__retrieve_aspect_ratio()
         self.refresh_ui()
 
-    # Update the height
     def __update_height(self):
+        """
+        Update the height
+        :return:
+        """
         if self.__ratio_selected is not None:
             pm.setAttr("defaultResolution.height",
                     pm.getAttr("defaultResolution.width") / _AspectRatios[self.__ratio_selected]["ratio"])
 
-    # Update the width
     def __update_width(self):
+        """
+        Update the width
+        :return:
+        """
         if self.__ratio_selected is not None:
             pm.setAttr("defaultResolution.width",
                     pm.getAttr("defaultResolution.height") * _AspectRatios[self.__ratio_selected]["ratio"])
 
-    # Retrieve the aspect ratio
     def __retrieve_aspect_ratio(self):
+        """
+        Retrieve the aspect ratio
+        :return:
+        """
         self.__ratio_selected = None
         aspect_ratio = pm.getAttr("defaultResolution.deviceAspectRatio")
         for name, aspect_ratio_datas in _AspectRatios.items():
@@ -172,15 +205,23 @@ class ImageSizePart(ControlRoomPart):
                 self.__ratio_selected = name
                 break
 
-    # Update the gate attributes
     def __update_gate_attr(self):
+        """
+        Update the gate attributes
+        :return:
+        """
         if self.__cam is not None:
             self.__cam.displayGateMaskOpacity.set(1.0 if self.__is_gate_opaque else 0.7)
             self.__cam.displayGateMaskColor.set((0, 0, 0) if self.__is_gate_opaque else (0.5, 0.5, 0.5))
             self.__cam.displayResolution.set(self.__is_gate_enabled)
 
     def refresh_ui(self):
+        """
+        Refresh the UI
+        :return:
+        """
         try:
+            # Width
             width_retrieved = pm.getAttr("defaultResolution.width")
             stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
                 self._part_name, "width", width_retrieved)
@@ -197,6 +238,7 @@ class ImageSizePart(ControlRoomPart):
                 width_displayed = width_retrieved
                 self.__ui_width_edit.setText(str(width_retrieved))
 
+            # Height
             height_retrieved = pm.getAttr("defaultResolution.height")
             stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
                 self._part_name, "height", height_retrieved)
@@ -210,6 +252,7 @@ class ImageSizePart(ControlRoomPart):
                 height_displayed = height_retrieved
                 self.__ui_height_edit.setText(str(height_retrieved))
 
+            # Aspect ratio / Quality
             aspect_ratio_displayed = width_displayed / height_displayed
 
             stylesheet_selected = "background-color:#2C2C2C"
@@ -253,6 +296,7 @@ class ImageSizePart(ControlRoomPart):
                 and not self.__cam.displayGateMaskOpacity.isConnected()
                 and not self.__cam.displayGateMaskColor.isConnected())
 
+            # Gate
             stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
                 self._part_name, "enable_gate", self.__is_gate_enabled)
             self.__ui_enable_gate_cb.setStyleSheet("QCheckBox{"+stylesheet_lbl+"}")
@@ -275,36 +319,57 @@ class ImageSizePart(ControlRoomPart):
         except:
             pass
 
-    # On checkbox gate enable changed
     def __on_gate_enable_changed(self, state):
+        """
+        On checkbox gate enable changed retrieve the value and update gate
+        :param state
+        :return:
+        """
         if not self._preset_hovered:
             self.__is_gate_enabled = state == 2
             self.__update_gate_attr()
 
-    # On checkbox gate opacity changed
     def __on_gate_opacity_changed(self, state):
+        """
+        On checkbox gate opacity changed retrieve the value and update gate
+        :param state
+        :return:
+        """
         if not self._preset_hovered:
             self.__is_gate_opaque = state == 2
             self.__update_gate_attr()
 
-    # On line edit width changed
     def __on_width_changed(self):
+        """
+        On line edit width changed set width resolution
+        :return:
+        """
         if not self._preset_hovered:
             pm.setAttr("defaultResolution.width", int(self.__ui_width_edit.text()))
             self.__update_height()
 
-    # On line edit height changed
     def __on_height_changed(self):
+        """
+        On line edit height changed set height resolution
+        :return:
+        """
         if not self._preset_hovered:
             pm.setAttr("defaultResolution.height", int(self.__ui_height_edit.text()))
             self.__update_width()
 
-    # Callback that retrieve data and refresh UI
     def __callback(self):
+        """
+        Callback that retrieve data and refresh UI
+        :return:
+        """
         self.__retrieve_aspect_ratio()
         self.refresh_ui()
 
     def add_callbacks(self):
+        """
+        Add the callbacks
+        :return:
+        """
         self.__width_callback = pm.scriptJob(
             attributeChange=["defaultResolution.width", self.__callback])
         self.__height_callback = pm.scriptJob(
@@ -312,31 +377,49 @@ class ImageSizePart(ControlRoomPart):
         self.__aspect_ratio_callback = pm.scriptJob(
             attributeChange=["defaultResolution.deviceAspectRatio", self.__callback])
 
-    # Add dynamic callback for the camera
     def add_dynamic_callbacks(self):
+        """
+        Add dynamic callback for the camera
+        :return:
+        """
         if self.__cam is not None:
             self.__overscan_callback = pm.scriptJob(
                 attributeChange=[self.__cam + '.overscan', self.__callback])
 
     def remove_callbacks(self):
+        """
+        Remove the callbacks
+        :return:
+        """
         pm.scriptJob(kill=self.__width_callback)
         pm.scriptJob(kill=self.__height_callback)
         pm.scriptJob(kill=self.__aspect_ratio_callback)
         self.remove_dynamic_callbacks()
 
-    # Remove dynamic callback for the camera
     def remove_dynamic_callbacks(self):
+        """
+        Remove dynamic callback for the camera
+        :return:
+        """
         if self.__overscan_callback is not None:
             pm.scriptJob(kill=self.__overscan_callback)
             self.__overscan_callback = None
 
-    # retrieve the gate attributes
     def __retrieve_gate_attr(self):
+        """
+        retrieve the gate attributes
+        :return:
+        """
         if self.__cam is not None:
             self.__is_gate_enabled = self.__cam.displayResolution.get()
             self.__is_gate_opaque = self.__cam.displayGateMaskOpacity.get() == 1.0
 
     def add_to_preset(self, preset):
+        """
+        Add fields to a preset
+        :param preset
+        :return:
+        """
         preset.set(self._part_name, "width", pm.getAttr("defaultResolution.width"))
         preset.set(self._part_name, "height", pm.getAttr("defaultResolution.height"))
         if self.__cam is not None:
@@ -345,6 +428,11 @@ class ImageSizePart(ControlRoomPart):
             preset.set(self._part_name, "enable_gate", self.__is_gate_enabled)
 
     def apply(self, preset):
+        """
+        Apply a preset on the part
+        :param preset
+        :return:
+        """
         if preset.contains(self._part_name, "width"):
             width = preset.get(self._part_name, "width")
             pm.setAttr("defaultResolution.width", width)

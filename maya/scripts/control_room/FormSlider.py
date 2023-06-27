@@ -15,12 +15,27 @@ from .ControlRoom import *
 
 
 class FormSliderType(Enum):
+    """
+    Type of a Form Slider
+    """
     IntSlider = 0
     FloatSlider = 1
 
 
 class FormSlider:
     def __init__(self, control_room,  type, name, part_name, field_name, key_preset, min, max, mmax=None):
+        """
+        Constructor
+        :param control_room
+        :param type (see above)
+        :param name
+        :param part_name
+        :param field_name
+        :param key_preset: key in the preset
+        :param min
+        :param max
+        :param mmax: max even for the text form
+        """
         self.__control_room = control_room
         self.__type = type
         self.__name = name
@@ -46,23 +61,36 @@ class FormSlider:
         self.__preset_hovered = False
         self.__retrieve_override()
 
-    # Create an override for the field of the slider
     def __create_override(self):
+        """
+        Create an override for the field of the slider
+        :return:
+        """
         obj_attr = self.__field_name.split(".")
         self.__override = cr.ControlRoom.create_override(obj_attr[0], obj_attr[1])
 
-    # Remove the override
     def __remove_override(self):
+        """
+        Remove the override
+        :return:
+        """
         cr.ControlRoom.remove_override(self.__override)
         self.__override = None
 
-    # retrieve an override corresponding to the slider
     def __retrieve_override(self):
+        """
+        Retrieve an override corresponding to the slider
+        :return:
+        """
         obj_attr = self.__field_name.split(".")
         self.__override = cr.ControlRoom.retrieve_override(obj_attr[0], obj_attr[1])
 
-    # On value of slider changed
     def __on_slider_value_changed(self, value):
+        """
+        On value of slider changed retrieve the value
+        :param value:
+        :return:
+        """
         if self.__type is FormSliderType.IntSlider:
             value = int(value)
         else:
@@ -71,16 +99,23 @@ class FormSlider:
         if not self.__preset_hovered:
             pm.setAttr(self.__field_name, value)
 
-    # On value of line edit changed
+    #
     def __on_edit_value_changed(self):
+        """
+        On value of line edit changed retrieve the value
+        :return:
+        """
         str_value = self.__ui_value_line_edit.text()
         value = float(str_value)
         self.__ui_slider.setValue(value)
         if not self.__preset_hovered:
             pm.setAttr(self.__field_name, value)
 
-    # Generate the UI for the slider
     def generate_ui(self):
+        """
+        Generate the UI for the slider
+        :return:
+        """
         # Label
         self.__ui_lbl_widget = QLabel(self.__name)
         self.__ui_lbl_widget.setAlignment(Qt.AlignCenter)
@@ -119,8 +154,11 @@ class FormSlider:
         lyt.addWidget(self.__ui_slider, 3)
         return self.__ui_lbl_widget, self.__ui_background_widget
 
-    # Refresh the UI
     def refresh_ui(self):
+        """
+        Refresh the UI
+        :return:
+        """
         try:
             val = pm.getAttr(self.__field_name)
             if val >= self.__max:
@@ -151,16 +189,25 @@ class FormSlider:
         except:
             pass
 
-    # Add callbacks
     def add_callbacks(self):
+        """
+        Add callbacks
+        :return:
+        """
         self.__callback = pm.scriptJob(attributeChange=[self.__field_name, self.refresh_ui])
         self.__layer_callback = pm.scriptJob(event=["renderLayerManagerChange", self.refresh_ui])
 
-    # remove callbacks
     def remove_callbacks(self):
+        """
+        remove callbacks
+        :return:
+        """
         pm.scriptJob(kill=self.__callback)
         pm.scriptJob(kill=self.__layer_callback)
 
-    # Getter of the key preset and the field name
     def get_key_preset_and_field(self):
+        """
+        Getter of the key preset and the field name
+        :return:
+        """
         return self.__key_preset, self.__field_name

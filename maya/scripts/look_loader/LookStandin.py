@@ -15,6 +15,11 @@ class LookPresentState(Enum):
 class LookStandin(ABC):
     @staticmethod
     def __get_free_operator_slot(standin):
+        """
+        Get the first free operator slot of the StandIn
+        :param standin
+        :return: index slot
+        """
         index = 0
         while True:
             if pm.getAttr(standin + ".operators[" + str(index) + "]") is None:
@@ -22,6 +27,12 @@ class LookStandin(ABC):
             index += 1
 
     def __init__(self, standin, standin_name, object_name):
+        """
+        Constructor
+        :param standin
+        :param standin_name
+        :param object_name
+        """
         self.__object_name = object_name
         self._valid = True
         self._standin = standin
@@ -29,27 +40,50 @@ class LookStandin(ABC):
         self._looks = {}
         self._uvs = []
 
-    # Getter of object name
     def get_object_name(self):
+        """
+        Getter of object name
+        :return: object name
+        """
         return self.__object_name
 
-    # Getter of standin name
+    #
     def get_standin_name(self):
+        """
+        Getter of standin name
+        :return: standin name
+        """
         return self._standin_name
 
-    # Getter ofthe  standin
+    # Getter of the standin
     def get_standin(self):
+        """
+        Getter of the standin
+        :return: standin
+        """
         return self._standin
 
     # Getter of the looks
     def get_looks(self):
+        """
+        Getter of the looks
+        :return: looks
+        """
         return self._looks
 
     # Getter of whether the standin object is valid
     def is_valid(self):
+        """
+        Getter of whether the standin object is valid
+        :return: is valid
+        """
         return self._valid
 
     def is_looks_up_to_date(self):
+        """
+        Getter of whether the looks are up to date
+        :return: is looks up to date
+        """
         for look_name, look_data in self._looks.items():
             look_state = look_data[1]
             if (look_name in ["default", "override"] and look_state == LookPresentState.NotPlugged) or \
@@ -57,8 +91,13 @@ class LookStandin(ABC):
                 return False
         return True
 
-    # Add Looks to the operators
+    #
     def add_looks(self, filepath_looks):
+        """
+        Add Looks to the operators
+        :param filepath_looks
+        :return:
+        """
         for look_filepath in filepath_looks:
             for look_name, look_data in self._looks.items():
                 if look_data[0] == look_filepath:
@@ -75,8 +114,12 @@ class LookStandin(ABC):
                             LookStandin.__get_free_operator_slot(self._standin)]
         pm.select(clear=True)
 
-    # Update existent Looks to the operators
+    #
     def update_existent_looks(self):
+        """
+        Update existent Looks to the operators
+        :return:
+        """
         for look_name, look_data in self._looks.items():
             look_filepath = look_data[0]
             look_state = look_data[1]
@@ -91,18 +134,39 @@ class LookStandin(ABC):
 
     @abstractmethod
     def is_uv_up_to_date(self):
+        """
+        Getter of whether the uvs are up to date
+        :return: is uv up to date
+        """
         pass
 
     @abstractmethod
     def retrieve_uvs(self, current_project_dir):
+        """
+        Retrieve the UVs
+        :param current_project_dir
+        :return:
+        """
         pass
 
     @abstractmethod
     def retrieve_looks(self, current_project_dir):
+        """
+        Retrieve the looks
+        :param current_project_dir
+        :return:
+        """
         pass
 
-
     def _retrieve_looks_aux(self, current_project_dir, folder_sublook, suffix_operator, check_for_override=False):
+        """
+        Auxiliary function to retrieve looks
+        :param current_project_dir
+        :param folder_sublook
+        :param suffix_operator
+        :param check_for_override
+        :return:
+        """
         # Looks
         looks = {}
 
@@ -177,27 +241,41 @@ class LookStandin(ABC):
 class LookAsset(LookStandin):
     @staticmethod
     def get_uvs(standin_name, current_project_dir):
+        """
+        Getter of UVs
+        :param standin_name
+        :param current_project_dir
+        :return: uvs
+        """
         assets_folder = os.path.join(current_project_dir, "assets")
         uv_folder = os.path.join(assets_folder, standin_name, "abc")
         uvs = []
         if os.path.isdir(uv_folder):
             for file in os.listdir(uv_folder):
                 file_path = os.path.join(uv_folder, file)
-                print("LOG: %s"%file_path)
+                print("LOG: %s" % file_path)
                 match = re.match(r".*mod(?:\.v([0-9]{3}))?\.abc", file, re.IGNORECASE)
                 if os.path.isfile(file_path) and match:
                     try:
                         uvs.append((int(match.group(1)), file_path))
                     except:
                         print("INT MATCH GROUP FAILED")
-
             uvs = sorted(uvs, reverse=True)
         return uvs
 
     def retrieve_looks(self, current_project_dir):
+        """
+        Retrieve the looks
+        :param current_project_dir
+        :return:
+        """
         self._retrieve_looks_aux(current_project_dir, "look", "_operator", True)
 
     def is_uv_up_to_date(self):
+        """
+        Getter of whether the uvs are up to date
+        :return: is uv up to date
+        """
         if len(self._uvs) == 0:
             return True
         dso = self._standin.dso.get()
@@ -207,11 +285,20 @@ class LookAsset(LookStandin):
         return int(match.group(1)) == self._uvs[0][0]
 
     def retrieve_uvs(self, current_project_dir):
+        """
+        Retrieve the UVs
+        :param current_project_dir
+        :return:
+        """
         self._uvs = LookAsset.get_uvs(self._standin_name, current_project_dir)
         if len(self._uvs) == 0:
             self._valid = False
 
     def update_uvs(self):
+        """
+        Update the UVs
+        :return:
+        """
         if len(self._uvs) == 0:
             print_warning("No mod files found for " + self.__object_name, char_filler='-')
             return
@@ -219,9 +306,18 @@ class LookAsset(LookStandin):
 
 class LookFur(LookStandin):
     def retrieve_looks(self, current_project_dir):
+        """
+        Retrieve the looks
+        :param current_project_dir
+        :return:
+        """
         self._retrieve_looks_aux(current_project_dir, "look_fur", "_fur", False)
 
     def is_uv_up_to_date(self):
+        """
+        UVs always up to date with fur
+        :return: is uv up to date
+        """
         return True
 
     def retrieve_uvs(self, current_project_dir):

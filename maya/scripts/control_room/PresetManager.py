@@ -11,9 +11,12 @@ class PresetManager:
     # ################################################### Singleton ####################################################
     __instance = None
 
-    # Getter of the instance for the Singleton pattern
     @staticmethod
     def get_instance():
+        """
+        Getter of the instance for the Singleton pattern
+        :return: instance of PresetManager
+        """
         if PresetManager.__instance is None:
             PresetManager.__instance = PresetManager()
             PresetManager.__instance.retrieve_presets()
@@ -27,13 +30,20 @@ class PresetManager:
         self.__default_presets = []
         self.__active_preset = None
 
-    # Clear the presets
     def clear(self):
+        """
+        Clear the presets
+        :return:
+        """
         self.__presets.clear()
         self.__active_preset = None
 
-    # Add a preset
     def add_preset(self, preset_to_add):
+        """
+        Add a preset
+        :param preset_to_add
+        :return:
+        """
         to_remove = None
         for preset in self.__presets:
             if preset.get_name() == preset_to_add.get_name():
@@ -48,20 +58,31 @@ class PresetManager:
         if preset_to_add not in self.__presets:
             self.__presets.append(preset_to_add)
 
-    # Remove a preset
     def remove_preset(self, preset_to_remove):
+        """
+        Remove a preset
+        :param preset_to_remove
+        :return:
+        """
         if preset_to_remove is not None:
             self.__presets.remove(preset_to_remove)
 
-    # Setter of the active state of a preset
     def set_preset_active(self, active_preset):
+        """
+        Setter of the active state of a preset
+        :param active_preset
+        :return:
+        """
         # Set all presets to inactive except the wanted one
         if active_preset is not None:
             for preset in self.__presets:
                 preset.set_active(preset is active_preset)
 
-    # Retrieve the existing presets in the scene
     def retrieve_presets(self):
+        """
+        Retrieve the existing presets in the scene
+        :return:
+        """
         self.clear()
         if "presets" in pm.fileInfo:
             found_active = False
@@ -76,24 +97,36 @@ class PresetManager:
             except:
                 print_warning("Error while trying to parse an existing preset")
 
-    # Save presets in the scene
     def save_presets(self):
+        """
+        Save presets in the scene
+        :return:
+        """
         arr_json_presets = []
         for preset in self.__presets:
             arr_json_presets.append(preset.to_preset_array())
         pm.fileInfo["presets"] = json.dumps(arr_json_presets)
 
-    # Getter of the presets
     def get_presets(self):
+        """
+        Getter of the presets
+        :return: presets
+        """
         self.__presets.sort(key=lambda x: x.get_name())
         return self.__presets
 
-    # Getter of the default presets
     def get_default_presets(self):
+        """
+        Getter of the default presets
+        :return: default presets
+        """
         return self.__default_presets
 
-    # Retrieve all the default presets
     def retrieve_default_presets(self):
+        """
+        Retrieve all the default presets
+        :return:
+        """
         self.__default_presets = []
         default_preset_dir = os.path.join(os.path.dirname(__file__), "default_preset")
         for preset_filename in os.listdir(default_preset_dir):
@@ -106,9 +139,13 @@ class PresetManager:
             except:
                 print_warning("Error while trying to parse a default preset : "+preset_path)
 
-
-    # Getter of whether a preset exist with a given name
     def has_preset_with_name(self, name):
+        """
+        Getter of whether a preset exist with a given name
+        :param name
+        :return: has preset with name
+        """
         for preset in self.__presets:
             if preset.get_name() == name:
                 return True
+        return False

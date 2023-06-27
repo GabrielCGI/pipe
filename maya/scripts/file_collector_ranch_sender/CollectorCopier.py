@@ -39,9 +39,13 @@ _LENGTH_HEADER_FOOTER = 200
 
 class CollectorCopier:
 
-    # Generate the dict data for a path
     @staticmethod
     def __generate_data_for_path(path):
+        """
+        Generate the dict data for a path
+        :param path
+        :return: data
+        """
         if not os.path.exists(path):
             return None
         match = re.match(r"^([A-Z]):[\\/](.*)$", path)
@@ -57,7 +61,21 @@ class CollectorCopier:
             }
         return None
 
+    @staticmethod
+    def __to_str_past_time(time_start, time_end):
+        """
+        Get the string of the time past
+        :param time_start
+        :param time_end
+        :return: time past string
+        """
+        return time.strftime("%H:%M:%S", time.gmtime(time_end - time_start))
+
     def __init__(self, force_override_ass_paths_files=False):
+        """
+        Constructor
+        :param force_override_ass_paths_files
+        """
         self.__datas = []
         self.__force_override_ass_paths_files = force_override_ass_paths_files
         self.__scene_path = ""
@@ -70,11 +88,11 @@ class CollectorCopier:
         self.__output_queue = Queue()
         self.__output_enabled = False
 
-    def __to_str_past_time(self, time_start, time_end):
-        return time.strftime("%H:%M:%S", time.gmtime(time_end - time_start))
-
-    # Init some attributes for the copy and logs
     def __reinit_copy_attributes(self):
+        """
+        Init some attributes for the copy and logs
+        :return:
+        """
         self.__total_file_size = 0
         self.__current_file_size = 0
         self.__total_file_nb = 0
@@ -83,8 +101,11 @@ class CollectorCopier:
         self.__datas_length = len(self.__datas)
         self.__max_length_path = 0
 
-    # Save datas during the collect phase
     def __store_datas(self):
+        """
+        Save datas during the collect phase
+        :return:
+        """
         collector_copier_dict = {
             "datas": self.__datas,
             "scene_path": self.__scene_path,
@@ -95,8 +116,12 @@ class CollectorCopier:
         f.write(json_dict)
         f.close()
 
-    # Retrieve datas during the copy phase saved during the collect phase
     def __retrieve_datas(self, file_data_path):
+        """
+        Retrieve datas during the copy phase saved during the collect phase
+        :param file_data_path
+        :return:
+        """
         self.__data_file_name = file_data_path
         f = open(self.__data_file_name, "r")
         json_dict = f.read()
@@ -109,15 +134,23 @@ class CollectorCopier:
             "file_logs_name"] if "file_logs_name" in collector_copier_dict else ""
         self.__reinit_copy_attributes()
 
-    # Output informations (write into logs and print in console)
     def __output(self, msg, print_msg=True):
+        """
+        Output informations (write into logs and print in console)
+        :param msg
+        :param print_msg
+        :return:
+        """
         self.__log_file.write(msg + "\n")
         self.__log_file.flush()
         if print_msg:
             print(msg, flush=True)
 
-    # Output the logs in a file and text thanks to a message queue
     def __thread_output(self):
+        """
+        Output the logs in a file and text thanks to a message queue
+        :return:
+        """
         while self.__output_enabled or not self.__output_queue.empty():
             if not self.__output_queue.empty():
                 msg = self.__output_queue.get_nowait()
@@ -127,7 +160,13 @@ class CollectorCopier:
                 time.sleep(0.5)
 
     # #################################################### COLLECT #####################################################
+
     def __get_paths_with_udim(self, path):
+        """
+        Check the UDIMs for a path
+        :param path
+        :return: array of paths
+        """
         paths = []
         folder, filename = os.path.split(path)
         if not os.path.exists(folder):
@@ -146,9 +185,14 @@ class CollectorCopier:
         else:
             return [path] if os.path.exists(path) else []
 
-    # Retrieve the paths dependent of a path (can be relative or absolute and an UDIM)
-    # Check the UDIMS and if the path is relative
     def __retrieve_dependent_paths(self, path, check_relative_path=True):
+        """
+        Retrieve the paths dependent of a path (can be relative or absolute and an UDIM)
+        Check the UDIMS and if the path is relative
+        :param path
+        :param check_relative_path
+        :return:
+        """
         paths = []
         folder = os.path.dirname(path)
         if os.path.exists(folder):
@@ -167,8 +211,11 @@ class CollectorCopier:
                         break
         return paths
 
-    # Retrieve all the paths used in Maya Scene
     def __retrieve_paths_in_maya(self):
+        """
+        Retrieve all the paths used in Maya Scene
+        :return:
+        """
         time_start = time.time()
         self.__output("\n+- Start retrieve all the paths in Maya -----")
         count_path = 1
@@ -241,10 +288,13 @@ class CollectorCopier:
                 self.__datas.append(path)
 
         self.__output("+- End retrieve all the paths in Maya [" + str(nb_added) + "] ----- " +
-                      self.__to_str_past_time(time_start, time.time()) + " -----")
+                      CollectorCopier.__to_str_past_time(time_start, time.time()) + " -----")
 
-    # Retrieve all paths in the ass files
     def __retrieve_ass_paths(self):
+        """
+        Retrieve all paths in the ass files
+        :return:
+        """
         time_start = time.time()
         self.__output("\n+- Start retrieve all the paths in ASS files -----")
         list_standin = pm.ls(type='aiStandIn')
@@ -374,12 +424,16 @@ class CollectorCopier:
             i += 1
 
         self.__output("+- End retrieve all the paths in ASS files [" + str(ass_paths_count) + "] ----- " +
-                      self.__to_str_past_time(time_start, time.time()) + " -----")
+                      CollectorCopier.__to_str_past_time(time_start, time.time()) + " -----")
 
     # ###################################################### COPY ######################################################
 
-    # Copy with datas to Ranch
     def __copy_from_data(self, data):
+        """
+        Copy with datas to Ranch
+        :param data
+        :return:
+        """
         path_src = data["src"]
         path_dest = data["dest"]
         size_src = data["size"]
@@ -418,8 +472,11 @@ class CollectorCopier:
                 msg = "| error while copying " + path_src + " : " + str(e)
                 self.__output_queue.put(msg.ljust(str_length, " ") + "|")
 
-    # Thread of copy : It takes the data of the current file and copy it. It then take the next available
     def __thread_copy_file(self):
+        """
+        Thread of copy : It takes the data of the current file and copy it. It then take the next available
+        :return:
+        """
         file_available = True
         while file_available:
             # Increment current data Index
@@ -434,8 +491,11 @@ class CollectorCopier:
                 # Copy the current file
                 self.__copy_from_data(file_datas)
 
-    # Copy all the files retrieved
     def __copy(self):
+        """
+        Copy all the files retrieved
+        :return:
+        """
         time_start = time.time()
 
         # Sort the files according to their size to be more efficient.
@@ -479,24 +539,34 @@ class CollectorCopier:
 
         with self.__progress_lock:
             msg = "+- Copy On RANCH Finished ----- " + \
-                  self.__to_str_past_time(time_start, time.time())
+                  CollectorCopier.__to_str_past_time(time_start, time.time())
 
             self.__output_queue.put(
                 msg.ljust(self.__max_length_path + count_file_str_length + _LENGTH_PADDING, "-") + "+")
 
-    # Start the thread for writing in log file during copy
     def __start_thread_log(self):
+        """
+        Start the thread for writing in log file during copy
+        :return:
+        """
         self.__output_enabled = True
         self.__thread_output = threading.Thread(target=self.__thread_output)
         self.__thread_output.start()
 
-    # Stop the log thread
     def __stop_thread_log(self):
+        """
+        Stop the log thread
+        :return:
+        """
         self.__output_enabled = False
         self.__thread_output.join()
 
     # ##################################################### COMMON #####################################################
     def __generate_log_data(self):
+        """
+        Generate data for logs
+        :return:
+        """
         scene_dirname, scene_basename = os.path.split(self.__scene_path)
         match_name = re.match(r"^(.*)\.(?:ma|mb)$", scene_basename)
         scene_name = match_name.group(1)
@@ -508,27 +578,42 @@ class CollectorCopier:
         self.__log_file_name = name_file + ".log"
         self.__data_file_name = name_file + ".data"
 
-    # Create and start appending in the log file
     def __start_log(self):
+        """
+        Create and start appending in the log file
+        :return:
+        """
         self.__log_file = open(self.__log_file_name, "a")
 
-    # Close the log file
     def __stop_log(self):
+        """
+        Close the log file
+        :return:
+        """
         self.__log_file.close()
 
-    # Generate the logs file name and the Header
     def __header_log(self):
+        """
+        Generate the logs file name and the Header
+        :return:
+        """
         padding_length = (_LENGTH_HEADER_FOOTER - 21) // 2
         header = padding_length * "#" + " " + time.strftime("%Y-%m-%d %H:%M:%S") + " " + padding_length * "#"
         self.__output(header, False)
 
-    # Generate the Footer
     def __footer_log(self):
+        """
+        Generate the Footer
+        :return:
+        """
         footer = _LENGTH_HEADER_FOOTER * "#"
         self.__output_queue.put(footer, False)
 
-    # Generate all the datas from the file path
     def __generate_ranged_cache_dest(self):
+        """
+        Generate all the datas from the file path
+        :return:
+        """
         ranged_cache_paths = []
         for path in self.__datas:
             data = CollectorCopier.__generate_data_for_path(path)
@@ -538,8 +623,11 @@ class CollectorCopier:
 
     # ###################################################### RUN #######################################################
 
-    # Run Collector and Copier to Ranch
     def run_collect(self):
+        """
+        Run Collector and Copier to Ranch
+        :return:
+        """
         self.__datas.clear()
         self.__scene_path = pm.sceneName()
 
@@ -560,14 +648,24 @@ class CollectorCopier:
 
         # COPY
         self.__store_datas()
+
+        # Out of Maya Window
         dirname = os.path.dirname(__file__)
         si = subprocess.STARTUPINFO()
         si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
         subprocess.Popen(["python", os.path.join(dirname, "copy_to_distant.py"), self.__data_file_name], startupinfo=si)
+        ## Within Maya Window
+        # collector_copier = CollectorCopier()
+        # collector_copier.run_copy(self.__data_file_name)
 
         self.__stop_log()
 
     def run_copy(self, file_data_path):
+        """
+        Run the Copy of the CollectorCopier
+        :param file_data_path:
+        :return:
+        """
         self.__retrieve_datas(file_data_path)
         self.__start_log()
         self.__start_thread_log()

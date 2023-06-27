@@ -51,22 +51,36 @@ PRESET_CONTAINS_AND_DIFFERENT_LABEL_COLOR = "rgb(53, 200, 223)"
 
 class ControlRoom(QDialog):
 
-    # Generic function that create an override for an attribute of an object
     @staticmethod
     def create_override(obj_name, attr_name):
+        """
+        Generic function that create an override for an attribute of an object
+        :param obj_name:
+        :param attr_name:
+        :return: override
+        """
         visible_layer = render_setup.instance().getVisibleRenderLayer()
         col = visible_layer.renderSettingsCollectionInstance()
         return col.createAbsoluteOverride(obj_name, attr_name)
 
-    # Generic function that remove an override
     @staticmethod
     def remove_override(override):
+        """
+        Generic function that remove an override
+        :param override:
+        :return:
+        """
         if override is not None:
             maya_override.delete(override)
 
-    # Generic function that retrieve an override for an attribute of an object
     @staticmethod
     def retrieve_override(obj_name, attr_name):
+        """
+        Generic function that retrieve an override for an attribute of an object
+        :param obj_name:
+        :param attr_name:
+        :return: override
+        """
         visible_layer = render_setup.instance().getVisibleRenderLayer()
         for override in render_setup_utils.getOverridesRecursive(visible_layer):
             if override.typeName() == "absUniqueOverride" and obj_name == override.targetNodeName() and attr_name == override.attributeName():
@@ -119,9 +133,12 @@ class ControlRoom(QDialog):
         else:
             self.close()
 
-    # Test if Arnold is loaded and display a warning popup if it is not
     @staticmethod
     def test_arnold_renderer():
+        """
+        Test if Arnold is loaded and display a warning popup if it is not
+        :return: is arnold renderer loaded
+        """
         arnold_renderer_loaded = pm.objExists("defaultArnoldRenderOptions")
         if not arnold_renderer_loaded:
             msg = QMessageBox()
@@ -133,15 +150,21 @@ class ControlRoom(QDialog):
             msg.exec_()
         return arnold_renderer_loaded
 
-    # Save preferences
     def __save_prefs(self):
+        """
+        v
+        :return:
+        """
         size = self.size()
         self.__prefs["window_size"] = {"width": size.width()}
         pos = self.pos()
         self.__prefs["window_pos"] = {"x": pos.x(), "y": pos.y()}
 
-    # Retrieve preferences
     def __retrieve_prefs(self):
+        """
+        Retrieve preferences
+        :return:
+        """
         if "window_size" in self.__prefs:
             size = self.__prefs["window_size"]
             self.__ui_width = size["width"]
@@ -149,13 +172,19 @@ class ControlRoom(QDialog):
             pos = self.__prefs["window_pos"]
             self.__ui_pos = QPoint(pos["x"], pos["y"])
 
-    # Remove callbacks and save preferences
     def hideEvent(self, arg__1: QCloseEvent) -> None:
+        """
+        Remove callbacks and save preferences
+        :return:
+        """
         self.__remove_callbacks()
         self.__save_prefs()
 
-    # Create the ui
     def __create_ui(self):
+        """
+        Create the ui
+        :return:
+        """
         # Reinit attributes of the UI
         self.setMinimumWidth(self.__ui_min_width)
         self.setFixedHeight(self.__ui_height)
@@ -180,21 +209,41 @@ class ControlRoom(QDialog):
         # Presets Part
         main_lyt.addLayout(self.__preset_part.create_ui())
 
-    # Refresh the ui according to the model attribute
     def __refresh_ui(self):
+        """
+        Refresh the ui according to the model attribute
+        :return:
+        """
         for part in self.__parts:
             part.refresh_ui()
         self.__preset_part.refresh_ui()
 
     def set_hovered_preset(self, preset):
+        """
+        Setter of the hovered preset
+        :param preset
+        :return:
+        """
         self.__hovered_preset = preset
         for part in self.__parts:
             part.refresh_ui()
 
     def get_hovered_preset(self):
+        """
+        Getter of the hovered preset
+        :return: hovered preset
+        """
         return self.__hovered_preset
 
     def get_stylesheet_color_for_field(self, part_name, field_name, val, override=None):
+        """
+        Get the right color for a filed according to the state of the hovered preset and the value
+        :param part_name
+        :param field_name
+        :param val
+        :param override
+        :return:
+        """
         if self.__hovered_preset and self.__hovered_preset.contains(part_name, field_name):
             if self.__hovered_preset.get(part_name, field_name) != val:
                 ss_color = "color:" + cr.PRESET_CONTAINS_AND_DIFFERENT_LABEL_COLOR
@@ -207,24 +256,38 @@ class ControlRoom(QDialog):
         return ss_color
 
     def on_new_scene(self):
+        """
+        On new scene hide and close the control room
+        :return:
+        """
         self.hide()
         self.close()
 
-    # Add the callbacks of all parts
     def __add_callbacks(self):
+        """
+        Add the callbacks of all parts
+        :return:
+        """
         self.__new_scene_callback = pm.scriptJob(runOnce=True, event=["SceneOpened", self.on_new_scene])
         for part in self.__parts:
             part.add_callbacks()
         self.__preset_part.add_callbacks()
 
-    # Remove the callbacks of all parts
     def __remove_callbacks(self):
+        """
+        Remove the callbacks of all parts
+        :return:
+        """
         for part in self.__parts:
             part.remove_callbacks()
         self.__preset_part.remove_callbacks()
 
-    # Generate a preset with the attributes of all parts
     def generate_preset(self, preset_name):
+        """
+        Generate a preset with the attributes of all parts
+        :param preset_name:
+        :return:
+        """
         preset_manager = PresetManager.get_instance()
         preset = Preset(name=preset_name, active=True)
         for part in self.__parts:
@@ -235,8 +298,12 @@ class ControlRoom(QDialog):
             preset_manager.add_preset(preset)
             preset_manager.save_presets()
 
-    # Apply a preset to all parts
     def apply_preset(self, preset):
+        """
+        Apply a preset to all parts
+        :param preset:
+        :return:
+        """
         for part in self.__parts:
             part.apply(preset)
         self.__preset_part.apply(preset)

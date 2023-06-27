@@ -14,13 +14,22 @@ from common.utils import *
 
 class ControlRoomPart(ABC):
     def __init__(self, control_room, name, part_name):
+        """
+        Constructor
+        :param control_room
+        :param name
+        :param part_name
+        """
         self._control_room = control_room
         self._name = name
         self._part_name = part_name
         self._preset_hovered = False
 
-    # Generate the part's UI
     def create_ui(self):
+        """
+        Generate the UI of the part
+        :return:
+        """
         lyt = QVBoxLayout()
         lyt.setSpacing(2)
         lyt.setAlignment(Qt.AlignTop)
@@ -33,32 +42,52 @@ class ControlRoomPart(ABC):
         lyt.addLayout(self.populate())
         return lyt
 
-    # Generate the UI content of the part
     @abstractmethod
     def populate(self):
+        """
+        Generate the UI content of the part
+        :return:
+        """
         pass
 
-    # Refresh the part's UI
     @abstractmethod
     def refresh_ui(self):
+        """
+        Refresh the part's UI
+        :return:
+        """
         pass
 
-    # Add the part's callbacks
     @abstractmethod
     def add_callbacks(self):
+        """
+        Add the callbacks
+        :return:
+        """
         pass
 
-    # Remove the part's callbacks
     @abstractmethod
     def remove_callbacks(self):
+        """
+        Remove the callbacks
+        :return:
+        """
         pass
 
-    # Generate the part's attributes in the preset
     @abstractmethod
     def add_to_preset(self, preset):
+        """
+        Generate the part's attributes in the preset
+        :param preset:
+        :return:
+        """
         pass
 
-    # Apply the preset
     @abstractmethod
     def apply(self, preset):
+        """
+        Apply the preset
+        :param preset:
+        :return:
+        """
         pass

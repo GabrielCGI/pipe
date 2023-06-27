@@ -3,6 +3,10 @@ import pymel.core as pm
 
 
 def run():
+    """
+    Toggle the studio in the scene
+    :return:
+    """
     studio_filepath = (os.path.dirname(__file__) + "/assets/studio.mb").replace("\\","/")
     # Find existing and remove reference if found
     for ref in pm.listReferences():

@@ -5,9 +5,18 @@ from common.utils import *
 
 class LookFactory:
     def __init__(self, current_project_dir):
+        """
+        Constructor
+        :param current_project_dir
+        """
         self.__current_project_dir = current_project_dir
 
     def generate(self, standin):
+        """
+        Generate a LookStandIn according to the StandIn
+        :param standin
+        :return: LookStandIn
+        """
         standin_trsf = standin.getParent()
         trsf_name = standin_trsf.name()
         object_name = trsf_name

@@ -31,10 +31,15 @@ _FILE_NAME_PREFS = "character_publisher"
 
 
 class CharacterPublisher(QDialog):
-
-    # Generate a path corresponding to the output tx
     @staticmethod
     def texture_path_to_output_tx_path(texture_path, color_space, render_color_space):
+        """
+        Generate a path corresponding to the output tx
+        :param texture_path
+        :param color_space
+        :param render_color_space
+        :return:
+        """
         texture_path = os.path.normpath(texture_path)
         dir_path, file_ext = os.path.splitext(texture_path)
         file_name = os.path.basename(dir_path)
@@ -47,9 +52,13 @@ class CharacterPublisher(QDialog):
 
         return output_path, output_path_legacy
 
-    # Check if color sets diffferent from "Pref" exists
     @staticmethod
     def __check_color_sets(color_set_name):
+        """
+        Check if color sets diffferent from "Pref" exists
+        :param color_set_name
+        :return:
+        """
         # Get the selected objects
         selected_objects = pm.selected()
 
@@ -89,9 +98,13 @@ class CharacterPublisher(QDialog):
             except:
                 continue
 
-    # Get the file path attributes from a texture node (File or image here)
     @staticmethod
     def get_path_from_texture_node(tex_node):
+        """
+        Get the file path attributes from a texture node (File or image here)
+        :param tex_node
+        :return:
+        """
         if pm.objectType(tex_node, isType="file"):
             return tex_node.fileTextureName.get()
         elif pm.objectType(tex_node, isType="aiImage"):
@@ -99,9 +112,14 @@ class CharacterPublisher(QDialog):
         else:
             return None
 
-    # Set the file path attributes to a texture node (File or image here)
     @staticmethod
     def set_path_to_texture_node(tex_node, path):
+        """
+        Set the file path attributes to a texture node (File or image here)
+        :param tex_node
+        :param path
+        :return:
+        """
         if pm.objectType(tex_node, isType="file"):
             tex_node.fileTextureName.set(path)
         elif pm.objectType(tex_node, isType="aiImage"):
@@ -159,8 +177,11 @@ class CharacterPublisher(QDialog):
             msg.setInformativeText('Make sure the opened scene is good and retry')
             msg.exec_()
 
-    # Save preferences
     def __save_prefs(self):
+        """
+        Save preferences
+        :return:
+        """
         size = self.size()
         self.__prefs["window_size"] = {"width": size.width(), "height": size.height()}
         pos = self.pos()
@@ -168,8 +189,11 @@ class CharacterPublisher(QDialog):
         self.__prefs["publish_uv"] = self.__publish_uv
         self.__prefs["publish_look"] = self.__publish_look
 
-    # Retrieve preferences
     def __retrieve_prefs(self):
+        """
+        Retrieve preferences
+        :return:
+        """
         if "window_size" in self.__prefs:
             size = self.__prefs["window_size"]
             self.__ui_width = size["width"]
@@ -190,20 +214,34 @@ class CharacterPublisher(QDialog):
         pass
 
     def hideEvent(self, arg__1: QCloseEvent) -> None:
+        """
+        Remove callbacks and save preferences
+        :return:
+        """
         self.__remove_callback()
         self.__save_prefs()
 
     def __add_callback(self):
+        """
+        Add callbacks
+        :return:
+        """
         self.__selection_callback = \
             OpenMaya.MEventMessage.addEventCallback("SelectionChanged", self.__on_selection_changed)
 
-    # Remove the selection callback
     def __remove_callback(self):
+        """
+        Remove the selection callback
+        :return:
+        """
         if self.__selection_callback is not None:
             OpenMaya.MMessage.removeCallback(self.__selection_callback)
 
-    # Guess the asset directory and name from the current scene name.
     def __retrieve_dir_and_asset_from_scene_name(self):
+        """
+        Guess the asset directory and name from the current scene name
+        :return:
+        """
         scene = pm.system.sceneName()
         split = scene.split("/")
         split[0] = split[0] + "\\"
@@ -212,8 +250,11 @@ class CharacterPublisher(QDialog):
                 self.__asset_dir = os.path.join(*split[0:-(i - 1)])
                 self.__asset_name = split[-i]
 
-    # Create the ui
     def __create_ui(self):
+        """
+        Create the ui
+        :return:
+        """
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
@@ -256,8 +297,11 @@ class CharacterPublisher(QDialog):
         self.__ui_publish_btn.clicked.connect(self.__on_publish)
         options_lyt.addWidget(self.__ui_publish_btn, 2, 0, 1, 2)
 
-    # Refresh the ui according to the model attribute
     def __refresh_ui(self):
+        """
+        Refresh the ui according to the model attribute
+        :return:
+        """
         self.__ui_look_publish_cb.setChecked(self.__publish_look)
         self.__ui_uv_publish_cb.setChecked(self.__publish_uv)
         self.__ui_look_name.setEnabled(self.__publish_look)
@@ -266,27 +310,47 @@ class CharacterPublisher(QDialog):
         no_empty_sel = len(self.__selection) > 0
         self.__ui_publish_btn.setEnabled(no_empty_sel and (self.__publish_look or self.__publish_uv))
 
-    # On publish UV checkbox checked
     def __on_uv_publish_state_changed(self, state):
+        """
+        On publish UV checkbox checked
+        :param state
+        :return:
+        """
         self.__publish_uv = state == 2
         self.__refresh_ui()
 
-    # On publish look checkbox checked
     def __on_look_publish_state_changed(self, state):
+        """
+        On publish look checkbox checked
+        :param state
+        :return:
+        """
         self.__publish_look = state == 2
         self.__refresh_ui()
 
-    # On Look name changed
     def __on_look_name_changed(self, value):
+        """
+        On Look name changed
+        :param value
+        :return:
+        """
         self.__look_name = value
 
-    # On scene selection changed
     def __on_selection_changed(self, *args, **kwargs):
+        """
+        On scene selection changed
+        :param args
+        :param kwargs
+        :return:
+        """
         self.__retrieve_datas()
         self.__refresh_ui()
 
-    # Retrieve all the detas (selection, abc dir, abc name and texture nodes)
     def __retrieve_datas(self):
+        """
+        Retrieve all the detas (selection, abc dir, abc name and texture nodes)
+        :return:
+        """
         self.__selection = pm.ls(selection=True)
         self.__retrieve_abc_dir_and_name()
         self.__texture_node.clear()
@@ -301,8 +365,11 @@ class CharacterPublisher(QDialog):
         if len(image_nodes) == 0: return
         self.__texture_node = list(dict.fromkeys(file_nodes + image_nodes))
 
-    # Replace texture path by tx textures
     def __replace_texture_node_to_tx(self):
+        """
+        Replace texture path by tx textures
+        :return:
+        """
         for tex_node in self.__texture_node:
             tex_path = CharacterPublisher.get_path_from_texture_node(tex_node)
             if tex_path is None: continue
@@ -330,8 +397,11 @@ class CharacterPublisher(QDialog):
 
             print(f"Replace {tex_path} -> {updated_path}")
 
-    # Retrieve ABC Dir and ABC Name
     def __retrieve_abc_dir_and_name(self):
+        """
+        Retrieve ABC Dir and ABC Name
+        :return:
+        """
         if len(self.__selection) == 0:
             return
 
@@ -357,8 +427,11 @@ class CharacterPublisher(QDialog):
             self.__abc_name = self.__asset_name + "_mod.v" + num_str + ".abc"
             num += 1
 
-    # Export UV
     def abc_export(self):
+        """
+        Export UV
+        :return:
+        """
         abc_path = os.path.join(self.__abc_dir, self.__abc_name)
         abc_path = abc_path.replace("\\", "/")
         os.makedirs(self.__abc_dir, exist_ok=True)
@@ -374,8 +447,13 @@ class CharacterPublisher(QDialog):
         standin.dso.set(abc_path)
         return standin
 
-    # Build shader for look
     def __build_shader_operator(self, standin, sel):
+        """
+        Build shader for look
+        :param standin
+        :param sel
+        :return:
+        """
         # Get the selected objects
         ai_merge = pm.createNode("aiMerge", n="aiMerge_%s" % standin.getParent().name())
         empty_displace = None
@@ -466,7 +544,6 @@ class CharacterPublisher(QDialog):
 
             # CATCLARK
             sss_set_name = m.ai_sss_setname.get()
-            trace_sets = m.aiTraceSets.get()
             ai_disp_height = m.aiDispHeight.get()
             casts_shadows = m.castsShadows.get()
             cat_clark_type = m.aiSubdivType.get()
@@ -477,18 +554,19 @@ class CharacterPublisher(QDialog):
             if sss_set_name != "":
                 pm.setAttr(set_shader + ".assignment[5]", "string ai_sss_setname=\"%s\"" % (sss_set_name),
                            type="string")
-            if trace_sets != "":
-                pm.setAttr(set_shader + ".assignment[8]", "string trace_sets=\"%s\"" % (trace_sets),
-                           type="string")
-
             if casts_shadows == 0:
                 pm.setAttr(set_shader + ".assignment[6]", "visibility=253", type="string")
             if ai_disp_height != 1:
                 pm.setAttr(set_shader + ".assignment[7]", "disp_height=%s" % (ai_disp_height), type="string")
         return shaders_used
 
-    # Export look
     def __export_arnold_graph(self, standin, shaders_used):
+        """
+        Export look
+        :param standin
+        :param shaders_used
+        :return:
+        """
         look_dir = os.path.join(self.__asset_dir, "publish")
         # Check if default look or special one
         if len(self.__look_name) > 0:
@@ -522,8 +600,11 @@ class CharacterPublisher(QDialog):
         pm.other.arnoldExportAss(export_list, f=path, s=True, asciiAss=True, mask=6160, lightLinks=0, shadowLinks=0,
                                  fullPath=0)
 
-    # On submit publish
     def __on_publish(self):
+        """
+        On submit publish
+        :return:
+        """
         CharacterPublisher.__check_color_sets("Pref")
         self.__replace_texture_node_to_tx()
         sel = self.__selection

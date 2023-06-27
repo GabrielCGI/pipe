@@ -76,15 +76,21 @@ class LookLoader(QDialog):
         self.__create_ui()
         self.__refresh_ui()
 
-    # Save preferences
     def __save_prefs(self):
+        """
+        Save preferences
+        :return:
+        """
         size = self.size()
         self.__prefs["window_size"] = {"width": size.width(), "height": size.height()}
         pos = self.pos()
         self.__prefs["window_pos"] = {"x": pos.x(), "y": pos.y()}
 
-    # Retrieve preferences
     def __retrieve_prefs(self):
+        """
+        Retrieve preferences
+        :return:
+        """
         if "window_size" in self.__prefs:
             size = self.__prefs["window_size"]
             self.__ui_width = size["width"]
@@ -95,21 +101,35 @@ class LookLoader(QDialog):
             self.__ui_pos = QPoint(pos["x"], pos["y"])
 
     def showEvent(self, arg__1: QShowEvent) -> None:
+        """
+        Create callback
+        :return:
+        """
         self.__selection_callback = \
             OpenMaya.MEventMessage.addEventCallback("SelectionChanged", self.__on_scene_selection_changed)
 
     def hideEvent(self, arg__1: QCloseEvent) -> None:
+        """
+        Remove callback and save preferences
+        :return:
+        """
         OpenMaya.MMessage.removeCallback(self.__selection_callback)
         self.__save_prefs()
 
-    # Retrieve the current project dir specified in the Illogic maya launcher
     def __retrieve_current_project_dir(self):
+        """
+        Retrieve the current project dir specified in the Illogic maya launcher
+        :return:
+        """
         self.__current_project_dir = os.getenv("CURRENT_PROJECT_DIR")
         if self.__current_project_dir is None:
             self.__error_current_project_dir()
 
-    # Delete the window and show an error message
     def __error_current_project_dir(self):
+        """
+        Delete the window and show an error message
+        :return:
+        """
         self.deleteLater()
         msg = QMessageBox()
         msg.setWindowTitle("Error current project directory not found")
@@ -119,8 +139,11 @@ class LookLoader(QDialog):
             "Current project directory has not been found. You should use an Illogic Maya Launcher")
         msg.exec_()
 
-    # Create the ui
     def __create_ui(self):
+        """
+        Create the ui
+        :return:
+        """
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
@@ -167,18 +190,27 @@ class LookLoader(QDialog):
         self.__ui_add_looks_to_standin_btn.clicked.connect(self.__on_add_looks_to_standin)
         main_lyt.addWidget(self.__ui_add_looks_to_standin_btn)
 
-    # Refresh the ui according to the model attribute
     def __refresh_ui(self):
+        """
+        Refresh the ui according to the model attribute
+        :return:
+        """
         self.__refresh_standin_table()
         self.__refresh_btn()
 
-    # Refresh the buttons
     def __refresh_btn(self):
+        """
+        Refresh the buttons
+        :return:
+        """
         self.__ui_add_looks_to_standin_btn.setEnabled(self.__standin_obj_selected is not None and
                                                       len(self.__file_looks_selected) > 0)
 
-    # Refresh the standin table
     def __refresh_standin_table(self):
+        """
+        Refresh the standin table
+        :return:
+        """
         refresh_selection = self.__refresh_selection
         self.__refresh_selection = False
         self.__ui_standin_table.setRowCount(0)
@@ -222,8 +254,11 @@ class LookLoader(QDialog):
             self.__ui_standin_table.selectRow(row_selected)
         self.__refresh_selection = refresh_selection
 
-    # Refresh the looks
     def __refresh_looks_list(self):
+        """
+        Refresh the looks
+        :return:
+        """
         self.__ui_looks_list.clear()
         if self.__standin_obj_selected is not None:
             looks = self.__standin_obj_selected.get_looks()
@@ -236,9 +271,12 @@ class LookLoader(QDialog):
                 elif look_data[1] == LookPresentState.AnteriorVersionPlugged:
                     look_list_widget.setTextColor(QColor(255, 255, 0).rgba())
 
-    # Retrieve the standins : all valid standin if selection is None
-    # or all valid standins within selection
     def __retrieve_standins(self):
+        """
+        Retrieve the standins : all valid standin if selection is None
+        or all valid standins within selection
+        :return:
+        """
         self.__standins.clear()
         selection = pm.ls(selection=True)
         if len(selection) > 0:
@@ -266,15 +304,23 @@ class LookLoader(QDialog):
 
         self.__standins = dict(sorted(self.__standins.items()))
 
-    # On scene selection changed
     def __on_scene_selection_changed(self, *args, **kwargs):
+        """
+        On scene selection changed
+        :param args
+        :param kwargs
+        :return:
+        """
         if self.__refresh_selection:
             self.__retrieve_standins()
             self.__refresh_standin_table()
             self.__on_standin_select_changed()
 
-    # On standin selected changed in standin table
     def __on_standin_select_changed(self):
+        """
+        On standin selected changed in standin table
+        :return:
+        """
         if self.__refresh_selection:
             rows_selected = self.__ui_standin_table.selectionModel().selectedRows()
             if len(rows_selected) > 0:
@@ -285,16 +331,22 @@ class LookLoader(QDialog):
             self.__refresh_looks_list()
             self.__refresh_btn()
 
-    # On Look selected changed in Look list
     def __on_look_selected_changed(self):
+        """
+        On Look selected changed in Look list
+        :return:
+        """
         self.__file_looks_selected.clear()
         selected_items = self.__ui_looks_list.selectedItems()
         for item in selected_items:
             self.__file_looks_selected.append(item.data(Qt.UserRole))
         self.__refresh_btn()
 
-    # Add selected looks to selected standin
     def __on_add_looks_to_standin(self):
+        """
+        Add selected looks to selected standin
+        :return:
+        """
         self.__refresh_selection = False
         self.__standin_obj_selected.add_looks(self.__file_looks_selected)
         self.__standin_obj_selected.retrieve_looks(self.__current_project_dir)

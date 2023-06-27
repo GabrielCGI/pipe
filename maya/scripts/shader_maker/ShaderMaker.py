@@ -34,33 +34,14 @@ DEFAULT_DISPLACEMENT_SCALE = 0.02
 DEFAULT_DISPLACEMENT_MID = 0
 
 ########################################################################################################################
+# CS mean create shaders part
+# US mean update shaders part
+
+########################################################################################################################
 
 FILE_EXTENSION_SUPPORTED_REGEX = "|".join(FILE_EXTENSION_SUPPORTED)
 
 from .Shader import Shader
-
-
-def unload_packages(silent=True, packages=None):
-    if packages is None:
-        packages = []
-
-    # construct reload list
-    reload_list = []
-    for i in sys.modules.keys():
-        for package in packages:
-            if i.startswith(package):
-                reload_list.append(i)
-
-    # unload everything
-    for i in reload_list:
-        try:
-            if sys.modules[i] is not None:
-                del (sys.modules[i])
-                if not silent:
-                    print("Unloaded: %s" % i)
-        except:
-            pass
-
 
 class Assignation(Enum):
     NoAssign = 1
@@ -68,12 +49,14 @@ class Assignation(Enum):
     AssignToSelection = 3
 
 
-# CS mean create shaders part
-# US mean update shaders part
 class ShaderMaker(QtWidgets.QDialog):
 
     @staticmethod
     def __get_dir_name():
+        """
+        Get the current directory (scene sir or default if not found)
+        :return:
+        """
         scene_name = pm.sceneName()
         if len(scene_name) > 0:
             dirname = os.path.dirname(os.path.dirname(scene_name))
@@ -130,34 +113,47 @@ class ShaderMaker(QtWidgets.QDialog):
         self.__refresh_ui()
         self.__create_callback()
 
-
-    # Save preferences
     def __save_prefs(self):
+        """
+        Save preferences
+        :return:
+        """
         size = self.size()
         self.__prefs["window_size"] = {"width": size.width(), "height": size.height()}
         pos = self.pos()
         self.__prefs["window_pos"] = {"x": pos.x(), "y": pos.y()}
 
-    # Retrieve preferences
     def __retrieve_prefs(self):
+        """
+        Retrieve preferences
+        :return:
+        """
         if "window_pos" in self.__prefs:
             pos = self.__prefs["window_pos"]
             self.__ui_pos = QPoint(pos["x"],pos["y"])
 
 
-    # Create a callback for when new Maya selection
     def __create_callback(self):
+        """
+        Create a callback for when new Maya selection
+        :return:
+        """
         self.__us_selection_callback = \
             OpenMaya.MEventMessage.addEventCallback("SelectionChanged", self.on_selection_changed)
 
-    # Remove callback
     def hideEvent(self, arg__1: QtGui.QCloseEvent) -> None:
+        """
+        Remove callback on window hide
+        :return:
+        """
         OpenMaya.MMessage.removeCallback(self.__us_selection_callback)
         self.__save_prefs()
 
-
-    # Function to browse a new folder for the creation part
     def __browse_cs_folder(self):
+        """
+        Function to browse a new folder for the creation part
+        :return:
+        """
         dirname = ShaderMaker.__get_dir_name()
 
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(
@@ -166,8 +162,11 @@ class ShaderMaker(QtWidgets.QDialog):
         if len(folder_path) > 0 and folder_path != self.__cs_folder_path:
             self.__ui_cs_folder_path.setText(folder_path)
 
-    # Function to browse a new foler for the update part
     def __browse_us_folder(self):
+        """
+        Function to browse a new foler for the update part
+        :return:
+        """
         dirname = ShaderMaker.__get_dir_name()
 
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(
@@ -176,8 +175,11 @@ class ShaderMaker(QtWidgets.QDialog):
         if len(folder_path) > 0 and folder_path != self.__us_folder_path:
             self.__ui_us_folder_path.setText(folder_path)
 
-    # Create the ui
     def __create_ui(self):
+        """
+        Create the ui
+        :return:
+        """
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
@@ -315,26 +317,41 @@ class ShaderMaker(QtWidgets.QDialog):
         us_lyt.addWidget(self.__ui_us_submit_btn, 0, QtCore.Qt.AlignHCenter)
 
     def __displacement_scale_changed(self, value):
+        """
+        On displacement scale changed retrieve the value
+        :param value
+        :return:
+        """
         if len(value) > 0:
             self.__displacement_scale = float(value)
 
     def __displacement_mid_changed(self, value):
+        """
+        On displacement mid changed retrieve the value
+        :param value
+        :return:
+        """
         if len(value) > 0:
             self.__displacement_mid = float(value)
 
-    # Refresh the ui according to the model attribute
     def __refresh_ui(self):
+        """
+        Refresh the ui according to the model attribute
+        :return:
+        """
         # Refresh browser
         self.__ui_cs_folder_path.setText(self.__cs_folder_path)
         self.__ui_us_folder_path.setText(self.__us_folder_path)
 
         self.refresh_btn()
-
         self.__refresh_cs_body()
-
         self.__refresh_us_body()
 
     def refresh_btn(self):
+        """
+        Refresh the buttons and the radio checkboxes
+        :return:
+        """
         nb_shader_enabled = 0
         for shader in self.__cs_shaders:
             if shader.is_enabled():
@@ -348,7 +365,10 @@ class ShaderMaker(QtWidgets.QDialog):
             self.__auto_assign_radio.setChecked(True)
 
     def __refresh_cs_body(self):
-        # Refresh the body of the creation part
+        """
+        Refresh the body of the creation part
+        :return:
+        """
         nb_shaders = len(self.__cs_shaders)
         self.__ui_widget_header.setVisible(nb_shaders > 0)
         if self.__ui_shaders_cs_lyt is not None:
@@ -369,74 +389,93 @@ class ShaderMaker(QtWidgets.QDialog):
                     shader.populate(self, list_shaders_lyt)
 
     def __refresh_us_body(self):
-        # Refresh the body of the update part
+        """
+        Refresh the body of the update part by retrieving the textures and comparing it with the last version
+        :return:
+        """
         textures_displayed= {}
-        if self.__ui_tree_us_files is not None:
-            self.__ui_tree_us_files.clear()
-            update_btn_enabled = False
-            for directory, data in self.__us_data.items():
-                textures = data[0]
-                shaders = data[1]
-                dir_string = directory + "     ["
-                nb_shaders = len(shaders)
-                for i in range(len(shaders)):
-                    dir_string += shaders[i].name()
-                    if i != nb_shaders - 1:
-                        dir_string += ", "
-                dir_string += "]"
+        if self.__ui_tree_us_files is None: return
 
-                if directory not in textures_displayed:
-                    textures_displayed[directory] = []
+        self.__ui_tree_us_files.clear()
+        update_btn_enabled = False
+        for directory, data in self.__us_data.items():
+            textures = data[0]
+            shaders = data[1]
+            dir_string = directory + "     ["
+            nb_shaders = len(shaders)
+            for i in range(len(shaders)):
+                dir_string += shaders[i].name()
+                if i != nb_shaders - 1:
+                    dir_string += ", "
+            dir_string += "]"
 
-                item = QtWidgets.QTreeWidgetItem([dir_string])
-                self.__ui_tree_us_files.addTopLevelItem(item)
-                for texture in textures:
-                    filepath = texture.getAttr("fileTextureName")
-                    if filepath not in textures_displayed[directory]:
-                        textures_displayed[directory].append(filepath)
+            if directory not in textures_displayed:
+                textures_displayed[directory] = []
 
-                        filename = os.path.basename(filepath)
-                        child = QtWidgets.QTreeWidgetItem([filename])
+            item = QtWidgets.QTreeWidgetItem([dir_string])
+            self.__ui_tree_us_files.addTopLevelItem(item)
+            for texture in textures:
+                filepath = texture.getAttr("fileTextureName")
+                if filepath in textures_displayed[directory]: continue
+                textures_displayed[directory].append(filepath)
 
-                        base = re.search("(.*)(?:<UDIM>|[0-9]{4})\.(?:" + FILE_EXTENSION_SUPPORTED_REGEX + ")", filename)
-                        match = base.groups()[0]
-                        regex = match.replace(".", "\.") + "((?:[0-9]{0,4})\.(?:" + FILE_EXTENSION_SUPPORTED_REGEX + "))"
-                        new_file_path = self.__us_find_file_in_directory(
-                            self.__us_folder_path, regex)
+                filename = os.path.basename(filepath)
+                child = QtWidgets.QTreeWidgetItem([filename])
 
-                        child_enabled = new_file_path is not None and new_file_path != filepath
-                        update_btn_enabled |= child_enabled
-                        child.setDisabled(not child_enabled)
-                        item.addChild(child)
-                item.setExpanded(True)
+                base = re.search(r"(.*)(?:<UDIM>|[0-9]{4})\.(?:" + FILE_EXTENSION_SUPPORTED_REGEX + ")", filename)
+                if base is None:
+                    print_warning("filename \""+filename+"\" not valid as a texture")
+                    continue
+                match = base.groups()[0]
+                regex = match.replace(".", "\.") + "((?:[0-9]{0,4})\.(?:" + FILE_EXTENSION_SUPPORTED_REGEX + "))"
+                # Get the last version
+                new_file_path = self.__us_find_file_in_directory(
+                    self.__us_folder_path, regex)
 
-            # Refresh the update button according to the update body
-            if self.__ui_us_submit_btn is not None:
-                self.__ui_us_submit_btn.setEnabled(
-                    len(self.__us_data) > 0 and os.path.isdir(self.__us_folder_path) and update_btn_enabled)
-                self.__ui_us_submit_btn.setEnabled(True)
+                child_enabled = new_file_path is not None and new_file_path != filepath
+                update_btn_enabled |= child_enabled
+                child.setDisabled(not child_enabled)
+                item.addChild(child)
+            item.setExpanded(True)
 
-    # Refresh UI and model attribute when the fodler of the creation part changes
+        # Refresh the update button according to the update body
+        if self.__ui_us_submit_btn is not None:
+            self.__ui_us_submit_btn.setEnabled(
+                len(self.__us_data) > 0 and os.path.isdir(self.__us_folder_path) and update_btn_enabled)
+            self.__ui_us_submit_btn.setEnabled(True)
+
     def __on_folder_cs_changed(self):
+        """
+        Refresh UI and model attribute when the fodler of the creation part changes
+        :return:
+        """
         folder_path = self.__ui_cs_folder_path.text()
         self.__cs_folder_path = folder_path
         self.__generate_cs_shaders()
         self.__refresh_ui()
 
-    # Refresh UI and model attribute when the fodler of the update part changes
     def __on_folder_us_changed(self):
+        """
+        Refresh UI and model attribute when the fodler of the update part changes
+        :return:
+        """
         folder_path = self.__ui_us_folder_path.text()
         self.__us_folder_path = folder_path
         self.__generate_us_data()
         self.__refresh_ui()
-
-    # Function called by the callback of the Maya selection
     def on_selection_changed(self, *args, **kwargs):
+        """
+        Function called by the callback of the Maya selection
+        :return:
+        """
         self.__generate_us_data()
         self.__refresh_us_body()
 
-    # Get the textures and the shading groups of the selection
     def __get_us_shading_groups_and_textures(self):
+        """
+        Get the textures and the shading groups of the selection
+        :return:
+        """
         files = []
         selection = pm.ls(sl=True, transforms=True)
         distinct_shading_groups = []
@@ -454,8 +493,12 @@ class ShaderMaker(QtWidgets.QDialog):
                 files.append({texture, shading_group})
         return files
 
-    # Get the textures from a node recursively
     def __get_textures_recursive(self, node):
+        """
+        Get the textures from a node recursively
+        :param node:
+        :return: textures
+        """
         textures = []
         connections = node.listConnections(source=True, destination=False)
         for connection in connections:
@@ -465,8 +508,11 @@ class ShaderMaker(QtWidgets.QDialog):
                 textures.extend(self.__get_textures_recursive(connection))
         return textures
 
-    # Generate model data for the update part
     def __generate_us_data(self):
+        """
+        Generate model data for the update part
+        :return:
+        """
         self.__us_data.clear()
         for texture, shading_group in self.__get_us_shading_groups_and_textures():
             dirname = os.path.dirname(texture.getAttr("fileTextureName"))
@@ -478,8 +524,11 @@ class ShaderMaker(QtWidgets.QDialog):
             if shading_group not in self.__us_data[dirname][1]:
                 self.__us_data[dirname][1].append(shading_group)
 
-    # Generate the model data for the creatino part
     def __generate_cs_shaders(self):
+        """
+        Generate the model data for the creatino part
+        :return:
+        """
         self.__cs_shaders.clear()
         if not os.path.isdir(self.__cs_folder_path):
             return
@@ -517,13 +566,20 @@ class ShaderMaker(QtWidgets.QDialog):
                             self.__cs_shaders.append(shad)
 
     def __get_shading_values(self):
+        """
+        Get the displacement values
+        :return: displacement_scale and displacement_mid
+        """
         return {
             "displacement_scale": self.__displacement_scale,
             "displacement_mid": self.__displacement_mid
         }
 
-    # Create the shader according to the method of assignation
     def __submit_create_shader(self):
+        """
+        Create the shader according to the method of assignation checked
+        :return:
+        """
         pm.undoInfo(openChunk=True)
         no_items_to_assign = False
         shading_values = self.__get_shading_values()
@@ -592,8 +648,12 @@ class ShaderMaker(QtWidgets.QDialog):
                     i += 1
         pm.undoInfo(closeChunk=True)
 
-    # Delete an existing shader recursively
     def __delete_existing_shader(self, node):
+        """
+        Delete an existing shader recursively
+        :param node:
+        :return:
+        """
         for s in node.inputs():
             if pm.objExists(s):
                 if s.type() != "transform":
@@ -605,8 +665,11 @@ class ShaderMaker(QtWidgets.QDialog):
                         pass
         print("Existing shaders deleted")
 
-    # Update file path with model datas
     def __submit_update_shader(self):
+        """
+        Update file path with model datas
+        :return:
+        """
         pm.undoInfo(openChunk=True)
         for directory, data in self.__us_data.items():
             textures = data[0]
@@ -626,6 +689,13 @@ class ShaderMaker(QtWidgets.QDialog):
         pm.undoInfo(closeChunk=True)
 
     def __us_find_file_in_directory(self, directory, regex, depth=4):
+        """
+        Get the last version of a filepath
+        :param directory: base directory
+        :param regex: regex that the filename has to valid
+        :param depth: recursivity depth
+        :return: filepath
+        """
         if depth > 0:
             filename = None
             if os.path.isdir(directory):
@@ -647,14 +717,30 @@ class ShaderMaker(QtWidgets.QDialog):
         return None
 
     def set_all_shaders_enabled(self, enabled):
+        """
+        Set enable field of all shaders
+        :param enabled
+        :return:
+        """
         for shader in self.__cs_shaders:
             shader.set_enabled(enabled)
 
     def set_all_field_enabled(self, keyword, enabled):
+        """
+        Set enable field of all field with a given keyword
+        :param keyword: field keyword
+        :param enabled
+        :return:
+        """
         for shader in self.__cs_shaders:
             shader.set_field_enabled(keyword, enabled)
 
-    # Change the Assignation type
     def __assign(self, assign_type, enabled):
+        """
+        Change the Assignation type
+        :param assign_type
+        :param enabled
+        :return:
+        """
         if enabled:
             self.__assign_cs = assign_type

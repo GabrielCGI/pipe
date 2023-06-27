@@ -16,14 +16,23 @@ from PySide2.QtGui import *
 from utils import *
 
 
-# Print log in console and also in a file
 def print_log(msg, log_file):
+    """
+    Print log in console and also in a file
+    :param msg
+    :param log_file
+    :return:
+    """
     print(msg)
     log_file.write(msg + "\n")
 
 
-# Choose a list of shots
 def list_shots(current_project_dir):
+    """
+    Choose a list of shots
+    :param current_project_dir
+    :return:
+    """
     file_dialog = QFileDialog()
     file_dialog.setDirectory(current_project_dir)
     file_dialog.setFileMode(QFileDialog.DirectoryOnly)
@@ -38,8 +47,13 @@ def list_shots(current_project_dir):
     return paths
 
 
-# List the abcs contained in the shots
 def list_abcs(shots, char_dict):
+    """
+    List the abcs contained in the shots
+    :param shots
+    :param char_dict
+    :return:
+    """
     abcs = {}
     for shot_path in shots:
         # Check if shot path is valid
@@ -79,8 +93,13 @@ def list_abcs(shots, char_dict):
     return abcs
 
 
-# Create the fur node
 def create_fur(file_path, otl):
+    """
+    Create the fur node
+    :param file_path
+    :param otl
+    :return:
+    """
     obj_context = hou.node('/obj')
     fur = obj_context.createNode(otl)
     # Set the Animated Alembic to the latest character abc
@@ -88,8 +107,14 @@ def create_fur(file_path, otl):
     return fur
 
 
-# Export the fur node
 def export_fur(shot_path, char_name, fur):
+    """
+    Export the fur node
+    :param shot_path
+    :param char_name
+    :param fur
+    :return:
+    """
     char_fur_path = os.path.join(shot_path, "abc_fur", char_name)
     version = 0
     # Find the latest fur version to increment it
@@ -108,8 +133,14 @@ def export_fur(shot_path, char_name, fur):
     return export_path
 
 
-# Set some params
 def set_params(fur, options, abc_path):
+    """
+    Set some params
+    :param fur
+    :param options
+    :param abc_path
+    :return:
+    """
     if "motion_blur" in options:
         fur.parm("motionBlur").set(options["motion_blur"])
     if "samples" in options:
@@ -130,6 +161,14 @@ def set_params(fur, options, abc_path):
 
 
 def run(current_project_dir, char_dict, options, log_file_folder):
+    """
+    Run Fur Export
+    :param current_project_dir
+    :param char_dict
+    :param options
+    :param log_file_folder
+    :return:
+    """
     # Get the next log version
     version = 0
     if not os.path.exists(log_file_folder): os.makedirs(log_file_folder)

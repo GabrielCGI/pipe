@@ -5,6 +5,10 @@ from common.standin_utils import *
 
 class Standin:
     def __init__(self, standin):
+        """
+        Constructor
+        :param standin
+        """
         self.__standin = standin
         self.__object_name = ""
         self.__standin_name = ""
@@ -14,8 +18,12 @@ class Standin:
         self.__parse_valid = False
         self.__parse()
 
-    # Retrieve all the datas of the standin
     def __parse(self):
+        """
+        Retrieve all the datas of the standin
+        :return:
+        """
+        # Use the parse_standin function in common package (Illogic package)
         parsed_data = parse_standin(self.__standin)
         self.__object_name = parsed_data["object_name"]
         self.__parse_valid = parsed_data["valid"]
@@ -27,38 +35,68 @@ class Standin:
             self.__versions = parsed_data["standin_versions"]
 
     def is_valid(self):
+        """
+        Getter of whether the StandIn is valid or not
+        :return: i valid
+        """
         return self.__parse_valid
 
-    # Getter of object name
     def get_object_name(self):
+        """
+        Getter of object name
+        :return: object name
+        """
         return self.__object_name
 
-    # Getter of standin name
     def get_standin_name(self):
+        """
+        Getter of standin name
+        :return: standin name
+        """
         return self.__standin_name
 
-    # Getter of the active variant
     def get_active_variant(self):
+        """
+        Getter of the active variant
+        :return: active variant
+        """
         return self.__active_variant
 
-    # Getter of the active version
     def get_active_version(self):
+        """
+        Getter of the active version
+        :return: active version
+        """
         return self.__active_version
 
-    # Getter of the variants and versions
     def get_versions(self):
+        """
+        Getter of the variants and versions
+        :return: variants and versions
+        """
         return self.__versions
 
-    # Get the last version
     def last_version(self):
+        """
+        Get the last version
+        :return: last version
+        """
         return self.__versions[self.__active_variant][0][0]
 
-    # Getter of whether the standin is up to date
     def is_up_to_date(self):
+        """
+        Getter of whether the standin is up to date
+        :return: is up to date
+        """
         return self.last_version() == self.__active_version
 
-    # Set a new variant and version
     def set_active_variant_version(self, variant, version):
+        """
+        Set a new variant and version
+        :param variant
+        :param version
+        :return:
+        """
         if self.__active_variant != variant or self.__active_version != version:
             if len(variant) > 0 and len(version) > 0:
                 version_file = self.__publish_ass_dir + "/" + self.__standin_name + "_" + variant + "/" + version + "/" + \
@@ -68,20 +106,34 @@ class Standin:
                     self.__active_variant = variant
                     self.__active_version = version
 
-    # Update to last version of the current variant
     def update_to_last(self):
+        """
+        Update to last version of the current variant
+        :return:
+        """
         self.set_active_variant_version(self.__active_variant, self.last_version())
 
-    # Getter of whether the standin active variant is a SD
     def has_version_in_sd(self):
+        """
+        Getter of whether the standin active variant is a SD
+        :return: has version in sd
+        """
         return self.__get_version_replaced("HD", "SD") is not None
 
-    # Getter of whether the standin active variant is a HD
     def has_version_in_hd(self):
+        """
+        Getter of whether the standin active variant is a HD
+        :return: has version in hd
+        """
         return self.__get_version_replaced("SD", "HD") is not None
 
-    # Get the version to replace
     def __get_version_replaced(self, old_v, new_v):
+        """
+        Get the version to replace
+        :param old_v: old version
+        :param new_v: new version
+        :return: active variant
+        """
         if new_v in self.__active_variant: return None
         variant = self.__active_variant.replace(old_v, new_v)
         if variant in self.__versions.keys():
@@ -90,20 +142,29 @@ class Standin:
                     return variant
         return None
 
-    # Set to a SD variant
     def set_to_sd(self):
+        """
+        Set to a SD variant
+        :return:
+        """
         variant = self.__get_version_replaced("HD", "SD")
         if variant is not None:
             self.set_active_variant_version(variant, self.__active_version)
 
-    # Set to a HD variant
     def set_to_hd(self):
+        """
+        Set to a HD variant
+        :return:
+        """
         variant = self.__get_version_replaced("SD", "HD")
         if variant is not None:
             self.set_active_variant_version(variant, self.__active_version)
 
-    # Convert the standin to maya object
     def convert_to_maya(self):
+        """
+        Convert the standin to maya object
+        :return:
+        """
         dso = self.__standin.dso.get()
         maya_path = dso.replace(".ass", ".ma")
 

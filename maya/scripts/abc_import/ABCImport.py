@@ -32,9 +32,13 @@ _FILE_NAME_PREFS = "abc_import"
 
 
 class ABCImport(QDialog):
-    # Get the directory parent of the abc folders
     @staticmethod
     def __get_abc_parent_dir(max_recursion):
+        """
+        Get the directory parent of the abc folders
+        :param max_recursion
+        :return:
+        """
         folder_name_target = ["abc", "abc_fur"]
         def check_dir_recursive(count, dirpath):
             for child_dirname in os.listdir(dirpath):
@@ -56,9 +60,13 @@ class ABCImport(QDialog):
             abc_parent_dir = None
         return abc_parent_dir
 
-    # Test if a folder is correct to be a container of abcs
     @staticmethod
     def __is_correct_folder(folder):
+        """
+        Test if a folder is correct to be a container of abcs
+        :param folder
+        :return:
+        """
         if not os.path.exists(folder):
             return False
         if ABCImport.__is_parent_abc_folder(folder):
@@ -69,19 +77,31 @@ class ABCImport(QDialog):
             return True
         return False
 
-    # Test whether the folder is an abc folder or not
     @staticmethod
     def __is_abc_folder(folder):
+        """
+        Test whether the folder is an abc folder or not
+        :param folder
+        :return:
+        """
         return re.match(r".*[/\\]abc[/\\]?$", folder)
 
-    # Test whether the folder is an abc_fur folder or not
     @staticmethod
     def __is_abc_fur_folder(folder):
+        """
+        Test whether the folder is an abc_fur folder or not
+        :param folder:
+        :return:
+        """
         return re.match(r".*[/\\]abc_fur[/\\]?$", folder)
 
-    # Test whether the folder is a parent of an abc folder or an abc_fur folder or not
     @staticmethod
     def __is_parent_abc_folder(folder):
+        """
+        Test whether the folder is a parent of an abc folder or an abc_fur folder or not
+        :param folder:
+        :return:
+        """
         for d in os.listdir(folder):
             if os.path.isdir(os.path.join(folder, d)):
                 if d in ["abc", "abc_fur"]:
@@ -127,15 +147,21 @@ class ABCImport(QDialog):
         self.__create_ui()
         self.__refresh_ui()
 
-    # Save preferences
     def __save_prefs(self):
+        """
+        Save preferences
+        :return:
+        """
         size = self.size()
         self.__prefs["window_size"] = {"width": size.width(), "height": size.height()}
         pos = self.pos()
         self.__prefs["window_pos"] = {"x": pos.x(), "y": pos.y()}
 
-    # Retrieve preferences
     def __retrieve_prefs(self):
+        """
+        Retrieve preferences
+        :return:
+        """
         if "window_size" in self.__prefs:
             size = self.__prefs["window_size"]
             self.__ui_width = size["width"]
@@ -145,18 +171,27 @@ class ABCImport(QDialog):
             pos = self.__prefs["window_pos"]
             self.__ui_pos = QPoint(pos["x"], pos["y"])
 
-    # Remove callbacks
     def hideEvent(self, arg__1: QCloseEvent) -> None:
+        """
+        Save preferences
+        :return:
+        """
         self.__save_prefs()
 
-    # Retrieve the current project dir specified in the Illogic maya launcher
     def __retrieve_current_project_dir(self):
+        """
+        Retrieve the current project dir specified in the Illogic maya launcher
+        :return:
+        """
         self.__current_project_dir = os.getenv("CURRENT_PROJECT_DIR")
         if self.__current_project_dir is None:
             self.__stop_and_display_error()
 
-    # Delete the window and show an error message
     def __stop_and_display_error(self):
+        """
+        Delete the window and show an error message
+        :return:
+        """
         self.deleteLater()
         msg = QMessageBox()
         msg.setWindowTitle("Error current project directory not found")
@@ -165,8 +200,11 @@ class ABCImport(QDialog):
         msg.setInformativeText("Current project directory has not been found. You should use an Illogic Maya Launcher")
         msg.exec_()
 
-    # Create the ui
     def __create_ui(self):
+        """
+        Create the ui
+        :return:
+        """
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
@@ -235,13 +273,19 @@ class ABCImport(QDialog):
         self.__ui_import_btn.clicked.connect(self.__import_update_selected_abcs)
         main_lyt.addWidget(self.__ui_import_btn)
 
-    # Refresh the ui according to the model attribute
     def __refresh_ui(self):
+        """
+        Refresh the ui according to the model attribute
+        :return:
+        """
         self.__refresh_btn()
         self.__refresh_table()
 
-    # Refresh the button import
     def __refresh_btn(self):
+        """
+        Refresh the button import
+        :return:
+        """
         nb_abcs_selected = len(self.__selected_abcs)
         enabled = True
         tooltip = ""
@@ -254,13 +298,14 @@ class ABCImport(QDialog):
         self.__ui_import_btn.setEnabled(enabled)
         self.__ui_import_btn.setToolTip(tooltip)
 
-    # Refresh the table
     def __refresh_table(self):
-
+        """
+        Refresh the table
+        :return:
+        """
         selected_abcs = [abc.get_name() for abc in self.__selected_abcs]
 
         asset_dir = os.path.dirname(__file__) + "/assets/"
-
 
         self.__ui_abcs_table.setRowCount(0)
         row_index = 0
@@ -360,14 +405,20 @@ class ABCImport(QDialog):
             self.__ui_abcs_table.selectRow(row_index)
         self.__ui_abcs_table.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
-    # Browse a new folder path
     def __browse_folder(self):
+        """
+        Browse a new folder path
+        :return:
+        """
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select ABC Directory", self.__folder_path)
         if ABCImport.__is_correct_folder(folder_path) and folder_path != self.__folder_path:
             self.__ui_folder_path.setText(folder_path)
 
-    # Browse an abc file and import it
     def __browse_import_abc_file(self):
+        """
+        Browse an abc file and import it
+        :return:
+        """
         file_path = QtWidgets.QFileDialog.getOpenFileName(self, "Select ABC File to Import", self.__folder_path, "ABC (*.abc)")[0]
         match = re.match(r"^.*[/\\](?:(.*)(?:_[a-zA-Z]+(?:\.[0-9]+)?)|(.*))\.abc$", file_path)
         if match:
@@ -381,40 +432,61 @@ class ABCImport(QDialog):
             self.__retrieve_assets_in_scene()
             self.__refresh_ui()
 
-    # Refresh ui on new selection
     def __on_selection_changed(self, *args, **kwarrgs):
+        """
+        Refresh ui on new selection
+        :return:
+        """
         self.__retrieve_assets_in_scene()
         self.__refresh_ui()
 
-    # On check "update uvs and shaders"
     def __on_checked_update_uvs_shaders(self, state):
+        """
+        On check update uvs and shaders
+        :param state:
+        :return:
+        """
         self.__update_uvs_shaders = state == 2
 
-    # Get the new folder and refresh the ui on new folder
     def __on_folder_changed(self):
+        """
+        Retrieve the new folder and refresh the ui on new folder
+        :return:
+        """
         retrieved_text = self.__ui_folder_path.text().strip("\\/")
         if self.__folder_path != retrieved_text:
             self.__folder_path = retrieved_text
             self.__retrieve_abcs()
             self.__refresh_ui()
 
-    # On selection in the table changed
     def __on_abcs_selection_changed(self):
+        """
+        On selection in the table changed
+        :return:
+        """
         self.__selected_abcs.clear()
         for selected_row in self.__ui_abcs_table.selectionModel().selectedRows():
             self.__selected_abcs.append(self.__ui_abcs_table.item(selected_row.row(), 1).data(Qt.UserRole))
         self.__refresh_btn()
 
-    # On import version changed for an abc
     def __on_version_combobox_changed(self, row_index, cb_index):
+        """
+        On import version changed for an abc
+        :param row_index
+        :param cb_index
+        :return:
+        """
         abc = self.__ui_abcs_table.item(row_index, 1).data(Qt.UserRole)
         version_path = self.__ui_abcs_table.cellWidget(row_index, 3).model().item(cb_index).data(Qt.UserRole)
         abc.set_import_path(version_path)
 
-    # Retrieve the abcs at the folder path.
-    # If parent folder specified, retrieves abc and abc_fur
-    # If only one, retrieves the one selected
     def __retrieve_abcs(self):
+        """
+        Retrieve the abcs at the folder path.
+        If parent folder specified, retrieves abc and abc_fur
+        If only one, retrieves the one selected
+        :return:
+        """
         self.__abcs.clear()
         if os.path.exists(self.__folder_path):
             if ABCImport.__is_parent_abc_folder(self.__folder_path):
@@ -427,39 +499,47 @@ class ABCImport(QDialog):
                 self.__retrieve_assets(self.__folder_path, False)
         self.__retrieve_assets_in_scene()
 
-    # Auxiliary method to retrieve assets in the file architecture of the folder path
     def __retrieve_assets(self, folder_path, is_anim_folder):
+        """
+        Auxiliary method to retrieve assets in the file architecture of the folder path
+        :param folder_path
+        :param is_anim_folder
+        :return:
+        """
         folder_path = folder_path.replace("\\","/")
-        if os.path.isdir(folder_path):
-            for asset_folder in os.listdir(folder_path):
-                asset_folder_path = os.path.join(folder_path, asset_folder)
-                anim_versions = []
-                if os.path.isdir(asset_folder_path) and asset_folder[0:2] == "ch":
-                    for version_folder in os.listdir(asset_folder_path):
-                        version_folder_path = os.path.join(asset_folder_path, version_folder)
-                        if os.path.isdir(version_folder_path):
-                            for abc in os.listdir(version_folder_path):
-                                add = False
-                                if is_anim_folder:
-                                    if asset_folder + ".abc" == abc:
-                                        add = True
-                                else:
-                                    if re.match(r""+asset_folder+r"_fur(?:\.[0-9]+)?\.abc", abc):
-                                        add = True
-                                if add :
-                                    anim_versions.append(version_folder_path)
-                                    break
-                    if len(anim_versions) > 0:
-                        if is_anim_folder:
-                            asset = ABCImportAnim(asset_folder, self.__current_project_dir, self.__look_factory, anim_versions)
-                        else:
-                            asset = ABCImportFur(asset_folder, self.__current_project_dir, self.__look_factory, anim_versions)
-                        self.__abcs.append(asset)
+        if not os.path.isdir(folder_path): return
+        for asset_folder in os.listdir(folder_path):
+            asset_folder_path = os.path.join(folder_path, asset_folder)
+            anim_versions = []
+            if not os.path.isdir(asset_folder_path) or asset_folder[0:2] != "ch": continue
+            for version_folder in os.listdir(asset_folder_path):
+                version_folder_path = os.path.join(asset_folder_path, version_folder)
+                if not os.path.isdir(version_folder_path): continue
+                for abc in os.listdir(version_folder_path):
+                    add = False
+                    if is_anim_folder:
+                        if asset_folder + ".abc" == abc:
+                            add = True
+                    else:
+                        if re.match(r""+asset_folder+r"_fur(?:\.[0-9]+)?\.abc", abc):
+                            add = True
+                    if add :
+                        anim_versions.append(version_folder_path)
+                        break
+            if len(anim_versions) < 1: continue
+            if is_anim_folder:
+                asset = ABCImportAnim(asset_folder, self.__current_project_dir, self.__look_factory, anim_versions)
+            else:
+                asset = ABCImportFur(asset_folder, self.__current_project_dir, self.__look_factory, anim_versions)
+            self.__abcs.append(asset)
 
-    # Retrieve one alone asset in scene
-    # It can retrieve abc_fur having the abc file in the dso or
-    # it can retrieve abc having the abc file in the abc_layer
     def __retrieve_alone_asset_in_scene(self, abc):
+        """
+        Retrieve one alone asset in scene
+        It can retrieve abc_fur having the abc file in the dso or
+        it can retrieve abc having the abc file in the abc_layer
+        :param abc
+        """
         standins = pm.ls(type="aiStandIn")
         abc_name = abc.get_name()
         for standin in standins:
@@ -480,10 +560,13 @@ class ABCImport(QDialog):
                     abc.set_actual_standin(standin)
                     return
 
-    # Retrieve assets in scene
-    # It can retrieve abc_fur having the abc file in the dso or
-    # it can retrieve abc having the abc file in the abc_layer
     def __retrieve_assets_in_scene(self):
+        """
+        Retrieve assets in scene
+        It can retrieve abc_fur having the abc file in the dso or
+        it can retrieve abc having the abc file in the abc_layer
+        :return:
+        """
         standins = pm.ls(type="aiStandIn")
         standins_datas = {}
         if len(self.__abcs) == 0:
@@ -518,8 +601,11 @@ class ABCImport(QDialog):
                 abc.set_actual_standin(None)
                 abc.set_actual_version(None)
 
-    # Import the selected abcs
     def __import_update_selected_abcs(self):
+        """
+        Import the selected abcs
+        :return:
+        """
         standin_nodes = []
         for abc in self.__selected_abcs:
             standin_nodes.append(abc.import_update_abc(self.__update_uvs_shaders))

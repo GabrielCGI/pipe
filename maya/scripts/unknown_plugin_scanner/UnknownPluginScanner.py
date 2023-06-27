@@ -68,15 +68,21 @@ class UnknownPluginScanner(QDialog):
         self.__create_ui()
         self.__refresh_ui()
 
-    # Save preferences
     def __save_prefs(self):
+        """
+        Save preferences
+        :return:
+        """
         size = self.size()
         self.__prefs["window_size"] = {"width": size.width(), "height": size.height()}
         pos = self.pos()
         self.__prefs["window_pos"] = {"x": pos.x(), "y": pos.y()}
 
-    # Retrieve preferences
     def __retrieve_prefs(self):
+        """
+        Retrieve preferences
+        :return:
+        """
         if "window_size" in self.__prefs:
             size = self.__prefs["window_size"]
             self.__ui_width = size["width"]
@@ -89,12 +95,19 @@ class UnknownPluginScanner(QDialog):
     def showEvent(self, arg__1: QShowEvent) -> None:
         pass
 
-    # Remove callbacks
     def hideEvent(self, arg__1: QCloseEvent) -> None:
+        """
+        Remove callbacks
+        :param arg__1:
+        :return:
+        """
         self.__save_prefs()
 
-    # Create the ui
     def __create_ui(self):
+        """
+        Create the ui
+        :return:
+        """
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
@@ -125,17 +138,29 @@ class UnknownPluginScanner(QDialog):
         self.__ui_line_edit.setReadOnly(True)
         main_lyt.addWidget(self.__ui_line_edit)
 
-    # Refresh the ui according to the model attributes
     def __refresh_ui(self):
+        """
+        Refresh the ui according to the model attributes
+        :return:
+        """
         self.__refresh_tree_list(True)
         self.__refresh_line_edit()
         self.__refresh_progress_bar()
 
     def __refresh_progress_bar(self):
+        """
+        Refresh the progress bar
+        :return:
+        """
         with self.__refreshing_lock:
             self.__progress_bar.setValue(self.__progress_value)
 
     def __refresh_tree_list(self, waiting_for_scan_if_empty = False):
+        """
+        Refresh the tree list
+        :param waiting_for_scan_if_empty
+        :return:
+        """
         with self.__refreshing_lock:
             self.__ui_tree_refs.clear()
             for ref in self.__refs:
@@ -159,9 +184,17 @@ class UnknownPluginScanner(QDialog):
             self.__ui_tree_refs.expandAll()
 
     def __refresh_line_edit(self):
+        """
+        Refresh the line edit
+        :return:
+        """
         self.__ui_line_edit.setText(self.__current_path if self.__current_path is not None else "")
 
     def __retrieve_refs(self):
+        """
+        Retrieve the loaded references
+        :return:
+        """
         self.__refs.clear()
         refs = pm.ls(references=True)
         for ref in refs:
@@ -170,6 +203,10 @@ class UnknownPluginScanner(QDialog):
                 self.__refs.append(ref_obj)
 
     def __on_ref_selected(self):
+        """
+        On reference selected get the path
+        :return:
+        """
         items = self.__ui_tree_refs.selectedItems()
         if len(items) == 0:
             self.__current_path = None
@@ -178,6 +215,10 @@ class UnknownPluginScanner(QDialog):
         self.__refresh_line_edit()
 
     def __scan_for_unknown_plugins(self):
+        """
+        Launch scan for unknown Plugins
+        :return:
+        """
         self.__progress_value = 1
         self.__refresh_progress_bar()
         with self.__refreshing_lock:

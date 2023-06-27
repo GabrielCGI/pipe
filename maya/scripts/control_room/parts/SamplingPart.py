@@ -5,6 +5,11 @@ import pymel.core as pm
 
 class SamplingPart(ControlRoomPart):
     def __init__(self, control_room, part_name):
+        """
+        Constructor
+        :param control_room
+        :param part_name
+        """
         super(SamplingPart, self).__init__(control_room, "Sampling", part_name)
         self.__form_sliders = [
             FormSlider(self._control_room, FormSliderType.IntSlider, "Camera (AA)", part_name,
@@ -36,22 +41,35 @@ class SamplingPart(ControlRoomPart):
 
         self.__retrieve_progressive_render_override()
 
-    # Create progressive render override
     def __create_progressive_render_override(self):
+        """
+        Create progressive render override
+        :return:
+        """
         self.__progressive_render_override = cr.ControlRoom.create_override("defaultArnoldRenderOptions",
                                                                             "enableProgressiveRender")
 
-    # Remove progressive render override
     def __remove_progressive_render_override(self):
+        """
+        Remove progressive render override
+        :return:
+        """
         cr.ControlRoom.remove_override(self.__progressive_render_override)
         self.__progressive_render_override = None
 
-    # Retrieve progressive render override
     def __retrieve_progressive_render_override(self):
+        """
+        Retrieve progressive render override
+        :return:
+        """
         self.__progressive_render_override = cr.ControlRoom.retrieve_override("defaultArnoldRenderOptions",
                                                                               "enableProgressiveRender")
 
     def populate(self):
+        """
+        Generate the UI content of the SamplingPart
+        :return: content
+        """
         content = QVBoxLayout()
         content.setContentsMargins(4, 4, 1, 4)
 
@@ -72,6 +90,10 @@ class SamplingPart(ControlRoomPart):
         return content
 
     def refresh_ui(self):
+        """
+        Refresh the UI
+        :return:
+        """
         try:
             visible_layer = render_setup.instance().getVisibleRenderLayer()
             is_default_layer = visible_layer.name() == "defaultRenderLayer"
@@ -101,12 +123,20 @@ class SamplingPart(ControlRoomPart):
         except:
             pass
 
-    # On enable progressive render checkbox changed
     def __on_progressive_render_changed(self, state):
+        """
+        On enable progressive render checkbox changed set enableProgressiveRender
+        :param state:
+        :return:
+        """
         if not self._preset_hovered:
             pm.setAttr("defaultArnoldRenderOptions.enableProgressiveRender", state == 2)
 
     def add_callbacks(self):
+        """
+        Add the callbacks
+        :return:
+        """
         self.__progressive_render_callback = pm.scriptJob(
             attributeChange=["defaultArnoldRenderOptions.enableProgressiveRender", self.refresh_ui])
         for fs in self.__form_sliders:
@@ -114,18 +144,32 @@ class SamplingPart(ControlRoomPart):
         self.__layer_callback = pm.scriptJob(event=["renderLayerManagerChange", self.refresh_ui])
 
     def remove_callbacks(self):
+        """
+        Remove the callbacks
+        :return:
+        """
         pm.scriptJob(kill=self.__progressive_render_callback)
         for fs in self.__form_sliders:
             fs.remove_callbacks()
         pm.scriptJob(kill=self.__layer_callback)
 
     def add_to_preset(self, preset):
+        """
+        Add fields to a preset
+        :param preset
+        :return:
+        """
         preset.set(self._part_name, "enable_progressive_render", pm.getAttr("defaultArnoldRenderOptions.enableProgressiveRender"))
         for fs in self.__form_sliders:
             key, field = fs.get_key_preset_and_field()
             preset.set(self._part_name, key, pm.getAttr(field))
 
     def apply(self, preset):
+        """
+        Apply a preset on the part
+        :param preset
+        :return:
+        """
         if preset.contains(self._part_name, "enable_progressive_render"):
             pm.setAttr("defaultArnoldRenderOptions.enableProgressiveRender", preset.get(self._part_name, "enable_progressive_render"))
         for fs in self.__form_sliders:

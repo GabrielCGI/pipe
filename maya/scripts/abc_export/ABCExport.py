@@ -37,9 +37,13 @@ _FILE_NAME_PREFS = "abc_export"
 main_window = omui.MQtUtil.mainWindow()
 class ABCExport(QDialog):
 
-    # Get the abc directory
     @staticmethod
     def __get_abc_dir(max_recursion):
+        """
+        Get the abc directory
+        :param max_recursion
+        :return:
+        """
         def check_dir_recursive(count, dirpath):
             for child_dirname in os.listdir(dirpath):
                 child_dirpath = os.path.join(dirpath, child_dirname)
@@ -60,13 +64,22 @@ class ABCExport(QDialog):
             abc_parent_dir = None
         return abc_parent_dir
 
-    # Test if a folder is an abc folder and if it exists
     @staticmethod
     def __is_abc_folder(folder):
+        """
+        Test if a folder is an abc folder and if it exists
+        :param folder
+        :return:
+        """
         return re.match(r".*/abc(?:/|\\)?$", folder) and os.path.exists(folder)
 
     @staticmethod
     def get_database(database_path):
+        """
+        Get the database from database path
+        :param database_path
+        :return:
+        """
         assets = {}
         list_assets = [asset for asset in os.listdir(database_path) if
                        os.path.isfile(os.path.join(database_path, asset))]
@@ -124,16 +137,26 @@ class ABCExport(QDialog):
 
         self.__retrieve_folder()
 
-    # Don't show the window if the database hasn't been found
     def show(self) -> None:
+        """
+        Don't show the window if the database hasn't been found
+        :return:
+        """
         if self.__database_path is not None:
             super(ABCExport, self).show()
 
     def __retrieve_folder(self):
+        """
+        Retrieve the default folder
+        :return:
+        """
         self.__ui_folder_path.setText(ABCExport.__get_abc_dir(4))
 
-    # Retrieve the database folder
     def __retrieve_database_dir(self):
+        """
+        Retrieve the database folder
+        :return:
+        """
         self.__database_path = None
         database_path = os.getenv("CURRENT_PROJECT_DIR")
         # If database not found close the window
@@ -148,8 +171,11 @@ class ABCExport(QDialog):
         self.__database_path = database_path
         return True
 
-    # Delete the window and show an error message
     def __stop_and_display_error(self):
+        """
+        Delete the window and show an error message
+        :return:
+        """
         self.deleteLater()
         msg = QMessageBox()
         msg.setWindowTitle("Error Database not found")
@@ -158,8 +184,11 @@ class ABCExport(QDialog):
         msg.setInformativeText("Asset Database has not been found. You should use an Illogic Maya Launcher")
         msg.exec_()
 
-    # Save preferences
     def __save_prefs(self):
+        """
+        Save preferences
+        :return:
+        """
         size = self.size()
         self.__prefs["window_size"] = {"width": size.width(), "height": size.height()}
         pos = self.pos()
@@ -168,8 +197,11 @@ class ABCExport(QDialog):
         self.__prefs["abc_subsamples"] = self.__subsamples
         self.__prefs["euler_filter"] = self.__euler_filter
 
-    # Retrieve preferences
     def __retrieve_prefs(self):
+        """
+        Retrieve preferences
+        :return:
+        """
         if "window_size" in self.__prefs:
             size = self.__prefs["window_size"]
             self.__ui_width = size["width"]
@@ -187,12 +219,18 @@ class ABCExport(QDialog):
         if "euler_filter" in self.__prefs:
             self.__euler_filter = self.__prefs["euler_filter"]
 
-    # Remove callbacks
     def hideEvent(self, arg__1: QCloseEvent) -> None:
+        """
+        Remove callbacks
+        :return:
+        """
         self.__save_prefs()
 
-    # Create the ui
     def __create_ui(self):
+        """
+        Create the ui
+        :return:
+        """
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
@@ -267,14 +305,20 @@ class ABCExport(QDialog):
         self.__export_btn.clicked.connect(self.__export_selected_abcs)
         main_lyt.addWidget(self.__export_btn)
 
-    # Refresh the ui according to the model attribute
     def __refresh_ui(self):
+        """
+        Refresh the ui according to the model attribute
+        :return:
+        """
         self.__refresh_btn()
         self.__refresh_param()
         self.__refresh_abcs_table()
 
-    # Refresh the submit button
     def __refresh_btn(self):
+        """
+        Refresh the submit button
+        :return:
+        """
         nb_abcs_selected = len(self.__selected_abcs)
         enabled = True
         tooltip = ""
@@ -287,14 +331,20 @@ class ABCExport(QDialog):
         self.__export_btn.setEnabled(enabled)
         self.__export_btn.setToolTip(tooltip)
 
-    # Refresh the subsamples fields
     def __refresh_param(self):
+        """
+        Refresh the subsamples fields
+        :return:
+        """
         self.__ui_subsamples_enable_cb.setChecked(self.__enable_subsamples)
         self.__ui_subsamples.setEnabled(self.__enable_subsamples)
         self.__ui_euler_filter_cb.setChecked(self.__euler_filter)
 
-    # Refresh the asset table
     def __refresh_abcs_table(self):
+        """
+        Refresh the asset table
+        :return:
+        """
         selected_abcs = self.__selected_abcs
 
         # If the folder is valid we display the "Next version" column
@@ -340,68 +390,108 @@ class ABCExport(QDialog):
             self.__ui_abcs_table.selectRow(row_index)
         self.__ui_abcs_table.setSelectionMode(QAbstractItemView.ExtendedSelection)
 
-    # Browse a new abc folder
     def __browse_folder(self):
+        """
+        Browse a new abc folder
+        :return:
+        """
         dirname = ABCExport.__get_abc_dir(4)
         folder_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select ABC Directory", dirname)
         self.__set_folder(folder_path)
 
     def __set_folder(self, folder_path):
+        """
+        Set a folder if it is a valid abc folder
+        :param folder_path
+        :return:
+        """
         if re.match(r".*/abc(?:/|\\)?$", folder_path) and folder_path != self.__folder_path:
             self.__ui_folder_path.setText(folder_path)
 
-    # Retrieve the folder path on folder linedit change
     def __on_folder_changed(self):
+        """
+        Retrieve the folder path on folder linedit change
+        :return:
+        """
         self.__folder_path = self.__ui_folder_path.text()
         self.__refresh_ui()
 
-    # Retrieve the start frame value on edit and change end frame
-    # if it is lower than the start frame
     def __on_start_frame_changed(self):
+        """
+        Retrieve the start frame value on edit and change end frame if it is lower than the start frame
+        :return:
+        """
         start_frame = self.__ui_start_frame.text()
         self.__start_frame = 1 if len(start_frame) == 0 or int(start_frame) <= 0 else int(start_frame)
         if self.__start_frame >= self.__end_frame:
             self.__ui_end_frame.setText(str(self.__start_frame + 1))
 
-    # Change the end frame
     def __on_end_frame_changed(self):
+        """
+        Change the end frame
+        :return:
+        """
         end_frame = self.__ui_end_frame.text()
         self.__end_frame = self.__start_frame + 1 if len(end_frame) == 0 or int(
             end_frame) <= self.__start_frame else int(end_frame)
 
-    # On start frame loose focus refresh the display
     def __on_start_frame_edited(self):
+        """
+        On start frame loose focus refresh the display
+        :return:
+        """
         self.__ui_start_frame.setText(str(self.__start_frame))
 
-    # On end frame loose focus refresh the display
     def __on_end_frame_edited(self):
+        """
+        On end frame loose focus refresh the display
+        :return:
+        """
         self.__ui_end_frame.setText(str(self.__end_frame))
 
-    # Retrieve the subsamples
     def __on_subsamples_edited(self):
+        """
+        Retrieve the subsamples
+        :return:
+        """
         self.__subsamples = self.__ui_subsamples.text()
 
     def __on_subsample_enable_change(self, state):
+        """
+        Retrieve the enable subsample state value on state checked changed
+        :param state
+        :return:
+        """
         self.__enable_subsamples = state == 2
         self.__refresh_param()
 
     def __on_euler_filter_change(self, state):
+        """
+        Retrieve the euler filter state value on state checked changed
+        :param state
+        :return:
+        """
         self.__euler_filter = state == 2
 
-    # Retrieve the abcs selected on rows selected in the asset table
     def __on_abcs_selection_changed(self):
+        """
+        Retrieve the abcs selected on rows selected in the asset table
+        :return:
+        """
         self.__selected_abcs.clear()
         for selected_row in self.__ui_abcs_table.selectionModel().selectedRows():
             self.__selected_abcs.append(self.__ui_abcs_table.item(selected_row.row(), 0).data(Qt.UserRole))
         self.__refresh_btn()
 
-    # Retrieve all the asset datas in the database of the current project
-    def __get_database(self):
-        return ABCExport.get_database(self.__database_path)
-
-    # Retrieve all the geos of an asset in the scene
     @staticmethod
     def list_existing_geos(database, name, namespace):
+        """
+        Retrieve all the geos of an asset in the scene
+        :param database
+        :param name
+        :param namespace
+        :return: new_geos
+        """
         geos = database[name]["geo"]
         new_geos = []
         for g in geos:
@@ -410,9 +500,13 @@ class ABCExport(QDialog):
                 new_geos.append(geo_ns_replaced)
         return new_geos
 
-    # Retrieve all the abcs existing in the scene and build the list of abc
     @staticmethod
     def retrieve_abcs(database_path):
+        """
+        Retrieve all the abcs existing in the scene and build the list of abc
+        :param database_path
+        :return:  abcs
+        """
         abcs = []
         abcs_by_name = {}
         existing_assets = dict(sorted(ABCExport.get_database(database_path).items(),
@@ -466,12 +560,18 @@ class ABCExport(QDialog):
             abcs.extend(abcs_existing)
         return abcs
 
-    # Retrieve all the abcs existing in the scene and build the list of abc
     def __retrieve_abcs(self):
+        """
+        Retrieve all the abcs existing in the scene and build the list of abc
+        :return:
+        """
         self.__abcs = ABCExport.retrieve_abcs(self.__database_path)
 
-    # Export all the selected abcs
     def __export_selected_abcs(self):
+        """
+        Export all the selected abcs
+        :return:
+        """
         self.__export_btn.setEnabled(False)
         for abc in self.__selected_abcs:
             abc.export(self.__folder_path, self.__start_frame, self.__end_frame,

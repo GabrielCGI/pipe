@@ -1,6 +1,7 @@
 import os
 import re
 import traceback
+
 from abc import *
 from enum import Enum
 
@@ -11,8 +12,10 @@ from look_loader.LookStandin import LookAsset
 from common.utils import *
 
 
-# ABC State in the scene
 class ABCState(Enum):
+    """
+    ABC State in the scene
+    """
     UpToDate = 0
     OutOfDate = 1
     New = 2
@@ -20,6 +23,13 @@ class ABCState(Enum):
 
 class ABCImportAsset(ABC):
     def __init__(self, name, current_project_dir, look_factory, versions=None):
+        """
+        Constructor
+        :param name
+        :param current_project_dir
+        :param look_factory : Factory of Look (in package look_loader)
+        :param versions
+        """
         if versions is None:
             versions = []
         self._name = name
@@ -31,8 +41,12 @@ class ABCImportAsset(ABC):
         self._actual_standin = None
         self._look_standin_obj = None
 
-    # Get icon filename according to the state
     def get_icon_filename(self, state):
+        """
+        Get icon filename according to the state
+        :param state
+        :return: icon filename
+        """
         if state == ABCState.UpToDate:
             return "valid.png"
         elif state == ABCState.OutOfDate:
@@ -40,36 +54,63 @@ class ABCImportAsset(ABC):
         else:
             return "new.png"
 
-    # Getter of the name
     def get_name(self):
+        """
+        Getter of the name
+        :return: name
+        """
         return self._name
 
-    # Getter of the name
     def _get_char_name(self):
+        """
+        Getter of the char name
+        :return: char name
+        """
         return self._name[:-len(self._name.split("_")[-1]) - 1]
 
-    # Getter of the versions
     def get_versions(self):
+        """
+        Getter of the versions
+        :return: versions
+        """
         return self.__versions
 
-    # Setter of the current import version
     def set_import_path(self, path):
+        """
+        Setter of the current import version
+        :param path
+        :return:
+        """
         self._import_path = path
 
-    # Getter of the current import version
     def get_import_path(self):
+        """
+        Getter of the current import version
+        :return: current import version
+        """
         return self._import_path
 
-    # Setter of the actual version
     def set_actual_version(self, version_path):
+        """
+        Setter of the actual version
+        :param version_path:
+        :return:
+        """
         self._actual_version = version_path
 
-    # Getter of the actual version
     def get_actual_version(self):
+        """
+        Getter of the actual version
+        :return: actual version
+        """
         return self._actual_version
 
-    # Setter of the actual Standin
     def set_actual_standin(self, standin):
+        """
+        Setter of the actual Standin
+        :param standin:
+        :return:
+        """
         self._actual_standin = standin
         if self._actual_standin is not None:
             try:
@@ -79,26 +120,40 @@ class ABCImportAsset(ABC):
                 print(f'caught {type(e)}: e')
                 print(e)
                 traceback.print_exception(*sys.exc_info())
-                return
 
-    # Import the abc in the scene
     @abstractmethod
     def import_update_abc(self, do_update_uvs_shaders):
+        """
+        Import the abc in the scene
+        :param do_update_uvs_shaders:
+        :return:
+        """
         pass
 
-    # Update the shader and uvs of the abc
     def update(self):
+        """
+        Update the shader and uvs of the abc
+        :return:
+        """
         if self._look_standin_obj is not None:
             self._look_standin_obj.update_existent_looks()
 
-    # Getter of whether the abc has his uv and looks up to date
     def is_look_up_to_date(self):
+        """
+        Getter of whether the abc has his uv and looks up to date
+        :return: is look up to date
+        """
         if self._look_standin_obj is None:
             return False
         return self._look_standin_obj.is_looks_up_to_date() and self._look_standin_obj.is_uv_up_to_date()
 
     @staticmethod
     def _configure_standin(standin_node):
+        """
+        Configure some parameters of the StandIn
+        :param standin_node:
+        :return:
+        """
         current_unit = pm.currentUnit(time=True, query=True)
         unit_to_fps = {
             "game": 15,
@@ -115,6 +170,11 @@ class ABCImportAsset(ABC):
 
 class ABCImportAnim(ABCImportAsset):
     def import_update_abc(self, do_update_uvs_shaders):
+        """
+        Import or Update an animation
+        :param do_update_uvs_shaders
+        :return:
+        """
         is_import = self._actual_standin is None
 
         char_name = self._get_char_name()
@@ -124,8 +184,6 @@ class ABCImportAnim(ABCImportAsset):
             print(f'caught {type(e)}: e')
             print(e)
             traceback.print_exception(*sys.exc_info())
-            print_warning("Error while retrieving UV files of "+char_name, char_filler='-')
-            return
 
         name = self.get_name()
 
@@ -170,6 +228,11 @@ class ABCImportAnim(ABCImportAsset):
 class ABCImportFur(ABCImportAsset):
 
     def get_icon_filename(self, state):
+        """
+        Get fur icon filename according to the state
+        :param state
+        :return: icon filename
+        """
         if state == ABCState.UpToDate:
             return "valid_fur.png"
         elif state == ABCState.OutOfDate:
@@ -178,9 +241,18 @@ class ABCImportFur(ABCImportAsset):
             return "new_fur.png"
 
     def get_name(self):
+        """
+        Get the fur name
+        :return:
+        """
         return self._name + "_fur"
 
     def import_update_abc(self, do_update_uvs_shaders):
+        """
+        Import or Update a fur
+        :param do_update_uvs_shaders
+        :return:
+        """
         is_import = self._actual_standin is None
 
         name = self.get_name()

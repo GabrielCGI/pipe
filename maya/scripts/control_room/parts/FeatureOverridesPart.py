@@ -6,6 +6,14 @@ import pymel.core as pm
 
 class IgnoreFields:
     def __init__(self, control_room, name, part_name, field_name, key_preset=None):
+        """
+        Constructor
+        :param control_room
+        :param name
+        :param part_name
+        :param field_name
+        :param key_preset
+        """
         self.__control_room = control_room
         self.__name = name
         self.__part_name = part_name
@@ -22,32 +30,51 @@ class IgnoreFields:
         self.__action_remove_override.triggered.connect(self.__remove_override)
         self.__retrieve_override()
 
-    # Create an override for the field of the checkbox
     def __create_override(self):
+        """
+        Create an override for the field of the checkbox
+        :return:
+        """
         obj_attr = self.__field_name.split(".")
         self.__override = cr.ControlRoom.create_override(obj_attr[0], obj_attr[1])
 
-    # Remove the override of the field of the checkbox
     def __remove_override(self):
+        """
+        Remove the override of the field of the checkbox
+        :return:
+        """
         cr.ControlRoom.remove_override(self.__override)
         self.__override = None
 
-    # Retrieve the override of the field of the checkbox
     def __retrieve_override(self):
+        """
+        Retrieve the override of the field of the checkbox
+        :return:
+        """
         obj_attr = self.__field_name.split(".")
         self.__override = cr.ControlRoom.retrieve_override(obj_attr[0], obj_attr[1])
 
-    # On checkbox changed
     def __on_state_changed(self, state):
+        """
+        On checkbox changed
+        :param state
+        :return:
+        """
         if not self.__preset_hovered:
             pm.setAttr(self.__field_name, state == 2)
 
-    # Getter of the key preset and the field
     def get_key_preset_and_field(self):
+        """
+        Getter of the key preset and the field
+        :return:
+        """
         return self.__key_preset, self.__field_name
 
-    # Generate the checkbox
     def generate_checkbox(self):
+        """
+        Generate the checkbox
+        :return:
+        """
         self.__checkbox = QCheckBox(self.__name)
         self.__checkbox.stateChanged.connect(self.__on_state_changed)
         self.__checkbox.setContextMenuPolicy(Qt.ActionsContextMenu)
@@ -55,8 +82,11 @@ class IgnoreFields:
         self.__checkbox.addAction(self.__action_remove_override)
         return self.__checkbox
 
-    # Refresh the checkbox
     def refresh_checkbox(self):
+        """
+        Refresh the checkbox
+        :return:
+        """
         try:
             visible_layer = render_setup.instance().getVisibleRenderLayer()
             is_default_layer = visible_layer.name() == "defaultRenderLayer"
@@ -81,16 +111,29 @@ class IgnoreFields:
             pass
 
     def add_callback(self):
+        """
+        Add the callbacks
+        :return:
+        """
         self.__callback = pm.scriptJob(attributeChange=[self.__field_name, self.refresh_checkbox])
         self.__layer_callback = pm.scriptJob(event=["renderLayerManagerChange", self.refresh_checkbox])
 
     def remove_callback(self):
+        """
+        Remove the callbacks
+        :return:
+        """
         pm.scriptJob(kill=self.__callback)
         pm.scriptJob(kill=self.__layer_callback)
 
 
 class FeatureOverridesPart(ControlRoomPart):
     def __init__(self, control_room, part_name):
+        """
+        Constructor
+        :param control_room
+        :param part_name
+        """
         super(FeatureOverridesPart, self).__init__(control_room, "Feature Overrides", part_name)
         self.__ignore_fields = [
             IgnoreFields(self._control_room, "Ignore Athmosphere", part_name,
@@ -112,6 +155,10 @@ class FeatureOverridesPart(ControlRoomPart):
         self.__arnold_render_callback = None
 
     def populate(self):
+        """
+        Generate the UI content of the FeatureOverridesPart
+        :return: content
+        """
         content = QHBoxLayout()
         content.setContentsMargins(5, 5, 5, 5)
         content.setSizeConstraint(QLayout.SetNoConstraint)
@@ -140,6 +187,10 @@ class FeatureOverridesPart(ControlRoomPart):
         return content
 
     def refresh_ui(self):
+        """
+        Refresh the UI
+        :return:
+        """
         try:
             self.__refresh_ignore_fields()
             self.__refresh_ignore_aov()
@@ -147,13 +198,19 @@ class FeatureOverridesPart(ControlRoomPart):
         except:
             pass
 
-    # Refresh all the ignore fields
     def __refresh_ignore_fields(self):
+        """
+        Refresh all the ignore fields
+        :return:
+        """
         for ign_field in self.__ignore_fields:
             ign_field.refresh_checkbox()
 
-    # Refresh the ignore aovs field
     def __refresh_ignore_aov(self):
+        """
+        Refresh the ignore aovs field
+        :return:
+        """
         stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
             self._part_name, "ignore_aovs", self.__ignore_aovs)
         self.__ui_ignore_aovs_cb.setStyleSheet("QCheckBox{" + stylesheet_lbl + "}")
@@ -165,8 +222,11 @@ class FeatureOverridesPart(ControlRoomPart):
         else:
             self.__ui_ignore_aovs_cb.setChecked(self.__ignore_aovs)
 
-    # Refresh the output denoising aov field
     def __refresh_output_denoising_aov(self):
+        """
+        Refresh the output denoising aov field
+        :return:
+        """
         checked = pm.ls("defaultArnoldRenderOptions")[0].outputVarianceAOVs.get()
         stylesheet_lbl = self._control_room.get_stylesheet_color_for_field(
             self._part_name, "output_denoising", checked)
@@ -180,15 +240,23 @@ class FeatureOverridesPart(ControlRoomPart):
         else:
             self.__ui_output_denoising_aovs_cb.setChecked(checked)
 
-    # On ignore aov checkbox changed
     def __on_state_changed_ignore_aovs(self, state):
+        """
+        On ignore aov checkbox changed, set value to fields
+        :param state
+        :return:
+        """
         if not self._preset_hovered:
             self.__ignore_aovs = state == 2
             pm.setAttr("defaultArnoldRenderOptions.aovMode", 2 if self.__ignore_aovs else 1)
             self.__refresh_ignore_aov()
 
-    # On output denoising aov checkbox changed
     def __on_state_changed_output_denoising_aovs(self, state):
+        """
+        On output denoising aov checkbox changed, set value to fields
+        :param state
+        :return:
+        """
         if not self._preset_hovered:
             enabled = state == 2
             pm.ls("defaultArnoldRenderOptions")[0].outputVarianceAOVs.set(enabled)
@@ -208,18 +276,31 @@ class FeatureOverridesPart(ControlRoomPart):
             self.__refresh_output_denoising_aov()
 
     def add_callbacks(self):
+        """
+        Add the callbacks
+        :return:
+        """
         self.__arnold_render_callback = pm.scriptJob(
             attributeChange=['defaultArnoldRenderOptions.outputVarianceAOVs', self.__refresh_output_denoising_aov])
         for ign_field in self.__ignore_fields:
             ign_field.add_callback()
 
     def remove_callbacks(self):
+        """
+        Remove the callbacks
+        :return:
+        """
         pm.scriptJob(kill=self.__arnold_render_callback)
 
         for ign_field in self.__ignore_fields:
             ign_field.remove_callback()
 
     def add_to_preset(self, preset):
+        """
+        Add fields to a preset
+        :param preset
+        :return:
+        """
         for ign_field in self.__ignore_fields:
             key, field = ign_field.get_key_preset_and_field()
             if key:
@@ -228,6 +309,11 @@ class FeatureOverridesPart(ControlRoomPart):
         preset.set(self._part_name, "output_denoising", pm.getAttr("defaultArnoldRenderOptions.outputVarianceAOVs"))
 
     def apply(self, preset):
+        """
+        Apply a preset on the part
+        :param preset
+        :return:
+        """
         for ign_field in self.__ignore_fields:
             key, field = ign_field.get_key_preset_and_field()
             if key and preset.contains(self._part_name, key):

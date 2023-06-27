@@ -30,7 +30,6 @@ from .Model import *
 
 # ######################################################################################################################
 
-# TODO Change the prefs name for this project
 _FILE_NAME_PREFS = "mAIrus"
 
 _TEMPERATURE = 0
@@ -53,6 +52,9 @@ _MODELS = [
 
 
 class MAIrusState(Enum):
+    """
+    MAIrus request state
+    """
     INACTIVE = 0
     WAITING = 10
     COMPUTING = 20
@@ -99,16 +101,22 @@ class MAIrus(QDialog):
         self.__create_ui()
         self.__refresh_ui()
 
-    # Save preferences
     def __save_prefs(self):
+        """
+        Save preferences
+        :return:
+        """
         size = self.size()
         self.__prefs["window_size"] = {"width": size.width(), "height": size.height()}
         pos = self.pos()
         self.__prefs["window_pos"] = {"x": pos.x(), "y": pos.y()}
         self.__prefs["model"] = self.__model.get_model_name()
 
-    # Retrieve preferences
     def __retrieve_prefs(self):
+        """
+        Retrieve preferences
+        :return:
+        """
         if "window_size" in self.__prefs:
             size = self.__prefs["window_size"]
             self.__ui_width = size["width"]
@@ -124,12 +132,18 @@ class MAIrus(QDialog):
                     self.__model = model
                     break
 
-    # Remove callbacks
     def hideEvent(self, arg__1: QCloseEvent) -> None:
+        """
+        Remove callbacks
+        :return:
+        """
         self.__save_prefs()
 
-    # Create the ui
     def __create_ui(self):
+        """
+        Create the ui
+        :return:
+        """
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
@@ -214,14 +228,21 @@ class MAIrus(QDialog):
         self.__ui_copy_response_btn.setEnabled(False)
         use_response_phase_layout.addWidget(self.__ui_copy_response_btn, 1)
 
-    # Refresh the ui according to the model attribute
     def __refresh_ui(self):
+        """
+        Refresh the ui according to the model attribute
+        :return:
+        """
         for index in range(self.__ui_model_combobox.count()):
             if self.__ui_model_combobox.itemData(index, Qt.UserRole) == self.__model:
                 self.__ui_model_combobox.setCurrentIndex(index)
         self.__refresh_mairus_state()
 
     def __refresh_mairus_state(self):
+        """
+        Refresh the mAIrus state ui
+        :return:
+        """
         # Display according to the state
         if self.__mAIrus_state == MAIrusState.WAITING:
             self.__ui_mAIrus_state_lbl.setStyleSheet("border:1px solid " + _WAITING_COLOR)
@@ -239,12 +260,19 @@ class MAIrus(QDialog):
             self.__ui_mAIrus_state_lbl.setStyleSheet("border:1px solid " + _OUTPUT_ERROR_COLOR)
             self.__ui_mAIrus_state_lbl.setText("Output Error")
 
-    # Change the model selected
     def __on_model_changed(self, index):
+        """
+        Change the model selected
+        :param index
+        :return:
+        """
         self.__model = self.__ui_model_combobox.itemData(index, Qt.UserRole)
 
-    # Send a request to openai with the model selected and the prompt selected
     def __send_request(self):
+        """
+        Send a request to openai with the model selected and the prompt selected
+        :return:
+        """
         self.__mAIrus_state = MAIrusState.COMPUTING
         self.__refresh_mairus_state()
         prompt = self.__ui_input_area.toPlainText()
@@ -253,8 +281,12 @@ class MAIrus(QDialog):
         request.request_ended.connect(self.__on_result_request_ready)
         request.start()
 
-    # On request end display the result
     def __on_result_request_ready(self, result_request):
+        """
+        On request end display the result
+        :param result_request
+        :return:
+        """
         self.__mAIrus_state = MAIrusState.OUTPUTING_SUCCESS
         self.__refresh_mairus_state()
         self.__ui_output_area.setPlainText(result_request)

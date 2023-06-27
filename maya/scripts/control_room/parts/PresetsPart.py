@@ -15,6 +15,10 @@ _NBMAX_PRESET = 10
 
 class PresetFilterDialog(QDialog):
     def __init__(self, preset):
+        """
+        Constructor
+        :param preset
+        """
         super(PresetFilterDialog, self).__init__(wrapInstance(int(omui.MQtUtil.mainWindow()), QWidget))
 
         # Model attributes
@@ -39,8 +43,11 @@ class PresetFilterDialog(QDialog):
         self.__create_ui()
         self.__refresh_ui()
 
-    # Create the ui
     def __create_ui(self):
+        """
+        Create the ui
+        :return:
+        """
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
@@ -67,8 +74,11 @@ class PresetFilterDialog(QDialog):
         self.__ui_submit_btn.clicked.connect(self.__submit_filter)
         main_lyt.addWidget(self.__ui_submit_btn)
 
-    # Refresh the ui according to the model attribute
     def __refresh_ui(self):
+        """
+        Refresh the ui according to the model attribute
+        :return:
+        """
         try:
             self.__ui_list_fields.clear()
             first = True
@@ -104,26 +114,49 @@ class PresetFilterDialog(QDialog):
             pass
 
     def __refresh_btn(self):
+        """
+        Refresh the button
+        :return:
+        """
         self.__ui_submit_btn.setEnabled(len(self.__fields_selected) > 0)
 
     def __on_selection_field_changed(self):
+        """
+        On field selected retrieve it and refresh button
+        :return:
+        """
         self.__fields_selected.clear()
         for item in self.__ui_list_fields.selectedItems():
             self.__fields_selected.append(item.data(Qt.UserRole))
         self.__refresh_btn()
 
     def __submit_filter(self):
+        """
+        Submit the filter to the preset
+        :return:
+        """
         self.__preset.filter(self.__fields_selected)
         self.accept()
 
 
 class EventFilterPreset(QObject):
     def __init__(self, control_room, preset):
+        """
+        Constructor
+        :param control_room
+        :param preset
+        """
         super().__init__()
         self.__control_room = control_room
         self.__preset = preset
 
     def eventFilter(self, object, event):
+        """
+        Event actions
+        :param object
+        :param event
+        :return: event known
+        """
         if event.type() == QtCore.QEvent.Enter:
             self.__control_room.set_hovered_preset(self.__preset)
             return True
@@ -136,6 +169,12 @@ class EventFilterPreset(QObject):
 class PresetsPart(ControlRoomPart):
 
     def __init__(self, control_room, asset_path, part_name):
+        """
+        Constructor
+        :param control_room
+        :param asset_path
+        :param part_name
+        """
         super(PresetsPart, self).__init__(control_room, "Presets", part_name)
         self.__ui_presets_lyt = None
         self.__asset_path = asset_path
@@ -144,12 +183,20 @@ class PresetsPart(ControlRoomPart):
         self.__event_filters = []
 
     def populate(self):
+        """
+        Generate the UI content of the PresetsPart
+        :return: content
+        """
         self.__ui_presets_lyt = QVBoxLayout()
         self.__ui_presets_lyt.setContentsMargins(2, 4, 2, 4)
         self.__ui_presets_lyt.setSpacing(5)
         return self.__ui_presets_lyt
 
     def refresh_ui(self):
+        """
+        Refresh the UI
+        :return:
+        """
         try:
             self.__event_filters.clear()
             if self.__spacer is not None:
@@ -228,8 +275,11 @@ class PresetsPart(ControlRoomPart):
         except:
             pass
 
-    # Generate a new preset
     def __generate_new_preset(self):
+        """
+        Generate a new preset
+        :return:
+        """
         result = pm.promptDialog(
             title='New Preset',
             message='Enter the name:',
@@ -249,8 +299,12 @@ class PresetsPart(ControlRoomPart):
             self._control_room.generate_preset(name)
             self.refresh_ui()
 
-    # Delete the preset
     def __delete_preset(self, preset):
+        """
+        Delete the preset
+        :param preset:
+        :return:
+        """
         answer_delete = pm.confirmDialog(
             title='Confirm',
             message="Are you sure to delete the preset " + preset.get_name() + " ?",
@@ -264,18 +318,34 @@ class PresetsPart(ControlRoomPart):
             self.refresh_ui()
 
     def __apply_preset(self, preset):
+        """
+        Apply the preset clicked
+        :param preset:
+        :return:
+        """
         self._control_room.apply_preset(preset)
         self.refresh_ui()
 
-    # Callback when a Scene is opened
     def __callback_scene_opened(self):
+        """
+        Callback when a Scene is opened
+        :return:
+        """
         PresetManager.get_instance().retrieve_presets()
         self.refresh_ui()
 
     def add_callbacks(self):
+        """
+        Add the callbacks
+        :return:
+        """
         self.__maya_callback = pm.scriptJob(event=["SceneOpened", self.__callback_scene_opened])
 
     def remove_callbacks(self):
+        """
+        Remove the callbacks
+        :return:
+        """
         pm.scriptJob(kill=self.__maya_callback)
 
     def add_to_preset(self, preset):
@@ -287,6 +357,11 @@ class PresetsPart(ControlRoomPart):
         pass
 
     def filter(self, preset):
+        """
+        Display the PresetFilterDialog
+        :param preset:
+        :return:
+        """
         filter_preset = PresetFilterDialog(preset)
         if filter_preset.exec_():
             return True

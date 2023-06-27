@@ -5,6 +5,11 @@ import pymel.core as pm
 
 class MotionBlurPart(ControlRoomPart):
     def __init__(self, control_room, part_name):
+        """
+        Constructor
+        :param control_room
+        :param part_name
+        """
         super(MotionBlurPart, self).__init__(control_room, "Motion Blur", part_name)
         self.__form_sliders = [
             FormSlider(self._control_room, FormSliderType.IntSlider, "Keys", part_name,
@@ -32,37 +37,59 @@ class MotionBlurPart(ControlRoomPart):
         self.__retrieve_motion_blur_override()
         self.__retrieve_instant_shutter_override()
 
-    # Create the enable motion blur override
     def __create_motion_blur_override(self):
+        """
+        Create the enable motion blur override
+        :return:
+        """
         self.__motion_blur_override = \
             cr.ControlRoom.create_override("defaultArnoldRenderOptions", "motion_blur_enable")
 
-    # Remove the enable motion blur override
     def __remove_motion_blur_override(self):
+        """
+        Remove the enable motion blur override
+        :return:
+        """
         cr.ControlRoom.remove_override(self.__motion_blur_override)
         self.__motion_blur_override = None
 
-    # Retrieve the enable motion blur override
     def __retrieve_motion_blur_override(self):
+        """
+        Retrieve the enable motion blur override
+        :return:
+        """
         self.__motion_blur_override = \
             cr.ControlRoom.retrieve_override("defaultArnoldRenderOptions", "motion_blur_enable")
 
-    # Create the instant shutter override
     def __create_instant_shutter_override(self):
+        """
+        Create the instant shutter override
+        :return:
+        """
         self.__instant_shutter_override = \
             cr.ControlRoom.create_override("defaultArnoldRenderOptions", "ignoreMotionBlur")
 
-    # Remove the instant shutter override
     def __remove_instant_shutter_override(self):
+        """
+        Remove the instant shutter override
+        :return:
+        """
         cr.ControlRoom.remove_override(self.__instant_shutter_override)
         self.__instant_shutter_override = None
 
-    # Retrieve the instant shutter override
     def __retrieve_instant_shutter_override(self):
+        """
+        Retrieve the instant shutter override
+        :return:
+        """
         self.__instant_shutter_override = \
             cr.ControlRoom.retrieve_override("defaultArnoldRenderOptions", "ignoreMotionBlur")
 
     def populate(self):
+        """
+        Generate the UI content of the MotionBlurPart
+        :return: content
+        """
         content = QVBoxLayout()
         content.setContentsMargins(4, 4, 1, 4)
 
@@ -90,6 +117,10 @@ class MotionBlurPart(ControlRoomPart):
         return content
 
     def refresh_ui(self):
+        """
+        Refresh the UI
+        :return:
+        """
         try:
             motion_blur_enable  = pm.getAttr("defaultArnoldRenderOptions.motion_blur_enable")
             ignore_motion_blur = pm.getAttr("defaultArnoldRenderOptions.ignoreMotionBlur")
@@ -135,17 +166,29 @@ class MotionBlurPart(ControlRoomPart):
         except:
             pass
 
-    # On motion blur enable checkbox changed
     def __on_motion_blur_changed(self, state):
+        """
+        On motion blur enable checkbox changed set motion_blur_enable
+        :param state
+        :return:
+        """
         if not self._preset_hovered:
             pm.setAttr("defaultArnoldRenderOptions.motion_blur_enable", state == 2)
 
-    # On instant shutter checkbox changed
     def __on_instant_shutter_changed(self, state):
+        """
+        On instant shutter checkbox changed set ignoreMotionBlur
+        :param state
+        :return:
+        """
         if not self._preset_hovered:
             pm.setAttr("defaultArnoldRenderOptions.ignoreMotionBlur", state == 2)
 
     def add_callbacks(self):
+        """
+        Add the callbacks
+        :return:
+        """
         self.__motion_blur_callback = pm.scriptJob(
             attributeChange=["defaultArnoldRenderOptions.motion_blur_enable", self.refresh_ui])
         self.__instant_shutter_callback = pm.scriptJob(
@@ -155,6 +198,10 @@ class MotionBlurPart(ControlRoomPart):
         self.__layer_callback = pm.scriptJob(event=["renderLayerManagerChange", self.refresh_ui])
 
     def remove_callbacks(self):
+        """
+        Remove the callbacks
+        :return:
+        """
         pm.scriptJob(kill=self.__motion_blur_callback)
         pm.scriptJob(kill=self.__instant_shutter_callback)
         for fs in self.__form_sliders:
@@ -162,6 +209,11 @@ class MotionBlurPart(ControlRoomPart):
         pm.scriptJob(kill=self.__layer_callback)
 
     def add_to_preset(self, preset):
+        """
+        Add fields to a preset
+        :param preset
+        :return:
+        """
         preset.set(self._part_name, "enable_motion_blur", pm.getAttr("defaultArnoldRenderOptions.motion_blur_enable"))
         preset.set(self._part_name, "instant_shutter", pm.getAttr("defaultArnoldRenderOptions.ignoreMotionBlur"))
         for fs in self.__form_sliders:
@@ -169,6 +221,11 @@ class MotionBlurPart(ControlRoomPart):
             preset.set(self._part_name, key, pm.getAttr(field))
 
     def apply(self, preset):
+        """
+        Apply a preset on the part
+        :param preset
+        :return:
+        """
         if preset.contains(self._part_name, "enable_motion_blur"):
             pm.setAttr("defaultArnoldRenderOptions.motion_blur_enable", preset.get(self._part_name, "enable_motion_blur"))
         if preset.contains(self._part_name, "instant_shutter"):

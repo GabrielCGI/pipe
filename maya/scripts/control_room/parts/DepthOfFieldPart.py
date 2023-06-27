@@ -5,6 +5,11 @@ import pymel.core as pm
 
 class DepthOfFieldPart(ControlRoomPart):
     def __init__(self, control_room, part_name):
+        """
+        Constructor
+        :param control_room
+        :param part_name
+        """
         super(DepthOfFieldPart, self).__init__(control_room, "Depth of Field", part_name)
         self.__no_refresh = False
         self.__cam = None
@@ -20,6 +25,10 @@ class DepthOfFieldPart(ControlRoomPart):
         if self.__cam is not None : self.add_dynamic_callbacks()
 
     def populate(self):
+        """
+        Generate the UI content of the DepthOfFieldPart
+        :return: content
+        """
         content = QHBoxLayout()
         content.setContentsMargins(4, 4, 1, 4)
 
@@ -42,6 +51,10 @@ class DepthOfFieldPart(ControlRoomPart):
         return content
 
     def refresh_ui(self):
+        """
+        Refresh the UI
+        :return:
+        """
         try:
             dof_checked = False
             if self.__cam is not None and not self.__no_refresh:
@@ -79,15 +92,22 @@ class DepthOfFieldPart(ControlRoomPart):
         except:
             pass
 
-    # On checkbox Depth of Field changed
     def __on_dof_changed(self, state):
+        """
+        On checkbox Depth of Field changed
+        :param state
+        :return:
+        """
         if self.__cam is not None and not self._preset_hovered:
             self.__no_refresh = True
             self.__cam.depthOfField.set(state == 2)
             self.__no_refresh = False
 
-    # On FStop line edit changed
     def __on_fstop_changed(self):
+        """
+        On FStop line edit changed
+        :return:
+        """
         if self.__cam is not None and not self._preset_hovered:
             self.__no_refresh = True
             self.__cam.fStop.set(float(self.__ui_line_edit_fstop.text()))
@@ -97,16 +117,22 @@ class DepthOfFieldPart(ControlRoomPart):
         # Nothing
         pass
 
-    # Add callbacks to the current camera
     def add_dynamic_callbacks(self):
+        """
+        Add callbacks to the current camera
+        :return:
+        """
         if self.__cam is not None:
             self.__camera_dof_callback = pm.scriptJob(
                 attributeChange=[self.__cam + '.depthOfField', self.refresh_ui])
             self.__camera_fstop_callback = pm.scriptJob(
                 attributeChange=[self.__cam + '.fStop', self.refresh_ui])
 
-    # Remove the callbacks from the current camera
     def remove_callbacks(self):
+        """
+        Remove the callbacks from the current camera
+        :return:
+        """
         if self.__camera_dof_callback is not None:
             pm.scriptJob(kill=self.__camera_dof_callback)
             self.__camera_dof_callback = None
@@ -115,11 +141,21 @@ class DepthOfFieldPart(ControlRoomPart):
             self.__camera_fstop_callback = None
 
     def add_to_preset(self, preset):
+        """
+        Add fields to a preset
+        :param preset
+        :return:
+        """
         if self.__cam is not None:
             preset.set(self._part_name, "depth_of_field", self.__cam.depthOfField.get())
             preset.set(self._part_name, "f_stop", self.__cam.fStop.get())
 
     def apply(self, preset):
+        """
+        Apply a preset on the part
+        :param preset
+        :return:
+        """
         if self.__cam is not None:
             if preset.contains(self._part_name, "depth_of_field"):
                 self.__cam.depthOfField.set(preset.get(self._part_name, "depth_of_field"))

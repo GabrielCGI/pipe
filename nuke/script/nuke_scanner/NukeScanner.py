@@ -41,8 +41,11 @@ class ConfirmationNukeScanner(QDialog):
         self.__create_ui()
         self.__refresh_ui()
 
-    # Create the ui
     def __create_ui(self):
+        """
+        Create the ui
+        :return:
+        """
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
@@ -69,8 +72,11 @@ class ConfirmationNukeScanner(QDialog):
         accept_btn.clicked.connect(self.accept)
         btn_lyt.addWidget(accept_btn)
 
-    # Refresh the ui according to the model attribute
     def __refresh_ui(self):
+        """
+        Refresh the ui according to the model attribute
+        :return:
+        """
         self.__ui_list_folders.clear()
         for path in self.__data_renaming_folder.keys():
             self.__ui_list_folders.addItem(QListWidgetItem(path))
@@ -78,6 +84,9 @@ class ConfirmationNukeScanner(QDialog):
 
 class NukeScanner:
     def __init__(self):
+        """
+        Constructor
+        """
         self.__files = []
         self.__folders = []
         self.__retrieve_shot()
@@ -87,6 +96,10 @@ class NukeScanner:
             print("SHOT DIR NOT FOUND")
 
     def __retrieve_shot(self):
+        """
+        Retrieve the current shot
+        :return:
+        """
         self.__compo_filepath = nuke.root()['name'].value().replace("\\", "/")
         match = re.match(r"^(.+)/compo/\w*\.nk$", self.__compo_filepath)
         if match:
@@ -95,7 +108,10 @@ class NukeScanner:
             self.__shot_dir = None
 
     def __retrieve_files(self):
-        print("RETRIEVE FILES LAUNCHED")
+        """
+        Retrieve all the files
+        :return:
+        """
         read_nodes = nuke.allNodes("Read")
         for node in read_nodes:
             file_path = node["file"].value()
@@ -106,10 +122,14 @@ class NukeScanner:
             if folder in self.__folders:
                 continue
             self.__folders.append(folder)
-        print("RETRIEVE FILES ENDED")
 
     def __check_folder_recursive(self, folder, check_folder=True):
-        print("CHECK FOLDER RECURSIVE ",folder)
+        """
+        Check the files recursively to output folder not used
+        :param folder
+        :param check_folder
+        :return: folder is used, not used folders
+        """
         not_used_folders = []
         is_used = True if not check_folder else folder.replace("\\", "/") in self.__folders
         for child in os.listdir(folder):
@@ -126,23 +146,23 @@ class NukeScanner:
             return is_used, not_used_folders
 
     def run(self):
-        print("RUN")
-        if self.__shot_dir is not None:
-            render_out_folder = self.__shot_dir + "/render_out"
-            is_used, folders_to_delete = self.__check_folder_recursive(render_out_folder, False)
-            dict_rename_folders = {}
-            for folder_path in folders_to_delete:
-                print(folder_path)
-                folder_path= folder_path.replace("\\", "/")
-                dirname, basename = os.path.split(folder_path)
-                if not basename.startswith(_PREFIX_TO_DELETE):
-                    new_path = os.path.join(dirname, _PREFIX_TO_DELETE + basename).replace("\\", "/")
-                    dict_rename_folders[folder_path] = new_path
+        """
+        Run the Nuke Scanner
+        :return:
+        """
+        if self.__shot_dir is None: return
+        render_out_folder = self.__shot_dir + "/render_out"
+        is_used, folders_to_delete = self.__check_folder_recursive(render_out_folder, False)
+        dict_rename_folders = {}
+        for folder_path in folders_to_delete:
+            folder_path= folder_path.replace("\\", "/")
+            dirname, basename = os.path.split(folder_path)
+            if not basename.startswith(_PREFIX_TO_DELETE):
+                new_path = os.path.join(dirname, _PREFIX_TO_DELETE + basename).replace("\\", "/")
+                dict_rename_folders[folder_path] = new_path
 
-            if len(dict_rename_folders)>0:
-                if ConfirmationNukeScanner(render_out_folder, dict_rename_folders).exec_():
-                    for folder_path,new_path in dict_rename_folders.items():
-                        os.rename(folder_path, new_path)
-                        print(folder_path + "\n\t--> " + new_path)
-            else:
-                print("NOTHING TO DELETE")
+        if len(dict_rename_folders)>0:
+            if ConfirmationNukeScanner(render_out_folder, dict_rename_folders).exec_():
+                for folder_path,new_path in dict_rename_folders.items():
+                    os.rename(folder_path, new_path)
+                    print(folder_path + "\n\t--> " + new_path)

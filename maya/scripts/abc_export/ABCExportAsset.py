@@ -13,6 +13,10 @@ class ABCExportAsset:
 
     @staticmethod
     def __optimize_scene_size():
+        """
+        Optimize Scene Size by cleaning it up
+        :return:
+        """
         print("\nvvvvvvvvvvvvvvvv Optimize Scene Size vvvvvvvvvvvvvvvv")
         pm.mel.source('cleanUpScene')
         pm.mel.scOpt_performOneCleanup({
@@ -38,6 +42,10 @@ class ABCExportAsset:
 
     @staticmethod
     def __delete_unknown_node():
+        """
+        Delete all unknown Nodes
+        :return:
+        """
         print("\nvvvvvvvvvvvvvvv Delete Unknown Nodes vvvvvvvvvvvvvvvv")
         unknown = pm.ls(type="unknown")
         if unknown:
@@ -49,6 +57,10 @@ class ABCExportAsset:
 
     @staticmethod
     def __remove_unknown_plugins():
+        """
+        Remoave all unknown Plugins
+        :return:
+        """
         print("\nvvvvvvvvvvvvvv Remove Unknown Plugins vvvvvvvvvvvvvvv")
         old_plug = pm.unknownPlugin(query=True, list=True)
         if old_plug:
@@ -64,6 +76,10 @@ class ABCExportAsset:
 
     @staticmethod
     def __unlock_all_nodes():
+        """
+        Unlock all Nodes
+        :return:
+        """
         print("\n------------------ Unlock All Nodes -----------------\n")
         all_nodes = pm.ls()
         if all_nodes:
@@ -72,6 +88,10 @@ class ABCExportAsset:
 
     @staticmethod
     def __remove_blast_panel_error():
+        """
+        Fix CgAbBlastPanel Error
+        :return:
+        """
         print("\n------------ Remove CgAbBlastPanel Error ------------\n")
         for model_panel in pm.getPanel(typ="modelPanel"):
             # Get callback of the model editor
@@ -85,13 +105,21 @@ class ABCExportAsset:
 
     @staticmethod
     def __fix_isg():
+        """
+        Fix initialShadingGroup Error
+        :return:
+        """
         print("\n-------------- Fix initialShadingGroup --------------\n")
         pm.lockNode('initialShadingGroup', lock=0, lockUnpublished=0)
         pm.lockNode('initialParticleSE', lock=0, lockUnpublished=0)
 
-    # Get the next version (version when the ABC will be exported)
     @staticmethod
     def next_version(folder):
+        """
+        Get the next version (version when the ABC will be exported)
+        :param folder:
+        :return:
+        """
         version = 1
         if os.path.isdir(folder):
             for f in os.listdir(folder):
@@ -109,29 +137,57 @@ class ABCExportAsset:
         return version
 
     def __init__(self, name, namespace, geos):
+        """
+        Constructor
+        :param name
+        :param namespace
+        :param geos
+        """
         self.__name = name
         self.__namespace = namespace
         self.__num = 0
         self.__geos = geos
 
-    # Getter of the name
     def get_name(self):
+        """
+        Getter of the name
+        :return:
+        """
         return self.__name
 
-    # Getter of the name merged with the num
     def get_name_with_num(self):
+        """
+        Getter of the name merged with the num
+        :return: name with num
+        """
         return self.__name + "_" + str(self.__num).zfill(2)
 
-    # Setter of the num
     def set_num(self, num):
+        """
+        Setter of the num
+        :param num
+        :return:
+        """
         self.__num = num
 
-    # Getter of the geos
     def get_geos(self):
+        """
+        Getter of the geos
+        :return: geos
+        """
         return self.__geos
 
-    # Export this reference in ABC in a new version
     def export(self, folder, start, end, subsamples_enabled, subsamples, euler_filter):
+        """
+        Export this reference in ABC in a new version
+        :param folder
+        :param start
+        :param end
+        :param subsamples_enabled
+        :param subsamples
+        :param euler_filter
+        :return:
+        """
         abc_name = self.get_name_with_num()
         asset_dir_path = os.path.join(folder, abc_name)
         next_version = ABCExportAsset.next_version(asset_dir_path)
@@ -177,6 +233,13 @@ class ABCExportAsset:
             log_file.write(time_log+export_path_log+char_log+version_log+source_scene_log)
 
     def __export_light(self, version_dir_path, start, end):
+        """
+        Export the lights of the Asset if it has some
+        :param version_dir_path
+        :param start
+        :param end
+        :return:
+        """
         lights = pm.ls(self.__namespace + ":*", type="light")
         if len(lights) > 0:
             self.__optimize_scene_size()

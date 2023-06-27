@@ -8,7 +8,13 @@ from shiboken2 import wrapInstance
 from common.utils import *
 from .cornea_by_char import *
 
+
 def __retrieve_datas(cornea_dict):
+    """
+    Retrieve the cornea for characters
+    :param cornea_dict
+    :return:
+    """
     # Selection
     selection = pm.ls(selection=True)
     if len(selection) < 2:
@@ -37,6 +43,13 @@ def __retrieve_datas(cornea_dict):
 
 
 def __light_link_cornea(shape, cornea_shapes, lights):
+    """
+    Light link the corneas
+    :param shape
+    :param cornea_shapes
+    :param lights
+    :return:
+    """
     # Light Expression
     c = [l.fullPath().replace("|", "/") for l in lights]
     string = "' '".join(c)
@@ -59,6 +72,10 @@ def __light_link_cornea(shape, cornea_shapes, lights):
 
 
 def run():
+    """
+    Launch Asset link cornea
+    :return:
+    """
     current_project_dir = os.getenv("CURRENT_PROJECT_DIR")
     if current_project_dir is None:
         print_warning("Current project dir not defined. Use an illogic launcher")
