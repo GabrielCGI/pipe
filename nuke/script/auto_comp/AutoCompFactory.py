@@ -33,10 +33,14 @@ _OPERATION_MERGE_RULE_KEY = "operation"
 
 
 class AutoCompFactory:
-    # Create an Unpack Mode with a json file path that contains a name, a shuffle mode
-    # and the path to the merge mode rule set json file
     @staticmethod
     def get_unpack_mode(path):
+        """
+        Create an Unpack Mode with a json file path that contains a name, a shuffle mode
+        and the path to the merge mode rule set json file
+        :param path
+        :return: Unpack Mode
+        """
         layout_manager = LayoutManager()
         # Parse Rule Set
         rule_set_data = AutoCompFactory.__parse_rule_set(path)
@@ -52,9 +56,15 @@ class AutoCompFactory:
         if merge_mode is None: return None
         return UnpackMode(path, rule_set_data[_NAME_KEY], var_set, shuffle_mode, merge_mode, layout_manager)
 
-    # Create an Unpack Mode to shuffle only one layer
     @staticmethod
     def shuffle_layer(path, shot_path, layers):
+        """
+        Create an Unpack Mode to shuffle only one layer
+        :param path : Unpack mode path
+        :param shot_path
+        :param layers
+        :return:
+        """
         layout_manager = LayoutManager()
         # Parse Rule Set
         rule_set_data = AutoCompFactory.__parse_rule_set(path)
@@ -73,9 +83,14 @@ class AutoCompFactory:
         unpack_mode.scan_layers(shot_path, layers)
         unpack_mode.unpack(shot_path)
 
-    # Create an Unpack Mode to shuffle channels of a layer
     @staticmethod
     def shuffle_channel_mode(read_node, channels):
+        """
+        Create an Unpack Mode to shuffle channels of a layer
+        :param read_node
+        :param channels
+        :return:
+        """
         layout_manager = LayoutManager()
         # Shuffle
         shuffle_mode = ShuffleChannelMode(channels, layout_manager)
@@ -98,6 +113,11 @@ class AutoCompFactory:
 
     @staticmethod
     def __parse_rule_set(path):
+        """
+        Parse a unpack mode json config file to retrieve the json
+        :param path
+        :return: json
+        """
         with open(path, "r") as f:
             json_data = f.read()
         try:
@@ -106,9 +126,14 @@ class AutoCompFactory:
             print("Error while parsing " + path + " :\n" + str(e))
             return None
 
-    # Get the Variable Set according to the layers config data
     @staticmethod
     def __get_var_set(start_vars_data, layer_filter_arr=None):
+        """
+        Get the Variable Set according to the layers config data
+        :param start_vars_data
+        :param layer_filter_arr
+        :return: variable set
+        """
         start_vars = []
         order=0
         # Scan for start variables
@@ -158,9 +183,14 @@ class AutoCompFactory:
             return None
         return VariablesSet(start_vars)
 
-    # Build the Merge by parsing the rule set json file
     @staticmethod
     def __get_merge_mode(merge_data, layout_manager):
+        """
+        Build the Merge by parsing the rule set json file
+        :param merge_data
+        :param layout_manager
+        :return: Merge Mode
+        """
         if _MERGE_RULES_KEY not in merge_data:
             return None
         relations = []

@@ -15,19 +15,35 @@ _DISTANCE_STEP_MERGE = 2
 
 class MergeMode:
     def __init__(self, relations, layout_manager):
+        """
+        Constructor
+        :param relations
+        :param layout_manager
+        """
         self.__layout_manager = layout_manager
         self.__var_set = None
         self.__relations = relations
 
-    # Setter of the variable set
     def set_var_set(self, var_set):
+        """
+        Setter of the variable set
+        :param var_set
+        :return:
+        """
         self.__var_set = var_set
 
-    # Getter of the  raltions
     def get_relations(self):
+        """
+        Getter of the relations
+        :return: relations
+        """
         return self.__relations
 
     def __run_group(self):
+        """
+        Group vars if needed
+        :return:
+        """
         active_vars = self.__var_set.get_active_vars()
         var_by_name = {}
 
@@ -38,6 +54,7 @@ class MergeMode:
             var_by_name[var_name].append(var)
 
         for var_name, vars in var_by_name.items():
+            # Group only if there are more than 1 var
             if len(vars) <= 1: continue
             print(var_name, len(vars))
             vars.sort(key=lambda x: x.get_layer().lower())
@@ -72,8 +89,11 @@ class MergeMode:
             result_var = Variable(name, previous_node, [], step)
             self.__var_set.active_var(result_var, True)
 
-    # Run the Merge
     def run(self):
+        """
+        Run the Merge
+        :return:
+        """
         if self.__var_set is None:
             return
         self.__run_group()

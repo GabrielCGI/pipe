@@ -35,9 +35,13 @@ _COLOR_GREY_DISABLE = 105,105,105
 
 
 class AutoComp(QWidget):
-    # Test if a folder is a correct shot path
     @staticmethod
     def __is_correct_shot_folder(folder):
+        """
+        Test if a folder is a correct shot path
+        :param folder
+        :return: is correct shot folder
+        """
         return os.path.isdir(os.path.join(folder, "render_out")) and os.path.isdir(folder)
 
     def __init__(self, prt=None):
@@ -68,7 +72,7 @@ class AutoComp(QWidget):
         self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width, self.__ui_height) / 2
 
         self.__retrieve_prefs()
-        self.__retrieve_selected_unpack_mode()
+        self.__retrieve_default_unpack_mode()
         self.__retrieve_read_nodes_to_update()
 
         self.__scan_layers()
@@ -84,30 +88,50 @@ class AutoComp(QWidget):
         self.__create_ui()
         self.__refresh_ui()
 
-    def showEvent(self, event):
+    def showEvent(self, arg__1):
+        """
+        Add callbacks
+        :return:
+        """
         self.remove_callbacks()
         nuke.addKnobChanged(self.__on_read_node_selected, nodeClass="Read")
         self.__on_read_node_selected()
 
-    # Remove callbacks
     def hideEvent(self, arg__1):
+        """
+        Save preferences on hide
+        :return:
+        """
         # self.remove_callbacks()
         self.__save_prefs()
 
     def remove_callbacks(self):
+        """
+        Remove callbacks
+        :return:
+        """
         nuke.removeKnobChanged(self.__on_read_node_selected, nodeClass="Read")
 
-    # Save preferences
     def __save_prefs(self):
+        """
+        Save preferences
+        :return:
+        """
         if self.__selected_unpack_mode is not None:
             self.__prefs["unpack_mode"] = self.__selected_unpack_mode.get_name()
 
-    # Retrieve preferences
     def __retrieve_prefs(self):
+        """
+        Retrieve preferences
+        :return:
+        """
         self.__retrieve_unpack_mode_prefs()
 
-    # Retrieve the mode stored in preferences
     def __retrieve_unpack_mode_prefs(self):
+        """
+        Retrieve the mode stored in preferences
+        :return:
+        """
         if "unpack_mode" in self.__prefs:
             sel_unpack_mode_name = self.__prefs["unpack_mode"]
             for unpack_mode in self.__unpack_modes:
@@ -115,8 +139,12 @@ class AutoComp(QWidget):
                     self.__selected_unpack_mode = unpack_mode
                     break
 
-    # Retrieve all the modes in mode config files
     def __retrieve_unpack_modes(self, unpack_mode_dir):
+        """
+        Retrieve all the modes in mode config files
+        :param unpack_mode_dir
+        :return:
+        """
         del self.__unpack_modes[:]
         for unpack_mode_filename in os.listdir(unpack_mode_dir):
             if not unpack_mode_filename.endswith(".json"):
@@ -128,13 +156,22 @@ class AutoComp(QWidget):
             if unpack_mode is not None:
                 self.__unpack_modes.append(unpack_mode)
 
-    def __retrieve_selected_unpack_mode(self):
+    def __retrieve_default_unpack_mode(self):
+        """
+        Retrieve the default Unpack Mode
+        :return:
+        """
         if self.__selected_unpack_mode is None and len(self.__unpack_modes) > 0:
             self.__selected_unpack_mode = self.__unpack_modes[0]
 
-    # Generate a header layout for a subpart (with hline and facultative button)
     @staticmethod
     def __get_header_ui(title, button = None):
+        """
+        Generate a header layout for a subpart (with hline and facultative button)
+        :param title
+        :param button
+        :return: header
+        """
         header = QHBoxLayout()
         line = QFrame()
         line.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
@@ -156,8 +193,11 @@ class AutoComp(QWidget):
         header.addWidget(line)
         return header
 
-    # Create the ui
     def __create_ui(self):
+        """
+        Create the ui
+        :return:
+        """
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
@@ -246,7 +286,6 @@ class AutoComp(QWidget):
         self.__ui_shuffle_layer_btn.clicked.connect(self.__shuffle_layer)
         content_shot_autocomp_lyt.addWidget(self.__ui_shuffle_layer_btn,2,1)
 
-
         # SHUFFLE READ CHANNEL PART
 
         shuffle_read_channel_lyt = QVBoxLayout()
@@ -305,8 +344,11 @@ class AutoComp(QWidget):
         self.__ui_update_reads_btn.clicked.connect(self.__update_read)
         update_reads_lyt.addWidget(self.__ui_update_reads_btn)
 
-    # Refresh the ui according to the model attribute
     def __refresh_ui(self):
+        """
+        Refresh the ui according to the model attribute
+        :return:
+        """
         self.__refresh_shot_autocomp_btn()
         self.__refresh_unpack_modes()
         self.__refresh_layers_list()
@@ -316,30 +358,45 @@ class AutoComp(QWidget):
         self.__refresh_update_reads_table()
         self.__refresh_update_read_node_btn()
 
-    # Refresh all the button of the shot to autocomp part
     def __refresh_shot_autocomp_btn(self):
+        """
+        Refresh all the button of the shot to autocomp part
+        :return:
+        """
         self.__refresh_shuffle_layer_btn()
         self.__refresh_autocomp_btn()
 
-    # Refresh the shuffle layer button
     def __refresh_shuffle_layer_btn(self):
+        """
+        Refresh the shuffle layer button
+        :return:
+        """
         self.__ui_shuffle_layer_btn.setEnabled(
             len(self.__selected_layers) > 0 and self.__selected_unpack_mode is not None and
             os.path.isdir(os.path.join(self.__shot_path, "render_out")))
 
-    # Refresh the autocomp button
     def __refresh_autocomp_btn(self):
+        """
+        Refresh the autocomp button
+        :return:
+        """
         self.__ui_autocomp_btn.setEnabled(
             self.__selected_unpack_mode is not None and os.path.isdir(os.path.join(self.__shot_path, "render_out")))
 
-    # Refresh the unpack mode combobox
     def __refresh_unpack_modes(self):
+        """
+        Refresh the unpack mode combobox
+        :return:
+        """
         for index in range(self.__ui_unpack_mode.count()):
             if self.__ui_unpack_mode.itemData(index, Qt.UserRole) == self.__selected_unpack_mode:
                 self.__ui_unpack_mode.setCurrentIndex(index)
 
-    # Refresh the layer start var list of the current mode
     def __refresh_layers_list(self):
+        """
+        Refresh the layer start var list of the current mode
+        :return:
+        """
         self.__ui_layers_list.clear()
         # Check existence shot path
         if not os.path.isdir(self.__shot_path): return
@@ -371,8 +428,11 @@ class AutoComp(QWidget):
             item.setText(name)
             self.__ui_layers_list.addItem(item)
 
-    # Refresh the layer start var list of the current mode
     def __refresh_start_vars_list(self):
+        """
+        Refresh the layer start var list of the current mode
+        :return:
+        """
         self.__ui_start_vars_list.clear()
         if self.__selected_unpack_mode is not None:
             start_vars = [var for var in self.__selected_unpack_mode.get_var_set().get_start_vars()]
@@ -385,8 +445,11 @@ class AutoComp(QWidget):
                 if not self.__selected_unpack_mode.is_layer_name_scanned(var_str):
                     item.setTextColor(QColor(150,150,150))
 
-    # Refresh the channel list of the selected read node
     def __refresh_read_node_ui(self):
+        """
+        Refresh the channel list of the selected read node
+        :return:
+        """
         self.__ui_channel_list.clear()
         if self.__selected_read_node is not None:
             self.__ui_lbl_selected_read_node.setText(self.__selected_read_node.name())
@@ -403,16 +466,25 @@ class AutoComp(QWidget):
         else:
             self.__ui_lbl_selected_read_node.setText("")
 
-    # Refresh the shuffle channel buttonn
     def __refresh_shuffle_channel_btn(self):
+        """
+        Refresh the shuffle channel button
+        :return:
+        """
         self.__ui_shuffle_channel_btn.setEnabled(len(self.__selected_channels) > 0)
 
-    # Refresh the Update Reads Node button
     def __refresh_update_read_node_btn(self):
+        """
+        Refresh the Update Reads Node button
+        :return:
+        """
         self.__ui_update_reads_btn.setEnabled(len(self.__selected_read_nodes_for_update_data) > 0)
 
-    # Refresh tje Update Reads Table
     def __refresh_update_reads_table(self):
+        """
+        Refresh the Update Reads Table
+        :return:
+        """
         self.__ui_read_nodes_table.setRowCount(0)
         row_index = 0
         for layer, current_version, last_version, last_version_path, read_node in self.__read_nodes_list_for_update:
@@ -443,29 +515,43 @@ class AutoComp(QWidget):
                 current_version_item.setTextColor(QColor(*_COLOR_GREY_DISABLE))
                 last_version_item.setTextColor(QColor(*_COLOR_GREY_DISABLE))
 
-    # Browse a new abc folder
     def __browse_folder(self):
+        """
+        Browse a new abc folder
+        :return:
+        """
         dirname = nuke.root()['name'].value()
         if len(dirname) == 0:
             dirname = _DEFAULT_SHOT_DIR
         shot_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Shot Directory", dirname)
         self.__set_shot_path(shot_path)
 
-    # Check and set a new shot path
     def __set_shot_path(self, shot_path):
+        """
+        Check and set a new shot path
+        :param shot_path
+        :return:
+        """
         if AutoComp.__is_correct_shot_folder(shot_path) and shot_path != self.__shot_path:
             self.__ui_shot_path.setText(shot_path)
 
-    # Retrieve the folder path on folder linedit change
     def __on_folder_changed(self):
+        """
+        Retrieve the folder path on folder linedit change
+        :return:
+        """
         self.__shot_path = self.__ui_shot_path.text()
         self.__scan_layers()
         self.__refresh_shot_autocomp_btn()
         self.__refresh_start_vars_list()
         self.__refresh_layers_list()
 
-    # On Unpack Mode combobox value changed retrieve the datas of the mode and rescan layers
     def __on_unpack_mode_changed(self, index):
+        """
+        On Unpack Mode combobox value changed retrieve the datas of the mode and rescan layers
+        :param index
+        :return:
+        """
         self.__selected_unpack_mode = self.__ui_unpack_mode.itemData(index, Qt.UserRole)
         self.__scan_layers()
         self.__refresh_start_vars_list()
@@ -473,23 +559,32 @@ class AutoComp(QWidget):
         self.__selected_layers = []
         self.__refresh_shuffle_layer_btn()
 
-    # On Layer selected refresh the shuffle layer button
     def __on_layer_selected(self):
+        """
+        On Layer selected refresh the shuffle layer button
+        :return:
+        """
         self.__selected_layers = []
         for item in self.__ui_layers_list.selectedItems():
             self.__selected_layers.append(item.data(Qt.UserRole))
         self.__refresh_shuffle_layer_btn()
 
-    # On Channel selected retrieve selected and refresh the shuffle channel button
     def __on_channel_selected(self):
+        """
+        On Channel selected retrieve selected and refresh the shuffle channel button
+        :return:
+        """
         items = self.__ui_channel_list.selectedItems()
         del self.__selected_channels[:]
         for item in items:
             self.__selected_channels.append(item.data(Qt.UserRole))
         self.__refresh_shuffle_channel_btn()
 
-    # On Read Node selected in the Graph change the selected read node and refresh the ui
     def __on_read_node_selected(self):
+        """
+        On Read Node selected in the Graph change the selected read node and refresh the ui
+        :return:
+        """
         try:
             node = nuke.thisNode()
             knob = nuke.thisKnob()
@@ -505,8 +600,11 @@ class AutoComp(QWidget):
                 self.__selected_read_node = read_nodes_selected[0]
         self.__refresh_read_node_ui()
 
-    # On Read Node selected in Update Reads Table Retrieve selected and refresh the update button
     def __on_read_node_list_item_selected(self):
+        """
+        On Read Node selected in Update Reads Table Retrieve selected and refresh the update button
+        :return:
+        """
         rows_selected = self.__ui_read_nodes_table.selectionModel().selectedRows()
         del self.__selected_read_nodes_for_update_data[:]
         for row_selected in rows_selected:
@@ -526,13 +624,19 @@ class AutoComp(QWidget):
             self.__refresh_update_reads_table()
         self.__refresh_update_read_node_btn()
 
-    # Retrieve the read nodes and refresh the tables
     def __refresh_read_nodes_to_update(self):
+        """
+        Retrieve the read nodes and refresh the tables
+        :return:
+        """
         self.__retrieve_read_nodes_to_update()
         self.__refresh_update_reads_table()
 
-    # Refresh the read nodes list for the Update Reads Part
     def __retrieve_read_nodes_to_update(self):
+        """
+        Refresh the read nodes list for the Update Reads Part
+        :return:
+        """
         del self.__read_nodes_list_for_update[:]
         read_nodes = nuke.allNodes("Read")
         for read_node in read_nodes:
@@ -566,36 +670,54 @@ class AutoComp(QWidget):
         self.__read_nodes_list_for_update = sorted(self.__read_nodes_list_for_update, reverse=True,
                                                    key=lambda x: (x[1] == x[2], x[0]))
 
-    # Scan the layers with the current unpack mode
     def __scan_layers(self):
+        """
+        Scan the layers with the current unpack mode
+        :return:
+        """
         if self.__selected_unpack_mode is not None:
             self.__selected_unpack_mode.scan_layers(self.__shot_path)
 
-    # Reinit the unpack mode to eventually start a new autocomp
     def __reinit_auto_comp(self):
+        """
+        Reinit the unpack mode to eventually start a new autocomp
+        :return:
+        """
         self.__retrieve_unpack_modes(_UNPACK_MODES_DIR)
         self.__retrieve_unpack_mode_prefs()
-        self.__retrieve_selected_unpack_mode()
+        self.__retrieve_default_unpack_mode()
         self.__scan_layers()
 
-    # Shuffle a specific layer with the current mode
     def __shuffle_layer(self):
+        """
+        Shuffle a specific layer with the current mode
+        :return:
+        """
         AutoCompFactory.shuffle_layer(
             self.__selected_unpack_mode.get_config_path(), self.__shot_path, self.__selected_layers)
 
-    # Run the autocomp, store the mode in the preferences and refresh the ui
     def __unpack(self):
+        """
+        Run the autocomp, store the mode in the preferences and refresh the ui
+        :return:
+        """
         self.__prefs["unpack_mode"] = self.__selected_unpack_mode.get_name()
         self.__selected_unpack_mode.unpack(self.__shot_path)
         self.__reinit_auto_comp()
         self.__refresh_read_nodes_to_update()
 
-    # Update selected read nodes in the Update Reads Table to the last version of their layer
     def __update_read(self):
+        """
+        Update selected read nodes in the Update Reads Table to the last version of their layer
+        :return:
+        """
         for read_node,new_path in self.__selected_read_nodes_for_update_data:
             read_node.knob("file").setValue(new_path)
         self.__refresh_read_nodes_to_update()
 
-    # Shuffle selected channels of the selected read node
     def __shuffle_channel(self):
+        """
+        Shuffle selected channels of the selected read node
+        :return:
+        """
         AutoCompFactory.shuffle_channel_mode(self.__selected_read_node, self.__selected_channels)

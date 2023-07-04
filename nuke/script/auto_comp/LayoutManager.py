@@ -31,9 +31,15 @@ class LayoutManager:
     ALIGN_CENTER = 2
     ALIGN_END = 3
 
-    # Get initialization data of a backdrop
+    #
     @staticmethod
     def __get_init_backdrop_data(long_name, parent_long_name):
+        """
+        Get initialization data of a backdrop
+        :param long_name
+        :param parent_long_name
+        :return: init backdrop data
+        """
         return {
             "long_name": long_name,
             "parent_long_name": parent_long_name,
@@ -44,14 +50,21 @@ class LayoutManager:
             "visited": False}
 
     def __init__(self):
+        """
+        Constructor
+        """
         self.__backdrops_data = LayoutManager.__get_init_backdrop_data("", None)
         self.__nodes_layout_data = {}
         self.__backdrops_layout_data = {}
         self.__current_workspace_y = None
         self.__bbox_graph = 0, 0, 0, 0
 
-    # Compute the bounding box of the graph to know where to place new graph
+    #
     def compute_current_bbox_graph(self):
+        """
+        Compute the bounding box of the graph to know where to place new graph
+        :return:
+        """
         nodes = nuke.allNodes(recurseGroups=True)
         if len(nodes) == 0: return 0, 0, 0, 0
         min_x = float('inf')
@@ -69,8 +82,13 @@ class LayoutManager:
             max_y = max(max_y, y + height)
         self.__bbox_graph = min_x, min_y, max_x, max_y
 
-    # Get the backdrop data of the backdrop
+    #
     def __backdrop_data(self, backdrop_longname):
+        """
+        Get the backdrop data of the backdrop
+        :param backdrop_longname
+        :return: backdrop data
+        """
         backdrop_shortnames = backdrop_longname.split(".")
         nb_bd = len(backdrop_shortnames)
         current_bd = self.__backdrops_data
@@ -85,8 +103,14 @@ class LayoutManager:
                 return current_bd
         return None
 
-    # Add nodes to a backdrop
+    #
     def add_nodes_to_backdrop(self, backdrop_longname, nodes=None):
+        """
+        Add nodes to a backdrop
+        :param backdrop_longname:
+        :param nodes
+        :return:
+        """
         if nodes is None:
             nodes = []
         current_bd = self.__backdrop_data(backdrop_longname)
@@ -94,14 +118,30 @@ class LayoutManager:
             if node not in current_bd["nodes"]:
                 current_bd["nodes"].append(node)
 
-    # Add or edit a backdrop option
+    #
     def add_backdrop_option(self, backdrop_longname, option, value):
+        """
+        Add or edit a backdrop option
+        :param backdrop_longname
+        :param option
+        :param value
+        :return:
+        """
         current_bd = self.__backdrop_data(backdrop_longname)
         current_bd["options"][option] = value
 
-    # Add relation between backdrop (only possible with top level backdrops)
+    #
     def add_top_level_backdrop_layout_relation(self, rel_backdrop_longname, backdrop_longname, position=POS_RIGHT,
                                                alignment=ALIGN_CENTER, mult_distance=1):
+        """
+        Add relation between backdrop (only possible with top level backdrops)
+        :param rel_backdrop_longname
+        :param backdrop_longname
+        :param position
+        :param alignment
+        :param mult_distance
+        :return:
+        """
         self.__backdrops_layout_data[backdrop_longname] = {
             "base_backdrop": rel_backdrop_longname,
             "position": position,
@@ -109,8 +149,16 @@ class LayoutManager:
             "distance": mult_distance * _BASE_DISTANCE,
         }
 
-    # Add node relation
+    #
     def add_node_layout_relation(self, base_node, node_to_place, position=POS_RIGHT, mult_distance=1):
+        """
+        Add node relation
+        :param base_node
+        :param node_to_place
+        :param position
+        :param mult_distance
+        :return:
+        """
         self.__nodes_layout_data[node_to_place] = {
             "base_node": base_node,
             "position": position,
@@ -118,9 +166,18 @@ class LayoutManager:
             "visited": False
         }
 
-    # Build the layout of nodes
+    #
     def build_layout_node_graph(self):
+        """
+        Build the layout of nodes
+        :return:
+        """
         def __build_layout_node_graph_aux(node_to_place):
+            """
+            Auxiliary function to build the layout of nodes
+            :param node_to_place:
+            :return:
+            """
             if node_to_place in self.__nodes_layout_data:
                 lyt_rel = self.__nodes_layout_data[node_to_place]
                 if lyt_rel["visited"]:
@@ -165,9 +222,18 @@ class LayoutManager:
             node.screenWidth(), node.screenHeight()
             __build_layout_node_graph_aux(node)
 
-    # Compute layout backdrops
+    #
     def __compute_build_layout_backdrops(self):
+        """
+        Compute layout backdrops
+        :return:
+        """
         def __compute_build_layout_backdrop(bd_data):
+            """
+            Auxiliary function to compute layout backdrops
+            :param bd_data
+            :return: bounding box
+            """
             backdrops = bd_data["backdrops"]
             nodes = bd_data["nodes"]
             # Retrieve all the options
@@ -231,10 +297,20 @@ class LayoutManager:
         for bd_data in self.__backdrops_data["backdrops"].values():
             __compute_build_layout_backdrop(bd_data)
 
-    # Compute relation between top level backdrops
+    #
     def __compute_top_level_backdrops_relation(self):
-        # Translate the backdrop and all the content of it
+        """
+        Compute relation between top level backdrops
+        :return:
+        """
         def __translate_backdrop(tr_x, tr_y, bd_data):
+            """
+            Translate the backdrop and all the content of it
+            :param tr_x
+            :param tr_y
+            :param bd_data
+            :return:
+            """
             backdrops = bd_data["backdrops"]
             nodes = bd_data["nodes"]
             if "layout_data" not in bd_data: #TODO remove
@@ -249,6 +325,12 @@ class LayoutManager:
                 node.setYpos(int(node.ypos() + tr_y))
 
         def __compute_backdrops_relation_aux(bd_longname, bd_lyt_data):
+            """
+            Auxiliary function to compute relation between top level backdrops
+            :param bd_longname
+            :param bd_lyt_data
+            :return:
+            """
             bd_data = self.__backdrop_data(bd_longname)
             if "layout_data" not in bd_data: return
             base_bd_longname = bd_lyt_data["base_backdrop"]
@@ -311,9 +393,20 @@ class LayoutManager:
                 for bd_data in self.__backdrops_data["backdrops"].values():
                     __translate_backdrop(tr_x, 0, bd_data)
 
-    # Build the backdrops layout
+    #
     def build_layout_backdrops(self):
+        """
+        Build the backdrops layout
+        :return:
+        """
         def __build_backdrop_aux(backdrop_name, backdrop_data, z_order):
+            """
+            Auxiliary function to build the backdrops layout
+            :param backdrop_name
+            :param backdrop_data
+            :param z_order
+            :return: backdrop node
+            """
             for child_bd_name, child_bd_data in backdrop_data["backdrops"].items():
                 __build_backdrop_aux(child_bd_name, child_bd_data, z_order + 1)
             if "layout_data" not in backdrop_data:

@@ -29,23 +29,39 @@ _LAYER_POSTAGE_DISTANCE = 6
 
 class UnpackMode:
 
-    # Get a lightened version of the input color
     @staticmethod
     def __ligthen_color(r, g, b):
+        """
+        Get a lightened version of the input color
+        :param r
+        :param g
+        :param b
+        :return: lighthened color
+        """
         ligthen_ratio = 0.3
         return int(r + (255 - r) * ligthen_ratio), int(g + (255 - g) * ligthen_ratio), \
                int(b + (255 - b) * ligthen_ratio)
 
-    # Get a darkened version of the input color
     @staticmethod
     def __darken_color(r, g, b):
+        """
+        Get a darkened version of the input color
+        :param r
+        :param g
+        :param b
+        :return: darkened color
+        """
         darken_ratio = 0.3
 
         return int(r * (1-darken_ratio)), int(g *(1-darken_ratio)), int(b *(1-darken_ratio))
 
-    # Get the last sequence and utility sequence of a layer
     @staticmethod
     def get_last_seq_from_layer(layer_path):
+        """
+        Get the last sequence and utility sequence of a layer
+        :param layer_path
+        :return: seq_path, utility_path, start_frame, end_frame
+        """
         if not os.path.isdir(layer_path):
             return None
         for seq_name in reversed(os.listdir(layer_path)):
@@ -71,15 +87,31 @@ class UnpackMode:
                     return seq_path, utility_path, start_frame, end_frame
         return None
 
-    # Create a read node with a postage stamp node
     @staticmethod
     def __create_read_with_postage(name, seq_path, start_frame, end_frame):
+        """
+        Create a read node with a postage stamp node
+        :param name
+        :param seq_path
+        :param start_frame
+        :param end_frame
+        :return: read_node, postage_stamp
+        """
         read_node = nuke.nodes.Read(name=name, file=seq_path, first=start_frame, last=end_frame)
         postage_stamp = nuke.nodes.PostageStamp(name=_PREFIX_POSTAGE + name, hide_input=True, inputs=[read_node],
                                                 postage_stamp=True)
         return read_node, postage_stamp
 
     def __init__(self, config_path, name, var_set, shuffle_mode, merge_mode, layout_manager):
+        """
+        Constructor
+        :param config_path
+        :param name
+        :param var_set
+        :param shuffle_mode
+        :param merge_mode
+        :param layout_manager
+        """
         self.__name = name
         self.__config_path = config_path
         self.__var_set = var_set
@@ -90,32 +122,55 @@ class UnpackMode:
         self.__shuffle_mode.set_var_set(self.__var_set)
         self.__merge_mode.set_var_set(self.__var_set)
 
-    # Getter if the Unpack mode name
     def get_name(self):
+        """
+        Getter of the name
+        :return: name
+        """
         return self.__name
 
-    # Getter if the Unpack mode config path
     def get_config_path(self):
+        """
+        Getter of the config path
+        :return: config path
+        """
         return self.__config_path
 
-    # Getter if the Unpack mode variable set
     def get_var_set(self):
+        """
+        Getter of the variable set
+        :return: variable set
+        """
         return self.__var_set
 
-    # Getter if the Unpack mode Shuffle mode
     def get_shuffle_mode(self):
+        """
+        Getter of the Shuffle mode
+        :return: Shuffle mode
+        """
         return self.__shuffle_mode
 
-    # Getter if the Unpack mode Merge Mode
     def get_merge_mode(self):
+        """
+        Getter of the Merge Mode
+        :return:
+        """
         return self.__merge_mode
 
-    # Getter of whether the Unpack Mode is valid or not (Shuffle and Merge not None)
     def is_valid(self):
+        """
+        Getter of whether the Unpack Mode is valid or not (Shuffle and Merge not None)
+        :return: is valid
+        """
         return self.__shuffle_mode is not None and self.__merge_mode is not None
 
-    # Retrieve the layers in the shot corresponding to the variable in ruleset
     def scan_layers(self, shot_path, layer_filter_arr =None):
+        """
+        Retrieve the layers in the shot corresponding to the variable in ruleset
+        :param shot_path
+        :param layer_filter_arr
+        :return:
+        """
         if not os.path.isdir(shot_path):
             return
         if shot_path.endswith("render_out"):
@@ -140,23 +195,34 @@ class UnpackMode:
             self.__start_vars_to_unpack.append(start_var)
         self.__start_vars_to_unpack.sort(key=lambda x: x.get_order())
 
-    # Getter of whether the layer is scanned or not
     def is_layer_scanned(self, layer):
+        """
+        Getter of whether the layer is scanned or not
+        :param layer
+        :return:
+        """
         for start_var in self.__start_vars_to_unpack:
-            # if start_var.is_rule_valid(layer):
             if start_var.get_layer() == layer:
                 return start_var
         return False
 
-    # Getter of whether the layer is scanned or not
     def is_layer_name_scanned(self, layer_name):
+        """
+        Getter of whether the layer is scanned or not
+        :param layer_name
+        :return: is layer name scanned
+        """
         for start_var in self.__start_vars_to_unpack:
             if start_var.get_name() == layer_name:
                 return True
         return False
 
-    # Retrieve the layers, create the read node, postages and setup layout options
     def __unpack_layers(self, shot_path):
+        """
+        Retrieve the layers, create the read node, postages and setup layout options
+        :param shot_path
+        :return:
+        """
         render_path = os.path.join(shot_path, "render_out")
         read_nodes = []
         postage_nodes = []
@@ -254,8 +320,12 @@ class UnpackMode:
                                                            _LAYER_POSTAGE_DISTANCE)
             curr = postage_node
 
-    # Run the AutoCOmp by unpacking layers, shuffling them, merging the outputs and building all the layouts
     def unpack(self, shot_path):
+        """
+        Run the AutoCOmp by unpacking layers, shuffling them, merging the outputs and building all the layouts
+        :param shot_path
+        :return:
+        """
         if len(self.__start_vars_to_unpack) == 0: return
         # Retrieve the bounding box of the current graph to place correctly incoming graph
         self.__layout_manager.compute_current_bbox_graph()

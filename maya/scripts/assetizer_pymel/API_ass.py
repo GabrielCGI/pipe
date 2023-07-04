@@ -39,7 +39,7 @@ def scanAss(dso):
 
     AiASSLoad(dso)
     # Iterate over all shader nodes
-    iter = AiUniverseGetNodeIterator(AI_NODE_SHAPE);
+    iter = AiUniverseGetNodeIterator(AI_NODE_SHAPE)
     while not AiNodeIteratorFinished(iter):
         node = AiNodeIteratorGetNext(iter)
         node_name = AiNodeGetName( node )

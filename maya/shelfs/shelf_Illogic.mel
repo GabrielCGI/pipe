@@ -577,7 +577,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
-        -command "import importlib\nfrom common import utils\nutils.unload_packages(silent=True, package=\"style_dreamer\")\nimportlib.import_module(\"style_dreamer\")\nfrom style_dreamer.StyleDreamer import StyleDreamer\ntry:\n    style_dreamer.close()\nexcept:\n    pass\n\n# ##################################################################################################################\n\n__SERVER_HOST = \"https://3f19e42736153e58ab.gradio.live\"\n\n# ##################################################################################################################\n\nstyle_dreamer = StyleDreamer(__SERVER_HOST)\nstyle_dreamer.show()\n" 
+        -command "import importlib\nfrom common import utils\nutils.unload_packages(silent=True, package=\"style_dreamer\")\nimportlib.import_module(\"style_dreamer\")\nfrom style_dreamer.StyleDreamer import StyleDreamer\ntry:\n    style_dreamer.close()\nexcept:\n    pass\n\n# ##################################################################################################################\n\n__SERVER_HOST = \"http://192.168.0.27:7860\"\n\n# ##################################################################################################################\n\nstyle_dreamer = StyleDreamer(__SERVER_HOST)\nstyle_dreamer.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
