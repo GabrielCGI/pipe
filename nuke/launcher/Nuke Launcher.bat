@@ -1,0 +1,5 @@
+SET PIPELINE_DIR=R:/pipeline/pipe
+SET PIPELINE_DIR_NUKE=%PIPELINE_DIR%/nuke
+SET NUKE_PATH=%NUKE_PATH%;%PIPELINE_DIR_NUKE%/init;
+
+start C:\"Program Files"\Nuke12.1v5\Nuke12.1.exe

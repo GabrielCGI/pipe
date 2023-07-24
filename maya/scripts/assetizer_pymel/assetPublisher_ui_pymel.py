@@ -24,14 +24,14 @@ def maya_main_window():
 
 
 
-class AssetLoader(QtWidgets.QDialog):
+class AssetPublisher(QtWidgets.QDialog):
     def __init__(self, parent=maya_main_window()):
-        super(AssetLoader, self).__init__(parent)
+        super(AssetPublisher, self).__init__(parent)
         self.qtSignal = QtCore.Signal()
 
         #################################################################
     def create(self):
-        self.setWindowTitle("AssetLoader")
+        self.setWindowTitle("Asset Publisher")
         self.setWindowFlags(QtCore.Qt.Tool)
         self.resize(300, 100) # re-size the window
 
@@ -100,7 +100,7 @@ class AssetLoader(QtWidgets.QDialog):
         maya_root = pm.ls(sl=True)[0]
         asset_name = utils.only_name(maya_root)
         asset_dir = self.get_dir(asset_name)
-        pub.check_is_retake(asset_dir,maya_root)
+        pub.check_is_retake(asset_dir)
 
         pub.publish(maya_root,asset_dir,self.import_published.isChecked())
         if self.delete_after_publish.isChecked():
@@ -115,7 +115,7 @@ class AssetLoader(QtWidgets.QDialog):
 
         asset_dir = self.get_dir(asset_name)
 
-        pub.check_is_retake(asset_dir,maya_root)
+        pub.check_is_retake(asset_dir)
 
         pub.publish(maya_root,asset_dir,self.import_published.isChecked(),selected_variant)
 
@@ -135,6 +135,6 @@ try:
     ui.deleteLater()
 except:
     pass
-ui = AssetLoader()
+ui = AssetPublisher()
 ui.create()
 ui.show()

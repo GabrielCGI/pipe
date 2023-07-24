@@ -42,7 +42,7 @@ _OUTPUT_SUCCESS_COLOR = "green"
 _OUTPUT_ERROR_COLOR = "red"
 
 _MODELS = [
-    # ChatGPT4(_TEMPERATURE, _TOP_P), #TODO when access
+    ChatGPT4(_TEMPERATURE, _TOP_P), #TODO when access
     ChatGPT3_5(_TEMPERATURE, _TOP_P),
     ChatGPT3(_TEMPERATURE, _TOP_P),
 ]

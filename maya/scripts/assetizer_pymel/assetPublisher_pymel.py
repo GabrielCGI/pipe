@@ -293,7 +293,7 @@ def checkAsset(asset):
     if asset.proxy: logger.info("Proxy found:" + asset.proxy.name())
 
 
-def check_is_retake(asset_dir, maya_root):
+def check_is_retake(asset_dir):
     if os.path.isdir(asset_dir):
         msg = pm.confirmDialog(title='Confirm', message='The asset already exist: \n%s' % (asset_dir),
                                button=['Update asset', 'Cancel'], defaultButton='Cancel', cancelButton='Cancel',

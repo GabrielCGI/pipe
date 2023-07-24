@@ -1,12 +1,14 @@
 import time
 
-
-
 reader = app.createReader(input_file)
 writer = app.createWriter(output_file)
+print(output_file, output_file[-3:])
 reader.getParam("onMissingFrame").setValue(2)
-codec = writer.getParam("codecShortName")
-codec.setValue("libopenh264")
+
+if output_file[-3:] == "mov":
+    codec = writer.getParam("codecShortName")
+    codec.setValue("libopenh264")
+
 premult = writer.getParam("inputPremult")
 premult.setValue(2)
 #The node will be accessible via app.MyWriter after this call
