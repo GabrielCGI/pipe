@@ -1,0 +1,1 @@
+C:\"Program Files"\Autodesk\Maya2022\bin\mayapy.exe "R:\pipeline\pipe\deadline\bat\check_arnold_license.py"

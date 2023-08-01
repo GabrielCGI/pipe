@@ -1,0 +1,44 @@
+[State]
+Type=Enum
+Items=Global Enabled;Opt-In;Disabled
+Category=Options
+CategoryOrder=0
+Index=0
+Label=State
+Default=Global Enabled
+Description=How this event plug-in should respond to events. If Global, all jobs and Workers will trigger the events for this plugin. If Opt-In, jobs and Workers can choose to trigger the events for this plugin. If Disabled, no events are triggered for this plugin.
+
+[DiscordServer]
+Type=String
+Category=Discord Configuration
+Label=Discord Server
+Default=
+Description=The Discord server
+
+[DefaultDiscordChannel]
+Type=String
+Category=Discord Configuration
+Label=Discord Default Channel
+Default=
+Description=The Discord channel
+
+[DiscordProjectChannelList]
+Type=MultilineString
+Category=Discord Configuration
+Label=Discord Projects Channels
+Default=projet_1:Projet 1
+Description=The list of users with their discord account to ping them on their publish
+
+[DiscordUserAccount]
+Type=MultilineString
+Category=Discord Configuration
+Label=User Discord Account name
+Default=deadlineuser1:discordnameuser1
+Description=The list of users with their discord account to ping them on their publish
+
+[MessageList]
+Type=MultilineString
+Category=Publish
+Label=Message List
+Default=
+Description=The list of the possible messages

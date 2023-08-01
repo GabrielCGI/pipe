@@ -16,6 +16,7 @@ _DISTANCE_READ_TO_SHUFFLE = 1.7
 _HEIGHT_COLUMN_SHUFFLE = 3
 _DISTANCE_OUTPUT_SHUFFLE = 1.7
 _PERCENT_HEIGHT_SHUFFLE = 1/4.0
+_EXTRA_CHANNELS = ["emission", "emission_indirect"]
 
 
 # ######################################################################################################################
@@ -34,7 +35,7 @@ class ShuffleMode:
         channels = []
         for channel in detailed_channels:
             channel_split = channel.split(".")[0]
-            if channel_split.startswith("RGBA_") and channel_split not in visited_channels:
+            if (channel_split.startswith("RGBA_") or channel_split in _EXTRA_CHANNELS) and channel_split not in visited_channels:
                 channels.append(channel_split)
                 visited_channels.append(channel_split)
         return channels
@@ -49,13 +50,20 @@ class ShuffleMode:
         child_nodes = []
 
         def __check_node(root_node, current):
-            for i in range(current.inputs()):
-                input_node = current.input(i)
-                if input_node == read_node or input_node in child_nodes:
-                    child_nodes.append(root_node)
-                    break
-                else:
-                    __check_node(root_node, input_node)
+            try:
+                inputs = current.inputs()
+                for i in range(inputs):
+                    input_node = current.input(i)
+                    if input_node is None: continue
+                    if input_node == read_node or input_node in child_nodes:
+                        child_nodes.append(root_node)
+                        break
+                    else:
+                        __check_node(root_node, input_node)
+            except Exception as e:
+
+                print("%s.inputs() doesn't exist"%current)
+                print (e.message, e.args)
 
         for node in nuke.allNodes("Shuffle2"):
             __check_node(node, node)
