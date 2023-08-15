@@ -46,7 +46,7 @@ def maya_main_window():
 
 
 #current_project="D:/gabriel/assetizer"
-project_list = ["I:/swaDisney_2307","B:/trashtown_2112","I:/battlestar_2206","I:/swarovski_2301","I:/clarins_2301","D:/"]
+project_list = ["I:/swaDisney_2307","B:/trashtown_2112","I:/battlestar_2206","I:/swarovski_2301","I:/clarins_2301","D:/","I:/swaChristmas_2023"]
 
 empty_scene = ""
 

@@ -380,7 +380,7 @@ def parse_aov_list(exrpath):
         if len(split) > 2 and split[-2].startswith("RGBA"):
             if split[-2] not in aov_list:
                 aov_list.append(split[-2])
-        elif len(split) > 2 and split[-2].startswith("emission_"):
+        elif len(split) > 2 and split[-2].startswith("emission"):
             if split[-2] not in aov_list:
                 aov_list.append(split[-2])
 
