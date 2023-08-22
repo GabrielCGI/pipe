@@ -19,12 +19,14 @@ class ShadingGroupRenamerTool(ActionTool):
             # Find connected surface shader
             surface_shader = sg.surfaceShader.listConnections()
             try:
+                if sg == "initialParticleSE" or sg == "initialShadingGroup":
+                    continue
                 if surface_shader:
                     old_name = sg.name()
                     shader = surface_shader[0]
                     # Rename the shading group based on the surface shader's name
                     new_sg_name = shader.nodeName() + '_SG'
-                    rename(sg, new_sg_name)
+                    pm.rename(sg, new_sg_name)
                     print(f'Renamed {old_name} to {new_sg_name}')
                 else:
                     print(f'Skipping {sg} as no surface shader is connected')

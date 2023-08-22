@@ -12,4 +12,6 @@ set input_file=%input_file:\=/%
 set range=%start%-%end%
 
 set command="output_file=\"%output_file%\";input_file=\"%input_file%\";hd=\"%hd%\""
+echo %command%
 start R:\pipeline\networkInstall\natron\2.5.0\Natron\bin\NatronRenderer.exe %cd%/exr2mov.py -c %command% -w MyWriter %range%
+pause

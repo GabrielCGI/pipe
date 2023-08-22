@@ -44,5 +44,6 @@ try:
     #To use with Natron (Gui) to start render
     #app.render(writer, 0, 6)
 except Exception as e :
+    print("ERROR output:"+output_file)
     print(repr(e))
     os.system("pause")

@@ -3,8 +3,8 @@ chcp 65001 > NUL
 setlocal ENABLEDELAYEDEXPANSION
 
 rem "--------------------------- PATHS TO MODIFY ---------------------------"
-set path_source=G:\Drive partagés\clarins_shared\clarins_2301\
-set path_source2=G:\Drive partagés\clarins_shared\clarins_2301\
+set path_source=G:\Drive partagés\swaChristmas_shared\swaChristmas_2023\
+set path_source2=G:\Drive partagés\swaChristmas_shared\swaChristmas_2023\
 set path_destination=I:\clarins_2301\
 rem "--------------------------- PATHS TO MODIFY ---------------------------"
 

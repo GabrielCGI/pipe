@@ -39,16 +39,33 @@ class ExrToMov(DeadlineEventListener):
         output_directory = job.OutputDirectories[0]
         first_frame = min(job.Frames)
         last_frame = max(job.Frames)
-        frame_range = str(first_frame)+"-"+str(last_frame)
-        print("Output directory: " +str(output_directory))
+        frame_range = f"{first_frame}-{last_frame}"
+        print(f"Output directory: {output_directory}")
 
         # Compute input files path and output file path
+        output_filenames = job.OutputFileNames
+
+        if len(output_filenames) == 0:
+            print("No Output filenames : Abort EXR to MOV")
+            return
+
+        # determine file extension
+        filename, file_extension = os.path.splitext(output_filenames[0])
+        file_extension = file_extension.lower()
+
+        if file_extension not in ['.exr', '.png']:
+            print(f"Unsupported file type: {file_extension}")
+            return
+
         input_file = os.path.join(output_directory, job.OutputFileNames[0])
-        input_file = re.sub( "\?", "#", input_file )
-        first_frame_file = FrameUtils.ReplacePaddingWithFrameNumber(input_file, first_frame)
-        trim = first_frame_file[:-9]
-        input_file= (trim + ".####.exr").replace("\\", "/")
-        output_file =  (trim + "_preview").replace("\\", "/")
+        print("job.OutputFileNames[0]:"+job.OutputFileNames[0])
+        pattern = r"\.\d{3,4}\.exr"
+        replacement = ".####.exr"
+        input_file = re.sub(pattern, replacement, input_file)
+
+        input_file= input_file.replace("\\", "/")
+        output_file =  (input_file[:-9] + "_preview").replace("\\", "/")
+
         if len(job.Frames)>2:
             output_file+=".mov"
         else:
