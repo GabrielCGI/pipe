@@ -1,6 +1,6 @@
 import sys
 import pymel.core as pm
-from zoetrop_app import logic
+from zoetrop_app_dev import logic
 import importlib
 importlib.reload(logic)
 from maya import OpenMayaUI as omui
