@@ -253,6 +253,41 @@ global proc shelf_Illogic () {
         -manage 1
         -visible 1
         -preventOverride 0
+        -annotation "Publish To DATABASE" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "from abc_export import publish_to_database\n\nimport importlib\nimp..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "data" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "BookmarkDown.png" 
+        -image1 "BookmarkDown.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from abc_export import publish_to_database\n\nimport importlib\nimportlib.reload(publish_to_database)\n\npublish_to_database.createNewAsset()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
         -annotation "Look Loader" 
         -enableBackground 0
         -backgroundColor 0 0 0 
@@ -783,6 +818,41 @@ global proc shelf_Illogic () {
         -marginWidth 0
         -marginHeight 1
         -command "import zoetrop\nimport importlib\nimportlib.reload(zoetrop)\ntry:\n    zoetrop_ui.close()\nexcept:\n    pass\nzoetrop_ui = zoetrop.CustomUI()\nzoetrop_ui.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "from zoetrop_app import ui\nfrom zoetrop_app import logic\n\nimport importlib\nimportlib.reload(ui)\nimportlib.reload(logic)\n\ntry:\n    zoetrop_ui.close()\nexcept:\n    pass\nzoetrop_ui = ui.CustomUI()\nzoetrop_ui.show()\n" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "from zoetrop_app import ui\nfrom zoetrop_app import logic\n\nimport..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "v2" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/zoetrop2.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/zoetrop2.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from zoetrop_app import ui\nfrom zoetrop_app import logic\n\nimport importlib\nimportlib.reload(ui)\nimportlib.reload(logic)\n\ntry:\n    zoetrop_ui.close()\nexcept:\n    pass\nzoetrop_ui = ui.CustomUI()\nzoetrop_ui.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
