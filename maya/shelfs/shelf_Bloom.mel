@@ -31,7 +31,7 @@ global proc shelf_Bloom () {
         -image "abc_export3.png" 
         -image1 "abc_export3.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "\n\nimport abcPipelineExport_ui as abcExp_ui\nimport importlib\nimportlib.reload(abcExp_ui)\n\ntry:\n    ui.deleteLater()\nexcept:\n    pass\nui = abcExp_ui.ABC_pipelineExport()\nui.create()\nui.show()" 
         -sourceType "python" 
@@ -65,7 +65,7 @@ global proc shelf_Bloom () {
         -image "abcPipelineExport.png" 
         -image1 "abcPipelineExport.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import abcPipelineExport as ppEx\nfrom importlib import reload\nreload(ppEx)\nexportAnimGuiCls = ppEx.exportAnimGuiCls()\nexportAnimGuiCls.show()\nlist =  ppEx.listCharRef()\nexportAnimGuiCls.updateCharList(list)" 
         -sourceType "python" 
@@ -99,7 +99,7 @@ global proc shelf_Bloom () {
         -image "abcPipelineImport.png" 
         -image1 "abcPipelineImport.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import abcPipelineImport as ppIm\nfrom importlib import reload\nreload(ppIm)\nppIm.import_anim()" 
         -sourceType "python" 
@@ -133,7 +133,7 @@ global proc shelf_Bloom () {
         -image "toolSettings.png" 
         -image1 "toolSettings.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "\nimport char_pip_pymel\nimport importlib\nimportlib.reload(char_pip_pymel)\n\nchar_pip_pymel.run()" 
         -sourceType "python" 
@@ -167,7 +167,7 @@ global proc shelf_Bloom () {
         -image "abcPipelineTool2.png" 
         -image1 "abcPipelineTool2.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import abcPipelineTools as ppTools\nppTools.createNewAsset()\n" 
         -sourceType "python" 
@@ -201,7 +201,7 @@ global proc shelf_Bloom () {
         -image "aov.png" 
         -image1 "aov.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import aov as aov\nfrom importlib import reload\nreload(aov)\n\naov.createGUI()" 
         -sourceType "python" 
@@ -236,7 +236,7 @@ global proc shelf_Bloom () {
         -image "Camera.png" 
         -image1 "Camera.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import rsCameraUI\nrsCameraUI.rsCameraUIBuild()" 
         -sourceType "python" 
@@ -270,7 +270,7 @@ global proc shelf_Bloom () {
         -image "focus.png" 
         -image1 "focus.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import focusDistance\nimport importlib\nimportlib.reload(focusDistance)\nfocusDistance.focus()" 
         -sourceType "python" 
@@ -304,7 +304,7 @@ global proc shelf_Bloom () {
         -image "substanceImp.png" 
         -image1 "substanceImp.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import substanceToMaya\nimport importlib\nimportlib.reload(substanceToMaya)" 
         -sourceType "python" 
@@ -338,7 +338,7 @@ global proc shelf_Bloom () {
         -image "on.png" 
         -image1 "on.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import maya.mel as mel\nimport maya.cmds as cmds\n\nlibDir = mel.eval('$s=`getenv \"LIB_DIR\"`;')\n\ncmds.file( 'R:/lib/3d/studio/studio.mb', r=True )\n#cmds.file( 'R:/lib/3d/studio/studio.mb', rr=True )" 
         -sourceType "python" 
@@ -372,7 +372,7 @@ global proc shelf_Bloom () {
         -image "off.png" 
         -image1 "off.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import maya.mel as mel\nimport maya.cmds as cmds\n\nlibDir = mel.eval('$s=`getenv \"LIB_DIR\"`;')\n\n#cmds.file( libDir+'/3d/studio/studio.mb', r=True )\ncmds.file( libDir+'/3d/studio/studio.mb', rr=True )" 
         -sourceType "python" 
@@ -407,7 +407,7 @@ global proc shelf_Bloom () {
         -image "saveLib2.png" 
         -image1 "saveLib2.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import libSave\nimport importlib\nimportlib.reload(libSave)\nlibSave.libSave()" 
         -sourceType "python" 
@@ -442,7 +442,7 @@ global proc shelf_Bloom () {
         -image "wipLib.png" 
         -image1 "wipLib.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import libSave\nlibSave.wipSave()" 
         -sourceType "python" 
@@ -476,7 +476,7 @@ global proc shelf_Bloom () {
         -image "savePreview.png" 
         -image1 "savePreview.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import savePreview\nsavePreview.savePreview()" 
         -sourceType "python" 
@@ -510,7 +510,7 @@ global proc shelf_Bloom () {
         -image "doctor.png" 
         -image1 "doctor.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import importlib\nimport doctor_gui\nimportlib.reload(doctor_gui)\ndoctor_gui.createGUI()\n" 
         -sourceType "python" 
@@ -544,7 +544,7 @@ global proc shelf_Bloom () {
         -image "tweenMachine.png" 
         -image1 "tweenMachine.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import tween_machine\ntween_machine.start()\n#END\n" 
         -sourceType "python" 
@@ -577,9 +577,9 @@ global proc shelf_Bloom () {
         -image "R:/pipeline/networkInstall/studiolibrary-2.7.1/src/studiolibrary/resource/icons/icon.png" 
         -image1 "R:/pipeline/networkInstall/studiolibrary-2.7.1/src/studiolibrary/resource/icons/icon.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
-        -command "\n# -----------------------------------\n# Studio Library\n# www.studiolibrary.com\n# -----------------------------------\n\nimport os\nimport sys\n    \nif not os.path.exists(r'R:\\pipeline\\networkInstall\\studiolibrary-2.7.1\\src'):\n    raise IOError(r'The source path \"R:\\pipeline\\networkInstall\\studiolibrary-2.7.1\\src\" does not exist!')\n    \nif r'R:\\pipeline\\networkInstall\\studiolibrary-2.7.1\\src' not in sys.path:\n    sys.path.insert(0, r'R:\\pipeline\\networkInstall\\studiolibrary-2.7.1\\src')\n    \nimport studiolibrary\nstudiolibrary.main()\n" 
+        -command "\n# -----------------------------------\n# Studio Library\n# www.studiolibrary.com\n# -----------------------------------\n\nimport os\nimport sys\n    \nif not os.path.exists(r'R:\\pipeline\\networkInstall\\studiolibrary-2.10.12\\src'):\n    raise IOError(r'The source path R:\\pipeline\\networkInstall\\studiolibrary-2.10.12\\src\" does not exist!')\n    \nif r'R:\\pipeline\\networkInstall\\studiolibrary-2.7.1\\src' not in sys.path:\n    sys.path.insert(0, r'R:\\pipeline\\networkInstall\\studiolibrary-2.10.12\\src')\n    \nimport studiolibrary\nstudiolibrary.main()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -612,7 +612,7 @@ global proc shelf_Bloom () {
         -image "colorProfile.png" 
         -image1 "colorProfile.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import replace_by_tx2\n\nreplace_by_tx2.all_to_tx()" 
         -sourceType "python" 
@@ -647,7 +647,7 @@ global proc shelf_Bloom () {
         -image "colorPresetSpectrum.png" 
         -image1 "colorPresetSpectrum.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import replace_by_tx2\n\nreplace_by_tx2.all_to_original()" 
         -sourceType "python" 
@@ -681,7 +681,7 @@ global proc shelf_Bloom () {
         -image "swapBG.png" 
         -image1 "swapBG.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import transferShaders as tf\ntf.transferShaders()" 
         -sourceType "python" 
@@ -716,7 +716,7 @@ global proc shelf_Bloom () {
         -image "pythonFamily.png" 
         -image1 "pythonFamily.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import arShake_v012                                                                                                     \narShake_v012.GUI() " 
         -sourceType "python" 
@@ -750,7 +750,7 @@ global proc shelf_Bloom () {
         -image "turobtron.png" 
         -image1 "turobtron.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import importlib\nimport turbotron\nimportlib.reload(turbotron)\nturbotron.createGUI()\n" 
         -sourceType "python" 
@@ -785,7 +785,7 @@ global proc shelf_Bloom () {
         -image "R:/pipeline/networkInstall/dublast/DuBlast-Maya_1.1.0/dublast.png" 
         -image1 "R:/pipeline/networkInstall/dublast/DuBlast-Maya_1.1.0/dublast.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import maya.cmds as cmds\ntry:\n    cmds.loadPlugin( 'DuBlast.py' )\n    cmds.dublast()\n    \nexcept:\n    cmds.confirmDialog( title='Dublast warning', message='The pluggin is not installed?\\n Install available here: \\n R:\\pipeline\\\\networkInstall\\dublast', button=['Ok'], )" 
         -sourceType "python" 
@@ -819,7 +819,7 @@ global proc shelf_Bloom () {
         -image "lightLinker.svg" 
         -image1 "lightLinker.svg" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import importlib\nimport arnold_ass_lightlink as aa\nimportlib.reload(aa)\naa.light_link()\n" 
         -sourceType "python" 
@@ -854,7 +854,7 @@ global proc shelf_Bloom () {
         -image "pythonFamily.png" 
         -image1 "pythonFamily.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import maya.cmds as cmds\nimport os\nimport sys\nimport importlib\n#Load Abc Plugins\ncmds.loadPlugin(\"AbcImport.mll\", quiet=True)\ncmds.loadPlugin(\"AbcExport.mll\", quiet=True)\nimport maya.mel as mel\nimport projects as projects\ncurrentProject = projects.getCurrentProject()\nprojectsData = projects.getProjectData(currentProject)\nassetsDir = projectsData.get(\"assetsDir\")\nassetsDic = projects.buildAssetDb()   #Get dictionnary of all asset for th current project\ndef listAbcFromDir(path):\n    \"List all Abc from a directory\"\n    listAbc = []\n    for abc in os.listdir(path):\n        if abc.endswith(\".abc\"):\n            listAbc.append(abc)\n    return listAbc\ndef importReference(path, refNamespace):\n    \"Import a reference given a path\"\n    cmds.file(path, reference = True, namespace=refNamespace)\ndef nameFromAbc(abc):\n    \"ch_name_01.abc => ch_name\"\n    #HacK paradise\n    if len(abc.split(\"_\"))==3:\n        name = \"%s_%s\"%(abc.split(\"_\")[0],abc.split(\"_\")[1])\n    if len(abc.split(\"_\"))==2:\n        name = abc.split(\"_\")[0]\n    return name\ndef createScriptNode(refNamespace, abcPath):\n    # HACK SWAROVKI OLD=> childRef = cmds.referenceQuery(\"%sRN\"%(refNamespace), rfn=True, ch=True)[0]     #HACK PROD NUTRO !!!! [-1] to get the ABC. [0] usualy\n    childRefList = cmds.referenceQuery(\"%sRN\"%(refNamespace), rfn=True, ch=True)\n    for c in childRefList:\n        if c.split(\":\")[-1].split(\"_\")[0]==\"ch\":\n            childRef = c\n    script ='cmds.file (\"%s\", loadReference = \"%s\", type=\"Alembic\")'%(abcPath, childRef)\n    scriptNodeName = \"scriptNode_\"+refNamespace\n    scriptNode = cmds.scriptNode (st= 1, n= scriptNodeName, bs=script, stp = \"python\")\n    deferScript = 'cmds.file(\"%s\", loadReference=\"%s\", type=\"Alembic\")'%(abcPath, childRef)        #Update the alembic.\n    cmds.evalDeferred(deferScript)\ndef createCharStandIn(name, anim_abc_path,abcv, asset_publish_path, asset_abc_path):\n    name_standin_shape =abcv+\"_00Shape\"\n    name_standin =abcv+\"_00\"\n    if cmds.objExists(name_standin):\n        result = cmds.confirmDialog( title='Confirm', message='The character already exist: %s'%name_standin,\n        button=['Delete manually later',\"Delete now\"] )\n        if result == \"Delete now\":\n            cmds.delete(name_standin)\n    a = cmds.createNode(\"aiStandIn\",n=name_standin_shape)\n    b= cmds.listRelatives(a,parent=True)\n    c=cmds.rename(b,name_standin)\n    abc_mod = [abc for abc in os.listdir(asset_abc_path) if abc.endswith(\"mod.abc\")]\n    if len(abc_mod) == 0:\n        abc_mod = \"none.abc\"\n        cmds.warning(\"Can't find modeling abc for %s\"%name)\n    else:\n        abc_mod=abc_mod[0]\n    abc_mod_path = os.path.join(asset_abc_path,abc_mod)\n    cmds.setAttr(c+\".dso\",abc_mod_path,type=\"string\")\n    list = os.listdir(asset_publish_path)\n    cmds.setAttr(c+\".useFrameExtension\", 1)\n    operators = [o for o in list if o.endswith(\".ass\")]\n    operators.sort()\n    if operators:\n        op = operators[-1]\n        op_path= os.path.join(asset_publish_path,op)\n        cmds.setAttr(c+\".abc_layers\", anim_abc_path , type=\"string\")\n        set_shader = cmds.createNode(\"aiIncludeGraph\", n=\"aiIncludeGraph_\"+abcv)\n        cmds.setAttr(set_shader+\".filename\",op_path , type=\"string\")\n        #cmds.setAttr(set_shader+\".target\", \"aiStandInShape/input_merge_op\", type=\"string\" )\n        cmds.connectAttr(set_shader+\".out\",c+\".operators[0]\", f=True )\n    return c\ndef abcLoad(anim_abc_path):\n    \"Import Abc from a directory\"\n    abc_filename = anim_abc_path.split(\"/\")[-1]\n    abcv = abc_filename.split(\".\")[0]\n    dir=assetsDir\n    name = nameFromAbc(abc_filename)\n    #LEGACY WORKFLOW\n    refNamespace = name +\"_shading_lib_\"+ abc_filename.split(\"_\")[-1].split(\".\")[0]  #00 ou 01 ou 02\n\n\n\n\n\n\n\n\n\n\n    shadingRefPath = assetsDic.get(name).get(\"shading\")\n    scriptNodeName = \"scriptNode_\" + refNamespace\n    #LEGACY WORKFLOW  END\n    asset_path= os.path.join(dir,name)\n    asset_publish_path = os.path.join(asset_path,\"publish\")\n    asset_abc_path = os.path.join(asset_path,\"abc\")\n    if os.path.isdir(asset_publish_path):\n        standin =createCharStandIn(name, anim_abc_path, abcv, asset_publish_path, asset_abc_path)\n        return standin\n    else:\n        #LEGACY WORKFLOW\n        if cmds.objExists(scriptNodeName):\n            print(\"Updating animation for: %s \\n %s\"%(refNamespace, anim_abc_path))\n            cmds.delete (scriptNodeName)                #Delete old script Node\n            createScriptNode(refNamespace, abcPath)\n           #Create new script Node\n        else:\n            print(\"LEGACY MODE !\")\n            print(\"Importing animation for: %s \\n %s\" % (refNamespace, anim_abc_path))\n            importReference(shadingRefPath, refNamespace)               #Import Reference\n            createScriptNode(refNamespace, anim_abc_path)\n            #Create new script Node\ndef importAnim():\n    \"Import selected alembic in the file dialog - Master fonction\"\n    basicFilter = \"*.abc\"\n    listAbc = cmds.fileDialog2(fileFilter=basicFilter, dialogStyle=2, fileMode=4)\n    list = []\n    for abcPath in listAbc:\n        standin = abcLoad(abcPath)\n        list.append(standin)\n    cmds.select(list)\nimportAnim()" 
         -sourceType "python" 

@@ -35,7 +35,7 @@ class CustomUI(QWidget):
         super(CustomUI, self).__init__(parent)
         self.setWindowTitle("Sample UI")
         self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
-        self.setGeometry(100, 100,350, 180)
+        self.setGeometry(100, 100,450, 180)
 
         # Initialize default values
         self.start_loop_val = 100
@@ -97,6 +97,9 @@ class CustomUI(QWidget):
         # Update Button
         self.update_button = QPushButton("Update Loop")
         self.update_button.clicked.connect(self.update_loop)
+        # Clear Button
+        self.clear_button = QPushButton("Clear Loop")
+        self.clear_button.clicked.connect(self.clear_loop)
 
         #left_frame = QFrame()
         #left_frame.setLayout(left_layout)
@@ -110,9 +113,10 @@ class CustomUI(QWidget):
         self.rigth_layout= QVBoxLayout()
         self.rigth_layout.addWidget(self.loop_set_list_view)
         self.rigth_layout.addWidget(self.update_button)
+        self.rigth_layout.addWidget(self.clear_button)
 
-        main_layout.addLayout(left_layout)
-        main_layout.addLayout(self.rigth_layout)
+        main_layout.addLayout(left_layout, 1)
+        main_layout.addLayout(self.rigth_layout, 3)
 
         self.setLayout(main_layout)
 
@@ -154,8 +158,8 @@ class CustomUI(QWidget):
         )
 
     def run(self):
-        #current_frame = pm.currentTime(query=True)
-        #print(current_frame)
+        current_frame = pm.currentTime(query=True)
+
         # Get the current selected object
         selected = pm.selected()
         if not selected:
@@ -168,16 +172,20 @@ class CustomUI(QWidget):
                 pm.warning(f"{obj} does not have a parent. Aborting.")
                 return
 
-        pm.undoInfo(openChunk=True)
 
         try:
+            pm.undoInfo(state=False)
             for obj in selected:
                 self.duplicate_on_even_frames(obj)
                 self.update_list_view()
-
+            pm.currentTime(current_frame, edit=True)
+            pm.select(clear=True)
+        except Exception as e:
+            print("Exception occurred:", e)
+            pm.warning("Something went wrong")
         finally:
-            pm.undoInfo(closeChunk=True)
-        #pm.currentTime(current_frame, edit=True)
+            pm.undoInfo(state=True)
+
     def duplicate_on_even_frames(self, obj):
         loop = self.get_loop_params()
 
@@ -191,18 +199,27 @@ class CustomUI(QWidget):
 
         print("------ End ------")
 
-    def update_loop(self):
+    def get_selected_set_names(self):
+        """Helper function to retrieve selected set names from the view."""
         selection_model = self.loop_set_list_view.selectionModel()
         selected_indexes = selection_model.selectedIndexes()
         if not selected_indexes:
             pm.warning("Nothing selected to update.")
-            return
-        # Extract the names of the sets from the selection
-        selected_sets_names = [index.data() for index in selected_indexes]
+            return []
 
+        # Extract the names of the sets from the selection
+        return [index.data() for index in selected_indexes]
+
+    def get_objects_to_select(self, set_names):
+        """Helper function to retrieve objects from the provided set names."""
         objects_to_select = []
 
-        for set_name in selected_sets_names:
+        for set_name in set_names:
+            if not pm.objExists(set_name):
+                pm.warning("Set does not exist")
+                self.update_list_view()
+                return []
+
             set_node = pm.PyNode(set_name)
             members = pm.sets(set_node, query=True)
 
@@ -212,13 +229,38 @@ class CustomUI(QWidget):
             else:
                 print(f"The set {set_name} is empty.")
 
+        return objects_to_select
+
+    def update_loop(self):
+        selected_sets_names = self.get_selected_set_names()
+        if not selected_sets_names:
+            return
+
+        objects_to_select = self.get_objects_to_select(selected_sets_names)
         pm.select(objects_to_select)
         self.run()
 
+    def clear_loop(self):
+        selected_sets_names = self.get_selected_set_names()
+        if not selected_sets_names:
+            return
+
+        objects_to_select = self.get_objects_to_select(selected_sets_names)
+
+        for obj in objects_to_select:
+            parent = obj.getParent()
+            if parent:
+                parent_name = parent.replace(':', "NS")
+                group_name = f"LOOP_{parent_name}"
+                try:
+                    pm.delete(group_name)
+                except:
+                    pm.warning(f"Fail to delete {group_name}")
+
     def create_or_replace_group(self, obj):
         """Creates a new group or replaces if it exists."""
-        parent_name = obj.getParent().split(':')[-1]
-        group_name = f"{parent_name}_LOOP"
+        parent_name = obj.getParent().replace(':',"NS")
+        group_name = f"LOOP_{parent_name}"
 
         if pm.objExists(group_name):
             pm.delete(group_name)
@@ -242,30 +284,29 @@ class CustomUI(QWidget):
             if frame % loop.modulo == 0:
                 pm.currentTime(frame)
                 duplicated = pm.duplicate(obj)
-                renamed_duplicated = pm.rename(duplicated[0], f"{obj[0]}_{frame}")
-                subGroup = pm.group(em=True, name=f"zeroOut_{renamed_duplicated.name()}")
-                self.setup_visibility_sample(subGroup,frame,loop.modulo)
+                renamed_duplicated = pm.rename(duplicated[0], f"sample_{frame}")
+                subGroup = pm.group(em=True, name=f"rotor_{renamed_duplicated.name()}")
+
                 pm.parent(subGroup, group)
                 pm.parent(renamed_duplicated, subGroup)
+                self.setup_visibility_sample(subGroup,frame,loop.modulo)
                 print(f"Succes on time: {frame}")
 
-    def force_visibility_all_children(self, objs):
+    def force_visibility_all_children(self, obj):
+        # Set the visibility of the main object
 
-        if not isinstance(objs, list):
-            objs = [objs]
-        for obj in objs:
-            all_descendants = obj.listRelatives(allDescendents=True) # This gets all the children, grandchildren, etc.
+        # Get the children of the object and set their visibility
+        children = obj.getChildren()  # This will fetch all children including nested ones.
+        for child in children:
+            print(child)
+            if child.hasAttr('visibility'):
+                child.visibility.set(1)
 
-            for desc in all_descendants:
-                if desc.hasAttr('visibility'):
-                    desc.visibility.set(0)  # Set visibility to 0 (invisible)
-
-            if obj.hasAttr('visibility'):
-                obj.visibility.set(0)  # Set visibility for the main selected object
 
     def setup_visibility_sample(self,sample,start_range, loop_modulo):
 
         #Force restore visibility to 1
+        print(sample)
         self.force_visibility_all_children(sample)
         expression_name = f"{sample.name()}_visExpression"
         end_range = start_range + loop_modulo - 1
@@ -308,10 +349,11 @@ class CustomUI(QWidget):
         if pm.objExists(expression_name):
             pm.expression(expression_name, edit=True, s=expression_str)
         else:
-            #source_attr = target.getInput(p=True)
-            #if source_attr:
-                #print("disconet")
-                #pm.disconnectAttr(source_attr, target)
+            if target.isDestination():
+                source_attr = target.getInput(p=True)
+                if source_attr:
+                    print("disconet")
+                    pm.disconnectAttr(source_attr, target)
             pm.expression(name=expression_name, s=expression_str)
         print (f"Visibility set on {target}")
 
