@@ -80,6 +80,17 @@ class Loop():
         parent_name = self.geo.getParent().replace(':',"NS")
         return f"LP_{parent_name}"
 
+    @property
+    def is_aiStandIn(self):
+        if not pm.objExists(self.geo):
+            return False
+        node_type = pm.nodeType(self.geo)
+        if node_type == 'aiStandIn':
+            return True
+        else:
+            return False
+
+
     def update_data(self,data):
         self.start_loop = data[0]
         self.end_loop = data[1]
@@ -113,12 +124,19 @@ class Loop():
         print(f"Generating {self.samples} samples")
         print(f"Speed Angle: {self.angle}\n")
 
+
+
     def _generate_frames(self):
         """Duplicates the given object for specified frames and groups them."""
         for frame in range(self.start_loop, self.end_loop):
             if frame % self.modulo == 0:
                 pm.currentTime(frame)
-                copy_geo = pm.duplicate(self.geo, name=f"frame_{frame}")[0]
+                frame_name = f"frame_{frame}"
+                if self.is_aiStandIn:
+                    copy_geo = pm.duplicate(self.geo,  name=frame_name , rr=True, ic=True)[0]
+                else:
+                    copy_geo = pm.duplicate(self.geo, name=frame_name)[0]
+
                 rot_group = pm.group(em=True, name=f"{copy_geo.name()}_rot")
 
                 pm.parent(rot_group, self.loop_group)

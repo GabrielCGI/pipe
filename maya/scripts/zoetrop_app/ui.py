@@ -97,7 +97,7 @@ class CustomUI(QWidget):
 
         self.loop_set_list_widget = QListWidget()  # Note: Changed the variable name for clarity
         self.loop_set_list_widget.setSelectionMode(QAbstractItemView.ExtendedSelection)
-
+        self.loop_set_list_widget.itemSelectionChanged.connect(self.list_widget_selection_changed)
 
         self.rigth_layout= QVBoxLayout()
         self.rigth_layout.addWidget(self.loop_set_list_widget)
@@ -118,7 +118,6 @@ class CustomUI(QWidget):
         self.zoetrop = logic.Zoetrop(self.get_loop_params())
         self.update_list_widget()
 
-
     def update_samples(self):
         data = self.get_loop_params()
         start_loop = data[0]
@@ -132,15 +131,46 @@ class CustomUI(QWidget):
             samples = samples
         self.samples_input.setText(str(samples))
 
+    @staticmethod
+    def pretty_display(name, existing_names=None):
+        element_name = name.split('NS')[-1]
+
+        if existing_names is None:
+            existing_names = set()
+
+        base_name = element_name
+        increment = 1
+
+        while element_name in existing_names:
+            element_name = f"{base_name}_{increment}"
+            increment += 1
+
+        return element_name
+
+
+    def list_widget_selection_changed(self):
+        items = [item for item in self.loop_set_list_widget.selectedItems()]
+        geo_list = [geo.data(Qt.UserRole).geo for geo in items]
+
+        # Fetching loop_group_name from each QListWidgetItem
+        for geo in items:
+            loop_group_name = geo.data(Qt.UserRole).loop_group_name
+            if loop_group_name and pm.objExists(loop_group_name):
+                geo_list.append(pm.PyNode(loop_group_name))
+
+        pm.select(geo_list)
+
     def update_list_widget(self):
         # Store the names of currently selected items for later restoration
         selected_names_set = {item.text() for item in self.loop_set_list_widget.selectedItems()}
 
         # Clear and repopulate the list widget
         self.loop_set_list_widget.clear()
+        existing_names = set()
         for loop in self.zoetrop.loops:
-            print(len(self.zoetrop.loops))
-            item = QListWidgetItem(loop.loop_set_name)
+            pretty_name = self.pretty_display(loop.loop_set_name, existing_names)
+            existing_names.add(pretty_name)
+            item = QListWidgetItem(pretty_name)
             item.setData(Qt.UserRole, loop)  # Store the Loop object with the item
             self.loop_set_list_widget.addItem(item)
 

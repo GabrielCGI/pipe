@@ -189,7 +189,7 @@ class ABCImportAnim(ABCImportAsset):
 
         # If import we create the standin
         if is_import:
-            actual_standin = pm.createNode("aiStandIn", n="shape_" + name)
+            actual_standin = pm.createNode("aiStandIn", n=name+"Shape")
             standin_node = pm.listRelatives(actual_standin, parent=True)[0]
             standin_node = pm.rename(standin_node, name)
         else:
