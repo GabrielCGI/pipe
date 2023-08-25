@@ -543,6 +543,8 @@ class ABCImport(QDialog):
         standins = pm.ls(type="aiStandIn")
         abc_name = abc.get_name()
         for standin in standins:
+            if standin.name().startswith("frame"): # NOTE: Workaround for Swarovski issue to prevent updating incorrect standin due to duplicates.
+                continue
             standin_node = pm.listRelatives(standin, parent=True)[0]
             dso = standin.dso.get()
             # Check dso
@@ -572,6 +574,8 @@ class ABCImport(QDialog):
         if len(self.__abcs) == 0:
             return
         for standin in standins:
+            if standin.name().startswith("frame"): # NOTE: Workaround for Swarovski issue to prevent updating incorrect standin due to duplicates.
+                continue
             standin_node = pm.listRelatives(standin, parent=True)[0]
             dso = standin.dso.get()
             added = False

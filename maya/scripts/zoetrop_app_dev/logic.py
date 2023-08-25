@@ -84,12 +84,14 @@ class Loop():
     def is_aiStandIn(self):
         if not pm.objExists(self.geo):
             return False
-        node_type = pm.nodeType(self.geo)
-        if node_type == 'aiStandIn':
-            return True
-        else:
-            return False
 
+        # If the given node is a transform, get its shape children.
+        if pm.nodeType(self.geo) == "transform":
+            shape_nodes = pm.listRelatives(self.geo, shapes=True)
+            if shape_nodes:
+                return pm.nodeType(shape_nodes[0]) == 'aiStandIn'
+
+        return False
 
     def update_data(self,data):
         self.start_loop = data[0]
@@ -133,6 +135,7 @@ class Loop():
                 pm.currentTime(frame)
                 frame_name = f"frame_{frame}"
                 if self.is_aiStandIn:
+
                     copy_geo = pm.duplicate(self.geo,  name=frame_name , rr=True, ic=True)[0]
                 else:
                     copy_geo = pm.duplicate(self.geo, name=frame_name)[0]

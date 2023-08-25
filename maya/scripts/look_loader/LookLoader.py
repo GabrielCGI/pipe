@@ -281,8 +281,11 @@ class LookLoader(QDialog):
         selection = pm.ls(selection=True)
         if len(selection) > 0:
             for sel in selection:
+                if sel.name().startswith("frame"): # NOTE: Workaround for Swarovski issue to prevent updating incorrect standin due to duplicates.
+                    continue
                 if pm.objectType(sel, isType="aiStandIn"):
                     # Standin found
+
                     look_obj = self.__look_factory.generate(sel)
                     if look_obj is not None: self.__standins[look_obj.get_object_name()] = look_obj
                 elif pm.objectType(sel, isType="transform"):
@@ -291,6 +294,7 @@ class LookLoader(QDialog):
                         shape = prt.getShape()
                         if shape is not None and pm.objectType(shape, isType="aiStandIn"):
                             # Proxy of Standin found
+
                             look_obj = self.__look_factory.generate(shape)
                             if look_obj is not None: self.__standins[look_obj.get_object_name()] = look_obj
 
@@ -299,6 +303,8 @@ class LookLoader(QDialog):
                     if look_obj is not None: self.__standins[look_obj.get_object_name()] = look_obj
         else:
             for standin in pm.ls(type="aiStandIn"):
+                if standin.name().startswith("frame"): # NOTE: Workaround for Swarovski issue to prevent updating incorrect standin due to duplicates.
+                    continue
                 look_obj = self.__look_factory.generate(standin)
                 if look_obj is not None: self.__standins[look_obj.get_object_name()] = look_obj
 
