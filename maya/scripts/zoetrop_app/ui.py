@@ -1,6 +1,6 @@
 import sys
 import pymel.core as pm
-from zoetrop_app import logic
+from . import logic
 import importlib
 importlib.reload(logic)
 from maya import OpenMayaUI as omui
@@ -72,8 +72,9 @@ class CustomUI(QWidget):
         # Execute Button
         self.execute_button = QPushButton("Create Loop")
         self.execute_button.clicked.connect(self.run)
-        #left_layout.addStretch(1)
+
         left_layout.addWidget(self.execute_button)
+        left_layout.addStretch(1)
 
 
         self.hide_rig_button = QPushButton("Hide rig")
@@ -169,6 +170,7 @@ class CustomUI(QWidget):
         existing_names = set()
         for loop in self.zoetrop.loops:
             pretty_name = self.pretty_display(loop.loop_set_name, existing_names)
+            loop.pretty_name = pretty_name
             existing_names.add(pretty_name)
             item = QListWidgetItem(pretty_name)
             item.setData(Qt.UserRole, loop)  # Store the Loop object with the item
@@ -211,10 +213,12 @@ class CustomUI(QWidget):
 
     def update_loop(self):
         items = [item for item in self.loop_set_list_widget.selectedItems()]
-        data= self.get_loop_params()
+        new_data= self.get_loop_params()
+        print("oooooooo")
         for i in items:
             loop= i.data(Qt.UserRole)
-            loop.update_data(data)
+            loop.check_data_difference(new_data)
+            #loop.update_data(data)
             loop.create_loop()
 
     def clear_loop(self):

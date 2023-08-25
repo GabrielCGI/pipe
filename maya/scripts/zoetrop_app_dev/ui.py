@@ -45,6 +45,7 @@ class CustomUI(QWidget):
         self.start_end_layout.addWidget(self.start_end_label)
         self.start_end_layout.addWidget(self.start_loop_input)
         self.start_end_layout.addWidget(self.end_loop_input)
+        #left_layout.addStretch(1)
         left_layout.addLayout(self.start_end_layout)
         # FPS Maya
         self.FPS_maya_label = QLabel("FPS Maya")
@@ -72,7 +73,7 @@ class CustomUI(QWidget):
         # Execute Button
         self.execute_button = QPushButton("Create Loop")
         self.execute_button.clicked.connect(self.run)
-        #left_layout.addStretch(1)
+        left_layout.addStretch(1)
         left_layout.addWidget(self.execute_button)
 
 
@@ -100,6 +101,7 @@ class CustomUI(QWidget):
         self.loop_set_list_widget.itemSelectionChanged.connect(self.list_widget_selection_changed)
 
         self.rigth_layout= QVBoxLayout()
+
         self.rigth_layout.addWidget(self.loop_set_list_widget)
         self.rigth_layout.addLayout(self.rig_layout)
         self.rigth_layout.addWidget(self.update_button)
@@ -169,6 +171,7 @@ class CustomUI(QWidget):
         existing_names = set()
         for loop in self.zoetrop.loops:
             pretty_name = self.pretty_display(loop.loop_set_name, existing_names)
+            loop.pretty_name = pretty_name
             existing_names.add(pretty_name)
             item = QListWidgetItem(pretty_name)
             item.setData(Qt.UserRole, loop)  # Store the Loop object with the item
@@ -211,10 +214,12 @@ class CustomUI(QWidget):
 
     def update_loop(self):
         items = [item for item in self.loop_set_list_widget.selectedItems()]
-        data= self.get_loop_params()
+        new_data= self.get_loop_params()
+        print("oooooooo")
         for i in items:
             loop= i.data(Qt.UserRole)
-            loop.update_data(data)
+            loop.check_data_difference(new_data)
+            #loop.update_data(data)
             loop.create_loop()
 
     def clear_loop(self):
