@@ -25,13 +25,15 @@ class Zoetrop():
         :param attributes_list: List of attributes to read from the top parent of the imported Alembic.
         :return: Dictionary containing attribute values. If an attribute does not exist, its value will be None.
         """
-        loop_attributes_template = ['start_loop', 'end_loop', 'FPS_maya', 'FPS_loop']
+        loop_attributes_template = ['data_start_loop', 'data_end_loop', 'data_FPS_maya', 'data_FPS_loop']
         if pm.nodeType(node) == 'transform':
             shapes = pm.listRelatives(node, shapes=True, type='aiStandIn')
             if not shapes:
+                pm.warning("No standin found")
                 raise ValueError(f"No aiStandIn shape found under transform: {node}")
             node = shapes[0]
         if pm.nodeType(node) != 'aiStandIn':
+            pm.warning("No standin found")
             raise ValueError(f"Node {node} is not an aiStandIn object.")
         alembic_path = node.dso.get()
         print(alembic_path)
@@ -228,17 +230,18 @@ class Loop():
 
         # Define the attributes and their types to add.
         attributes = {
-            'start_loop': 'double',
-            'end_loop': 'double',
-            'FPS_maya': 'double',
-            'FPS_loop': 'double'
+            'data_start_loop': 'double',
+            'data_end_loop': 'double',
+            'data_FPS_maya': 'double',
+            'data_FPS_loop': 'double'
         }
         # Add each attribute if it doesn't exist and set its value.
         for attr_name, attr_type in attributes.items():
             if not pm.attributeQuery(attr_name, node=self.geo, exists=True):
                 pm.addAttr(self.geo, longName=attr_name, attributeType=attr_type, keyable=True)
 
-            pm.setAttr(f"{self.geo}.{attr_name}", getattr(self, attr_name))
+            pm.setAttr(f"{self.geo}.{attr_name}", getattr(self, attr_name[len("data_"):])) #remove "data_" prefix and map maya attribut to class attribut
+
 
         pm.warning(f"Data attributes added to {self.geo}.")
 
@@ -248,7 +251,7 @@ class Loop():
             pm.warning(f"Node {self.geo} does not exist. Cannot read attributes.")
             return None
 
-        attributes = ['start_loop', 'end_loop', 'FPS_maya', 'FPS_loop']
+        attributes = ['data_start_loop', 'data_end_loop', 'data_FPS_maya', 'data_FPS_loop']
 
         attribute_values = []
 
@@ -275,7 +278,10 @@ class Loop():
     def prompt_user_select_data(self, new_data, existing_data):
         """Prompts user whether to keep the existing data or update with new data."""
         import pymel.core as pm
-
+        print ('new_data:' )
+        print( new_data)
+        print ('existing:' )
+        print(existing_data)
         attributes_list = ['start_loop', 'end_loop', 'FPS_maya', 'FPS_loop']
 
         # Building the message string

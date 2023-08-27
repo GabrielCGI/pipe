@@ -144,29 +144,37 @@ class CustomUI(QWidget):
         self.zoetrop.set_key(selection[0],loop_param)
 
 
-    def get_clicked(self):
+    def get_clicked(self,nodes):
+        selection = pm.selected()
+        if not selection:
+            pm.warning("Nothing selected.")
+            return
 
         loop_attributes= self.zoetrop.read_loop_attributs_from_standIn(selection[0])
+
         # Update the Start Loop input field
-        start_loop_val = loop_attributes.get('start_loop')
+        start_loop_val = loop_attributes.get('data_start_loop')
         if start_loop_val is not None:
             self.start_loop_input.setText(str(int(start_loop_val)))
 
         # Update the End Loop input field
-        end_loop_val = loop_attributes.get('end_loop')
+        end_loop_val = loop_attributes.get('data_end_loop')
         if end_loop_val is not None:
             self.end_loop_input.setText(str(int(end_loop_val)))
 
         # Update the FPS Maya combobox
-        FPS_maya_val = loop_attributes.get('FPS_maya')
+        FPS_maya_val = loop_attributes.get('data_FPS_maya')
         if FPS_maya_val is not None:
-            self.FPS_maya_combobox.setCurrentText(str(FPS_maya_val))
+            self.FPS_maya_combobox.setCurrentText(str(int(FPS_maya_val)))
 
         # Update the FPS Loop combobox
-        FPS_loop_val = loop_attributes.get('FPS_loop')
+        FPS_loop_val = loop_attributes.get('data_FPS_loop')
         if FPS_loop_val is not None:
-            self.FPS_loop_combobox.setCurrentText(str(FPS_loop_val))
-        self.update_samples()
+            print("DEBUG")
+            print (FPS_loop_val)
+            self.FPS_loop_combobox.setCurrentText(str(int(FPS_loop_val)))
+            print(self.FPS_loop_combobox.currentText())
+        #self.update_samples()
 
     def update_samples(self):
         data = self.get_loop_params()
@@ -263,7 +271,6 @@ class CustomUI(QWidget):
     def update_loop(self):
         items = [item for item in self.loop_set_list_widget.selectedItems()]
         new_data= self.get_loop_params()
-        print("oooooooo")
         for i in items:
             loop= i.data(Qt.UserRole)
             loop.check_data_difference(new_data)
