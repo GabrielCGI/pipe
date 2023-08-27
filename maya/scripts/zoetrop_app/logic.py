@@ -1,5 +1,5 @@
 import pymel.core as pm
-
+import math
 class Zoetrop():
     def __init__(self,data):
         self.data = data
@@ -15,6 +15,47 @@ class Zoetrop():
                 geo = members[0]
                 loops.append(Loop(geo,self.data))
         return loops
+
+    @staticmethod
+    def read_loop_attributs_from_standIn(node):
+        """
+        Imports an Alembic into the Maya scene, reads specified attributes from the top parent, and deletes the Alembic.
+
+        :param alembic_path: Path to the Alembic file.
+        :param attributes_list: List of attributes to read from the top parent of the imported Alembic.
+        :return: Dictionary containing attribute values. If an attribute does not exist, its value will be None.
+        """
+        loop_attributes_template = ['start_loop', 'end_loop', 'FPS_maya', 'FPS_loop']
+        if pm.nodeType(node) == 'transform':
+            shapes = pm.listRelatives(node, shapes=True, type='aiStandIn')
+            if not shapes:
+                raise ValueError(f"No aiStandIn shape found under transform: {node}")
+            node = shapes[0]
+        if pm.nodeType(node) != 'aiStandIn':
+            raise ValueError(f"Node {node} is not an aiStandIn object.")
+        alembic_path = node.dso.get()
+        print(alembic_path)
+        # Import the Alembic into the Maya scene
+        imported_nodes = pm.importFile(alembic_path, returnNewNodes=True)
+
+        # Ensure we imported something
+        if not imported_nodes:
+            pm.warning("Failed to import Alembic.")
+            return None
+
+        # The top parent (usually the transform node) should be the first in the list
+        top_parent = imported_nodes[0]
+
+        # Read attributes from the provided list
+        loop_attributes = {}
+        for attr_name in loop_attributes_template:
+            if pm.hasAttr(top_parent, attr_name):
+                loop_attributes[attr_name] = pm.getAttr(top_parent + "." + attr_name)
+            else:
+                loop_attributes[attr_name] = None
+
+        pm.delete(imported_nodes)
+        return loop_attributes
 
     def create_loop_from_selection(self):
         selected = pm.selected()
@@ -43,6 +84,29 @@ class Zoetrop():
             pm.undoInfo(state=True)
             self.loops = self.get_all_loops()
 
+    @staticmethod
+
+    def set_key(node, data):
+        result = pm.confirmDialog(title='Confirm Action',
+                                  message=f'Are you sure you want to set these keys on {node.name()}? \nThis will disconnect existing connections to rotateY.',
+                                  button=['Yes', 'No'],
+                                  defaultButton='Yes',
+                                  cancelButton='No',
+                                  dismissString='No')
+
+        if result == 'No':
+            pm.warning("Operation cancelled by user.")
+            return
+
+        loop = Loop(node, data)
+        input_plug = pm.listConnections(node.rotateY, plugs=True, d=False, s=True)
+        if input_plug:
+            pm.disconnectAttr(input_plug[0], node.rotateY)
+
+        for frame in range(0, 301):  # Including 300, hence 301 as the stop value
+            rot_value = math.floor(frame / loop.modulo) * loop.angle
+            node.rotateY.setKey(time=frame, value=rot_value)
+            pm.keyTangent(node, edit=True, time=(frame,), attribute='rotateY', inTangentType='linear', outTangentType='linear')
 
 
 class Loop():
@@ -91,8 +155,12 @@ class Loop():
 
         return False
 
+
+
+    # Fetch and print the attribute values
+
     @staticmethod
-    def freezeStandin(node,frame):
+    def safe_get_standIn_shape(node):
         if pm.nodeType(node) == 'transform':
             shapes = pm.listRelatives(node, shapes=True, type='aiStandIn')
             if not shapes:
@@ -100,7 +168,11 @@ class Loop():
             node = shapes[0]
         if pm.nodeType(node) != 'aiStandIn':
             raise ValueError(f"Node {node} is not an aiStandIn object.")
+        return node
 
+    @staticmethod
+    def freezeStandin(node,frame):
+        node = safe_get_standIn_shape(node)
         connected_exprs = pm.listConnections(node.frameNumber, type='expression')
         if connected_exprs:
             print("exp delete")
@@ -169,6 +241,7 @@ class Loop():
             pm.setAttr(f"{self.geo}.{attr_name}", getattr(self, attr_name))
 
         pm.warning(f"Data attributes added to {self.geo}.")
+
 
     def read_data_attributs(self):
         if not pm.objExists(self.geo):

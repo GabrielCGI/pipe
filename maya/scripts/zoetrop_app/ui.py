@@ -70,6 +70,19 @@ class CustomUI(QWidget):
         left_layout.addWidget(self.samples_input)
 
         # Execute Button
+        self.get_button_layout = QHBoxLayout()
+        self.get_button = QPushButton("Get")
+        self.get_button.clicked.connect(self.get_clicked)
+
+        self.get_button_layout.addWidget(self.get_button)
+
+        self.to_key_button = QPushButton("to key")
+        self.to_key_button.clicked.connect(self.to_key_clicked)
+        self.get_button_layout.addWidget(self.to_key_button)
+        self.get_button_layout.addStretch(1)
+        left_layout.addLayout(self.get_button_layout)
+
+        # Execute Button
         self.execute_button = QPushButton("Create Loop")
         self.execute_button.clicked.connect(self.run)
 
@@ -119,6 +132,42 @@ class CustomUI(QWidget):
         self.zoetrop = logic.Zoetrop(self.get_loop_params())
         self.update_list_widget()
 
+
+
+
+    def to_key_clicked(self):
+        selection = pm.selected()
+        if not selection:
+            pm.warning("Nothing selected.")
+            return
+        loop_param = self.get_loop_params()
+        self.zoetrop.set_key(selection[0],loop_param)
+
+
+    def get_clicked(self):
+
+        loop_attributes= self.zoetrop.read_loop_attributs_from_standIn(selection[0])
+        # Update the Start Loop input field
+        start_loop_val = loop_attributes.get('start_loop')
+        if start_loop_val is not None:
+            self.start_loop_input.setText(str(int(start_loop_val)))
+
+        # Update the End Loop input field
+        end_loop_val = loop_attributes.get('end_loop')
+        if end_loop_val is not None:
+            self.end_loop_input.setText(str(int(end_loop_val)))
+
+        # Update the FPS Maya combobox
+        FPS_maya_val = loop_attributes.get('FPS_maya')
+        if FPS_maya_val is not None:
+            self.FPS_maya_combobox.setCurrentText(str(FPS_maya_val))
+
+        # Update the FPS Loop combobox
+        FPS_loop_val = loop_attributes.get('FPS_loop')
+        if FPS_loop_val is not None:
+            self.FPS_loop_combobox.setCurrentText(str(FPS_loop_val))
+        self.update_samples()
+
     def update_samples(self):
         data = self.get_loop_params()
         start_loop = data[0]
@@ -147,7 +196,6 @@ class CustomUI(QWidget):
             increment += 1
 
         return element_name
-
 
     def list_widget_selection_changed(self):
         items = [item for item in self.loop_set_list_widget.selectedItems()]
@@ -204,6 +252,7 @@ class CustomUI(QWidget):
         for i in items:
             loop= i.data(Qt.UserRole)
             loop.rig_visibility(0)
+
     def show_rig(self):
         # Get the current selected object
         items = [item for item in self.loop_set_list_widget.selectedItems()]
