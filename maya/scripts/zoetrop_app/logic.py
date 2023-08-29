@@ -25,7 +25,7 @@ class Zoetrop():
         :param attributes_list: List of attributes to read from the top parent of the imported Alembic.
         :return: Dictionary containing attribute values. If an attribute does not exist, its value will be None.
         """
-        loop_attributes_template = ['data_start_loop', 'data_end_loop', 'data_FPS_maya', 'data_FPS_loop']
+        loop_attributes_template = ['data_start_loop', 'data_end_loop', 'data_FPS_maya', 'data_FPS_loop', 'data_motion']
         if pm.nodeType(node) == 'transform':
             shapes = pm.listRelatives(node, shapes=True, type='aiStandIn')
             if not shapes:
@@ -99,7 +99,7 @@ class Zoetrop():
         if result == 'No':
             pm.warning("Operation cancelled by user.")
             return
-
+        pm.undoInfo(openChunk=True)
         loop = Loop(node, data)
         input_plug = pm.listConnections(node.rotateY, plugs=True, d=False, s=True)
         if input_plug:
@@ -109,7 +109,7 @@ class Zoetrop():
             rot_value = math.floor(frame / loop.modulo) * loop.angle
             node.rotateY.setKey(time=frame, value=rot_value)
             pm.keyTangent(node, edit=True, time=(frame,), attribute='rotateY', inTangentType='linear', outTangentType='linear')
-
+        pm.undoInfo(closeChunk=True)
 
 class Loop():
     def __init__(self,geo,data):
@@ -174,7 +174,7 @@ class Loop():
 
     @staticmethod
     def freezeStandin(node,frame):
-        node = safe_get_standIn_shape(node)
+        node = Loop.safe_get_standIn_shape(node)
         connected_exprs = pm.listConnections(node.frameNumber, type='expression')
         if connected_exprs:
             print("exp delete")
@@ -219,6 +219,7 @@ class Loop():
         self.end_loop = data[1]
         self.FPS_maya = data[2]
         self.FPS_loop = data[3]
+        self.motion = data[4]
 
     def write_data_attributs(self):
         """Adds custom data attributes to self.geo."""
@@ -233,7 +234,8 @@ class Loop():
             'data_start_loop': 'double',
             'data_end_loop': 'double',
             'data_FPS_maya': 'double',
-            'data_FPS_loop': 'double'
+            'data_FPS_loop': 'double',
+            'data_motion' : 'double'
         }
         # Add each attribute if it doesn't exist and set its value.
         for attr_name, attr_type in attributes.items():
@@ -251,7 +253,7 @@ class Loop():
             pm.warning(f"Node {self.geo} does not exist. Cannot read attributes.")
             return None
 
-        attributes = ['data_start_loop', 'data_end_loop', 'data_FPS_maya', 'data_FPS_loop']
+        attributes = ['data_start_loop', 'data_end_loop', 'data_FPS_maya', 'data_FPS_loop','data_motion']
 
         attribute_values = []
 
@@ -278,11 +280,8 @@ class Loop():
     def prompt_user_select_data(self, new_data, existing_data):
         """Prompts user whether to keep the existing data or update with new data."""
         import pymel.core as pm
-        print ('new_data:' )
-        print( new_data)
-        print ('existing:' )
-        print(existing_data)
-        attributes_list = ['start_loop', 'end_loop', 'FPS_maya', 'FPS_loop']
+
+        attributes_list = ['start_loop', 'end_loop', 'FPS_maya', 'FPS_loop','motion']
 
         # Building the message string
         message_lines = [f"Loop parameters are different for {self.pretty_name} \n"]
@@ -338,10 +337,15 @@ class Loop():
     ### INTERNAL UTILITIES ###
     def _generate_frames(self):
         """Duplicates the given object for specified frames and groups them."""
-        for frame in range(self.start_loop, self.end_loop):
+        counter = 0
+        new_end_loop= int(self.end_loop + ((self.motion*-1)*self.modulo))
+        print("new_end_lop")
+        print (new_end_loop)
+        for frame in range(self.start_loop, new_end_loop):
+
             if frame % self.modulo == 0:
                 pm.currentTime(frame)
-                frame_name = f"frame_{frame}"
+                frame_name = f"frame_{self.pretty_name}_{frame}"
                 if self.is_aiStandIn:
                     copy_geo = pm.duplicate(self.geo,  name=frame_name , rr=True, ic=True)[0]
                     print(copy_geo)
@@ -350,8 +354,14 @@ class Loop():
                     copy_geo = pm.duplicate(self.geo, name=frame_name)[0]
 
                 rot_group = pm.group(em=True, name=f"{copy_geo.name()}_rot")
+                extra_rot =0
+
+
+                counter +=1
                 pm.parent(rot_group, self.loop_group)
                 pm.parent(copy_geo , rot_group)
+
+
                 self.force_visibility_on_children(rot_group)
                 #self.hide_frame_over_rig(rot_group,frame,self.modulo)
                 print(f"Succes on time: {frame}")

@@ -19,7 +19,7 @@ class CustomUI(QWidget):
 
         # Initialize default values
         self.start_loop_val = 100
-        self.end_loop_val = 124
+        self.end_loop_val = 148
         self.FPS_maya_val = 24
         self.FPS_loop_val = 12
         self.samples_val = 12
@@ -45,13 +45,13 @@ class CustomUI(QWidget):
         self.start_end_layout.addWidget(self.start_end_label)
         self.start_end_layout.addWidget(self.start_loop_input)
         self.start_end_layout.addWidget(self.end_loop_input)
-        #left_layout.addStretch(1)
         left_layout.addLayout(self.start_end_layout)
         # FPS Maya
         self.FPS_maya_label = QLabel("FPS Maya")
         self.FPS_maya_combobox = QComboBox()
         self.FPS_maya_combobox.addItems(['12', '24', '25'])
         self.FPS_maya_combobox.setCurrentText(str(self.FPS_maya_val))
+
         left_layout.addWidget(self.FPS_maya_label)
         left_layout.addWidget(self.FPS_maya_combobox)
 
@@ -63,6 +63,14 @@ class CustomUI(QWidget):
         left_layout.addWidget(self.FPS_loop_label)
         left_layout.addWidget(self.FPS_loop_combobox)
 
+        self.motion_label = QLabel("Motion direction")
+        self.motion_combobox = QComboBox()
+        self.motion_combobox.addItems(["0", '1', '-1'])
+        self.motion_combobox.setCurrentText("0")
+
+        left_layout.addWidget(self.motion_label)
+        left_layout.addWidget(self.motion_combobox)
+
         # Samples
         self.samples_label = QLabel("Anim Samples")
         self.samples_input = QLineEdit(str(self.samples_val))
@@ -71,10 +79,24 @@ class CustomUI(QWidget):
         left_layout.addWidget(self.samples_input)
 
         # Execute Button
+        self.get_button_layout = QHBoxLayout()
+        self.get_button = QPushButton("Get")
+        self.get_button.clicked.connect(self.get_clicked)
+
+        self.get_button_layout.addWidget(self.get_button)
+
+        self.to_key_button = QPushButton("to key")
+        self.to_key_button.clicked.connect(self.to_key_clicked)
+        self.get_button_layout.addWidget(self.to_key_button)
+        self.get_button_layout.addStretch(1)
+        left_layout.addLayout(self.get_button_layout)
+
+        # Execute Button
         self.execute_button = QPushButton("Create Loop")
         self.execute_button.clicked.connect(self.run)
-        left_layout.addStretch(1)
+
         left_layout.addWidget(self.execute_button)
+        left_layout.addStretch(1)
 
 
         self.hide_rig_button = QPushButton("Hide rig")
@@ -101,7 +123,6 @@ class CustomUI(QWidget):
         self.loop_set_list_widget.itemSelectionChanged.connect(self.list_widget_selection_changed)
 
         self.rigth_layout= QVBoxLayout()
-
         self.rigth_layout.addWidget(self.loop_set_list_widget)
         self.rigth_layout.addLayout(self.rig_layout)
         self.rigth_layout.addWidget(self.update_button)
@@ -120,12 +141,59 @@ class CustomUI(QWidget):
         self.zoetrop = logic.Zoetrop(self.get_loop_params())
         self.update_list_widget()
 
+
+
+
+    def to_key_clicked(self):
+        selection = pm.selected()
+        if not selection:
+            pm.warning("Nothing selected.")
+            return
+        loop_param = self.get_loop_params()
+        self.zoetrop.set_key(selection[0],loop_param)
+
+
+    def get_clicked(self,nodes):
+        selection = pm.selected()
+        if not selection:
+            pm.warning("Nothing selected.")
+            return
+
+        loop_attributes= self.zoetrop.read_loop_attributs_from_standIn(selection[0])
+
+        # Update the Start Loop input field
+        start_loop_val = loop_attributes.get('data_start_loop')
+        if start_loop_val is not None:
+            self.start_loop_input.setText(str(int(start_loop_val)))
+
+        # Update the End Loop input field
+        end_loop_val = loop_attributes.get('data_end_loop')
+        if end_loop_val is not None:
+            self.end_loop_input.setText(str(int(end_loop_val)))
+
+        # Update the FPS Maya combobox
+        FPS_maya_val = loop_attributes.get('data_FPS_maya')
+        if FPS_maya_val is not None:
+            self.FPS_maya_combobox.setCurrentText(str(int(FPS_maya_val)))
+
+        # Update the FPS Loop combobox
+        FPS_loop_val = loop_attributes.get('data_FPS_loop')
+        if FPS_loop_val is not None:
+            self.FPS_loop_combobox.setCurrentText(str(int(FPS_loop_val)))
+            print(self.FPS_loop_combobox.currentText())
+        #self.update_samples()
+
+        motion_loop_val = loop_attributes.get('data_motion')
+        if motion_loop_val is not None:
+            self.motion_combobox.setCurrentText(str(int(motion_loop_val)))
+
     def update_samples(self):
         data = self.get_loop_params()
         start_loop = data[0]
         end_loop = data[1]
         FPS_maya = data[2]
         FPS_loop = data[3]
+        motion = data[4]
         samples = FPS_loop * ((end_loop - start_loop)/ FPS_maya)
         if samples < 0:
             samples = 0
@@ -148,7 +216,6 @@ class CustomUI(QWidget):
             increment += 1
 
         return element_name
-
 
     def list_widget_selection_changed(self):
         items = [item for item in self.loop_set_list_widget.selectedItems()]
@@ -188,7 +255,8 @@ class CustomUI(QWidget):
             int(self.start_loop_input.text()),
             int(self.end_loop_input.text()),
             int(self.FPS_maya_combobox.currentText()),
-            int(self.FPS_loop_combobox.currentText())
+            int(self.FPS_loop_combobox.currentText()),
+            int(self.motion_combobox.currentText())
         ]
 
     def run(self):
@@ -205,6 +273,7 @@ class CustomUI(QWidget):
         for i in items:
             loop= i.data(Qt.UserRole)
             loop.rig_visibility(0)
+
     def show_rig(self):
         # Get the current selected object
         items = [item for item in self.loop_set_list_widget.selectedItems()]
@@ -215,7 +284,6 @@ class CustomUI(QWidget):
     def update_loop(self):
         items = [item for item in self.loop_set_list_widget.selectedItems()]
         new_data= self.get_loop_params()
-        print("oooooooo")
         for i in items:
             loop= i.data(Qt.UserRole)
             loop.check_data_difference(new_data)

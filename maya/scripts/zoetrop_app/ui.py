@@ -19,7 +19,7 @@ class CustomUI(QWidget):
 
         # Initialize default values
         self.start_loop_val = 100
-        self.end_loop_val = 124
+        self.end_loop_val = 148
         self.FPS_maya_val = 24
         self.FPS_loop_val = 12
         self.samples_val = 12
@@ -51,6 +51,7 @@ class CustomUI(QWidget):
         self.FPS_maya_combobox = QComboBox()
         self.FPS_maya_combobox.addItems(['12', '24', '25'])
         self.FPS_maya_combobox.setCurrentText(str(self.FPS_maya_val))
+
         left_layout.addWidget(self.FPS_maya_label)
         left_layout.addWidget(self.FPS_maya_combobox)
 
@@ -61,6 +62,14 @@ class CustomUI(QWidget):
         self.FPS_loop_combobox.setCurrentText(str(self.FPS_loop_val))
         left_layout.addWidget(self.FPS_loop_label)
         left_layout.addWidget(self.FPS_loop_combobox)
+
+        self.motion_label = QLabel("Motion direction")
+        self.motion_combobox = QComboBox()
+        self.motion_combobox.addItems(["0", '1', '-1'])
+        self.motion_combobox.setCurrentText("0")
+
+        left_layout.addWidget(self.motion_label)
+        left_layout.addWidget(self.motion_combobox)
 
         # Samples
         self.samples_label = QLabel("Anim Samples")
@@ -170,11 +179,13 @@ class CustomUI(QWidget):
         # Update the FPS Loop combobox
         FPS_loop_val = loop_attributes.get('data_FPS_loop')
         if FPS_loop_val is not None:
-            print("DEBUG")
-            print (FPS_loop_val)
             self.FPS_loop_combobox.setCurrentText(str(int(FPS_loop_val)))
             print(self.FPS_loop_combobox.currentText())
         #self.update_samples()
+
+        motion_loop_val = loop_attributes.get('data_motion')
+        if motion_loop_val is not None:
+            self.motion_combobox.setCurrentText(str(int(motion_loop_val)))
 
     def update_samples(self):
         data = self.get_loop_params()
@@ -182,6 +193,7 @@ class CustomUI(QWidget):
         end_loop = data[1]
         FPS_maya = data[2]
         FPS_loop = data[3]
+        motion = data[4]
         samples = FPS_loop * ((end_loop - start_loop)/ FPS_maya)
         if samples < 0:
             samples = 0
@@ -243,7 +255,8 @@ class CustomUI(QWidget):
             int(self.start_loop_input.text()),
             int(self.end_loop_input.text()),
             int(self.FPS_maya_combobox.currentText()),
-            int(self.FPS_loop_combobox.currentText())
+            int(self.FPS_loop_combobox.currentText()),
+            int(self.motion_combobox.currentText())
         ]
 
     def run(self):

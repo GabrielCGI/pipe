@@ -1,5 +1,5 @@
 import pymel.core as pm
-
+import math
 class Zoetrop():
     def __init__(self,data):
         self.data = data
@@ -15,6 +15,49 @@ class Zoetrop():
                 geo = members[0]
                 loops.append(Loop(geo,self.data))
         return loops
+
+    @staticmethod
+    def read_loop_attributs_from_standIn(node):
+        """
+        Imports an Alembic into the Maya scene, reads specified attributes from the top parent, and deletes the Alembic.
+
+        :param alembic_path: Path to the Alembic file.
+        :param attributes_list: List of attributes to read from the top parent of the imported Alembic.
+        :return: Dictionary containing attribute values. If an attribute does not exist, its value will be None.
+        """
+        loop_attributes_template = ['data_start_loop', 'data_end_loop', 'data_FPS_maya', 'data_FPS_loop', 'data_motion']
+        if pm.nodeType(node) == 'transform':
+            shapes = pm.listRelatives(node, shapes=True, type='aiStandIn')
+            if not shapes:
+                pm.warning("No standin found")
+                raise ValueError(f"No aiStandIn shape found under transform: {node}")
+            node = shapes[0]
+        if pm.nodeType(node) != 'aiStandIn':
+            pm.warning("No standin found")
+            raise ValueError(f"Node {node} is not an aiStandIn object.")
+        alembic_path = node.dso.get()
+        print(alembic_path)
+        # Import the Alembic into the Maya scene
+        imported_nodes = pm.importFile(alembic_path, returnNewNodes=True)
+
+        # Ensure we imported something
+        if not imported_nodes:
+            pm.warning("Failed to import Alembic.")
+            return None
+
+        # The top parent (usually the transform node) should be the first in the list
+        top_parent = imported_nodes[0]
+
+        # Read attributes from the provided list
+        loop_attributes = {}
+        for attr_name in loop_attributes_template:
+            if pm.hasAttr(top_parent, attr_name):
+                loop_attributes[attr_name] = pm.getAttr(top_parent + "." + attr_name)
+            else:
+                loop_attributes[attr_name] = None
+
+        pm.delete(imported_nodes)
+        return loop_attributes
 
     def create_loop_from_selection(self):
         selected = pm.selected()
@@ -43,7 +86,30 @@ class Zoetrop():
             pm.undoInfo(state=True)
             self.loops = self.get_all_loops()
 
+    @staticmethod
 
+    def set_key(node, data):
+        result = pm.confirmDialog(title='Confirm Action',
+                                  message=f'Are you sure you want to set these keys on {node.name()}? \nThis will disconnect existing connections to rotateY.',
+                                  button=['Yes', 'No'],
+                                  defaultButton='Yes',
+                                  cancelButton='No',
+                                  dismissString='No')
+
+        if result == 'No':
+            pm.warning("Operation cancelled by user.")
+            return
+        pm.undoInfo(openChunk=True)
+        loop = Loop(node, data)
+        input_plug = pm.listConnections(node.rotateY, plugs=True, d=False, s=True)
+        if input_plug:
+            pm.disconnectAttr(input_plug[0], node.rotateY)
+
+        for frame in range(0, 301):  # Including 300, hence 301 as the stop value
+            rot_value = math.floor(frame / loop.modulo) * loop.angle
+            node.rotateY.setKey(time=frame, value=rot_value)
+            pm.keyTangent(node, edit=True, time=(frame,), attribute='rotateY', inTangentType='linear', outTangentType='linear')
+        pm.undoInfo(closeChunk=True)
 
 class Loop():
     def __init__(self,geo,data):
@@ -91,8 +157,12 @@ class Loop():
 
         return False
 
+
+
+    # Fetch and print the attribute values
+
     @staticmethod
-    def freezeStandin(node,frame):
+    def safe_get_standIn_shape(node):
         if pm.nodeType(node) == 'transform':
             shapes = pm.listRelatives(node, shapes=True, type='aiStandIn')
             if not shapes:
@@ -100,7 +170,11 @@ class Loop():
             node = shapes[0]
         if pm.nodeType(node) != 'aiStandIn':
             raise ValueError(f"Node {node} is not an aiStandIn object.")
+        return node
 
+    @staticmethod
+    def freezeStandin(node,frame):
+        node = Loop.safe_get_standIn_shape(node)
         connected_exprs = pm.listConnections(node.frameNumber, type='expression')
         if connected_exprs:
             print("exp delete")
@@ -145,6 +219,7 @@ class Loop():
         self.end_loop = data[1]
         self.FPS_maya = data[2]
         self.FPS_loop = data[3]
+        self.motion = data[4]
 
     def write_data_attributs(self):
         """Adds custom data attributes to self.geo."""
@@ -156,26 +231,29 @@ class Loop():
 
         # Define the attributes and their types to add.
         attributes = {
-            'start_loop': 'double',
-            'end_loop': 'double',
-            'FPS_maya': 'double',
-            'FPS_loop': 'double'
+            'data_start_loop': 'double',
+            'data_end_loop': 'double',
+            'data_FPS_maya': 'double',
+            'data_FPS_loop': 'double',
+            'data_motion' : 'double'
         }
         # Add each attribute if it doesn't exist and set its value.
         for attr_name, attr_type in attributes.items():
             if not pm.attributeQuery(attr_name, node=self.geo, exists=True):
                 pm.addAttr(self.geo, longName=attr_name, attributeType=attr_type, keyable=True)
 
-            pm.setAttr(f"{self.geo}.{attr_name}", getattr(self, attr_name))
+            pm.setAttr(f"{self.geo}.{attr_name}", getattr(self, attr_name[len("data_"):])) #remove "data_" prefix and map maya attribut to class attribut
+
 
         pm.warning(f"Data attributes added to {self.geo}.")
+
 
     def read_data_attributs(self):
         if not pm.objExists(self.geo):
             pm.warning(f"Node {self.geo} does not exist. Cannot read attributes.")
             return None
 
-        attributes = ['start_loop', 'end_loop', 'FPS_maya', 'FPS_loop']
+        attributes = ['data_start_loop', 'data_end_loop', 'data_FPS_maya', 'data_FPS_loop','data_motion']
 
         attribute_values = []
 
@@ -203,7 +281,7 @@ class Loop():
         """Prompts user whether to keep the existing data or update with new data."""
         import pymel.core as pm
 
-        attributes_list = ['start_loop', 'end_loop', 'FPS_maya', 'FPS_loop']
+        attributes_list = ['start_loop', 'end_loop', 'FPS_maya', 'FPS_loop','motion']
 
         # Building the message string
         message_lines = [f"Loop parameters are different for {self.pretty_name} \n"]
@@ -259,10 +337,15 @@ class Loop():
     ### INTERNAL UTILITIES ###
     def _generate_frames(self):
         """Duplicates the given object for specified frames and groups them."""
-        for frame in range(self.start_loop, self.end_loop):
+        counter = 0
+        new_end_loop= int(self.end_loop + ((self.motion*-1)*self.modulo))
+        print("new_end_lop")
+        print (new_end_loop)
+        for frame in range(self.start_loop, new_end_loop):
+
             if frame % self.modulo == 0:
                 pm.currentTime(frame)
-                frame_name = f"frame_{frame}"
+                frame_name = f"frame_{self.pretty_name}_{frame}"
                 if self.is_aiStandIn:
                     copy_geo = pm.duplicate(self.geo,  name=frame_name , rr=True, ic=True)[0]
                     print(copy_geo)
@@ -271,8 +354,14 @@ class Loop():
                     copy_geo = pm.duplicate(self.geo, name=frame_name)[0]
 
                 rot_group = pm.group(em=True, name=f"{copy_geo.name()}_rot")
+                extra_rot =0
+
+
+                counter +=1
                 pm.parent(rot_group, self.loop_group)
                 pm.parent(copy_geo , rot_group)
+
+
                 self.force_visibility_on_children(rot_group)
                 #self.hide_frame_over_rig(rot_group,frame,self.modulo)
                 print(f"Succes on time: {frame}")
