@@ -197,7 +197,7 @@ class ABCExportAsset:
         log_path = os.path.join(version_dir_path, "export_"+time.strftime("%d_%m_%Y")+".log")
         log_path = log_path.replace("\\", "/")
 
-        command = "-frameRange %s %s" % (start, end)
+        command = "-frameRange %s %s -attrPrefix data" % (start, end)
         if subsamples_enabled:
             command += " -step 1.0"
             for frame in subsamples.split(" "):

@@ -338,7 +338,7 @@ class Loop():
     def _generate_frames(self):
         """Duplicates the given object for specified frames and groups them."""
         counter = 0
-        new_end_loop= int(self.end_loop + ((self.motion*-1)*self.modulo))
+        new_end_loop= int(self.end_loop + ((self.motion)*self.modulo))
         print("new_end_lop")
         print (new_end_loop)
         for frame in range(self.start_loop, new_end_loop):

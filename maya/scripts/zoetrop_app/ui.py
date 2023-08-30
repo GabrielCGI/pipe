@@ -19,7 +19,7 @@ class CustomUI(QWidget):
 
         # Initialize default values
         self.start_loop_val = 100
-        self.end_loop_val = 148
+        self.end_loop_val = 136
         self.FPS_maya_val = 24
         self.FPS_loop_val = 12
         self.samples_val = 12

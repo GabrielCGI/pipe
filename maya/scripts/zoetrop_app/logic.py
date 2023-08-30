@@ -285,14 +285,16 @@ class Loop():
 
         # Building the message string
         message_lines = [f"Loop parameters are different for {self.pretty_name} \n"]
-
-        for attr, old_val, new_val in zip(attributes_list, existing_data, new_data):
-            if old_val != new_val:
-                message_lines.append(f"{attr}:\tOld: {old_val}\tNew: {new_val}")
-
+        try:
+            for attr, old_val, new_val in zip(attributes_list, existing_data, new_data):
+                if old_val != new_val:
+                    message_lines.append(f"{attr}:\tOld: {old_val}\tNew: {new_val}")
+        except Exception as e:
+            pm.warning("Fail to compare data")
+            print (e)
         # If there are no differences, exit the function
         if len(message_lines) == 1:
-            pm.warning("No differences found between new and existing data.")
+            print("No differences found between new and existing data.")
             return
 
         message = "\n".join(message_lines)
@@ -312,6 +314,7 @@ class Loop():
             self.write_data_attributs()
             pm.warning("Data attributes updated.")
         else:
+            self.update_data(existing_data)
             pm.warning("Retained existing data attributes.")
 
     ### LOOP OPERATIONS ###
@@ -339,8 +342,12 @@ class Loop():
         """Duplicates the given object for specified frames and groups them."""
         counter = 0
         new_end_loop= int(self.end_loop + ((self.motion*-1)*self.modulo))
-        print("new_end_lop")
-        print (new_end_loop)
+        parent = self.geo.getParent()
+        parent_visibility_state= parent.visibility.get()
+        try:
+            parent.visibility.set(1)
+        except:
+            pm.warning("fail to set visibility on parent:"+parent.name())
         for frame in range(self.start_loop, new_end_loop):
 
             if frame % self.modulo == 0:
@@ -365,7 +372,11 @@ class Loop():
                 self.force_visibility_on_children(rot_group)
                 #self.hide_frame_over_rig(rot_group,frame,self.modulo)
                 print(f"Succes on time: {frame}")
-
+        #restore visibility rig
+        try:
+            parent.visibility.set(parent_visibility_state)
+        except:
+            pm.warning("fail to set visibility on parent:"+parent.name())
     def _create_or_replace_group(self):
         """Creates a new group or replaces it if it exists, while preserving the original parent."""
 
