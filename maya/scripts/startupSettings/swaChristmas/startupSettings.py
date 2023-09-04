@@ -35,5 +35,5 @@ def run():
     print("SETTING AUTO SAVE TO ON")
     cmds.evalDeferred('cmds.autoSave(enable=True)')
     cmds.evalDeferred('cmds.autoSave(limitBackups=True)')
-    cmds.evalDeferred('cmds.autoSave(maxBackups=10)')
+    cmds.evalDeferred('cmds.autoSave(maxBackups=5)')
     cmds.file(modified=False)

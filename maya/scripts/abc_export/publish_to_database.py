@@ -76,7 +76,6 @@ def createNewAsset():
 
     #Check asset data
     assetTxt = assetName+'.txt'
-    print("assetDbDir"+assetsDbDir)
 
     assetDataPath = os.path.join(assetsDbDir,assetTxt) #Build .txt path
 
@@ -137,4 +136,3 @@ def writeAssetData(assetData,assetName,assetsDbDir):
             raise
 
     return
-createNewAsset()

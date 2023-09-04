@@ -17,6 +17,15 @@ class Zoetrop():
         return loops
 
     @staticmethod
+    def findTopParent(imported_nodes):
+        for node in imported_nodes:
+            if isinstance(node, pm.nodetypes.Transform):  # Checking if the node is a transform.
+                potential_parents = node.getAllParents()
+                if not potential_parents:  # If the node has no parents, it's a top-level node.
+                    return node
+        return None
+
+    @staticmethod
     def read_loop_attributs_from_standIn(node):
         """
         Imports an Alembic into the Maya scene, reads specified attributes from the top parent, and deletes the Alembic.
@@ -25,6 +34,7 @@ class Zoetrop():
         :param attributes_list: List of attributes to read from the top parent of the imported Alembic.
         :return: Dictionary containing attribute values. If an attribute does not exist, its value will be None.
         """
+
         loop_attributes_template = ['data_start_loop', 'data_end_loop', 'data_FPS_maya', 'data_FPS_loop', 'data_motion']
         if pm.nodeType(node) == 'transform':
             shapes = pm.listRelatives(node, shapes=True, type='aiStandIn')
@@ -35,8 +45,10 @@ class Zoetrop():
         if pm.nodeType(node) != 'aiStandIn':
             pm.warning("No standin found")
             raise ValueError(f"Node {node} is not an aiStandIn object.")
-        alembic_path = node.dso.get()
-        print(alembic_path)
+
+        alembic_path = node.abc_layers.get()
+        if not alembic_path:
+            return None
         # Import the Alembic into the Maya scene
         imported_nodes = pm.importFile(alembic_path, returnNewNodes=True)
 
@@ -46,7 +58,8 @@ class Zoetrop():
             return None
 
         # The top parent (usually the transform node) should be the first in the list
-        top_parent = imported_nodes[0]
+        top_parent = Zoetrop.findTopParent(imported_nodes)
+
 
         # Read attributes from the provided list
         loop_attributes = {}
@@ -183,6 +196,15 @@ class Loop():
         node.frameNumber.set(frame)
         # Set useFrameExtension to 0.
         node.useFrameExtension.set(0)
+
+    @staticmethod
+    def set_inherits_transform_recursively(node):
+        """Set inheritsTransform attribute recursively for a given node and its transform children."""
+        if isinstance(node, pm.nodetypes.Transform):  # Check if node is of type Transform
+            node.inheritsTransform.set(True)
+            for child in node.getChildren():
+                Loop.set_inherits_transform_recursively(child)  # Recursive call
+
 
     @staticmethod
     def force_visibility_on_children(target):
@@ -348,17 +370,18 @@ class Loop():
             parent.visibility.set(1)
         except:
             pm.warning("fail to set visibility on parent:"+parent.name())
-        for frame in range(self.start_loop, new_end_loop):
+        for frame in range(int(self.start_loop), new_end_loop):
 
             if frame % self.modulo == 0:
                 pm.currentTime(frame)
                 frame_name = f"frame_{self.pretty_name}_{frame}"
                 if self.is_aiStandIn:
                     copy_geo = pm.duplicate(self.geo,  name=frame_name , rr=True, ic=True)[0]
-                    print(copy_geo)
                     self.freezeStandin(copy_geo,frame)
                 else:
                     copy_geo = pm.duplicate(self.geo, name=frame_name)[0]
+                    Loop.set_inherits_transform_recursively(copy_geo)
+
 
                 rot_group = pm.group(em=True, name=f"{copy_geo.name()}_rot")
                 extra_rot =0

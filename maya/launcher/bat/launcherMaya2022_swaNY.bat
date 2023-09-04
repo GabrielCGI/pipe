@@ -24,7 +24,7 @@ SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons\swaChrystmas_2023;%PIPELINE_DIR_MAYA%\
 
 rem \---- ARNOLD SETUP
 
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\maya2024_7.2.3.2\maya2024;
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.2.3.2\maya2022;
 
 rem \ MAYA SECURITY TOOL
 SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;R:\pipeline\networkInstall\MayaScanner;
@@ -44,9 +44,9 @@ rem \----DEADLINE
 SET MAYA_SCRIPT_PATH=%MAYA_SCRIPT_PATH%;R:\deadline\submission\Maya\Client;
 
 
-SET CURRENT_PROJECT=swaChristmas_2023
-SET CURRENT_PROJECT_DIR=I:/swaChristmas_2023
-SET ASSETS_DIR=I:/swaChristmas_2023/assets
+SET CURRENT_PROJECT=swaNY_2308
+SET CURRENT_PROJECT_DIR=I:/swaNY_2308
+SET ASSETS_DIR=I:/swaNY_2308/assets
 
 REM == Start maya and launch statupSettings (FPS, Unit ect...)
-start C:\"Program Files"\Autodesk\Maya2024\bin\maya.exe -file %1 -command "python(\"import startupSettings\"); python (\"startupSettings.run()\")"  %*
+start C:\"Program Files"\Autodesk\Maya2022\bin\maya.exe -file %1 -command "python(\"import startupSettings\"); python (\"startupSettings.run()\")"  %*

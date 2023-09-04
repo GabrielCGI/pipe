@@ -160,7 +160,10 @@ class CustomUI(QWidget):
             return
 
         loop_attributes= self.zoetrop.read_loop_attributs_from_standIn(selection[0])
-
+        if not loop_attributes:
+            pm.warning("Fail to read alembic attribut on: "+selection)
+            return
+        print (loop_attributes)
         # Update the Start Loop input field
         start_loop_val = loop_attributes.get('data_start_loop')
         if start_loop_val is not None:
