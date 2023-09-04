@@ -38,7 +38,7 @@ class ABCImportAsset(ABC):
         self._look_factory = look_factory
         self._import_path = self.__versions[0] if len(self.__versions) > 0 else None
         self._actual_version = None
-        self._actual_standin = None
+        self._actual_standins = []
         self._look_standin_obj = None
 
     def get_icon_filename(self, state):
@@ -105,16 +105,17 @@ class ABCImportAsset(ABC):
         """
         return self._actual_version
 
-    def set_actual_standin(self, standin):
+    def set_actual_standins(self, standins):
         """
         Setter of the actual Standin
         :param standin:
         :return:
         """
-        self._actual_standin = standin
-        if self._actual_standin is not None:
+        self._actual_standins = standins
+        if len(self._actual_standins) > 0:
             try:
-                self._look_standin_obj = self._look_factory.generate(self._actual_standin)
+                for standin in self._actual_standins:
+                    self._look_standin_obj = self._look_factory.generate(standin)
             except Exception as e:
                 print_warning("Error while retrieving Looks files of " + self._name, char_filler='-')
                 print(f'caught {type(e)}: e')
@@ -175,9 +176,10 @@ class ABCImportAnim(ABCImportAsset):
         :param do_update_uvs_shaders
         :return:
         """
-        is_import = self._actual_standin is None
+        is_import = len(self._actual_standins) == 0
 
         char_name = self._get_char_name()
+        last_uv = None
         try:
             last_uv = LookAsset.get_uvs(char_name, self._current_project_dir)[0][1]
         except Exception as e:
@@ -192,18 +194,24 @@ class ABCImportAnim(ABCImportAsset):
             actual_standin = pm.createNode("aiStandIn", n=name+"Shape")
             standin_node = pm.listRelatives(actual_standin, parent=True)[0]
             standin_node = pm.rename(standin_node, name)
+            actual_standins = [actual_standin]
+            standin_nodes = [standin_node]
         else:
-            actual_standin = self._actual_standin
-            standin_node = pm.listRelatives(actual_standin, parent=True)[0]
+            actual_standins = self._actual_standins
+            standin_nodes = []
+            for standin in actual_standins:
+                standin_nodes.append(pm.listRelatives(standin, parent=True)[0])
 
-        if is_import or do_update_uvs_shaders:
-            actual_standin.dso.set(last_uv)
-        self.set_actual_standin(actual_standin)
+        if (is_import or do_update_uvs_shaders) and last_uv is not None:
+            for standin in actual_standins:
+                standin.dso.set(last_uv)
+        self.set_actual_standins(actual_standins)
         abc_filename = name + ".abc"
         abc_filepath = os.path.join(self._import_path, abc_filename)
-        standin_node.mode.set(6)
-        standin_node.abc_layers.set(abc_filepath)
-        ABCImportAsset._configure_standin(standin_node)
+        for standin_node in standin_nodes:
+            standin_node.mode.set(6)
+            standin_node.abc_layers.set(abc_filepath)
+            ABCImportAsset._configure_standin(standin_node)
 
         light_filename = name + "_light.ma"
         light_filepath = os.path.join(self._import_path, light_filename)
@@ -222,7 +230,7 @@ class ABCImportAnim(ABCImportAsset):
 
         if is_import or do_update_uvs_shaders:
             self.update()
-        return standin_node
+        return standin_nodes
 
 
 class ABCImportFur(ABCImportAsset):
@@ -253,7 +261,7 @@ class ABCImportFur(ABCImportAsset):
         :param do_update_uvs_shaders
         :return:
         """
-        is_import = self._actual_standin is None
+        is_import = len(self._actual_standins) == 0
 
         name = self.get_name()
         dso = None
@@ -270,16 +278,21 @@ class ABCImportFur(ABCImportAsset):
                 actual_standin = pm.createNode("aiStandIn", n="shape_" + name)
                 standin_node = pm.listRelatives(actual_standin, parent=True)[0]
                 standin_node = pm.rename(standin_node, name)
+                actual_standins = [actual_standin]
+                standin_nodes = [standin_node]
             else:
-                actual_standin = self._actual_standin
-                standin_node = pm.listRelatives(actual_standin, parent=True)[0]
+                actual_standins = self._actual_standins
+                standin_nodes = []
+                for standin in actual_standins:
+                    standin_nodes.append(pm.listRelatives(standin, parent=True)[0])
 
-            standin_node.dso.set(os.path.join(self._import_path, dso))
 
-            self.set_actual_standin(actual_standin)
-            standin_node.mode.set(4)
-            ABCImportAsset._configure_standin(standin_node)
+            self.set_actual_standins(actual_standins)
+            for standin_node in standin_nodes:
+                standin_node.dso.set(os.path.join(self._import_path, dso))
+                standin_node.mode.set(4)
+                ABCImportAsset._configure_standin(standin_node)
 
             if is_import or do_update_uvs_shaders:
                 self.update()
-        return standin_node
+        return standin_nodes

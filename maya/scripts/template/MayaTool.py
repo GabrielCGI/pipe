@@ -15,8 +15,8 @@ from PySide2.QtGui import *
 
 from shiboken2 import wrapInstance
 
+from common import utils
 from utils import *
-
 from Prefs import *
 
 import maya.OpenMaya as OpenMaya
@@ -35,7 +35,7 @@ class MayaTool(QDialog):
     def __init__(self, prnt=wrapInstance(int(omui.MQtUtil.mainWindow()), QWidget)):
         # TODO change class name
         super(MayaTool, self).__init__(prnt)
-        
+
         # Common Preferences (common preferences on all tools)
         self.__common_prefs = Prefs()
         # Preferences for this tool

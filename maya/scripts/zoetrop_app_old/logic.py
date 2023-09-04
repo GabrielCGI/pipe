@@ -17,6 +17,15 @@ class Zoetrop():
         return loops
 
     @staticmethod
+    def findTopParent(imported_nodes):
+        for node in imported_nodes:
+            if isinstance(node, pm.nodetypes.Transform):  # Checking if the node is a transform.
+                potential_parents = node.getAllParents()
+                if not potential_parents:  # If the node has no parents, it's a top-level node.
+                    return node
+        return None
+
+    @staticmethod
     def read_loop_attributs_from_standIn(node):
         """
         Imports an Alembic into the Maya scene, reads specified attributes from the top parent, and deletes the Alembic.
@@ -25,6 +34,7 @@ class Zoetrop():
         :param attributes_list: List of attributes to read from the top parent of the imported Alembic.
         :return: Dictionary containing attribute values. If an attribute does not exist, its value will be None.
         """
+
         loop_attributes_template = ['data_start_loop', 'data_end_loop', 'data_FPS_maya', 'data_FPS_loop', 'data_motion']
         if pm.nodeType(node) == 'transform':
             shapes = pm.listRelatives(node, shapes=True, type='aiStandIn')
@@ -35,8 +45,10 @@ class Zoetrop():
         if pm.nodeType(node) != 'aiStandIn':
             pm.warning("No standin found")
             raise ValueError(f"Node {node} is not an aiStandIn object.")
-        alembic_path = node.dso.get()
-        print(alembic_path)
+
+        alembic_path = node.abc_layers.get()
+        if not alembic_path:
+            return None
         # Import the Alembic into the Maya scene
         imported_nodes = pm.importFile(alembic_path, returnNewNodes=True)
 
@@ -46,7 +58,8 @@ class Zoetrop():
             return None
 
         # The top parent (usually the transform node) should be the first in the list
-        top_parent = imported_nodes[0]
+        top_parent = Zoetrop.findTopParent(imported_nodes)
+
 
         # Read attributes from the provided list
         loop_attributes = {}
@@ -185,6 +198,15 @@ class Loop():
         node.useFrameExtension.set(0)
 
     @staticmethod
+    def set_inherits_transform_recursively(node):
+        """Set inheritsTransform attribute recursively for a given node and its transform children."""
+        if isinstance(node, pm.nodetypes.Transform):  # Check if node is of type Transform
+            node.inheritsTransform.set(True)
+            for child in node.getChildren():
+                Loop.set_inherits_transform_recursively(child)  # Recursive call
+
+
+    @staticmethod
     def force_visibility_on_children(target):
         # Define a helper function to force set visibility
         def force_visibility(node):
@@ -285,14 +307,16 @@ class Loop():
 
         # Building the message string
         message_lines = [f"Loop parameters are different for {self.pretty_name} \n"]
-
-        for attr, old_val, new_val in zip(attributes_list, existing_data, new_data):
-            if old_val != new_val:
-                message_lines.append(f"{attr}:\tOld: {old_val}\tNew: {new_val}")
-
+        try:
+            for attr, old_val, new_val in zip(attributes_list, existing_data, new_data):
+                if old_val != new_val:
+                    message_lines.append(f"{attr}:\tOld: {old_val}\tNew: {new_val}")
+        except Exception as e:
+            pm.warning("Fail to compare data")
+            print (e)
         # If there are no differences, exit the function
         if len(message_lines) == 1:
-            pm.warning("No differences found between new and existing data.")
+            print("No differences found between new and existing data.")
             return
 
         message = "\n".join(message_lines)
@@ -312,6 +336,7 @@ class Loop():
             self.write_data_attributs()
             pm.warning("Data attributes updated.")
         else:
+            self.update_data(existing_data)
             pm.warning("Retained existing data attributes.")
 
     ### LOOP OPERATIONS ###
@@ -338,20 +363,25 @@ class Loop():
     def _generate_frames(self):
         """Duplicates the given object for specified frames and groups them."""
         counter = 0
-        new_end_loop= int(self.end_loop + ((self.motion)*self.modulo))
-        print("new_end_lop")
-        print (new_end_loop)
-        for frame in range(self.start_loop, new_end_loop):
+        new_end_loop= int(self.end_loop + ((self.motion*-1)*self.modulo))
+        parent = self.geo.getParent()
+        parent_visibility_state= parent.visibility.get()
+        try:
+            parent.visibility.set(1)
+        except:
+            pm.warning("fail to set visibility on parent:"+parent.name())
+        for frame in range(int(self.start_loop), new_end_loop):
 
             if frame % self.modulo == 0:
                 pm.currentTime(frame)
                 frame_name = f"frame_{self.pretty_name}_{frame}"
                 if self.is_aiStandIn:
                     copy_geo = pm.duplicate(self.geo,  name=frame_name , rr=True, ic=True)[0]
-                    print(copy_geo)
                     self.freezeStandin(copy_geo,frame)
                 else:
                     copy_geo = pm.duplicate(self.geo, name=frame_name)[0]
+                    Loop.set_inherits_transform_recursively(copy_geo)
+
 
                 rot_group = pm.group(em=True, name=f"{copy_geo.name()}_rot")
                 extra_rot =0
@@ -365,7 +395,11 @@ class Loop():
                 self.force_visibility_on_children(rot_group)
                 #self.hide_frame_over_rig(rot_group,frame,self.modulo)
                 print(f"Succes on time: {frame}")
-
+        #restore visibility rig
+        try:
+            parent.visibility.set(parent_visibility_state)
+        except:
+            pm.warning("fail to set visibility on parent:"+parent.name())
     def _create_or_replace_group(self):
         """Creates a new group or replaces it if it exists, while preserving the original parent."""
 

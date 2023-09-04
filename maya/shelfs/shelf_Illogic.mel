@@ -258,7 +258,7 @@ global proc shelf_Illogic () {
         -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "from abc_export import publish_to_database\n\nimport importlib\nimp..." 
+        -label "Publish Database" 
         -labelOffset 0
         -rotation 0
         -flipX 0
@@ -757,19 +757,19 @@ global proc shelf_Illogic () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 31
+        -flexibleWidthValue 32
         -enable 1
-        -width 34
+        -width 35
         -height 34
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "import webbrowser\n\nurl = \"https://illogic.notion.site/Wiki-2f062f644c404c19b3f74aca2f7aab05\"  # Replace with your desired URL\nwebbrowser.open(url)\n" 
+        -annotation "Notion" 
         -enableBackground 0
         -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "import webbrowser\n\nurl = \"https://illogic.notion.site/Wiki-2f062..." 
+        -label "Notion" 
         -labelOffset 0
         -rotation 0
         -flipX 0
@@ -798,19 +798,18 @@ global proc shelf_Illogic () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "from zoetrop_app import ui\nfrom zoetrop_app import logic\n\nimport importlib\nimportlib.reload(ui)\nimportlib.reload(logic)\n\ntry:\n    zoetrop_ui.close()\nexcept:\n    pass\nzoetrop_ui = ui.CustomUI()\nzoetrop_ui.show()\n" 
+        -annotation "Zoetrop" 
         -enableBackground 0
         -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "from zoetrop_app import ui\nfrom zoetrop_app import logic\n\nimport..." 
+        -label "Zoetrop" 
         -labelOffset 0
         -rotation 0
         -flipX 0
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
-        -imageOverlayLabel "v2" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
         -image "R:/pipeline/pipe/maya/icons/zoetrop2.png" 

@@ -543,24 +543,23 @@ class ABCImport(QDialog):
         standins = pm.ls(type="aiStandIn")
         abc_name = abc.get_name()
         for standin in standins:
-            if standin.name().startswith("frame"): # NOTE: Workaround for Swarovski issue to prevent updating incorrect standin due to duplicates.
-                continue
-            standin_node = pm.listRelatives(standin, parent=True)[0]
-            dso = standin.dso.get()
             # Check dso
+            dso = standin.dso.get()
             if dso is not None:
                 match_dso = re.match(r".*[\\/](.*_fur)(?:\.[0-9]+)?\.abc", dso, re.IGNORECASE)
                 if match_dso and match_dso.group(1) == abc_name:
-                    abc.set_actual_standin(standin)
+                    abc.set_actual_standins([standin])
                     return
+
             # Check abc_layer
+            standin_node = pm.listRelatives(standin, parent=True)[0]
             abc_layer = standin_node.abc_layers.get()
             if abc_layer is not None:
                 abc_layer = abc_layer.replace("\\", "/")
                 match_abc_layer = re.match(r".*[\\/](.*)\.abc", abc_layer, re.IGNORECASE)
                 if match_abc_layer and match_abc_layer.group(1) == abc_name:
-                    abc.set_actual_standin(standin)
-                    return
+                    abc.set_actual_standins([standin])
+
 
     def __retrieve_assets_in_scene(self):
         """
@@ -574,35 +573,39 @@ class ABCImport(QDialog):
         if len(self.__abcs) == 0:
             return
         for standin in standins:
-            if standin.name().startswith("frame"): # NOTE: Workaround for Swarovski issue to prevent updating incorrect standin due to duplicates.
-                continue
-            standin_node = pm.listRelatives(standin, parent=True)[0]
-            dso = standin.dso.get()
             added = False
+
             # Check dso
+            dso = standin.dso.get()
             if dso is not None:
                 match_dso = re.match(r".*/(.*)/([0-9]{4})/.*_[0-9]{2}_fur(?:\.[0-9]+)?\.abc", dso, re.IGNORECASE)
                 if match_dso:
                     name = match_dso.group(1) + "_fur"
-                    standins_datas[name] = (standin, match_dso.group(2))
+                    acc_standins = standins_datas[name][0] if name in standins_datas else []
+                    acc_standins.append(standin)
+                    standins_datas[name] = (acc_standins, match_dso.group(2))
                     added = True
             if not added:
                 # Check abc_layer
+                standin_node = pm.listRelatives(standin, parent=True)[0]
                 abc_layer = standin_node.abc_layers.get()
                 if abc_layer is not None:
                     abc_layer = abc_layer.replace("\\", "/")
                     match_abc_layer = re.match(r".*/(.*)/([0-9]{4})/.*_[0-9]{2}\.abc", abc_layer, re.IGNORECASE)
                     if match_abc_layer:
                         name = match_abc_layer.group(1)
-                        standins_datas[name] = (standin, match_abc_layer.group(2))
+                        acc_standins = standins_datas[name][0] if name in standins_datas else []
+                        acc_standins.append(standin)
+                        standins_datas[name] = (acc_standins, match_abc_layer.group(2))
+
         # Make the correspondence between abcs in file architecture and abcs in scene
         for abc in self.__abcs:
             abc_name = abc.get_name()
             if abc_name in standins_datas.keys():
-                abc.set_actual_standin(standins_datas[abc_name][0])
+                abc.set_actual_standins(standins_datas[abc_name][0])
                 abc.set_actual_version(standins_datas[abc_name][1])
             else:
-                abc.set_actual_standin(None)
+                abc.set_actual_standins([])
                 abc.set_actual_version(None)
 
     def __import_update_selected_abcs(self):
@@ -612,7 +615,7 @@ class ABCImport(QDialog):
         """
         standin_nodes = []
         for abc in self.__selected_abcs:
-            standin_nodes.append(abc.import_update_abc(self.__update_uvs_shaders))
+            standin_nodes.extend(abc.import_update_abc(self.__update_uvs_shaders))
         pm.select(standin_nodes)
         self.__retrieve_assets_in_scene()
         self.__refresh_ui()
