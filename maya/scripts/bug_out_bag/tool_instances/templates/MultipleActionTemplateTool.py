@@ -3,7 +3,7 @@ from tool_models.MultipleActionTool import *
 
 class MultipleActionTemplateTool(MultipleActionTool):
     def __init__(self):
-        # MTODO odify fields as you want (pref_name should be unique)
+        # TODO modify fields as you want (pref_name should be unique)
         actions = {
             "action_1": {
                 "text": "Action 1",

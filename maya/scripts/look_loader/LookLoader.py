@@ -49,6 +49,7 @@ class LookLoader(QDialog):
         self.__standin_obj_selected = None
         self.__file_looks_selected = []
         self.__selection_callback = None
+        self.__replace_looks = False
 
         self.__retrieve_current_project_dir()
         self.__look_factory = LookFactory(self.__current_project_dir)
@@ -85,6 +86,7 @@ class LookLoader(QDialog):
         self.__prefs["window_size"] = {"width": size.width(), "height": size.height()}
         pos = self.pos()
         self.__prefs["window_pos"] = {"x": pos.x(), "y": pos.y()}
+        self.__prefs["replace_looks"] = self.__replace_looks
 
     def __retrieve_prefs(self):
         """
@@ -99,6 +101,9 @@ class LookLoader(QDialog):
         if "window_pos" in self.__prefs:
             pos = self.__prefs["window_pos"]
             self.__ui_pos = QPoint(pos["x"], pos["y"])
+
+        if "replace_looks" in self.__prefs:
+            self.__replace_looks = self.__prefs["replace_looks"]
 
     def showEvent(self, arg__1: QShowEvent) -> None:
         """
@@ -158,6 +163,7 @@ class LookLoader(QDialog):
         self.setLayout(main_lyt)
 
         grid_layout = QGridLayout()
+        grid_layout.setContentsMargins(0,0,0,5)
         main_lyt.addLayout(grid_layout)
         grid_layout.setRowStretch(1, 1)
         grid_layout.setColumnStretch(0, 2)
@@ -175,7 +181,7 @@ class LookLoader(QDialog):
         self.__ui_standin_table.setSelectionMode(QAbstractItemView.SingleSelection)
         self.__ui_standin_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.__ui_standin_table.itemSelectionChanged.connect(self.__on_standin_select_changed)
-        grid_layout.addWidget(self.__ui_standin_table, 1, 0)
+        grid_layout.addWidget(self.__ui_standin_table, 1, 0, 2,1)
 
         # List of Looks
         self.__ui_looks_list = QListWidget()
@@ -184,6 +190,11 @@ class LookLoader(QDialog):
         self.__ui_looks_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.__ui_looks_list.itemSelectionChanged.connect(self.__on_look_selected_changed)
         grid_layout.addWidget(self.__ui_looks_list, 1, 1)
+
+        # Toggle replace
+        self.__ui_toggle_replace_look_btn = QRadioButton("Replace looks")
+        self.__ui_toggle_replace_look_btn.clicked.connect(self.__on_replace_looks_checked)
+        grid_layout.addWidget(self.__ui_toggle_replace_look_btn, 2, 1, alignment=Qt.AlignCenter)
 
         # Button
         self.__ui_add_looks_to_standin_btn = QPushButton("Set Looks to the StandIn")
@@ -197,6 +208,7 @@ class LookLoader(QDialog):
         """
         self.__refresh_standin_table()
         self.__refresh_btn()
+        self.__ui_toggle_replace_look_btn.setChecked(self.__replace_looks)
 
     def __refresh_btn(self):
         """
@@ -281,11 +293,8 @@ class LookLoader(QDialog):
         selection = pm.ls(selection=True)
         if len(selection) > 0:
             for sel in selection:
-                if sel.name().startswith("frame"): # NOTE: Workaround for Swarovski issue to prevent updating incorrect standin due to duplicates.
-                    continue
                 if pm.objectType(sel, isType="aiStandIn"):
                     # Standin found
-
                     look_obj = self.__look_factory.generate(sel)
                     if look_obj is not None: self.__standins[look_obj.get_object_name()] = look_obj
                 elif pm.objectType(sel, isType="transform"):
@@ -294,7 +303,6 @@ class LookLoader(QDialog):
                         shape = prt.getShape()
                         if shape is not None and pm.objectType(shape, isType="aiStandIn"):
                             # Proxy of Standin found
-
                             look_obj = self.__look_factory.generate(shape)
                             if look_obj is not None: self.__standins[look_obj.get_object_name()] = look_obj
 
@@ -303,12 +311,16 @@ class LookLoader(QDialog):
                     if look_obj is not None: self.__standins[look_obj.get_object_name()] = look_obj
         else:
             for standin in pm.ls(type="aiStandIn"):
-                if standin.name().startswith("frame"): # NOTE: Workaround for Swarovski issue to prevent updating incorrect standin due to duplicates.
+                if standin.name().startswith("frame"):
                     continue
                 look_obj = self.__look_factory.generate(standin)
                 if look_obj is not None: self.__standins[look_obj.get_object_name()] = look_obj
 
         self.__standins = dict(sorted(self.__standins.items()))
+
+
+    def __on_replace_looks_checked(self, state):
+        self.__replace_looks = state
 
     def __on_scene_selection_changed(self, *args, **kwargs):
         """
@@ -354,7 +366,7 @@ class LookLoader(QDialog):
         :return:
         """
         self.__refresh_selection = False
-        self.__standin_obj_selected.add_looks(self.__file_looks_selected)
+        self.__standin_obj_selected.add_looks(self.__file_looks_selected, self.__replace_looks)
         self.__standin_obj_selected.retrieve_looks(self.__current_project_dir)
         self.__refresh_selection = True
         self.__refresh_standin_table()

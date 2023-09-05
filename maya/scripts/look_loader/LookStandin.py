@@ -91,27 +91,62 @@ class LookStandin(ABC):
                 return False
         return True
 
-    #
-    def add_looks(self, filepath_looks):
+    def add_looks(self, filepath_looks, replace_looks):
         """
         Add Looks to the operators
         :param filepath_looks
         :return:
         """
+        # print_var(filepath_looks,list(self._looks.items()))
+        # return
         for look_filepath in filepath_looks:
             for look_name, look_data in self._looks.items():
                 if look_data[0] == look_filepath:
+                    to_unplug = []
                     if look_data[1] == LookPresentState.AlreadyPlugged:
-                        continue
+                        # If Replace Mode disconnect all the other looks
+                        if replace_looks:
+                            for ln, ld in self._looks.items():
+                                if ld[2] != look_data[2] :
+                                    # Unplug all the looks except the current (add to a list to unplug)
+                                    to_unplug.append(ld[2])
                     elif look_data[1] == LookPresentState.AnteriorVersionPlugged:
                         include_graph = look_data[2]
                         include_graph.filename.set(look_filepath)
                     else:
-                        include_graph = pm.createNode("aiIncludeGraph", n="aiIncludeGraph_" +
-                                                                          self.__object_name + "_" + look_name)
-                        include_graph.filename.set(look_filepath)
-                        include_graph.out >> self._standin.operators[
-                            LookStandin.__get_free_operator_slot(self._standin)]
+                        # If Replace Mode replace the first one
+                        if replace_looks and len(self._looks) > 0:
+                            replaced = False
+                            to_unplug = []
+                            for ln, ld in self._looks.items():
+                                if ld[1] == LookPresentState.AlreadyPlugged or ld[1] == LookPresentState.AnteriorVersionPlugged :
+                                    include_graph = ld[2]
+                                    if not replaced:
+                                        # Replace the first
+                                        include_graph.filename.set(look_filepath)
+                                        include_graph.setName("aiIncludeGraph_" +self.__object_name + "_" + look_name)
+                                        replaced = True
+                                    else:
+                                        # Unplug the others looks (add to a list to unplug)
+                                        to_unplug.append(include_graph)
+                        else:
+                            # Create a new look
+                            include_graph = pm.createNode("aiIncludeGraph", n="aiIncludeGraph_" +
+                                                                              self.__object_name + "_" + look_name)
+                            include_graph.filename.set(look_filepath)
+                            include_graph.out >> self._standin.operators[
+                                LookStandin.__get_free_operator_slot(self._standin)]
+                    if replace_looks and len(to_unplug) >0:
+                        # Do Unplug
+                        index = 0
+                        to_unplug_remaining = len(to_unplug)
+                        while to_unplug_remaining>0 or index ==20:
+                            attribute = self.__object_name + ".operators[" + str(index) + "]"
+                            if pm.getAttr(attribute) in to_unplug:
+                                pm.disconnectAttr(attribute)
+                                to_unplug_remaining-=1
+                            index += 1
+                        return # Stop after replacing
         pm.select(clear=True)
 
     #
@@ -232,6 +267,7 @@ class LookStandin(ABC):
             for look_name in self._looks.keys():
                 if self._looks[look_name][0] == plugged_look_path:
                     self._looks[look_name][1] = LookPresentState.AlreadyPlugged
+                    self._looks[look_name][2] = plugged_look
                 elif self._looks[look_name][0].startswith(root_look_path) and \
                         self._looks[look_name][1] != LookPresentState.AlreadyPlugged:
                     self._looks[look_name][1] = LookPresentState.AnteriorVersionPlugged

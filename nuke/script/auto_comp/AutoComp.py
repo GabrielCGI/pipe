@@ -712,7 +712,8 @@ class AutoComp(QWidget):
         :return:
         """
         for read_node,new_path in self.__selected_read_nodes_for_update_data:
-            read_node.knob("file").setValue(new_path)
+            if new_path is not None:
+                read_node.knob("file").setValue(new_path)
         self.__refresh_read_nodes_to_update()
 
     def __shuffle_channel(self):

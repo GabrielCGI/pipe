@@ -411,12 +411,17 @@ class AssetLoader(QtWidgets.QDialog):
                 return
             versions_active_variant = variants_and_versions[selected_variant]
             active_version = standin.get_active_version()
+            select_wg = None
             for version in versions_active_variant:
                 version_list_widget = QListWidgetItem(version[0])
+                if select_wg is None:
+                    select_wg = version_list_widget
                 self.__ui_version_list.addItem(version_list_widget)
                 if active_variant == selected_variant and active_version == version[0]:
-                    self.__ui_version_list.setItemSelected(version_list_widget, True)
+                    select_wg = version_list_widget
                     version_list_widget.setTextColor(QColor(0, 255, 255).rgba())
+            if select_wg is not None:
+                self.__ui_version_list.setItemSelected(select_wg, True)
 
     def __refresh_btn(self):
         """

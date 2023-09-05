@@ -34,6 +34,7 @@ from .tool_instances.OverrideKillerTool import *
 from .tool_instances.ShadingGroupRenamerTool import *
 from .tool_instances.HierarchyCheckTool import *
 from .tool_instances.CharacterTimeSetTool import *
+from .tool_instances.TraceSetTool import *
 
 # ######################################################################################################################
 
@@ -64,6 +65,7 @@ class BobApp(QDialog):
                 UVCopierTool(),
                 SplineStepTool(),
                 CharacterTimeSetTool(),
+                TraceSetTool()
             ]),
             BobCategory("Clean", self.__prefs, [
                 CleanFreezeTool(),

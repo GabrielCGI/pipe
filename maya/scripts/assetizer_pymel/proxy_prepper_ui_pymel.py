@@ -79,9 +79,9 @@ class ProxyPrepper(QtWidgets.QDialog):
         self.display_label2 = QtWidgets.QLabel("Proxy with textures")
         self.generate_proxy_button = QtWidgets.QPushButton("Generate proxy")
         self.hierarchy = QtWidgets.QPushButton("Generate hierarchy")
+        self.var_hierarchy = QtWidgets.QPushButton("Generate variant hierarchy")
         self.bakeTexture_button = QtWidgets.QPushButton("Proxy shader")
         self.generate_lowpoly_button = QtWidgets.QPushButton("Generate Low poly")
-        self.hierarchy = QtWidgets.QPushButton("Generate hierarchy")
 
         # ADD WIDGET TO LAYOUT
 
@@ -93,6 +93,7 @@ class ProxyPrepper(QtWidgets.QDialog):
 
 
         self.button_layout.addWidget(self.hierarchy)
+        self.button_layout.addWidget(self.var_hierarchy)
         self.button_layout.addWidget(self.generate_lowpoly_button)
         self.button_layout.addWidget(self.generate_proxy_button)
         self.button_layout.addWidget(self.bakeTexture_button)
@@ -107,6 +108,7 @@ class ProxyPrepper(QtWidgets.QDialog):
         self.bakeTexture_button.clicked.connect(self.bakeTexture_button_clicked)
         self.generate_lowpoly_button.clicked.connect(self.generate_lowpoly_clicked)
         self.hierarchy.clicked.connect(self.hierarchy_clicked)
+        self.var_hierarchy.clicked.connect(self.var_hierarchy_clicked)
 
 
 
@@ -114,6 +116,11 @@ class ProxyPrepper(QtWidgets.QDialog):
         obj = pm.ls(selection=True)
         pp.build_hiearchy(obj)
         self.hierarchy.setStyleSheet("background-color:rgb(110,150,110)")
+
+    def var_hierarchy_clicked(self):
+        obj = pm.ls(selection=True)
+        pp.build_var_hiearchy(obj)
+        self.var_hierarchy.setStyleSheet("background-color:rgb(110,150,110)")
 
     def get_image_dir(self):
         filepath = pm.system.sceneName()

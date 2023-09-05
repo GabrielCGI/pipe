@@ -15,6 +15,35 @@ def only_name(obj):
     only_name = obj.name().split("|")[-1]
     return only_name
 
+def build_var_hiearchy(objs):
+    # Check
+    if len(objs) == 0:
+        utils.warning("Not enough object selected")
+    result = pm.promptDialog(
+        title='Rename Object',
+        message='Enter Name:',
+        text=str(utils.only_name(objs[0])),
+        button=['Validate as HD','Validate as SD', 'Cancel'],
+        defaultButton='Validate as HD',
+        cancelButton='Cancel',
+        dismissString='Cancel')
+    is_HD = result == "Validate as HD"
+    is_SD = result == "Validate as SD"
+    if not is_HD and not is_SD:
+        utils.warning('abort by user')
+        return
+    if is_HD:
+        suffix = "HD"
+    else:
+        suffix = "SD"
+    asset_name = pm.promptDialog(query=True, text=True)
+    root = pm.createNode("transform", n=asset_name)
+    for obj in objs:
+        var = pm.createNode("transform", n=asset_name+"_"+utils.only_name(obj).replace("_","")+suffix)
+        pm.parent(var, root)
+        pm.parent(obj, var)
+    pm.select(root)
+
 
 def build_hiearchy(obj):
     # Check

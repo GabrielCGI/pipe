@@ -53,6 +53,14 @@ class MultipleActionTool(BobTool, ABC):
         """
         pass
 
+    def _add_ui_after_buttons(self, lyt):
+        """
+        Function if the tool should have additionnal UI after the buttons
+        :param lyt: layout
+        :return:
+        """
+        pass
+
     def populate(self):
         """
         Populate the MultipleActionTool
@@ -86,4 +94,6 @@ class MultipleActionTool(BobTool, ABC):
             if stretch > 0:
                 action_btn.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
             layouts[row].addWidget(action_btn, stretch)
+
+        self._add_ui_after_buttons(content_layout)
         return layout

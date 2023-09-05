@@ -20,7 +20,6 @@ import pymel.core as pm
 from common.utils import *
 from common.Prefs import *
 
-sys.path.append(r"R:\pipeline\networkInstall\arnold\SDK\Arnold-7.1.4.2-windows")
 from arnold import *
 
 # ######################################################################################################################
@@ -736,8 +735,8 @@ class RendererDiagnosis(QDialog):
                 camera_trsf = camera.getTransform()
                 break
 
-        AiASSLoad(self.__temp_path)
-        univ = AiUniverseGetNodeIterator(AI_NODE_SHAPE)
+        AiASSLoad(universe=None, filename=self.__temp_path, mask=AI_NODE_SHAPE)
+        univ = AiUniverseGetNodeIterator(universe=None, mask=AI_NODE_SHAPE)
         while not AiNodeIteratorFinished(univ):
             node = AiNodeIteratorGetNext(univ)
             node_name = AiNodeGetName(node)
