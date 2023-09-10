@@ -22,7 +22,7 @@ except:
 
 # ######################################################################################################################
 
-_RANCH_CACHE_FOLDER = "I:/ranch/ranch_cache2"
+_RANCH_CACHE_FOLDER = "I:/ranch/ranch_cache3"
 _LOGS_FOLDER = "I:/ranch/logs"
 _MAX_NB_THREADs = 8
 
