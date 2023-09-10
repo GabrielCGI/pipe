@@ -7,7 +7,7 @@ import sys
 import math
 logger = logging.getLogger("CollectFiles")
 #Init variable
-localCacheFolder = "D:/cache"
+localCacheFolder = "D:/RED_COLLECT"
 networkPath = "I:/"
 dirList=[] #List of full directory to copy
 assSequenceDir= []
@@ -132,8 +132,11 @@ def scan():
     allAssFile = listAllAssPath()
     allPath = allMayaFile + allAssFile
     for path in allPath:
-        size = round(os.path.getsize(path)*0.000001, 1)
-        print ("%s: %s MO"%(path,size))
+        try:
+            size = round(os.path.getsize(path)*0.000001, 1)
+            print ("%s: %s MO"%(path,size))
+        except:
+            print ("faile"+path)
 
 def run():
     print("\n")

@@ -1,29 +1,51 @@
 import sys
-import pymel.core as pm
-from . import logic
-import importlib
-importlib.reload(logic)
-from maya import OpenMayaUI as omui
-from PySide2.QtCore import Qt, QStringListModel, QItemSelectionModel
-from PySide2.QtGui import QIntValidator, QDoubleValidator
-from PySide2.QtWidgets import QWidget, QVBoxLayout, QLabel, QLineEdit, QComboBox, QPushButton, QHBoxLayout,QListWidget, QListWidgetItem, QAbstractItemView
 
+from . import logic
+
+import pymel.core as pm
+from maya import OpenMayaUI as omui
+from PySide2.QtCore import Qt, QStringListModel, QItemSelectionModel, QPoint
+from PySide2.QtGui import QIntValidator, QDoubleValidator, QCloseEvent
+from PySide2.QtWidgets import QWidget, QDesktopWidget, QVBoxLayout, QLabel, QLineEdit, QComboBox, QPushButton, QHBoxLayout,QListWidget, QListWidgetItem, QAbstractItemView
+
+from common.utils import *
+from common.Prefs import *
+
+# ######################################################################################################################
+
+_FILE_NAME_PREFS = "zoetrop"
+
+# ######################################################################################################################
 
 
 class CustomUI(QWidget):
     def __init__(self, parent=None):
         super(CustomUI, self).__init__(parent)
+
+        # Common Preferences (common preferences on all tools)
+        self.__common_prefs = Prefs()
+        # Preferences for this tool
+        self.__prefs = Prefs(_FILE_NAME_PREFS)
+
+        self.__ui_updating = False
+
         self.setWindowTitle("Sample UI")
-        self.setWindowFlags(self.windowFlags() | Qt.WindowStaysOnTopHint)
-        self.setGeometry(100, 100,450, 180)
+        self.__ui_width = 450
+        self.__ui_height = 180
+        self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width, self.__ui_height) / 2
+        self.setWindowFlags(Qt.Tool)
+
 
         # Initialize default values
         self.start_loop_val = 100
-        self.end_loop_val = 136
-        self.FPS_maya_val = 24
-        self.FPS_loop_val = 12
+        self.end_loop_val =  136
+        self.FPS_maya_val =  24
+        self.FPS_loop_val =  12
+        self.motion_val = 0
         self.samples_val = 12
 
+        self.retrieve_prefs()
+        self.compute_samples()
 
         # Set main layout
         main_layout = QHBoxLayout()
@@ -66,7 +88,7 @@ class CustomUI(QWidget):
         self.motion_label = QLabel("Motion direction")
         self.motion_combobox = QComboBox()
         self.motion_combobox.addItems(["0", '1', '-1'])
-        self.motion_combobox.setCurrentText("0")
+        self.motion_combobox.setCurrentText(str(self.motion_val))
 
         left_layout.addWidget(self.motion_label)
         left_layout.addWidget(self.motion_combobox)
@@ -74,6 +96,7 @@ class CustomUI(QWidget):
         # Samples
         self.samples_label = QLabel("Anim Samples")
         self.samples_input = QLineEdit(str(self.samples_val))
+        self.samples_input.setReadOnly(True)
         self.samples_input.setValidator(QDoubleValidator())
         left_layout.addWidget(self.samples_label)
         left_layout.addWidget(self.samples_input)
@@ -92,9 +115,14 @@ class CustomUI(QWidget):
         left_layout.addLayout(self.get_button_layout)
 
         # Execute Button
+        self.setup_hierarchy_button = QPushButton("Setup Hierarchy")
+        self.setup_hierarchy_button.clicked.connect(self.setup_hierarchy)
+        left_layout.addWidget(self.setup_hierarchy_button)
+        left_layout.addStretch(1)
+
+        # Execute Button
         self.execute_button = QPushButton("Create Loop")
         self.execute_button.clicked.connect(self.run)
-
         left_layout.addWidget(self.execute_button)
         left_layout.addStretch(1)
 
@@ -134,14 +162,58 @@ class CustomUI(QWidget):
         self.setLayout(main_layout)
 
         # Connect
-        self.start_loop_input.textChanged.connect(self.update_samples)
-        self.end_loop_input.textChanged.connect(self.update_samples)
-        self.FPS_loop_combobox.currentIndexChanged.connect(self.update_samples)
-        self.FPS_maya_combobox.currentIndexChanged.connect(self.update_samples)
+        self.start_loop_input.textChanged.connect(self.update_params)
+        self.end_loop_input.textChanged.connect(self.update_params)
+        self.FPS_loop_combobox.currentIndexChanged.connect(self.update_params)
+        self.FPS_maya_combobox.currentIndexChanged.connect(self.update_params)
+        self.motion_combobox.currentIndexChanged.connect(self.update_params)
         self.zoetrop = logic.Zoetrop(self.get_loop_params())
         self.update_list_widget()
 
+        self.resize(self.__ui_width, self.__ui_height)
+        self.move(self.__ui_pos)
 
+    # Save preferences
+    def save_prefs(self):
+        size = self.size()
+        self.__prefs["window_size"] = {"width": size.width(), "height": size.height()}
+        pos = self.pos()
+        self.__prefs["window_pos"] = {"x": pos.x(), "y": pos.y()}
+
+        self.__prefs["start_loop_val"] = self.start_loop_val
+        self.__prefs["end_loop_val"] = self.end_loop_val
+        self.__prefs["FPS_maya_val"] = self.FPS_maya_val
+        self.__prefs["FPS_loop_val"] = self.FPS_loop_val
+        self.__prefs["motion_val"] = self.motion_val
+
+    # Remove callbacks
+    def hideEvent(self, arg__1: QCloseEvent) -> None:
+        self.save_prefs()
+
+
+    def retrieve_prefs(self):
+        """
+        Retrieve preferences
+        :return:
+        """
+        if "window_pos" in self.__prefs:
+            pos = self.__prefs["window_pos"]
+            self.__ui_pos = QPoint(pos["x"], pos["y"])
+
+        if "start_loop_val" in self.__prefs:
+            self.start_loop_val = self.__prefs["start_loop_val"]
+
+        if "end_loop_val" in self.__prefs:
+            self.end_loop_val = self.__prefs["end_loop_val"]
+
+        if "FPS_maya_val" in self.__prefs:
+            self.FPS_maya_val = self.__prefs["FPS_maya_val"]
+
+        if "FPS_loop_val" in self.__prefs:
+            self.FPS_loop_val = self.__prefs["FPS_loop_val"]
+
+        if "motion_val" in self.__prefs:
+            self.motion_val = self.__prefs["motion_val"]
 
 
     def to_key_clicked(self):
@@ -164,45 +236,80 @@ class CustomUI(QWidget):
             pm.warning("Fail to read alembic attribut on: "+selection)
             return
         print (loop_attributes)
+
         # Update the Start Loop input field
         start_loop_val = loop_attributes.get('data_start_loop')
         if start_loop_val is not None:
-            self.start_loop_input.setText(str(int(start_loop_val)))
+            self.start_loop_val = int(start_loop_val)
+            self.start_loop_input.setText(str(self.start_loop_val))
 
         # Update the End Loop input field
         end_loop_val = loop_attributes.get('data_end_loop')
         if end_loop_val is not None:
-            self.end_loop_input.setText(str(int(end_loop_val)))
+            self.end_loop_val = int(end_loop_val)
+            self.end_loop_input.setText(str(self.end_loop_val))
 
         # Update the FPS Maya combobox
         FPS_maya_val = loop_attributes.get('data_FPS_maya')
         if FPS_maya_val is not None:
-            self.FPS_maya_combobox.setCurrentText(str(int(FPS_maya_val)))
+            self.FPS_maya_val = int(FPS_maya_val)
+            self.FPS_maya_combobox.setCurrentText(str(self.FPS_maya_val))
 
         # Update the FPS Loop combobox
         FPS_loop_val = loop_attributes.get('data_FPS_loop')
         if FPS_loop_val is not None:
-            self.FPS_loop_combobox.setCurrentText(str(int(FPS_loop_val)))
-            print(self.FPS_loop_combobox.currentText())
-        #self.update_samples()
+            self.FPS_loop_val = int(FPS_loop_val)
+            self.FPS_loop_combobox.setCurrentText(str(self.FPS_loop_val))
 
         motion_loop_val = loop_attributes.get('data_motion')
         if motion_loop_val is not None:
-            self.motion_combobox.setCurrentText(str(int(motion_loop_val)))
+            self.motion_val = int(motion_loop_val)
+            self.motion_combobox.setCurrentText(str(self.motion_val))
 
-    def update_samples(self):
-        data = self.get_loop_params()
-        start_loop = data[0]
-        end_loop = data[1]
-        FPS_maya = data[2]
-        FPS_loop = data[3]
-        motion = data[4]
-        samples = FPS_loop * ((end_loop - start_loop)/ FPS_maya)
+
+    def retrieve_loop_params(self):
+        """
+        Retrieve the parameters from inpute fields and combobox (only if the UI isn't updating)
+        """
+        if self.__ui_updating: return
+        start_loop= self.start_loop_input.text()
+        self.start_loop_val = int(start_loop) if len(start_loop)>0 else 0
+        end_loop= self.end_loop_input.text()
+        self.end_loop_val = int(end_loop) if len(end_loop)>0 else 0
+        self.FPS_maya_val = int(self.FPS_maya_combobox.currentText())
+        self.FPS_loop_val = int(self.FPS_loop_combobox.currentText())
+        self.motion_val = int(self.motion_combobox.currentText())
+
+    def update_params(self):
+        """
+        Retrieve the parameters from input fields and combobox, compute the samples then update in the UI
+        """
+        self.retrieve_loop_params()
+        self.compute_samples()
+        self.update_ui_params()
+
+    def update_ui_params(self):
+        """
+        Update the param field UI according to model attribute
+        """
+        self.__ui_updating = True
+        self.start_loop_input.setText(str(self.start_loop_val))
+        self.end_loop_input.setText(str(self.end_loop_val))
+        self.FPS_maya_combobox.setCurrentText(str(self.FPS_maya_val))
+        self.FPS_loop_combobox.setCurrentText(str(self.FPS_loop_val))
+        self.motion_combobox.setCurrentText(str(self.motion_val))
+        self.samples_input.setText(str(self.samples_val))
+        self.__ui_updating = False
+
+    def compute_samples(self):
+        """
+        Compute the samples thanks the other param
+        """
+        samples = self.FPS_loop_val * ((self.end_loop_val - self.start_loop_val)/ self.FPS_maya_val)
         if samples < 0:
-            samples = 0
+            self.samples_val = 0
         else:
-            samples = samples
-        self.samples_input.setText(str(samples))
+            self.samples_val = samples
 
     @staticmethod
     def pretty_display(name, existing_names=None):
@@ -230,7 +337,18 @@ class CustomUI(QWidget):
             if loop_group_name and pm.objExists(loop_group_name):
                 geo_list.append(pm.PyNode(loop_group_name))
 
-        pm.select(geo_list)
+        if len(geo_list)>0:
+            pm.select(geo_list)
+            geo_with_attr = geo_list[0]
+            # ['data_start_loop', 'data_end_loop', 'data_FPS_maya', 'data_FPS_loop', 'data_motion']
+            self.start_loop_val = int(geo_with_attr.getAttr("data_start_loop"))
+            self.end_loop_val = int(geo_with_attr.getAttr("data_end_loop"))
+            self.FPS_maya_val = int(geo_with_attr.getAttr("data_FPS_maya"))
+            self.FPS_loop_val = int(geo_with_attr.getAttr("data_FPS_loop"))
+            self.motion_val = int(geo_with_attr.getAttr("data_motion"))
+            self.compute_samples()
+            self.update_ui_params()
+
 
     def update_list_widget(self):
         # Store the names of currently selected items for later restoration
@@ -253,19 +371,28 @@ class CustomUI(QWidget):
             if item.text() in selected_names_set:
                 item.setSelected(True)
 
+
     def get_loop_params(self):
+        self.retrieve_loop_params()
         return [
-            int(self.start_loop_input.text()),
-            int(self.end_loop_input.text()),
-            int(self.FPS_maya_combobox.currentText()),
-            int(self.FPS_loop_combobox.currentText()),
-            int(self.motion_combobox.currentText())
-        ]
+            self.start_loop_val,
+            self.end_loop_val,
+            self.FPS_maya_val,
+            self.FPS_loop_val,
+            self.motion_val
+            ]
+
+    def setup_hierarchy(self):
+        selection = pm.ls(sl = True)
+        for sl in selection:
+            pm.group(sl, name=sl.name()+'_grp')
+        pm.select(selection)
+
 
     def run(self):
         # Get the current selected object
 
-        data= self.get_loop_params()
+        data=self.get_loop_params()
         self.zoetrop = logic.Zoetrop(data)
         self.zoetrop.create_loop_from_selection()
         self.update_list_widget()

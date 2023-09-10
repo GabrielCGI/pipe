@@ -376,8 +376,10 @@ class Loop():
                 pm.currentTime(frame)
                 frame_name = f"frame_{self.pretty_name}_{frame}"
                 if self.is_aiStandIn:
-                    copy_geo = pm.duplicate(self.geo,  name=frame_name , rr=True, ic=True)[0]
+                    copy_geo = pm.duplicate(self.geo,  name=frame_name , rr=True, un=True)[0]
+
                     self.freezeStandin(copy_geo,frame)
+
                 else:
                     copy_geo = pm.duplicate(self.geo, name=frame_name)[0]
                     Loop.set_inherits_transform_recursively(copy_geo)

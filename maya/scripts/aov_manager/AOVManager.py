@@ -113,7 +113,7 @@ class AOVManager(QDialog):
         # For Aovs Part
         self.__output_denoising = pm.ls("defaultArnoldRenderOptions")[0].outputVarianceAOVs.get() \
             if pm.objExists("defaultArnoldRenderOptions") else False
-        self.__mono_driver = pm.objExists("defaultArnoldDriver") and pm.PyNode("defaultArnoldDriver").halfPrecision.get() == 0
+        self.__mono_driver = 0
         self.__active_aovs = []
         self.__available_aovs = {}
         self.__active_aovs_selected = []
@@ -161,7 +161,7 @@ class AOVManager(QDialog):
         if "window_pos" in self.__prefs:
             pos = self.__prefs["window_pos"]
             self.__ui_pos = QPoint(pos["x"],pos["y"])
-            
+
     def test_arnold_renderer(self):
         """
         Test if Arnold is loaded and display an error message if not

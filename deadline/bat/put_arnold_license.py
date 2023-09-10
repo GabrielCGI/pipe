@@ -202,10 +202,13 @@ try:
         os.system(r"start R:\pipeline\networkInstall\arnold\7.2.1.0\maya2022\bin\ArnoldLicenseManager.exe")
         # Get the coordinates an size of the primary monitor
         info = get_monitor_info()
+        print(info)
         # Set the arnold window to the monitor coordinates
         setup_arnold_manager_window(info)
+        print("setup")
         # Check if arnold has a license
         if not check_valid_license() :
+            print("start")
             # Click on Signin Button
             click_on_signin()
             # Set the chrome window to the primary monitor
