@@ -739,7 +739,10 @@ class RendererDiagnosis(QDialog):
         univ = AiUniverseGetNodeIterator(universe=None, mask=AI_NODE_SHAPE)
         while not AiNodeIteratorFinished(univ):
             node = AiNodeIteratorGetNext(univ)
-            node_name = AiNodeGetName(node)
+            try:
+                node_name = AiNodeGetName(node)
+            except:
+                print("DECODE FAILED ")
             if not node_name: continue
             renderer_diagnosis_dcc = AiNodeGetStr(node, "renderer_diagnosis_dcc")
             is_polymesh_standin = AiNodeIs(node, "polymesh") and len(renderer_diagnosis_dcc) > 0
