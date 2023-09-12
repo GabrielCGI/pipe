@@ -223,7 +223,7 @@ class CollectorCopier:
         list_files = pm.ls(type="file")
         list_images = pm.ls(type="aiImage")
         list_standins = pm.ls(type='aiStandIn')
-        list_refs = pm.ls(references=True)
+        list_refs = [] # DISABELING COPY OF REFERNECE BECAUSE RETRIEVE ALL VERSION OF THE REFERENCE CONFUSED LIKE A UDIM TEXTURES pm.ls(references=True)
         nb_tot = len(list_files) + len(list_images) + len(list_standins) + len(list_refs)
         paths = []
         # FILES
