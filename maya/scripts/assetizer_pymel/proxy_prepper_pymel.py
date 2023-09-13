@@ -37,12 +37,23 @@ def build_var_hiearchy(objs):
     else:
         suffix = "SD"
     asset_name = pm.promptDialog(query=True, text=True)
-    root = pm.createNode("transform", n=asset_name)
-    for obj in objs:
-        var = pm.createNode("transform", n=asset_name+"_"+utils.only_name(obj).replace("_","")+suffix)
-        pm.parent(var, root)
-        pm.parent(obj, var)
-    pm.select(root)
+
+    #if variant already exists, parent to existing transform
+
+    if cmds.objExists(asset_name):
+        for obj in objs:
+            var = pm.createNode("transform", n=asset_name+"_"+utils.only_name(obj).replace("_","")+suffix)
+            pm.parent(obj, var)
+            pm.parent(var, asset_name)
+        pm.select(asset_name)
+
+    else:
+        root = pm.createNode("transform", n=asset_name)
+        for obj in objs:
+            var = pm.createNode("transform", n=asset_name+"_"+utils.only_name(obj).replace("_","")+suffix)
+            pm.parent(var, root)
+            pm.parent(obj, var)
+        pm.select(root)
 
 
 def build_hiearchy(obj):
