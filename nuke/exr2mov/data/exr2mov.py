@@ -16,10 +16,10 @@ try:
             x26xSpeed.setValue("Slower")
         else:
             codec.setValue("libx264")
-            crf = writer.getParam("crf")
-            crf.setValue("Very Low Quality")
-            x26xSpeed = writer.getParam("x26xSpeed")
-            x26xSpeed.setValue("Ultra Fast")
+            #crf = writer.getParam("crf")
+            #crf.setValue("Very Low Quality")
+            #x26xSpeed = writer.getParam("x26xSpeed")
+            #x26xSpeed.setValue("Ultra Fast")
 
     premult = writer.getParam("inputPremult")
     premult.setValue(2)
