@@ -1,0 +1,56 @@
+import pymel.core as pm
+import maya.cmds as cmds
+
+def write_ass(path=""):
+    cmds.file(path, 
+              force=True, 
+              options="-shadowLinks 0;-mask 6201;-lightLinks 0;-boundingBox;-fullPath", 
+              type="ASS Export", 
+              exportSelected=True)
+
+def export_selection():
+    # Get the selected objects
+    selected_objects = pm.selected()
+    
+    if selected_objects:
+        # Create the folder path
+        folder_path = "I:/swaNY_2308/shots/shot140/assets"
+        
+        for obj in selected_objects:
+            # Get the name and parent of the current object
+            obj_name = obj.nodeName()
+            original_parent = pm.listRelatives(obj, parent=True)
+            
+            # Parent the object to the world
+            pm.parent(obj, world=True)
+            
+            # Create the file paths for .ass and .ma files
+            ass_file_path = f"{folder_path}/{obj_name}.ass"
+            ma_file_path = f"{folder_path}/{obj_name}.ma"
+            
+            # Select the current object
+            pm.select(obj)
+            
+            # Export .ass file
+            write_ass(ass_file_path)
+            
+            # Export .ma file
+            cmds.file(ma_file_path, force=True, options="v=0;", type="mayaAscii", exportSelected=True)
+            
+            # Delete the original object
+            pm.delete(obj)
+            
+            # Create a new stand-in node and set its file path to the exported .ass file
+            standin_node = pm.createNode('aiStandIn')
+            standin_transform = pm.listRelatives(standin_node, parent=True)[0]
+            standin_transform.rename(obj_name)
+            standin_node.attr('dso').set(ass_file_path)
+            
+            # Reparent the stand-in to its original parent
+            if original_parent:
+                pm.parent(standin_transform, original_parent[0])
+    else:
+        print("No objects selected. Please select at least one object.")
+
+# Execute the function
+export_selection()

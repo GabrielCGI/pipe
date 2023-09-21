@@ -1,0 +1,32 @@
+import pymel.core as pm
+
+def combine_objects_with_same_shading_group():
+    # Step 1: Get all shading groups in the scene
+    all_shading_groups = pm.ls(type='shadingEngine')
+    
+    for shading_group in all_shading_groups:
+        # Step 2: Get all objects connected to this shading group
+        objects_in_shading_group = pm.sets(shading_group, q=True)
+        
+        if not objects_in_shading_group:
+            pm.warning(f"No objects found in shading group: {shading_group}")
+            continue
+
+        # Filter out objects that can't be combined (like lights, etc.)
+        mesh_objects_in_shading_group = [obj for obj in objects_in_shading_group if pm.nodeType(obj) == 'mesh']
+
+        if len(mesh_objects_in_shading_group) <= 1:
+            pm.warning(f"Not enough mesh objects to combine in shading group: {shading_group}")
+            continue
+
+        # Step 3: Combine all mesh objects in this shading group
+        combined_object = pm.polyUnite(mesh_objects_in_shading_group, ch=False)[0]
+        
+        # Step 4: Rename the combined object based on the shading group name
+        pm.rename(combined_object, f"{shading_group}_combined")
+
+        # Print message to confirm the operation
+        pm.warning(f"All objects in shading group '{shading_group}' have been combined into '{shading_group}_combined'")
+
+# Run the function
+combine_objects_with_same_shading_group()

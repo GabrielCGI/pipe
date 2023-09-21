@@ -1,4 +1,4 @@
-echo off
+@echo off
 
 set input_file=%~1
 set output_file=%~2
@@ -14,5 +14,12 @@ echo Command: %command%
 set natron_path=R:\pipeline\networkInstall\natron\2.5.0\Natron\bin\NatronRenderer.exe
 set script_path=R:\pipeline\pipe\nuke\exr2mov\data\exr2mov.py
 
-echo Starting Natron Renderer...
-"%natron_path%" "%script_path%" -c %command% -w MyWriter %range%
+IF EXIST %output_file% (
+    echo MOV file already found, skipping Natron Renderer...
+) ELSE (
+    echo Starting Natron Renderer...
+    "%natron_path%" "%script_path%" -c %command% -w MyWriter %range%
+)
+
+
+

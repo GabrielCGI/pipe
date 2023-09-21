@@ -252,7 +252,7 @@ class AOVManager(QDialog):
         :return: lights
         """
         return [light for light in pm.ls(type=["light"] + pm.listNodeTypes("light"), dag=True) if
-                light.type() not in ["aiLightDecay","aiGobo","aiLightBlocker","lightEditor","lightItem"]]
+                light.type() not in ["aiLightDecay","aiGobo","aiLightBlocker","lightEditor","lightItem","ambientLight"]]
 
     @staticmethod
     def __check_name_light_group(name):

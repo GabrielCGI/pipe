@@ -1,0 +1,42 @@
+import pymel.core as pm
+
+def merge_objects_with_same_material_to_unique_shading_group():
+    # Step 1: Get all materials in the scene
+    all_materials = pm.ls(mat=True)
+    
+    for material in all_materials:
+        # Step 2: Get the shading groups associated with the current material
+        shading_groups = pm.listConnections(material, type='shadingEngine')
+        
+        if not shading_groups:
+            pm.warning("No shading groups found for material: {}".format(material))
+            continue
+        
+        # Step 3: Get all objects connected to these shading groups
+        objects_with_material = []
+        for sg in shading_groups:
+            objects_with_material.extend(pm.sets(sg, q=True) or [])
+        
+        if not objects_with_material:
+            pm.warning("No objects found with material: {}".format(material))
+            continue
+        
+        # Step 4: Create a new shading group
+        unique_shading_group_name = f"{material}_uniqueSG"
+        unique_shading_group = pm.sets(renderable=True, noSurfaceShader=True, empty=True, name=unique_shading_group_name)
+        
+        # Step 5: Connect the material to the new shading group
+        pm.connectAttr(f'{material}.outColor', f'{unique_shading_group_name}.surfaceShader', force=True)
+        
+        # Step 6: Connect all objects to the unique shading group
+        pm.sets(unique_shading_group, forceElement=objects_with_material)
+        
+        # Step 7: Delete the old shading groups
+        for sg in shading_groups:
+            pm.delete(sg)
+        
+        # Print message to confirm the operation
+        pm.warning(f"All objects with material '{material}' have been merged to the shading group '{unique_shading_group}'")
+
+# Run the function
+merge_objects_with_same_material_to_unique_shading_group()
