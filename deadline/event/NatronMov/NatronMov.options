@@ -1,0 +1,12 @@
+[InputPattern]
+Type=Filename
+Label=Input pattern
+Description=Full file path for first frame of the sequence to denoise. 
+Required=True
+
+
+[OutputPattern]
+Type=FilenameSave
+Label=Output pattern
+Description=Full file path for the first frame of output.
+Required=True

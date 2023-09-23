@@ -1,0 +1,21 @@
+[About]
+Type=label
+Label=About
+Category=About Plugin
+CategoryOrder=-1
+Default=NatronMov
+Description=Not configurable
+
+[ConcurrentTasks]
+Type=label
+Label=ConcurrentTasks
+Category=About Plugin
+CategoryOrder=-1
+Default=True
+Description=Not configurable
+
+[NatronRenderExecutable]
+Type=filename
+Label=Natron Render Executable
+Default=R:\pipeline\pipe\nuke\exr2mov\data\exr2mov.bat
+Description=The path to the executable file used for rendering.
