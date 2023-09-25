@@ -211,10 +211,13 @@ class LookStandin(ABC):
         # Find default look
         look_default = ""
         for f in reversed(os.listdir(looks_main_dir)):
+
             filepath = os.path.join(looks_main_dir, f).replace("\\", "/")
+
             match = re.match(r"^" + self._standin_name + suffix_operator + r"\.v[0-9]{3}\.ass$", f)
             if os.path.isfile(filepath) and match:
                 look_default = filepath
+
                 break
         # If default is not found then stop the function (valid is False)
         if look_default is None:

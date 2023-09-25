@@ -45,7 +45,7 @@ def maya_main_window():
 
 
 #current_project="D:/gabriel/assetizer"
-project_list = ["I:/swaChristmas_2023","I:/swaNY_2308","I:/swaDisney_2307","D:/"]
+project_list = ["I:/swaChristmas_2023","I:/swaNY_2308","I:/swaDisney_2307","D:/","I:/swaAlice_2309"]
 AddIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\_AddIcon.png"
 BackIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\_BackIcon.png"
 FolderIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\_FolderIcon.png"
@@ -436,7 +436,7 @@ class AssetBrowser(QtWidgets.QDialog):
         filtered_departement_file_list =   fnmatch.filter(self.departement_file_list, pattern)
         parent_dir = self.package.dir
         self.second_Qlist.clear()
-        for dir_name in filtered_departement_dir_list: 
+        for dir_name in filtered_departement_dir_list:
 
             item = QtWidgets.QListWidgetItem()
             item.setText(dir_name)
@@ -685,7 +685,7 @@ class AssetBrowser(QtWidgets.QDialog):
         else:
             testName = package + '_' + second
 
-        
+
         #get directory path of selected file
         current = self.third_Qlist.currentItem().data(QtCore.Qt.UserRole)
         directory = os.path.dirname(current)
@@ -745,7 +745,7 @@ class SaveAsPopup(QtWidgets.QDialog):
         self.gridLayout.addWidget(self._cancelB, 2, 1)
 
         self._lineName.setText(scene_name)
-        self._radioMA.setChecked(True)
+        self._radioMB.setChecked(True)
 
         self._confirmSaveB.clicked.connect(self.saveAs)
         self._cancelB.clicked.connect(self.cancel)
@@ -760,7 +760,7 @@ class SaveAsPopup(QtWidgets.QDialog):
             sceneType = "mayaBinary"
             ext = ".mb"
 
-        
+
         sceneName = os.path.join(self.directory,self._lineName.text()) + ext
 
         cmds.file(rename=sceneName)
@@ -785,7 +785,7 @@ class ScreenCaptureTool(QtWidgets.QWidget):
         self.setWindowOpacity(0.5)
         self.showMaximized()
         self.escape_pressed = False  # Ajoutez une nouvelle variable d'état pour suivre si "Échap" a été pressé
-        self.setCursor(QtGui.Qt.CrossCursor) 
+        self.setCursor(QtGui.Qt.CrossCursor)
         #hide asset browser
         globalself.hideWindow()
 
@@ -816,7 +816,7 @@ class ScreenCaptureTool(QtWidgets.QWidget):
 
         screen = QtWidgets.QApplication.primaryScreen()
         screenshot = screen.grabWindow(0, rect.x(), rect.y(), rect.width(), rect.height())
-        
+
 
         #backup old preview
         if os.path.exists(self.save_path+'\\preview.png'):

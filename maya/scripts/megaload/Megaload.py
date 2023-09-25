@@ -28,7 +28,7 @@ class MegascanAsset:
 		return self._type
 
 
-def build_shader(asset, maps):
+def build_shader_3dmodel(asset, maps):
 	shading_group = pm.sets(renderable=True, noSurfaceShader=True, empty=True, name=asset.name + "_SG")
 	shader = pm.shadingNode("aiStandardSurface", asShader=True, name=asset.name+"_shader")
 	place2dTexture = pm.shadingNode("place2dTexture", asUtility=True)
@@ -36,8 +36,8 @@ def build_shader(asset, maps):
 	shader.outColor >> shading_group.surfaceShader
 
 	if "Color" in maps:
-		color_node = pm.shadingNode("file", asUtility=True)
-		aiColor_node = pm.shadingNode("aiColorCorrect", asUtility=True)
+		color_node = pm.shadingNode("file", asUtility=True, name=asset.name + "_Color")
+		aiColor_node = pm.shadingNode("aiColorCorrect", asUtility=True, name=asset.name + "_aiColor")
 		color_node.fileTextureName.set(maps["Color"])
 
 		place2dTexture.outUV >> color_node.uvCoord
@@ -45,10 +45,10 @@ def build_shader(asset, maps):
 		aiColor_node.outColor >> shader.baseColor
 
 
-	if "SpecRoughness" in maps:
-		rough_node = pm.shadingNode("file", asUtility=True)
-		remap_node = pm.shadingNode("remapValue", asUtility=True)
-		rough_node.fileTextureName.set(maps["SpecRoughness"])
+	if "Roughness" in maps:
+		rough_node = pm.shadingNode("file", asUtility=True, name=asset.name + "_rough")
+		remap_node = pm.shadingNode("remapValue", asUtility=True, name=asset.name + "_remap")
+		rough_node.fileTextureName.set(maps["Roughness"])
 
 		place2dTexture.outUV >> rough_node.uvCoord
 		rough_node.outColorR >> remap_node.inputValue
@@ -56,7 +56,7 @@ def build_shader(asset, maps):
 
 
 	if "Metalness" in maps:
-		metal_node = pm.shadingNode("file", asUtility=True)
+		metal_node = pm.shadingNode("file", asUtility=True, name=asset.name + "_metal")
 		metal_node.fileTextureName.set(maps["Metalness"])
 
 		place2dTexture.outUV >> metal_node.uvCoord
@@ -64,8 +64,8 @@ def build_shader(asset, maps):
 
 
 	if "Normal" in maps:
-		normal_node = pm.shadingNode("file", asUtility=True)
-		aiNormal_node = pm.shadingNode("aiNormalMap", asUtility=True)
+		normal_node = pm.shadingNode("file", asUtility=True, name=asset.name + "_normal")
+		aiNormal_node = pm.shadingNode("aiNormalMap", asUtility=True, name=asset.name + "_aiNormal")
 		normal_node.fileTextureName.set(maps["Normal"])
 
 		place2dTexture.outUV >> normal_node.uvCoord
@@ -74,13 +74,71 @@ def build_shader(asset, maps):
 
 
 	if "Diplace" in maps:
-		displace_node = pm.shadingNode("file", asUtility=True)
-		dispShader_node = pm.shadingNode("displacementShader", asUtility=True)
+		displace_node = pm.shadingNode("file", asUtility=True, name=asset.name + "_displace")
+		dispShader_node = pm.shadingNode("displacementShader", asUtility=True, name=asset.name + "_dispShader")
 		displace_node.fileTextureName.set(maps["Diplace"])
 
 		place2dTexture.outUV >> displace_node.uvCoord
 		displace_node.outColorR >> dispShader_node.displacement
 		dispShader_node.displacement >> shading_group.displacementShader
+
+	return shading_group
+
+def build_shader_3dplant(asset, maps):
+	shading_group = pm.sets(renderable=True, noSurfaceShader=True, empty=True, name=asset.name + "_SG")
+	shader = pm.shadingNode("standardSurface", asShader=True, name=asset.name+"_shader")
+	place2dTexture = pm.shadingNode("place2dTexture", asUtility=True)
+
+	pm.setAttr(shader + ".thinWalled", 1)
+	pm.setAttr(shader + ".subsurface", 0.5)
+
+	shader.outColor >> shading_group.surfaceShader
+
+	if "Color" in maps:
+		color_node = pm.shadingNode("file", asUtility=True, name=asset.name + "_color")
+		color_node.fileTextureName.set(maps["Color"])
+
+		place2dTexture.outUV >> color_node.uvCoord
+		color_node.outColor >> shader.baseColor
+
+
+	if "Roughness" in maps:
+		rough_node = pm.shadingNode("file", asUtility=True, name=asset.name + "_rough")
+		range_node = pm.shadingNode("aiRange", asUtility=True, name=asset.name + "_range")
+		rough_node.fileTextureName.set(maps["Roughness"])
+
+		place2dTexture.outUV >> rough_node.uvCoord
+		rough_node.outColor >> range_node.input
+		range_node.outColorR >> shader.specularRoughness
+
+
+	if "Translucency" in maps:
+		trans_node = pm.shadingNode("file", asUtility=True, name=asset.name + "_trans")
+		aiTrans_node = pm.shadingNode("aiAdd", asUtility=True, name=asset.name + "_aiTrans")
+		trans_node.fileTextureName.set(maps["Translucency"])
+
+		place2dTexture.outUV >> trans_node.uvCoord
+		color_node.outColor >> aiTrans_node.input1
+		trans_node.outColor >> aiTrans_node.input2
+		aiTrans_node.outColor >> shader.subsurfaceColor
+
+
+	if "Opacity" in maps:
+		opac_node = pm.shadingNode("file", asUtility=True, name=asset.name + "_opac")
+		opac_node.fileTextureName.set(maps["Opacity"])
+
+		place2dTexture.outUV >> opac_node.uvCoord
+		opac_node.outColor >> shader.opacity
+
+
+	if "Normal" in maps:
+		normal_node = pm.shadingNode("file", asUtility=True, name=asset.name + "_normal")
+		aiNormal_node = pm.shadingNode("aiNormalMap", asUtility=True, name=asset.name + "_aiNormal")
+		normal_node.fileTextureName.set(maps["Normal"])
+
+		place2dTexture.outUV >> normal_node.uvCoord
+		normal_node.outColor >> aiNormal_node.input
+		aiNormal_node.outValue >> shader.normalCamera
 
 	return shading_group
 
@@ -90,26 +148,26 @@ def scan_map(texture,asset_directory):
 		if texture in filename and (filename.endswith('.exr') or filename.endswith('.jpg')):
 			return asset_directory + "\\" + filename
 
-def cleaned_maps(matching_files):
+def clean_empty_value(matching_files):
 	# If a map value is empty, delete the map in dict
 	for file in [texture for texture, file in matching_files.items() if not file]:
 		del matching_files[file]
 	return matching_files
 
 
-def retrieve_maps_3dmodel(asset):
+def retrieve_maps(asset):
 	
 	asset_directory = asset.path
 
 	matching_files = {}
 
 	matching_files["Color"] = 			scan_map("_Albedo", asset_directory)
-	matching_files["SpecRoughness"] = 	scan_map("_Roughness", asset_directory)
+	matching_files["Roughness"] = 		scan_map("_Roughness", asset_directory)
 	matching_files["Metalness"] = 		scan_map("_Metalness", asset_directory)
 	matching_files["Normal"] = 			scan_map("_Normal", asset_directory)
 	matching_files["Diplace"] = 		scan_map("_Displacement", asset_directory)
 
-	return cleaned_maps(matching_files)
+	return clean_empty_value(matching_files)
 
 def retrieve_maps_3dplant(asset):
 	
@@ -118,27 +176,14 @@ def retrieve_maps_3dplant(asset):
 	matching_files = {}
 
 	matching_files["Color"] = 			scan_map("_Albedo", asset_directory)
+	matching_files["Roughness"] = 		scan_map("_Roughness", asset_directory)
+	matching_files["Translucency"] = 	scan_map("_Translucency", asset_directory)
+	matching_files["Opacity"] = 		scan_map("_Opacity", asset_directory)
+	matching_files["Normal"] = 			scan_map("_Normal", asset_directory)
 
-	return cleaned_maps(matching_files)
+	return clean_empty_value(matching_files)
 
-def retrieve_maps_surface():
-	pass
-
-
-def retrive_maps(asset):
-	if asset.type == "3dmodel":
-		maps = retrieve_maps_3dmodel(asset)
-		return maps
-
-	if asset.type == "3dplant":
-		maps = retrieve_maps_3dplant(asset)
-		return maps
-
-	if asset.type == "surface":
-		maps = retrieve_maps_surface(asset)
-		return maps
-
-
+'''
 def load_object(name, direc, shading_group):
 	#get objs in scene before import
 	objs_before = set(pm.ls(dag=True, long=True))
@@ -160,23 +205,51 @@ def load_object(name, direc, shading_group):
 				pm.select(obj)
 				pm.hyperShade(assign=shading_group)
 
+'''
+
+def load_object(pattern, direc, shading_group):
+	objs_before = set(pm.ls(dag=True, long=True))
+	fbx_files = [f for f in os.listdir(direc) if f.startswith(pattern) and f.endswith('.fbx')]
+
+	if fbx_files:
+		pm.importFile(os.path.join(direc, fbx_files[0]))
+	new_objs = set(pm.ls(dag=True, long=True)) - objs_before
+
+	for obj in new_objs:
+		if pm.objectType(obj) == "transform":
+			pm.rename(obj, pattern)
+			pm.select(obj)
+			pm.hyperShade(assign=shading_group)
 
 
-def run(directory):
-	asset = MegascanAsset(directory)
-	maps = retrive_maps(asset)
-	shading_group = build_shader(asset, maps)
 
+def shading_process(asset):
 	if asset.type == "3dmodel":
+		maps = retrieve_maps(asset)
+		shading_group = build_shader_3dmodel(asset, maps)
+
 		load_object(asset.name, asset.path, shading_group)
 
-	elif asset.type == "3dplant":
-		all_subdir = [d for d in os.listdir(asset.path) if os.path.isdir(os.path.join(asset.path, d))]
+	if asset.type == "3dplant":
+		maps = retrieve_maps_3dplant(asset)
+		shading_group = build_shader_3dplant(asset, maps)
 
+		#all_subdir = [d for d in os.listdir(asset.path) if os.path.isdir(os.path.join(asset.path, d))]
+		all_subdir = os.listdir(asset.path)
 		for subdir in all_subdir:
 			if subdir.startswith("Var"):
 				folderpath = os.path.join(asset.path, subdir)
 				load_object("Var",folderpath,shading_group)
+
+	if asset.type == "surface":
+		maps = retrieve_maps(asset)
+		shading_group = build_shader_3dmodel(asset, maps)
+
+
+
+def run(directory):
+	asset = MegascanAsset(directory)
+	shading_process(asset)
 
 
 run(directory)
