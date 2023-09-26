@@ -5,10 +5,11 @@ from PySide2.QtGui import QIcon, QPixmap
 from PySide2.QtCore import Qt
 from maya import OpenMayaUI as omui
 from shiboken2 import wrapInstance
-from megaload import megaload_loader
+from megaload import megaload_loader1
 import importlib
-importlib.reload(megaload_loader)
+importlib.reload(megaload_loader1)
 
+print("dev")
 FolderIcon = r"R:\pipeline\pipe\maya\scripts\megaload\_FolderIcon.png"
 EmptyImg = r"R:\pipeline\pipe\maya\scripts\megaload\preview_exemple.png"
 
@@ -86,4 +87,4 @@ class Megaload(QDialog):
     def run_loader(self):
         directory = self.path_edit.text()
         if os.path.exists(directory):
-            megaload_loader.run_loader(directory)
+            megaload_loader1.run_loader(directory)

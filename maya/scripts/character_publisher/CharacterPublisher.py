@@ -548,6 +548,7 @@ class CharacterPublisher(QDialog):
             casts_shadows = m.castsShadows.get()
             cat_clark_type = m.aiSubdivType.get()
             cat_clark_subdiv = m.aiSubdivIterations.get()
+            traceSets= m.aiTraceSets.get()
             if cat_clark_type > 0 and cat_clark_subdiv > 0:
                 pm.setAttr(set_shader + ".assignment[3]", "subdiv_type='catclark'", type="string")
                 pm.setAttr(set_shader + ".assignment[4]", "subdiv_iterations=%s" % (cat_clark_subdiv), type="string")
@@ -558,6 +559,8 @@ class CharacterPublisher(QDialog):
                 pm.setAttr(set_shader + ".assignment[6]", "visibility=253", type="string")
             if ai_disp_height != 1:
                 pm.setAttr(set_shader + ".assignment[7]", "disp_height=%s" % (ai_disp_height), type="string")
+            if traceSets:
+                pm.setAttr(set_shader+".assignment[8]","trace_sets='%s'"%(traceSets), type="string")
         return shaders_used
 
     def __export_arnold_graph(self, standin, shaders_used):
