@@ -24,6 +24,7 @@ from .AOV import *
 from .AOVBehavior import *
 from common.Prefs import *
 
+
 ########################################################################################################################
 
 _FILE_NAME_PREFS = "aov_manager"
@@ -236,9 +237,11 @@ class AOVManager(QDialog):
 
         half_driver.exrCompression.set(9)
         half_driver.mergeAOVs.set(1)
-        full_driver.multipart.set(0)
-        half_driver.multipart.set(0)
-        half_driver.halfPrecision.set(0 if self.__mono_driver else 1)
+        half_driver.halfPrecision.set(1)
+
+        full_driver.multipart.set(0 if self.__output_denoising else 1)
+        half_driver.multipart.set(0 if self.__output_denoising else 1)
+
 
         if pm.objExists("defaultRenderGlobals"):
             pm.ls("defaultRenderGlobals")[0].imageFilePrefix.set("<RenderLayer>/<Scene>/<Scene>")
@@ -369,12 +372,12 @@ class AOVManager(QDialog):
         aovs_lyt.addLayout(lyt_cb)
 
         # Widget ML.1.2.1 : Output Denoising
-        output_denoising_cb = QCheckBox("Output Denoising")
-        output_denoising_cb.setChecked(self.__output_denoising)
-        output_denoising_cb.stateChanged.connect(self.__on_output_denoising_changed)
-        lyt_cb.addWidget(output_denoising_cb)
+        self.output_denoising_cb = QCheckBox("Output Denoising")
+        self.output_denoising_cb.setChecked(self.__output_denoising)
+        self.output_denoising_cb.stateChanged.connect(self.__on_output_denoising_changed)
+        lyt_cb.addWidget(self.output_denoising_cb)
 
-        # Widget ML.1.2.2 : Output Denoising
+        # Widget ML.1.2.2 : Mono Driver
         mono_driver_cb = QCheckBox("Mono Driver")
         mono_driver_cb.setChecked(self.__mono_driver)
         mono_driver_cb.stateChanged.connect(self.__on_mono_driver_changed)

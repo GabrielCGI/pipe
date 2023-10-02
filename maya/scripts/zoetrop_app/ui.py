@@ -124,13 +124,19 @@ class CustomUI(QWidget):
         self.setup_hierarchy_button = QPushButton("Setup Hierarchy")
         self.setup_hierarchy_button.clicked.connect(self.setup_hierarchy)
         left_layout.addWidget(self.setup_hierarchy_button)
-        left_layout.addStretch(1)
+
+
 
         # Execute Button
         self.execute_button = QPushButton("Create Loop")
         self.execute_button.clicked.connect(self.run)
         left_layout.addWidget(self.execute_button)
         left_layout.addStretch(1)
+
+        #Clean expression
+        self.freeze_button = QPushButton("Freeze all loops (f100)")
+        self.freeze_button.clicked.connect(self.freeze_clicked)
+        left_layout.addWidget(self.freeze_button)
 
 
         self.hide_rig_button = QPushButton("Hide rig")
@@ -221,7 +227,15 @@ class CustomUI(QWidget):
         if "motion_val" in self.__prefs:
             self.motion_val = self.__prefs["motion_val"]
 
+    def freeze_clicked(self):
 
+
+        # Set the current frame to 100
+        pm.currentTime(100)
+
+        for transform in pm.ls('LOOP*', type='transform'):
+            if transform.ry.isConnected():
+                transform.ry.disconnect()
     def to_key_clicked(self):
         selection = pm.selected()
         if not selection:

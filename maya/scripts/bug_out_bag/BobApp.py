@@ -35,6 +35,7 @@ from .tool_instances.ShadingGroupRenamerTool import *
 from .tool_instances.HierarchyCheckTool import *
 from .tool_instances.CharacterTimeSetTool import *
 from .tool_instances.TraceSetTool import *
+from .tool_instances.SelectBigObject import *
 
 # ######################################################################################################################
 
@@ -65,7 +66,8 @@ class BobApp(QDialog):
                 UVCopierTool(),
                 SplineStepTool(),
                 CharacterTimeSetTool(),
-                TraceSetTool()
+                TraceSetTool(),
+                SelectBigObject()
             ]),
             BobCategory("Clean", self.__prefs, [
                 CleanFreezeTool(),

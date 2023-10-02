@@ -14,7 +14,6 @@ importlib.reload(assetBrowser)
 _FILE_NAME_PREFS = "asset_browser"
 
 # ######################################################################################################################
-
 import os
 import json
 from maya import OpenMaya
@@ -46,7 +45,12 @@ def maya_main_window():
 
 
 #current_project="D:/gabriel/assetizer"
-project_list = ["I:/swaChristmas_2023","I:/swaNY_2308","I:/swaDisney_2307","D:/"]
+project_list = ["I:/swaChristmas_2023","I:/swaNY_2308","I:/swaDisney_2307","D:/","I:/swaAlice_2309"]
+AddIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_AddIcon.png"
+BackIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_BackIcon.png"
+FolderIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_FolderIcon.png"
+LinkIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_LinkIcon.png"
+ScreenIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_ScreenIcon.png"
 
 empty_scene = ""
 
@@ -135,16 +139,19 @@ class Package():
         self.shading_scene = None
 
 
-
 class AssetBrowser(QtWidgets.QDialog):
     def __init__(self, parent=maya_main_window()):
         super(AssetBrowser, self).__init__(parent)
         self.qtSignal = QtCore.Signal()
 
+        global globalself
+        globalself = self
+
         #################################################################
     def create(self):
         self.setWindowTitle("AssetBrowser")
-        self.setWindowFlags(QtCore.Qt.Tool)
+        self.setWindowFlags(QtCore.Qt.Window)
+
         self.resize(950, 400) # re-size the window
 
 
@@ -160,6 +167,7 @@ class AssetBrowser(QtWidgets.QDialog):
         self.header_fileLayout = QtWidgets.QHBoxLayout(self)
 
         #WIDGET BUTTONS
+        self.package_info_layout =  QtWidgets.QHBoxLayout(self)
         self.buttons_layout =  QtWidgets.QHBoxLayout(self)
         self.buttons_left_layout = QtWidgets.QVBoxLayout(self)
         self.buttons_right_layout = QtWidgets.QVBoxLayout(self)
@@ -173,16 +181,18 @@ class AssetBrowser(QtWidgets.QDialog):
         self.button_mode_shot.setMaximumWidth(130)
 
         #Add New item buttons
-        self.button_add_new = QtWidgets.QPushButton("+")
+        self.button_add_new = QtWidgets.QPushButton("")
         self.button_add_new.setMaximumWidth(25)
+        self.button_add_new.setIcon(QtGui.QIcon(AddIcon))
 
         #Current prod:
         self.comboBox_current_prod = QtWidgets.QComboBox()
         self.comboBox_current_prod.addItems(project_list)
         #Add Last Modified sort checkbox
         self.sort_by_last_checkbox = QtWidgets.QCheckBox("Sort by last modified")
-        self.button_return_previous = QtWidgets.QPushButton("<")
+        self.button_return_previous = QtWidgets.QPushButton("")
         self.button_return_previous.setMaximumWidth(25)
+        self.button_return_previous.setIcon(QtGui.QIcon(BackIcon))
 
         # WIDGET LIST
         self.package_Qlist = QtWidgets.QListWidget()
@@ -194,6 +204,7 @@ class AssetBrowser(QtWidgets.QDialog):
         self.second_Qlist.setMaximumWidth(220)
         self.second_Qlist.setMinimumWidth(160)
 
+        self.dirText = QtWidgets.QLabel("")
         self.third_Qlist = QtWidgets.QListWidget()
         self.third_Qlist.setMinimumWidth(220)
 
@@ -207,12 +218,17 @@ class AssetBrowser(QtWidgets.QDialog):
 
 
 
-        self.display_label = QtWidgets.QLabel("Asset:")
+        self.open_scene = QtWidgets.QPushButton("Open scene")
+        self.save_button = QtWidgets.QPushButton("Save here")
         self.import_button = QtWidgets.QPushButton("Import")
         self.reference_button = QtWidgets.QPushButton("Reference")
-        self.open_folder = QtWidgets.QPushButton("Open folder")
-        self.open_scene = QtWidgets.QPushButton("Open scene")
-        self.copy_path = QtWidgets.QPushButton("Copy path")
+
+        self.open_folder = QtWidgets.QPushButton("")
+        self.copy_path = QtWidgets.QPushButton("")
+        self.screenshotB = QtWidgets.QPushButton("")
+        self.open_folder.setMaximumWidth(25)
+        self.copy_path.setMaximumWidth(25)
+        self.screenshotB.setMaximumWidth(25)
 
         #DISPLAY IMAGE
 
@@ -237,6 +253,7 @@ class AssetBrowser(QtWidgets.QDialog):
 
         self.fileLayout.addLayout(self.header_fileLayout)
 
+        self.fileLayout.addWidget(self.dirText)
         self.fileLayout.addWidget(self.third_Qlist)
 
         self.comboLayout.addLayout(self.packageLayout)
@@ -246,19 +263,24 @@ class AssetBrowser(QtWidgets.QDialog):
 
 
         self.rightLayout.addWidget(self.label)
-        self.rightLayout.addWidget(self.package_infos_label)
         self.rightLayout.addStretch()
+        self.rightLayout.addLayout(self.package_info_layout)
         self.rightLayout.addLayout(self.buttons_layout)
 
+        self.mainLayout.addLayout(self.topLayout)
+        self.mainLayout.addLayout(self.bodyLayout)
 
+###################################################################################buttons
 
-        self.buttons_left_layout.addStretch()
-        self.buttons_left_layout.addWidget(self.import_button)
-        self.buttons_left_layout.addWidget(self.reference_button)
+        self.package_info_layout.addWidget(self.package_infos_label)
+        self.package_info_layout.addWidget(self.open_folder)
+        self.package_info_layout.addWidget(self.copy_path)
+        self.package_info_layout.addWidget(self.screenshotB)
+
+        self.buttons_left_layout.addWidget(self.save_button)
         self.buttons_left_layout.addWidget(self.open_scene)
-        self.buttons_right_layout.addStretch()
-        self.buttons_right_layout.addWidget(self.open_folder)
-        self.buttons_right_layout.addWidget(self.copy_path)
+        self.buttons_right_layout.addWidget(self.reference_button)
+        self.buttons_right_layout.addWidget(self.import_button)
 
 
         self.buttons_layout.addLayout(self.buttons_left_layout)
@@ -271,11 +293,12 @@ class AssetBrowser(QtWidgets.QDialog):
         self.topLayout.addWidget(self.button_mode_shot)
         self.topLayout.addWidget(self.button_add_new)
         self.topLayout.addWidget(self.comboBox_current_prod)
-        #self.topLayout.addWidget(self.sort_by_last_checkbox)
-        #self.topLayout.addWidget(self.filter_text)
+
         self.topLayout.addStretch()
-        self.mainLayout.addLayout(self.topLayout)
-        self.mainLayout.addLayout(self.bodyLayout)
+
+        self.open_folder.setIcon(QtGui.QIcon(FolderIcon))
+        self.copy_path.setIcon(QtGui.QIcon(LinkIcon))
+        self.screenshotB.setIcon(QtGui.QIcon(ScreenIcon))
 
         #OPEN BY DEFAULT AS ASSET BROWSER
         if "current_project" in asset_browser_prefs:
@@ -298,7 +321,11 @@ class AssetBrowser(QtWidgets.QDialog):
         #self.package_Qlist_changed()
 
         #CONNECT WIDGET
+
+        self.screenshotB.clicked.connect(self.screenshotB_clicked)
+
         self.import_button.clicked.connect(self.import_clicked)
+        self.save_button.clicked.connect(self.save_clicked)
         self.open_folder.clicked.connect(self.open_folder_clicked)
         self.open_scene.clicked.connect(self.open_scene_clicked)
         self.copy_path.clicked.connect(self.copy_path_clicked)
@@ -317,11 +344,13 @@ class AssetBrowser(QtWidgets.QDialog):
 
         self.reference_button.clicked.connect(self.reference_clicked)
         self.package_Qlist.itemSelectionChanged.connect(self.package_Qlist_changed)
+        self.package_Qlist.itemSelectionChanged.connect(self.screenB_enability)
         self.second_Qlist.itemSelectionChanged.connect(self.second_Qlist_changed)
         self.third_Qlist.itemClicked.connect(self.third_Qlist_changed)
         self.third_Qlist.itemDoubleClicked.connect(self.enter_directory)
 
         self.rebuild_package_list()
+
 
 
     ##############QLIST CHANGED ##############
@@ -350,6 +379,7 @@ class AssetBrowser(QtWidgets.QDialog):
 
             self.rebuild_image()
 
+        
 
     def second_Qlist_changed(self):
         current_item = self.second_Qlist.currentItem()
@@ -409,6 +439,7 @@ class AssetBrowser(QtWidgets.QDialog):
         parent_dir = self.package.dir
         self.second_Qlist.clear()
         for dir_name in filtered_departement_dir_list:
+
             item = QtWidgets.QListWidgetItem()
             item.setText(dir_name)
             dir = os.path.join(parent_dir,dir_name)
@@ -428,7 +459,6 @@ class AssetBrowser(QtWidgets.QDialog):
             item.setForeground(file_color_item)
 
 
-
         list_set_selected_byName(self.second_Qlist,self.package.favorite_dir)
 
     def rebuild_files_list(self,parent_dir):
@@ -436,7 +466,11 @@ class AssetBrowser(QtWidgets.QDialog):
 
         file_list, dir_list = list_files_and_dirs_sorted(parent_dir, self.sort_by_last_checkbox.isChecked())
 
-
+        #rebuild sub directory
+        parent =  self.second_Qlist.currentItem().data(QtCore.Qt.UserRole)
+        subDir = parent_dir.replace(parent,'')
+        subDir = subDir[1:]
+        self.dirText.setText(subDir)
 
         for dir_name in dir_list:
             item = QtWidgets.QListWidgetItem()
@@ -459,6 +493,7 @@ class AssetBrowser(QtWidgets.QDialog):
 
 
     def rebuild_image(self):
+
         list = os.listdir(self.package.dir)
         preview_image_list = [file for file in list if file.lower().endswith(('.png', '.jpg', '.jpeg' ))]
         if len(preview_image_list) > 0:
@@ -471,6 +506,8 @@ class AssetBrowser(QtWidgets.QDialog):
 
         self.pixmap = QtGui.QPixmap(self.image.scaledToWidth(450))
         self.label.setPixmap(self.pixmap)
+        self.resize(self.sizeHint())
+
 
 
     ############## UTILITY FUNCTION  ##############
@@ -552,13 +589,17 @@ class AssetBrowser(QtWidgets.QDialog):
             self.button_mode_shot.setChecked(True)
             pass
     def current_prod_changed(self):
+
         self.current_project = self.comboBox_current_prod.currentText()
         asset_browser_prefs["current_project"] = self.current_project
         asset_browser_prefs.pop("package_name")
         asset_browser_prefs.pop("departement_selection")
-
         self.all_packages_dir = os.path.join(self.current_project,self.mode)
         self.rebuild_package_list()
+        self.package_Qlist.setCurrentItem(self.package_Qlist.item(0))
+
+        self.dirText.setText('')
+
 
     def build_path_scene(self):
         item_third = self.third_Qlist.currentItem()
@@ -574,6 +615,7 @@ class AssetBrowser(QtWidgets.QDialog):
 
     def enter_directory(self,item):
         data = item.data(QtCore.Qt.UserRole)
+        departement_dir =  self.second_Qlist.currentItem().data(QtCore.Qt.UserRole)
         if os.path.isdir(data):
             self.rebuild_files_list(data)
 
@@ -584,8 +626,27 @@ class AssetBrowser(QtWidgets.QDialog):
         departement_dir =  self.second_Qlist.currentItem().data(QtCore.Qt.UserRole)
         if os.path.dirname(data) == os.path.join(self.package.dir,departement_dir):
             return
+
         dir = os.path.dirname(os.path.dirname(data))
         self.rebuild_files_list(dir)
+
+
+    def screenshotB_clicked(self):
+
+        package_dir = self.package.dir
+
+
+        self.screenshot_tool = ScreenCaptureTool(package_dir)
+        self.screenshot_tool.show()
+
+
+    def screenB_enability(self):
+
+        full_path = cmds.file(query=True, sceneName=True)
+        package_path = self.package.dir.replace("\\",'/')
+
+        self.screenshotB.setEnabled(package_path in full_path)
+
 
     def import_clicked(self):
         path, namespace = self.build_path_scene()
@@ -598,6 +659,7 @@ class AssetBrowser(QtWidgets.QDialog):
             cmds.file(path, reference=True,namespace=namespace)
         else:
             print("Not a maya scene")
+
     def open_folder_clicked(self):
         path, namespace = self.build_path_scene()
         if os.path.isdir(path):
@@ -616,10 +678,180 @@ class AssetBrowser(QtWidgets.QDialog):
             confirmed = cmds.confirmDialog(title="Open Scene", message=f"Are you sure you want to open {path}?", button=["Yes", "No"], defaultButton="Yes", cancelButton="No", dismissString="No")
             if confirmed == "Yes":
                 cmds.file(path, open=True, force=True)
+                self.screenB_enability()
         else:
             print("Not a Maya scene!")
-"""
 
+    def hideWindow(self):
+        self.hide()
+
+    def showWindow(self):
+        self.show()
+
+    def save_clicked(self):
+        path, namespace = self.build_path_scene()
+        package = self.package_Qlist.currentItem().text()
+        second = self.second_Qlist.currentItem().text()
+        content = self.dirText.text()
+        content = content.replace("\\",'_')
+
+        if content:
+            testName = package + '_' + second + '_' + content
+        else:
+            testName = package + '_' + second
+
+
+        #get directory path of selected file
+        current = self.third_Qlist.currentItem().data(QtCore.Qt.UserRole)
+        directory = os.path.dirname(current)
+
+        testDir = os.path.join(directory,testName)
+
+        #-------> check if other scene has same name, then find the correct increment
+        i = 1
+        exit = 0
+        final_number = 1
+
+        while exit == 0:
+            for j in range(500):
+                if not os.path.exists( testDir + ".%04d.ma" % i) or os.path.exists( testDir + ".%04d.mb" % i):
+                    i += 1
+                    if j == 499:
+                        i -= 500
+                        exit = 1
+                else:
+                    while os.path.exists( testDir + ".%04d.ma" % i) or os.path.exists( testDir + ".%04d.mb" % i):
+                        i += 1
+                    final_number = i
+
+        scene_name = testName + ".%04d" % final_number
+        #<-------
+
+        self.wSaveAs = SaveAsPopup(self, scene_name, directory)
+        self.wSaveAs.exec_()
+
+
+class SaveAsPopup(QtWidgets.QDialog):
+    def __init__(self, parent, scene_name, directory):
+        super(SaveAsPopup, self).__init__(parent)
+        self.directory = directory
+        self.setWindowTitle("Save As")
+        self.resize( 350, 50)
+
+        self.gridLayout = QtWidgets.QGridLayout(self)
+        self.radiolayout = QtWidgets.QHBoxLayout(self)
+
+        self._lineName = QtWidgets.QLineEdit()
+        self._confirmSaveB = QtWidgets.QPushButton("Save As")
+        self._cancelB = QtWidgets.QPushButton("Cancel")
+
+        self.bntgrp = QtWidgets.QButtonGroup()
+        self._radioMA = QtWidgets.QRadioButton(".ma")
+        self._radioMB = QtWidgets.QRadioButton(".mb")
+        self.bntgrp.addButton(self._radioMA)
+        self.bntgrp.addButton(self._radioMB)
+
+        self.gridLayout.addWidget(self._lineName, 0, 0, 1, 2)
+        self.gridLayout.addLayout(self.radiolayout, 1, 0, 1, 2)
+        self.radiolayout.addWidget(self._radioMA)
+        self.radiolayout.addWidget(self._radioMB)
+        self.radiolayout.addStretch()
+        self.gridLayout.addWidget(self._confirmSaveB, 2, 0)
+        self.gridLayout.addWidget(self._cancelB, 2, 1)
+
+        self._lineName.setText(scene_name)
+        self._radioMB.setChecked(True)
+
+        self._confirmSaveB.clicked.connect(self.saveAs)
+        self._cancelB.clicked.connect(self.cancel)
+
+
+    def saveAs(self):
+
+        if self._radioMA.isChecked():
+            sceneType = "mayaAscii"
+            ext = ".ma"
+        else:
+            sceneType = "mayaBinary"
+            ext = ".mb"
+
+
+        sceneName = os.path.join(self.directory,self._lineName.text()) + ext
+
+        cmds.file(rename=sceneName)
+        cmds.file(save=True,force=True,type=sceneType,op="v=0;")
+        globalself.rebuild_files_list(self.directory)
+
+        self.close()
+
+    def cancel(self):
+        self.close()
+
+class ScreenCaptureTool(QtWidgets.QWidget):
+    def __init__(self, save_path):
+        super().__init__()
+        self.save_path = save_path
+        self.rubberBand = QtWidgets.QRubberBand(QtWidgets.QRubberBand.Rectangle, self)
+        self.origin = None
+        self.layout = QtWidgets.QVBoxLayout()
+        self.label = QtWidgets.QLabel("Drag the mouse to capture a region")
+        self.layout.addWidget(self.label)
+        self.setLayout(self.layout)
+        self.setWindowOpacity(0.5)
+        self.showMaximized()
+        self.escape_pressed = False  # Ajoutez une nouvelle variable d'état pour suivre si "Échap" a été pressé
+        self.setCursor(QtGui.Qt.CrossCursor)
+        #hide asset browser
+        globalself.hideWindow()
+
+    def mousePressEvent(self, event):
+        self.origin = event.pos()
+        self.rubberBand.setGeometry(QtCore.QRect(self.origin, event.pos()).normalized())
+        self.rubberBand.show()
+        self.escape_pressed = False  # Réinitialisez l'état lorsque le bouton de la souris est pressé
+
+    def mouseMoveEvent(self, event):
+        self.rubberBand.setGeometry(QtCore.QRect(self.origin, event.pos()).normalized())
+
+    def mouseReleaseEvent(self, event):
+        if not self.escape_pressed:  # Vérifiez l'état avant de sauvegarder l'image
+            #self.rubberBand.hide()
+            rect = self.rubberBand.geometry()
+            self.close()
+            self.captureScreen(rect)
+
+    def keyPressEvent(self, event):
+        if event.key() == QtCore.Qt.Key_Escape:
+            self.escape_pressed = True
+            self.rubberBand.hide()  # Cacher le rubberBand si visible
+            self.close()  # Fermer le widget
+            globalself.showWindow()
+
+    def captureScreen(self, rect):
+
+        screen = QtWidgets.QApplication.primaryScreen()
+        screenshot = screen.grabWindow(0, rect.x(), rect.y(), rect.width(), rect.height())
+
+
+
+        #backup old preview
+        if os.path.exists(self.save_path+'\\preview.png'):
+
+            if not os.path.exists(self.save_path+"\\_old_preview"):
+                os.mkdir(self.save_path+"\\_old_preview")
+            nb_backup = 1
+            for i in os.listdir(self.save_path+"\\_old_preview"):
+                nb_backup += 1
+            shutil.move(self.save_path+'\\preview.png', self.save_path+'\\_old_preview\\old_preview.%03d.png' % nb_backup)
+        
+
+        screenshot.save(self.save_path+'\\preview.png', 'png')
+
+        globalself.rebuild_departementList()
+        globalself.rebuild_image()
+        globalself.showWindow()
+
+'''
 try:
 
     ui.deleteLater()
@@ -628,4 +860,4 @@ except:
 ui = AssetBrowser()
 ui.create()
 ui.show()
-"""
+'''

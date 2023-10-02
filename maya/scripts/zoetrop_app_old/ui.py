@@ -111,7 +111,13 @@ class CustomUI(QWidget):
         self.to_key_button = QPushButton("to key")
         self.to_key_button.clicked.connect(self.to_key_clicked)
         self.get_button_layout.addWidget(self.to_key_button)
+
+
+        self.automation_button = QPushButton("123")
+        self.automation_button.clicked.connect(self.automation_clicked)
+        self.get_button_layout.addWidget(self.automation_button)
         self.get_button_layout.addStretch(1)
+
         left_layout.addLayout(self.get_button_layout)
 
         # Execute Button
@@ -224,8 +230,20 @@ class CustomUI(QWidget):
         loop_param = self.get_loop_params()
         self.zoetrop.set_key(selection[0],loop_param)
 
+    def automation_clicked(self):
+        selection = pm.selected()
+        for s in selection:
+            try:
+                pm.select(s)
+                self.get_clicked()
+                self.setup_hierarchy()
+                self.run()
+            except Exception as e:
+                print("Faile"+s.name())
+                print(e)
 
-    def get_clicked(self,nodes):
+
+    def get_clicked(self):
         selection = pm.selected()
         if not selection:
             pm.warning("Nothing selected.")
@@ -266,7 +284,7 @@ class CustomUI(QWidget):
             self.motion_val = int(motion_loop_val)
             self.motion_combobox.setCurrentText(str(self.motion_val))
 
-
+        pm.select(selection)
     def retrieve_loop_params(self):
         """
         Retrieve the parameters from inpute fields and combobox (only if the UI isn't updating)
