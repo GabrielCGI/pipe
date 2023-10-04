@@ -14,11 +14,11 @@ def export_selection():
     
     if selected_objects:
         # Create the folder path
-        folder_path = "I:/swaNY_2308/shots/shot140/assets"
+        folder_path = "I:/swaChristmas_2023/assets/ch_zootrope/assets"
         
         for obj in selected_objects:
             # Get the name and parent of the current object
-            obj_name = obj.nodeName()
+            obj_name = obj.nodeName().replace(":","_")
             original_parent = pm.listRelatives(obj, parent=True)
             
             # Parent the object to the world
