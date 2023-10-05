@@ -23,7 +23,54 @@ def get_out_of_date_standins():
     return out_of_date_standins
 
 
+def has_active_arnold_imager():
+    # Reference the defaultArnoldRenderOptions node
+    arnold_render_options = pm.PyNode("defaultArnoldRenderOptions")
+
+    # Check the 'imagers' attribute for connections
+    imagers_connections = arnold_render_options.imagers.listConnections()
+
+    # If any connections exist, it means there's an active Arnold Imager
+    if imagers_connections:
+        return imagers_connections
+    return False
+
+def disconnect_all_arnold_imagers():
+    # Reference the defaultArnoldRenderOptions node
+    arnold_render_options = pm.PyNode("defaultArnoldRenderOptions")
+
+    # Retrieve all the connected imagers' plugs
+    imagers_plugs = arnold_render_options.imagers.getArrayIndices()
+
+    for plug_index in imagers_plugs:
+        connected_plug = arnold_render_options.attr(f'imagers[{plug_index}]')
+        if connected_plug.isConnected():
+            print("Breaking imager: "+connected_plug)
+            connected_plug.disconnect()
+
 def run(force_override_ass_paths_files):
+    imagers = has_active_arnold_imager()
+    if imagers:
+        msg = "/!\ Imager detected /!\\ \n\n"
+
+        for imager in imagers:
+            msg += "%s \n"%(imager.name())
+        imager_prompt = pm.confirmDialog(
+            title='Imagers detected',
+            icon="question",
+            message=msg,
+            button=['Remove imagers', 'Skip', 'Cancel'],
+            defaultButton='Remove imagers',
+            dismissString='Cancel',
+            cancelButton='Cancel')
+        if imager_prompt == "Remove imagers":
+            disconnect_all_arnold_imagers()
+            print("Removing imagers success !")
+        if imager_prompt == "Cancel":
+            return
+
+
+
     out_of_date_standins = get_out_of_date_standins()
     if len(out_of_date_standins) > 0:
         max_display_standins = 15

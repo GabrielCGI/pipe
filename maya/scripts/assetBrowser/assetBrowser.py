@@ -542,6 +542,7 @@ class AssetBrowser(QtWidgets.QDialog):
 
         if ok:
             self.create_entity(str(text))
+            self.rebuild_departementList()
 
     def create_entity(self, name):
 
@@ -557,7 +558,7 @@ class AssetBrowser(QtWidgets.QDialog):
             task_dir = os.path.join(path,task)
             os.makedirs(task_dir, exist_ok=True)
 
-            #SKIPE DEFAULT SCENE CREATION IN NOT A MAYA TYPE
+            #SKIP DEFAULT SCENE CREATION IN NOT A MAYA TYPE
             if task not in maya_taks_template:
                 continue
 
@@ -565,7 +566,7 @@ class AssetBrowser(QtWidgets.QDialog):
             if not os.path.isfile(task_file):
                 absolute_path = os.path.dirname(os.path.realpath(__file__))
                 scene_empty = os.path.join(absolute_path, "template","empty.ma")
-                shutil.copy(scene_empty,task_file)
+                #shutil.copy(scene_empty,task_file)
 
         self.rebuild_package_list()
 
@@ -695,37 +696,22 @@ class AssetBrowser(QtWidgets.QDialog):
         content = self.dirText.text()
         content = content.replace("\\",'_')
 
-        if content:
-            testName = package + '_' + second + '_' + content
-        else:
-            testName = package + '_' + second
-
+        testName = f"{package}_{second}_{content}" if content else f"{package}_{second}"
 
         #get directory path of selected file
-        current = self.third_Qlist.currentItem().data(QtCore.Qt.UserRole)
-        directory = os.path.dirname(current)
+        directory = self.second_Qlist.currentItem().data(QtCore.Qt.UserRole)
 
         testDir = os.path.join(directory,testName)
 
+
+
         #-------> check if other scene has same name, then find the correct increment
-        i = 1
-        exit = 0
-        final_number = 1
-
-        while exit == 0:
-            for j in range(500):
-                if not os.path.exists( testDir + ".%04d.ma" % i) or os.path.exists( testDir + ".%04d.mb" % i):
-                    i += 1
-                    if j == 499:
-                        i -= 500
-                        exit = 1
-                else:
-                    while os.path.exists( testDir + ".%04d.ma" % i) or os.path.exists( testDir + ".%04d.mb" % i):
-                        i += 1
-                    final_number = i
-
-        scene_name = testName + ".%04d" % final_number
+        files = [f for f in os.listdir(directory) if f.startswith(testName) and f.endswith(('.ma', '.mb'))]
+        increments = [int(f.split('.')[1]) for f in files]
+        final_number = max(increments, default=0) + 1
+        scene_name = f"{testName}.{final_number:04d}"
         #<-------
+
 
         self.wSaveAs = SaveAsPopup(self, scene_name, directory)
         self.wSaveAs.exec_()

@@ -21,6 +21,8 @@ try:
             #x26xSpeed = writer.getParam("x26xSpeed")
             #x26xSpeed.setValue("Ultra Fast")  
     elif output_file[-3:] == "jpg":
+        pass
+
 
     premult = writer.getParam("inputPremult")
     premult.setValue(2)

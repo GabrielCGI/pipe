@@ -165,6 +165,8 @@ class ABCImportAsset(ABC):
             "palf": 50,
             "ntscf": 60,
         }
+        if standin_node.name().startswith("frame"): #HACK ZOOTROP SWA 2023
+            return
         standin_node.abcFPS.set(unit_to_fps[current_unit] if current_unit in unit_to_fps else 24)
         standin_node.useFrameExtension.set(True)
 

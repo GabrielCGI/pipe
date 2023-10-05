@@ -178,7 +178,7 @@ class LookLoader(QDialog):
         self.__ui_standin_table.horizontalHeader().setSectionResizeMode(0, QHeaderView.Stretch)
         self.__ui_standin_table.setSelectionBehavior(QAbstractItemView.SelectRows)
         self.__ui_standin_table.verticalHeader().hide()
-        self.__ui_standin_table.setSelectionMode(QAbstractItemView.SingleSelection)
+        self.__ui_standin_table.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.__ui_standin_table.setEditTriggers(QTableWidget.NoEditTriggers)
         self.__ui_standin_table.itemSelectionChanged.connect(self.__on_standin_select_changed)
         grid_layout.addWidget(self.__ui_standin_table, 1, 0, 2,1)
@@ -366,7 +366,19 @@ class LookLoader(QDialog):
         :return:
         """
         self.__refresh_selection = False
-        self.__standin_obj_selected.add_looks(self.__file_looks_selected, self.__replace_looks)
+        rows_selected = self.__ui_standin_table.selectionModel().selectedRows()
+        for row in rows_selected:
+
+
+            standIn = self.__ui_standin_table.item(row.row(), 0).data(Qt.UserRole)
+            standIn_name = standIn.get_standin_name()
+            first_standIn_name = self.__standin_obj_selected.get_standin_name()
+            if not standIn_name == first_standIn_name:
+                pm.warning("Can't update  %s and %s (%s)"%(standIn_name,first_standIn_name, standIn.get_object_name()))
+            print("Loop updated on: " + standIn.get_object_name())
+            standIn.add_looks(self.__file_looks_selected,self.__replace_looks)
+            standIn.retrieve_looks(self.__current_project_dir)
+
         self.__standin_obj_selected.retrieve_looks(self.__current_project_dir)
         self.__refresh_selection = True
         self.__refresh_standin_table()
