@@ -12,7 +12,10 @@ class Zoetrop():
         for set in loop_sets:
             members = pm.sets(set, query=True)
             if members and len(members)==1:
+
                 geo = members[0]
+                print(members)
+                print(geo)
                 loops.append(Loop(geo,self.data))
         return loops
 
@@ -154,7 +157,11 @@ class Loop():
 
     @property
     def loop_set_name(self):
-        parent_name = self.geo.getParent().replace(':',"NS")
+        try:
+            parent_name = self.geo.getParent().replace(':',"NS")
+        except:
+            pm.warning("Failed to get parent for %s"%(self.geo))
+            return "ERROR %s"%(self.geo)
         return f"LP_{parent_name}"
 
     @property

@@ -360,10 +360,11 @@ class CharacterPublisher(QDialog):
         shading_nodes = pm.listConnections(shapes, type='shadingEngine')
         if len(shading_nodes) == 0: return
         file_nodes = pm.listHistory(shading_nodes, type="file")
-        if len(file_nodes) == 0: return
+
         image_nodes = pm.listHistory(shading_nodes, type="aiImage")
-        if len(image_nodes) == 0: return
         self.__texture_node = list(dict.fromkeys(file_nodes + image_nodes))
+
+        print(self.__texture_node)
 
     def __replace_texture_node_to_tx(self):
         """
@@ -372,6 +373,7 @@ class CharacterPublisher(QDialog):
         """
         for tex_node in self.__texture_node:
             tex_path = CharacterPublisher.get_path_from_texture_node(tex_node)
+
             if tex_path is None: continue
 
             color_space = tex_node.colorSpace.get()
@@ -570,6 +572,8 @@ class CharacterPublisher(QDialog):
         :param shaders_used
         :return:
         """
+        pm.setAttr("defaultArnoldRenderOptions.absoluteTexturePaths", 0)
+        pm.setAttr("defaultArnoldRenderOptions.texture_searchpath", "[DISK_I];[DISK_B];[DISK_P];I:;P:;B:")
         look_dir = os.path.join(self.__asset_dir, "publish")
         # Check if default look or special one
         if len(self.__look_name) > 0:

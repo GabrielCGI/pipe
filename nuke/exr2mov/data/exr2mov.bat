@@ -3,6 +3,8 @@ set /p start=Start frame:
 set /p end=End frame:
 set /p hd=HD (y/n):
 
+echo bonjour
+
 set sequence=%1
 set trim=%sequence:~0,-8%
 set output_file=%trim%preview.mov

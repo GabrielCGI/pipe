@@ -390,6 +390,7 @@ class CustomUI(QWidget):
         self.loop_set_list_widget.clear()
         existing_names = set()
         for loop in self.zoetrop.loops:
+            print (loop.loop_set_name)
             pretty_name = self.pretty_display(loop.loop_set_name, existing_names)
             loop.pretty_name = pretty_name
             existing_names.add(pretty_name)

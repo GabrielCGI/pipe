@@ -28,6 +28,10 @@ class CleanerTool(RoutineTool):
             "fix_initialshadinggroup": {
                 "action": CleanerTool.__fix_isg,
                 "text": "Fix initialShadingGroup"
+            },
+            "remove_unused_aiIncludeGraph": {
+                "action": CleanerTool.__remove_aiIncludeGraph,
+                "text": "Remove Unused aiIncludeGraph"
             }
         }
         super().__init__(name="Cleaner", pref_name="cleaner",
@@ -135,3 +139,18 @@ class CleanerTool(RoutineTool):
         print("\n-------------- Fix initialShadingGroup --------------\n")
         pm.lockNode('initialShadingGroup', lock=0, lockUnpublished=0)
         pm.lockNode('initialParticleSE', lock=0, lockUnpublished=0)
+
+    @staticmethod
+    def __remove_aiIncludeGraph():
+
+        print("\n-------------- Remove Unused aiIncludeGraph --------------\n")
+
+        nodes = pm.ls(type="aiIncludeGraph")
+        
+        for node in nodes:
+            connections = pm.listConnections(node + ".out", destination=True, plugs=True)
+
+            # Exception : Si la liste des connexions est vide ou contient uniquement 'defaultRenderUtilityList1'
+            if not connections:
+                print("Deleting {} node.".format(node))
+                pm.delete(node)

@@ -1,6 +1,7 @@
 nuke.pluginAddPath ('R:/nukeGizmo')
 nuke.pluginAddPath ('R:/pipeline/pipe/nuke/script')
 
+import custom_writer
 import cryptomatte_utilities
 import collectFiles
 cryptomatte_utilities.setup_cryptomatte()
@@ -19,6 +20,7 @@ nuke.pluginAddPath('./layerShuffler')
 
 
 nuke.pluginAddPath("R:\nukeGizmo\NukeSurvivalToolkit_publicRelease-master\NukeSurvivalToolkit")
+
 # >>>PrismStart
 import nuke
 

@@ -7,41 +7,13 @@ import file_collector_ranch_sender.CollectorCopier
 from file_collector_ranch_sender.CollectorCopier import *
 
 import maya.OpenMayaUI as mui
-from PySide2 import QtWidgets, QtGui, QtCore
+from PySide2 import QtWidgets, QtGui
 import shiboken2
 
 def maya_main_window():
     main_window_ptr = mui.MQtUtil.mainWindow()
     return shiboken2.wrapInstance(int(main_window_ptr), QtWidgets.QWidget)
 
-def add_separator_to_layout(layout):
-    separator = QtWidgets.QFrame()
-    separator.setFrameShape(QtWidgets.QFrame.HLine)
-    separator.setFrameShadow(QtWidgets.QFrame.Sunken)
-    layout.addWidget(separator)
-
-def get_arnold_bucket_size():
-    if pm.pluginInfo('mtoa', q=True, loaded=True):
-        return pm.getAttr('defaultArnoldRenderOptions.bucketSize')
-    else:
-        raise Exception('Arnold plugin is not loaded!')
-
-def set_slider_to_64(slider):
-    slider.setValue(64)
-    update_arnold_bucket_size(64)
-
-def update_text_edit(slider_value, text_edit_widget):
-    text_edit_widget.setText(str(slider_value))
-    update_arnold_bucket_size(slider_value)
-
-def update_slider_from_text(text_edit_widget, slider):
-    value = int(text_edit_widget.text())
-    slider.setValue(value)
-    update_arnold_bucket_size(value)
-
-def update_arnold_bucket_size(value):
-    arnold_renderer = pm.ls(type="aiOptions")[0]
-    pm.setAttr(arnold_renderer.bucketSize, value)
 
 def get_out_of_date_standins():
     standins = pm.ls(type="aiStandIn")
@@ -138,43 +110,11 @@ def run(force_override_ass_paths_files):
     execute_cleanup = False
     execute_standins = False
 
-    def set_bucket_size(bucket_size):
-        bucket_layout = QtWidgets.QHBoxLayout()
-
-        bucket_label = QtWidgets.QLabel("Bucket Size")
-        bucket_layout.addWidget(bucket_label)
-
-        text_edit = QtWidgets.QLineEdit()
-        text_edit.setText(str(bucket_size))  # Set valeur par défaut
-        text_edit.setMaximumWidth(70)
-        bucket_layout.addWidget(text_edit)
-
-        bucket_slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        bucket_slider.setRange(16, 256)
-        bucket_slider.setValue(bucket_size)  # Set valeur par défaut
-        bucket_layout.addWidget(bucket_slider)
-
-        bucket_button = QtWidgets.QPushButton("64")
-        bucket_button.setMaximumWidth(25)
-        bucket_layout.addWidget(bucket_button)
-
-        # Signaux et Slots
-        bucket_button.clicked.connect(lambda: set_slider_to_64(bucket_slider))
-        bucket_slider.valueChanged.connect(lambda value: update_text_edit(value, text_edit))
-        text_edit.editingFinished.connect(lambda: update_slider_from_text(text_edit, bucket_slider))
-
-        layout.addLayout(bucket_layout)
-
     def add_imagers_section():
+        # Add a QListWidget for imagers
         imagers_list_widget = QtWidgets.QListWidget()
         names = [imager.name() for imager in imagers]
         imagers_list_widget.addItems(names)
-
-        # Ajustement de la hauteur en fonction du nombre d'éléments
-        item_height = 15
-        max_visible_items = 20
-        total_height = min(len(names), max_visible_items) * item_height
-        imagers_list_widget.setMaximumHeight(total_height)
 
         imagers_list_widget.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         layout.addWidget(QtWidgets.QLabel("Active Arnold Imagers:"))
@@ -183,7 +123,6 @@ def run(force_override_ass_paths_files):
         remove_button = QtWidgets.QPushButton("Remove Selected Imagers")
         remove_button.clicked.connect(lambda: remove_selected_imagers(imagers_list_widget))
         layout.addWidget(remove_button)
-
 
     def add_checked_overrides_section():
         all_checkboxes = []
@@ -204,52 +143,28 @@ def run(force_override_ass_paths_files):
 
     dialog = QtWidgets.QDialog(maya_main_window())
     dialog.setWindowTitle("Cleanup")
-    dialog.setMinimumSize(400, 300) 
     layout = QtWidgets.QVBoxLayout()
 
-    bucket_size = get_arnold_bucket_size()
     imagers = has_active_arnold_imager()
     checked_attributes = list_checked_overrides()
 
-
-    layout.addStretch()
-
-
-    if bucket_size != 64:
-        set_bucket_size(bucket_size)
-        execute_cleanup = True
-    else:
-        label = QtWidgets.QLabel("Correct Bucket Size")
-        label.setStyleSheet("color: green;")
-        layout.addWidget(label)
-
-
-    layout.addStretch()
-    add_separator_to_layout(layout)
-    layout.addStretch()
-
-
+    
     if imagers:
         add_imagers_section()
         execute_cleanup = True
     else:
-        label = QtWidgets.QLabel("No Active Arnold Imager")
-        label.setStyleSheet("color: green;")
-        layout.addWidget(label)
+        layout.addWidget(QtWidgets.QLabel("No Active Arnold Imager"))
 
-
-    layout.addStretch()
-    add_separator_to_layout(layout)
-    layout.addStretch()
-
+    separator = QtWidgets.QFrame()
+    separator.setFrameShape(QtWidgets.QFrame.HLine)
+    separator.setFrameShadow(QtWidgets.QFrame.Sunken)
+    layout.addWidget(separator)
 
     if checked_attributes:
         add_checked_overrides_section()
         execute_cleanup = True
     else:
-        label = QtWidgets.QLabel("No Checked Overrides")
-        label.setStyleSheet("color: green;")
-        layout.addWidget(label)
+        layout.addWidget(QtWidgets.QLabel("No Checked Overrides"))
 
 
     # Ajout des boutons "Continue" et "Cancel"
@@ -268,11 +183,9 @@ def run(force_override_ass_paths_files):
     layout.addLayout(button_layout)
 
 
-    # Set du layout au dialog
-    dialog.setLayout(layout)
 
-    # execute_standins=True si execute_cleanup==False ou si dialog_exec_ est accepté 
-    #(on exec le dialog, donc il s'affiche)
+    # Set the layout to the dialog and show it
+    dialog.setLayout(layout)
     execute_standins = not execute_cleanup or dialog.exec_() == QtWidgets.QDialog.Accepted
 
 

@@ -2,7 +2,7 @@ from ..tool_models.ActionTool import *
 
 from common.utils import *
 
-class SelectBigObject(ActionTool):
+class SelectBigObjects(ActionTool):
     def __init__(self):
         super().__init__(name="Select Big Objects", pref_name="select_big_objects",
                          description="Selects the objects with the highest number of polygons", button_text="Run")

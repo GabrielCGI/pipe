@@ -1,0 +1,24 @@
+import os
+
+def process_file(filepath):
+    print ("PROCESS START ON:"+filepath)
+    """Process a single .ass file, replacing absolute paths with relative paths."""
+    with open(filepath, 'r') as file:
+        content = file.read()
+
+        # Replace the absolute path with the relative path
+        content = content.replace('filename "I:/', 'filename "')
+
+    with open(filepath, 'w') as file:
+        file.write(content)
+
+def process_directory(directory_path):
+    """Process all .ass files in the given directory."""
+    for filename in os.listdir(directory_path):
+        if filename.endswith('.ass'):
+            filepath = os.path.join(directory_path, filename)
+            process_file(filepath)
+
+if __name__ == '__main__':
+    directory_path = r"D:/testReplace\assets"
+    process_directory(directory_path)

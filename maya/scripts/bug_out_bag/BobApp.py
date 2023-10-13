@@ -35,7 +35,9 @@ from .tool_instances.ShadingGroupRenamerTool import *
 from .tool_instances.HierarchyCheckTool import *
 from .tool_instances.CharacterTimeSetTool import *
 from .tool_instances.TraceSetTool import *
-from .tool_instances.SelectBigObject import *
+from .tool_instances.SelectBigObjects import *
+from .tool_instances.SelectInvisibleObjects import *
+from .tool_instances.PrintAbcLayer import *
 
 # ######################################################################################################################
 
@@ -67,7 +69,9 @@ class BobApp(QDialog):
                 SplineStepTool(),
                 CharacterTimeSetTool(),
                 TraceSetTool(),
-                SelectBigObject()
+                SelectBigObjects(),
+                SelectInvisibleObjects(),
+                PrintAbcLayer()
             ]),
             BobCategory("Clean", self.__prefs, [
                 CleanFreezeTool(),
