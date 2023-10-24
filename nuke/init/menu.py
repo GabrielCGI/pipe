@@ -12,6 +12,8 @@ import nuke
 from nukescripts import panels
 import LayerShuffler
 from auto_comp.AutoComp import AutoComp
+from nuke_scanner.NukeScanner import NukeScanner
+from nuke_scanner import select_unconnected_read
 
 import cryptomatte_utilities
 import MultiChannelCombine
@@ -28,9 +30,9 @@ collectMenu.addCommand('Collect Files', 'collectFiles.collectFiles()')
 collectMenu.addCommand('Help', 'collectFiles.myBlog()')
 
 bloomMenu = nuke.menu("Nodes").addMenu("bloom","bloom.png")
-bloomMenu.addCommand("Multi Channel Combine", "MultiChannelCombine.MultiChannelCombine()")
-bloomMenu.addCommand("Reads update", "nukeReadLoader.start()")
-bloomMenu.addCommand("Denoise AOVs List", "noice_aov_print.run()")
+bloomMenu.addCommand("Delete unused render", "NukeScanner().run()")
+bloomMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
+
 
 toolbar = nuke.toolbar("Nodes")
 toolbar.addMenu("VideoCopilot", icon="VideoCopilot.png")

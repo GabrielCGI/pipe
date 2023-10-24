@@ -429,6 +429,28 @@ class CharacterPublisher(QDialog):
             self.__abc_name = self.__asset_name + "_mod.v" + num_str + ".abc"
             num += 1
 
+    def __cleanInitialShadingGroup(self):
+        attr_name = "compInstObjGroups[0].compObjectGroups[0]"
+        for obj_shape in pm.listRelatives(self.__selection, ad=True,shapes=True):
+            # Check if attribute exists
+            if not obj_shape.hasAttr(attr_name):
+                return
+
+            attr_path = "{}.{}".format(obj_shape, attr_name)
+            try:
+                destination_conns = pm.listConnections(attr_path, plugs=True, destination=True, type='shadingEngine')
+
+                if destination_conns:
+                    for dest in destination_conns:
+                        if 'initialShadingGroup' in dest.name():
+                            pm.disconnectAttr(attr_path, dest)
+                            print("Cleaning initial shading group on %s" %(obj_shape))
+            except Exception as e:
+                print ("Initial shading group cleaning fail")
+                print(e)
+
+
+
     def abc_export(self):
         """
         Export UV
@@ -614,6 +636,7 @@ class CharacterPublisher(QDialog):
         """
         CharacterPublisher.__check_color_sets("Pref")
         self.__replace_texture_node_to_tx()
+        self.__cleanInitialShadingGroup()
         sel = self.__selection
         if self.__publish_uv:
             standin = self.abc_export()

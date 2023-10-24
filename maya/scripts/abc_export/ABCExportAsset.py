@@ -217,6 +217,7 @@ class ABCExportAsset:
 
         os.makedirs(version_dir_path, exist_ok=True)
         pm.refresh(suspend=True)
+        print(command)
         pm.AbcExport(j=command)
         pm.refresh(suspend=False)
 

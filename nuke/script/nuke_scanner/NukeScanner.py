@@ -101,7 +101,10 @@ class NukeScanner:
         :return:
         """
         self.__compo_filepath = nuke.root()['name'].value().replace("\\", "/")
-        match = re.match(r"^(.+)/compo/\w*\.nk$", self.__compo_filepath)
+        print(self.__compo_filepath)
+
+        # Updated regex pattern
+        match = re.match(r"^(.+)/comp(?:o)?/\w*\.nk$", self.__compo_filepath)
         if match:
             self.__shot_dir = match.group(1)
         else:
