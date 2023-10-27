@@ -45,7 +45,7 @@ def maya_main_window():
 
 
 #current_project="D:/gabriel/assetizer"
-project_list = ["I:/swaChristmas_2023","I:/swaNY_2308","I:/swaDisney_2307","D:/","I:/swaAlice_2309"]
+project_list = ["I:/swaChristmas_2023","I:/swaNY_2308","I:/swaDisney_2307","D:/","I:/swaAlice_2309","I:/swaMarvel_2309"]
 AddIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_AddIcon.png"
 BackIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_BackIcon.png"
 FolderIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_FolderIcon.png"
@@ -379,7 +379,7 @@ class AssetBrowser(QtWidgets.QDialog):
 
             self.rebuild_image()
 
-        
+
 
     def second_Qlist_changed(self):
         current_item = self.second_Qlist.currentItem()
@@ -829,7 +829,7 @@ class ScreenCaptureTool(QtWidgets.QWidget):
             for i in os.listdir(self.save_path+"\\_old_preview"):
                 nb_backup += 1
             shutil.move(self.save_path+'\\preview.png', self.save_path+'\\_old_preview\\old_preview.%03d.png' % nb_backup)
-        
+
 
         screenshot.save(self.save_path+'\\preview.png', 'png')
 

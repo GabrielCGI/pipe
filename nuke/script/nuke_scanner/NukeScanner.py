@@ -83,6 +83,8 @@ class ConfirmationNukeScanner(QDialog):
 
 
 class NukeScanner:
+    SHOTS_DIR = 'shots'
+    COMP_DIRS = ['comp', 'compo']
     def __init__(self):
         """
         Constructor
@@ -97,16 +99,25 @@ class NukeScanner:
 
     def __retrieve_shot(self):
         """
-        Retrieve the current shot
-        :return:
+        Retrieve the current shot directory.
+        If the directory structure matches expectations, set the shot directory.
+        Otherwise, set it to None.
         """
-        self.__compo_filepath = nuke.root()['name'].value().replace("\\", "/")
-        print(self.__compo_filepath)
+        try:
+            self.__compo_filepath = nuke.root()['name'].value().replace("\\", "/")
+        except AttributeError:
+            self.__shot_dir = None
+            return
 
-        # Updated regex pattern
-        match = re.match(r"^(.+)/comp(?:o)?/\w*\.nk$", self.__compo_filepath)
-        if match:
-            self.__shot_dir = match.group(1)
+        path_components = self.__compo_filepath.split("/")
+
+        if len(path_components) > 4 and \
+           path_components[2] == self.SHOTS_DIR and \
+           path_components[4] in self.COMP_DIRS:
+
+            # Extract the desired path up to the "shot" directory.
+            desired_path_components = path_components[:4]
+            self.__shot_dir = "/".join(desired_path_components)
         else:
             self.__shot_dir = None
 
@@ -169,3 +180,5 @@ class NukeScanner:
                 for folder_path,new_path in dict_rename_folders.items():
                     os.rename(folder_path, new_path)
                     print(folder_path + "\n\t--> " + new_path)
+a=NukeScanner()
+a.run()
