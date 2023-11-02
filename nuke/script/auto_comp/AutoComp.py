@@ -415,7 +415,11 @@ class AutoComp(QWidget):
         for render_layer in os.listdir(render_path):
             item = QListWidgetItem()
             # Check layer folder contains shot
-            if UnpackMode.get_last_seq_from_layer(os.path.join(render_path, render_layer)) is None: continue
+            if UnpackMode.get_last_seq_from_layer(os.path.join(render_path, render_layer)) is None:
+                print(UnpackMode.get_last_seq_from_layer(os.path.join(render_path, render_layer)))
+                print(os.path.join(render_path, render_layer))
+                print("fail")
+                continue
             start_var = self.__selected_unpack_mode.is_layer_scanned(render_layer)
             # Determine if known layer or unknown
             if not start_var:

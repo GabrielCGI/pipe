@@ -1,0 +1,28 @@
+import pymel.core as pm
+
+def copy_and_replace_objects():
+    # Get selected objects
+    selected_objects = pm.selected()
+
+    # Ensure we have at least two objects selected
+    if len(selected_objects) < 2:
+        pm.warning("Please select at least 2 objects. Last selected should be the source object.")
+        return
+
+    # Split the selected objects into source and targets
+    source_object = selected_objects[-1]
+    target_objects = selected_objects[:-1]
+
+    for target in target_objects:
+        # Duplicate the source object
+        duplicated_object = pm.duplicate(source_object)[0]
+
+        # Match the transformation of the duplicated object to the target object
+        pm.delete(pm.parentConstraint(target, duplicated_object))
+        pm.delete(pm.scaleConstraint(target, duplicated_object))
+
+        # Delete the old target object
+        pm.delete(target)
+
+# Execute the function
+copy_and_replace_objects()

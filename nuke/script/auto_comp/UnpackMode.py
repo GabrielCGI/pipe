@@ -63,6 +63,7 @@ class UnpackMode:
         :return: seq_path, utility_path, start_frame, end_frame
         """
         if not os.path.isdir(layer_path):
+            print ("NOT A DIR ! %s "%(layer_path))
             return None
         for seq_name in reversed(os.listdir(layer_path)):
             seq_dir_path = os.path.join(layer_path, seq_name)
@@ -74,15 +75,15 @@ class UnpackMode:
                 for frame in os.listdir(seq_dir_path):
                     match = re.match(r"^" + seq_name + r"(_utility)?\.([0-9]{4})\.exr$", frame)
                     if match:
-                        if match.group(1) is not None:
+                        if match.group(1) is None:
                             frame_count = int(match.group(2))
                             if frame_count < start_frame or start_frame is None:
                                 start_frame = frame_count
                             if frame_count > end_frame or end_frame is None:
                                 end_frame = frame_count
                             seq_path = os.path.join(seq_dir_path, seq_name + ".####.exr").replace("\\", "/")
-                        else:
                             utility_path = os.path.join(seq_dir_path, seq_name + "_utility.####.exr").replace("\\", "/")
+
                 if seq_path is not None:
                     return seq_path, utility_path, start_frame, end_frame
         return None

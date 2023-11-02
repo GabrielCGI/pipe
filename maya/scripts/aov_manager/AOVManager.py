@@ -235,7 +235,7 @@ class AOVManager(QDialog):
         else:
             half_driver = pm.createNode('aiAOVDriver', name="defaultArnoldDriver")
 
-        half_driver.exrCompression.set(3)
+        half_driver.exrCompression.set(9)
         half_driver.mergeAOVs.set(1)
         half_driver.halfPrecision.set(1)
 
