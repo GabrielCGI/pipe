@@ -74,12 +74,12 @@ def has_active_arnold_imager():
 def remove_selected_imagers(imagers_list_widget):
     for item in imagers_list_widget.selectedItems():
         imager_node = pm.PyNode(item.text())
-        
+
         try:
             pm.disconnectAttr(imager_node.message, 'defaultArnoldRenderOptions.imagers[0]')
         except:
             pass
-        
+
         pm.delete(imager_node)
         imagers_list_widget.takeItem(imagers_list_widget.row(item))
 
@@ -105,7 +105,8 @@ def list_checked_overrides():
         "ignore Sss",
         "ignore Operators",
         "force Translate Shading Engines",
-        "ignore Imagers"
+        "ignore Imagers",
+        "enableProgressiveRender"
     ]
 
     checked_attributes = []
@@ -121,7 +122,7 @@ def checkbox_changed(cb):
     # Get the Arnold renderer node
     arnold_renderer = pm.ls(type="aiOptions")[0]
     attribute_name = cb.text()
-    
+
     if cb.isChecked():
         arnold_renderer.setAttr(attribute_name, 1)
     else:
@@ -204,7 +205,7 @@ def run(force_override_ass_paths_files):
 
     dialog = QtWidgets.QDialog(maya_main_window())
     dialog.setWindowTitle("Cleanup")
-    dialog.setMinimumSize(400, 300) 
+    dialog.setMinimumSize(400, 300)
     layout = QtWidgets.QVBoxLayout()
 
     bucket_size = get_arnold_bucket_size()
@@ -271,7 +272,7 @@ def run(force_override_ass_paths_files):
     # Set du layout au dialog
     dialog.setLayout(layout)
 
-    # execute_standins=True si execute_cleanup==False ou si dialog_exec_ est accepté 
+    # execute_standins=True si execute_cleanup==False ou si dialog_exec_ est accepté
     #(on exec le dialog, donc il s'affiche)
     execute_standins = not execute_cleanup or dialog.exec_() == QtWidgets.QDialog.Accepted
 
