@@ -643,7 +643,6 @@ class AutoComp(QWidget):
         """
         del self.__read_nodes_list_for_update[:]
         read_nodes = nuke.allNodes("Read")
-
         for read_node in read_nodes:
             path = read_node.knob("file").value().replace("\\", "/")
             # Check the current path to retrieve the layer and current version
@@ -654,7 +653,6 @@ class AutoComp(QWidget):
             versions = sorted(os.listdir(folder_versions), reverse=True)
             last_version = None
             last_version_path = None
-
             # Retrieve the last version for the layer found
             for version_dirname in versions:
                 version_dirpath = os.path.join(folder_versions,version_dirname)
@@ -662,17 +660,13 @@ class AutoComp(QWidget):
                     match_version = re.match(r"^("+version_dirname+")\.[0-9]{4}(\.\w+)$", seq_file)
                     if match_version is not None:
                         last_version = match_version.group(1).split(".")[-1]
-
-                        utility = "_utility" if "utility" in path else ""
-
                         last_version_path = \
                             os.path.join(version_dirpath,
-                                         match_version.group(1)+utility+".####"+match_version.group(2)).replace("\\","/")
+                                         match_version.group(1)+".####"+match_version.group(2)).replace("\\","/")
                         break
                 if last_version is not None:
                     break
             if last_version is None: continue
-
             # Store the retrieved data
             self.__read_nodes_list_for_update.append(
                 (match.group(2), match.group(3),last_version,last_version_path, read_node))

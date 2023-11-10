@@ -1,14 +1,27 @@
 import os
 import shutil
 import nuke
+import re
+
+# Add the convert_to_hashes function
+def convert_to_hashes(file_path):
+    regex = re.compile(r'%0(\d)d')
+    def replace_with_hashes(match):
+        length = int(match.group(1))
+        return '#' * length
+    return regex.sub(replace_with_hashes, file_path)
 
 def run_before():
     global currentNode
     global original_file_path
+    global original_file_value
     global temp_path
 
     currentNode = nuke.thisNode()
     original_file_path = nuke.filename(currentNode)
+    original_file_value = currentNode['file'].getValue()
+    # Convert %0xd back to # placeholders
+    original_file_value = convert_to_hashes(original_file_value)
 
     base_filename = os.path.basename(original_file_path)
     sanitized_base_filename = base_filename.replace("#", "")
@@ -38,10 +51,9 @@ def run_after_each_frame():
 
         os.remove(temp_file_path)
 
-
-    if nuke.filename(currentNode) != original_file_path:
-        currentNode["file"].setValue(original_file_path.replace('\\', '/'))
+    # When setting the value back, ensure the # placeholders are restored
+    if nuke.filename(currentNode) != original_file_value:
+        currentNode["file"].setValue(convert_to_hashes(original_file_value))
 
 def run_after():
     shutil.rmtree(temp_dir)
-

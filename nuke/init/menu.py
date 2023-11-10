@@ -14,6 +14,7 @@ import LayerShuffler
 from auto_comp.AutoComp import AutoComp
 from nuke_scanner.NukeScanner import NukeScanner
 from nuke_scanner import select_unconnected_read
+from crypto import crypto_extract
 
 import cryptomatte_utilities
 import MultiChannelCombine
@@ -32,6 +33,7 @@ collectMenu.addCommand('Help', 'collectFiles.myBlog()')
 bloomMenu = nuke.menu("Nodes").addMenu("bloom","bloom.png")
 bloomMenu.addCommand("Delete unused render", "NukeScanner().run()")
 bloomMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
+bloomMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
 
 
 toolbar = nuke.toolbar("Nodes")
