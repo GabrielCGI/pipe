@@ -38,7 +38,7 @@ from .tool_instances.TraceSetTool import *
 from .tool_instances.SelectBigObjects import *
 from .tool_instances.SelectInvisibleObjects import *
 from .tool_instances.PrintAbcLayer import *
-
+from .tool_instances.ViewportShader import *
 # ######################################################################################################################
 
 _FILE_NAME_PREFS = "bug_out_bag"
@@ -71,7 +71,8 @@ class BobApp(QDialog):
                 TraceSetTool(),
                 SelectBigObjects(),
                 SelectInvisibleObjects(),
-                PrintAbcLayer()
+                PrintAbcLayer(),
+                ViewportShader()
             ]),
             BobCategory("Clean", self.__prefs, [
                 CleanFreezeTool(),
