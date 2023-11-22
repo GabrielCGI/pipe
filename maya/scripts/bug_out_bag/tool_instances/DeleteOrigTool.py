@@ -4,7 +4,7 @@ from ..tool_models.ActionTool import *
 class DeleteOrigTool(ActionTool):
     def __init__(self):
         super().__init__(name="Delete Orig", pref_name="delete_orig_tool",
-                         description="Delete orig objects of the selected objects", button_text="Delete")
+                         description="Delete intermediate objects of the selected objects", button_text="Delete")
         self.__selection = []
 
     def _action(self):

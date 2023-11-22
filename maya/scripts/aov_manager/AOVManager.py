@@ -114,7 +114,10 @@ class AOVManager(QDialog):
         # For Aovs Part
         self.__output_denoising = pm.ls("defaultArnoldRenderOptions")[0].outputVarianceAOVs.get() \
             if pm.objExists("defaultArnoldRenderOptions") else False
-        self.__mono_driver = 0
+        if pm.objExists('monoDriverOn'):
+            self.__mono_driver = 1
+        else:
+            self.__mono_driver = 0
         self.__active_aovs = []
         self.__available_aovs = {}
         self.__active_aovs_selected = []
@@ -710,6 +713,13 @@ class AOVManager(QDialog):
         :return:
         """
         self.__mono_driver = state == 2
+        if self.__mono_driver:
+            if not pm.objExists('monoDriverOn'):
+                pm.sets(name='monoDriverOn', empty=True)
+        if not self.__mono_driver:
+            if pm.objExists('monoDriverOn'):
+                pm.delete('monoDriverOn')
+
         self.__update_active_aovs()
 
     def __submit_light_group(self, lights=None, name=None):

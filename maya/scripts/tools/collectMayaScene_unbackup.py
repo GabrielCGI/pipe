@@ -7,7 +7,7 @@ import sys
 
 logger = logging.getLogger("CollectFiles")
 # Init variable
-localCacheFolder = "Z:/"
+localCacheFolder = "D:/"
 networkPath = "I:/"
 dirList = []  # List of full directory to copy
 assSequenceDir = []
@@ -80,7 +80,7 @@ def listAllAssPath():
                     print("Difference found. Updating " + dirname)
                     assListDir = list_full_paths(dirname)
                     allAssPath = allAssPath + assListDir
-                    writeTimeStamp(os.stat(dirname).st_mtime, getHotCacheDir(dirname))
+                    #writeTimeStamp(os.stat(dirname).st_mtime, getHotCacheDir(dirname))
                 else:
                     print("No folder difference found. Skipping  " + dirname)
 
@@ -92,7 +92,7 @@ def listAllAssPath():
 
 def copyFromTo(source, to):
     if source == to:
-        raise 
+        raise
     size_source = os.path.getsize(source)
     size_dest = 0
     # need to check scene exist before getting size
@@ -161,8 +161,8 @@ def run():
     i = 0
     for path in allPath:
         splitPath = path.split(":")
-        localPath = path.replace("I:/swarovski_2205","Z:/swaChristmas_2023")
-        localPath = localPath.replace("E:/swarovski_2205","Z:/swaChristmas_2023")
+        localPath = path.replace(networkPath,localCacheFolder)
+
         assetFilename = os.path.basename(path)
         # logger.info("Cache on farm asset: %s"%(assetFilename))
         print("Cache on farm asset: %s" % (assetFilename))
@@ -195,14 +195,4 @@ def run():
     print(str(counter_update) + " files updated")
     print(str(counter_skip) + " files skipped (already cached)")
 
-
-def copySceneFile():
-    path = cmds.file(q=True, sn=True)
-    splitPath = path.split(":")
-    print("paaath"+path)
-    localPath = path.replace("E:/swarovski_2205","Z:/swaChristmas_2023")
-
-    try:
-        copy = copyFromTo(path, localPath)
-    except Exception as e:
-        print("Oops!", e.__class__, "occurred.")
+run()

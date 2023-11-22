@@ -39,6 +39,7 @@ from .tool_instances.SelectBigObjects import *
 from .tool_instances.SelectInvisibleObjects import *
 from .tool_instances.PrintAbcLayer import *
 from .tool_instances.ViewportShader import *
+from .tool_instances.Orig import *
 # ######################################################################################################################
 
 _FILE_NAME_PREFS = "bug_out_bag"
@@ -72,7 +73,8 @@ class BobApp(QDialog):
                 SelectBigObjects(),
                 SelectInvisibleObjects(),
                 PrintAbcLayer(),
-                ViewportShader()
+                ViewportShader(),
+                Orig()
             ]),
             BobCategory("Clean", self.__prefs, [
                 CleanFreezeTool(),

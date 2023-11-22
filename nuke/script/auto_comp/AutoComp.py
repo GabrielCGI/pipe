@@ -33,7 +33,6 @@ _COLOR_GREY_DISABLE = 105,105,105
 
 # ######################################################################################################################
 
-
 class AutoComp(QWidget):
     @staticmethod
     def __is_correct_shot_folder(folder):
@@ -636,6 +635,7 @@ class AutoComp(QWidget):
         self.__retrieve_read_nodes_to_update()
         self.__refresh_update_reads_table()
 
+
     def __retrieve_read_nodes_to_update(self):
         """
         Refresh the read nodes list for the Update Reads Part
@@ -644,41 +644,39 @@ class AutoComp(QWidget):
         del self.__read_nodes_list_for_update[:]
         read_nodes = nuke.allNodes("Read")
 
+        if not read_nodes:
+            return  # Exit if no read nodes are found
+
+        # Updated pattern to include frame sequence capture
+        pattern = re.compile(r"(.*/render_out/[^/]+)/([^\.]+)\.([0-9]+)/([^/]+)(\.(\d{4})|\.%04d)\.exr")
+
         for read_node in read_nodes:
             path = read_node.knob("file").value().replace("\\", "/")
-            # Check the current path to retrieve the layer and current version
-            match = re.match(r"^([\w\/\:\.]+\/render_out\/(\w+))\/\w+\.([0-9]+)\/[\w\.%]+\.[a-z]+$", path)
-            if not match: continue
-            folder_versions = match.group(1)
-            if not os.path.isdir(folder_versions): continue
-            versions = sorted(os.listdir(folder_versions), reverse=True)
-            last_version = None
-            last_version_path = None
+            match = pattern.search(path)
 
-            # Retrieve the last version for the layer found
-            for version_dirname in versions:
-                version_dirpath = os.path.join(folder_versions,version_dirname)
-                for seq_file in os.listdir(version_dirpath):
-                    match_version = re.match(r"^("+version_dirname+")\.[0-9]{4}(\.\w+)$", seq_file)
-                    if match_version is not None:
-                        last_version = match_version.group(1).split(".")[-1]
+            if not match:
+                continue  # Skip the iteration if the pattern doesn't match
 
-                        utility = "_utility" if "utility" in path else ""
+            base_directory, parent_directory, version_number, shot_name, _, frame_sequence = match.groups()
+            base_var = base_directory.split('/')[-1]
+            shot_name = shot_name.split('.')[0]
+            frame_sequence = frame_sequence or "####"  # Default frame sequence
 
-                        last_version_path = \
-                            os.path.join(version_dirpath,
-                                         match_version.group(1)+utility+".####"+match_version.group(2)).replace("\\","/")
-                        break
-                if last_version is not None:
-                    break
-            if last_version is None: continue
+            entries = os.listdir(base_directory)
+            directories = [entry for entry in entries if os.path.isdir(os.path.join(base_directory, entry))]
+            directories.sort()
 
-            # Store the retrieved data
-            self.__read_nodes_list_for_update.append(
-                (match.group(2), match.group(3),last_version,last_version_path, read_node))
-        # Sort the data to have the out of date nodes at first and then alphabetically
-        self.__read_nodes_list_for_update = sorted(self.__read_nodes_list_for_update, reverse=True,
-                                                   key=lambda x: (x[1] == x[2], x[0]))
+            if not directories:
+                continue  # Skip if no directories found
+
+            last_directory = directories[-1]
+            last_version = last_directory.split('.')[-1]
+            utility = "_utility" if "utility" in path else ""
+
+            last_version_path = os.path.join(base_directory, parent_directory + "." + last_version, shot_name + "." + last_version + utility + "." + frame_sequence + ".exr").replace("\\", "/")
+
+            self.__read_nodes_list_for_update.append((base_var, version_number,last_version,last_version_path, read_node))
+            self.__read_nodes_list_for_update = sorted(self.__read_nodes_list_for_update, reverse=True, key=lambda x: (x[1] == x[2], x[0]))
 
     def __scan_layers(self):
         """
