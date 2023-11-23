@@ -56,37 +56,57 @@ class UnpackMode:
         return int(r * (1-darken_ratio)), int(g *(1-darken_ratio)), int(b *(1-darken_ratio))
 
     @staticmethod
+
     def get_last_seq_from_layer(layer_path):
         """
         Get the last sequence and utility sequence of a layer
-        :param layer_path
-        :return: seq_path, utility_path, start_frame, end_frame
+        :param layer_path: Path to the layer directory
+        :return: Tuple of sequence path, utility path, start frame number, and end frame number
         """
         if not os.path.isdir(layer_path):
-            print ("NOT A DIR ! %s "%(layer_path))
+            print("NOT A DIR ! %s" % layer_path)
             return None
-        for seq_name in reversed(os.listdir(layer_path)):
-            seq_dir_path = os.path.join(layer_path, seq_name)
-            if os.path.isdir(seq_dir_path):
-                start_frame = None
-                end_frame = None
-                utility_path = None
-                seq_path = None
-                for frame in os.listdir(seq_dir_path):
-                    match = re.match(r"^" + seq_name + r"(_utility)?\.([0-9]{4})\.exr$", frame)
-                    if match:
-                        if match.group(1) is None:
-                            frame_count = int(match.group(2))
-                            if frame_count < start_frame or start_frame is None:
-                                start_frame = frame_count
-                            if frame_count > end_frame or end_frame is None:
-                                end_frame = frame_count
-                            seq_path = os.path.join(seq_dir_path, seq_name + ".####.exr").replace("\\", "/")
-                            utility_path = os.path.join(seq_dir_path, seq_name + "_utility.####.exr").replace("\\", "/")
 
-                if seq_path is not None:
-                    return seq_path, utility_path, start_frame, end_frame
-        return None
+        # Find the last valid sequence directory
+        seq_dirs = [d for d in sorted(os.listdir(layer_path), reverse=True) 
+                    if os.path.isdir(os.path.join(layer_path, d))]
+
+        if not seq_dirs:
+            return None
+
+        seq_dir_path = os.path.join(layer_path, seq_dirs[0])
+        frame_files = os.listdir(seq_dir_path)
+
+        if frame_files and "still" in frame_files[0]:
+            pattern_str_tile = r"_tile_.*_" + re.escape(seq_dirs[0]) + r"(\.(\d{4}))?\.exr$"
+            tile_pattern = re.compile(pattern_str_tile)
+
+            matching_files = [f for f in frame_files if tile_pattern.match(f)]
+
+            seq_path = os.path.join(seq_dir_path, matching_files[0]).replace("\\", "/")
+            utility_path = os.path.join(seq_dir_path, seq_dirs[0] + "_utility.exr").replace("\\", "/")
+            start_frame = 1
+            end_frame = 1
+
+        else:
+            pattern_str = "^" + re.escape(seq_dirs[0]) + r"(_utility)?\.([0-9]{4})\.exr$"
+            frame_pattern = re.compile(pattern_str)
+
+            frames = [frame_pattern.match(f) for f in frame_files]
+            frames = [m.groups() for m in frames if m]
+
+            if not frames:
+                return None
+
+            # Determine the start and end frame numbers
+            start_frame = min(int(f[1]) for f in frames if f[0] is None)
+            end_frame = max(int(f[1]) for f in frames if f[0] is None)
+            
+            # Construct the paths for the sequence and utility files
+            seq_path = os.path.join(seq_dir_path, seq_dirs[0] + ".####.exr").replace("\\", "/")
+            utility_path = os.path.join(seq_dir_path, seq_dirs[0] + "_utility.####.exr").replace("\\", "/")
+
+        return seq_path, utility_path, start_frame, end_frame
 
     @staticmethod
     def __create_read_with_postage(name, seq_path, start_frame, end_frame):
