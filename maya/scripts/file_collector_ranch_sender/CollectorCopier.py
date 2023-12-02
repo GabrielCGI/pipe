@@ -22,7 +22,7 @@ except:
 
 # ######################################################################################################################
 
-_RANCH_CACHE_FOLDER = "I:/ranch/ranch_cache3"
+_RANCH_CACHE_FOLDER = "I:/ranch/ranch_cache4"
 _LOGS_FOLDER = "I:/ranch/logs"
 _MAX_NB_THREADs = 2
 
@@ -223,7 +223,7 @@ class CollectorCopier:
         list_files = pm.ls(type="file")
         list_images = pm.ls(type="aiImage")
         list_standins = pm.ls(type='aiStandIn')
-        list_refs = [] # DISABELING COPY OF REFERNECE BECAUSE RETRIEVE ALL VERSION OF THE REFERENCE CONFUSED LIKE A UDIM TEXTURES pm.ls(references=True)
+        list_refs = pm.ls(references=True) # DISABELING COPY OF REFERNECE BECAUSE RETRIEVE ALL VERSION OF THE REFERENCE CONFUSED LIKE A UDIM TEXTURES pm.ls(references=True)
         nb_tot = len(list_files) + len(list_images) + len(list_standins) + len(list_refs)
         paths = []
         # FILES
@@ -271,7 +271,8 @@ class CollectorCopier:
                 self.__output("| " + str(count_path) + "/" + str(nb_tot) +
                               " - Error Reference node not associated to reference file : " + ref)
                 continue
-            reference_paths = self.__retrieve_dependent_paths(path)
+            #reference_paths = self.__retrieve_dependent_paths(path) //skip dependt_path caussing wip version to be considered as udim
+            reference_paths = [path]
             if len(reference_paths)==0:
                 self.__output("| " + str(count_path) + "/" + str(nb_tot) +
                               " - Error Reference path do not exists : " + path)

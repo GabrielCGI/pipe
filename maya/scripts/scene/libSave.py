@@ -5,6 +5,7 @@ import shutil
 import maya.mel as mel
 import sys
 import doctor_utils as doc
+import replace_by_tx2
 
 tasks = ["shading","fur","animation","anim","mod","modeling","model","fx","rigging","rig"]
 def isInt(s):
@@ -151,13 +152,38 @@ def wipSave():
     return
 
 
+def replace_references_path_with_variable():
+    # Get all references in the scene
+    all_references = cmds.ls(type='reference')
+
+    for ref in all_references:
+        # Skip the default reference and any reference not associated with a file
+        if "sharedReferenceNode" in ref or "UNKNOWN" in ref:
+            print("skip"+ref)
+            continue
+
+        ref_node = cmds.referenceQuery(ref, referenceNode=True)
+        # Check if the reference is a top-level reference
+        # If it has no parent reference, it's a top-level reference
+        if cmds.referenceQuery(ref, parent=True, referenceNode=True) is None:
+            # Get the file path of the reference
+            ref_file = cmds.referenceQuery(ref, filename=True)
+
+            # Replace "I:" with "$DISK_I" in the file path
+            new_ref_file = ref_file.replace('I:', '$DISK_I')
+            print ("Replaced ref path with: new_ref_file ")
+            # Load the reference with the new path
+            cmds.file(new_ref_file, loadReference=ref)
+
 
 def libSave():
     """
     Save the file "on the spot". Make a backup in oldfile.
     If the scene is a Wip, transform as lib
     """
+
     wipSave()
+    replace_references_path_with_variable()
 
 
     _sSourcePath = cmds.file(q=True, sceneName=True)
@@ -194,6 +220,7 @@ def libSave():
         doc.fixcolorSpaceUnknown()
         badColorSpaceTex = doc.getBadColorSpaceTex()
         doc.fixColorSpace(badColorSpaceTex)
+        replace_by_tx2.all_to_tx()
         msg= "Auto cleaning the scene: Delete extra camera, Optimize scene size, Textures colorspaces checking"
         cmds.warning(msg)
 

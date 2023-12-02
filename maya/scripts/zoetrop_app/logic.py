@@ -121,7 +121,7 @@ class Zoetrop():
         if input_plug:
             pm.disconnectAttr(input_plug[0], node.rotateY)
 
-        for frame in range(0, 301):  # Including 300, hence 301 as the stop value
+        for frame in range(0, 501):  # Including 300, hence 301 as the stop value
             rot_value = math.floor(frame / loop.modulo) * loop.angle
             node.rotateY.setKey(time=frame, value=rot_value)
             pm.keyTangent(node, edit=True, time=(frame,), attribute='rotateY', inTangentType='linear', outTangentType='linear')
