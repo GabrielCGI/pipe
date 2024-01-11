@@ -45,7 +45,7 @@ def maya_main_window():
 
 
 #current_project="D:/gabriel/assetizer"
-project_list = ["D:/","I:/swaMarvel_2309","I:/swaValentine_2310","I:/dubuis_2312"]
+project_list = ["I:/swaChristmas_2023","I:/swaNY_2308","I:/swaDisney_2307","D:/","I:/swaAlice_2309","I:/swaMarvel_2309","I:/swaValentine_2310"]
 AddIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_AddIcon.png"
 BackIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_BackIcon.png"
 FolderIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_FolderIcon.png"
@@ -179,9 +179,6 @@ class AssetBrowser(QtWidgets.QDialog):
         self.button_mode_shot = QtWidgets.QPushButton("Shot")
         self.button_mode_shot.setCheckable(True)
         self.button_mode_shot.setMaximumWidth(130)
-        self.button_mode_ressource = QtWidgets.QPushButton("Ressources")
-        self.button_mode_ressource.setCheckable(True)
-        self.button_mode_ressource.setMaximumWidth(130)
 
         #Add New item buttons
         self.button_add_new = QtWidgets.QPushButton("")
@@ -294,7 +291,6 @@ class AssetBrowser(QtWidgets.QDialog):
 
         self.topLayout.addWidget(self.button_mode_asset)
         self.topLayout.addWidget(self.button_mode_shot)
-        self.topLayout.addWidget(self.button_mode_ressource)
         self.topLayout.addWidget(self.button_add_new)
         self.topLayout.addWidget(self.comboBox_current_prod)
 
@@ -344,7 +340,6 @@ class AssetBrowser(QtWidgets.QDialog):
         #Connect asset and shot buttons
         self.button_mode_asset.clicked.connect(self.button_mode_asset_clicked)
         self.button_mode_shot.clicked.connect(self.button_mode_shot_clicked)
-        self.button_mode_ressource.clicked.connect(self.button_mode_ressource_clicked)
         self.button_add_new.clicked.connect(self.button_add_new_clicked)
 
         self.reference_button.clicked.connect(self.reference_clicked)
@@ -576,27 +571,24 @@ class AssetBrowser(QtWidgets.QDialog):
         self.rebuild_package_list()
 
     def button_mode_asset_clicked(self):
-        self.mode = "assets"
-        self.all_packages_dir = os.path.join(self.current_project,"assets")
-        self.rebuild_package_list()
-        self.button_mode_shot.setChecked(False)
-        self.button_mode_ressource.setChecked(False)
+        if self.button_mode_asset.isChecked() and self.button_mode_shot.isChecked() ==True:
+            self.mode = "assets"
+            self.all_packages_dir = os.path.join(self.current_project,"assets")
+            self.rebuild_package_list()
+            self.button_mode_shot.setChecked(False)
+        else:
+            self.button_mode_asset.setChecked(True)
+            pass
 
     def button_mode_shot_clicked(self):
-
-        self.mode = "shots"
-        self.all_packages_dir = os.path.join(self.current_project,"shots")
-        self.rebuild_package_list()
-        self.button_mode_asset.setChecked(False)
-        self.button_mode_ressource.setChecked(False)
-
-    def button_mode_ressource_clicked(self):
-        self.mode = "ressources"
-        self.all_packages_dir = os.path.join(self.current_project,"ressources")
-        self.rebuild_package_list()
-        self.button_mode_asset.setChecked(False)
-        self.button_mode_shot.setChecked(False)
-
+        if self.button_mode_shot.isChecked() and self.button_mode_asset.isChecked() ==True:
+            self.mode = "shots"
+            self.all_packages_dir = os.path.join(self.current_project,"shots")
+            self.rebuild_package_list()
+            self.button_mode_asset.setChecked(False)
+        else:
+            self.button_mode_shot.setChecked(True)
+            pass
     def current_prod_changed(self):
 
         self.current_project = self.comboBox_current_prod.currentText()

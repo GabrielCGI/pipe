@@ -7,7 +7,7 @@ import sys
 
 logger = logging.getLogger("CollectFiles")
 # Init variable
-localCacheFolder = "I:/guerlain_cache"
+localCacheFolder = "I:/ranch/ranch_cache4"
 networkPath = "I:/"
 dirList = []  # List of full directory to copy
 assSequenceDir = []
@@ -100,7 +100,10 @@ def copyFromTo(source, to):
         pass
     kind = ""
     os.makedirs(os.path.dirname(to), exist_ok=True)
-
+    if (not os.path.exists(source)):
+        print("Source does not exist - skipping:" + source + " ---> " + to + "\n")
+        kind = "skipped"
+        return kind
     # CHECK 1 !
     if (not os.path.exists(to)):
         try:
@@ -141,7 +144,13 @@ def run():
     print("------------------------------------------------")
     print("\n")
     allMayaFile = cmds.file(list=True, q=True)
+    allMayaFile = [s for s in allMayaFile if not s.startswith("R:/")]
+    for pathFile in allMayaFile:
+        print("Found: "+pathFile)
     allAssFile = listAllAssPath()
+    print("List ass path done")
+    for pathass in allAssFile:
+        print("Found: "+pathass)
     allPath = allMayaFile + allAssFile
 
     # print ("LIST OF ASSET FOUND:")
@@ -152,11 +161,8 @@ def run():
     counter_skip = 0
     copy = ""
 
-    cmds.progressWindow(title='Stepped Progress Bar', progress=0, status='Local asset caching:', isInterruptable=False)
-    limit = len(allPath)
-    print("Total path: " + str(limit))
-    step = 10
-    i = 0
+
+
     for path in allPath:
         splitPath = path.split(":")
         localPath = localCacheFolder + "/" + splitPath[0] + splitPath[-1]
@@ -179,12 +185,7 @@ def run():
             counter_skip += 1
         print("------------------------------------------------")
 
-        i += 1
-        progress = 100.0 / limit * i
-        if progress % step:
-            continue
-        cmds.progressWindow(e=1, progress=progress, status='Local asset caching')
-    cmds.progressWindow(endProgress=1)
+
 
     print("\n")
     print("Done !")

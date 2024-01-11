@@ -20,11 +20,11 @@ SET MAYA_DISABLE_CER=1
 
 rem \---- Shelf
 SET MAYA_SHELF_PATH=%PIPELINE_DIR_MAYA%\shelfs
-SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons\swaMarvel;%PIPELINE_DIR_MAYA%\icons
+SET XBMLANGPATH=%PIPELINE_DIR_MAYA%\icons\dubuis;%PIPELINE_DIR_MAYA%\icons
 
 rem \---- ARNOLD SETUP
 
-SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.2.4.1\maya2022;
+SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;%NETWORK_INSTALL%\arnold\7.2.5.0\maya2022;
 
 rem \ MAYA SECURITY TOOL
 SET MAYA_MODULE_PATH=%MAYA_MODULE_PATH%;R:\pipeline\networkInstall\MayaScanner;
@@ -44,9 +44,9 @@ rem \----DEADLINE
 SET MAYA_SCRIPT_PATH=%MAYA_SCRIPT_PATH%;R:\deadline\submission\Maya\Client;
 
 
-SET CURRENT_PROJECT=swaMarvel_2309
-SET CURRENT_PROJECT_DIR=I:/swaMarvel_2309
-SET ASSETS_DIR=I:/swaMarvel_2309/assets
+SET CURRENT_PROJECT=dubuis_2312
+SET CURRENT_PROJECT_DIR=I:/dubuis_2312
+SET ASSETS_DIR=I:/dubuis_2312/assets
 SET DISK_I=I:
 REM == Start maya and launch statupSettings (FPS, Unit ect...)
 start C:\"Program Files"\Autodesk\Maya2022\bin\maya.exe -file %1 -command "python(\"import startupSettings\"); python (\"startupSettings.run()\")"  %*

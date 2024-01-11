@@ -106,6 +106,7 @@ class CollectorCopier:
         Save datas during the collect phase
         :return:
         """
+        self.__output("\n+- BUILDING DATA JSON -----")
         collector_copier_dict = {
             "datas": self.__datas,
             "scene_path": self.__scene_path,
@@ -115,6 +116,7 @@ class CollectorCopier:
         f = open(self.__data_file_name, "w")
         f.write(json_dict)
         f.close()
+        self.__output("\n+- BUILDING DATA JSON SUCCES ! -----")
 
     def __retrieve_datas(self, file_data_path):
         """
@@ -122,6 +124,7 @@ class CollectorCopier:
         :param file_data_path
         :return:
         """
+
         self.__data_file_name = file_data_path
         f = open(self.__data_file_name, "r")
         json_dict = f.read()
@@ -132,6 +135,7 @@ class CollectorCopier:
         self.__scene_path = collector_copier_dict["scene_path"] if "scene_path" in collector_copier_dict else ""
         self.__log_file_name = collector_copier_dict[
             "file_logs_name"] if "file_logs_name" in collector_copier_dict else ""
+
         self.__reinit_copy_attributes()
 
     def __output(self, msg, print_msg=True):
@@ -650,6 +654,7 @@ class CollectorCopier:
         # COPY
         self.__store_datas()
 
+
         # Out of Maya Window
         dirname = os.path.dirname(__file__)
         si = subprocess.STARTUPINFO()
@@ -667,11 +672,21 @@ class CollectorCopier:
         :param file_data_path:
         :return:
         """
+        print ("RETRIVED DATA START")
         self.__retrieve_datas(file_data_path)
+        print ("RETRIVED DATA END")
+        print ("START LOG")
         self.__start_log()
+        print ("START END")
+        print ("START THREAD LOG")
         self.__start_thread_log()
+        print ("START THREAD LOG END ")
+        print ("__generate_ranged_cache_dest")
         self.__generate_ranged_cache_dest()
+        print ("__generate_ranged_cache_dest END")
+        print ("START COPY")
         self.__copy()
+        print ("START COPY END")
         self.__footer_log()
         self.__stop_thread_log()
         self.__stop_log()

@@ -19,6 +19,11 @@ class Gate(MultipleActionTool):
                 "text": "9:16",
                 "action": self.__ver,
                 "row": 0
+            },
+            "del": {
+                "text": "Remove",
+                "action": self.__del,
+                "row": 0
             }
         }
         super().__init__(name="Gate tool", pref_name="gate_tool",
@@ -28,20 +33,35 @@ class Gate(MultipleActionTool):
 
     def __square(self):
         # TODO Enter the code you want the tool to execute on action 1
-        print("Action 1")
         # Usage
         image_path = "R:/pipeline/pipe/maya/scripts/bug_out_bag/textures/square.png"
         self.create_imageplane(image_path)
     def __hor(self):
-        print("Action 2")
         # Usage
         image_path = "R:/pipeline/pipe/maya/scripts/bug_out_bag/textures/hor.png"
         self.create_imageplane(image_path)
     def __ver(self):
-        print("Action 3")
         # Usage
         image_path = "R:/pipeline/pipe/maya/scripts/bug_out_bag/textures/ver.png"
         self.create_imageplane(image_path)
+    def __del(self):
+        # List all image plane nodes
+        image_planes = pm.ls(type='imagePlane')
+
+        if not image_planes:
+            print("No image planes found.")
+            return
+
+        # Loop through each image plane and try to delete
+        for img_plane in image_planes:
+            try:
+                pm.delete(img_plane)
+                print(f"Deleted image plane: {img_plane}")
+            except Exception as e:
+                print(f"Failed to delete {img_plane}: {e}")
+
+        print("Image plane deletion process complete.")
+
 
     def create_imageplane(self, image_path):
 

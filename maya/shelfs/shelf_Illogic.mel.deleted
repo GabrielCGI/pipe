@@ -1,0 +1,965 @@
+global proc shelf_Illogic () {
+    global string $gBuffStr;
+    global string $gBuffStr0;
+    global string $gBuffStr1;
+
+
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "BOB" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "BOB" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/bob.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/bob.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"bug_out_bag\")\nimportlib.import_module(\"bug_out_bag\")\nfrom bug_out_bag.BobApp import BobApp\ntry:\n    bob.close()\nexcept:\n    pass\nbob = BobApp()\nbob.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Renderer Diagnosis" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Renderer Diagnosis" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/renderer_diagnosis.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/renderer_diagnosis.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"renderer_diagnosis\")\nimportlib.import_module(\"renderer_diagnosis\")\nfrom renderer_diagnosis.RendererDiagnosis import RendererDiagnosis\ntry:\n    rend_diagnos.close()\nexcept:\n    pass\nrend_diagnos = RendererDiagnosis()\nrend_diagnos.show()\n" 
+        -sourceType "python" 
+        -doubleClickCommand "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"renderer_diagnosis\")\nimportlib.import_module(\"renderer_diagnosis\")\nfrom renderer_diagnosis.RendererDiagnosis import RendererDiagnosis\ntry:\n    rend_diagnos.close()\nexcept:\n    pass\nrend_diagnos = RendererDiagnosis()\nrend_diagnos.show()\n" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Control Room" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Control Room" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/control_room.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/control_room.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"control_room\")\nimportlib.import_module(\"control_room\")\nfrom control_room.ControlRoom import ControlRoom\ntry:\n    control_room.close()\nexcept:\n    pass\ncontrol_room = ControlRoom()\ncontrol_room.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Deadline Ranch Submit" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Deadline Ranch Submit" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/custom_deadline_submit.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/custom_deadline_submit.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import simple_maya_to_deadline\nimport importlib\nimportlib.reload(simple_maya_to_deadline)\n\nsimple_maya_to_deadline.run()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Asset Browser" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Asset Browser" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/asset_browser.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/asset_browser.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import assetBrowser\nimport importlib\nimportlib.reload(assetBrowser)\n\ntry:\n    ui.deleteLater()\nexcept:\n    pass\nui = assetBrowser.AssetBrowser()\nui.create()\nui.show()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "ABC Export" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "ABC Export" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/abc_export.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/abc_export.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"abc_export\")\nimportlib.import_module(\"abc_export\")\nfrom abc_export.ABCExport import ABCExport\ntry:\n    abc_export.close()\nexcept:\n    pass\nabc_export = ABCExport()\nabc_export.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "ABC Import" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "ABC Import" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/abc_import.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/abc_import.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"abc_import\")\nimportlib.import_module(\"abc_import\")\nfrom abc_import.ABCImport import ABCImport\ntry:\n    abc_import.close()\nexcept:\n    pass\nabc_import = ABCImport()\nabc_import.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Publish To DATABASE" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Publish Database" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "data" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "BookmarkDown.png" 
+        -image1 "BookmarkDown.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from abc_export import publish_to_database\n\nimport importlib\nimportlib.reload(publish_to_database)\n\npublish_to_database.createNewAsset()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Look Loader" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Look Loader" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/look_loader.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/look_loader.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"look_loader\")\nimportlib.import_module(\"look_loader\")\nfrom look_loader.LookLoader import LookLoader\ntry:\n    look_loader.close()\nexcept:\n    pass\nlook_loader = LookLoader()\nlook_loader.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Character Publisher" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Character Publisher" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/character_publisher.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/character_publisher.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"character_publisher\")\nimportlib.import_module(\"character_publisher\")\nfrom character_publisher.CharacterPublisher import CharacterPublisher\ntry:\n    char_publisher.close()\nexcept:\n    pass\nchar_publisher = CharacterPublisher()\nchar_publisher.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Proxy Prepper" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Proxy Prepper" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "box.ico" 
+        -image1 "box.ico" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import sys\nsys.path.append(\"R:/pipeline/pipe/maya/scripts/assetizer_pymel\")\n\nimport proxy_prepper_ui_pymel\nimport importlib\nimportlib.reload( proxy_prepper_ui_pymel)\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Asset Publisher" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Asset Publisher" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "box_publish.ico" 
+        -image1 "box_publish.ico" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import sys\nsys.path.append(\"R:/pipeline/pipe/maya/scripts/assetizer_pymel\")\nimport assetPublisher_ui_pymel\n\nimport importlib\nimportlib.reload(assetPublisher_ui_pymel)\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Asset Loader" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Asset Loader" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/box_lib.ico" 
+        -image1 "R:/pipeline/pipe/maya/icons/box_lib.ico" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"asset_loader\")\nimportlib.import_module(\"asset_loader\")\nfrom asset_loader.AssetLoader import AssetLoader\ntry:\n    app.close()\nexcept:\n    pass\napp = AssetLoader()\napp.show()\n\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "AOV Manager" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "AOV Manager" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/aov_manager.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/aov_manager.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"aov_manager\")\nimportlib.import_module(\"aov_manager\")\nfrom aov_manager.AOVManager import AOVManager\ntry:\n    aov_manager.close()\nexcept:\n    pass\naov_manager = AOVManager()\naov_manager.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Shader Maker" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Shader Maker" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/shader_maker.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/shader_maker.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"shader_maker\")\nimportlib.import_module(\"shader_maker\")\nfrom shader_maker.ShaderMaker import ShaderMaker\ntry:\n    shader_maker.close()\nexcept:\n    pass\nshader_maker = ShaderMaker()\nshader_maker.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Light Texture Picker" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Light Texture Picker" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/light_texture_picker.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/light_texture_picker.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"lights_texture_picker\")\nimportlib.import_module(\"lights_texture_picker\")\nfrom lights_texture_picker.LightTexturePicker import LightTexturePicker\ntry:\n    ltp.close()\nexcept:\n    pass\nltp = LightTexturePicker()\nltp.show()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Unknown Plugin Scanner" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Unknown Plugin Scanner" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/unknown_plugin_scanner.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/unknown_plugin_scanner.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"unknown_plugin_scanner\")\nimportlib.import_module(\"unknown_plugin_scanner\")\n\nfrom unknown_plugin_scanner.UnknownPluginScanner import UnknownPluginScanner\ntry:\n    unknown_plugin_scanner.close()\nexcept:\n    pass\nunknown_plugin_scanner = UnknownPluginScanner()\nunknown_plugin_scanner.show()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Style Dreamer" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Style Dreamer" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/style_dreamer.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/style_dreamer.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\nutils.unload_packages(silent=True, package=\"style_dreamer\")\nimportlib.import_module(\"style_dreamer\")\nfrom style_dreamer.StyleDreamer import StyleDreamer\ntry:\n    style_dreamer.close()\nexcept:\n    pass\n\n# ##################################################################################################################\n\n__SERVER_HOST = \"http://192.168.0.27:7860\"\n\n# ##################################################################################################################\n\nstyle_dreamer = StyleDreamer(__SERVER_HOST)\nstyle_dreamer.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "mAIrus" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "mAIrus" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/mAIrus.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/mAIrus.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\n\nfrom common import utils\nutils.unload_packages(silent=True, package=\"mAIrus\")\nimportlib.import_module(\"mAIrus\")\nfrom mAIrus.MAIrus import MAIrus\ntry:\n    mAIrus_tool.close()\nexcept:\n    pass\n\n# ##################################################################################################################\n\n__PATH_TO_OPENAI_KEY = r\"R:\\pipeline\\networkInstall\\openai\\openai_key\"\n\n# ##################################################################################################################\n\nmAIrus_tool = MAIrus(__PATH_TO_OPENAI_KEY)\nmAIrus_tool.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Studio Toggle" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Studio Toggle" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/studio.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/studio.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"studio\")\nimportlib.import_module(\"studio\")\nfrom studio import studio_loader\nstudio_loader.run()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Asset Linker Cornea" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Asset Linker Cornea" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/ass_link_cornea.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/ass_link_cornea.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"ass_link_cornea\")\nimportlib.import_module(\"ass_link_cornea\")\nfrom ass_link_cornea import ass_link_cornea\nass_link_cornea.run()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Notion" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Notion" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/notion.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/notion.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import webbrowser\n\nurl = \"https://illogic.notion.site/Wiki-2f062f644c404c19b3f74aca2f7aab05\"  # Replace with your desired URL\nwebbrowser.open(url)\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Zoetrop" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Zoetrop" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/zoetrop2.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/zoetrop2.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from zoetrop_app import ui\nfrom zoetrop_app import logic\n\nimport importlib\nimportlib.reload(ui)\nimportlib.reload(logic)\n\ntry:\n    zoetrop_ui.close()\nexcept:\n    pass\nzoetrop_ui = ui.CustomUI()\nzoetrop_ui.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import garland\n\nimport importlib\nimportlib.reload(garland)\n\n\ntry:\n    ui.close()\nexcept:\n    pass\nui = garland.CustomUI()\nui.show()\n" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import garland\n\nimport importlib\nimportlib.reload(garland)\n\n\ntry..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "LightDown.png" 
+        -image1 "LightDown.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import garland\n\nimport importlib\nimportlib.reload(garland)\n\n\ntry:\n    ui.close()\nexcept:\n    pass\nui = garland.CustomUI()\nui.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "from megaload import megaload\nimport importlib\nimportlib.reload(megaload)\n\ntry:\n    ui.deleteLater()\nexcept:\n    pass\nui = megaload.Megaload()\nui.create()\nui.show()" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "h" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/megaload.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/megaload.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "from megaload import megaload\nimport importlib\nimportlib.reload(megaload)\n\ntry:\n    ui.deleteLater()\nexcept:\n    pass\nui = megaload.Megaload()\nui.create()\nui.show()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Enable autosave" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "def setup_autosave():\n    autosave_dir = \"D:/_save_maya\"\n    if ..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "AUTO" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "save.png" 
+        -image1 "save.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "def setup_autosave():\n    autosave_dir = \"D:/_save_maya\"\n    if not os.path.exists(autosave_dir):\n        try:\n            os.makedirs(autosave_dir)\n            destination = 1\n        except:\n            destination = 0\n\n    cmds.autoSave(enable=True)\n    cmds.autoSave(limitBackups=True)\n    cmds.autoSave(maxBackups=5)\n    cmds.autoSave(destination=1)  # 1 for local directory\n    cmds.autoSave(folder=autosave_dir)\n    cmds.confirmDialog(message=\"Auto save on!\")\nsetup_autosave()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import animPublishValentine\nimport importlib\nimportlib.reload(animPublishValentine)\n\nanimPublishValentine.main()" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import animPublishValentine\nimport importlib\nimportlib.reload(an..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "LIB" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "animPrefsWndIcon.png" 
+        -image1 "animPrefsWndIcon.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import animPublishValentine\nimport importlib\nimportlib.reload(animPublishValentine)\n\nanimPublishValentine.main()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "\nimport importlib\nimport replace_by_tx\n\nfrom common import utils\nutils.unload_packages(silent=True, package=\"file_collector_ranch_sender\")\nimportlib.import_module(\"file_collector_ranch_sender\")\nfrom file_collector_ranch_sender import maya_to_deadline_ranch\n\n################################################################################################\n\n# Force deletion and creation of a new file \".paths\" next to ABCs to track path dependencies\n__FORCE_OVERRIDE_ASS_PATHS_FILES = False\n\n################################################################################################\n\nmaya_to_deadline_ranch.run(__FORCE_OVERRIDE_ASS_PATHS_FILES)" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "\nimport importlib\nimport replace_by_tx\n\nfrom common import utils..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "RANCH" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "pythonFamily.png" 
+        -image1 "pythonFamily.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "\nimport importlib\nimport replace_by_tx\n\nfrom common import utils\nutils.unload_packages(silent=True, package=\"file_collector_ranch_sender\")\nimportlib.import_module(\"file_collector_ranch_sender\")\nfrom file_collector_ranch_sender import maya_to_deadline_ranch\n\n################################################################################################\n\n# Force deletion and creation of a new file \".paths\" next to ABCs to track path dependencies\n__FORCE_OVERRIDE_ASS_PATHS_FILES = False\n\n################################################################################################\n\nmaya_to_deadline_ranch.run(__FORCE_OVERRIDE_ASS_PATHS_FILES)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+
+} 
