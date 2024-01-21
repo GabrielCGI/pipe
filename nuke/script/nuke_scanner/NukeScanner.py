@@ -178,6 +178,7 @@ class NukeScanner:
         if len(dict_rename_folders)>0:
             if ConfirmationNukeScanner(render_out_folder, dict_rename_folders).exec_():
                 for folder_path,new_path in dict_rename_folders.items():
+                    print("RENAMING %s -> %s"%(folder_path, new_path))
                     os.rename(folder_path, new_path)
                     print(folder_path + "\n\t--> " + new_path)
 a=NukeScanner()
