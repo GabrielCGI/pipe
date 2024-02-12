@@ -674,6 +674,7 @@ global proc shelf_Illogic () {
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
+        -imageOverlayLabel "old" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
         -image "R:/pipeline/pipe/maya/icons/studio.png" 
@@ -682,6 +683,74 @@ global proc shelf_Illogic () {
         -marginWidth 0
         -marginHeight 1
         -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"studio\")\nimportlib.import_module(\"studio\")\nfrom studio import studio_loader\nstudio_loader.run()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\ncmds.file( 'R:/lib/3d/studio_v2/studio_v2.mb', r=True )\n#cmds.file( 'R:/lib/3d/studio/studio.mb', rr=True )" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\ncmds.file( 'R..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/studiov2.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/studiov2.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\ncmds.file( 'R:/lib/3d/studio_v2/studio_v2.mb', r=True )\n#cmds.file( 'R:/lib/3d/studio/studio.mb', rr=True )" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\n\ncmds.file( 'R:/lib/3d/studio_v2/studio_v2.mb', rr=True )" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\n\ncmds.file( '..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/studiov2off.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/studiov2off.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\n\ncmds.file( 'R:/lib/3d/studio_v2/studio_v2.mb', rr=True )" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

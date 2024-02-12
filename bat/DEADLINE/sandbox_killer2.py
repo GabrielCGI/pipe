@@ -65,15 +65,19 @@ def main():
         print(f"The last modified file is: {latest_file}")
         target_string = "SandboxedPlugin still waiting for SandboxThread to exit"
         new_check_string = "Skipping thermal shutdown check because it is not required at this time"
+        string_Natron_fail = "Render aborted"
         check_string = check_string_in_file(latest_file, target_string)
         check_last_two = check_last_two_lines(latest_file, new_check_string)
+        check_string_natron = check_string_in_file(latest_file,string_Natron_fail)
 
-        if check_string or check_last_two:
+
+        if check_string or check_last_two or check_string_natron:
             print("##########################################")
             print("##########################################")
             print("##########################################")
             print ("check_string_in_file (found if true):"+ str(check_string))
             print("check_last_two_lines: (found if true) "+ str(check_last_two))
+            print("check_string_natron: (found if true) "+ str(check_string_natron))
             print("##########################################")
             print("##########################################")
             print("##########################################")

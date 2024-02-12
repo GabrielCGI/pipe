@@ -41,6 +41,8 @@ from .tool_instances.PrintAbcLayer import *
 from .tool_instances.ViewportShader import *
 from .tool_instances.Orig import *
 from .tool_instances.Gate import *
+from .tool_instances.IsolateTool import *
+from .tool_instances.FaceFromShader import *
 # ######################################################################################################################
 
 _FILE_NAME_PREFS = "bug_out_bag"
@@ -76,7 +78,9 @@ class BobApp(QDialog):
                 PrintAbcLayer(),
                 ViewportShader(),
                 Orig(),
-                Gate()
+                Gate(),
+                IsolateTool(),
+                FaceFromShader()
             ]),
             BobCategory("Clean", self.__prefs, [
                 CleanFreezeTool(),
