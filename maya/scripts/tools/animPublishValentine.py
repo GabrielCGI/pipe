@@ -84,6 +84,6 @@ def main():
     print("SUCCES !\n %s"%destination_path)
     destination_path_abc = build_lib_path_and_backup(".abc")
     print(destination_path_abc)
-    abcExport(destination_path_abc)
-    print("SUCCES !\n %s"%destination_path_abc)
+    #abcExport(destination_path_abc)
+    #print("SUCCES !\n %s"%destination_path_abc)
     pm.warning("Export succes ! %s"%destination_path)

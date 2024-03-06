@@ -224,6 +224,8 @@ def libSave():
         cmds.warning(msg)
 
         if makeBackup(libpath):
+            mel.eval('IncrementAndSave;')
+            print("// Saved !")
             pm.exportSelected(libpath, preserveReferences=True,type="mayaBinary")
 
             print("// Result: %s"%(libpath))
