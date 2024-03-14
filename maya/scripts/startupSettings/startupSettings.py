@@ -1,6 +1,7 @@
 import maya.cmds as cmds
 import pymel.core as pm
 import assetBrowser
+import webbrowser
 
 
 
@@ -17,8 +18,10 @@ def run():
     cmds.pluginInfo("MayaScannerCB.py", edit=True, autoload=True)
 
     # HACK TO FORCE PLUGIN PREFS AUTOLOADING
-
-
+    url = "https://illogic-studios.cg-wire.com/"  # Replace with your desired URL
+    webbrowser.open(url)
+	
+	
 
 
     cmds.evalDeferred(
