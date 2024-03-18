@@ -390,6 +390,8 @@ class AssetBrowser(QtWidgets.QDialog):
         current_item = self.second_Qlist.currentItem()
         if current_item is not None:
             text = current_item.text()
+            if not self.package.dir:
+                return
             departement_dir = os.path.join(self.package.dir,text)
             if self.second_Qlist_refresh:
                 if departement_dir:
@@ -473,6 +475,8 @@ class AssetBrowser(QtWidgets.QDialog):
 
         #rebuild sub directory
         parent =  self.second_Qlist.currentItem().data(QtCore.Qt.UserRole)
+        if not parent:
+            return
         subDir = parent_dir.replace(parent,'')
         subDir = subDir[1:]
         self.dirText.setText(subDir)
@@ -591,8 +595,27 @@ class AssetBrowser(QtWidgets.QDialog):
         self.button_mode_ressource.setChecked(False)
 
     def button_mode_ressource_clicked(self):
-        self.mode = "ressources"
-        self.all_packages_dir = os.path.join(self.current_project,"ressources")
+
+        # Try "ressources" first
+        potential_dir = os.path.join(self.current_project, "ressources")
+        if os.path.exists(potential_dir):
+            self.mode = "ressources"
+        else:
+            # If "ressources" doesn't exist, try "ressource"
+            potential_dir = os.path.join(self.current_project, "ressource")
+
+            if os.path.exists(potential_dir):
+                self.mode = "ressource"
+
+            else:
+                # If neither exists, handle it accordingly (e.g., log an error, create the directory, etc.)
+                print("Neither 'ressources' nor 'ressource' directory exists.")
+                # For example, to create 'ressources' if neither exists (optional):
+                # os.makedirs(potential_dir)
+                # self.mode = "ressources"
+                return  # Early return to avoid setting all_packages_dir to a non-existing path
+
+        self.all_packages_dir = potential_dir
         self.rebuild_package_list()
         self.button_mode_asset.setChecked(False)
         self.button_mode_shot.setChecked(False)
@@ -652,9 +675,10 @@ class AssetBrowser(QtWidgets.QDialog):
     def screenB_enability(self):
 
         full_path = cmds.file(query=True, sceneName=True)
-        package_path = self.package.dir.replace("\\",'/')
+        if self.package.dir:
+            package_path = self.package.dir.replace("\\",'/')
 
-        self.screenshotB.setEnabled(package_path in full_path)
+            self.screenshotB.setEnabled(package_path in full_path)
 
 
     def import_clicked(self):

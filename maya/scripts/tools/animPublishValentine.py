@@ -1,4 +1,6 @@
 import pymel.core as pm
+import maya.cmds as cmds
+import maya.mel as mel
 import os
 import shutil
 from datetime import datetime
@@ -39,6 +41,32 @@ def build_lib_path_and_backup(extension):
         print(f'Existing file backed up to {backup_path}')
     return destination_path
 
+def replace_references_path_with_variable():
+    # Get all references in the scene
+    all_references = cmds.ls(type='reference')
+
+    for ref in all_references:
+        # Skip the default reference and any reference not associated with a file
+        if "sharedReferenceNode" in ref or "UNKNOWN" in ref:
+            print("skip"+ref)
+            continue
+
+        ref_node = cmds.referenceQuery(ref, referenceNode=True)
+        # Check if the reference is a top-level reference
+        # If it has no parent reference, it's a top-level reference
+        if cmds.referenceQuery(ref, parent=True, referenceNode=True) is None:
+            # Get the file path of the reference
+            ref_file = cmds.referenceQuery(ref, filename=True, unresolvedName=True)
+            print (ref_file)
+
+            # Replace "I:" with "$DISK_I" in the file path
+            new_ref_file = ref_file.replace('I:', '$DISK_I')
+            print(new_ref_file)
+            if new_ref_file != ref_file:
+                print ("Replaced ref path with: new_ref_file ")
+                # Load the reference with the new path
+                cmds.file(new_ref_file, loadReference=ref)
+
 def abcExport(destination_path_abc):
 
     # Get the current scene name and replace its extension with .abc
@@ -78,7 +106,8 @@ def main():
 
 
     destination_path = build_lib_path_and_backup(".mb")
-
+    replace_references_path_with_variable()
+    mel.eval('IncrementAndSave;')
     pm.exportSelected(destination_path, preserveReferences=True,type="mayaBinary")
 
     print("SUCCES !\n %s"%destination_path)
