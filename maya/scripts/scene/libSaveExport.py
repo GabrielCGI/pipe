@@ -214,7 +214,7 @@ def libSave():
                 mayaWarningExit(msg)
 
         #Cleaning operation
-        doc.delCamera()
+        #doc.delCamera()
         doc.cleanUpScene()
         doc.fixcolorSpaceUnknown()
         badColorSpaceTex = doc.getBadColorSpaceTex()

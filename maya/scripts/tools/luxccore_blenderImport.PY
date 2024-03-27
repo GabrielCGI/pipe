@@ -52,6 +52,10 @@ def create_luxcore_metal_material(name, color, roughness):
 # Iterate over materials in Blender and replace them based on the shader data
 for mat in bpy.data.materials:
     print(f"Checking material: {mat.name}")
+    # Skip if the material name already includes 'LuxeCore', indicating it's been converted
+    if "LuxCore" in mat.name:
+        print(f"Skipping {mat.name} as it has already been converted.")
+        continue
     if mat.name in shader_data:
         shader = shader_data[mat.name]
         base_color = shader['base_color']

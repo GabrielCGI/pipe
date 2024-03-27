@@ -71,16 +71,24 @@ def __light_link_cornea(shape, cornea_shapes, lights):
     pm.connectAttr(ai_set_parameter+".out",shape+".operators[30]", f=True)
 
 
+
+#def run():
+#    """
+#    Launch Asset link cornea
+#    :return:
+#    """
+#    current_project_dir = os.getenv("CURRENT_PROJECT_DIR")
+#    if current_project_dir is None:
+#        print_warning("Current project dir not defined. Use an illogic launcher")
+#    datas = __retrieve_datas(CORNEA_CHAR[current_project_dir])
+#    if datas is None:
+#        return
+#    shape, cornea_shapes, lights = datas
+#    __light_link_cornea(shape, cornea_shapes, lights)
+
 def run():
-    """
-    Launch Asset link cornea
-    :return:
-    """
-    current_project_dir = os.getenv("CURRENT_PROJECT_DIR")
-    if current_project_dir is None:
-        print_warning("Current project dir not defined. Use an illogic launcher")
-    datas = __retrieve_datas(CORNEA_CHAR[current_project_dir])
-    if datas is None:
-        return
-    shape, cornea_shapes, lights = datas
+
+    shape = pm.ls(sl=True)[-1].getShape()
+    cornea_shapes= ""
+    lights = pm.ls(sl=True, )[:-1]
     __light_link_cornea(shape, cornea_shapes, lights)
