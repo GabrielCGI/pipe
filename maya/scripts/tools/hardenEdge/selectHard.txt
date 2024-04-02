@@ -1,0 +1,8 @@
+polySelectConstraint -m 3 -t 0x8000 -sm 1;
+string $currentSelection[] = `ls -sl`;
+
+// Convert the selection to faces
+string $faces[] = `polyListComponentConversion -toFace -internal`;
+
+// Select the converted faces
+select -r $faces;

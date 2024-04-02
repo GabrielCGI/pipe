@@ -6,7 +6,7 @@ import random
 import string
 import sys
 import pymel.core as pm
-
+import hashlib
 import pymel.core as pm
 
 
@@ -61,12 +61,19 @@ def ensure_two_shaders():
 
 
 def renameNamespacesToRandom():
-    # Function to generate a unique 5-character string
-    def generateUniqueName(existingNames):
-        while True:
-            newName = ''.join(random.choices(string.ascii_letters + string.digits, k=5))
-            if newName not in existingNames:
-                return newName
+    def generateHashedName(name, existingNames):
+        # Generate a consistent hash from the namespace name
+        hash_object = hashlib.sha1(name.encode())
+        hex_dig = hash_object.hexdigest()
+        # Generate a name using the first 5 characters of the hash
+        # Ensuring uniqueness by appending numbers if needed
+        baseName = hex_dig[:5]
+        newName = baseName
+        i = 0
+        while newName in existingNames:
+            i += 1
+            newName = f"{baseName}{i}"
+        return newName
 
     # Get all namespaces except for the root and UI namespaces, which cannot be renamed
     allNamespaces = [ns for ns in pm.namespaceInfo(listOnlyNamespaces=True, recurse=True) if ns not in ['UI', 'shared']]
@@ -79,8 +86,8 @@ def renameNamespacesToRandom():
     for ns in allNamespaces:
         # Only rename the namespace if its length is greater than 5 characters
         if len(ns) > 5:
-            # Generate a unique new namespace name
-            newNs = generateUniqueName(renamedNamespaces)
+            # Generate a consistent new namespace name
+            newNs = generateHashedName(ns, renamedNamespaces)
 
             # Rename the namespace
             pm.namespace(rename=[ns, newNs])
@@ -90,7 +97,6 @@ def renameNamespacesToRandom():
             renamedNamespaces.add(newNs)
         else:
             print(f"Namespace {ns} not renamed because its length is not greater than 5 characters.")
-
 
 
 # Execute the function to start the renaming process
@@ -163,15 +169,27 @@ def export_shaders_json():
 
     for sg in shading_groups:
         # Get the shader connected to the surfaceShader attribute of the shading group
-        shaders = sg.surfaceShader.listConnections()
+        connections = sg.surfaceShader.listConnections(plugs=True)
 
-        # Proceed if there's a connected shader and it's an aiStandardSurface
-        if shaders and shaders[0].type() == 'aiStandardSurface':
-            shader = shaders[0]
+        shader = None
+        for conn in connections:
+            # Check if the connection is from an aiTraceSet node
+            if conn.node().type() == 'aiTraceSet':
+                # Get the shader connected to the passthrough input of the aiTraceSet
+                passthrough_connections = conn.node().passthrough.listConnections()
+                if passthrough_connections:
+                    shader = passthrough_connections[0]
+                    break
+            else:
+                # Direct connection from an aiStandardSurface shader
+                if conn.node().type() == 'aiStandardSurface':
+                    shader = conn.node()
+                    break
 
+        # Proceed if a shader has been identified
+        if shader:
             # Initialize a dictionary to store attribute values or texture paths
             attrs = {}
-
             # List of shader attributes to check
             shader_attrs = ['transmission', 'transmissionColor', 'baseColor',
                             'specularIOR', 'specularRoughness', 'metalness',
@@ -179,25 +197,32 @@ def export_shaders_json():
 
             for attr_name in shader_attrs:
                 attr = getattr(shader, attr_name)
+                attrs[attr_name] = attr.get()
 
                 # Check if the attribute has an input connection
                 inputs = attr.listConnections(s=True, d=False)
                 if inputs:
                     input_node = inputs[0]
 
+                    # Special handling for aiRaySwitch connected to transmissionColor
+                    if attr_name == 'transmissionColor' and input_node.type() == 'aiRaySwitch':
+                        # Get the connection from the "camera" input of the aiRaySwitch
+                        camera_input = input_node.camera.listConnections(s=True, d=False)
+                        if camera_input:
+                            # Connect the camera input to the transmissionColor of the aiStandardSurface
+                            camera_input[0].outColor.connect(shader.transmissionColor, f=True)
+
+                            # Update the attrs dictionary after reconnecting
+                            attrs[attr_name] = shader.transmissionColor.get()
+                            continue  # Skip the rest of the loop for this attribute
+
                     # Check for file or aiImage nodes and fetch the texture path
-                    if input_node.type() == 'file':
-                        texture_path = input_node.fileTextureName.get()
-                        attrs[attr_name] = texture_path
-                    elif input_node.type() == 'aiImage':
-                        texture_path = input_node.filename.get()
-                        attrs[attr_name] = texture_path
+                    if input_node.type() == 'file' or input_node.type() == 'aiImage':
+                        texture_path = input_node.fileTextureName.get() if input_node.type() == 'file' else input_node.filename.get()
+                        attrs[attr_name + '_texture'] = texture_path  # Store texture path under attributeName_texture
                     else:
-                        # If connected but not a texture node, fetch the attribute value
-                        attrs[attr_name] = attr.get()
-                else:
-                    # If no input connection, fetch the attribute value
-                    attrs[attr_name] = attr.get()
+                        # For non-texture connections, store the name of the connected node
+                        attrs[attr_name + '_connection'] = input_node.name()
 
             # Update all_shaders_data with the fetched attributes or texture paths
             all_shaders_data[sg.name()] = attrs

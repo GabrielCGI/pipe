@@ -1,0 +1,31 @@
+string $objList[] = `ls -sl -o`;
+string $uvBorder[];
+string $edgeUVs[];
+string $finalBorder[];
+
+for ($subObj in $objList) {
+select -r $subObj;
+polyNormalPerVertex -ufn true;
+polySoftEdge -a 180 -ch 1 $subObj;
+select -r $subObj.map["*"];
+
+polySelectBorderShell 1;
+
+$uvBorder = `polyListComponentConversion -te -in`;
+$uvBorder = `ls -fl $uvBorder`;
+
+clear( $finalBorder );
+
+for( $curEdge in $uvBorder ) {
+$edgeUVs = `polyListComponentConversion -tuv $curEdge`;
+$edgeUVs = `ls -fl $edgeUVs`;
+
+if( size( $edgeUVs ) > 2 ) {
+$finalBorder[ size( $finalBorder ) ] = $curEdge;
+}
+}
+
+polySoftEdge -a 0 -ch 1 $finalBorder;
+}
+
+select -r $objList;

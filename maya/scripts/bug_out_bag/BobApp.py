@@ -43,6 +43,7 @@ from .tool_instances.Orig import *
 from .tool_instances.Gate import *
 from .tool_instances.IsolateTool import *
 from .tool_instances.FaceFromShader import *
+from .tool_instances.GlassShadow import *
 # ######################################################################################################################
 
 _FILE_NAME_PREFS = "bug_out_bag"
@@ -67,20 +68,20 @@ class BobApp(QDialog):
         self.__bob_categories = [
             BobCategory("Utils", self.__prefs, [
                 LockTool(),
-                ShaderTransferTool(),
-                RestPosToVertexColorTool(),
-                UVCopierTool(),
+
+
+
                 SplineStepTool(),
                 CharacterTimeSetTool(),
                 TraceSetTool(),
                 SelectBigObjects(),
                 SelectInvisibleObjects(),
                 PrintAbcLayer(),
-                ViewportShader(),
+
                 Orig(),
                 Gate(),
                 IsolateTool(),
-                FaceFromShader()
+
             ]),
             BobCategory("Clean", self.__prefs, [
                 CleanFreezeTool(),
@@ -88,9 +89,20 @@ class BobApp(QDialog):
                 TextureCheckTool(),
                 DeleteOrigTool(),
                 ShapeRenamerTool(),
-                ShadingGroupRenamerTool(),
+
                 OverrideKillerTool(),
                 HierarchyCheckTool(),
+            ]),
+
+            BobCategory("Shading", self.__prefs, [
+                UVCopierTool(),
+                GlassShadow(),
+                ShaderTransferTool(),
+                RestPosToVertexColorTool(),
+                ViewportShader(),
+                FaceFromShader(),
+                ShadingGroupRenamerTool(),
+
             ]),
         ]
         self.__selected_category = 0
