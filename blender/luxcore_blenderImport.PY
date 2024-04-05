@@ -23,6 +23,11 @@ def create_luxcore_glass_material(name, color, ior,transmissionDispersion, rough
 
     # Set the glass material properties
     glass_node.inputs[0].default_value = (color[0], color[1], color[2])
+
+   # Blend the transmission color with white to set the reflection color
+    blend_with_white = [(c + 1.0) / 2 for c in color]  # Averaging color with white
+    glass_node.inputs[1].default_value = (blend_with_white[0], blend_with_white[1], blend_with_white[2])  # Reflection color
+
     glass_node.inputs[2].default_value = ior
     if transmissionDispersion != 0:
         glass_node.inputs[3].default_value = 0.015

@@ -62,17 +62,18 @@ def ensure_two_shaders():
 
 def renameNamespacesToRandom():
     def generateHashedName(name, existingNames):
+        # Ensure the hash starts with a letter ('n' in this case) for Maya compatibility
         # Generate a consistent hash from the namespace name
-        hash_object = hashlib.sha1(name.encode())
+        hash_object = hashlib.sha256(name.encode())  # Using sha256 for better distribution
         hex_dig = hash_object.hexdigest()
-        # Generate a name using the first 5 characters of the hash
-        # Ensuring uniqueness by appending numbers if needed
-        baseName = hex_dig[:5]
+        # We start with 'n' and then take 4 characters from the hash, adjusting as needed
+        baseName = 'n' + hex_dig[:4]
         newName = baseName
-        i = 0
-        while newName in existingNames:
+        i = 1  # Start counting from 1 for any necessary suffixes
+        # Ensure uniqueness in the scene
+        while newName in existingNames or pm.namespace(exists=newName):
+            newName = 'n' + hex_dig[i:i+4]  # Shift the window for the next 4 chars of the hash
             i += 1
-            newName = f"{baseName}{i}"
         return newName
 
     # Get all namespaces except for the root and UI namespaces, which cannot be renamed
@@ -97,7 +98,6 @@ def renameNamespacesToRandom():
             renamedNamespaces.add(newNs)
         else:
             print(f"Namespace {ns} not renamed because its length is not greater than 5 characters.")
-
 
 # Execute the function to start the renaming process
 
@@ -137,6 +137,23 @@ def connect_aiRaySwitch_camera_to_shading_group():
                 if camera_shader:
                     # Connect the camera_shader to the surfaceShader input of the shading group
                     pm.connectAttr(camera_shader[0].outColor, sg.surfaceShader, force=True)
+def delete_invisible_objects():
+    """
+    Deletes all invisible objects in the scene. This function iterates through all transform nodes
+    and deletes those where the visibility attribute is set to False.
+    """
+    # List all transform nodes in the scene
+    all_transforms = pm.ls(type='transform')
+
+    # Filter out transforms that are not visible
+    invisible_transforms = [transform for transform in all_transforms if not transform.visibility.get()]
+
+    # Delete the invisible transforms
+    if invisible_transforms:
+        pm.delete(invisible_transforms)
+        print(f"Deleted {len(invisible_transforms)} invisible objects.")
+    else:
+        print("No invisible objects found to delete.")
 
 def redirectAiSurfaceShaderToSurfaceShader():
     # Get all shading groups in the scene
@@ -160,6 +177,38 @@ def redirectAiSurfaceShaderToSurfaceShader():
 
 # Execute the function
 
+def apply_polySmooth_based_on_conditions():
+    """
+    Applies a polySmooth to meshes based on specific conditions:
+    - If aiSubdivType is set to 1 (Catmull-Clark) and aiSubdivIterations is greater than 0.
+    - Or if the mesh has Smooth Mesh Preview activated.
+    The polySmooth resolution matches aiSubdivIterations up to a maximum of 2, or is set to 2 if using Smooth Mesh Preview.
+    """
+    # Iterate through all mesh nodes in the scene
+    for mesh in pm.ls(type='mesh'):
+        # Ensure the mesh has a transform node parent
+        transform_node = mesh.getParent()
+
+        # Initialize variables
+        apply_smooth = False
+        smooth_level = 0
+
+        # Check for Arnold subdivision attributes
+        if pm.attributeQuery('aiSubdivType', node=mesh, exists=True) and pm.attributeQuery('aiSubdivIterations', node=mesh, exists=True):
+            if mesh.aiSubdivType.get() == 1 and mesh.aiSubdivIterations.get() > 0:
+                apply_smooth = True
+                smooth_level = min(mesh.aiSubdivIterations.get(), 2)
+
+        # Check for Smooth Mesh Preview activation
+        if transform_node.displaySmoothMesh.get() != 0:
+            apply_smooth = True
+            smooth_level = 2
+
+        # Apply polySmooth if conditions are met
+        if apply_smooth:
+            transform_node.displaySmoothMesh.set(0)
+            pm.polySmooth(mesh, divisions=smooth_level, mth=0, sdt=2, ovb=1, ofb=3, ofc=0, ost=1, ocr=0, dv=smooth_level, c=1, kb=1, ksb=1, khe=0, kt=1, kmb=1, suv=1, peh=0, sl=1, dpe=1, ps=0.1, ro=1, ch=1)
+            print(f"Applied polySmooth to {transform_node} with division level {smooth_level}.")
 
 def export_shaders_json():
     all_shaders_data = {}
@@ -263,7 +312,12 @@ def run ():
     print("Succes import all references")
     print("Starting renameNamespacesToRandom")
     renameNamespacesToRandom()
+
     print("Succes renameNamespacesToRandom")
+    print("delete invisible")
+    delete_invisible_objects()
+    print("Apply smooth")
+    apply_polySmooth_based_on_conditions()
     print("Starting redirectAiSurfaceShaderToSurfaceShader")
     redirectAiSurfaceShaderToSurfaceShader()
     connect_aiRaySwitch_camera_to_shading_group()

@@ -50,8 +50,11 @@ def replace_references_path_with_variable():
         if "sharedReferenceNode" in ref or "UNKNOWN" in ref:
             print("skip"+ref)
             continue
-
-        ref_node = cmds.referenceQuery(ref, referenceNode=True)
+        try:
+            ref_node = cmds.referenceQuery(ref, referenceNode=True)
+        except:
+            print("Could note query ref node: "+ref_node)
+            continue
         # Check if the reference is a top-level reference
         # If it has no parent reference, it's a top-level reference
         if cmds.referenceQuery(ref, parent=True, referenceNode=True) is None:
