@@ -45,7 +45,7 @@ def maya_main_window():
 
 
 #current_project="D:/gabriel/assetizer"
-project_list = ["D:/","I:/swaMarvel_2309","I:/swaValentine_2310","I:/dubuis_2312","I:/swaMilan_2401","I:/fresh","I:/swaNY_2308","I:\swaSF_2403","I:/swaValentine_2310","I:/swaTrolls_2401","I:/swaLion_2401"]
+project_list = ["D:/","I:/swaMarvel_2309","I:/swaValentine_2310","I:/dubuis_2312","I:/swaMilan_2401","I:/fresh_2403","I:/swaNY_2308","I:\swaSF_2403","I:/swaValentine_2310","I:/swaTrolls_2401","I:/swaLion_2401"]
 AddIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_AddIcon.png"
 BackIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_BackIcon.png"
 FolderIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_FolderIcon.png"
