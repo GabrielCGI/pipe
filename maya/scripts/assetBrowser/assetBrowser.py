@@ -410,6 +410,10 @@ class AssetBrowser(QtWidgets.QDialog):
 
     def rebuild_package_list(self):
         self.clear_all_list()
+        if not os.path.exists(self.all_packages_dir):
+            print(f"Directory {self.all_packages_dir} does not exist.")
+            return
+
         packages_list = os.listdir(self.all_packages_dir)
         self.clean_package_list = [package for package in packages_list if not_blacklisted(package)]
 
