@@ -24,7 +24,27 @@ class LookFactory:
         # standin name
         standin_file_path = standin.dso.get()
         if standin_file_path is None:
+            print("'niente'")
             return
+
+        print("I HAVzdzdzdzdzdzdE BEEN MODIzdzdzddddddddddFIED")
+
+        # Gabriel EDIT to make it work for fresh
+        filename = standin_file_path.split('/')[-1]
+        if filename.startswith('ch_') and filename.endswith('.abc') and "_mod" not in filename:
+            parts = filename.split('_')
+
+            if len(parts) >= 2:  # Ensure there are at least two parts
+                standin_name = '_'.join(parts[:2])  # Join the first two
+                look_obj = LookAsset(standin, standin_name, object_name)
+                print (standin, standin_name, object_name)
+                look_obj.retrieve_looks(self.__current_project_dir)
+                if look_obj.is_valid():
+                    return look_obj
+
+
+
+        #END GABRIEL EDIT
         match = re.match(r"^.*[\\/](abc|abc_fur)[\\/].*?(?:(.+)_mod\.v[0-9]{3}|(\w+)_[0-9]{2}_fur)\.abc$",
                          standin_file_path)
         if match is None:

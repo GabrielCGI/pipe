@@ -55,7 +55,7 @@ ScreenIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_ScreenIcon.png"
 empty_scene = ""
 
 
-template_directories = {"assets" :["modeling","shading","rigging"],
+template_directories = {"assets" :["shading","rigging","houdini","abc"],
                         "shots" : ["anim","lighting","comp","abc"]
                         }
 
