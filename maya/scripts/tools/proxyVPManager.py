@@ -84,23 +84,46 @@ def importProxyFromSelection(force=False):
                     set_to_procedural_null(proxy_group)
                     lock_transforms(proxy_group)
 
-def set_standInDrawOverride(selectionOnly=False, state=0):
-
+def set_standInDrawOverride(selectionOnly=False, state=0, proxy_check=True):
     if selectionOnly:
-        nodes = pm.selected()
+        nodes_selected = pm.selected()
+        nodes = nodes_selected + pm.listRelatives(nodes_selected, allDescendents=True, type='aiStandIn')
+
+        # Remove duplicates that might occur if children are also selected
+        nodes = list(set(nodes))
+
     else:
         nodes = pm.ls(type='aiStandIn')  # List all aiStandIn nodes in the scene
 
     # Filter aiStandIn nodes
     aiStandIn_nodes = [node for node in nodes if node.nodeType() == 'aiStandIn']
-    print(aiStandIn_nodes)
-    print (state)
-    # Set the standInDrawOverride attribute to 3 for each aiStandIn node
+    print (aiStandIn_nodes)
     for node in aiStandIn_nodes:
-        if node.hasAttr('standInDrawOverride'):
-            node.standInDrawOverride.set(state)
-        else:
+        if not node.hasAttr('standInDrawOverride'):
             pm.warning(f"{node} does not have a 'standInDrawOverride' attribute.")
+            continue
+
+        # Perform proxy check if required
+        if proxy_check and state == 3:
+            has_proxy = False
+            for child in node.getParent().listRelatives(children=True):
+                if "proxy" in child.name().lower():
+                    has_proxy = True
+                    break
+
+            # If a proxy child is found, make the standIn invisible
+            if has_proxy:
+                node.standInDrawOverride.set(3)  # Make invisible
+            else:
+                # If no proxy and state is explicitly set to make visible, apply the state
+                if state != 3:  # Assuming 3 means invisible, adjust according to your needs
+                    node.standInDrawOverride.set(state)
+                # If the intention is to always leave non-proxy standIns visible regardless of the state argument,
+                # you might want to force a visible state here instead of applying 'state'.
+                # For example, node.standInDrawOverride.set(0) to force visibility.
+        else:
+            # If proxy check is not required, just apply the provided state
+            node.standInDrawOverride.set(state)
 
 def set_aiStandIn_mode(nodes, mode):
     """
@@ -115,26 +138,27 @@ def set_aiStandIn_mode(nodes, mode):
             node.mode.set(mode)
 
 def proxy_visibility(visibility, selectionOnly):
+    nodes = []
     if selectionOnly:
-        # Get only the selected nodes and their descendants
         selected_nodes = pm.selected()
-        nodes = []
         for node in selected_nodes:
-            # Include the node if it's a transform and has "proxy" in its name
             if "proxy" in node.name().lower() and node.type() == "transform":
                 nodes.append(node)
-            # Also consider the descendants of the selected node
             descendants = node.listRelatives(allDescendents=True, type='transform')
             for desc in descendants:
                 if "proxy" in desc.name().lower():
                     nodes.append(desc)
     else:
-        # Get all transform nodes in the scene that have "proxy" in their name
-        nodes = pm.ls('*proxy*', type='transform')
+        # Get all transform nodes with "proxy" in their name
+        proxy_nodes = pm.ls('*proxy*', type='transform')
+        for node in proxy_nodes:
+            nodes.append(node)
+            # Include children of the node
+            children = node.listRelatives(allDescendents=True, type='transform')
+            nodes.extend(children)
 
     for node in nodes:
         node.visibility.set(visibility)
-
 
 
 # Your createGarland function here...
@@ -163,6 +187,7 @@ class ProxyManagerUI(QWidget):
         self.viewportLabel = QtWidgets.QLabel("Viewport stand in:")
         self.btn_viewportOn = QtWidgets.QPushButton("On")
         self.btn_viewportOff = QtWidgets.QPushButton("Off")
+        self.btn_viewportOffAll = QtWidgets.QPushButton("Off All")
         self.proxLabel = QtWidgets.QLabel("Viewport Proxy:")
         self.btn_proxOn = QtWidgets.QPushButton("On")
         self.btn_proxOff = QtWidgets.QPushButton("Off")
@@ -174,8 +199,10 @@ class ProxyManagerUI(QWidget):
         self.btn_action1.clicked.connect(self.action1)
         self.btn_viewportOn.clicked.connect(self.btn_viewportOn_clicked)
         self.btn_viewportOff.clicked.connect(self.btn_viewportOff_clicked)
+        self.btn_viewportOffAll.clicked.connect(self.btn_viewportOffAll_clicked)
         self.btn_proxOn.clicked.connect(self.btn_proxOn_clicked)
         self.btn_proxOff.clicked.connect(self.btn_proxOff_clicked)
+
         self.drawModeComboBox.currentIndexChanged.connect(self.onDrawModeChange)
 
     def create_layouts(self):
@@ -193,6 +220,7 @@ class ProxyManagerUI(QWidget):
         viewportLayout.addWidget(self.viewportLabel)
         viewportLayout.addWidget(self.btn_viewportOn)
         viewportLayout.addWidget(self.btn_viewportOff)
+        viewportLayout.addWidget(self.btn_viewportOffAll)
         proxLayout.addWidget(self.proxLabel)
         proxLayout.addWidget(self.btn_proxOn)
         proxLayout.addWidget(self.btn_proxOff)
@@ -213,7 +241,9 @@ class ProxyManagerUI(QWidget):
         set_standInDrawOverride(self.selectionOnlyCheckbox.isChecked(), state=0)
         print("Action 2 executed")
     def btn_viewportOff_clicked(self):
-        set_standInDrawOverride(self.selectionOnlyCheckbox.isChecked(), state=3)
+        set_standInDrawOverride(self.selectionOnlyCheckbox.isChecked(), state=3, proxy_check=True)
+    def btn_viewportOffAll_clicked(self):
+        set_standInDrawOverride(self.selectionOnlyCheckbox.isChecked(), state=3, proxy_check=False)
         print("Action off executed")
     def btn_proxOn_clicked(self):
         proxy_visibility(1,self.selectionOnlyCheckbox.isChecked())

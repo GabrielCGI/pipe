@@ -108,7 +108,7 @@ class ABCImport(QDialog):
                     return True
         return False
 
-    def __init__(self, prnt=wrapInstance(int(omui.MQtUtil.mainWindow()), QWidget)):
+    def __init__(self, directory=None, prnt=wrapInstance(int(omui.MQtUtil.mainWindow()), QWidget)):
         super(ABCImport, self).__init__(prnt)
 
         # Common Preferences (common preferences on all tools)
@@ -116,9 +116,12 @@ class ABCImport(QDialog):
         # Preferences for this tool
         self.__prefs = Prefs(_FILE_NAME_PREFS)
 
-        # Model attributes
-        dirname = ABCImport.__get_abc_parent_dir(4)
-        self.__folder_path = dirname if dirname is not None else ""
+        if directory and os.path.isdir(directory):
+            self.__folder_path = directory.replace("\\", "/")
+        else:
+            dirname = ABCImport.__get_abc_parent_dir(4)
+            self.__folder_path = dirname if dirname is not None else ""
+
         self.__update_uvs_shaders = True
         self.__abcs = []
         self.__selected_abcs = []
