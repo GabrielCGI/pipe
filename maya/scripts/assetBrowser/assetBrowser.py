@@ -30,6 +30,8 @@ import time
 from datetime import datetime
 import fnmatch
 from common.Prefs import Prefs
+#FREHS
+from abc_importFresh.ABCImport import ABCImport
 #TO DO: packageClass()
 #CONNECT BUTTON
 
@@ -51,7 +53,7 @@ BackIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_BackIcon.png"
 FolderIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_FolderIcon.png"
 LinkIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_LinkIcon.png"
 ScreenIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_ScreenIcon.png"
-
+FreshIcon = r"R:\pipeline\pipe\maya\icons\abc_import.png"
 empty_scene = ""
 
 
@@ -229,6 +231,8 @@ class AssetBrowser(QtWidgets.QDialog):
         self.open_folder = QtWidgets.QPushButton("")
         self.copy_path = QtWidgets.QPushButton("")
         self.screenshotB = QtWidgets.QPushButton("")
+        self.fresh = QtWidgets.QPushButton("")
+        self.fresh.setMaximumWidth(25)
         self.open_folder.setMaximumWidth(25)
         self.copy_path.setMaximumWidth(25)
         self.screenshotB.setMaximumWidth(25)
@@ -276,7 +280,9 @@ class AssetBrowser(QtWidgets.QDialog):
 ###################################################################################buttons
 
         self.package_info_layout.addWidget(self.package_infos_label)
+        self.package_info_layout.addWidget(self.fresh)
         self.package_info_layout.addWidget(self.open_folder)
+
         self.package_info_layout.addWidget(self.copy_path)
         self.package_info_layout.addWidget(self.screenshotB)
 
@@ -303,6 +309,7 @@ class AssetBrowser(QtWidgets.QDialog):
         self.open_folder.setIcon(QtGui.QIcon(FolderIcon))
         self.copy_path.setIcon(QtGui.QIcon(LinkIcon))
         self.screenshotB.setIcon(QtGui.QIcon(ScreenIcon))
+        self.fresh.setIcon(QtGui.QIcon(FreshIcon))
 
         #OPEN BY DEFAULT AS ASSET BROWSER
         if "current_project" in asset_browser_prefs:
@@ -333,7 +340,7 @@ class AssetBrowser(QtWidgets.QDialog):
         self.open_folder.clicked.connect(self.open_folder_clicked)
         self.open_scene.clicked.connect(self.open_scene_clicked)
         self.copy_path.clicked.connect(self.copy_path_clicked)
-
+        self.fresh.clicked.connect(self.fresh_clicked)
         #Connect curent dir changed:
         self.comboBox_current_prod.currentTextChanged.connect(self.current_prod_changed)
         #Connect CHECKBOX
@@ -650,7 +657,7 @@ class AssetBrowser(QtWidgets.QDialog):
         return path, namespace
 
     def enter_directory(self,item):
-        data = item.data(QtCore.Qt.UserRole)
+        data = item.data.data(QtCore.Qt.UserRole)
         departement_dir =  self.second_Qlist.currentItem().data(QtCore.Qt.UserRole)
         if os.path.isdir(data):
             self.rebuild_files_list(data)
@@ -666,6 +673,13 @@ class AssetBrowser(QtWidgets.QDialog):
         dir = os.path.dirname(os.path.dirname(data))
         self.rebuild_files_list(dir)
 
+    def fresh_clicked(self):
+        try:
+            self.abc_import.close()
+        except:
+            pass
+        self.abc_import = ABCImport(directory=self.package.dir)
+        self.abc_import.show()
 
     def screenshotB_clicked(self):
 
