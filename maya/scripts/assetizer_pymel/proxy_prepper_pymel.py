@@ -64,7 +64,22 @@ def build_hiearchy(obj):
         utils.warning("Please import reference before")
     # Get asset name
     obj = obj[0]
-    asset_name = utils.only_name(obj)
+    # Get the base name of the current scene file
+    filename = pm.system.sceneName().basename()
+    print(f"Filename: {filename}")
+
+    # Split the filename by underscores
+    filename_split = filename.split("_shading")
+
+    # Check if there are more than two parts in the split filename
+    if len(filename_split) >= 2:
+        # Concatenate the first two parts to form the asset name
+        asset_name = filename_split[0]
+        print(f"Asset Name: {asset_name}")
+    else:
+        print("Filename does not contain enough parts to form an asset name.")
+        asset_name = filename
+
 
     result = pm.promptDialog(
         title='Rename Object',

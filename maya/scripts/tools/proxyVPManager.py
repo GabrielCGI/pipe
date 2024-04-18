@@ -170,8 +170,9 @@ class ProxyManagerUI(QWidget):
         super(ProxyManagerUI, self).__init__(parent)
 
 
-        self.setWindowTitle("Simple Window")
+        self.setWindowTitle("proxy manager")
         self.setMinimumSize(350, 100)
+        self.setWindowFlags(Qt.Window | Qt.WindowStaysOnTopHint)
         self.create_widgets()
         self.create_layouts()
 
@@ -184,18 +185,21 @@ class ProxyManagerUI(QWidget):
         # Connect the buttons to their respective slot functions
 
 
-        self.viewportLabel = QtWidgets.QLabel("Viewport stand in:")
-        self.btn_viewportOn = QtWidgets.QPushButton("On")
-        self.btn_viewportOff = QtWidgets.QPushButton("Off")
-        self.btn_viewportOffAll = QtWidgets.QPushButton("Off All")
-        self.proxLabel = QtWidgets.QLabel("Viewport Proxy:")
-        self.btn_proxOn = QtWidgets.QPushButton("On")
-        self.btn_proxOff = QtWidgets.QPushButton("Off")
-        self.drawModeLabel = QtWidgets.QLabel("Draw Mode:")
+        self.viewportLabel = QtWidgets.QLabel("StandIn:")
+        self.btn_viewportOn = QtWidgets.QPushButton("Show")
+        self.btn_viewportOff = QtWidgets.QPushButton("Hide")
+        self.btn_viewportOffAll = QtWidgets.QPushButton("Hide all")
+        self.proxLabel = QtWidgets.QLabel("Proxy:")
+        self.btn_proxOn = QtWidgets.QPushButton("Show")
+        self.btn_proxOff = QtWidgets.QPushButton("Hide")
+        self.drawModeLabel = QtWidgets.QLabel("StandIn Display:")
         self.drawModeComboBox = QtWidgets.QComboBox()
         self.drawModeComboBox.addItems(["Bounding Box", "Shaded", "Point Cloud", "Polywire"])
         self.selectionOnlyCheckbox = QtWidgets.QCheckBox("Selection only")
-
+        self.line = QtWidgets.QFrame()
+        self.line.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line2 = QtWidgets.QFrame()
+        self.line2.setFrameShape(QtWidgets.QFrame.HLine)
         self.btn_action1.clicked.connect(self.action1)
         self.btn_viewportOn.clicked.connect(self.btn_viewportOn_clicked)
         self.btn_viewportOff.clicked.connect(self.btn_viewportOff_clicked)
@@ -214,6 +218,7 @@ class ProxyManagerUI(QWidget):
         action1_layout.addWidget(self.btn_action1)
         action1_layout.addWidget(self.checkbox_action1)
         main_layout.addLayout(action1_layout)
+        main_layout.addWidget(self.line)
 
         viewportLayout = QtWidgets.QHBoxLayout()
         proxLayout = QtWidgets.QHBoxLayout()
@@ -230,6 +235,7 @@ class ProxyManagerUI(QWidget):
 
         main_layout.addLayout(viewportLayout)
         main_layout.addLayout(proxLayout)
+        main_layout.addWidget(self.line2)
         main_layout.addLayout(drawModeLayout)
         main_layout.addWidget(self.selectionOnlyCheckbox)
     def action1(self):
