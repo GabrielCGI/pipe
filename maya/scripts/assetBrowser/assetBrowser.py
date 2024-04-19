@@ -657,7 +657,7 @@ class AssetBrowser(QtWidgets.QDialog):
         return path, namespace
 
     def enter_directory(self,item):
-        data = item.data.data(QtCore.Qt.UserRole)
+        data = item.data(QtCore.Qt.UserRole)
         departement_dir =  self.second_Qlist.currentItem().data(QtCore.Qt.UserRole)
         if os.path.isdir(data):
             self.rebuild_files_list(data)
