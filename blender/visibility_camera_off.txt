@@ -1,0 +1,21 @@
+import bpy
+
+# Iterate over all selected objects
+for obj in bpy.context.selected_objects:
+    # Set the 'visible_to_camera' property to False
+    obj.luxcore.visible_to_camera = False
+    
+    # Save the original location
+    original_location = obj.location.x
+    
+    # Move the object slightly in the X direction
+    obj.location.x += 1
+    
+    # Update the scene (force recalculations)
+    bpy.context.view_layer.update()
+    
+    # Move the object back to its original location
+    obj.location.x = original_location
+
+# Update the scene again to ensure all changes are finalized
+bpy.context.view_layer.update()

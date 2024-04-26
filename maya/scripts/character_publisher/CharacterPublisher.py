@@ -461,7 +461,7 @@ class CharacterPublisher(QDialog):
         os.makedirs(self.__abc_dir, exist_ok=True)
         geo_list_to_export = [s.longName() for s in self.__selection]
         geo_string_to_export = " -root ".join(geo_list_to_export)
-        job = '-frameRange 1 1 -stripNamespaces -uvWrite -writeColorSets -worldSpace -writeFaceSets -dataFormat ogawa -root %s -file "%s"' % (
+        job = '-frameRange 150 150 -stripNamespaces -uvWrite -writeColorSets -worldSpace -writeFaceSets -dataFormat ogawa -root %s -file "%s"' % (
             geo_string_to_export, abc_path)
         pm.AbcExport(j=job)
 
@@ -499,7 +499,8 @@ class CharacterPublisher(QDialog):
             # selection = selection + "*"
 
             sgs = m.outputs(type='shadingEngine')
-            sgs = list(set(sgs))
+            seen = set()
+            sgs = [sg for sg in sgs if sg not in seen and not seen.add(sg)]
             set_shader = pm.createNode("aiSetParameter", n="setShader_" + m)
             selection_attr = set_shader.attr("selection")
             selection_attr.set(selection)
@@ -554,6 +555,8 @@ class CharacterPublisher(QDialog):
                             shaders_used.append(empty_displace)
                             displacement_shader_string += "'%s' " % (empty_displace)
 
+            print ("Shader final")
+            print(shader)
             pm.setAttr(set_shader + ".assignment[0]", "shader=%s" % (shader), type="string")
             if displacement_shader_string != "":
                 pm.setAttr(set_shader + ".assignment[1]", "disp_map=%s" % (displacement_shader_string), type="string")
@@ -626,7 +629,7 @@ class CharacterPublisher(QDialog):
         path = path_test
         look = pm.listConnections(standin + ".operators")
         export_list = look + shaders_used
-        pm.other.arnoldExportAss(export_list, f=path, s=True, asciiAss=True, mask=6160, lightLinks=0, shadowLinks=0,
+        pm.other.arnoldExportAss(export_list, f=path, s=True, asciiAss=True, mask=6161, lightLinks=0, shadowLinks=0,
                                  fullPath=0)
 
     def __on_publish(self):

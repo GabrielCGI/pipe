@@ -71,6 +71,7 @@ class ShaderMaker(QtWidgets.QDialog):
 
     def __init__(self, prnt=wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)):
         super(ShaderMaker, self).__init__(prnt)
+        print("yo")
 
         # Common Preferences (common preferences on all tools)
         self.__common_prefs = Prefs()
@@ -92,7 +93,7 @@ class ShaderMaker(QtWidgets.QDialog):
         self.__ui_height = 700
         self.__ui_min_width = 750
         self.__ui_min_height = 200
-        self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width,self.__ui_height)/2
+        #self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width,self.__ui_height)/2
         self.__ui_cs_folder_path = None
         self.__ui_us_folder_path = None
         self.__ui_cs_submit_btn = None
@@ -195,7 +196,7 @@ class ShaderMaker(QtWidgets.QDialog):
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
-        self.move(self.__ui_pos)
+        #self.move(self.__ui_pos)
 
         browse_icon_path = os.path.dirname(__file__) + "/assets/browse.png"
 

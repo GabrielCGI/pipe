@@ -44,6 +44,7 @@ from .tool_instances.Gate import *
 from .tool_instances.IsolateTool import *
 from .tool_instances.FaceFromShader import *
 from .tool_instances.GlassShadow import *
+from .tool_instances.ShaderDuplicate import *
 # ######################################################################################################################
 
 _FILE_NAME_PREFS = "bug_out_bag"
@@ -102,6 +103,7 @@ class BobApp(QDialog):
                 ViewportShader(),
                 FaceFromShader(),
                 ShadingGroupRenamerTool(),
+                ShaderDuplicate(),
 
             ]),
         ]
