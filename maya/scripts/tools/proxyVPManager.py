@@ -180,18 +180,18 @@ class ProxyManagerUI(QWidget):
         """
         Creates the widgets for the window
         """
-        self.btn_action1 = QtWidgets.QPushButton("Import proxy for selection")
+        self.btn_action1 = QtWidgets.QPushButton("Import proxy")
         self.checkbox_action1 = QtWidgets.QCheckBox("Force")
         # Connect the buttons to their respective slot functions
 
 
         self.viewportLabel = QtWidgets.QLabel("StandIn:")
-        self.btn_viewportOn = QtWidgets.QPushButton("Show")
-        self.btn_viewportOff = QtWidgets.QPushButton("Hide")
+        self.btn_viewportOn = QtWidgets.QPushButton("Show ASS")
+        self.btn_viewportOff = QtWidgets.QPushButton("Hide ASS")
         self.btn_viewportOffAll = QtWidgets.QPushButton("Hide all")
         self.proxLabel = QtWidgets.QLabel("Proxy:")
-        self.btn_proxOn = QtWidgets.QPushButton("Show")
-        self.btn_proxOff = QtWidgets.QPushButton("Hide")
+        self.btn_proxOn = QtWidgets.QPushButton("Show GEO")
+        self.btn_proxOff = QtWidgets.QPushButton("Hide GEO")
         self.drawModeLabel = QtWidgets.QLabel("StandIn Display:")
         self.drawModeComboBox = QtWidgets.QComboBox()
         self.drawModeComboBox.addItems(["Bounding Box", "Shaded", "Point Cloud", "Polywire"])
@@ -222,11 +222,11 @@ class ProxyManagerUI(QWidget):
 
         viewportLayout = QtWidgets.QHBoxLayout()
         proxLayout = QtWidgets.QHBoxLayout()
-        viewportLayout.addWidget(self.viewportLabel)
+        #viewportLayout.addWidget(self.viewportLabel)
         viewportLayout.addWidget(self.btn_viewportOn)
         viewportLayout.addWidget(self.btn_viewportOff)
-        viewportLayout.addWidget(self.btn_viewportOffAll)
-        proxLayout.addWidget(self.proxLabel)
+        #viewportLayout.addWidget(self.btn_viewportOffAll)
+        #proxLayout.addWidget(self.proxLabel)
         proxLayout.addWidget(self.btn_proxOn)
         proxLayout.addWidget(self.btn_proxOff)
         drawModeLayout = QtWidgets.QHBoxLayout()

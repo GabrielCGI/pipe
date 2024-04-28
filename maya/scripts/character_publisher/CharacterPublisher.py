@@ -99,6 +99,14 @@ class CharacterPublisher(QDialog):
                 continue
 
     @staticmethod
+    def find_root_object(target_name):
+        root_objects = pm.ls(assemblies=True)
+        for root_object in root_objects:
+            if root_object.nodeName() == target_name:
+                return root_object
+        return None
+
+    @staticmethod
     def get_path_from_texture_node(tex_node):
         """
         Get the file path attributes from a texture node (File or image here)
@@ -637,10 +645,23 @@ class CharacterPublisher(QDialog):
         On submit publish
         :return:
         """
-        CharacterPublisher.__check_color_sets("Pref")
+        #CharacterPublisher.__check_color_sets("Pref")
         self.__replace_texture_node_to_tx()
         self.__cleanInitialShadingGroup()
+
         sel = self.__selection
+
+        selected = pm.selected()[0]
+        original_parent = selected.getParent()
+
+        if original_parent:
+            short_name = selected.nodeName()
+            root_object = self.find_root_object(short_name)
+            if root_object:
+                pm.rename(root_object, short_name + "_TMP_")
+
+            selected.setParent(world=True)
+
         if self.__publish_uv:
             standin = self.abc_export()
         else:
@@ -649,6 +670,6 @@ class CharacterPublisher(QDialog):
         if self.__publish_look:
             shaders_used = self.__build_shader_operator(standin, sel)
             self.__export_arnold_graph(standin, shaders_used)
-
+        selected.setParent(original_parent)
         # if not self.__publish_uv:
         #     pm.delete(standin.getTransform())

@@ -356,6 +356,41 @@ global proc shelf_Illogic () {
         -manage 1
         -visible 1
         -preventOverride 0
+        -annotation "import publishFreshAsset\nimport importlib\nimportlib.reload(publishFreshAsset)\n\npublishFreshAsset.run()" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import publishFreshAsset\nimport importlib\nimportlib.reload(publi..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "geo" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/character_publisher.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/character_publisher.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import publishFreshAsset\nimport importlib\nimportlib.reload(publishFreshAsset)\n\npublishFreshAsset.run()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
         -annotation "Proxy Prepper" 
         -enableBackground 0
         -backgroundColor 0 0 0 
@@ -628,75 +663,6 @@ global proc shelf_Illogic () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "mAIrus" 
-        -enableBackground 0
-        -backgroundColor 0 0 0 
-        -highlightColor 0.321569 0.521569 0.65098 
-        -align "center" 
-        -label "mAIrus" 
-        -labelOffset 0
-        -rotation 0
-        -flipX 0
-        -flipY 0
-        -useAlpha 1
-        -font "plainLabelFont" 
-        -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0.5 
-        -image "R:/pipeline/pipe/maya/icons/mAIrus.png" 
-        -image1 "R:/pipeline/pipe/maya/icons/mAIrus.png" 
-        -style "iconOnly" 
-        -marginWidth 0
-        -marginHeight 1
-        -command "import importlib\n\nfrom common import utils\nutils.unload_packages(silent=True, package=\"mAIrus\")\nimportlib.import_module(\"mAIrus\")\nfrom mAIrus.MAIrus import MAIrus\ntry:\n    mAIrus_tool.close()\nexcept:\n    pass\n\n# ##################################################################################################################\n\n__PATH_TO_OPENAI_KEY = r\"R:\\pipeline\\networkInstall\\openai\\openai_key\"\n\n# ##################################################################################################################\n\nmAIrus_tool = MAIrus(__PATH_TO_OPENAI_KEY)\nmAIrus_tool.show()\n" 
-        -sourceType "python" 
-        -commandRepeatable 1
-        -flat 1
-    ;
-    shelfButton
-        -enableCommandRepeat 1
-        -flexibleWidthType 3
-        -flexibleWidthValue 32
-        -enable 1
-        -width 35
-        -height 34
-        -manage 1
-        -visible 1
-        -preventOverride 0
-        -annotation "Studio Toggle" 
-        -enableBackground 0
-        -backgroundColor 0 0 0 
-        -highlightColor 0.321569 0.521569 0.65098 
-        -align "center" 
-        -label "Studio Toggle" 
-        -labelOffset 0
-        -rotation 0
-        -flipX 0
-        -flipY 0
-        -useAlpha 1
-        -font "plainLabelFont" 
-        -imageOverlayLabel "old" 
-        -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0.5 
-        -image "R:/pipeline/pipe/maya/icons/studio.png" 
-        -image1 "R:/pipeline/pipe/maya/icons/studio.png" 
-        -style "iconOnly" 
-        -marginWidth 0
-        -marginHeight 1
-        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"studio\")\nimportlib.import_module(\"studio\")\nfrom studio import studio_loader\nstudio_loader.run()\n" 
-        -sourceType "python" 
-        -commandRepeatable 1
-        -flat 1
-    ;
-    shelfButton
-        -enableCommandRepeat 1
-        -flexibleWidthType 3
-        -flexibleWidthValue 32
-        -enable 1
-        -width 35
-        -height 34
-        -manage 1
-        -visible 1
-        -preventOverride 0
         -annotation "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\ncmds.file( 'R:/lib/3d/studio_v2/studio_v2.mb', r=True )\n#cmds.file( 'R:/lib/3d/studio/studio.mb', rr=True )" 
         -enableBackground 0
         -backgroundColor 0 0 0 
@@ -901,40 +867,6 @@ global proc shelf_Illogic () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "import garland\n\nimport importlib\nimportlib.reload(garland)\n\n\ntry:\n    ui.close()\nexcept:\n    pass\nui = garland.CustomUI()\nui.show()\n" 
-        -enableBackground 0
-        -backgroundColor 0 0 0 
-        -highlightColor 0.321569 0.521569 0.65098 
-        -align "center" 
-        -label "import garland\n\nimport importlib\nimportlib.reload(garland)\n\n\ntry..." 
-        -labelOffset 0
-        -rotation 0
-        -flipX 0
-        -flipY 0
-        -useAlpha 1
-        -font "plainLabelFont" 
-        -overlayLabelColor 0.8 0.8 0.8 
-        -overlayLabelBackColor 0 0 0 0.5 
-        -image "LightDown.png" 
-        -image1 "LightDown.png" 
-        -style "iconOnly" 
-        -marginWidth 1
-        -marginHeight 1
-        -command "import garland\n\nimport importlib\nimportlib.reload(garland)\n\n\ntry:\n    ui.close()\nexcept:\n    pass\nui = garland.CustomUI()\nui.show()\n" 
-        -sourceType "python" 
-        -commandRepeatable 1
-        -flat 1
-    ;
-    shelfButton
-        -enableCommandRepeat 1
-        -flexibleWidthType 3
-        -flexibleWidthValue 32
-        -enable 1
-        -width 35
-        -height 34
-        -manage 1
-        -visible 1
-        -preventOverride 0
         -annotation "from megaload import megaload\nimport importlib\nimportlib.reload(megaload)\n\ntry:\n    ui.deleteLater()\nexcept:\n    pass\nui = megaload.Megaload()\nui.create()\nui.show()" 
         -enableBackground 0
         -backgroundColor 0 0 0 
@@ -1066,9 +998,9 @@ global proc shelf_Illogic () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 32
+        -flexibleWidthValue 33
         -enable 1
-        -width 35
+        -width 36
         -height 34
         -manage 1
         -visible 1
@@ -1087,12 +1019,80 @@ global proc shelf_Illogic () {
         -font "plainLabelFont" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "vortexField.svg" 
-        -image1 "vortexField.svg" 
+        -image "R:/pipeline/pipe/maya/icons/flower.JPG" 
+        -image1 "R:/pipeline/pipe/maya/icons/flower.JPG" 
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
         -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"proxyVPManager\")\nimportlib.import_module(\"proxyVPManager\")\nfrom proxyVPManager import ProxyManagerUI\ntry:\n    prox.close()\nexcept:\n    pass\nprox = ProxyManagerUI()\nprox.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import borderColor\nimport importlib\nimportlib.reload(borderColor)\n\nborderColor.run()" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import borderColor\nimport importlib\nimportlib.reload(borderColor..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "linearLight.closed.svg" 
+        -image1 "linearLight.closed.svg" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import borderColor\nimport importlib\nimportlib.reload(borderColor)\n\nborderColor.run_edge()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 33
+        -enable 1
+        -width 36
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import borderColor\nimport importlib\nimportlib.reload(borderColor)\n\nborderColor.run_color()" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import borderColor\nimport importlib\nimportlib.reload(borderColor..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/petal.JPG" 
+        -image1 "R:/pipeline/pipe/maya/icons/petal.JPG" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import borderColor\nimport importlib\nimportlib.reload(borderColor)\n\nborderColor.run_color()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
