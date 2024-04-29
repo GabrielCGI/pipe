@@ -32,6 +32,39 @@ _FILE_NAME_PREFS = "abc_import"
 
 
 class ABCImport(QDialog):
+
+    @staticmethod
+    def get_aiStandIn_shape():
+        # Get the current selection
+        selection = pm.selected()
+
+        if not selection:
+            return None
+
+        # Check if selection is aiStandIn or its transform
+        for sel in selection:
+            if isinstance(sel, pm.nodetypes.AiStandIn):
+                return sel
+            elif sel.getShape() and isinstance(sel.getShape(), pm.nodetypes.AiStandIn):
+                return sel.getShape()
+
+        # If not found, check parent of the first selected object
+        parent = selection[0].getParent()
+        if parent:
+            parent_shape = parent.getShape()
+            if isinstance(parent_shape, pm.nodetypes.AiStandIn):
+                return parent_shape
+            else:
+                gparent = parent[0].getParent()
+                if gparent:
+                    parent_shape = gparent.getShape()
+                    if isinstance(parent_shape, pm.nodetypes.AiStandIn):
+                        return parent_shape
+
+
+
+        return None
+
     @staticmethod
     def __get_abc_parent_dir(max_recursion):
         """
@@ -51,6 +84,15 @@ class ABCImport(QDialog):
             if not os.path.exists(next_dirpath):
                 return None
             return check_dir_recursive(count + 1, next_dirpath)
+
+        standin_shape = ABCImport.get_aiStandIn_shape()
+        if standin_shape:
+            dso = standin_shape.dso.get()
+            parts = dso.split('/')
+            dir =  '/'.join(parts[:3] + [parts[3].split('/')[0]])
+            if os.path.exists(dir):
+                return dir
+
 
         scene_name = pm.sceneName()
         if len(scene_name) > 0:

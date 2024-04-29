@@ -41,8 +41,8 @@ def lock_transforms(sel):
         for attr in attributes_to_lock:
             n.attr(attr).lock()
 
-def importProxyFromSelection(force=False):
 
+def importProxyFromSelection(force=False):
     # Iterate over selected objects
     for transform in pm.selected():
         # Initialize a flag to check for existing proxy groups
@@ -61,7 +61,7 @@ def importProxyFromSelection(force=False):
 
         # Skip the rest of the loop if a proxy exists and force is False
         if proxyExists:
-            print("skip proxy --> "+transform )
+            print("skip proxy --> "+transform)
             continue
 
         # Check for shape nodes under the transform
@@ -69,20 +69,31 @@ def importProxyFromSelection(force=False):
             # Check if the shape is an aiStandIn
             if shape.nodeType() == 'aiStandIn':
                 dso_path = shape.getAttr('dso')
-                # Check if a proxy file exists
-                proxy_path = os.path.splitext(dso_path)[0] + '_proxy.abc'
-                if os.path.exists(proxy_path):
-                    # Create an empty group for the proxy
-                    proxy_group = pm.group(em=True, name=f"{transform.name()}_proxy")
+                version_number = int(dso_path.split('/')[-2])  # Extracting the version number
+                base_path = '/'.join(dso_path.split('/')[:-2]) + '/'  # Base path without version and file
 
-                    # Import the Alembic file and reparent it under the "proxy" group
-                    pm.AbcImport(proxy_path, mode="import", rpr=proxy_group)
+                # Try finding a valid proxy file by decrementing versions
+                while version_number > 0:
+                    print(version_number)
+                    test_version = f"{version_number:04d}"
+                    proxy_path = os.path.join(base_path, test_version, os.path.basename(os.path.splitext(dso_path)[0] + '_proxy.abc'))
+                    if os.path.exists(proxy_path):
+                        # Create an empty group for the proxy
+                        proxy_group = pm.group(em=True, name=f"{transform.name()}_proxy")
 
-                    # Match transform of the group to the aiStandIn's transform
-                    pm.matchTransform(proxy_group, transform)
-                    pm.parent(proxy_group, transform)
-                    set_to_procedural_null(proxy_group)
-                    lock_transforms(proxy_group)
+                        # Import the Alembic file and reparent it under the "proxy" group
+                        pm.AbcImport(proxy_path, mode="import", rpr=proxy_group)
+
+                        # Match transform of the group to the aiStandIn's transform
+                        pm.matchTransform(proxy_group, transform)
+                        pm.parent(proxy_group, transform)
+                        # Assuming set_to_procedural_null and lock_transforms are defined elsewhere
+                        set_to_procedural_null(proxy_group)
+                        lock_transforms(proxy_group)
+                        break
+                    version_number -= 1
+
+
 
 def set_standInDrawOverride(selectionOnly=False, state=0, proxy_check=True):
     if selectionOnly:
@@ -189,6 +200,7 @@ class ProxyManagerUI(QWidget):
         self.btn_viewportOn = QtWidgets.QPushButton("Show ASS")
         self.btn_viewportOff = QtWidgets.QPushButton("Hide ASS")
         self.btn_viewportOffAll = QtWidgets.QPushButton("Hide all")
+        self.btn_connectTime = QtWidgets.QPushButton("Connect time")
         self.proxLabel = QtWidgets.QLabel("Proxy:")
         self.btn_proxOn = QtWidgets.QPushButton("Show GEO")
         self.btn_proxOff = QtWidgets.QPushButton("Hide GEO")
@@ -200,12 +212,15 @@ class ProxyManagerUI(QWidget):
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
         self.line2 = QtWidgets.QFrame()
         self.line2.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line3 = QtWidgets.QFrame()
+        self.line3.setFrameShape(QtWidgets.QFrame.HLine)
         self.btn_action1.clicked.connect(self.action1)
         self.btn_viewportOn.clicked.connect(self.btn_viewportOn_clicked)
         self.btn_viewportOff.clicked.connect(self.btn_viewportOff_clicked)
         self.btn_viewportOffAll.clicked.connect(self.btn_viewportOffAll_clicked)
         self.btn_proxOn.clicked.connect(self.btn_proxOn_clicked)
         self.btn_proxOff.clicked.connect(self.btn_proxOff_clicked)
+        self.btn_connectTime.clicked.connect(self.btn_connectTime_clicked)
 
         self.drawModeComboBox.currentIndexChanged.connect(self.onDrawModeChange)
 
@@ -238,6 +253,8 @@ class ProxyManagerUI(QWidget):
         main_layout.addWidget(self.line2)
         main_layout.addLayout(drawModeLayout)
         main_layout.addWidget(self.selectionOnlyCheckbox)
+        main_layout.addWidget(self.line3)
+        main_layout.addWidget(self.btn_connectTime)
     def action1(self):
         print("Action 1 executed")
         force_import = self.checkbox_action1.isChecked()
@@ -266,6 +283,46 @@ class ProxyManagerUI(QWidget):
         else:
             all_nodes = pm.ls(type='aiStandIn')
             set_aiStandIn_mode(all_nodes, mode_value)
+
+    def btn_connectTime_clicked(self):
+        # Get the current selection
+        selection = pm.selected()
+        if not selection:
+            raise ValueError("No node selected.")
+
+        standIn = selection[0].getShape()
+        if not standIn:
+            raise ValueError("No standIn found.")
+
+        # Check if the selected node is an aiStandIn
+        if standIn.type() != "aiStandIn":
+            raise TypeError("Selected node is not an aiStandIn.")
+
+        # Search for the first AlembicNode connected to any child shape
+        for child in selection[0].getChildren(ad=True, type="shape"):
+            # List all connections of type AlembicNode to this child
+            alembic_nodes = pm.listConnections(child, type="AlembicNode")
+            if alembic_nodes:
+                alembic_node = alembic_nodes[0]
+                break
+        else:
+            raise RuntimeError("No AlembicNode found connected to any child shape.")
+
+        # Create a plusMinusAverage node to invert the offset
+        pma_node = pm.createNode('plusMinusAverage', name='invert_frameOffset_pma')
+        pma_node.operation.set(1)  # Set operation to subtraction
+        pma_node.input1D[0].set(0)  # Set the first input to 0
+
+        # Connect the frameOffset of aiStandIn to the input of the plusMinusAverage
+        pm.connectAttr(standIn + ".frameOffset", pma_node.input1D[1])
+
+        # Connect the output of the plusMinusAverage to the offset of AlembicNode
+        pm.connectAttr(pma_node + ".output1D", alembic_node + ".offset", f=True)
+
+        # Connect frameNumber of aiStandIn directly to time of AlembicNode
+        pm.connectAttr(standIn + ".frameNumber", alembic_node + ".time", f=True)
+
+        print(f"Connected {standIn} with inverted offset to {alembic_node}")
 
 # Run the UI
 if __name__ == "__main__":
