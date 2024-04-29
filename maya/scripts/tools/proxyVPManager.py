@@ -63,7 +63,7 @@ def importProxyFromSelection(force=False):
         if proxyExists:
             print("skip proxy --> "+transform)
             continue
-
+        proxy_found = False
         # Check for shape nodes under the transform
         for shape in transform.getShapes():
             # Check if the shape is an aiStandIn
@@ -78,6 +78,7 @@ def importProxyFromSelection(force=False):
                     test_version = f"{version_number:04d}"
                     proxy_path = os.path.join(base_path, test_version, os.path.basename(os.path.splitext(dso_path)[0] + '_proxy.abc'))
                     if os.path.exists(proxy_path):
+                        proxy_found = True
                         # Create an empty group for the proxy
                         proxy_group = pm.group(em=True, name=f"{transform.name()}_proxy")
 
@@ -92,6 +93,8 @@ def importProxyFromSelection(force=False):
                         lock_transforms(proxy_group)
                         break
                     version_number -= 1
+        if not proxy_found:
+            cmds.warning( "No proxy found for %s"%dso_path )
 
 
 
@@ -108,7 +111,7 @@ def set_standInDrawOverride(selectionOnly=False, state=0, proxy_check=True):
 
     # Filter aiStandIn nodes
     aiStandIn_nodes = [node for node in nodes if node.nodeType() == 'aiStandIn']
-    print (aiStandIn_nodes)
+
     for node in aiStandIn_nodes:
         if not node.hasAttr('standInDrawOverride'):
             pm.warning(f"{node} does not have a 'standInDrawOverride' attribute.")
