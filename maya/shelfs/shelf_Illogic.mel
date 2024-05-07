@@ -375,7 +375,7 @@ global proc shelf_Illogic () {
         -image "R:/pipeline/pipe/maya/icons/character_publisher.png" 
         -image1 "R:/pipeline/pipe/maya/icons/character_publisher.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import publishFreshAsset\nimport importlib\nimportlib.reload(publishFreshAsset)\n\npublishFreshAsset.run()" 
         -sourceType "python" 
@@ -681,7 +681,7 @@ global proc shelf_Illogic () {
         -image "R:/pipeline/pipe/maya/icons/studiov2.png" 
         -image1 "R:/pipeline/pipe/maya/icons/studiov2.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\ncmds.file( 'R:/lib/3d/studio_v2/studio_v2.mb', r=True )\n#cmds.file( 'R:/lib/3d/studio/studio.mb', rr=True )" 
         -sourceType "python" 
@@ -715,7 +715,7 @@ global proc shelf_Illogic () {
         -image "R:/pipeline/pipe/maya/icons/studiov2off.png" 
         -image1 "R:/pipeline/pipe/maya/icons/studiov2off.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\n\ncmds.file( 'R:/lib/3d/studio_v2/studio_v2.mb', rr=True )" 
         -sourceType "python" 
@@ -817,7 +817,7 @@ global proc shelf_Illogic () {
         -image "R:/pipeline/pipe/maya/icons/logo-kitsu.de716c4b.png" 
         -image1 "R:/pipeline/pipe/maya/icons/logo-kitsu.de716c4b.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import webbrowser\n\nurl = \"https://illogic-studios.cg-wire.com/\"  # Replace with your desired URL\nwebbrowser.open(url)\n" 
         -sourceType "python" 
@@ -885,7 +885,7 @@ global proc shelf_Illogic () {
         -image "R:/pipeline/pipe/maya/icons/megaload.png" 
         -image1 "R:/pipeline/pipe/maya/icons/megaload.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "from megaload import megaload\nimport importlib\nimportlib.reload(megaload)\n\ntry:\n    ui.deleteLater()\nexcept:\n    pass\nui = megaload.Megaload()\nui.create()\nui.show()" 
         -sourceType "python" 
@@ -920,7 +920,7 @@ global proc shelf_Illogic () {
         -image "save.png" 
         -image1 "save.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "def setup_autosave():\n    autosave_dir = \"D:/_save_maya\"\n    if not os.path.exists(autosave_dir):\n        try:\n            os.makedirs(autosave_dir)\n            destination = 1\n        except:\n            destination = 0\n\n    cmds.autoSave(enable=True)\n    cmds.autoSave(limitBackups=True)\n    cmds.autoSave(maxBackups=5)\n    cmds.autoSave(destination=1)  # 1 for local directory\n    cmds.autoSave(folder=autosave_dir)\n    cmds.confirmDialog(message=\"Auto save on!\")\nsetup_autosave()" 
         -sourceType "python" 
@@ -955,7 +955,7 @@ global proc shelf_Illogic () {
         -image "animPrefsWndIcon.png" 
         -image1 "animPrefsWndIcon.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import animPublishValentine\nimport importlib\nimportlib.reload(animPublishValentine)\n\nanimPublishValentine.main()" 
         -sourceType "python" 
@@ -989,7 +989,7 @@ global proc shelf_Illogic () {
         -image "R:/pipeline/pipe/maya/icons/prism.png" 
         -image1 "R:/pipeline/pipe/maya/icons/prism.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import luxecore_mayaExport\nimport importlib\nimportlib.reload(luxecore_mayaExport)\n\nluxecore_mayaExport.run()" 
         -sourceType "python" 
@@ -1023,7 +1023,7 @@ global proc shelf_Illogic () {
         -image "R:/pipeline/pipe/maya/icons/flower.JPG" 
         -image1 "R:/pipeline/pipe/maya/icons/flower.JPG" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"proxyVPManager\")\nimportlib.import_module(\"proxyVPManager\")\nfrom proxyVPManager import ProxyManagerUI\ntry:\n    prox.close()\nexcept:\n    pass\nprox = ProxyManagerUI()\nprox.show()\n" 
         -sourceType "python" 
@@ -1057,7 +1057,7 @@ global proc shelf_Illogic () {
         -image "linearLight.closed.svg" 
         -image1 "linearLight.closed.svg" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import borderColor\nimport importlib\nimportlib.reload(borderColor)\n\nborderColor.run_edge()" 
         -sourceType "python" 
@@ -1067,9 +1067,9 @@ global proc shelf_Illogic () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 33
+        -flexibleWidthValue 32
         -enable 1
-        -width 36
+        -width 35
         -height 34
         -manage 1
         -visible 1
@@ -1091,7 +1091,7 @@ global proc shelf_Illogic () {
         -image "R:/pipeline/pipe/maya/icons/petal.JPG" 
         -image1 "R:/pipeline/pipe/maya/icons/petal.JPG" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import borderColor\nimport importlib\nimportlib.reload(borderColor)\n\nborderColor.run_color()" 
         -sourceType "python" 

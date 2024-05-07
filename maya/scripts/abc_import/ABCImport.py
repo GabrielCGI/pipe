@@ -5,15 +5,26 @@ import sys
 
 import pymel.core as pm
 import maya.OpenMayaUI as omui
+maya_version = pm.about(version=True))
+if maya_version.startswith("2022"):
+    # Using PySide2 for Maya 2022
+    from PySide2 import QtCore, QtGui, QtWidgets
+    from PySide2.QtWidgets import *
+    from PySide2.QtCore import *
+    from PySide2.QtGui import *
+elif maya_version.startswith("2025"):
+    # Using PySide6 for Maya 2025
+    from PySide6 import QtCore, QtGui, QtWidgets
+    from PySide6.QtWidgets import *
+    from PySide6.QtCore import *
+    from PySide6.QtGui import *
 
-from PySide2 import QtCore
-from PySide2 import QtGui
-from PySide2 import QtWidgets
-from PySide2.QtWidgets import *
-from PySide2.QtCore import *
-from PySide2.QtGui import *
-
-from shiboken2 import wrapInstance
+if maya_version.startswith("2022"):
+    # Using Shiboken2 for Maya 2022
+    from shiboken2 import wrapInstance
+elif maya_version.startswith("2025"):
+    # Using Shiboken6 for Maya 2025
+    from shiboken6 import wrapInstance
 
 from common.utils import *
 

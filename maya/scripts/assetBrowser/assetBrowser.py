@@ -19,10 +19,24 @@ import json
 from maya import OpenMaya
 from maya import OpenMayaUI as omui
 import maya.cmds as cmds
-from PySide2 import QtCore
-from PySide2 import QtWidgets
-from PySide2 import QtGui
-from shiboken2 import wrapInstance
+
+# Retrieve the version of Maya currently in use
+maya_version = cmds.about(version=True)
+
+if maya_version.startswith("2022"):
+    # Using PySide2 for Maya 2022
+    from PySide2 import QtCore, QtWidgets, QtGui
+elif maya_version.startswith("2025"):
+    # Using PySide6 for Maya 2025
+    # Note: QAction and QShortcut have moved from QtWidgets to QtGui in PySide6
+    from PySide6 import QtCore, QtWidgets, QtGui
+
+if maya_version.startswith("2022"):
+    # Using Shiboken2 for Maya 2022
+    from shiboken2 import wrapInstance
+elif maya_version.startswith("2025"):
+    # Using Shiboken6 for Maya 2025
+    from shiboken6 import wrapInstance
 from pathlib import Path
 import shutil
 import subprocess
@@ -47,7 +61,7 @@ def maya_main_window():
 
 
 #current_project="D:/gabriel/assetizer"
-project_list = ["D:/","I:/swaMarvel_2309","I:/swaValentine_2310","I:/dubuis_2312","I:/swaMilan_2401","I:/fresh_2403","I:/swaNY_2308","I:\swaSF_2403","I:/swaValentine_2310","I:/swaTrolls_2401","I:/swaLion_2401"]
+project_list = ["D:/","I:/fresh_2403","I:/swaTrolls_2401","I:/swaLion_2401","I:/swaSF_2403"]
 AddIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_AddIcon.png"
 BackIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_BackIcon.png"
 FolderIcon = r"R:\pipeline\pipe\maya\scripts\assetBrowser\icons\_FolderIcon.png"
