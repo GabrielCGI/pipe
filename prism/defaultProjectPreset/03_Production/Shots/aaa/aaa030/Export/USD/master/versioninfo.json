@@ -1,0 +1,15 @@
+{
+    "type": "shot",
+    "sequence": "aaa",
+    "shot": "aaa030",
+    "project_path": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset",
+    "project_name": "defaultProjectPreset",
+    "product": "USD",
+    "version": "v0001",
+    "comment": "default USD structure",
+    "username": "Valentin Dornel",
+    "user": "vdo",
+    "date": "16.05.24 14:31:46",
+    "dependencies": [],
+    "externalFiles": []
+}

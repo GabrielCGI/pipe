@@ -1,0 +1,11 @@
+#usda 1.0
+(
+    endTimeCode = 1100
+    framesPerSecond = 25
+    startTimeCode = 1001
+    subLayers = [
+        @R:\pipeline\pipe\prism\defaultProjectPreset\03_Production\Shots\aaa\_sequence\Export\USD\master\aaa-_sequence_USD_master.usda@
+    ]
+    timeCodesPerSecond = 25
+)
+

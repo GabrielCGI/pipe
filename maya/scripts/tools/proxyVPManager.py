@@ -96,8 +96,10 @@ def importProxyFromSelection(force=False):
                         lock_transforms(proxy_group)
                         break
                     version_number -= 1
+                    connectTime(transform)
         if not proxy_found:
             cmds.warning( "No proxy found for %s"%dso_path )
+        pm.select(transform)
 
 
 
@@ -178,6 +180,50 @@ def proxy_visibility(visibility, selectionOnly):
     for node in nodes:
         node.visibility.set(visibility)
 
+def connectTime(node):
+        # Get the current selection
+        try:
+            standIn = node.getShape()
+
+        except:
+            cmds.warning('Fail to get shape on %s'%node)
+            return
+        if not standIn:
+            cmds.warning("No standIn found.")
+            return
+
+        # Check if the selected node is an aiStandIn
+        if standIn.type() != "aiStandIn":
+            cmds.warning("Selected node is not an aiStandIn.")
+            return
+
+        # Search for the first AlembicNode connected to any child shape
+        for child in node.getChildren(ad=True, type="shape"):
+            # List all connections of type AlembicNode to this child
+            alembic_nodes = pm.listConnections(child, type="AlembicNode")
+            if alembic_nodes:
+                alembic_node = alembic_nodes[0]
+                break
+        else:
+            cmds.warning("No AlembicNode found connected to any child shape.")
+            return
+
+        # Create a plusMinusAverage node to invert the offset
+        pma_node = pm.createNode('plusMinusAverage', name='invert_frameOffset_pma')
+        pma_node.operation.set(2)  # Set operation to subtraction
+
+        pma_node.input1D[0].set(0)  # Set the first input to 0
+
+        # Connect the frameOffset of aiStandIn to the input of the plusMinusAverage
+        pm.connectAttr(standIn + ".frameOffset", pma_node.input1D[1])
+
+        # Connect the output of the plusMinusAverage to the offset of AlembicNode
+        pm.connectAttr(pma_node + ".output1D", alembic_node + ".offset", f=True)
+
+        # Connect frameNumber of aiStandIn directly to time of AlembicNode
+        pm.connectAttr(standIn + ".frameNumber", alembic_node + ".time", f=True)
+
+        print(f"Connected {standIn} with inverted offset to {alembic_node}")
 
 # Your createGarland function here...
 
@@ -267,6 +313,7 @@ class ProxyManagerUI(QWidget):
         force_import = self.checkbox_action1.isChecked()
         importProxyFromSelection(force=force_import)
 
+
     def btn_viewportOn_clicked(self):
         set_standInDrawOverride(self.selectionOnlyCheckbox.isChecked(), state=0)
         print("Action 2 executed")
@@ -277,6 +324,7 @@ class ProxyManagerUI(QWidget):
         print("Action off executed")
     def btn_proxOn_clicked(self):
         proxy_visibility(1,self.selectionOnlyCheckbox.isChecked())
+
     def btn_proxOff_clicked(self):
         proxy_visibility(0, self.selectionOnlyCheckbox.isChecked())
     def onDrawModeChange(self):
@@ -292,44 +340,9 @@ class ProxyManagerUI(QWidget):
             set_aiStandIn_mode(all_nodes, mode_value)
 
     def btn_connectTime_clicked(self):
-        # Get the current selection
-        selection = pm.selected()
-        if not selection:
-            raise ValueError("No node selected.")
+        for node in pm.selected():
+            connectTime(node)
 
-        standIn = selection[0].getShape()
-        if not standIn:
-            raise ValueError("No standIn found.")
-
-        # Check if the selected node is an aiStandIn
-        if standIn.type() != "aiStandIn":
-            raise TypeError("Selected node is not an aiStandIn.")
-
-        # Search for the first AlembicNode connected to any child shape
-        for child in selection[0].getChildren(ad=True, type="shape"):
-            # List all connections of type AlembicNode to this child
-            alembic_nodes = pm.listConnections(child, type="AlembicNode")
-            if alembic_nodes:
-                alembic_node = alembic_nodes[0]
-                break
-        else:
-            raise RuntimeError("No AlembicNode found connected to any child shape.")
-
-        # Create a plusMinusAverage node to invert the offset
-        pma_node = pm.createNode('plusMinusAverage', name='invert_frameOffset_pma')
-        pma_node.operation.set(1)  # Set operation to subtraction
-        pma_node.input1D[0].set(0)  # Set the first input to 0
-
-        # Connect the frameOffset of aiStandIn to the input of the plusMinusAverage
-        pm.connectAttr(standIn + ".frameOffset", pma_node.input1D[1])
-
-        # Connect the output of the plusMinusAverage to the offset of AlembicNode
-        pm.connectAttr(pma_node + ".output1D", alembic_node + ".offset", f=True)
-
-        # Connect frameNumber of aiStandIn directly to time of AlembicNode
-        pm.connectAttr(standIn + ".frameNumber", alembic_node + ".time", f=True)
-
-        print(f"Connected {standIn} with inverted offset to {alembic_node}")
 
 # Run the UI
 if __name__ == "__main__":
