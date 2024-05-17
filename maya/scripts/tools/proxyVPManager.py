@@ -47,6 +47,7 @@ def importProxyFromSelection(force=False):
     for transform in pm.selected():
         # Initialize a flag to check for existing proxy groups
         proxyExists = False
+        print("Start")
 
         # Check for existing child groups with "proxy" in the name
         for child in transform.getChildren(type='transform'):
@@ -66,17 +67,19 @@ def importProxyFromSelection(force=False):
         proxy_found = False
         # Check for shape nodes under the transform
         for shape in transform.getShapes():
+            print("Looking at %s"%shape)
             # Check if the shape is an aiStandIn
             if shape.nodeType() == 'aiStandIn':
                 dso_path = shape.getAttr('dso')
                 version_number = int(dso_path.split('/')[-2])  # Extracting the version number
                 base_path = '/'.join(dso_path.split('/')[:-2]) + '/'  # Base path without version and file
-
+                print("dso:%s"%dso_path)
                 # Try finding a valid proxy file by decrementing versions
-                while version_number > 0:
+                while version_number >= 0:
                     print(version_number)
                     test_version = f"{version_number:04d}"
                     proxy_path = os.path.join(base_path, test_version, os.path.basename(os.path.splitext(dso_path)[0] + '_proxy.abc'))
+                    print("Proxy_path: %s"%proxy_path)
                     if os.path.exists(proxy_path):
                         proxy_found = True
                         # Create an empty group for the proxy
@@ -95,6 +98,7 @@ def importProxyFromSelection(force=False):
                     version_number -= 1
         if not proxy_found:
             cmds.warning( "No proxy found for %s"%dso_path )
+
 
 
 
@@ -267,7 +271,7 @@ class ProxyManagerUI(QWidget):
         set_standInDrawOverride(self.selectionOnlyCheckbox.isChecked(), state=0)
         print("Action 2 executed")
     def btn_viewportOff_clicked(self):
-        set_standInDrawOverride(self.selectionOnlyCheckbox.isChecked(), state=3, proxy_check=True)
+        set_standInDrawOverride(self.selectionOnlyCheckbox.isChecked(), state=3, proxy_check=False)
     def btn_viewportOffAll_clicked(self):
         set_standInDrawOverride(self.selectionOnlyCheckbox.isChecked(), state=3, proxy_check=False)
         print("Action off executed")
