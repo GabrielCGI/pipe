@@ -33,7 +33,7 @@ def lock_transforms(sel):
 
         # Include the node itself plus all descendants in the processing
     descendants = [sel] + sel.listRelatives(allDescendents=True, type="transform")
-    print(descendants )
+
 
         # Iterate through each node to process
     for n in descendants:
@@ -47,7 +47,7 @@ def importProxyFromSelection(force=False):
     for transform in pm.selected():
         # Initialize a flag to check for existing proxy groups
         proxyExists = False
-        print("Start")
+        print("---------------------------")
 
         # Check for existing child groups with "proxy" in the name
         for child in transform.getChildren(type='transform'):
@@ -62,24 +62,31 @@ def importProxyFromSelection(force=False):
 
         # Skip the rest of the loop if a proxy exists and force is False
         if proxyExists:
-            print("skip proxy --> "+transform)
+            print("Skip proxy: "+transform)
             continue
         proxy_found = False
         # Check for shape nodes under the transform
         for shape in transform.getShapes():
-            print("Looking at %s"%shape)
+
             # Check if the shape is an aiStandIn
             if shape.nodeType() == 'aiStandIn':
                 dso_path = shape.getAttr('dso')
-                version_number = int(dso_path.split('/')[-2])  # Extracting the version number
-                base_path = '/'.join(dso_path.split('/')[:-2]) + '/'  # Base path without version and file
-                print("dso:%s"%dso_path)
+                try:
+                    version_number = int(dso_path.split('/')[-2])  # Extracting the version number
+                    base_path = '/'.join(dso_path.split('/')[:-2]) + '/'  # Base path without version and file
+                except Exception as e:
+
+                    pm.warning("Fail on %s"%transform)
+                    print(e)
+                    continue
+
+
                 # Try finding a valid proxy file by decrementing versions
                 while version_number >= 0:
-                    print(version_number)
+
                     test_version = f"{version_number:04d}"
                     proxy_path = os.path.join(base_path, test_version, os.path.basename(os.path.splitext(dso_path)[0] + '_proxy.abc'))
-                    print("Proxy_path: %s"%proxy_path)
+
                     if os.path.exists(proxy_path):
                         proxy_found = True
                         # Create an empty group for the proxy
@@ -94,9 +101,11 @@ def importProxyFromSelection(force=False):
                         # Assuming set_to_procedural_null and lock_transforms are defined elsewhere
                         set_to_procedural_null(proxy_group)
                         lock_transforms(proxy_group)
+                        print("Proxy found for %s: %s"%(transform,proxy_path))
+                        connectTime(transform)
                         break
                     version_number -= 1
-                    connectTime(transform)
+
         if not proxy_found:
             cmds.warning( "No proxy found for %s"%dso_path )
         pm.select(transform)
@@ -223,7 +232,6 @@ def connectTime(node):
         # Connect frameNumber of aiStandIn directly to time of AlembicNode
         pm.connectAttr(standIn + ".frameNumber", alembic_node + ".time", f=True)
 
-        print(f"Connected {standIn} with inverted offset to {alembic_node}")
 
 # Your createGarland function here...
 

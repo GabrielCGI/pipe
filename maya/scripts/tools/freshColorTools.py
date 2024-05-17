@@ -86,16 +86,49 @@ class MyTool(QtWidgets.QDialog):
 
         selection = pm.ls(selection=True)
         print(selection)
-        color = cmds.colorEditor()
-        if cmds.colorEditor(query=True, result=True):
-            rgb = cmds.colorEditor(query=True, rgb=True)
-        else:
-            cmds.warning("Abort by user")
+        color =  self.get_first_aiUserDataColor_default_value(obj)
+
         if 'f' in selection[0].name():
             self.run_color_faces(selection, rgb)
         else:
             for obj in selection:
                 self.run_color_object(obj, rgb)
+
+
+
+    def run_color_blinn(self):
+        for obj in pm.ls(selection=True):
+            color = self.get_first_aiUserDataColor_default_value(obj)
+
+            if pm.nodeType(obj) == 'transform':
+                shape = obj.getShape()
+            else:
+                shape = obj
+
+            shading_groups = pm.listConnections(shape, type='shadingEngine')
+            print(shading_groups)
+
+            if not shading_groups:
+                pm.warning("No shading groups found connected to the selected mesh.")
+                return
+
+            for sg in shading_groups:
+                current_shader = pm.listConnections(sg.surfaceShader, source=True, destination=False)
+
+                if current_shader:
+                    shader_type = pm.nodeType(current_shader[0])
+                    if shader_type not in ['blinn', 'lambert']:
+                        pm.connectAttr(current_shader[0].outColor, sg.aiSurfaceShader, force=True)
+
+                        # Create a new Lambert node
+                        new_lambert = pm.shadingNode('lambert', asShader=True)
+
+                        # Set its color to the retrieved color value
+                        new_lambert.color.set(color)
+
+                        # Connect the new Lambert node to the shading group's surfaceShader
+                        pm.connectAttr(new_lambert.outColor, sg.surfaceShader, force=True)
+
 
     def get_first_aiUserDataColor_default_value(self,node):
         default_color = None
@@ -128,7 +161,6 @@ class MyTool(QtWidgets.QDialog):
                 print("Skip color on %s"%obj)
                 continue
             self.run_color_object(obj,color)
-
 
 
     def lamberificator(self, first_item):
