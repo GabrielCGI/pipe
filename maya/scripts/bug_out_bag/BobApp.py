@@ -46,6 +46,7 @@ from .tool_instances.FaceFromShader import *
 from .tool_instances.GlassShadow import *
 from .tool_instances.ShaderDuplicate import *
 from .tool_instances.DisplayColor import *
+from .tool_instances.Exposure import *
 
 # ######################################################################################################################
 
@@ -106,7 +107,8 @@ class BobApp(QDialog):
                 FaceFromShader(),
                 ShadingGroupRenamerTool(),
                 ShaderDuplicate(),
-                DisplayColor()
+                DisplayColor(),
+                Exposure()
 
             ]),
         ]

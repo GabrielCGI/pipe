@@ -26,18 +26,22 @@ class MyTool(QtWidgets.QDialog):
 
         # Buttons
         self.run_edge_button = QtWidgets.QPushButton("Add border")
-        self.run_color_button = QtWidgets.QPushButton("Add color")
-        self.run_color_from_shader_button = QtWidgets.QPushButton("Add color from Shader")
+        self.run_color_button = QtWidgets.QPushButton("Add colorSet \"Cd\"")
+        self.run_color_from_shader_button = QtWidgets.QPushButton("Add colorSet \"Cd\" from Shader")
+        self.run_color_blinn_button = QtWidgets.QPushButton("Viewport Shader Convert")
 
         # Add buttons to the layout
         self.main_layout.addWidget(self.run_edge_button)
         self.main_layout.addWidget(self.run_color_button)
         self.main_layout.addWidget(self.run_color_from_shader_button)
+        self.main_layout.addWidget(self.run_color_blinn_button)
 
         # Connect buttons to their respective functions
         self.run_edge_button.clicked.connect(self.run_edge)
         self.run_color_button.clicked.connect(self.run_color)
         self.run_color_from_shader_button.clicked.connect(self.run_color_from_shader_clicked)
+        self.run_color_blinn_button.clicked.connect(self.run_color_blinn)
+
 
     def run_edge(self):
         selection = cmds.ls(selection=True)
@@ -129,7 +133,7 @@ class MyTool(QtWidgets.QDialog):
                         # Connect the new Lambert node to the shading group's surfaceShader
                         pm.connectAttr(new_lambert.outColor, sg.surfaceShader, force=True)
 
-
+            shape.displayColors.set(0)
     def get_first_aiUserDataColor_default_value(self,node):
         default_color = None
         selected_object = node.getShape()
