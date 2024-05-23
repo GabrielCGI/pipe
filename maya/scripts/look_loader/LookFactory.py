@@ -27,7 +27,6 @@ class LookFactory:
             print("'niente'")
             return
 
-        print("I HAVzdzdzdzdzdzdE BEEN MODIzdzdzddddddddddFIED")
 
         # Gabriel EDIT to make it work for fresh
         filename = standin_file_path.split('/')[-1]

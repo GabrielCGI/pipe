@@ -144,7 +144,8 @@ class ABCImportAsset(ABC):
         :return:
         """
         if self._look_standin_obj is not None:
-            self._look_standin_obj.update_existent_looks()
+            filepath = self._look_standin_obj.update_existent_looks()
+            return filepath
 
     def is_look_up_to_date(self):
         """
@@ -215,7 +216,7 @@ class ABCImportAnim(ABCImportAsset):
             ABCImportAsset._configure_standin(standin_node)
 
         self.set_actual_standins(actual_standins)
-        
+
         light_filename = name + "_light.ma"
         light_filepath = os.path.join(self._import_path, light_filename)
 
@@ -232,7 +233,15 @@ class ABCImportAnim(ABCImportAsset):
                 pm.createReference(light_filepath, defaultNamespace=True)
 
         if is_import or do_update_uvs_shaders:
-            self.update()
+
+            filepath = self.update()
+            print(filepath)
+            print("FORCE UPDATE LOOK")
+            if filepath:
+                for standin_node in standin_nodes:
+                    includeGraph = pm.listHistory(standin_node, type='aiIncludeGraph')[0]
+                    if includeGraph:
+                        includeGraph.filename.set(filepath)
         return standin_nodes
 
 
@@ -292,6 +301,7 @@ class ABCImportFur(ABCImportAsset):
 
             self.set_actual_standins(actual_standins)
             for standin_node in standin_nodes:
+                print(standin_node)
                 standin_node.dso.set(os.path.join(self._import_path, dso))
                 standin_node.mode.set(4)
                 ABCImportAsset._configure_standin(standin_node)

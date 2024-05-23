@@ -441,13 +441,15 @@ class ABCImport(QDialog):
             # Action
             if state != ABCState.New:
                 if not abc.is_look_up_to_date():
+                    print("ABC LOOK NOT UP TO DATE")
                     pixmap = QPixmap(asset_dir + abc.get_icon_filename(state))
+                    print(asset_dir + abc.get_icon_filename(state))
                     look_icon_widget = QLabel()
                     look_icon_widget.setFixedSize(QSize(22, 22))
                     look_icon_widget.setScaledContents(True)
                     look_icon_widget.setPixmap(pixmap)
                     look_icon_widget.setToolTip("Look out of date")
-                    pixmap = QPixmap(asset_dir + "look.png")
+                    pixmap = QPixmap(asset_dir + "warning.png")
                     look_icon_widget.setPixmap(pixmap)
                     container_look_icon_widget = QWidget()
                     layout_container_look_icon_widget = QVBoxLayout(container_look_icon_widget)

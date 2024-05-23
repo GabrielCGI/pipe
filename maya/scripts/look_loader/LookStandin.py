@@ -162,10 +162,15 @@ class LookStandin(ABC):
                 include_graph = pm.createNode("aiIncludeGraph", n="aiIncludeGraph_" + self.__object_name + "_" + look_name)
                 include_graph.filename.set(look_filepath)
                 include_graph.out >> self._standin.operators[LookStandin.__get_free_operator_slot(self._standin)]
+                return look_filepath
             elif look_state == LookPresentState.AnteriorVersionPlugged:
                 include_graph = look_data[2]
                 include_graph.filename.set(look_filepath)
+                return look_filepath
+
         pm.select(clear=True)
+        return look_filepath
+
 
     @abstractmethod
     def is_uv_up_to_date(self):
