@@ -1067,7 +1067,7 @@ global proc shelf_Illogic () {
     shelfButton
         -enableCommandRepeat 1
         -flexibleWidthType 3
-        -flexibleWidthValue 33
+        -flexibleWidthValue 32
         -enable 1
         -width 36
         -height 34
@@ -1128,6 +1128,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 1
         -marginHeight 1
+        -command "import pymel.core as pm\n\n# Set the FPS for all stand-in objects\nstandins = pm.ls(type='aiStandIn')\nfor standin in standins:\n    standin.abcFPS.set(25)\n\n# Set the current scene FPS to 25\npm.currentUnit(time='pal')\n" 
         -sourceType "mel" 
         -commandRepeatable 1
         -flat 1
@@ -1197,6 +1198,40 @@ global proc shelf_Illogic () {
         -marginWidth 1
         -marginHeight 1
         -command "import pymel.core as pm\n\nstandins = pm.ls(type='aiStandIn')\ntransforms = [standin.getParent() for standin in standins]\npm.select(transforms)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import colorTransfer\nimport importlib\nimportlib.reload(colorTransfer)\n\ntry:\n    ui.deleteLater()\nexcept:\n    pass\n\nui = colorTransfer.ColorTransferUI()\nui.show()\n" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import colorTransfer\nimport importlib\nimportlib.reload(colorTran..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "colorPickCursor.png" 
+        -image1 "colorPickCursor.png" 
+        -style "iconOnly" 
+        -marginWidth 1
+        -marginHeight 1
+        -command "import colorTransfer\nimport importlib\nimportlib.reload(colorTransfer)\n\ntry:\n    ui.deleteLater()\nexcept:\n    pass\n\nui = colorTransfer.ColorTransferUI()\nui.show()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

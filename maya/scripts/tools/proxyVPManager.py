@@ -125,7 +125,7 @@ def set_standInDrawOverride(selectionOnly=False, state=0, proxy_check=True):
         nodes = pm.ls(type='aiStandIn')  # List all aiStandIn nodes in the scene
 
     # Filter aiStandIn nodes
-    aiStandIn_nodes = [node for node in nodes if node.nodeType() == 'aiStandIn']
+    aiStandIn_nodes = [node for node in nodes if node.nodeType() == 'aiStandIn'and "publish/ass" not in node.dso.get()]
 
     for node in aiStandIn_nodes:
         if not node.hasAttr('standInDrawOverride'):

@@ -89,20 +89,29 @@ class MyTool(QtWidgets.QDialog):
     def run_color(self):
 
         selection = pm.ls(selection=True)
-        print(selection)
-        color =  self.get_first_aiUserDataColor_default_value(obj)
+        color = cmds.colorEditor()
+        if cmds.colorEditor(query=True, result=True):
+            rgb = cmds.colorEditor(query=True, rgb=True)
+        else:
+            rgb=[0,1,0]
+        color =  rgb
 
         if 'f' in selection[0].name():
-            self.run_color_faces(selection, rgb)
+            self.run_color_faces(selection, color )
         else:
             for obj in selection:
-                self.run_color_object(obj, rgb)
+                self.run_color_object(obj, color )
 
 
 
     def run_color_blinn(self):
         for obj in pm.ls(selection=True):
+            print("start vp shader on %s"%obj.name())
             color = self.get_first_aiUserDataColor_default_value(obj)
+            if not color:
+                pm.warning("No color found ! ")
+                return
+            print(color)
 
             if pm.nodeType(obj) == 'transform':
                 shape = obj.getShape()
@@ -117,12 +126,22 @@ class MyTool(QtWidgets.QDialog):
                 return
 
             for sg in shading_groups:
-                current_shader = pm.listConnections(sg.surfaceShader, source=True, destination=False)
+                aiSurface = sg.aiSurfaceShader.connections()
+                surface =sg.surfaceShader.connections()
+                if aiSurface:
+                    print("aiSurcaDetect")
+                    print(aiSurface)
+
+                    current_shader = aiSurface[0]
+                else:
+                    print(surface[0])
+                    current_shader = surface[0]
+
 
                 if current_shader:
-                    shader_type = pm.nodeType(current_shader[0])
+                    shader_type = pm.nodeType(current_shader)
                     if shader_type not in ['blinn', 'lambert']:
-                        pm.connectAttr(current_shader[0].outColor, sg.aiSurfaceShader, force=True)
+                        pm.connectAttr(current_shader.outColor, sg.aiSurfaceShader, force=True)
 
                         # Create a new Lambert node
                         new_lambert = pm.shadingNode('lambert', asShader=True)
@@ -132,6 +151,9 @@ class MyTool(QtWidgets.QDialog):
 
                         # Connect the new Lambert node to the shading group's surfaceShader
                         pm.connectAttr(new_lambert.outColor, sg.surfaceShader, force=True)
+                        allShapes = pm.listConnections(sg , type='shape', source=False)
+                        for s in allShapes:
+                            s.displayColors.set(0)
 
             shape.displayColors.set(0)
     def get_first_aiUserDataColor_default_value(self,node):
@@ -139,20 +161,34 @@ class MyTool(QtWidgets.QDialog):
         selected_object = node.getShape()
 
         shading_groups = pm.listConnections(selected_object, type='shadingEngine')
+        print(shading_groups)
 
         if not shading_groups:
             pm.warning("No shading group connected to the selected object.")
             return None
     # Iterate over the shading groups to find aiUserDataColor nodes
         for sg in shading_groups:
-            connected_nodes = pm.listHistory(sg)
+            aiSurface = sg.aiSurfaceShader.connections()
+            surface =sg.surfaceShader.connections()
+            if aiSurface:
+                print("aiSurcaDetect")
+                shader = aiSurface[0]
+            else:
+                shader = surface[0]
+
+            connected_nodes = pm.listHistory(shader)
+            print(connected_nodes)
             for node in connected_nodes:
                 if pm.nodeType(node) == 'aiUserDataColor':
                     if node.attribute.get() != "border":
                         # Get the default color value
                         default_color = pm.getAttr(node + ".default")
                         return default_color
-
+                if pm.nodeType(node) == 'colorConstant':
+                    if "MASTER" in node.name():
+                        # Get the default color value
+                        default_color = pm.getAttr(node + ".inColor")
+                        return default_color
         pm.warning("No aiUserDataColor node found.")
         return None
 

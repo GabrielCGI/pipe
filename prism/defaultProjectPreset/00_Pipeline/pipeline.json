@@ -10,7 +10,7 @@
             1920,
             1080
         ],
-        "useMasterVersion": true,
+        "useMasterVersion": false,
         "useMasterRenderVersion": false,
         "backupScenesOnPublish": false,
         "scenefileLocking": false,

@@ -1,7 +1,7 @@
 {
     "default": {
-        "access_token": "1c83d6af-e125-4aca-aeac-5836cc414630",
-        "preferred_license": "Plus"
+        "access_token": "",
+        "preferred_license": ""
     },
     "workstations": {
         "5C:E9:31:BC:56:6A": {
@@ -9,48 +9,8 @@
             "access_token": "",
             "preferred_license": ""
         },
-        "5C:E9:31:BC:56:D2": {
-            "name": "ROLLS-01",
-            "access_token": "",
-            "preferred_license": ""
-        },
         "5C:E9:31:BC:57:BF": {
             "name": "SPRINTER-02",
-            "access_token": "",
-            "preferred_license": ""
-        },
-        "5C:E9:31:BC:56:CC": {
-            "name": "SPRINTER-08",
-            "access_token": "",
-            "preferred_license": ""
-        },
-        "D8:5E:D3:5F:88:03": {
-            "name": "SPRINTER-01",
-            "access_token": "",
-            "preferred_license": ""
-        },
-        "5C:E9:31:BC:56:36": {
-            "name": "FX-01",
-            "access_token": "",
-            "preferred_license": ""
-        },
-        "04:42:1A:27:D4:9A": {
-            "name": "SPRINTER-07",
-            "access_token": "",
-            "preferred_license": ""
-        },
-        "5C:E9:31:BC:55:AE": {
-            "name": "ROLLS-03",
-            "access_token": "",
-            "preferred_license": ""
-        },
-        "5C:E9:31:BC:56:A9": {
-            "name": "FALCON-02",
-            "access_token": "",
-            "preferred_license": ""
-        },
-        "D8:BB:C1:3F:16:CA": {
-            "name": "FX-04",
             "access_token": "",
             "preferred_license": ""
         }
