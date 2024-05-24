@@ -58,6 +58,34 @@ class ABCImportAsset(ABC):
             return "warning.png"
         else:
             return "new.png"
+    def get_last_version_scan(self, base_filename):
+        directory, filename = os.path.split(base_filename)
+        base_name, ext = os.path.splitext(filename)
+
+        version_pattern = re.compile(r"(.*?)(\.v\d+)(\.ass)$")
+        match = version_pattern.match(filename)
+
+        if not match:
+            raise ValueError("Filename does not match expected pattern")
+
+        base_pattern = match.group(1)
+
+        highest_version = -1
+        latest_file = None
+
+        for f in os.listdir(directory):
+            if f.startswith(base_pattern) and f.endswith(ext):
+                version_match = re.search(r'\.v(\d+)\.ass$', f)
+                if version_match:
+                    version = int(version_match.group(1))
+                    if version > highest_version:
+                        highest_version = version
+                        latest_file = f
+
+        if latest_file:
+            return os.path.join(directory, latest_file)
+        return None
+
 
     def get_name(self):
         """
@@ -206,7 +234,7 @@ class ABCImportAnim(ABCImportAsset):
             standin_nodes = []
             for standin in actual_standins:
                 standin_nodes.append(pm.listRelatives(standin, parent=True)[0])
-        print(actual_standins)
+
 
         abc_filename = name + ".abc"
         abc_filepath = os.path.join(self._import_path, abc_filename)
@@ -234,14 +262,18 @@ class ABCImportAnim(ABCImportAsset):
 
         if is_import or do_update_uvs_shaders:
 
-            filepath = self.update()
-            print(filepath)
-            print("FORCE UPDATE LOOK")
-            if filepath:
-                for standin_node in standin_nodes:
-                    includeGraph = pm.listHistory(standin_node, type='aiIncludeGraph')[0]
-                    if includeGraph:
-                        includeGraph.filename.set(filepath)
+            for standin_node in standin_nodes:
+                includeGraphs = pm.listHistory(standin_node, type='aiIncludeGraph')
+                includeGraph = includeGraphs[0] if includeGraphs else None
+
+                if not includeGraph:
+                    self.update()
+                    continue
+                base_filename = includeGraph.filename.get()
+
+                new_filename = self.get_last_version_scan(base_filename)
+                print("LOOK UPDATE: %s: to %s"%(standin_node,new_filename))
+                if new_filename: includeGraph.filename.set(new_filename)
         return standin_nodes
 
 
@@ -301,7 +333,6 @@ class ABCImportFur(ABCImportAsset):
 
             self.set_actual_standins(actual_standins)
             for standin_node in standin_nodes:
-                print(standin_node)
                 standin_node.dso.set(os.path.join(self._import_path, dso))
                 standin_node.mode.set(4)
                 ABCImportAsset._configure_standin(standin_node)

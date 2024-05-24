@@ -52,7 +52,7 @@ class LightTextureDelegate(QtWidgets.QStyledItemDelegate):
 
     def sizeHint(self, option, index):
         # All items the same size.
-        return QtCore.QSize(100, 100)
+        return QtCore.QSize(200, 200)
 
 
 # Model class for the TableView
@@ -88,6 +88,7 @@ class LightTextureModel(QtCore.QAbstractTableModel):
 
 class LightTexturePicker(QtWidgets.QDialog):
     TEXTURE_PATH = "R:\\lib\\hdri_light_v2\\jpg"
+    TEXTURE_PATH_GRAY = "R:/greyscalegorilla/hdri"
 
     # Retrieve the selected light or create one
     def __init__(self, parent=wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)):
@@ -163,11 +164,20 @@ class LightTexturePicker(QtWidgets.QDialog):
     def __create_render_node_texture(self):
         render_node = cmds.shadingNode("file", asTexture=True, asUtility=True)
         #SWITCH TO TX
-        parentDir =os.path.dirname(os.path.dirname(self.__texture))
-        filename = os.path.basename(self.__texture)
-        filenameTX =  os.path.splitext(filename)[0]+".tx"
-        pathTX= os.path.join(parentDir,filenameTX)
+        #TEST A
+        if not "preview.jpg" in self.__texture:
+            parentDir =os.path.dirname(os.path.dirname(self.__texture))
+            filename = os.path.basename(self.__texture)
+            filenameTX =  os.path.splitext(filename)[0]+".tx"
+            pathTX= os.path.join(parentDir,filenameTX)
+        else:
+            parentDir =os.path.dirname(self.__texture)
+            filename = os.path.basename(self.__texture)
+            tx_name = filename.replace("_preview.jpg", "_scene-linear Rec.709-sRGB_ACEScg.exr.tx")
+            pathTX= os.path.join(parentDir,"tx",tx_name)
 
+
+        if not os.path.exists(pathTX): raise Exception("Sorry, path does not exist: %s "%pathTX)
         cmds.setAttr(render_node + '.fileTextureName', pathTX,
                      type="string")
         return render_node
@@ -232,8 +242,17 @@ class LightTexturePicker(QtWidgets.QDialog):
         model = LightTextureModel(column=4)
         self.__ui_texture_table_widget.setItemDelegate(delegate)
         self.__ui_texture_table_widget.setModel(model)
+
         for n, f in enumerate(listdir(self.TEXTURE_PATH)):
             filename = join(self.TEXTURE_PATH, f)
+            filename_without_ext = os.path.splitext(filename)[0]
+            if isfile(filename):
+                image = QtGui.QImage(filename_without_ext)
+                item = light_texture(n, filename, image)
+                model.light_textures.append(item)
+
+        for n, f in enumerate(listdir(self.TEXTURE_PATH_GRAY)):
+            filename = join(self.TEXTURE_PATH_GRAY, f)
             filename_without_ext = os.path.splitext(filename)[0]
             if isfile(filename):
                 image = QtGui.QImage(filename_without_ext)

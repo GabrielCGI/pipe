@@ -443,7 +443,6 @@ class ABCImport(QDialog):
                 if not abc.is_look_up_to_date():
                     print("ABC LOOK NOT UP TO DATE")
                     pixmap = QPixmap(asset_dir + abc.get_icon_filename(state))
-                    print(asset_dir + abc.get_icon_filename(state))
                     look_icon_widget = QLabel()
                     look_icon_widget.setFixedSize(QSize(22, 22))
                     look_icon_widget.setScaledContents(True)
