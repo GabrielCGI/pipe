@@ -22,14 +22,14 @@ except:
 
 # ######################################################################################################################
 
-_RANCH_CACHE_FOLDER = "I:/ranch/ranch_cache4"
+_RANCH_CACHE_FOLDER = "I:/ranch/ranch_cache"
 _LOGS_FOLDER = "I:/ranch/logs"
 _MAX_NB_THREADs = 2
 
 _ASS_PATHS_FILE_EXTENSION = "paths"
 
 _RELATIVE_SEARCH_DISK = ["I:/", "B:/", "R:/"]
-
+python_executable_path = r'R:\pipeline\networkInstall\python\Python310\python.exe'
 # ######################################################################################################################
 
 # 18 + Length of longer message possible (here : "File already exists")
@@ -116,6 +116,7 @@ class CollectorCopier:
         f = open(self.__data_file_name, "w")
         f.write(json_dict)
         f.close()
+        print(self.__data_file_name)
         self.__output("\n+- BUILDING DATA JSON SUCCES ! -----")
 
     def __retrieve_datas(self, file_data_path):
@@ -658,11 +659,21 @@ class CollectorCopier:
         # Out of Maya Window
         dirname = os.path.dirname(__file__)
         si = subprocess.STARTUPINFO()
+
         si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        subprocess.Popen(["python", os.path.join(dirname, "copy_to_distant.py"), self.__data_file_name], startupinfo=si)
+        process = subprocess.Popen([python_executable_path, os.path.join(dirname, "copy_to_distant.py"), self.__data_file_name],
+            startupinfo=si,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True
+        )
+        stdout, stderr = process.communicate()
+        print("Output:", stdout)
+        print("Errors:", stderr)
+
         ## Within Maya Window
-        # collector_copier = CollectorCopier()
-        # collector_copier.run_copy(self.__data_file_name)
+        #collector_copier = CollectorCopier()
+        #collector_copier.run_copy(self.__data_file_name)
 
         self.__stop_log()
 

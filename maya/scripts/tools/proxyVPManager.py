@@ -72,7 +72,7 @@ def importProxyFromSelection(force=False):
             if shape.nodeType() == 'aiStandIn':
                 dso_path = shape.getAttr('dso')
                 try:
-                    version_number = int(dso_path.split('/')[-2])  # Extracting the version number
+                    version_number = int(dso_path.split('/')[-2])+3  # Extracting the version number
                     base_path = '/'.join(dso_path.split('/')[:-2]) + '/'  # Base path without version and file
                 except Exception as e:
 
