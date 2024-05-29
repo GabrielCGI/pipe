@@ -661,15 +661,13 @@ class CollectorCopier:
         si = subprocess.STARTUPINFO()
 
         si.dwFlags |= subprocess.STARTF_USESHOWWINDOW
-        process = subprocess.Popen([python_executable_path, os.path.join(dirname, "copy_to_distant.py"), self.__data_file_name],
+        subprocess.Popen([python_executable_path, os.path.join(dirname, "copy_to_distant.py"), self.__data_file_name],
             startupinfo=si,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True
         )
-        stdout, stderr = process.communicate()
-        print("Output:", stdout)
-        print("Errors:", stderr)
+
 
         ## Within Maya Window
         #collector_copier = CollectorCopier()
