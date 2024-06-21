@@ -315,4 +315,4 @@ def run(force_override_ass_paths_files):
         collector_copier.run_collect()
 
         # Run modified submit to deadline
-        pm.mel.eval('source "R:/deadline/submission/Maya/Main/SubmitMayaToDeadlineRanch.mel";SubmitMayaToDeadlineRanch;')
+        pm.mel.eval('source "R:/pipeline/pipe/maya/scripts/file_collector_ranch_sender/SubmitMayaToDeadlineRanch.mel";SubmitMayaToDeadlineRanch;')
