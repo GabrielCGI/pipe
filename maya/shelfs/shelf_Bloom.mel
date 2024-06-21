@@ -477,7 +477,7 @@ global proc shelf_Bloom () {
         -image "pythonFamily.png" 
         -image1 "pythonFamily.png" 
         -style "iconOnly" 
-        -marginWidth 1
+        -marginWidth 0
         -marginHeight 1
         -command "import libSaveExport\nimport importlib\nimportlib.reload(libSaveExport)\nlibSaveExport.libSave()" 
         -sourceType "python" 

@@ -1,4 +1,5 @@
 import maya.cmds as cmds
+import os
 #import pymel.core as pm
 #import assetBrowser
 #import webbrowser
@@ -13,6 +14,7 @@ def run():
     print("LOADING MAYA SECURITY TOOL... ")
     #cmds.loadPlugin("MayaScanner.py")
     #cmds.pluginInfo("MayaScanner.py", edit=True, autoload=True)
+
 
     #cmds.loadPlugin("MayaScannerCB.py")
     #cmds.pluginInfo("MayaScannerCB.py", edit=True, autoload=True)
@@ -29,3 +31,4 @@ def run():
     cmds.evalDeferred('cmds.currentUnit(linear=\'cm\')', lp=True)
     cmds.evalDeferred('cmds.file(modified=False)', lp=True)
     cmds.evalDeferred('print("Setup Time to 25 FPS")', lp=True)
+    cmds.evalDeferred('import autosave; autosave.setup_autosave()')

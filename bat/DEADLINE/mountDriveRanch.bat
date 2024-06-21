@@ -1,7 +1,6 @@
 SUBST Z: /D
 SUBST Y: /D
-SUBST X: /D
 
-SUBST Z: C:\cache\I
-SUBST Y: C:\cache\R\
-SUBST X: C:\cache\B\
+
+SUBST Z: \\RANCH-110\cache\I
+SUBST Y: \\RANCH-110\cache\R

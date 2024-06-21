@@ -2,8 +2,8 @@
 REM Delete all .bat files in the specified Startup directory
 DEL "C:\Users\illogic\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\*.bat"
 
-SET "sourcePath=I:\ranch\ranchSync.ffs_batch"
-SET "destinationPath=C:\Users\illogic\Desktop\ranchSync.ffs_batch"
+SET "sourcePath=I:\tmp\ranch.ffs_batch"
+SET "destinationPath=C:\Users\sysadmin\Desktop\ranch.ffs_batch"
 
 
 IF EXIST "%sourcePath%" (

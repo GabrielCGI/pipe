@@ -85,7 +85,16 @@ class Gate(MultipleActionTool):
         if not cameraVP :
             raise Exception("Please select a camera.")
 
-        camera = cameraVP.getShape()
+        if pm.objectType( cameraVP ) == "camera":
+            camera = cameraVP
+        else:
+            print("looking for the camera shape")
+            camera = cameraVP.getShape()
+
+
+
+
+
         camera.filmFit.set(0)
         # Check for existing image planes attached to the camera
         image_planes = pm.listConnections(camera, type='imagePlane')
