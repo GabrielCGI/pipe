@@ -18,18 +18,7 @@
         "matchScenefileVersions": false,
         "requirePublishComment": true,
         "publishCommentLength": 3,
-        "required_plugins": [
-            "Houdini",
-            "Launcher",
-            "Libraries",
-            "Maya",
-            "MediaExtension",
-            "Nuke",
-            "PrismInternals",
-            "Standalone",
-            "USD",
-            "Deadline"
-        ],
+        "required_plugins": [],
         "expectedPrjPath": "",
         "allowAdditionalTasks": true,
         "departments_asset": [
@@ -155,7 +144,7 @@
                 "name": "Editing"
             }
         ],
-        "prism_version": "v2.0.6",
+        "prism_version": "v2.0.9",
         "versionPadding": 4,
         "framePadding": 4,
         "versionFormat": "v#",
@@ -813,58 +802,6 @@
                 "name": "Editing"
             },
             {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
                 "abbreviation": "cmp",
                 "name": "Compositing"
             },
@@ -931,5 +868,9 @@
     },
     "houdini": {
         "useRelativePaths": true
+    },
+    "launcher": {
+        "useConfig": false,
+        "configPath": "@project_path@/00_Pipeline/Configs/launcher.json"
     }
 }

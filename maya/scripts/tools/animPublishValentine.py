@@ -68,7 +68,11 @@ def replace_references_path_with_variable():
             if new_ref_file != ref_file:
                 print ("Replaced ref path with: new_ref_file ")
                 # Load the reference with the new path
-                cmds.file(new_ref_file, loadReference=ref)
+                try:
+                    cmds.file(new_ref_file, loadReference=ref)
+                except:
+                    print("failed to replace %s"%(new_ref_file))
+                    pass
 
 def abcExport(destination_path_abc):
 
