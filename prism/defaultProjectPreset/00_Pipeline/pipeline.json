@@ -762,7 +762,7 @@
     "mediaExtension": {
         "setOcioConfig": true,
         "ocioConfigType": "Custom",
-        "ocioCustomConfig": "R:\\pipeline\\networkInstall\\OpenColorIO-Configs\\CURRENT_CONFIG\\cg-config-v2.0.0_aces-v1.3_ocio-v2.2.ocio",
+        "ocioCustomConfig": "R:\\pipeline\\networkInstall\\OpenColorIO-Configs\\PRISM\\illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio",
         "clearOcio": false,
         "showDftConversionPresets": true,
         "enforceNukeOcio": true
@@ -797,6 +797,58 @@
         "useRelativePaths": true,
         "useSublayerMasters": false,
         "departmentOrder": [
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
+            {
+                "abbreviation": "edit",
+                "name": "Editing"
+            },
             {
                 "abbreviation": "edit",
                 "name": "Editing"
