@@ -7,13 +7,28 @@ import pymel.core as pm
 import maya.OpenMayaUI as omui
 import maya.OpenMaya as OpenMaya
 
-from PySide2 import QtCore
-from PySide2 import QtGui
-from PySide2 import QtWidgets
-from PySide2.QtWidgets import *
-from PySide2.QtCore import *
+import maya.cmds as cmds
 
-from shiboken2 import wrapInstance
+# Get the Maya version as an integer
+maya_version = int(cmds.about(version=True).split()[0])
+
+# Define the import based on the Maya version
+if maya_version <= 2022:
+    # For Maya 2022 and earlier, using PySide2 and Shiboken2
+    from PySide2 import QtCore
+    from PySide2 import QtGui
+    from PySide2 import QtWidgets
+    from PySide2.QtWidgets import *
+    from PySide2.QtCore import *
+    from shiboken2 import wrapInstance
+else:
+    # For Maya 2025 and later, using PySide6 and Shiboken6
+    from PySide6 import QtCore
+    from PySide6 import QtGui
+    from PySide6 import QtWidgets
+    from PySide6.QtWidgets import *
+    from PySide6.QtCore import *
+    from shiboken6 import wrapInstance
 
 import common.utils
 
@@ -119,7 +134,7 @@ class BobApp(QDialog):
         self.__ui_height = 700
         self.__ui_min_width = 300
         self.__ui_min_height = 300
-        self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width, self.__ui_height) / 2
+        self.__ui_pos = [100,100]
         self.__tab_widget = None
 
         self.__retrieve_prefs()
@@ -195,7 +210,7 @@ class BobApp(QDialog):
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
-        self.move(self.__ui_pos)
+        #self.move(self.__ui_pos)
 
         # Main Layout
         main_lyt = QVBoxLayout()

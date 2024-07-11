@@ -10,8 +10,17 @@ from common.utils import *
 from ..tool_models.ActionTool import *
 
 import maya.OpenMayaUI as omui
-from shiboken2 import wrapInstance
 
+import maya.cmds as cmds
+
+# Get the Maya version as an integer
+maya_version = int(cmds.about(version=True).split()[0])
+
+# Define the import based on the Maya version
+if maya_version <= 2022:
+    from shiboken2 import wrapInstance
+else:
+    from shiboken6 import wrapInstance
 # ######################################################################################################################
 
 # name_regexp is used to compare a retrieved colorspace with known colorspaces
@@ -144,7 +153,7 @@ class TextureCheckDialog(QDialog):
         self.__ui_height = 400
         self.__ui_min_width = 400
         self.__ui_min_height = 300
-        self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width, self.__ui_height) / 2
+        self.__ui_pos = [100,100]
 
         # name the window
         self.setWindowTitle("Check Texture")
@@ -334,7 +343,7 @@ class TextureCheckDialog(QDialog):
         # Reinit attributes of the UI
         self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
         self.resize(self.__ui_width, self.__ui_height)
-        self.move(self.__ui_pos)
+        #self.move(self.__ui_pos)
 
         # Main Layout
         main_lyt = QVBoxLayout()

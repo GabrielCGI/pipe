@@ -10,16 +10,17 @@ class SelectBigObjects(ActionTool):
     def _action(self):
         # Step 1: Get a list of all the polygon objects in the scene
         polygon_objects = pm.ls(type='mesh')
+        print(polygon_objects)
 
         # Step 2: Create a dictionary with object names as keys and their polycount as values
         polycount_dict = {}
         for poly in polygon_objects:
             # Getting the parent of the shape node (the transform node) to represent the object
             parent_node = pm.listRelatives(poly, parent=True)[0]
-            
+
             # Get the polycount of the current object
             polycount = pm.polyEvaluate(poly, vertex=True)
-            
+
             # Add to the dictionary only if the polycount is >= 2000
             if polycount >= 2000:
                 polycount_dict[parent_node] = polycount
@@ -33,4 +34,7 @@ class SelectBigObjects(ActionTool):
 
         # Step 5: Select the 20 most polycount-heavy objects
         heavy_objects = list(sorted_polycount_dict.keys())[:20]
-        pm.select(heavy_objects)
+        if heavy_objects:
+            pm.select(heavy_objects)
+        else:
+            print("no big object >2000 poly")

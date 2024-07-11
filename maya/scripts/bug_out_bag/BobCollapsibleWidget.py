@@ -1,4 +1,15 @@
-from PySide2 import QtWidgets, QtGui, QtCore
+import maya.cmds as cmds
+
+# Get the Maya version as an integer
+maya_version = int(cmds.about(version=True).split()[0])
+
+# Conditional imports based on the Maya version
+if maya_version <= 2022:
+    # For Maya 2022 and earlier, using PySide2
+    from PySide2 import QtWidgets, QtGui, QtCore
+else:
+    # For Maya 2025 and later, using PySide6
+    from PySide6 import QtWidgets, QtGui, QtCore
 
 class Header(QtWidgets.QWidget):
     """Header class for collapsible group"""

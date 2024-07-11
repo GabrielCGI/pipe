@@ -1,6 +1,14 @@
 import re
+import maya.cmds as cmds
 
-from shiboken2 import wrapInstance
+# Get the Maya version as an integer
+maya_version = int(cmds.about(version=True).split()[0])
+
+# Define the import based on the Maya version
+if maya_version <= 2022:
+    from shiboken2 import wrapInstance
+else:
+    from shiboken6 import wrapInstance
 from functools import partial
 
 import maya.OpenMayaUI as omui

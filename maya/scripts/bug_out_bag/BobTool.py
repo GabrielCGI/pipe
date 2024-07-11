@@ -1,7 +1,24 @@
-from PySide2 import QtCore
-from PySide2 import QtWidgets
-from PySide2.QtWidgets import *
-from PySide2.QtCore import *
+import maya.cmds as cmds
+
+# Get the Maya version as an integer
+maya_version = int(cmds.about(version=True).split()[0])
+
+# Conditional imports based on the Maya version
+if maya_version <= 2022:
+    # For Maya 2022 and earlier, using PySide2
+    from PySide2 import QtCore
+    from PySide2 import QtWidgets
+    from PySide2.QtWidgets import *
+    from PySide2.QtCore import *
+else:
+    # For Maya 2025 and later, using PySide6
+    from PySide6 import QtCore
+    from PySide6 import QtWidgets
+    from PySide6.QtWidgets import *
+    from PySide6.QtCore import *
+
+# Continue with your script logic below...
+
 
 import pymel.core as pm
 
