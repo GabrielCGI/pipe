@@ -103,81 +103,6 @@ def list_primitive_attributes(node_path):
 
     return attribute_names
 
-def build_collection(node_path, attr, componentgeometry, componentmaterial):
-    """
-    Builds a sequence of collection nodes based on geometry attributes
-    Each collection node corresponds to a unique material and includes paths of primitives that use this material.
-
-    Parameters:
-    node_path (str): The path to the Houdini node where geometry is fetched.
-    attr (str): The attribute name used to fetch material paths from geometry primitives.
-    componentgeometry (hou.Node): The Houdini node that serves as the starting point of the collection nodes.
-    componentmaterial (hou.Node): The Houdini node where the final collection node connects to continue the network flow.
-
-    """
-    node = hou.node(node_path)
-    pane = hou.ui.findPaneTab('panetab8')
-    stage_context = pane.pwd()
-
-    geo = node.geometry()
-
-    # Get names and material paths from geometry primitive attributes
-    names = geo.primStringAttribValues("path")
-    materials = geo.primStringAttribValues(attr)
-
-    # Dictionary to hold material keys and sets of names as values
-    material_name_dict = {}
-
-    # Iterate over names and materials and populate the dictionary
-    for material, name in zip(materials, names):
-        if material not in material_name_dict:
-            material_name_dict[material] = set()
-        material_name_dict[material].add(name)
-
-    # Get the parent node where to create collection nodes
-    parent_node = node.parent()
-
-    # Variable to keep track of the last created collection node
-    previous_node = None
-    first_node = None
-
-    # Creating a collection node for each material
-    for material, paths in material_name_dict.items():
-        # Generate a legal node name by replacing non-alphanumeric characters
-        last_part = material.split(r"/")[-1]
-        node_name = "mtl_" + clean_str(last_part)
-
-        # Create the collection node
-        pinfo(f"Trying to Collection node {node_name } ")
-        set_network_view_path(stage_context)
-        collection_node = stage_context.createNode("collection", node_name=node_name)
-
-        pinfo(f"Collection node {collection_node } created !")
-
-        sort_paths = sorted(paths)
-        # Set the include pattern to the list of paths for this material
-        include_pattern = "*"+" \n*".join(sort_paths)
-        collection_node.parm('includepattern1').set(include_pattern)
-        collection_node.parm('collectionname1').set(node_name)
-        collection_node.parm("defaultprimpath").set("/ASSET/mtl/collection")
-
-        # Connect the previous node's output to the current node's input if previous node exists
-        if previous_node:
-            collection_node.setInput(0, previous_node)
-        if not first_node:
-            first_node = collection_node
-
-        # Update previous_node to the current node
-        previous_node = collection_node
-    #Connect nodes
-    first_node.setInput(0,componentgeometry)
-    componentmaterial.setInput(0,collection_node)
-    first_node.parent().layoutChildren()
-
-def clean_str(str):
-    clean_str = re.sub(r'[^A-Za-z0-9_-]', '_', str)
-    return clean_str
-
 def get_material_list_from_attr(node_path, attr="shop_materialpath"):
     """
     Retrieve the values of an attribute (ie: shop_materialpath) from a given node.
@@ -216,7 +141,7 @@ def get_material_list_from_attr(node_path, attr="shop_materialpath"):
                         last_part = mtl.split(r"/")[-1]
 
                         # Replace non-alphanumeric characters (except underscore and hyphen) with an underscore, including spaces
-                        cleaned_mtl = clean_str(last_part)
+                        cleaned_mtl = re.sub(r'[^A-Za-z0-9_-]', '_', last_part)
                         print (cleaned_mtl)
 
                         mtl_list.append(cleaned_mtl)
@@ -311,7 +236,8 @@ def randomize_base_color(kmb_node, step, divider):
     except Exception as e:
         print(f"Error : {e}")
 
-def connect_prim_and_mat(component_material_node, material_names, collectionMode=True):
+
+def connect_prim_and_mat(component_material_node, material_names):
     """
     Update material assignments for a component material node in Houdini.
 
@@ -338,17 +264,49 @@ def connect_prim_and_mat(component_material_node, material_names, collectionMode
         material_path_parm.set(f'/ASSET/mtl/{material_name}')
 
         # Use a pattern
-        if (collectionMode==True):
-            primpattern = f'/ASSET/mtl/collection.collection:mtl_{material_name}'
-        else:
-            primpattern = f'%type:GeomSubset & *_{material_name}'
+        primpattern = f'%type:GeomSubset & *_{material_name}'
         primpattern_parm.set(primpattern)
 
-def create_karma_mat(default_output_path, attr, materiallibrary):
+def execute():
+    """
+    Main execution function
+    """
+
+    # start to check selection
+    componentgeometry, materiallibrary, componentmaterial=check_selection()
+
+    """pdebug(componentgeometry)
+    pdebug(materiallibrary)
+    pdebug(componentmaterial)"""
+
+    ## Search the default node in component geo  :
+    default_output_path = f"{componentgeometry.path()}/sopnet/geo/default"
+
+    ### Create a window to ask to the attr to create mat from
+    # Define the dropdown menu options
+    attrs = list_primitive_attributes(default_output_path)
+
+    # Show the dropdown dialog
+    choice = hou.ui.selectFromList(attrs, exclusive=True, title="Choose an Option", message="Choose an attribute to create material from. One mat will be created per attribute")
+
+    # Check if the user made a choice
+    if choice:
+        attr = attrs[choice[0]]
+    else:
+        return
+
     # Look for the attr on prims and create a list of material names
     mtl_list = get_material_list_from_attr(default_output_path, attr=attr)
-    network_editor = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
-    lop_network = network_editor.pwd()
+
+    # Quick check if there is a lot, prompt a UI with the possibility to cancel
+    how_many_mtl = len(mtl_list)
+    if how_many_mtl>20:
+        cancelUi = hou.ui.displayMessage(f"There is {how_many_mtl} materials to create, it will take some time, wanna continue?", severity = hou.severityType.ImportantMessage, buttons=('Sure, lets go! (Yes)','Damn really? I will double check (Cancel)'))
+        if cancelUi==0:
+            pass
+        else:
+            return
+
     # check what's inside the material lib node
     children_names = []
     for child in materiallibrary.children():
@@ -368,49 +326,11 @@ def create_karma_mat(default_output_path, attr, materiallibrary):
             node_color = hou.Color(rand_color)
             kma_subnet.setColor(node_color)
 
-
         else :
             pinfo(f"Mat name {mtl_name} already exists in {materiallibrary}, skipping")
-    network_editor.setPwd(lop_network)
-    return mtl_list
 
-def execute(collectionMode=True):
-    """
-    Main execution function
-    """
-
-    # start to check selection
-    componentgeometry, materiallibrary, componentmaterial=check_selection()
-
-    """pdebug(componentgeometry)
-    pdebug(materiallibrary)
-    pdebug(componentmaterial)"""
-
-    ## Search the default node in component geo  :
-    default_output_path = f"{componentgeometry.path()}/sopnet/geo/default"
-
-
-    ### Create a window to ask to the attr to create mat from
-    # Define the dropdown menu options
-    attrs = list_primitive_attributes(default_output_path)
-    # Show the dropdown dialog
-    choice = hou.ui.selectFromList(attrs, exclusive=True, title="Choose an Option", message="Choose an attribute to create material from. One mat will be created per attribute")
-
-    # Check if the user made a choice
-    if choice:
-        attr = attrs[choice[0]]
-    else:
-        return
-
-
-    mtl_list=create_karma_mat(default_output_path, attr, materiallibrary)
-    if (collectionMode==True):
-        build_collection(default_output_path, attr, componentgeometry, componentmaterial )
-        connect_prim_and_mat(componentmaterial, mtl_list, collectionMode=True)
-
-    else:
-        componentgeometry.parm("partitionattribs").set(attr)
-        connect_prim_and_mat(componentmaterial, mtl_list, collectionMode=False)
+    # connect mat on componentmaterial :
+    connect_prim_and_mat(componentmaterial, mtl_list)
 
 
 if __name__ != "__main__":

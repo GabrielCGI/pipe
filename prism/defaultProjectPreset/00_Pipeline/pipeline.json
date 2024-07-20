@@ -403,7 +403,8 @@
                     }
                 ]
             }
-        ]
+        ],
+        "presetScenes": []
     },
     "folder_structure": {
         "pipeline": {
@@ -751,7 +752,8 @@
         ]
     },
     "environmentVariables": {
-        "PRSIM_LAUNCHER_CONFIG": "%PRISM_JOB%\\00_Pipeline\\Launcher.json"
+        "PRSIM_LAUNCHER_CONFIG": "%PRISM_JOB%\\00_Pipeline\\Launcher.json",
+        "HOUDINI_TOOLBAR_PATH": "R:/pipeline/pipe/houdini/packages"
     },
     "export_paths": {},
     "render_paths": {},
@@ -797,58 +799,6 @@
         "useRelativePaths": true,
         "useSublayerMasters": false,
         "departmentOrder": [
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
-            {
-                "abbreviation": "edit",
-                "name": "Editing"
-            },
             {
                 "abbreviation": "edit",
                 "name": "Editing"

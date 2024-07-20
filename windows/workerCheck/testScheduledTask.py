@@ -13,4 +13,5 @@ def main():
         log_file.write(f"Script execute a : {datetime.datetime.now()} par {user_name} sur {machine_name}\n")
 
 if __name__ == "__main__":
-    main()
+    #main()
+    pass

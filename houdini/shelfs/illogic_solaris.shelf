@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <toolshelf name="illogic_solaris" label="illogic_solaris">
+    <memberTool name="kmx"/>
+    <memberTool name="kmx_geosubset"/>
+    <memberTool name="material_finder"/>
+  </toolshelf>
+
+  <tool name="karma_mat" label="Mat extractor" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+import kma_mat_from_attr
+reload(kma_mat_from_attr)
+kma_mat_from_attr.execute()]]></script>
+  </tool>
+
+  <tool name="kmx" label="kmx_col" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+
+import kma_mat_from_attr
+reload(kma_mat_from_attr)
+kma_mat_from_attr.execute(collectionMode=True)]]></script>
+  </tool>
+
+  <tool name="kmx_geosubset" label="kmx_sub" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+
+import kma_mat_from_attr
+reload(kma_mat_from_attr)
+kma_mat_from_attr.execute(collectionMode=False)]]></script>
+  </tool>
+
+  <tool name="material_finder" label="Get mat" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
+
+import materialFinder
+reload(materialFinder)
+materialFinder.run()]]></script>
+  </tool>
+</shelfDocument>
