@@ -53,7 +53,7 @@ def run():
     else:
         print("No LOP network found. Defaulting to stage")
         lop_network=hou.node("/stage")
-    print(lop_network)
+
     selection = lop_network.selection()[0]
     display_node= lop_network.displayNode().path()
 

@@ -41,7 +41,7 @@ import voptoolutils
 import colorsys
 import re
 
-print_debug=False
+print_debug=True
 print_info=True
 
 def pinfo(toPrint):
@@ -116,8 +116,13 @@ def build_collection(node_path, attr, componentgeometry, componentmaterial):
 
     """
     node = hou.node(node_path)
+
     pane = hou.ui.findPaneTab('panetab8')
     stage_context = pane.pwd()
+    pdebug(f"Looking for a lop network, found: {stage_context}")
+    if not stage_context.type().name() == 'lopnet':
+        stage_context = hou.node("/stage")
+        pdebug(f"Not lop network found in panetab8, get default stage: {stage_context}")
 
     geo = node.geometry()
 
@@ -148,7 +153,7 @@ def build_collection(node_path, attr, componentgeometry, componentmaterial):
         node_name = "mtl_" + clean_str(last_part)
 
         # Create the collection node
-        pinfo(f"Trying to Collection node {node_name } ")
+        pdebug(f"Trying to create collection node {node_name } ")
         set_network_view_path(stage_context)
         collection_node = stage_context.createNode("collection", node_name=node_name)
 
@@ -159,7 +164,7 @@ def build_collection(node_path, attr, componentgeometry, componentmaterial):
         include_pattern = "*"+" \n*".join(sort_paths)
         collection_node.parm('includepattern1').set(include_pattern)
         collection_node.parm('collectionname1').set(node_name)
-        collection_node.parm("defaultprimpath").set("/ASSET/mtl/collection")
+        collection_node.parm("defaultprimpath").set("/ASSET/mtl/collections")
 
         # Connect the previous node's output to the current node's input if previous node exists
         if previous_node:
@@ -217,10 +222,8 @@ def get_material_list_from_attr(node_path, attr="shop_materialpath"):
 
                         # Replace non-alphanumeric characters (except underscore and hyphen) with an underscore, including spaces
                         cleaned_mtl = clean_str(last_part)
-                        print (cleaned_mtl)
-
                         mtl_list.append(cleaned_mtl)
-
+        mtl_list = list(filter(None, mtl_list)) # Remove empty value
         return mtl_list
 
     except Exception as e:
@@ -260,6 +263,7 @@ def create_karma_mat_builder(material_library_node, mtl_name):
     so we force the network view to be teleported inside a LOP Material context where we want to create the karma mat builder
     most of the time it should be inside a material library
     """
+    pdebug("Start work on karma mat builder")
     set_network_view_path(material_library_node)
 
     mask = voptoolutils.KARMAMTLX_TAB_MASK
@@ -273,7 +277,7 @@ def create_karma_mat_builder(material_library_node, mtl_name):
 
     voptoolutils.createMaskedMtlXSubnet(kwargs,"karmamaterial",mask,"Karma Material Builder", "kma")
     karma_subnet_node = hou.selectedNodes()[0]
-    print(mtl_name)
+    pdebug("mat nam is: %s"%mtl_name)
     karma_subnet_node.setName(mtl_name, unique_name=True)
 
     pdebug(karma_subnet_node)
@@ -339,7 +343,7 @@ def connect_prim_and_mat(component_material_node, material_names, collectionMode
 
         # Use a pattern
         if (collectionMode==True):
-            primpattern = f'/ASSET/mtl/collection.collection:mtl_{material_name}'
+            primpattern = f'/ASSET/mtl/collections.collection:mtl_{material_name}'
         else:
             primpattern = f'%type:GeomSubset & *_{material_name}'
         primpattern_parm.set(primpattern)
@@ -358,7 +362,6 @@ def create_karma_mat(default_output_path, attr, materiallibrary):
     for i,mtl_name in enumerate(mtl_list):
         if mtl_name not in children_names:
             #pdebug(f"creating mtl_name: {mtl_name}")
-
             kma_subnet = create_karma_mat_builder(materiallibrary, mtl_name)
 
             # set a color for each material, it will split the hue value ladder based on the mat number to create
@@ -382,9 +385,9 @@ def execute(collectionMode=True):
     # start to check selection
     componentgeometry, materiallibrary, componentmaterial=check_selection()
 
-    """pdebug(componentgeometry)
+    pdebug(componentgeometry)
     pdebug(materiallibrary)
-    pdebug(componentmaterial)"""
+    pdebug(componentmaterial)
 
     ## Search the default node in component geo  :
     default_output_path = f"{componentgeometry.path()}/sopnet/geo/default"
@@ -404,6 +407,14 @@ def execute(collectionMode=True):
 
 
     mtl_list=create_karma_mat(default_output_path, attr, materiallibrary)
+    how_many_mtl = len(mtl_list)
+    pdebug(f"Total mtl: {how_many_mtl}")
+    if how_many_mtl>20:
+        cancelUi = hou.ui.displayMessage(f"There is {how_many_mtl} materials to create, it will take some time, wanna continue?", severity = hou.severityType.ImportantMessage, buttons=('Sure, lets go! (Yes)','Damn really? I will double check (Cancel)'))
+        if cancelUi==0:
+            pass
+        else:
+            return
     if (collectionMode==True):
         build_collection(default_output_path, attr, componentgeometry, componentmaterial )
         connect_prim_and_mat(componentmaterial, mtl_list, collectionMode=True)
