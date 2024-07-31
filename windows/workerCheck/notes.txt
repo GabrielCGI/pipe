@@ -1,0 +1,4 @@
+Pour build le .exe : 
+R:\pipeline\networkInstall\python\Python310\Scripts\pyinstaller.exe R:\pipeline\pipe\windows\workerCheck\workerCheck.py --noconsole
+
+Le build se retrouve ici : R:\pipeline\networkInstall\python\Python310\Scripts\dist

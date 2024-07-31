@@ -3,18 +3,10 @@ from tkinter import ttk
 import subprocess
 import psutil
 import os
-
-# Vérifiez si PIL est installé
-try:
-    from PIL import Image, ImageTk, ImageSequence
-    PIL_installed = True
-except ImportError:
-    PIL_installed = False
-    print("PIL n'est pas installé. Veuillez installer la bibliothèque Pillow.")
+import time
 
 # Chemin du fichier de verrouillage
-#lock_file_path = r"C:\ILLOGIC_APP\workerCheck.lock"
-
+# lock_file_path = r"C:\ILLOGIC_APP\workerCheck.lock"
 documents_path = os.path.join(os.path.expanduser("~"), "Documents")
 lock_file_path = os.path.join(documents_path, "workerCheckUi.lock")
 
@@ -22,7 +14,7 @@ class WorkerApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Gestion du Worker")
-        self.root.geometry("800x600")  # Définir la taille de la fenêtre
+        self.root.geometry("800x700")  # Définir la taille de la fenêtre
 
         # Forcer la fenêtre à s'afficher au premier plan
         self.root.attributes("-topmost", True)
@@ -48,16 +40,19 @@ class WorkerApp:
         self.root.configure(bg=main_bg_color)
 
         # Description
-        self.description = tk.Label(self.root, text="Votre worker est en train travailler, voulez-vous l'éteindre?",
-                                    bg=main_bg_color, fg=text_fg_color, font=("Helvetica", 32), wraplength=760, justify="center")
+        self.description = tk.Label(
+            self.root,
+            text="Votre worker est en train de travailler, voulez-vous l'éteindre?",
+            bg=main_bg_color, fg=text_fg_color, font=("Helvetica", 32),
+            wraplength=760, justify="center"
+        )
         self.description.pack(pady=10, padx=20)
 
-        # Créer un Label pour le GIF
-        self.gif_label = tk.Label(self.root, bg=main_bg_color)
-        self.gif_label.pack(pady=20)
+        # Créer un Label pour l'image
+        self.image_label = tk.Label(self.root, bg=main_bg_color)
+        self.image_label.pack(pady=20)
 
-        if PIL_installed:
-            self.animate_gif(self.gif_label, r"R:\pipeline\pipe\windows\workerCheck\cat-work.gif")
+        self.display_image(self.image_label, r"R:\pipeline\pipe\windows\workerCheck\image.png")
 
         # Frame pour contenir les boutons
         self.button_frame = ttk.Frame(self.root, style="Custom.TFrame")
@@ -67,7 +62,8 @@ class WorkerApp:
         style.configure("Custom.TFrame", background=main_bg_color)
 
         # Style pour les boutons avec une taille plus grande
-        style.configure("TButton", background=button_bg_color, foreground=button_fg_color, padding=20, relief="flat", font=("Helvetica", 32))
+        style.configure("TButton", background=button_bg_color, foreground=button_fg_color,
+                        padding=20, relief="flat", font=("Helvetica", 32))
         style.map("TButton",
                   background=[('active', button_bg_color)],
                   foreground=[('active', button_fg_color)])
@@ -81,7 +77,8 @@ class WorkerApp:
         self.btn_oui.pack(side=tk.RIGHT, padx=10)
 
         # Label pour le message de fermeture
-        self.message_label = tk.Label(self.root, text="", bg=main_bg_color, fg=self.message_fg_color, font=("Helvetica", 24))
+        self.message_label = tk.Label(self.root, text="", bg=main_bg_color,
+                                      fg=self.message_fg_color, font=("Helvetica", 24))
         self.message_label.pack(pady=10)
 
         # Assurez-vous que le fichier de verrouillage est supprimé à la fermeture de la fenêtre
@@ -110,18 +107,11 @@ class WorkerApp:
             os.remove(lock_file_path)
         self.root.destroy()
 
-    # Fonction pour animer le GIF
-    def animate_gif(self, label, gif_path):
-        gif = Image.open(gif_path)
-        frames = [ImageTk.PhotoImage(frame.copy()) for frame in ImageSequence.Iterator(gif)]
-
-        def update_frame(frame_index):
-            frame = frames[frame_index]
-            label.configure(image=frame)
-            self.root.after(100, update_frame, (frame_index + 1) % len(frames))
-
-        update_frame(0)
-
+    # Fonction pour afficher l'image
+    def display_image(self, label, image_path):
+        image = tk.PhotoImage(file=image_path)
+        label.configure(image=image)
+        label.image = image  # Garder une référence à l'image
 
 def is_deadlineworker_running():
     # Parcourir tous les processus en cours
@@ -131,8 +121,18 @@ def is_deadlineworker_running():
             return True
     return False
 
+def delete_lock_file_if_old(lock_file_path, max_age_hours=18):
+    """Supprime le fichier de verrouillage s'il existe depuis plus de max_age_hours heures."""
+    if os.path.exists(lock_file_path):
+        file_age = time.time() - os.path.getmtime(lock_file_path)
+        max_age_seconds = max_age_hours * 3600
+        if file_age > max_age_seconds:
+            os.remove(lock_file_path)
+            print(f"Le fichier de verrouillage existait depuis plus de {max_age_hours} heures et a été supprimé.")
+
 # Exemple d'utilisation
 if __name__ == "__main__":
+    delete_lock_file_if_old(lock_file_path)
     if os.path.exists(lock_file_path):
         print("Une instance de l'application est déjà en cours d'exécution.")
     else:
