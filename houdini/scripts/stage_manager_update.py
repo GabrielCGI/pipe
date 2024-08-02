@@ -1,34 +1,34 @@
 import hou
 
+import re
+
+def update_path(original_path):
+    # Define the part to replace (case-insensitive)
+    part_to_replace = re.compile(r"(?i)I:/interior/assets/houdini/usd/")
+    replacement = "$HIP/"
+
+    # Replace the part with $HIP
+    new_path = part_to_replace.sub(replacement, original_path, count=1)
+    print(new_path)
+    return new_path
 
 
-def update_path(path):
-    # Define the part of the path to replace and what to replace it with
-    old_base = "I:/2406_chickenverse"
-    new_base = "$PRISM_JOB"
-
-    # Replace the old base with the new base in the path
-    updated_path = path.replace(old_base, new_base)
-    return updated_path
-
-def list_mtlximage_filenames():
+def stage_manager_update():
+    print("yo")
     # Iterate over all selected nodes
-    for node in hou.selectedNodes():
+    node = hou.selectedNodes()[0]
         # Print the path of the selected node
-        print(f"Selected Node: {node.path()}")
+    print(f"Selected Node: {node.path()}")
 
-        # Iterate over all sub-nodes within the selected node
-        for subnode in node.allSubChildren():
-            # Check if the subnode is an mtlximage node
-            if subnode.type().name() == "mtlximage":
-                # Try to access the filename parameter
-                filename_parm = subnode.parm('file')
-                if filename_parm:
-                    path = filename_parm.eval()
-                    new_path = update_path(path)
-                    filename_parm.set(new_path)
-                    # Print the filename
-                    print(f"\nNode updated '{subnode.path()}' \nOld: {path} \nNew: {new_path}")
+    numChanges_parm = node.parm('num_changes')
+    count = numChanges_parm.valueAsData()
+    for i in range(1,count+1):
+        reffilepath_str= f"reffilepath{i}"
+        reffilepath = node.parm(reffilepath_str)
+        if reffilepath:
+            updated_path =  update_path(reffilepath.valueAsData())
+            reffilepath.set(updated_path)
+
 
 # Execute the function
-list_mtlximage_filenames()
+stage_manager_update()

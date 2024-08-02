@@ -14,7 +14,7 @@ class WorkerApp:
     def __init__(self, root):
         self.root = root
         self.root.title("Gestion du Worker")
-        self.root.geometry("800x700")  # Définir la taille de la fenêtre
+        self.root.geometry("800x800")  # Définir la taille de la fenêtre
 
         # Forcer la fenêtre à s'afficher au premier plan
         self.root.attributes("-topmost", True)
@@ -121,7 +121,7 @@ def is_deadlineworker_running():
             return True
     return False
 
-def delete_lock_file_if_old(lock_file_path, max_age_hours=18):
+def delete_lock_file_if_old(lock_file_path, max_age_hours=1):
     """Supprime le fichier de verrouillage s'il existe depuis plus de max_age_hours heures."""
     if os.path.exists(lock_file_path):
         file_age = time.time() - os.path.getmtime(lock_file_path)
