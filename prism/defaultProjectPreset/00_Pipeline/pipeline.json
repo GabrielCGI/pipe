@@ -420,7 +420,7 @@
             "value": "@sequence_path@/@shot@"
         },
         "textures": {
-            "value": "@project_path@/04_Resources/Textures"
+            "value": "@project_path@/04_Resources/Libraries"
         },
         "departments": {
             "value": "@entity_path@/Scenefiles/@department@"
@@ -486,7 +486,7 @@
             "value": "@project_path@/04_Resources/HDAs"
         },
         "textureVersions": {
-            "value": "@entity_path@/Textures/@identifier@/@version@"
+            "value": "@entity_path@/Libraries/@identifier@/@version@"
         },
         "polyHaven": {
             "value": "@project_path@/04_Resources/Libraries/PolyHaven"
@@ -752,8 +752,8 @@
         ]
     },
     "environmentVariables": {
-        "PRSIM_LAUNCHER_CONFIG": "%PRISM_JOB%\\00_Pipeline\\Launcher.json",
-        "HOUDINI_TOOLBAR_PATH": "R:/pipeline/pipe/houdini/packages"
+        "HOUDINI_TOOLBAR_PATH": "R:/pipeline/pipe/houdini/packages",
+        "PRISM_DEADLINE_HUSK_PATH": "C:\\Program Files\\Side Effects Software\\Houdini 20.5.312\\bin\\husk.exe"
     },
     "export_paths": {},
     "render_paths": {},
@@ -776,15 +776,33 @@
     "deadline": {
         "submitScenes": true,
         "useScriptDependencies": true,
-        "usePoolPresets": false,
-        "poolPresets": []
+        "usePoolPresets": true,
+        "poolPresets": [
+            {
+                "name": "Rendering",
+                "pool": "fast",
+                "secondaryPool": "slow",
+                "group": "h20_5_312"
+            }
+        ],
+        "pools": [
+            "none",
+            "fast",
+            "slow"
+        ],
+        "groups": [
+            "none",
+            "all",
+            "beta",
+            "h20_5_312"
+        ]
     },
     "library": {
         "useMasterTextureVersion": false,
         "generateThumbnailsOnDisk": true,
         "useRsConversion": false,
         "useAssetLibrary": true,
-        "useShotLibrary": false,
+        "useShotLibrary": true,
         "assetLibraryFileFilter": "*, !.yml, !.json, !.txt, !.tdl, !.ini, !.db",
         "shotLibraryFileFilter": "*, !.yml, !.json, !.txt, !.tdl, !.ini, !.db",
         "projectLibraryFileFilter": "*, !.yml, !.json, !.txt, !.tdl, !.ini, !.db",
@@ -872,7 +890,7 @@
         "useRelativePaths": true
     },
     "launcher": {
-        "useConfig": false,
+        "useConfig": true,
         "configPath": "@project_path@/00_Pipeline/Configs/launcher.json"
     }
 }

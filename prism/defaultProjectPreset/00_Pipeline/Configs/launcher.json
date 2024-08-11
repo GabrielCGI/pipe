@@ -1,0 +1,260 @@
+{
+    "apps": [
+        {
+            "label": "Project Browser",
+            "category": "Prism",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Project Browser.png",
+            "versions": [
+                {
+                    "label": "Project Browser",
+                    "mode": "Python",
+                    "cmd": "core.projectBrowser()",
+                    "preferred": true
+                }
+            ],
+            "uid": "75fc7a70-5309-11ef-946f-d85ed35d00b3"
+        },
+        {
+            "label": "Settings",
+            "category": "Prism",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Settings.png",
+            "versions": [
+                {
+                    "label": "Settings",
+                    "mode": "Python",
+                    "cmd": "core.prismSettings()",
+                    "preferred": true
+                }
+            ],
+            "uid": "7600c90c-5309-11ef-ac4d-d85ed35d00b3"
+        },
+        {
+            "label": "Documentation",
+            "category": "Prism",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Documentation.png",
+            "versions": [
+                {
+                    "label": "Documentation",
+                    "mode": "URL",
+                    "cmd": "https://prism-pipeline.com/docs/latest",
+                    "preferred": true
+                }
+            ],
+            "uid": "76061d4d-5309-11ef-bc70-d85ed35d00b3"
+        },
+        {
+            "label": "Hub",
+            "category": "Prism",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Hub.png",
+            "versions": [
+                {
+                    "label": "Hub",
+                    "mode": "Python",
+                    "cmd": "core.getPlugin(\"Hub\").launch()",
+                    "preferred": true
+                }
+            ],
+            "uid": "760b2678-5309-11ef-b5ec-d85ed35d00b3"
+        },
+        {
+            "label": "Media Converter",
+            "category": "Prism",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Media Converter.png",
+            "versions": [
+                {
+                    "label": "Media Converter",
+                    "mode": "Python",
+                    "cmd": "core.getPlugin(\"MediaExtension\").openConverter()",
+                    "preferred": true
+                }
+            ],
+            "uid": "7615348a-5309-11ef-9634-d85ed35d00b3"
+        },
+        {
+            "label": "Blender",
+            "category": "3D",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Blender.png",
+            "versions": [
+                {
+                    "label": "Blender 2.93",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Blender Foundation\\Blender 2.93\\blender.exe"
+                },
+                {
+                    "label": "Blender 3.5",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Blender Foundation\\Blender 3.5\\blender.exe",
+                    "preferred": true
+                }
+            ],
+            "uid": "7619a05e-5309-11ef-a854-d85ed35d00b3"
+        },
+        {
+            "label": "Houdini",
+            "category": "3D",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Houdini.png",
+            "versions": [
+                {
+                    "label": "20.0.0.688",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.0.688\\bin\\houdini.exe"
+                },
+                {
+                    "label": "20.5.0.312",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.5.312\\bin\\houdini.exe",
+                    "preferred": true
+                }
+            ],
+            "uid": "761da243-5309-11ef-9b47-d85ed35d00b3"
+        },
+        {
+            "label": "Houdini FX",
+            "category": "3D",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Houdini FX.png",
+            "versions": [
+                {
+                    "label": "20.0.0.688",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.0.688\\bin\\houdinifx.exe"
+                },
+                {
+                    "label": "20.5.0.312",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.5.312\\bin\\houdinifx.exe",
+                    "preferred": true
+                }
+            ],
+            "uid": "76218c66-5309-11ef-83da-d85ed35d00b3"
+        },
+        {
+            "label": "Maya",
+            "category": "3D",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Maya.png",
+            "versions": [
+                {
+                    "label": "Maya 2022",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Autodesk\\Maya2022\\bin\\maya.exe"
+                },
+                {
+                    "label": "Maya 2024",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Autodesk\\Maya2024\\bin\\maya.exe"
+                },
+                {
+                    "label": "Maya 2025",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Autodesk\\Maya2025\\bin\\maya.exe",
+                    "preferred": true
+                }
+            ],
+            "uid": "76258ec0-5309-11ef-983d-d85ed35d00b3"
+        },
+        {
+            "label": "Nuke",
+            "category": "2D",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Nuke.png",
+            "versions": [
+                {
+                    "label": "Nuke 11.3v4",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Nuke11.3v4\\Nuke11.3.exe"
+                },
+                {
+                    "label": "Nuke 12.1v5",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Nuke12.1v5\\Nuke12.1.exe"
+                },
+                {
+                    "label": "Nuke 15.0v4",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Nuke15.0v4\\Nuke15.0.exe"
+                },
+                {
+                    "label": "Nuke 15.0v4",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Nuke15.0v4\\Nuke15.0.exe",
+                    "preferred": true
+                }
+            ],
+            "uid": "76296957-5309-11ef-ae6f-d85ed35d00b3"
+        },
+        {
+            "label": "NukeX",
+            "category": "2D",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\NukeX.png",
+            "versions": [
+                {
+                    "label": "Nuke 11.3v4",
+                    "mode": "Shell Command",
+                    "cmd": "\"C:\\Program Files\\Nuke11.3v4\\Nuke11.3.exe\" --nukex"
+                },
+                {
+                    "label": "Nuke 12.1v5",
+                    "mode": "Shell Command",
+                    "cmd": "\"C:\\Program Files\\Nuke12.1v5\\Nuke12.1.exe\" --nukex"
+                },
+                {
+                    "label": "Nuke 15.0v4",
+                    "mode": "Shell Command",
+                    "cmd": "\"C:\\Program Files\\Nuke15.0v4\\Nuke15.0.exe\" --nukex"
+                },
+                {
+                    "label": "Nuke 15.0v4",
+                    "mode": "Shell Command",
+                    "cmd": "\"C:\\Program Files\\Nuke15.0v4\\Nuke15.0.exe\" --nukex",
+                    "preferred": true
+                }
+            ],
+            "uid": "762d5ee4-5309-11ef-aa5e-d85ed35d00b3"
+        },
+        {
+            "label": "Photoshop",
+            "category": "2D",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Photoshop.png",
+            "versions": [
+                {
+                    "label": "Photoshop 2024",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Adobe\\Adobe Photoshop 2024\\Photoshop.exe"
+                },
+                {
+                    "label": "Photoshop 2023",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Adobe\\Adobe Photoshop 2023\\Photoshop.exe",
+                    "preferred": true
+                }
+            ],
+            "uid": "7631d25e-5309-11ef-b2f2-d85ed35d00b3"
+        },
+        {
+            "label": "Deadline Monitor",
+            "category": "Other",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Deadline Monitor.png",
+            "versions": [
+                {
+                    "label": "Deadline Monitor 10",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Thinkbox\\Deadline10\\bin\\deadlinemonitor.exe",
+                    "preferred": true
+                }
+            ],
+            "uid": "7635d981-5309-11ef-aee5-d85ed35d00b3"
+        },
+        {
+            "label": "USD View",
+            "category": "Other",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\USD View.png",
+            "versions": [
+                {
+                    "label": "USD View",
+                    "mode": "Python",
+                    "cmd": "core.getPlugin(\"USD\").api.openUsdView()",
+                    "preferred": true
+                }
+            ],
+            "uid": "763971ad-5309-11ef-8229-d85ed35d00b3"
+        }
+    ]
+}

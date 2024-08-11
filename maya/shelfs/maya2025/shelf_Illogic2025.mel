@@ -1,0 +1,281 @@
+global proc shelf_Illogic2025 () {
+    global string $gBuffStr;
+    global string $gBuffStr0;
+    global string $gBuffStr1;
+
+
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "BOB" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "BOB" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/bob.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/bob.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nfrom common import utils\n\nutils.unload_packages(silent=True, package=\"bug_out_bag\")\nimportlib.import_module(\"bug_out_bag\")\nfrom bug_out_bag.BobApp import BobApp\ntry:\n    bob.close()\nexcept:\n    pass\nbob = BobApp()\nbob.show()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Asset Browser" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Asset Browser" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/asset_browser.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/asset_browser.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import assetBrowser\nimport importlib\nimportlib.reload(assetBrowser)\n\ntry:\n    ui.deleteLater()\nexcept:\n    pass\nui = assetBrowser.AssetBrowser()\nui.create()\nui.show()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\ncmds.file( 'R:/lib/3d/studio_v2/studio_v2.mb', r=True )\n#cmds.file( 'R:/lib/3d/studio/studio.mb', rr=True )" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\ncmds.file( 'R..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/studiov2.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/studiov2.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\ncmds.file( 'R:/lib/3d/studio_v2/studio_v2.mb', r=True )\n#cmds.file( 'R:/lib/3d/studio/studio.mb', rr=True )" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\n\ncmds.file( 'R:/lib/3d/studio_v2/studio_v2.mb', rr=True )" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\n\ncmds.file( '..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/studiov2off.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/studiov2off.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import maya.mel as mel\nimport maya.cmds as cmds\n\n\n\n\ncmds.file( 'R:/lib/3d/studio_v2/studio_v2.mb', rr=True )" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import webbrowser\n\nurl = \"https://illogic-studios.cg-wire.com/\"  # Replace with your desired URL\nwebbrowser.open(url)\n" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import webbrowser\n\nurl = \"https://illogic-studios.cg-wire.com/\" ..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/logo-kitsu.de716c4b.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/logo-kitsu.de716c4b.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import webbrowser\n\nurl = \"https://illogic-studios.cg-wire.com/\"  # Replace with your desired URL\nwebbrowser.open(url)\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Enable autosave" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "def setup_autosave():\n    autosave_dir = \"D:/_save_maya\"\n    if ..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "AUTO" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "save.png" 
+        -image1 "save.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "def setup_autosave():\n    autosave_dir = \"D:/_save_maya\"\n    if not os.path.exists(autosave_dir):\n        try:\n            os.makedirs(autosave_dir)\n            destination = 1\n        except:\n            destination = 0\n\n    cmds.autoSave(enable=True)\n    cmds.autoSave(limitBackups=True)\n    cmds.autoSave(maxBackups=5)\n    cmds.autoSave(destination=1)  # 1 for local directory\n    cmds.autoSave(folder=autosave_dir)\n    cmds.confirmDialog(message=\"Auto save on!\")\nsetup_autosave()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import webbrowser\n\nurl = \"https://illogic.notion.site/Wiki-2f062f644c404c19b3f74aca2f7aab05\"  # Replace with your desired URL\nwebbrowser.open(url)" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import webbrowser\n\nurl = \"https://illogic.notion.site/Wiki-2f062..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/notion.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/notion.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import webbrowser\n\nurl = \"https://illogic.notion.site/Wiki-2f062f644c404c19b3f74aca2f7aab05\"  # Replace with your desired URL\nwebbrowser.open(url)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import maya.cmds as cmds\nimport maya.mel as mel\n\ndef open_maya_scene():\n    # Prompt the user for a string input (path to the Maya scene)\n    scene_path = cmds.promptDialog(\n        title='Open Maya Scene',\n        message='Enter the path to the Maya scene:',\n        button=['OK', 'Cancel'],\n        defaultButton='OK',\n        cancelButton='Cancel',\n        dismissString='Cancel'\n    )\n\n    if scene_path == 'OK':\n        # Get the input text\n        scene_path = cmds.promptDialog(query=True, text=True)\n\n        # Check if the path is not empty\n        if scene_path:\n            # Open the Maya scene with the specified options\n            try:\n                cmds.file(scene_path, o=True, ignoreVersion=True, loadReferenceDepth=\"none\", f=True)\n\n            except Exception as e:\n                cmds.confirmDialog(title='Error', message='Failed to open scene:\\n{}'.format(e), button=['OK'])\n\nopen_maya_scene()\n" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import maya.cmds as cmds\nimport maya.mel as mel\n\ndef open_maya_s..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "openScript.png" 
+        -image1 "openScript.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import maya.cmds as cmds\nimport maya.mel as mel\n\ndef open_maya_scene():\n    # Prompt the user for a string input (path to the Maya scene)\n    scene_path = cmds.promptDialog(\n        title='Open Maya Scene',\n        message='Enter the path to the Maya scene:',\n        button=['OK', 'Cancel'],\n        defaultButton='OK',\n        cancelButton='Cancel',\n        dismissString='Cancel'\n    )\n\n    if scene_path == 'OK':\n        # Get the input text\n        scene_path = cmds.promptDialog(query=True, text=True)\n\n        # Check if the path is not empty\n        if scene_path:\n            # Open the Maya scene with the specified options\n            try:\n                cmds.file(scene_path, o=True, ignoreVersion=True, loadReferenceDepth=\"none\", f=True)\n\n            except Exception as e:\n                cmds.confirmDialog(title='Error', message='Failed to open scene:\\n{}'.format(e), button=['OK'])\n\nopen_maya_scene()\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+
+} 

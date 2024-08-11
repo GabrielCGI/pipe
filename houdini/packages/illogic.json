@@ -1,6 +1,7 @@
 {
     "env": [
         {"HOUDINI_TOOLBAR_PATH":"R:/pipeline/pipe/houdini/shelfs;"}, 
-        {"HOUDINI_NO_START_PAGE_SPLASH":"1"}
-    ]
+        {"HOUDINI_NO_START_PAGE_SPLASH":"1"},
+    ],
+
 }
