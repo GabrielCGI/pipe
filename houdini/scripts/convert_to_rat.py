@@ -70,4 +70,4 @@ def print_summary(updated_textures, skipped_textures, already_converted_textures
         print(f"{old_path}\n")
 
 # Execute the function with test_mode enabled
-convert_to_rat(test_mode=True)
+convert_to_rat(test_mode=False)

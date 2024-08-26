@@ -9,6 +9,7 @@
     <memberTool name="kmx"/>
     <memberTool name="kmx_geosubset"/>
     <memberTool name="material_finder"/>
+    <memberTool name="StageManager"/>
   </toolshelf>
 
   <tool name="karma_mat" label="Mat extractor" icon="PLASMA_App">

@@ -752,8 +752,7 @@
         ]
     },
     "environmentVariables": {
-        "HOUDINI_TOOLBAR_PATH": "R:/pipeline/pipe/houdini/packages",
-        "PRISM_DEADLINE_HUSK_PATH": "C:\\Program Files\\Side Effects Software\\Houdini 20.5.312\\bin\\husk.exe"
+        "PRISM_DEADLINE_HUSK_PATH": "C:\\Program Files\\Side Effects Software\\Houdini 20.5.322\\bin\\husk.exe"
     },
     "export_paths": {},
     "render_paths": {},

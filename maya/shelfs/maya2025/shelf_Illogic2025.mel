@@ -277,5 +277,74 @@ global proc shelf_Illogic2025 () {
         -commandRepeatable 1
         -flat 1
     ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "\nimport maya.cmds as cmds\n\n# Create the top-level group\nif not cmds.objExists('maya_world'):\n    maya_world = cmds.group(em=True, name='maya_world')\nelse:\n    maya_world = 'maya_world'\n\n# Create the 'assets' group under 'maya_world'\nif not cmds.objExists('assets'):\n    assets = cmds.group(em=True, name='assets', parent=maya_world)\nelse:\n    assets = 'assets'\n\n# Create the 'Character' group under 'assets'\nif not cmds.objExists('Character'):\n    character = cmds.group(em=True, name='Character', parent=assets)\n\n# Create the 'Prop' group under 'assets'\nif not cmds.objExists('Prop'):\n    prop = cmds.group(em=True, name='Prop', parent=assets)\n\nprint(\"Hierarchy created successfully.\")\n\n" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "\nimport maya.cmds as cmds\n\n# Create the top-level group\nif not c..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "group.png" 
+        -image1 "group.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "\nimport maya.cmds as cmds\n\n# Create the top-level group\nif not cmds.objExists('maya_world'):\n    maya_world = cmds.group(em=True, name='maya_world')\nelse:\n    maya_world = 'maya_world'\n\n# Create the 'assets' group under 'maya_world'\nif not cmds.objExists('assets'):\n    assets = cmds.group(em=True, name='assets', parent=maya_world)\nelse:\n    assets = 'assets'\n\n# Create the 'Character' group under 'assets'\nif not cmds.objExists('Character'):\n    character = cmds.group(em=True, name='Character', parent=assets)\n\n# Create the 'Prop' group under 'assets'\nif not cmds.objExists('Prop'):\n    prop = cmds.group(em=True, name='Prop', parent=assets)\n\nprint(\"Hierarchy created successfully.\")\n\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import subprocess\n\nmayapy_path = \"C:\\\\Program Files\\\\Autodesk\\\\Maya2025\\\\bin\\\\mayapy.exe\"\ncommand = [mayapy_path, \"-m\", \"pip\", \"install\", \"R:/pipeline/networkInstall/pymel/pymel-1.4.1b1-py2.py3-none-any.whl\"]\n\ntry:\n    subprocess.check_call(command)\n    print(\"PyMEL installed successfully!\")\nexcept subprocess.CalledProcessError:\n    print(\"Failed to install PyMEL.\")" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import subprocess\n\nmayapy_path = \"C:\\\\Program Files\\\\Autodesk\\\\M..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "PYMEL" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "pythonFamily.png" 
+        -image1 "pythonFamily.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import subprocess\n\nmayapy_path = \"C:\\\\Program Files\\\\Autodesk\\\\Maya2025\\\\bin\\\\mayapy.exe\"\ncommand = [mayapy_path, \"-m\", \"pip\", \"install\", \"R:/pipeline/networkInstall/pymel/pymel-1.4.1b1-py2.py3-none-any.whl\"]\n\ntry:\n    subprocess.check_call(command)\n    print(\"PyMEL installed successfully!\")\nexcept subprocess.CalledProcessError:\n    print(\"Failed to install PyMEL.\")" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
 
 } 
