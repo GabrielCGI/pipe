@@ -1,0 +1,47 @@
+{
+  "name": "Unpack Mode Name",
+  "layers": [
+    {
+      "name": "VOLUME",
+      "rule": "^VOLUME$",
+      "group_operation": "over",
+      "aliases": ["CURRENT"],
+      "options": {"color": [55, 55, 150]}
+    },
+    {
+      "name": "NAMELAYER2",
+      "rule": "^regex_layer2$",
+      "group_operation": "over",
+      "aliases": ["CURRENT"],
+      "options": {"color": [140, 50, 125]}
+    },
+    {
+      "name": "NAMELAYER3",
+      "rule": "^regex_layer3$",
+      "group_operation": "over",
+      "aliases": ["CURRENT"],
+      "options": {"color": [140, 50, 125]}
+    }
+  ],
+  "shuffle": {
+    "shuffle_layer": [
+      "VOLUME", "NAMELAYER2"
+    ]
+  },
+  "merge": {
+    "rules": [
+      {
+        "a": "NAMELAYER1",
+        "b": "NAMELAYER2",
+        "operation": "over",
+        "result": "CURRENT"
+      },
+      {
+        "a": "NAMELAYER3",
+        "b": "CURRENT",
+        "operation": "plus",
+        "result": "CURRENT"
+      }
+    ]
+  }
+}
