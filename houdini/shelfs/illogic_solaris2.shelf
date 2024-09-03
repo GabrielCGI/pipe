@@ -1,0 +1,235 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <shelfSet name="solaris_1" label="Solaris Geometry">
+    <memberToolshelf name="test_geometry"/>
+    <memberToolshelf name="lop_oceans"/>
+    <memberToolshelf name="illogic_solaris2"/>
+    <memberToolshelf name="shelf_1"/>
+  </shelfSet>
+
+  <toolshelf name="lop_oceans" label="Oceans">
+    <memberTool name="geometry_smallocean"/>
+    <memberTool name="geometry_largeocean"/>
+  </toolshelf>
+
+  <toolshelf name="illogic_solaris2" label="illogic_solaris2">
+    <memberTool name="kmx"/>
+    <memberTool name="kmx_geosubset"/>
+    <memberTool name="material_finder"/>
+    <memberTool name="stage_manager_update"/>
+    <memberTool name="copy"/>
+    <memberTool name="paste"/>
+  </toolshelf>
+
+  <toolshelf name="test_geometry" label="Test Geometry">
+    <memberTool name="lop_testgeometry_crag"/>
+    <memberTool name="lop_testgeometry_pighead"/>
+    <memberTool name="lop_testgeometry_rubbertoy"/>
+    <memberTool name="lop_testgeometry_shaderball"/>
+    <memberTool name="lop_testgeometry_squab"/>
+    <memberTool name="lop_testgeometry_templatebody"/>
+    <memberTool name="lop_testgeometry_templatehead"/>
+    <memberTool name="lop_testgeometry_tommy"/>
+  </toolshelf>
+
+  <tool name="material_finder" label="Get mat" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
+
+import materialFinder
+reload(materialFinder)
+materialFinder.run()]]></script>
+  </tool>
+
+  <tool name="kmx_geosubset" label="kmx_sub" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+
+import kma_mat_from_attr
+reload(kma_mat_from_attr)
+kma_mat_from_attr.execute(collectionMode=False)]]></script>
+  </tool>
+
+  <tool name="kmx" label="kmx_col" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+
+import kma_mat_from_attr
+reload(kma_mat_from_attr)
+kma_mat_from_attr.execute(collectionMode=True)]]></script>
+  </tool>
+
+  <tool name="geometry_largeocean" label="Large Ocean" icon="SHELF_ocean_large">
+    <helpURL>tool:largeocean</helpURL>
+    <toolSubmenu>Environments/Oceans</toolSubmenu>
+    <script scriptType="python"><![CDATA[
+import doptoolutils
+import dopparticlefluidtoolutils
+dopparticlefluidtoolutils.largeOcean(kwargs)]]></script>
+  </tool>
+
+  <tool name="geometry_smallocean" label="Small Ocean" icon="SHELF_ocean_small">
+    <helpURL>tool:smallocean</helpURL>
+    <toolSubmenu>Environments/Oceans</toolSubmenu>
+    <script scriptType="python"><![CDATA[
+import doptoolutils
+import dopparticlefluidtoolutils
+dopparticlefluidtoolutils.smallOcean(kwargs)]]></script>
+  </tool>
+
+  <tool name="lop_testgeometry_templatehead" label="Test Geometry: Template Head" icon="SOP_testgeometry_templatehead">
+    <toolMenuContext name="viewer">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolMenuContext name="network">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Test Geometry</toolSubmenu>
+    <script scriptType="python"><![CDATA[import loptoolutils
+asset_name = 'templatehead'
+node = loptoolutils.genericTool(kwargs, "assetreference", asset_name)
+loptoolutils.referenceTestAsset(node, asset_name)]]></script>
+  </tool>
+
+  <tool name="lop_testgeometry_templatebody" label="Test Geometry: Template Body" icon="SOP_testgeometry_templatebody">
+    <toolMenuContext name="viewer">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolMenuContext name="network">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Test Geometry</toolSubmenu>
+    <script scriptType="python"><![CDATA[import loptoolutils
+asset_name = 'templatebody'
+node = loptoolutils.genericTool(kwargs, "assetreference", asset_name)
+loptoolutils.referenceTestAsset(node, asset_name)]]></script>
+  </tool>
+
+  <tool name="lop_testgeometry_tommy" label="Test Geometry: Tommy" icon="SOP_testgeometry_tommy">
+    <toolMenuContext name="viewer">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolMenuContext name="network">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Test Geometry</toolSubmenu>
+    <script scriptType="python"><![CDATA[import loptoolutils
+asset_name = 'tommy'
+node = loptoolutils.genericTool(kwargs, "assetreference", asset_name)
+loptoolutils.referenceTestAsset(node, asset_name)]]></script>
+  </tool>
+
+  <tool name="lop_testgeometry_squab" label="Test Geometry: Squab" icon="SOP_testgeometry_squab">
+    <toolMenuContext name="viewer">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolMenuContext name="network">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Test Geometry</toolSubmenu>
+    <script scriptType="python"><![CDATA[import loptoolutils
+asset_name = 'squab'
+node = loptoolutils.genericTool(kwargs, "assetreference", asset_name)
+loptoolutils.referenceTestAsset(node, asset_name)]]></script>
+  </tool>
+
+  <tool name="lop_testgeometry_shaderball" label="Test Geometry: Shader Ball" icon="MISC_shaderball">
+    <toolMenuContext name="viewer">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolMenuContext name="network">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Test Geometry</toolSubmenu>
+    <script scriptType="python"><![CDATA[import loptoolutils
+asset_name = 'shaderball'
+node = loptoolutils.genericTool(kwargs, "assetreference", asset_name)
+loptoolutils.referenceTestAsset(node, asset_name)]]></script>
+  </tool>
+
+  <tool name="lop_testgeometry_rubbertoy" label="Test Geometry: Rubber Toy" icon="SOP_testgeometry_rubbertoy">
+    <toolMenuContext name="viewer">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolMenuContext name="network">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Test Geometry</toolSubmenu>
+    <script scriptType="python"><![CDATA[import loptoolutils
+asset_name = 'rubbertoy'
+node = loptoolutils.genericTool(kwargs, "assetreference", asset_name)
+loptoolutils.referenceTestAsset(node, asset_name)]]></script>
+  </tool>
+
+  <tool name="lop_testgeometry_pighead" label="Test Geometry: Pig Head" icon="SOP_testgeometry_pighead">
+    <toolMenuContext name="viewer">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolMenuContext name="network">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Test Geometry</toolSubmenu>
+    <script scriptType="python"><![CDATA[import loptoolutils
+asset_name = 'pig'
+node = loptoolutils.genericTool(kwargs, "assetreference", asset_name)
+loptoolutils.referenceTestAsset(node, asset_name)]]></script>
+  </tool>
+
+  <tool name="lop_testgeometry_crag" label="Test Geometry: Crag" icon="SOP_testgeometry_crag">
+    <toolMenuContext name="viewer">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolMenuContext name="network">
+      <contextNetType>LOP</contextNetType>
+    </toolMenuContext>
+    <toolSubmenu>Test Geometry</toolSubmenu>
+    <script scriptType="python"><![CDATA[import loptoolutils
+asset_name = 'crag'
+node = loptoolutils.genericTool(kwargs, "assetreference", asset_name)
+loptoolutils.referenceTestAsset(node, asset_name)]]></script>
+  </tool>
+
+  <tool name="paste" label="paste" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\copy_paste")
+
+import copy_paste
+reload(copy_paste)
+copy_paste.paste()]]></script>
+  </tool>
+
+  <tool name="copy" label="copy" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\copy_paste")
+
+import copy_paste
+reload(copy_paste)
+copy_paste.copy()]]></script>
+  </tool>
+
+  <tool name="stage_manager_update" label="stage_manager_update" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\stage_manager_update")
+
+import stage_manager_update
+reload(stage_manager_update)
+stage_manager_update.checkUpdate()]]></script>
+  </tool>
+</shelfDocument>

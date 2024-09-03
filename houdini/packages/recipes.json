@@ -1,7 +1,0 @@
-{
-    "env": [
-        {"HOUDINI_OTLSCAN_PATH":"R:/pipeline/pipe/houdini/recipes"}
-    ]
-}
-
-

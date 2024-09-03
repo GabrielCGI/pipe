@@ -1,3 +1,6 @@
+## Nuke Init for Illogic
+## ValDo Edit 240903
+
 nuke.pluginAddPath ('R:/nukeGizmo')
 nuke.pluginAddPath ('R:/pipeline/pipe/nuke/script')
 
