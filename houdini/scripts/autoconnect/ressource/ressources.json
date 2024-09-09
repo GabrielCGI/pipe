@@ -1,0 +1,24 @@
+{
+    "Extension" : [
+        ".exr",
+        ".tif",
+        ".png",
+        ".jpg",
+        ".jpeg"
+    ],
+
+    "Map_tags" : 
+    {
+        "base_color" : ["basecolor", "albedo"],
+        "specular_roughness" : ["roughness"],
+        "metalness" : ["metallic"],
+        "Height" : ["height"],
+        "normal" : ["normal"]
+    },
+
+    "Signature" : {
+        "default" : ["raw"],
+        "color3" : ["acescg"],
+        "vector3" : ["normal_raw"]
+    }
+}

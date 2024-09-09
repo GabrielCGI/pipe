@@ -35,7 +35,7 @@ class ShuffleMode:
         channels = []
         for channel in detailed_channels:
             channel_split = channel.split(".")[0]
-            if (channel_split.startswith("RGBA_") or channel_split in _EXTRA_CHANNELS) and channel_split not in visited_channels:
+            if (channel_split.startswith("C_") or channel_split in _EXTRA_CHANNELS) and channel_split not in visited_channels:
                 channels.append(channel_split)
                 visited_channels.append(channel_split)
         return channels
@@ -204,7 +204,7 @@ class ShuffleMode:
         shuffle_node = nuke.createNode("Shuffle2")
         shuffle_node["in1"].setValue(channel)
         shuffle_node["postage_stamp"].setValue(True)
-        shuffle_node.setName(_PREFIX_SHUFFLE + layer_var + "_" + channel.replace("RGBA_", ""))
+        shuffle_node.setName(_PREFIX_SHUFFLE + layer_var + "_" + channel.replace("C_", ""))
         shuffle_node.setInput(0, input_node)
         self._layout_manager.add_nodes_to_backdrop(shuffle_backdrop_longname, [shuffle_node])
         self._layout_manager.add_node_layout_relation(input_node, shuffle_node, LayoutManager.POS_BOTTOM,

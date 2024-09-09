@@ -24,6 +24,7 @@
     <memberTool name="stage_manager_update"/>
     <memberTool name="copy"/>
     <memberTool name="paste"/>
+    <memberTool name="autoconnect_maps"/>
   </toolshelf>
 
   <toolshelf name="test_geometry" label="Test Geometry">

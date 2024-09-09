@@ -21,7 +21,7 @@ def pdebug(toPrint):
     
 def get_latest_version(asset_path):
     """
-    Get the last version of an asset
+    Get the last version of an asset.
 
     Parameters:
     asset_path (str) : Path to an asset
@@ -50,7 +50,7 @@ def get_latest_version(asset_path):
 def checkUpdate():
     """
     Check for each asset if there is an uptade available,
-    Then ask the user if he want to uptate them
+    Then ask the user if he want to uptate them.
     
     """
     

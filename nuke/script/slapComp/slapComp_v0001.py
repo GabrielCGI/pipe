@@ -159,7 +159,6 @@ def choose_frame_range(folder_ranges):
             print("Invalid input. Please enter a number.")
 
 
-
 def run_nuke_command():
     print('')
     print('Welcome to SlapComper !')
@@ -187,14 +186,42 @@ def run_nuke_command():
     min_frame, max_frame = choose_frame_range(folder_ranges)
 
     sequences = {}
-    for folder_name, (version, folder) in chosen_versions.items():
+    sequence_order = []
+    print("\nChoose the order of sequences for merging:")
+    for index, folder_name in enumerate(chosen_versions.keys()):
+        print(f"[{index}] {folder_name}")
+    while len(sequence_order) < len(chosen_versions):
+        try:
+            choice = int(input(f"Select the next sequence to merge (0-{len(chosen_versions)-1}): "))
+            if 0 <= choice < len(chosen_versions) and choice not in sequence_order:
+                sequence_order.append(choice)
+            else:
+                print("Invalid choice or sequence already chosen. Please select another sequence.")
+        except ValueError:
+            print("Please enter a valid integer.")
+
+    for index in sequence_order:
+        folder_name = list(chosen_versions.keys())[index]
+        version, folder = chosen_versions[folder_name]
         if folder:
             sequences[folder_name] = f"{folder}/beauty/{shot_parent_folder}-{shot_number}_{folder_name}_{version}_beauty.####.exr"
 
     outpath_base = path + '/Renders/2dRender/SLAP_COMP/'
-
     new_version, outpath = get_next_version_path(outpath_base)
-    outfile = outpath + '/' + shot_parent_folder + '-' + shot_number + '_SLAP_COMP_' + new_version + '.####.exr'
+
+    
+    print('Output file format : ')
+    print()
+    print('[0] exr')
+    print('[1] mov')
+    outformat = int(input('Choose output format : '))
+
+    if outformat == 0 :
+        outfile = outpath + '/' + shot_parent_folder + '-' + shot_number + '_SLAP_COMP_' + new_version + '.####.exr'
+        outformat = 'exr'
+    if outformat == 1 :
+        outfile = outpath + '/' + shot_parent_folder + '-' + shot_number + '_SLAP_COMP_' + new_version + '.mov'
+        outformat = 'mov'
 
     print('')
     print('Launching Nuke...')
@@ -215,9 +242,12 @@ def run_nuke_command():
         str(min_frame),
         str(max_frame),
         outfile,
+        outformat,
     ]
 
-    for folder_name, seq in sequences.items():
+    for index in sequence_order:
+        folder_name = list(chosen_versions.keys())[index]
+        seq = sequences[folder_name]
         command.append('filepath='+seq)
 
     try:

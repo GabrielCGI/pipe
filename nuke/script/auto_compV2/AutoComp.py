@@ -25,10 +25,13 @@ from .UnpackMode import UnpackMode
 _FILE_NAME_PREFS = "auto_comp"
 
 _DEFAULT_SHOT_DIR = "I:/"
+# _DEFAULT_SHOT_DIR = "I:/myplace_2406/03_Production/Shots/mpa/110"
 
 _UNPACK_MODES_DIR = os.path.dirname(__file__) + "/mode"
 
 _COLOR_GREY_DISABLE = 105,105,105
+
+_RENDER_FOLDER = os.path.join("Renders", "3dRender")
 
 
 # ######################################################################################################################
@@ -41,7 +44,7 @@ class AutoComp(QWidget):
         :param folder
         :return: is correct shot folder
         """
-        return os.path.isdir(os.path.join(folder, "render_out")) and os.path.isdir(folder)
+        return os.path.isdir(os.path.join(folder, _RENDER_FOLDER)) and os.path.isdir(folder)
 
     def __init__(self, prt=None):
         super(AutoComp, self).__init__(prt)
@@ -372,7 +375,7 @@ class AutoComp(QWidget):
         """
         self.__ui_shuffle_layer_btn.setEnabled(
             len(self.__selected_layers) > 0 and self.__selected_unpack_mode is not None and
-            os.path.isdir(os.path.join(self.__shot_path, "render_out")))
+            os.path.isdir(os.path.join(self.__shot_path, _RENDER_FOLDER)))
 
     def __refresh_autocomp_btn(self):
         """
@@ -380,7 +383,7 @@ class AutoComp(QWidget):
         :return:
         """
         self.__ui_autocomp_btn.setEnabled(
-            self.__selected_unpack_mode is not None and os.path.isdir(os.path.join(self.__shot_path, "render_out")))
+            self.__selected_unpack_mode is not None and os.path.isdir(os.path.join(self.__shot_path, _RENDER_FOLDER)))
 
     def __refresh_unpack_modes(self):
         """
@@ -400,10 +403,10 @@ class AutoComp(QWidget):
         # Check existence shot path
         if not os.path.isdir(self.__shot_path): return
 
-        if self.__shot_path.endswith("render_out"):
+        if self.__shot_path.endswith(_RENDER_FOLDER):
             render_path = self.__shot_path
         else:
-            render_path = os.path.join(self.__shot_path, "render_out")
+            render_path = os.path.join(self.__shot_path, _RENDER_FOLDER)
 
         # Check existence render path
         if not os.path.isdir(render_path): return
@@ -648,7 +651,9 @@ class AutoComp(QWidget):
             return  # Exit if no read nodes are found
 
         # Updated pattern to include frame sequence capture
-        pattern = re.compile(r"(.*/render_out/[^/]+)/([^\.]+)\.([0-9]+)/([^/]+)(\.(\d{4})|\.%04d)\.exr")
+        pattern = re.compile(r"(.*"
+                            #  + f"{_RENDER_FOLDER}"
+                             + r"/[^/]+)/([^\.]+)\.([0-9]+)/([^/]+)(\.(\d{4})|\.%04d)\.exr")
 
         for read_node in read_nodes:
             path = read_node.knob("file").value().replace("\\", "/")

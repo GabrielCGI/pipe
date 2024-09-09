@@ -8,6 +8,7 @@ from .RuleSet import StartVariable
 
 # ######################################################################################################################
 
+_RENDER_FOLDER = os.path.join("Renders", "3dRender")
 _PREFIX_POSTAGE = "postage_"
 _PREFIX_UTILITY = "utility_"
 _PREFIX_UTILITY_MERGE = "utility_merge_"
@@ -73,8 +74,16 @@ class UnpackMode:
 
         if not seq_dirs:
             return None
-
-        seq_dir_path = os.path.join(layer_path, seq_dirs[0])
+        
+        render_dir_path = os.path.join(layer_path, seq_dirs[0])
+        
+        seq_render = [d for d in sorted(os.listdir(render_dir_path), reverse=True)
+                      if os.path.isdir(os.path.join(render_dir_path, d))]
+        
+        if not seq_render:
+            return None
+        
+        seq_dir_path = os.path.join(render_dir_path, seq_render[0])        
         frame_files = os.listdir(seq_dir_path)
 
         if frame_files and "still" in frame_files[0]:
@@ -89,22 +98,53 @@ class UnpackMode:
             end_frame = 1
 
         else:
-            pattern_str = "^" + re.escape(seq_dirs[0]) + r"(_utility)?\.([0-9]{4})\.exr$"
-            frame_pattern = re.compile(pattern_str)
-
-            frames = [frame_pattern.match(f) for f in frame_files]
-            frames = [m.groups() for m in frames if m]
-
+            # pattern_str = "^" + re.escape(seq_dirs[0]) + r"(_utility)?\.([0-9]{4})\.exr$"
+            # print(repr(pattern_str))
+            
+            # frames = [frame_pattern.match(f) for f in frame_files]
+            # frames = [m.groups(0) for m in frames if m]
+            
+            # start_frame = min(int(f[1]) for f in frames if f[0] is None)
+            # end_frame = max(int(f[1]) for f in frames if f[0] is None)
+            
+            # seq_path = os.path.join(seq_dir_path, seq_dirs[0] + ".####.exr").replace("\\", "/")
+            # utility_path = os.path.join(seq_dir_path, seq_dirs[0] + "_utility.####.exr").replace("\\", "/")
+            
+            # Check if there is atleast one frame and stop if not
+            generic_frame = None
+            for frame in frame_files:
+                frame_path = os.path.splitext(frame)
+                if frame_path[1] == '.exr':
+                    generic_frame = frame_path[0]
+                    continue
+            
+            if not generic_frame:
+                return None
+            
+            # Match every frame numbers
+            frames = []
+            for f in frame_files:
+                path = os.path.splitext(f)
+                frame_number = None
+                if path[1] == '.exr':
+                    frame_number = re.search("\d{4}$", path[0]).group(0)
+                if frame_number:
+                    frames.append(frame_number)
+            
             if not frames:
                 return None
 
             # Determine the start and end frame numbers
-            start_frame = min(int(f[1]) for f in frames if f[0] is None)
-            end_frame = max(int(f[1]) for f in frames if f[0] is None)
+            start_frame = min(int(f) for f in frames)
+            end_frame = max(int(f) for f in frames)
             
             # Construct the paths for the sequence and utility files
-            seq_path = os.path.join(seq_dir_path, seq_dirs[0] + ".####.exr").replace("\\", "/")
-            utility_path = os.path.join(seq_dir_path, seq_dirs[0] + "_utility.####.exr").replace("\\", "/")
+            generic_frame = os.path.splitext(generic_frame)[0]
+            seq_path = os.path.join(seq_dir_path, generic_frame + ".####.exr").replace("\\", "/")
+            # utility_path = os.path.join(seq_dir_path, generic_frame + "_utility.####.exr").replace("\\", "/")
+            utility_path = None
+            
+            
 
         return seq_path, utility_path, start_frame, end_frame
 
@@ -194,10 +234,10 @@ class UnpackMode:
         """
         if not os.path.isdir(shot_path):
             return
-        if shot_path.endswith("render_out"):
+        if shot_path.endswith(_RENDER_FOLDER):
             render_path = shot_path
         else:
-            render_path = os.path.join(shot_path, "render_out")
+            render_path = os.path.join(shot_path, _RENDER_FOLDER)
         if not os.path.isdir(render_path):
             return
         self.__start_vars_to_unpack = []
@@ -244,7 +284,7 @@ class UnpackMode:
         :param shot_path
         :return:
         """
-        render_path = os.path.join(shot_path, "render_out")
+        render_path = os.path.join(shot_path, _RENDER_FOLDER)
         read_nodes = []
         postage_nodes = []
         # for each layer
@@ -281,7 +321,7 @@ class UnpackMode:
                 self.__layout_manager.add_node_layout_relation(postage_stamp, merge_node, mult_distance=1.3)
                 self.__layout_manager.add_node_layout_relation(merge_node, utility_postage_stamp, LayoutManager.POS_TOP)
             else:
-                read_nodes.append((read_node))
+                read_nodes.append((read_node,))
                 start_var.set_node(postage_stamp)
 
             # Get the Backdrops name

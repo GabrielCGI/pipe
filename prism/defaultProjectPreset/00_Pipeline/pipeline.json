@@ -404,7 +404,8 @@
                 ]
             }
         ],
-        "presetScenes": []
+        "presetScenes": [],
+        "useEpisodes": false
     },
     "folder_structure": {
         "pipeline": {
