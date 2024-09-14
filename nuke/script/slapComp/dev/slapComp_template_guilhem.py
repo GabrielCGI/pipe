@@ -8,6 +8,8 @@ os.environ['OCIO'] = ocio_config_path
 nuke.root()['colorManagement'].setValue('OCIO')
 nuke.root()['OCIO_config'].setValue('aces_1.1')
 
+outformat = 'HD_1080'
+
 # variables coming from the other script
 start_frame = int(sys.argv[2])
 last_frame = int(sys.argv[3])
@@ -15,12 +17,12 @@ output = sys.argv[4]
 outputmov = output.split('.')[0]+'.mov'
 iterations = int(sys.argv[1].split('_')[-1])
 
-w = nuke.nodes.Write(file = outputmov, file_type = 'mov', colorspace = 'Colorspaces/Ouput/Output - sRGB', meta_codec = 'avc1')
+w = nuke.nodes.Write(file = outputmov, file_type = 'mov', colorspace = 'Colorspaces/Ouput/Output - sRGB', meta_codec = 'avc1', format = outformat)
 
 r = {}
 for i in range(iterations) : 
     filepath = sys.argv[i+5].split('=')[-1]
-    r[i] = nuke.nodes.Read(file = filepath, first=start_frame, last=last_frame, on_error = 'black')
+    r[i] = nuke.nodes.Read(file = filepath, first=start_frame, last=last_frame, on_error = 'black',  format = outformat)
 
 if iterations <= 2:
     print('')

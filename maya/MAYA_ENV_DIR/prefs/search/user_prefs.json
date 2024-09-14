@@ -1,0 +1,19 @@
+{
+    "context": "select",
+    "history": [
+        [
+            "NamespaceEditor",
+            "PaintLatticeWeightsTool",
+            "CreateLattice",
+            "CreateNURBSCircle",
+            "CreateCameraOnly",
+            "CreateCluster",
+            "JointTool",
+            "ParentConstraint"
+        ],
+        [],
+        [],
+        []
+    ],
+    "version": "0.21"
+}

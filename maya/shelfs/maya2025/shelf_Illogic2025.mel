@@ -306,7 +306,7 @@ global proc shelf_Illogic2025 () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "\nimport maya.cmds as cmds\n\n# Create the top-level group\nif not cmds.objExists('maya_world'):\n    maya_world = cmds.group(em=True, name='maya_world')\nelse:\n    maya_world = 'maya_world'\n\n# Create the 'assets' group under 'maya_world'\nif not cmds.objExists('assets'):\n    assets = cmds.group(em=True, name='assets', parent=maya_world)\nelse:\n    assets = 'assets'\n\n# Create the 'Character' group under 'assets'\nif not cmds.objExists('Character'):\n    character = cmds.group(em=True, name='Character', parent=assets)\n\n# Create the 'Prop' group under 'assets'\nif not cmds.objExists('Prop'):\n    prop = cmds.group(em=True, name='Prop', parent=assets)\n\nprint(\"Hierarchy created successfully.\")\n\n" 
+        -command "import initAnim\nimport importlib\nimportlib.reload(initAnim)\n\ninitAnim.run()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
