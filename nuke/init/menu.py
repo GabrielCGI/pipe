@@ -100,7 +100,7 @@ elif nuke.NUKE_VERSION_MAJOR>=15:
     # ### -------------------------------------------------------------------------------------------
     # ### ----------------------------------     Nuke 15+      --------------------------------------
     # ### -------------------------------------------------------------------------------------------
-    
+    from nukescripts import panels
     # >>>PrismStart
     if ((not nuke.env["studio"]) or nuke.env["indie"]) and nuke.env.get("gui"):
         if "pcore" in locals():
@@ -128,5 +128,9 @@ elif nuke.NUKE_VERSION_MAJOR>=15:
     toolbar = nuke.toolbar("Nodes")
     toolbar.addMenu("VideoCopilot", icon="VideoCopilot.png")
     toolbar.addCommand( "VideoCopilot/OpticalFlares", "nuke.createNode('OpticalFlares')", icon="OpticalFlares.png")
+
+    import auto_compV2.AutoComp as auto_comp_v2
+    
+    panels.registerWidgetAsPanel("auto_comp_v2.AutoComp", 'AutoComp V2', 'illogic_studios.autocompV2')
 
     print("End loading Nuke Menu as version 15+ ...")

@@ -95,15 +95,18 @@
             "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Houdini.png",
             "versions": [
                 {
-                    "label": "20.0.0.688",
+                    "label": "20.5.360",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.0.688\\bin\\houdini.exe"
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.5.360\\bin\\houdini.exe",
+                    "preferred": false,
+                    "environment": {}
                 },
                 {
-                    "label": "20.5.0.312",
+                    "label": "Latest",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.5.312\\bin\\houdini.exe",
-                    "preferred": true
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini %HOUDINI_ILL_VERSION%\\bin\\houdini.exe",
+                    "preferred": true,
+                    "environment": {}
                 }
             ],
             "uid": "761da243-5309-11ef-9b47-d85ed35d00b3"
@@ -114,15 +117,18 @@
             "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Houdini FX.png",
             "versions": [
                 {
-                    "label": "20.0.0.688",
+                    "label": "20.5.360",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.0.688\\bin\\houdinifx.exe"
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.0.360\\bin\\houdinifx.exe",
+                    "preferred": false,
+                    "environment": {}
                 },
                 {
-                    "label": "20.5.0.312",
+                    "label": "Latest",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.5.312\\bin\\houdinifx.exe",
-                    "preferred": true
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini %HOUDINI_ILL_VERSION%\\bin\\houdinifx.exe",
+                    "preferred": true,
+                    "environment": {}
                 }
             ],
             "uid": "76218c66-5309-11ef-83da-d85ed35d00b3"

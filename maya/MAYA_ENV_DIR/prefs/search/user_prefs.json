@@ -2,15 +2,25 @@
     "context": "ttf",
     "history": [
         [
-            "NamespaceEditor",
             "PaintLatticeWeightsTool",
             "CreateLattice",
             "CreateNURBSCircle",
-            "CreateCameraOnly",
             "CreateCluster",
             "JointTool",
+            "PreferencesWindow",
+            "MatchPivots",
+            "ToggleCameraNames",
+            "NamespaceEditor",
+            "CreateCameraOnly",
+            "HotkeyPreferencesWindow",
+            "NodeEditorWindow",
             "ParentConstraint",
-            "ToggleEditPivot"
+            "ToggleEditPivot",
+            "BevelPolygon",
+            "BridgeOrFill",
+            "ReferenceEditor",
+            "MatchTransform",
+            "CreateReference"
         ],
         [],
         [],

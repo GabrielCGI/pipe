@@ -145,7 +145,7 @@
             }
         ],
         "prism_version": "v2.0.9",
-        "versionPadding": 4,
+        "versionPadding": 3,
         "framePadding": 4,
         "versionFormat": "v#",
         "useStrictAssetDetection": false,
@@ -753,7 +753,7 @@
         ]
     },
     "environmentVariables": {
-        "PRISM_DEADLINE_HUSK_PATH": "C:\\Program Files\\Side Effects Software\\Houdini 20.5.322\\bin\\husk.exe",
+        "PRISM_DEADLINE_HUSK_PATH": "C:\\Program Files\\Side Effects Software\\Houdini %HOUDINI_ILL_VERSION%\\bin\\husk.exe",
         "PRISM_HUSK_DEADLINE_GROUP": "prism_plus"
     },
     "export_paths": {},
@@ -810,7 +810,8 @@
         "useProjectLibrary": true,
         "usePolyHaven": true,
         "useGpuOpen": false,
-        "customLibraries": []
+        "customLibraries": [],
+        "useLibraryImport": true
     },
     "usd": {
         "createUsdContainer": true,
@@ -882,7 +883,8 @@
         ],
         "playblastRenderer": [
             "GL"
-        ]
+        ],
+        "autoUpdateLayers": true
     },
     "maya": {
         "setPrefix": ""

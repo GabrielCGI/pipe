@@ -7,7 +7,6 @@
 
   <shelfSet name="solaris_1" label="Solaris Geometry">
     <memberToolshelf name="illogic_solaris6"/>
-    <memberToolshelf name="shelf_1"/>
   </shelfSet>
 
   <toolshelf name="illogic_solaris6" label="illogic_solaris6">
@@ -20,59 +19,15 @@
     <memberTool name="update_tex"/>
   </toolshelf>
 
-  <tool name="stage_manager_update" label="stage_manager_update" icon="hicon:/SVGIcons.index?BUTTONS_page_reload.svg">
+  <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
     <script scriptType="python"><![CDATA[import sys
 from imp import reload
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\stage_manager_update")
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
 
-import stage_manager_update
-reload(stage_manager_update)
-stage_manager_update.checkUpdate()]]></script>
-  </tool>
-
-  <tool name="copy" label="copy" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\copy_paste")
-
-import copy_paste
-reload(copy_paste)
-copy_paste.copy()]]></script>
-  </tool>
-
-  <tool name="paste" label="paste" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\copy_paste")
-
-import copy_paste
-reload(copy_paste)
-copy_paste.paste()]]></script>
-  </tool>
-
-  <tool name="kmx" label="kmx_col" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
-
-import kma_mat_from_attr
-reload(kma_mat_from_attr)
-kma_mat_from_attr.execute(collectionMode=True)]]></script>
-  </tool>
-
-  <tool name="kmx_geosubset" label="kmx_sub" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
-
-import kma_mat_from_attr
-reload(kma_mat_from_attr)
-kma_mat_from_attr.execute(collectionMode=False)]]></script>
+import mtlximage_path_updatev2
+reload(mtlximage_path_updatev2)
+mtlximage_path_updatev2.run()]]></script>
   </tool>
 
   <tool name="material_finder" label="Get mat" icon="PLASMA_App">
@@ -86,14 +41,58 @@ reload(materialFinder)
 materialFinder.run()]]></script>
   </tool>
 
-  <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
+  <tool name="kmx_geosubset" label="kmx_sub" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
     <script scriptType="python"><![CDATA[import sys
 from imp import reload
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
 
-import mtlximage_path_updatev2
-reload(mtlximage_path_updatev2)
-mtlximage_path_updatev2.run()]]></script>
+import kma_mat_from_attr
+reload(kma_mat_from_attr)
+kma_mat_from_attr.execute(collectionMode=False)]]></script>
+  </tool>
+
+  <tool name="kmx" label="kmx_col" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+
+import kma_mat_from_attr
+reload(kma_mat_from_attr)
+kma_mat_from_attr.execute(collectionMode=True)]]></script>
+  </tool>
+
+  <tool name="paste" label="paste" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\copy_paste")
+
+import copy_paste
+reload(copy_paste)
+copy_paste.paste()]]></script>
+  </tool>
+
+  <tool name="copy" label="copy" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\copy_paste")
+
+import copy_paste
+reload(copy_paste)
+copy_paste.copy()]]></script>
+  </tool>
+
+  <tool name="stage_manager_update" label="stage_manager_update" icon="hicon:/SVGIcons.index?BUTTONS_page_reload.svg">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\stage_manager_update")
+
+import stage_manager_update
+reload(stage_manager_update)
+stage_manager_update.checkUpdate()]]></script>
   </tool>
 </shelfDocument>
