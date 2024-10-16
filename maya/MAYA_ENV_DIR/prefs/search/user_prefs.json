@@ -8,9 +8,7 @@
             "CreateCluster",
             "JointTool",
             "PreferencesWindow",
-            "MatchPivots",
             "ToggleCameraNames",
-            "NamespaceEditor",
             "CreateCameraOnly",
             "HotkeyPreferencesWindow",
             "NodeEditorWindow",
@@ -18,9 +16,12 @@
             "ToggleEditPivot",
             "BevelPolygon",
             "BridgeOrFill",
+            "MatchPivots",
+            "NamespaceEditor",
             "ReferenceEditor",
             "MatchTransform",
-            "CreateReference"
+            "CreateReference",
+            "GraphEditor"
         ],
         [],
         [],
