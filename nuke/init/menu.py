@@ -97,9 +97,11 @@ if nuke.NUKE_VERSION_MAJOR==12:
 
 elif nuke.NUKE_VERSION_MAJOR>=15:
     print("Loading Nuke Menu as version 15+ ...")
+
     # ### -------------------------------------------------------------------------------------------
     # ### ----------------------------------     Nuke 15+      --------------------------------------
     # ### -------------------------------------------------------------------------------------------
+    from crypto import crypto_extract
     from nukescripts import panels
     # >>>PrismStart
     if ((not nuke.env["studio"]) or nuke.env["indie"]) and nuke.env.get("gui"):
@@ -125,6 +127,7 @@ elif nuke.NUKE_VERSION_MAJOR>=15:
     # <<<PrismEnd
 
     # ------ add the following lines to your menu.py file  ------ 
+
     toolbar = nuke.toolbar("Nodes")
     toolbar.addMenu("VideoCopilot", icon="VideoCopilot.png")
     toolbar.addCommand( "VideoCopilot/OpticalFlares", "nuke.createNode('OpticalFlares')", icon="OpticalFlares.png")
@@ -132,5 +135,6 @@ elif nuke.NUKE_VERSION_MAJOR>=15:
     import auto_compV2.AutoComp as auto_comp_v2
     
     panels.registerWidgetAsPanel("auto_comp_v2.AutoComp", 'AutoComp V2', 'illogic_studios.autocompV2')
-
+    bloomMenu = nuke.menu("Nodes").addMenu("bloom","bloom.png")
+    bloomMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
     print("End loading Nuke Menu as version 15+ ...")
