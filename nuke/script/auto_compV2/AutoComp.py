@@ -651,22 +651,31 @@ class AutoComp(QWidget):
             return  # Exit if no read nodes are found
 
         # Updated pattern to include frame sequence capture
-        pattern = re.compile(r"(.*"
-                            #  + f"{_RENDER_FOLDER}"
-                             + r"/[^/]+)/([^\.]+)\.([0-9]+)/([^/]+)(\.(\d{4})|\.%04d)\.exr")
+        pattern = re.compile(
+            r"(.*"
+            + (_RENDER_FOLDER).replace("\\", "/")
+            + r"/[^/]+)"                     # First group -> Full path + "Renders/3drender" + LAYER
+            + r"/(v\d{4})"                   # Second group -> Version folder (v followed by 4 digits)
+            + r"/([^\/]*)"                   # Third group -> "beauty"
+            + r"/([^\.]+)"                   # Fourth group -> Shot_name
+            + r"(\.(\d{4})|\.%04d)\.exr")    # Fifth frame -> Sequence
 
         for read_node in read_nodes:
             path = read_node.knob("file").value().replace("\\", "/")
             match = pattern.search(path)
 
+            # continue
             if not match:
                 continue  # Skip the iteration if the pattern doesn't match
 
-            base_directory, parent_directory, version_number, shot_name, _, frame_sequence = match.groups()
+            # Fetch base directory, version directory, "beauty", shot name and frame sequence
+            base_directory, version_number, parent_directory, shot_name, frame_sequence, _ = match.groups()
             base_var = base_directory.split('/')[-1]
-            shot_name = shot_name.split('.')[0]
-            frame_sequence = frame_sequence or "####"  # Default frame sequence
+            
+            # Normalize the frame sequence
+            frame_sequence = "####"  # Default frame sequence
 
+            # List every version directory and take the highest version
             entries = os.listdir(base_directory)
             directories = [entry for entry in entries if os.path.isdir(os.path.join(base_directory, entry))]
             directories.sort()
@@ -676,11 +685,17 @@ class AutoComp(QWidget):
 
             last_directory = directories[-1]
             last_version = last_directory.split('.')[-1]
-            utility = "_utility" if "utility" in path else ""
+            
+            # Replace the version number this the string if there is a new one
+            shot_name = re.sub(r"v\d{4}", last_version, shot_name)
+            
+            # Build the shot file name
+            map_name = shot_name + "." + frame_sequence + ".exr"
 
-            last_version_path = os.path.join(base_directory, parent_directory + "." + last_version, shot_name + "." + last_version + utility + "." + frame_sequence + ".exr").replace("\\", "/")
+            # Build the path to the last version
+            last_version_path = os.path.join(base_directory, last_directory, parent_directory, map_name).replace("\\", "/")
 
-            self.__read_nodes_list_for_update.append((base_var, version_number,last_version,last_version_path, read_node))
+            self.__read_nodes_list_for_update.append((base_var, version_number, last_version, last_version_path, read_node))
             self.__read_nodes_list_for_update = sorted(self.__read_nodes_list_for_update, reverse=True, key=lambda x: (x[1] == x[2], x[0]))
 
     def __scan_layers(self):

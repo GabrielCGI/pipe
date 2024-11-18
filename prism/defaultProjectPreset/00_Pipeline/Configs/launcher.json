@@ -139,20 +139,14 @@
             "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Maya.png",
             "versions": [
                 {
-                    "label": "Maya 2022",
-                    "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Autodesk\\Maya2022\\bin\\maya.exe"
-                },
-                {
-                    "label": "Maya 2024",
-                    "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Autodesk\\Maya2024\\bin\\maya.exe"
-                },
-                {
                     "label": "Maya 2025",
                     "mode": "Shell Command",
                     "cmd": "C:\\Program Files\\Autodesk\\Maya2025\\bin\\maya.exe",
-                    "preferred": true
+                    "preferred": true,
+                    "environment": {
+                        "MAYA_SHELF_PATH": "R:\\pipeline\\pipe\\maya\\shelfs\\maya2025",
+                        "PYTHONPATH": "R:\\pipeline\\pipe\\maya\\scripts;R:\\pipeline\\pipe\\maya\\scripts\\abcPipeline;R:\\pipeline\\pipe\\maya\\scripts\\scene;R:\\pipeline\\pipe\\maya\\scripts\\tools;R:\\pipeline\\pipe\\maya\\scripts\\startupSettings\\;R:\\pipeline\\pipe\\maya\\scripts\\shaderTransferTool;R:\\pipeline\\pipe\\maya\\scripts\\assetBrowser;"
+                    }
                 }
             ],
             "uid": "76258ec0-5309-11ef-983d-d85ed35d00b3"

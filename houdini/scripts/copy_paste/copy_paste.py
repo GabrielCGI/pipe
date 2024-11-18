@@ -6,16 +6,18 @@ def paste():
     """Paste an item from I:/tmp/houdini_Clipboard"""
     active_pane = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
     location = active_pane.pwd()
+    project_path = hou.hipFile.path().split('/')[1]+'/'
 
     filepath = hou.ui.selectFile(
         title="Load Clipboard File",
-        start_directory="I:/tmp/houdini_Clipboard/",
+        start_directory="I:/tmp/houdini_Clipboard/"+project_path,
         pattern="*.cpio",  # Filter only CPIO files
         chooser_mode=hou.fileChooserMode.Read
     )
 
     if filepath:
         location.loadItemsFromFile(filepath)
+        active_pane.homeToSelection()
         hou.ui.displayMessage(f"Items loaded from {filepath}")
     else:
         hou.ui.displayMessage("No file selected")
@@ -24,11 +26,11 @@ def copy():
     """Copy an item to I:/tmp/houdini_Clipboard"""
     # Get the selected items in Houdini
     tocopy = hou.selectedItems()
-
+    project_path = hou.hipFile.path().split('/')[1]+'/'
     # Check if there is anything selected
     if tocopy:
         # Ensure directory exists
-        clipboard_dir = "I:/tmp/houdini_Clipboard"
+        clipboard_dir = "I:/tmp/houdini_Clipboard/"+ project_path
         if not os.path.exists(clipboard_dir):
             os.makedirs(clipboard_dir)
 

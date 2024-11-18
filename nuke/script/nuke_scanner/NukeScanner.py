@@ -83,8 +83,8 @@ class ConfirmationNukeScanner(QDialog):
 
 
 class NukeScanner:
-    SHOTS_DIR = 'shots'
-    COMP_DIRS = ['comp', 'compo']
+    SHOTS_DIR = 'Shots'
+    COMP_DIRS = os.path.join("Scenefiles", "Compo", "Compo")
     def __init__(self):
         """
         Constructor
@@ -110,16 +110,24 @@ class NukeScanner:
             return
 
         path_components = self.__compo_filepath.split("/")
+        
+        # Localise if possible Scenefiles, Compo, Compo
+        compo_dir_expected = None
+        if len(path_components) > 8:
+            compo_dir_expected = os.path.join(path_components[6], path_components[7], path_components[8])
+        else:
+            self.__shot_dir = None
+            return
 
-        if len(path_components) > 4 and \
-           path_components[2] == self.SHOTS_DIR and \
-           path_components[4] in self.COMP_DIRS:
+        if path_components[3] == self.SHOTS_DIR and \
+           compo_dir_expected == self.COMP_DIRS:
 
             # Extract the desired path up to the "shot" directory.
-            desired_path_components = path_components[:4]
+            desired_path_components = path_components[:6]
             self.__shot_dir = "/".join(desired_path_components)
         else:
             self.__shot_dir = None
+            return
 
     def __retrieve_files(self):
         """
@@ -165,7 +173,7 @@ class NukeScanner:
         :return:
         """
         if self.__shot_dir is None: return
-        render_out_folder = self.__shot_dir + "/render_out"
+        render_out_folder = self.__shot_dir + "/Renders" + "/3dRender"
         is_used, folders_to_delete = self.__check_folder_recursive(render_out_folder, False)
         dict_rename_folders = {}
         for folder_path in folders_to_delete:
@@ -181,5 +189,3 @@ class NukeScanner:
                     print("RENAMING %s -> %s"%(folder_path, new_path))
                     os.rename(folder_path, new_path)
                     print(folder_path + "\n\t--> " + new_path)
-a=NukeScanner()
-a.run()

@@ -408,7 +408,7 @@ global proc shelf_Illogic2025 () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "import sys\nmyPath = r\"R:\\softs\\animBot\\2_5_1\"\nif myPath not in sys.path: sys.path.insert(0, myPath)\nimport animBot\nanimBot.toggle()" 
+        -command "import sys\nmyPath = r\"R:\\pipeline\\networkInstall\\animBot\\animBot_2_5_1_Ongoing\"\nif myPath not in sys.path: sys.path.insert(0, myPath)\nimport animBot\nanimBot.toggle()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -443,6 +443,41 @@ global proc shelf_Illogic2025 () {
         -marginWidth 0
         -marginHeight 1
         -command "import maya.cmds as cmds\n\ntry:\n    cmds.loadPlugin('tweener.py')\nexcept:\n    pass\n\nif cmds.pluginInfo('tweener.py', q=True, registered=True):\n    if cmds.pluginInfo('tweener.py', q=True, loaded=False):\n        cmds.loadPlugin('tweener.py')\n    cmds.tweener()\nelse:\n    cmds.warning('tweener.py is not registered')" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import gf_animUI.setup as animUI\nfrom gf_animtools.tools.anim_ui import ExtendedAnimWindow\n\nanimLauncherUI = animUI.ui.AnimLauncherDialog(ExtendedAnimWindow)\nanimLauncherUI.show()" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import gf_animUI.setup as animUI\nfrom gf_animtools.tools.anim_ui..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "PICKER" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "rigidBind.png" 
+        -image1 "rigidBind.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import gf_animUI.setup as animUI\nfrom gf_animtools.tools.anim_ui import ExtendedAnimWindow\n\nanimLauncherUI = animUI.ui.AnimLauncherDialog(ExtendedAnimWindow)\nanimLauncherUI.show()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

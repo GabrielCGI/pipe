@@ -24,6 +24,7 @@ if nuke.NUKE_VERSION_MAJOR==12:
     import auto_compV2.AutoComp as auto_comp_v2
     from nuke_scanner.NukeScanner import NukeScanner
     from nuke_scanner import select_unconnected_read
+    from nuke_scanner import nuke_delete
     from crypto import crypto_extract
 
     import cryptomatte_utilities
@@ -43,6 +44,7 @@ if nuke.NUKE_VERSION_MAJOR==12:
 
     bloomMenu = nuke.menu("Nodes").addMenu("bloom","bloom.png")
     bloomMenu.addCommand("Delete unused render", "NukeScanner().run()")
+    bloomMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
     bloomMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
     bloomMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
     bloomMenu.addCommand("Localization policy on", "set_localization_policy_on()")
@@ -102,6 +104,10 @@ elif nuke.NUKE_VERSION_MAJOR>=15:
     # ### ----------------------------------     Nuke 15+      --------------------------------------
     # ### -------------------------------------------------------------------------------------------
     from crypto import crypto_extract
+    import auto_compV2.AutoComp as auto_comp_v2
+    from nuke_scanner.NukeScanner import NukeScanner
+    from nuke_scanner import select_unconnected_read
+    from nuke_scanner import nuke_delete
     from nukescripts import panels
     # >>>PrismStart
     if ((not nuke.env["studio"]) or nuke.env["indie"]) and nuke.env.get("gui"):
@@ -132,9 +138,11 @@ elif nuke.NUKE_VERSION_MAJOR>=15:
     toolbar.addMenu("VideoCopilot", icon="VideoCopilot.png")
     toolbar.addCommand( "VideoCopilot/OpticalFlares", "nuke.createNode('OpticalFlares')", icon="OpticalFlares.png")
 
-    import auto_compV2.AutoComp as auto_comp_v2
-    
     panels.registerWidgetAsPanel("auto_comp_v2.AutoComp", 'AutoComp V2', 'illogic_studios.autocompV2')
-    bloomMenu = nuke.menu("Nodes").addMenu("bloom","bloom.png")
+    bloomMenu = nuke.menu("Nodes").addMenu("bloom", icon="bloom.png")
+    bloomMenu.addCommand("Delete unused render", "NukeScanner().run()")
+    bloomMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
+    bloomMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
     bloomMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
+    
     print("End loading Nuke Menu as version 15+ ...")

@@ -34,17 +34,23 @@ def get_latest_version(asset_path):
     
     ## Create a generic name for the asset by replacing
     # the version number and the extension 
-    directory_pattern = re.sub(r'v\d{4}', 'v*', directory_path)
-    file_pattern = re.sub(r'v\d{4}', 'v*', file_name)
+    directory_pattern = re.sub(r'v\d{3,4}', 'v*', directory_path)
+    file_pattern = re.sub(r'v\d{3,4}', 'v*', file_name)
     file_pattern = re.sub(r'\.(usdc|usd|usda)$', '.usd*', file_pattern)
     search_pattern = os.path.join(directory_pattern, file_pattern)
 
     # Search every differents versions of an asset
     matching_files = glob(search_pattern, recursive=True)
     
-    # Sort and return the last version 
-    matching_files.sort(key=lambda x: int(re.search(r'v(\d{4})', x).group(1)),
-        reverse=True)
+    matching_files = [f for f in matching_files if re.search(r'v(\d{3,4})', f)]
+    matching_files.sort(
+        key=lambda x: int(re.search(r'v(\d{3,4})', x).group(1)),
+        reverse=True
+    )
+    if matching_files:
+        pinfo("Matching files %s"%(matching_files[0]))
+    else:
+        pinfo("NO MATCHING FILE FOUND FOR %s"%asset_path)
     return matching_files[0] if matching_files else None
 
 def checkUpdate():
@@ -80,6 +86,9 @@ def checkUpdate():
                 
                 # Check if it is the latest version of that asset
                 latest_asset_path = get_latest_version(asset_path)
+                if not latest_asset_path:
+                    pinfo("Could not find latest asset path for %s"%(asset_path))
+                    continue
                 latest_asset_path = latest_asset_path.replace("\\",'/')
                 if asset_path != latest_asset_path:
                     pdebug(f"Found at {reffile_path_parm_name}")

@@ -7,6 +7,7 @@ import ressource
 import houdinilog as hlog
 import voptoolutils
 
+
 def log_shaders(shaders):
     space = " "*3
     for sh in shaders:
@@ -213,8 +214,8 @@ def run():
 
     ressource.load()
 
-    # start_directory = os.getcwd()
-    start_directory = "I:/ash_2407/03_Production/Assets/Sets/"
+    # Start directoy will be current working directory
+    start_directory = os.getcwd()
 
     # Check if the material library node is selected
     material_library = hou.selectedNodes()

@@ -2,7 +2,7 @@
 ## ValDo Edit 240903
 import nuke
 import os
-
+os.environ["OFX_PLUGIN_PATH"] = "D:/OFX_local"
 if nuke.NUKE_VERSION_MAJOR==12:
     print("Nuke Init as version 12...")
     ### -------------------------------------------------------------------------------------------
@@ -78,6 +78,10 @@ if nuke.NUKE_VERSION_MAJOR>=15:
                     files = os.getenv("PRISM_NUKE_TERMINAL_FILES").split(os.pathsep)
                     for file in files:
                         sys.path.append(os.path.dirname(file))
+                        try:
+                            print("Debug ValDo: %s")%(os.path.basename(file)[0])
+                        except:
+                            print("Fail to print debug info os.path.basename(file)[0]")
                         mod = importlib.import_module(os.path.splitext(os.path.basename(file))[0])
                         mod.Prism_NoQt()
                 else:
@@ -89,9 +93,12 @@ if nuke.NUKE_VERSION_MAJOR>=15:
     # <<<PrismEnd
 
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos')
+    nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/ToolSets')
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts')
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/icons')
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins')
+    nuke.pluginAddPath('R:/pipeline/pipe/nuke/script')
+    nuke.pluginAddPath("R:/pipeline/pipe/nuke/script/magicdefocus2")
 
     # Setting env var for optical flare : 
     #os.environ["OPTICAL_FLARES_PATH"] = "R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/OpticalFlares_Nuke_15.0_Node-Locked_1.0.94/plugin/Windows"
