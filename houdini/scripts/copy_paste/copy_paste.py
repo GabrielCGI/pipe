@@ -7,7 +7,9 @@ def paste():
     active_pane = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
     location = active_pane.pwd()
     project_path = hou.hipFile.path().split('/')[1]+'/'
-
+    
+    if not os.path.exists('I:/tmp/houdini_Clipboard/'+project_path):
+        os.makedirs('I:/tmp/houdini_Clipboard/'+project_path)
     filepath = hou.ui.selectFile(
         title="Load Clipboard File",
         start_directory="I:/tmp/houdini_Clipboard/"+project_path,
@@ -66,6 +68,8 @@ def copy():
             
             # Save the selected items to the file
             p = tocopy[0].parent()
+            print(p.type())
+            print(str(tocopy))
             p.saveItemsToFile(tocopy, file_path)
             hou.ui.displayMessage(f"Clipboard saved as: {file_path}")
         else:
