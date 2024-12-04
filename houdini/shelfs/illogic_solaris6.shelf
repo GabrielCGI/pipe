@@ -21,6 +21,9 @@
     <memberTool name="paste"/>
     <memberTool name="update_tex"/>
     <memberTool name="auto_connect"/>
+    <memberTool name="Lib_Importer"/>
+    <memberTool name="automanifest"/>
+
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -110,4 +113,27 @@ import auto
 reload(auto)
 auto.run()]]></script>
   </tool>
+ 
+  <tool name="Lib_Importer" label="Lib_Importer" icon="R:/pipeline/pipe/houdini/shelfs/icons/lib_importer.png">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\Lib_Importer")
+
+import Lib_Importer
+reload(Lib_Importer)
+Lib_Importer.libImport()]]></script>
+  </tool>
+
+  <tool name="automanifest" label="Auto Manifest" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\automanifest")
+
+import auto_manifest
+reload(auto_manifest)
+auto_manifest.autoManifest()]]></script>
+  </tool>
+ 
 </shelfDocument>

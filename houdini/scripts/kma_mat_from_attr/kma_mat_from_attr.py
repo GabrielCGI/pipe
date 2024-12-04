@@ -127,7 +127,11 @@ def build_collection(node_path, attr, componentgeometry, componentmaterial):
     geo = node.geometry()
 
     # Get names and material paths from geometry primitive attributes
-    names = geo.primStringAttribValues("path")
+    try:
+        names = geo.primStringAttribValues("path")
+        
+    except:
+        names = geo.primStringAttribValues("name")
     materials = geo.primStringAttribValues(attr)
 
     # Dictionary to hold material keys and sets of names as values
