@@ -25,13 +25,14 @@ def mirrorCtr():
                 new[k] = obj.attr(k).get() * mirValues[k]
         newValues[obj] = new
 
-    for obj, values in newValues.items():
-        for at, v in values.items():
-            at = obj.attr(at)
-            try:
-                at.set(v)
-            except:
-                sys.stderr.write('{} : Couldn\'t set value {} on {}'.format(obj, v, at))
+    with pm.UndoChunk():
+        for obj, values in newValues.items():
+            for at, v in values.items():
+                at = obj.attr(at)
+                try:
+                    at.set(v)
+                except:
+                    sys.stderr.write('{} : Couldn\'t set value {} on {}'.format(obj, v, at))
 
 
 def setDynamicValue(value):

@@ -23,7 +23,9 @@
     <memberTool name="auto_connect"/>
     <memberTool name="Lib_Importer"/>
     <memberTool name="automanifest"/>
-
+    <memberTool name="subnet"/>
+    <memberTool name="subnet0"/>
+    <memberTool name="materiallibrary"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -113,7 +115,7 @@ import auto
 reload(auto)
 auto.run()]]></script>
   </tool>
- 
+
   <tool name="Lib_Importer" label="Lib_Importer" icon="R:/pipeline/pipe/houdini/shelfs/icons/lib_importer.png">
     <script scriptType="python"><![CDATA[import sys
 from imp import reload
@@ -135,5 +137,4 @@ import auto_manifest
 reload(auto_manifest)
 auto_manifest.autoManifest()]]></script>
   </tool>
- 
 </shelfDocument>
