@@ -13,7 +13,11 @@ def load():
     global SIGNATURE
     global LOADED
     
-    ressource_path = os.path.join(__file__, "ressource", "ressources.json")
+    ressource_path = os.path.join(
+        os.path.dirname(__file__),
+        "ressource",
+        "ressources.json")
+    
     with open(ressource_path, 'r') as file:
         data = json.load(file)
         

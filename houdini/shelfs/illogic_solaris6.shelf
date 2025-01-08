@@ -22,10 +22,12 @@
     <memberTool name="update_tex"/>
     <memberTool name="auto_connect"/>
     <memberTool name="Lib_Importer"/>
+    <memberTool name="restart_houdini"/>
     <memberTool name="automanifest"/>
     <memberTool name="subnet"/>
     <memberTool name="subnet0"/>
     <memberTool name="materiallibrary"/>
+    <memberTool name="materiallibrary0"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -112,6 +114,8 @@ from imp import reload
 sys.path.append(r"R:\pipeline\pipe\houdini\scripts\autoconnect")
 
 import auto
+import ressource
+reload(ressource)
 reload(auto)
 auto.run()]]></script>
   </tool>

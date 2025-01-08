@@ -1,0 +1,41 @@
+import hou
+
+def create_rop_from_selected_copnet():
+    # 1. Retrieve the selected nodes in the scene
+    selected_nodes = hou.selectedNodes()
+    if not selected_nodes:
+        hou.ui.displayMessage("No node selected.")
+        return
+
+    # We only deal with the first selected node for now
+    src_node = selected_nodes[0]
+
+    # 2. Access the desired COP network where we'll create the rop_image node
+    copnet_path = "/stage/copnet1"  # <-- Adjust this path to match your setup
+    copnet = hou.node(copnet_path)
+    if not copnet:
+        hou.ui.displayMessage(f"Cannot find node at {copnet_path}")
+        return
+
+    # 3. Create a new ROP Image node (type: rop_image)
+    rop_comp = copnet.createNode("rop_image", node_name=f"AutoROP_{src_node.name()}")
+
+    # 4. Set the COP path parameter on the newly-created ROP node.
+    #    This is the path to the node we want to render from.
+    rop_comp.parm("coppath").set(src_node.path())
+
+    # 5. Set the output file parameter. 
+    #    e.g., `$HIP/render/[SELECTED_NODE_NAME].exr`
+    output_path = f"$HIP/render/{src_node.name()}.exr"
+    rop_comp.parm("copoutput").set(output_path)
+
+    # Tidy node layout
+    rop_comp.moveToGoodPosition()
+
+    # (Optional) Print feedback
+    print(f"Created ROP node '{rop_comp.name()}' in {copnet_path}")
+    print(f"  COP Path: {rop_comp.parm('coppath').eval()}")
+    print(f"  Output  : {rop_comp.parm('copoutput').eval()}")
+
+# Run the function
+create_rop_from_selected_copnet()

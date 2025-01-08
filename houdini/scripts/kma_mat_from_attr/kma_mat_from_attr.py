@@ -115,25 +115,40 @@ def build_collection(node_path, attr, componentgeometry, componentmaterial):
     componentmaterial (hou.Node): The Houdini node where the final collection node connects to continue the network flow.
 
     """
+    pdebug("Node path: %s"%(node_path))
     node = hou.node(node_path)
+    pdebug(node)
 
-    pane = hou.ui.findPaneTab('panetab8')
-    stage_context = pane.pwd()
-    pdebug(f"Looking for a lop network, found: {stage_context}")
-    if not stage_context.type().name() == 'lopnet':
-        stage_context = hou.node("/stage")
-        pdebug(f"Not lop network found in panetab8, get default stage: {stage_context}")
+    stage_context = hou.node("/stage")
+
 
     geo = node.geometry()
-
+    pdebug(geo)
+    names = None
     # Get names and material paths from geometry primitive attributes
     try:
         names = geo.primStringAttribValues("path")
-        
-    except:
-        names = geo.primStringAttribValues("name")
-    materials = geo.primStringAttribValues(attr)
+    except: 
+        pdebug("Fail to get geo.primStringAttribValues('path') ")
 
+    if names == None:
+
+        try:   
+            names = geo.primStringAttribValues("name")
+        except: 
+            pdebug("Fail to get geo.primStringAttribValues('name') ")
+    if names == None:
+
+        try:   
+            names = geo.primStringAttribValues("usdprimpath")
+            pdebug("USD PRIM PATH FOUND ")
+        except: 
+            pdebug("Fail to get geo.primStringAttribValues('usdprimpath') ")
+            pdebug("FAIL ! IT's MISSING PRIM ATTRIBUT ON THE OBJECT: PATH, NAME, OR USDPIMPATH")
+
+            return 
+
+    materials = geo.primStringAttribValues(attr)
     # Dictionary to hold material keys and sets of names as values
     material_name_dict = {}
 
@@ -409,7 +424,8 @@ def execute(collectionMode=True):
     else:
         return
 
-
+    mode = hou.updateModeSetting()
+    hou.setUpdateMode(hou.updateMode.Manual) 
     mtl_list=create_karma_mat(default_output_path, attr, materiallibrary)
     how_many_mtl = len(mtl_list)
     pdebug(f"Total mtl: {how_many_mtl}")
@@ -419,14 +435,17 @@ def execute(collectionMode=True):
             pass
         else:
             return
+          
     if (collectionMode==True):
+
         build_collection(default_output_path, attr, componentgeometry, componentmaterial )
         connect_prim_and_mat(componentmaterial, mtl_list, collectionMode=True)
 
     else:
         componentgeometry.parm("partitionattribs").set(attr)
         connect_prim_and_mat(componentmaterial, mtl_list, collectionMode=False)
-
+    print("Set Update Mode back to: %s"%(mode.name()))
+    hou.setUpdateMode(mode)
 
 if __name__ != "__main__":
     pdebug("\n\n-- New Exec --\n\n")

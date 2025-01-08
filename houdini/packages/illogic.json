@@ -7,6 +7,7 @@
         {"HOUDINI_EXTERNAL_HELP_BROWSER": 0},
         {"HOUDINI_LMINFO_VERBOSE": 1},
         {"HOUDINI_SCRIPT_PATH":"R:/pipeline/pipe/houdini/scripts;"},
+        {"PYTHONPATH":"R:/pipeline/pipe/houdini/scripts;"}
 
     ]
 }

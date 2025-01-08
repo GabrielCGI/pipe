@@ -25,6 +25,9 @@ if nuke.NUKE_VERSION_MAJOR==12:
     from nuke_scanner.NukeScanner import NukeScanner
     from nuke_scanner import select_unconnected_read
     from nuke_scanner import nuke_delete
+    import nuke_scanner_old.NukeScanner as NukeScannerOld
+    import nuke_scanner_old.nuke_delete as nuke_delete_old
+
     from crypto import crypto_extract
 
     import cryptomatte_utilities
@@ -44,7 +47,9 @@ if nuke.NUKE_VERSION_MAJOR==12:
 
     bloomMenu = nuke.menu("Nodes").addMenu("bloom","bloom.png")
     bloomMenu.addCommand("Delete unused render", "NukeScanner().run()")
+    bloomMenu.addCommand("Delete unused render (OLD)", "NukeScannerOld.NukeScanner().run()")
     bloomMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
+    bloomMenu.addCommand("Truly Delete unused render (OLD)", "nuke_delete_old.run()")
     bloomMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
     bloomMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
     bloomMenu.addCommand("Localization policy on", "set_localization_policy_on()")
