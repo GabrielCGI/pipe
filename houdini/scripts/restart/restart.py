@@ -20,6 +20,16 @@ def restart_houdini():
     # Get the Houdini executable and arguments
     houdini_executable = sys.executable
     
+
+    # Ask the user if he really want to restart
+    user_choice = hou.ui.displayMessage(
+                f"Do you really want to restart houdini ?\n{current_file}", buttons=('Confirm', 'Cancel'), 
+                default_choice=0, close_choice=1)    
+            
+    if user_choice != 0:
+        hou.ui.displayMessage("Restart cancelled by user")
+        return
+
     # Relaunch Houdini with the current file
     try:
         subprocess.Popen([houdini_executable] + [current_file])

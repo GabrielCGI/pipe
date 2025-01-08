@@ -7,9 +7,12 @@
 
   <shelfSet name="solaris_1" label="Solaris Geometry">
     <memberToolshelf name="illogic_solaris6"/>
+    <memberToolshelf name="DEV"/>
+    <memberToolshelf name="prism"/>
+    <memberToolshelf name="polygon"/>
   </shelfSet>
 
-  <toolshelf name="illogic_solaris6" label="illogic_solaris6">
+  <toolshelf name="illogic_solaris6" label="illogic_solaris">
     <memberTool name="kmx"/>
     <memberTool name="kmx_geosubset"/>
     <memberTool name="material_finder"/>
@@ -17,6 +20,14 @@
     <memberTool name="copy"/>
     <memberTool name="paste"/>
     <memberTool name="update_tex"/>
+    <memberTool name="auto_connect"/>
+    <memberTool name="Lib_Importer"/>
+    <memberTool name="restart_houdini"/>
+    <memberTool name="automanifest"/>
+    <memberTool name="subnet"/>
+    <memberTool name="subnet0"/>
+    <memberTool name="materiallibrary"/>
+    <memberTool name="materiallibrary0"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -94,5 +105,40 @@ sys.path.append(r"R:\pipeline\pipe\houdini\scripts\stage_manager_update")
 import stage_manager_update
 reload(stage_manager_update)
 stage_manager_update.checkUpdate()]]></script>
+  </tool>
+
+  <tool name="auto_connect" label="Auto Connect" icon="R:/pipeline/pipe/houdini/shelfs/icons/autoconnect.png">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\autoconnect")
+
+import auto
+import ressource
+reload(ressource)
+reload(auto)
+auto.run()]]></script>
+  </tool>
+
+  <tool name="Lib_Importer" label="Lib_Importer" icon="R:/pipeline/pipe/houdini/shelfs/icons/lib_importer.png">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\Lib_Importer")
+
+import Lib_Importer
+reload(Lib_Importer)
+Lib_Importer.libImport()]]></script>
+  </tool>
+
+  <tool name="automanifest" label="Auto Manifest" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\automanifest")
+
+import auto_manifest
+reload(auto_manifest)
+auto_manifest.autoManifest()]]></script>
   </tool>
 </shelfDocument>
