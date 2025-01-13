@@ -4,6 +4,9 @@ import subprocess
 import sys
 
 def restart_houdini():
+    """
+    Routine to save the current houdini session then restart it.
+    """
     # Save the current file
     current_file = hou.hipFile.name()
     

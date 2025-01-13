@@ -62,6 +62,7 @@ from .tool_instances.GlassShadow import *
 from .tool_instances.ShaderDuplicate import *
 from .tool_instances.DisplayColor import *
 from .tool_instances.Exposure import *
+from .tool_instances.USDcopyPaste import USDCopyPaste
 
 # ######################################################################################################################
 
@@ -100,6 +101,7 @@ class BobApp(QDialog):
                 Orig(),
                 Gate(),
                 IsolateTool(),
+                USDCopyPaste(),
 
             ]),
             BobCategory("Clean", self.__prefs, [

@@ -1,11 +1,14 @@
-import maps
-import hou
 import os
 import glob
 import re
-import ressource
-import houdinilog as hlog
+
+import hou
 import voptoolutils
+
+import autoconnect.maps as maps
+import autoconnect.ressource as ressource
+import autoconnect.houdinilog as hlog
+
 
 
 def log_shaders(shaders):

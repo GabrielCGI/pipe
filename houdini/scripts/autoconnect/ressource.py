@@ -1,6 +1,5 @@
 import json
 import os
-from collections import defaultdict
 
 EXTENSION = None
 MAPS_TAG = None

@@ -1,8 +1,9 @@
 //Maya ASCII 2025ff03 scene
 //Name: camRig.ma
-//Last modified: Mon, Jan 06, 2025 05:02:17 PM
+//Last modified: Fri, Jan 10, 2025 12:31:08 PM
 //Codeset: 1252
 requires maya "2025ff03";
+requires "stereoCamera" "10.0";
 requires "stereoCamera" "10.0";
 currentUnit -l centimeter -a degree -t pal;
 fileInfo "application" "maya";
@@ -10,12 +11,12 @@ fileInfo "product" "Maya 2025";
 fileInfo "version" "2025";
 fileInfo "cutIdentifier" "202407121012-8ed02f4c99";
 fileInfo "osv" "Windows 10 Pro v2009 (Build: 19045)";
-fileInfo "UUID" "BD11A027-4CA9-A5DD-0315-8EA5992970AC";
+fileInfo "UUID" "56865EA1-43FF-EC2B-90F1-9DAA97AE0D76";
 createNode transform -s -n "persp";
 	rename -uid "441DD6C9-4855-F603-2BD2-B6BD7F6BB9FA";
 	setAttr ".v" no;
-	setAttr ".t" -type "double3" 86.451868067618662 88.340967148333661 -42.550588794862364 ;
-	setAttr ".r" -type "double3" 318.86164719268498 -2764.2000000000962 0 ;
+	setAttr ".t" -type "double3" 23.502212319289438 49.176253089097571 -32.321514457623167 ;
+	setAttr ".r" -type "double3" 318.26164719161125 -2716.5999999981723 0 ;
 	setAttr ".rp" -type "double3" 2.7533531010703882e-14 -2.1552204465535851e-14 0 ;
 	setAttr ".rpt" -type "double3" -3.7580368978924766e-14 1.9153958786610848e-15 -2.713023484241178e-14 ;
 createNode camera -s -n "perspShape" -p "persp";
@@ -23,11 +24,12 @@ createNode camera -s -n "perspShape" -p "persp";
 	setAttr -k off ".v" no;
 	setAttr ".rnd" no;
 	setAttr ".fl" 34.999999999999979;
-	setAttr ".coi" 130.99063419248006;
+	setAttr ".coi" 65.704287586556774;
 	setAttr ".ow" 357.2483710893066;
 	setAttr ".imn" -type "string" "persp";
 	setAttr ".den" -type "string" "persp_depth";
 	setAttr ".man" -type "string" "persp_mask";
+	setAttr ".tp" -type "double3" 0 0 8.7061400240273414 ;
 	setAttr ".hc" -type "string" "viewSet -p %camera";
 createNode transform -n "camRig";
 	rename -uid "5E4C28E3-48C8-06E0-075C-479A305F5D29";
@@ -107,8 +109,6 @@ createNode transform -n "ctrl_general" -p "controls";
 		0 -max 1 -at "bool";
 	addAttr -ci true -sn "aimParent" -ln "aimParent" -nn "Aim Control Parent" -min 0 
 		-max 3 -en "World:General:Root" -at "enum";
-	addAttr -ci true -sn "horizontalParent" -ln "horizontalParent" -nn "Horizontal Cam Parent" 
-		-min 0 -max 1 -en "Root:Shake" -at "enum";
 	addAttr -ci true -sn "divider_imagePlanes" -ln "divider_imagePlanes" -nn " " -min 
 		0 -max 0 -en "------" -at "enum";
 	addAttr -ci true -sn "refVisibility" -ln "refVisibility" -nn "References" -min 0 
@@ -136,9 +136,8 @@ createNode transform -n "ctrl_general" -p "controls";
 	setAttr ".msze" yes;
 	setAttr -cb on ".divider_aimTarget";
 	setAttr -k on ".Aim";
-	setAttr -k on ".horizontalCam";
+	setAttr -k on ".horizontalCam" yes;
 	setAttr -k on ".aimParent";
-	setAttr -k on ".horizontalParent" 1;
 	setAttr -cb on ".divider_imagePlanes";
 	setAttr -k on ".refVisibility";
 	setAttr -k on ".refParent" 2;
@@ -158,11 +157,11 @@ createNode nurbsCurve -n "ctrl_generalShape" -p "ctrl_general";
 		1 4 0 no 3
 		5 0 1 2 3 4
 		5
-		0 68.570991463064004 -6.6613381477509392e-15
-		68.57099146306399 0 0
-		0 -68.570991463064004 6.6613381477509392e-15
-		-68.57099146306399 0 0
-		0 68.570991463064004 -6.6613381477509392e-15
+		0 12.021105646142942 -1.1677919176935021e-15
+		12.021105646142939 0 0
+		0 -12.021105646142942 1.1677919176935021e-15
+		-12.021105646142939 0 0
+		0 12.021105646142942 -1.1677919176935021e-15
 		;
 createNode transform -n "ctrl_root_OFFSET" -p "ctrl_general";
 	rename -uid "0030A882-4377-6DB4-8604-E5A1AE0E960E";
@@ -195,35 +194,35 @@ createNode nurbsCurve -n "ctrl_rootShape" -p "ctrl_root";
 		29 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27
 		 28
 		29
-		-1 2 -3.3306690738754696e-16
-		-0.99999999999999978 2.5982347560814332 0
-		-1.4000000000000004 2.5982347560814332 0
-		0 4 -6.6613381477509392e-16
-		1.3999999999999997 2.5982347560814332 0
-		1 2.5982347560814332 0
-		1 2 -3.3306690738754696e-16
-		2 1 -1.6653345369377348e-16
-		2.5982347560814332 1 5.5511151231257827e-17
-		2.5982347560814332 1.3999999999999997 1.1102230246251565e-16
-		4 0 0
-		2.5982347560814332 -1.3999999999999995 -5.5511151231257827e-17
-		2.5982347560814332 -1 1.6653345369377348e-16
-		2 -1 1.6653345369377348e-16
-		1 -2 3.3306690738754696e-16
-		1 -2.5982347560814332 0
-		1.3999999999999999 -2.5982347560814332 0
-		0 -4 6.6613381477509392e-16
-		-1.3999999999999999 -2.5982347560814332 0
-		-1 -2.5982347560814332 0
-		-1 -2 3.3306690738754696e-16
-		-2 -1 1.6653345369377348e-16
-		-2.5982347560814332 -1 1.6653345369377348e-16
-		-2.5982347560814332 -1.3999999999999995 -5.5511151231257827e-17
-		-4 0 0
-		-2.5982347560814332 1.3999999999999997 1.1102230246251565e-16
-		-2.5982347560814332 1 5.5511151231257827e-17
-		-2 1 -1.6653345369377348e-16
-		-1 2 -3.3306690738754696e-16
+		-0.17530890817902431 0.35061781635804862 -5.8389595884675097e-17
+		-0.17530890817902411 0.45549369828142983 0
+		-0.24543247145063388 0.45549369828142983 0
+		0 0.70123563271609723 -1.1677919176935019e-16
+		0.24543247145063388 0.45549369828142983 0
+		0.17530890817902431 0.45549369828142983 0
+		0.17530890817902431 0.35061781635804862 -5.8389595884675097e-17
+		0.35061781635804862 0.17530890817902431 -2.9194797942337549e-17
+		0.45549369828142983 0.17530890817902431 9.7315993141125106e-18
+		0.45549369828142983 0.24543247145063388 1.9463198628225021e-17
+		0.70123563271609723 0 0
+		0.45549369828142983 -0.24543247145063382 -9.7315993141125106e-18
+		0.45549369828142983 -0.17530890817902431 2.9194797942337549e-17
+		0.35061781635804862 -0.17530890817902431 2.9194797942337549e-17
+		0.17530890817902431 -0.35061781635804862 5.8389595884675097e-17
+		0.17530890817902431 -0.45549369828142983 0
+		0.24543247145063388 -0.45549369828142983 0
+		0 -0.70123563271609723 1.1677919176935019e-16
+		-0.24543247145063388 -0.45549369828142983 0
+		-0.17530890817902431 -0.45549369828142983 0
+		-0.17530890817902431 -0.35061781635804862 5.8389595884675097e-17
+		-0.35061781635804862 -0.17530890817902431 2.9194797942337549e-17
+		-0.45549369828142983 -0.17530890817902431 2.9194797942337549e-17
+		-0.45549369828142983 -0.24543247145063382 -9.7315993141125106e-18
+		-0.70123563271609723 0 0
+		-0.45549369828142983 0.24543247145063388 1.9463198628225021e-17
+		-0.45549369828142983 0.17530890817902431 9.7315993141125106e-18
+		-0.35061781635804862 0.17530890817902431 -2.9194797942337549e-17
+		-0.17530890817902431 0.35061781635804862 -5.8389595884675097e-17
 		;
 createNode transform -n "ctrl_shake_OFFSET" -p "ctrl_root";
 	rename -uid "19012519-413E-0CD2-B3AB-F19FA39BBDFE";
@@ -254,18 +253,18 @@ createNode nurbsCurve -n "ctrl_shakeShape" -p "ctrl_shake";
 		9 0 0.21505724700000001 0.89947866030000001 1.1476368939999999 1.7879380090000001
 		 2.205490202 2.780111019 3.201068383 4
 		9
-		-0.52687038988408852 2.0021074815595363 -2.2204460492503131e-16
-		0.52687038988408852 2.0021074815595363 -2.2204460492503131e-16
-		2.0021074815595363 0.52687038988408841 2.7755575615628914e-17
-		2.0021074815595363 -0.52687038988408852 -2.7755575615628914e-17
-		0.52687038988408841 -2.0021074815595363 2.2204460492503131e-16
-		-0.52687038988408841 -2.0021074815595363 2.2204460492503131e-16
-		-2.0021074815595363 -0.52687038988408852 -2.7755575615628914e-17
-		-2.0021074815595363 0.52687038988408852 2.7755575615628914e-17
-		-0.52687038988408852 2.0021074815595363 -2.2204460492503131e-16
+		-0.092365072802436429 0.35098727664925894 -3.8926397256450042e-17
+		0.092365072802436429 0.35098727664925894 -3.8926397256450042e-17
+		0.35098727664925894 0.092365072802436429 4.8657996570562553e-18
+		0.35098727664925894 -0.092365072802436429 -4.8657996570562553e-18
+		0.092365072802436429 -0.35098727664925894 3.8926397256450042e-17
+		-0.092365072802436429 -0.35098727664925894 3.8926397256450042e-17
+		-0.35098727664925894 -0.092365072802436429 -4.8657996570562553e-18
+		-0.35098727664925894 0.092365072802436429 4.8657996570562553e-18
+		-0.092365072802436429 0.35098727664925894 -3.8926397256450042e-17
 		;
 createNode aimConstraint -n "ctrl_shake_MOVE_aimConstraint1" -p "ctrl_shake_MOVE";
-	rename -uid "7CB15B5D-4558-1B5B-6509-D0955984E980";
+	rename -uid "0B6D8D38-4C83-82BC-1512-BBB32428689C";
 	addAttr -dcb 0 -ci true -sn "w0" -ln "ctrl_aimW0" -dv 1 -at "double";
 	setAttr -k on ".nds";
 	setAttr -k off ".v";
@@ -280,7 +279,6 @@ createNode aimConstraint -n "ctrl_shake_MOVE_aimConstraint1" -p "ctrl_shake_MOVE
 	setAttr -k off ".sz";
 	setAttr ".erp" yes;
 	setAttr ".a" -type "double3" 0 0 -1 ;
-	setAttr ".u" -type "double3" 1 0 0 ;
 	setAttr -k on ".w0";
 createNode transform -n "ctrl_cam_HOOK" -p "controls";
 	rename -uid "F629F9B7-41E2-B398-D1CD-F3B23D8B70AF";
@@ -289,7 +287,6 @@ createNode transform -n "ctrl_cam_HOOK" -p "controls";
 	setAttr ".oclr" -type "float3" 1 0.60000002 0.1 ;
 createNode transform -n "ctrl_cam_MOVE" -p "ctrl_cam_HOOK";
 	rename -uid "A0628A68-4F6F-7277-67B3-F19F200CF25A";
-	setAttr ".r" -type "double3" 0 720 0 ;
 	setAttr ".uocol" yes;
 	setAttr ".oclr" -type "float3" 0.69999999 0.60000002 1 ;
 createNode transform -n "ctrl_cam" -p "ctrl_cam_MOVE";
@@ -350,31 +347,31 @@ createNode nurbsCurve -n "ctrl_camShape" -p "ctrl_cam";
 		 5.2210476888020629 5.4821000732421661 5.7431524576822692 6.0042048421223724 6.2652572265624755
 		
 		25
-		4.3801565707484174e-09 -0.44325853462496628 0.31916035136762189
-		-0.31343111755147651 -0.31343112193163292 0.31916035136762189
-		-0.44539777478657128 -0.44539777478657128 6.5468148680025706e-09
-		-0.31343111127196926 -0.31343111565212578 0.31916035136762189
-		-0.44325850943838152 -6.0960787844088692e-17 0.31916035136762166
-		-0.62988753156759869 -3.1627648059793762e-17 6.5468148680025706e-09
-		-0.44325850943838152 -6.0960787844088692e-17 0.31916035136762166
-		-0.31343111755147651 0.31343112193163292 0.31916035136762166
-		-0.44539777478657128 0.44539777478657128 6.5468148680025706e-09
-		-0.31343111127196949 0.31343111565212561 0.31916035136762166
-		4.3801563210395576e-09 0.44325851381853765 0.31916035136762166
-		-3.1627648059793762e-17 0.62988753156759869 6.5468148680025706e-09
-		4.3801563073156742e-09 0.44325853462496639 0.31916035136762166
-		0.3134311263117896 0.31343112193163292 0.31916035136762166
-		0.44539777478657128 0.44539777478657128 6.5468148680025706e-09
-		0.31343112003228213 0.313431115652126 0.31916035136762166
-		0.44325851819869427 2.9514657601295662e-16 0.31916035136762178
-		0.62988753156759869 3.1627648059793762e-17 6.5468148680025706e-09
-		0.44325853900512308 3.0596388852054944e-16 0.31916035136762178
-		0.3134311263117896 -0.31343112193163292 0.31916035136762189
-		0.44539777478657128 -0.44539777478657128 6.5468149790248731e-09
-		0.31343112003228263 -0.31343111565212561 0.31916035136762189
-		4.3801565881200805e-09 -0.44325851381853765 0.31916035136762189
-		3.1627648059793762e-17 -0.62988753156759869 6.5468148680025706e-09
-		4.3801569644410827e-09 -0.44325853462496645 0.31916035136762189
+		7.6788046607108406e-10 -0.077707169746137117 0.055951652732291558
+		-0.054947267007280726 -0.054947267775161228 0.055951652732291558
+		-0.078082197603200856 -0.078082197603200856 1.1477149665597347e-09
+		-0.054947265906427206 -0.054947266674307695 0.055951652732291558
+		-0.077707165330704375 -1.0686969158680334e-17 0.055951652732291544
+		-0.11042489543469657 -5.5446084496328846e-18 1.1477149665597347e-09
+		-0.077707165330704375 -1.0686969158680334e-17 0.055951652732291544
+		-0.054947267007280726 0.054947267775161228 0.055951652732291544
+		-0.078082197603200856 0.078082197603200856 1.1477149665597347e-09
+		-0.054947265906427213 0.054947266674307653 0.055951652732291544
+		7.6788042229489841e-10 0.077707166098584704 0.055951652732291544
+		-5.5446084496328846e-18 0.11042489543469657 1.1477149665597347e-09
+		7.6788041988897845e-10 0.077707169746137117 0.055951652732291544
+		0.054947268543041737 0.054947267775161228 0.055951652732291544
+		0.078082197603200856 0.078082197603200856 1.1477149665597347e-09
+		0.054947267442188169 0.05494726667430775 0.055951652732291544
+		0.07770716686646513 5.1741823993608847e-17 0.055951652732291544
+		0.11042489543469657 5.5446084496328846e-18 1.1477149665597347e-09
+		0.077707170514017723 5.3638195238746238e-17 0.055951652732291544
+		0.054947268543041737 -0.054947267775161228 0.055951652732291558
+		0.078082197603200856 -0.078082197603200856 1.1477149860229328e-09
+		0.054947267442188273 -0.054947266674307653 0.055951652732291558
+		7.6788046911649176e-10 -0.077707166098584704 0.055951652732291558
+		5.5446084496328846e-18 -0.11042489543469657 1.1477149665597347e-09
+		7.678805350889169e-10 -0.077707169746137145 0.055951652732291558
 		;
 createNode nurbsCurve -n "ctrl_camShape1" -p "ctrl_cam";
 	rename -uid "8F29BED2-4851-26D7-8D98-EC8803927893";
@@ -388,15 +385,15 @@ createNode nurbsCurve -n "ctrl_camShape1" -p "ctrl_cam";
 		9 0 0.76536686473017967 1.5307337294603593 2.296100594190539 3.0614674589207187
 		 3.8268343236508984 4.592201188381078 5.3575680531112582 6.1229349178414374
 		9
-		3.8569489278295129e-17 -0.6298875611343403 2.0525733335219343e-08
-		-0.44539776586314805 -0.44539776586314805 2.0525733335219343e-08
-		-0.62988756113434041 -3.8569489278295135e-17 2.052573322419704e-08
-		-0.44539776586314811 0.44539776586314811 2.0525733113174738e-08
-		-3.8569489278295135e-17 0.62988756113434041 2.0525733113174738e-08
-		0.44539776586314811 0.44539776586314811 2.0525733113174738e-08
-		0.62988756113434041 3.8569489278295135e-17 2.052573322419704e-08
-		0.44539776586314811 -0.44539776586314811 2.0525733335219343e-08
-		3.8569489278295135e-17 -0.62988756113434041 2.0525733335219343e-08
+		6.7615750544004992e-18 -0.11042490061800968 3.5983439005711089e-09
+		-0.078082196038845281 -0.078082196038845281 3.5983439005711089e-09
+		-0.11042490061800968 -6.7615750544004992e-18 3.5983438811079056e-09
+		-0.078082196038845281 0.078082196038845281 3.5983438616447089e-09
+		-6.7615750544004992e-18 0.11042490061800968 3.5983438616447089e-09
+		0.078082196038845281 0.078082196038845281 3.5983438616447089e-09
+		0.11042490061800968 6.7615750544004992e-18 3.5983438811079056e-09
+		0.078082196038845281 -0.078082196038845281 3.5983439005711089e-09
+		6.7615750544004992e-18 -0.11042490061800968 3.5983439005711089e-09
 		;
 createNode nurbsCurve -n "curveShape1" -p "ctrl_cam";
 	rename -uid "1A7B83F8-4077-59DD-B338-38B04C15F042";
@@ -409,19 +406,19 @@ createNode nurbsCurve -n "curveShape1" -p "ctrl_cam";
 		1 12 0 no 3
 		13 0 1 2 3 4 5 6 7 8 9 10 11 12
 		13
-		0.77175699805513198 -0.77175697778606112 0.31916035136762133
-		0.77175698272607696 -0.7717570029951486 1.1608171338223954
-		0.77175699805513198 -0.77175697778606112 0.31916035136762133
-		-0.77175699805513198 -0.77175697778606112 0.31916035136762133
-		-0.77175698272607696 -0.7717570029951486 1.1608186698703129
-		-0.77175699805513198 -0.77175697778606112 0.31916035136762133
-		-0.77175699805513198 0.77175697778606112 0.31916035136762222
-		-0.77175698272607696 0.7717570029951486 1.1608182247963719
-		-0.77175699805513198 0.77175697778606112 0.31916035136762222
-		0.77175699805513198 0.77175697778606112 0.31916035136762222
-		0.77175698272607696 0.7717570029951486 1.1608162693340192
-		0.77175699805513198 0.77175697778606112 0.31916035136762222
-		0.77175699805513198 -0.77175697778606112 0.31916035136762133
+		0.13529587670856655 -0.13529587315521796 0.055951652732291517
+		0.13529587402124668 -0.13529587757459555 0.20350158432590842
+		0.13529587670856655 -0.13529587315521796 0.055951652732291517
+		-0.13529587670856655 -0.13529587315521796 0.055951652732291517
+		-0.13529587402124668 -0.13529587757459555 0.20350185360879183
+		-0.13529587670856655 -0.13529587315521796 0.055951652732291517
+		-0.13529587670856655 0.13529587315521796 0.055951652732291579
+		-0.13529587402124668 0.13529587757459555 0.20350177558336494
+		-0.13529587670856655 0.13529587315521796 0.055951652732291579
+		0.13529587670856655 0.13529587315521796 0.055951652732291579
+		0.13529587402124668 0.13529587757459555 0.20350143277339519
+		0.13529587670856655 0.13529587315521796 0.055951652732291579
+		0.13529587670856655 -0.13529587315521796 0.055951652732291517
 		;
 createNode transform -n "geo_grid_MOVE" -p "ctrl_cam";
 	rename -uid "8798EE89-472C-07EA-CCDC-879828452AAB";
@@ -769,13 +766,35 @@ createNode imagePlane -n "imagePlane_squareIllogicShape" -p "imagePlane_squareIl
 	rename -uid "E7B6BD77-43FB-445B-C680-23B731BC5AD7";
 	setAttr -k off ".v";
 	setAttr ".fc" 152;
-	setAttr ".imn" -type "string" "R:/pipeline/pipe/maya/camRig_emile/imagePlanes/square.png";
+	setAttr ".imn" -type "string" "R:/pipeline/pipe/maya/camRig_emile/imagePlanes/square_noCross.png";
 	setAttr ".cov" -type "short2" 1280 1280 ;
+	setAttr ".dic" yes;
 	setAttr ".ag" 0.5;
 	setAttr ".dlc" no;
 	setAttr ".w" 12.48;
 	setAttr ".h" 12.48;
 	setAttr ".cs" -type "string" "sRGB - Texture";
+createNode aimConstraint -n "ctrl_cam_MOVE_aimConstraint1" -p "ctrl_cam_MOVE";
+	rename -uid "EE18E323-4D52-4A3F-6E71-FEAFA5054331";
+	addAttr -dcb 0 -ci true -sn "w0" -ln "ctrl_aimW0" -dv 1 -at "double";
+	addAttr -dcb 0 -ci true -sn "w1" -ln "ctrl_horizontalCam_upW1" -dv 1 -at "double";
+	setAttr -k on ".nds";
+	setAttr -k off ".v";
+	setAttr -k off ".tx";
+	setAttr -k off ".ty";
+	setAttr -k off ".tz";
+	setAttr -k off ".rx";
+	setAttr -k off ".ry";
+	setAttr -k off ".rz";
+	setAttr -k off ".sx";
+	setAttr -k off ".sy";
+	setAttr -k off ".sz";
+	setAttr ".erp" yes;
+	setAttr -s 2 ".tg";
+	setAttr ".a" -type "double3" 0 0 -1 ;
+	setAttr ".wut" 0;
+	setAttr -k on ".w0";
+	setAttr -k on ".w1";
 createNode parentConstraint -n "pCon_ctrl_cam_HOOK" -p "ctrl_cam_HOOK";
 	rename -uid "6413BDFD-4DF1-DAD1-E1CA-BFB80CB0751B";
 	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "ctrl_shakeW0" -dv 1 -min 0 -at "double";
@@ -794,7 +813,6 @@ createNode parentConstraint -n "pCon_ctrl_cam_HOOK" -p "ctrl_cam_HOOK";
 	setAttr -k off ".sz";
 	setAttr ".erp" yes;
 	setAttr -s 2 ".tg";
-	setAttr ".lr" -type "double3" 0 0 90 ;
 	setAttr -k on ".w0";
 	setAttr -k on ".w1";
 createNode transform -n "ctrl_aim_OFFSET" -p "controls";
@@ -953,6 +971,45 @@ createNode parentConstraint -n "ctrl_aim_objectUp_HOOK_parentConstraint1" -p "ct
 	setAttr ".tg[1].tot" -type "double3" 0 0 -1.0666666666666667 ;
 	setAttr -k on ".w0";
 	setAttr -k on ".w1";
+createNode transform -n "ctrl_horizontalCam_up_OFFSET" -p "controls";
+	rename -uid "AF1A3585-42B1-C8B2-0B2F-3CAB8455204C";
+	setAttr ".t" -type "double3" 0 0 -20 ;
+	setAttr ".uocol" yes;
+	setAttr ".oclr" -type "float3" 0.89999998 0.30000001 0.60000002 ;
+createNode transform -n "ctrl_horizontalCam_up_MOVE" -p "ctrl_horizontalCam_up_OFFSET";
+	rename -uid "72308D35-4D77-EB01-7552-CA97ACDF1D73";
+	setAttr ".uocol" yes;
+	setAttr ".oclr" -type "float3" 0.69999999 0.60000002 1 ;
+createNode transform -n "ctrl_horizontalCam_up" -p "ctrl_horizontalCam_up_MOVE";
+	rename -uid "44C07AD2-4533-AF4A-C2EA-1BA9F515CD15";
+createNode nurbsCurve -n "ctrl_horizontalCam_upShape" -p "ctrl_horizontalCam_up";
+	rename -uid "4085EE5B-4B44-EDC9-1C2D-E2B71FDB22C5";
+	setAttr -k off ".v";
+	setAttr ".lodv" no;
+	setAttr ".tw" yes;
+	setAttr -s 11 ".cp[1:10]" -type "double3" 0 1.1398097076581033 0 0 
+		0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0;
+createNode parentConstraint -n "ctrl_horizontalCam_up_MOVE_parentConstraint1" -p "ctrl_horizontalCam_up_MOVE";
+	rename -uid "52D43C85-4084-629F-C936-14A7E6A3D198";
+	addAttr -dcb 0 -ci true -k true -sn "w0" -ln "ctrl_shakeW0" -dv 1 -min 0 -at "double";
+	addAttr -dcb 0 -ci true -k true -sn "w1" -ln "ctrl_rootW1" -dv 1 -min 0 -at "double";
+	setAttr -k on ".nds";
+	setAttr -k off ".v";
+	setAttr -k off ".tx";
+	setAttr -k off ".ty";
+	setAttr -k off ".tz";
+	setAttr -k off ".rx";
+	setAttr -k off ".ry";
+	setAttr -k off ".rz";
+	setAttr -k off ".sx";
+	setAttr -k off ".sy";
+	setAttr -k off ".sz";
+	setAttr ".erp" yes;
+	setAttr -s 2 ".tg";
+	setAttr ".tg[0].tot" -type "double3" 0 0 -1.3333333333333333 ;
+	setAttr ".tg[1].tot" -type "double3" 0 0 -1.3333333333333333 ;
+	setAttr -k on ".w0";
+	setAttr -k on ".w1" 0;
 createNode transform -n "ctrl_distance_OFFSET" -p "controls";
 	rename -uid "5DD88FB6-454A-E5C9-BF61-E69FBF7ED587";
 	setAttr ".uocol" yes;
@@ -1109,7 +1166,6 @@ createNode parentConstraint -n "ctrl_breathingCam_MOVE_parentConstraint1" -p "ct
 	setAttr -k off ".sy";
 	setAttr -k off ".sz";
 	setAttr ".erp" yes;
-	setAttr ".lr" -type "double3" 0 0 90 ;
 	setAttr -k on ".w0";
 createNode transform -n "constraints" -p "rig";
 	rename -uid "0E9B1CC4-4E7D-861C-2F47-FA82668CD058";
@@ -1129,7 +1185,6 @@ createNode parentConstraint -n "camera_pConstraint" -p "constraints";
 	setAttr -k off ".sy";
 	setAttr -k off ".sz";
 	setAttr ".erp" yes;
-	setAttr ".lr" -type "double3" 0 0 90 ;
 	setAttr -k on ".w0";
 createNode condition -n "cond_refsMOVE_general";
 	rename -uid "8E7F8FF9-46C1-A1C6-35C9-E0BAA43DEDBE";
@@ -1173,6 +1228,14 @@ createNode condition -n "cond_grid_squareIllogic";
 	setAttr ".st" 3;
 	setAttr ".ct" -type "float3" 1 0 0 ;
 	setAttr ".cf" -type "float3" 0 1 1 ;
+createNode condition -n "cond_horizontal_bool";
+	rename -uid "A5EAC3E7-4D5D-E07D-AD16-088C284B4D7E";
+	setAttr ".op" 3;
+createNode condition -n "cond_aim_bool";
+	rename -uid "1DE8A127-40DD-8275-3AF3-01BBCA88D2B6";
+	setAttr ".st" 1;
+	setAttr ".ct" -type "float3" 1 0 0 ;
+	setAttr ".cf" -type "float3" 0 1 1 ;
 createNode plusMinusAverage -n "PMA_breathingCam_intensityValueBalance_pConShake";
 	rename -uid "F6854650-46AB-287E-5231-5FB77C6167BD";
 	setAttr -s 2 ".i1";
@@ -1208,6 +1271,9 @@ createNode condition -n "cond_objectUp_parent_root";
 	setAttr ".st" 2;
 	setAttr ".ct" -type "float3" 1 0 0 ;
 	setAttr ".cf" -type "float3" 0 1 1 ;
+createNode makeNurbCircle -n "makeNurbCircle3";
+	rename -uid "EBC093A8-4DFE-BDBB-7A1B-B1BE690653EC";
+	setAttr ".nr" -type "double3" 0 0 0 ;
 createNode distanceBetween -n "distanceBetween1";
 	rename -uid "8CC6CCE6-4803-C378-064D-FFA008C3963D";
 createNode condition -n "cond_distanceGeneral_dist";
@@ -1296,7 +1362,7 @@ select -ne :defaultShaderList1;
 select -ne :postProcessList1;
 	setAttr -s 2 ".p";
 select -ne :defaultRenderUtilityList1;
-	setAttr -s 27 ".u";
+	setAttr -s 25 ".u";
 select -ne :defaultRenderingList1;
 select -ne :standardSurface1;
 	setAttr ".bc" -type "float3" 0.40000001 0.40000001 0.40000001 ;
@@ -1317,7 +1383,7 @@ select -ne :defaultResolution;
 	setAttr ".dar" 1;
 select -ne :defaultColorMgtGlobals;
 	setAttr ".cfe" yes;
-	setAttr ".cfp" -type "string" "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio";
+	setAttr ".cfp" -type "string" "R:\\pipeline\\networkInstall\\OpenColorIO-Configs\\PRISM\\illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio";
 	setAttr ".vtn" -type "string" "ACES 1.0 - SDR Video (sRGB - Display)";
 	setAttr ".vn" -type "string" "ACES 1.0 - SDR Video";
 	setAttr ".dn" -type "string" "sRGB - Display";
@@ -1398,6 +1464,7 @@ connectAttr "ctrl_general.controls" "ctrl_root.v";
 connectAttr "ctrl_shake_MOVE_aimConstraint1.crx" "ctrl_shake_MOVE.rx";
 connectAttr "ctrl_shake_MOVE_aimConstraint1.cry" "ctrl_shake_MOVE.ry";
 connectAttr "ctrl_shake_MOVE_aimConstraint1.crz" "ctrl_shake_MOVE.rz";
+connectAttr "ctrl_general.Aim" "ctrl_shake_MOVE_aimConstraint1.w0";
 connectAttr "ctrl_shake_MOVE.pim" "ctrl_shake_MOVE_aimConstraint1.cpim";
 connectAttr "ctrl_shake_MOVE.t" "ctrl_shake_MOVE_aimConstraint1.ct";
 connectAttr "ctrl_shake_MOVE.rp" "ctrl_shake_MOVE_aimConstraint1.crp";
@@ -1410,16 +1477,19 @@ connectAttr "ctrl_aim.pm" "ctrl_shake_MOVE_aimConstraint1.tg[0].tpm";
 connectAttr "ctrl_shake_MOVE_aimConstraint1.w0" "ctrl_shake_MOVE_aimConstraint1.tg[0].tw"
 		;
 connectAttr "ctrl_aim_objectUp.wm" "ctrl_shake_MOVE_aimConstraint1.wum";
-connectAttr "ctrl_aim.aimUpVector" "ctrl_shake_MOVE_aimConstraint1.wut";
 connectAttr "ctrl_aim.worldUpVectorX" "ctrl_shake_MOVE_aimConstraint1.wux";
 connectAttr "ctrl_aim.worldUpVectorY" "ctrl_shake_MOVE_aimConstraint1.wuy";
 connectAttr "ctrl_aim.worldUpVectorZ" "ctrl_shake_MOVE_aimConstraint1.wuz";
+connectAttr "ctrl_aim.aimUpVector" "ctrl_shake_MOVE_aimConstraint1.wut";
 connectAttr "pCon_ctrl_cam_HOOK.ctx" "ctrl_cam_HOOK.tx";
 connectAttr "pCon_ctrl_cam_HOOK.cty" "ctrl_cam_HOOK.ty";
 connectAttr "pCon_ctrl_cam_HOOK.ctz" "ctrl_cam_HOOK.tz";
 connectAttr "pCon_ctrl_cam_HOOK.crx" "ctrl_cam_HOOK.rx";
 connectAttr "pCon_ctrl_cam_HOOK.cry" "ctrl_cam_HOOK.ry";
 connectAttr "pCon_ctrl_cam_HOOK.crz" "ctrl_cam_HOOK.rz";
+connectAttr "ctrl_cam_MOVE_aimConstraint1.crx" "ctrl_cam_MOVE.rx";
+connectAttr "ctrl_cam_MOVE_aimConstraint1.cry" "ctrl_cam_MOVE.ry";
+connectAttr "ctrl_cam_MOVE_aimConstraint1.crz" "ctrl_cam_MOVE.rz";
 connectAttr "ctrl_general.controls" "ctrl_cam.v" -l on;
 connectAttr "ctrl_general.s" "ctrl_cam.s";
 connectAttr "remapVal_viewGrid_tZ.ov" "geo_grid_MOVE.tz";
@@ -1433,6 +1503,26 @@ connectAttr ":defaultColorMgtGlobals.cfe" "imagePlane_squareIllogicShape.cmcf";
 connectAttr ":defaultColorMgtGlobals.cfp" "imagePlane_squareIllogicShape.cmcp";
 connectAttr ":defaultColorMgtGlobals.wsn" "imagePlane_squareIllogicShape.ws";
 connectAttr "shotCamShape.msg" "imagePlane_squareIllogicShape.ltc";
+connectAttr "ctrl_cam_MOVE.pim" "ctrl_cam_MOVE_aimConstraint1.cpim";
+connectAttr "ctrl_cam_MOVE.t" "ctrl_cam_MOVE_aimConstraint1.ct";
+connectAttr "ctrl_cam_MOVE.rp" "ctrl_cam_MOVE_aimConstraint1.crp";
+connectAttr "ctrl_cam_MOVE.rpt" "ctrl_cam_MOVE_aimConstraint1.crt";
+connectAttr "ctrl_cam_MOVE.ro" "ctrl_cam_MOVE_aimConstraint1.cro";
+connectAttr "ctrl_aim.t" "ctrl_cam_MOVE_aimConstraint1.tg[0].tt";
+connectAttr "ctrl_aim.rp" "ctrl_cam_MOVE_aimConstraint1.tg[0].trp";
+connectAttr "ctrl_aim.rpt" "ctrl_cam_MOVE_aimConstraint1.tg[0].trt";
+connectAttr "ctrl_aim.pm" "ctrl_cam_MOVE_aimConstraint1.tg[0].tpm";
+connectAttr "ctrl_cam_MOVE_aimConstraint1.w0" "ctrl_cam_MOVE_aimConstraint1.tg[0].tw"
+		;
+connectAttr "ctrl_horizontalCam_up.t" "ctrl_cam_MOVE_aimConstraint1.tg[1].tt";
+connectAttr "ctrl_horizontalCam_up.rp" "ctrl_cam_MOVE_aimConstraint1.tg[1].trp";
+connectAttr "ctrl_horizontalCam_up.rpt" "ctrl_cam_MOVE_aimConstraint1.tg[1].trt"
+		;
+connectAttr "ctrl_horizontalCam_up.pm" "ctrl_cam_MOVE_aimConstraint1.tg[1].tpm";
+connectAttr "ctrl_cam_MOVE_aimConstraint1.w1" "ctrl_cam_MOVE_aimConstraint1.tg[1].tw"
+		;
+connectAttr "ctrl_general.Aim" "ctrl_cam_MOVE_aimConstraint1.w0";
+connectAttr "cond_horizontal_bool.ocr" "ctrl_cam_MOVE_aimConstraint1.w1";
 connectAttr "ctrl_cam_HOOK.ro" "pCon_ctrl_cam_HOOK.cro";
 connectAttr "ctrl_cam_HOOK.pim" "pCon_ctrl_cam_HOOK.cpim";
 connectAttr "ctrl_cam_HOOK.rp" "pCon_ctrl_cam_HOOK.crp";
@@ -1505,6 +1595,59 @@ connectAttr "ctrl_aim_objectUp_HOOK_parentConstraint1.w1" "ctrl_aim_objectUp_HOO
 connectAttr "cond_objectUp_parent_aim.ocr" "ctrl_aim_objectUp_HOOK_parentConstraint1.w0"
 		;
 connectAttr "cond_objectUp_parent_root.ocr" "ctrl_aim_objectUp_HOOK_parentConstraint1.w1"
+		;
+connectAttr "ctrl_horizontalCam_up_MOVE_parentConstraint1.ctx" "ctrl_horizontalCam_up_MOVE.tx"
+		;
+connectAttr "ctrl_horizontalCam_up_MOVE_parentConstraint1.cty" "ctrl_horizontalCam_up_MOVE.ty"
+		;
+connectAttr "ctrl_horizontalCam_up_MOVE_parentConstraint1.ctz" "ctrl_horizontalCam_up_MOVE.tz"
+		;
+connectAttr "ctrl_horizontalCam_up_MOVE_parentConstraint1.crx" "ctrl_horizontalCam_up_MOVE.rx"
+		;
+connectAttr "ctrl_horizontalCam_up_MOVE_parentConstraint1.cry" "ctrl_horizontalCam_up_MOVE.ry"
+		;
+connectAttr "ctrl_horizontalCam_up_MOVE_parentConstraint1.crz" "ctrl_horizontalCam_up_MOVE.rz"
+		;
+connectAttr "makeNurbCircle3.oc" "ctrl_horizontalCam_upShape.cr";
+connectAttr "ctrl_horizontalCam_up_MOVE.ro" "ctrl_horizontalCam_up_MOVE_parentConstraint1.cro"
+		;
+connectAttr "ctrl_horizontalCam_up_MOVE.pim" "ctrl_horizontalCam_up_MOVE_parentConstraint1.cpim"
+		;
+connectAttr "ctrl_horizontalCam_up_MOVE.rp" "ctrl_horizontalCam_up_MOVE_parentConstraint1.crp"
+		;
+connectAttr "ctrl_horizontalCam_up_MOVE.rpt" "ctrl_horizontalCam_up_MOVE_parentConstraint1.crt"
+		;
+connectAttr "ctrl_shake.t" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[0].tt"
+		;
+connectAttr "ctrl_shake.rp" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[0].trp"
+		;
+connectAttr "ctrl_shake.rpt" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[0].trt"
+		;
+connectAttr "ctrl_shake.r" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[0].tr"
+		;
+connectAttr "ctrl_shake.ro" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[0].tro"
+		;
+connectAttr "ctrl_shake.s" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[0].ts"
+		;
+connectAttr "ctrl_shake.pm" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[0].tpm"
+		;
+connectAttr "ctrl_horizontalCam_up_MOVE_parentConstraint1.w0" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[0].tw"
+		;
+connectAttr "ctrl_root.t" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[1].tt"
+		;
+connectAttr "ctrl_root.rp" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[1].trp"
+		;
+connectAttr "ctrl_root.rpt" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[1].trt"
+		;
+connectAttr "ctrl_root.r" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[1].tr"
+		;
+connectAttr "ctrl_root.ro" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[1].tro"
+		;
+connectAttr "ctrl_root.s" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[1].ts"
+		;
+connectAttr "ctrl_root.pm" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[1].tpm"
+		;
+connectAttr "ctrl_horizontalCam_up_MOVE_parentConstraint1.w1" "ctrl_horizontalCam_up_MOVE_parentConstraint1.tg[1].tw"
 		;
 connectAttr "ctrl_distance_OFFSET_parentConstraint1.ctx" "ctrl_distance_OFFSET.tx"
 		;
@@ -1623,6 +1766,9 @@ connectAttr "ctrl_cam.gridType" "cond_grid_scope.ft";
 connectAttr "ctrl_cam.gridType" "cond_grid_HD.ft";
 connectAttr "ctrl_cam.gridType" "cond_grid_square.ft";
 connectAttr "ctrl_cam.gridType" "cond_grid_squareIllogic.ft";
+connectAttr "ctrl_general.horizontalCam" "cond_horizontal_bool.st";
+connectAttr "cond_aim_bool.ocr" "cond_horizontal_bool.ft";
+connectAttr "ctrl_general.Aim" "cond_aim_bool.ft";
 connectAttr "cond_brethingCam_onOFF.ocg" "PMA_breathingCam_intensityValueBalance_pConShake.i1[0]"
 		;
 connectAttr "rev_breathingCam_intensity.oy" "PMA_breathingCam_intensityValueBalance_pConShake.i1[1]"
@@ -1650,6 +1796,8 @@ connectAttr "ctrl_distance.parent" "cond_distanceShake_dist.ft";
 connectAttr "cond_refsMOVE_general.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "cond_refsMOVE_root.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "remapVal_viewGrid_tZ.msg" ":defaultRenderUtilityList1.u" -na;
+connectAttr "cond_aim_bool.msg" ":defaultRenderUtilityList1.u" -na;
+connectAttr "cond_horizontal_bool.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "distanceBetween1.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "cond_distanceGeneral_dist.msg" ":defaultRenderUtilityList1.u" -na;
 connectAttr "cond_distanceRoot_dist.msg" ":defaultRenderUtilityList1.u" -na;

@@ -24,10 +24,7 @@
     <memberTool name="Lib_Importer"/>
     <memberTool name="restart_houdini"/>
     <memberTool name="automanifest"/>
-    <memberTool name="subnet"/>
-    <memberTool name="subnet0"/>
-    <memberTool name="materiallibrary"/>
-    <memberTool name="materiallibrary0"/>
+    <memberTool name="restart_houdini"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -119,7 +116,11 @@ reload(ressource)
 reload(auto)
 auto.run()]]></script>
   </tool>
+  <tool name="restart_houdini" label="Restart" icon="hicon:/SVGIcons.index?BUTTONS_cook.svg">
+    <script scriptType="python"><![CDATA[import restart.restart as restart
 
+restart.restart_houdini()]]></script>
+  </tool>
   <tool name="Lib_Importer" label="Lib_Importer" icon="R:/pipeline/pipe/houdini/shelfs/icons/lib_importer.png">
     <script scriptType="python"><![CDATA[import sys
 from imp import reload

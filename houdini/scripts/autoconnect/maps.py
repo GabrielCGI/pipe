@@ -1,9 +1,7 @@
-
 import re
-import ressource
 import os
-import houdinilog as hlog
-from collections import defaultdict
+
+import autoconnect.ressource as ressource
 
 
 def loadRessource():

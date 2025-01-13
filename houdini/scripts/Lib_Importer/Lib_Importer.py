@@ -58,5 +58,6 @@ def libImport():
     location = active_pane.pwd()
 
     location.loadItemsFromFile(finalFile)
+    
     active_pane.homeToSelection()
 

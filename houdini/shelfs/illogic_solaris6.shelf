@@ -27,10 +27,7 @@
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
+    <script scriptType="python"><![CDATA[from imp import reload
 
 import mtlximage_path_updatev2
 reload(mtlximage_path_updatev2)
@@ -38,10 +35,7 @@ mtlximage_path_updatev2.run()]]></script>
   </tool>
 
   <tool name="material_finder" label="Get mat" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
+    <script scriptType="python"><![CDATA[from imp import reload
 
 import materialFinder
 reload(materialFinder)
@@ -49,10 +43,7 @@ materialFinder.run()]]></script>
   </tool>
 
   <tool name="kmx_geosubset" label="kmx_sub" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+    <script scriptType="python"><![CDATA[from imp import reload
 
 import kma_mat_from_attr
 reload(kma_mat_from_attr)
@@ -60,69 +51,50 @@ kma_mat_from_attr.execute(collectionMode=False)]]></script>
   </tool>
 
   <tool name="kmx" label="kmx_col" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+    <script scriptType="python"><![CDATA[from imp import reload
 
 import kma_mat_from_attr
+print(dir(kma_mat_from_attr))
 reload(kma_mat_from_attr)
 kma_mat_from_attr.execute(collectionMode=True)]]></script>
   </tool>
 
   <tool name="paste" label="Paste" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+    <script scriptType="python"><![CDATA[from imp import reload
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\copy_paste")
-
-import copy_paste
+import copy_paste.copy_paste as copy_paste
 reload(copy_paste)
 copy_paste.paste()]]></script>
   </tool>
 
   <tool name="copy" label="Copy" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+    <script scriptType="python"><![CDATA[from imp import reload
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\copy_paste")
-
-import copy_paste
+import copy_paste.copy_paste as copy_paste
 reload(copy_paste)
 copy_paste.copy()]]></script>
   </tool>
 
   <tool name="stage_manager_update" label="Stage Manager Update" icon="hicon:/SVGIcons.index?BUTTONS_page_reload.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+    <script scriptType="python"><![CDATA[from imp import reload
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\stage_manager_update")
-
-import stage_manager_update
+import stage_manager_update.stage_manager_update as stage_manager_update
 reload(stage_manager_update)
 stage_manager_update.checkUpdate()]]></script>
   </tool>
 
   <tool name="auto_connect" label="Auto Connect" icon="R:/pipeline/pipe/houdini/shelfs/icons/autoconnect.png">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+    <script scriptType="python"><![CDATA[from imp import reload
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\autoconnect")
-
-import auto
-import ressource
-reload(ressource)
-reload(auto)
-auto.run()]]></script>
+import autoconnect
+reload(autoconnect)
+autoconnect.auto.run()]]></script>
   </tool>
 
   <tool name="Lib_Importer" label="Lib Importer" icon="R:/pipeline/pipe/houdini/shelfs/icons/lib_importer.png">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+    <script scriptType="python"><![CDATA[from imp import reload
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\Lib_Importer")
-
-import Lib_Importer
+import Lib_Importer.Lib_Importer as Lib_Importer
 reload(Lib_Importer)
 Lib_Importer.libImport()]]></script>
   </tool>
@@ -134,12 +106,9 @@ restart.restart_houdini()]]></script>
   </tool>
 
   <tool name="automanifest" label="Auto Manifest" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+    <script scriptType="python"><![CDATA[from imp import reload
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\automanifest")
-
-import auto_manifest
+import automanifest.auto_manifest as auto_manifest
 reload(auto_manifest)
 auto_manifest.autoManifest()]]></script>
   </tool>
