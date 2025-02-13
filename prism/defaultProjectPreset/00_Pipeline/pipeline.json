@@ -775,27 +775,44 @@
         "manager": "None"
     },
     "deadline": {
-        "submitScenes": true,
+        "submitScenes": false,
         "useScriptDependencies": true,
         "usePoolPresets": true,
         "poolPresets": [
             {
                 "name": "Rendering",
-                "pool": "fast",
-                "secondaryPool": "slow",
-                "group": "h20_5_312"
+                "pool": "hi_vram",
+                "secondaryPool": "low_vram",
+                "group": "houdini"
+            },
+            {
+                "name": "Nuke",
+                "pool": "< Pool >",
+                "secondaryPool": "< Secondary Pool >",
+                "group": "nukegrp"
+            },
+            {
+                "name": "HouFX",
+                "pool": "low_vram",
+                "secondaryPool": "hi_vram",
+                "group": "houdini"
             }
         ],
         "pools": [
             "none",
             "fast",
+            "gloutons",
+            "hi_vram",
+            "low_vram",
             "slow"
         ],
         "groups": [
             "none",
             "all",
             "beta",
-            "h20_5_312"
+            "houdini",
+            "nukegrp",
+            "prism_plus"
         ]
     },
     "library": {

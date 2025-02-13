@@ -114,6 +114,8 @@ elif nuke.NUKE_VERSION_MAJOR>=15:
     from nuke_scanner import select_unconnected_read
     from nuke_scanner import nuke_delete
     from nukescripts import panels
+
+    import stamps
     # >>>PrismStart
     if ((not nuke.env["studio"]) or nuke.env["indie"]) and nuke.env.get("gui"):
         if "pcore" in locals():
@@ -149,5 +151,35 @@ elif nuke.NUKE_VERSION_MAJOR>=15:
     bloomMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
     bloomMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
     bloomMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
+    s=bloomMenu.addMenu("Tools")
+    s.addCommand("Anim Buddy", "nuke.createNode(\"AnimVuddy\")") # >>> Add Anim Buddy tool
+    s.addCommand("Card Buddy", "nuke.createNode(\"CardBuddy\")") # >>> Add Card Buddy tool
+    s.addCommand("DepthBuddy", "nuke.createNode(\"DepthBuddy\")") # >>> Add Depth Buddy tool
+    s.addCommand("Flare Market", "nuke.createNode(\"FlareMarket\")") # >>> Add Flare Market tool
+    s.addCommand("Mask Buddy", "nuke.createNode(\"MaskBuddy\")") # >>> Add Mask Buddy tool
+    s.addCommand("Projection Buddy", "nuke.createNode(\"ProjectionBuddy\")") # >>> Add Projection Buddy tool
+    s.addCommand("Reflection Buddy", "nuke.createNode(\"ReflectionBuddy\")") # >>> Add Reflecrion Buddy tool
+
+    
+    ### edit folder path here ###
+    DVPath = "R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/Deep2VP_v40/asGroup/"
+    
+    ### MJTLab - Deep2VP v4.0 ###
+    DVPFam = {"general" : ["Deep2VP","DVPToImage","DVPortal","DVPColorCorrect"] , 
+	    	"matte" : ["DVPmatte","DVPattern","DVProjection"] , 
+		    "lighting" : ["DVPsetLight","DVPscene","DVPrelight","DVPrelightPT","DVPfresnel"] , 
+		    "shader" : ["DVP_Shader","DVP_ToonShader"]
+		    }   
+    ### hard code. Don't change it ###
+    toolbar = nuke.toolbar("Nodes")
+    DVP = toolbar.addMenu("Deep2VP", icon="Deep2VP.png")
+    for key,value in DVPFam.items() :
+	    for item in value :
+		    if key == "general" :
+			    DVP.addCommand( "{0}".format(item), "nuke.nodePaste(\"{0}{1}.nk\")".format(DVPath,item), icon="{0}.png".format(item) )
+		    else :
+			    DVP.addCommand( "{0}/{1}".format(key,item), "nuke.nodePaste(\"{0}{1}/{2}.nk\")".format(DVPath,key,item), icon="{0}.png".format(item) )
+    ### end here ###
+
     
     print("End loading Nuke Menu as version 15+ ...")

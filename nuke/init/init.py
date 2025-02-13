@@ -3,8 +3,12 @@
 import nuke
 import os
 os.environ["OFX_PLUGIN_PATH"] = "D:/OFX_local"
+
+
+
 if nuke.NUKE_VERSION_MAJOR==12:
     print("Nuke Init as version 12...")
+    
     ### -------------------------------------------------------------------------------------------
     ### ----------------------------------     Nuke 12      ---------------------------------------
     ### -------------------------------------------------------------------------------------------
@@ -31,10 +35,17 @@ if nuke.NUKE_VERSION_MAJOR==12:
 
 
     nuke.pluginAddPath("R:/nukeGizmo/NukeSurvivalToolkit_publicRelease-master/NukeSurvivalToolkit")
+    nuke.pluginAddPath("R:/nukeGizmo/stamps")
+
 
     print("End Nuke Init as version 12!")
 
-if nuke.NUKE_VERSION_MAJOR>=15:
+print(nuke.NUKE_VERSION_MAJOR)
+if nuke.NUKE_VERSION_MAJOR >= 15:
+
+    #ATTENTION A NE PAS UTILISER DE FORMAT f{} -> FAIS CRASHER NUKE 12 !!!!
+    nuke_version = str(nuke.NUKE_VERSION_MAJOR)+"."+str(nuke.NUKE_VERSION_MINOR)
+
     print("Nuke Init as version 15+ ...")
     # ### -------------------------------------------------------------------------------------------
     # ### ----------------------------------     Nuke 15+      --------------------------------------
@@ -98,12 +109,26 @@ if nuke.NUKE_VERSION_MAJOR>=15:
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/icons')
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins')
     nuke.pluginAddPath('R:/pipeline/pipe/nuke/script')
-    nuke.pluginAddPath("R:/pipeline/pipe/nuke/script/magicdefocus2")
+    nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/MagicDefocus2_v1.0.3")
+    nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/stamps")
+    nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/Deep2VP_v40")
+    nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/pixelfudger3")
 
-    # Setting env var for optical flare : 
-    #os.environ["OPTICAL_FLARES_PATH"] = "R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/OpticalFlares_Nuke_15.0_Node-Locked_1.0.94/plugin/Windows"
-    os.environ["OPTICAL_FLARES_PRESET_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\plugins\OpticalFlares_Nuke_15.0_Node-Locked_1.0.94\Textures-And-Presets"
-    os.environ["OPTICAL_FLARES_VERBOSE_CONSOLE"]="True"
+    if (nuke_version=="15.0"):
+        # Setting env var for optical flare : 
+        #os.environ["OPTICAL_FLARES_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\plugins\OpticalFlares_Nuke_15.0_Node-Locked_1.0.94\plugin\Windows"
+        #os.environ["OPTICAL_FLARES_PRESET_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\plugins\OpticalFlares_Nuke_15.0_Node-Locked_1.0.94\Textures-And-Presets"
+        #os.environ["OPTICAL_FLARES_VERBOSE_CONSOLE"]="True"
+        print('THIS VERSION SHOULD NOT BE USED ANYMORE!')
+
+    if (nuke_version=="15.1"):
+        # Setting env var for optical flare : 
+        os.environ["OPTICAL_FLARES_PRESET_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OpticalFlares_Nuke_15.1_Node-Locked_1.0.94\Textures-And-Presets"
+        os.environ["OPTICAL_FLARES_VERBOSE_CONSOLE"]="True"
+
+    else:
+        pass
+        #print(f"something went wrong with optical flare, maybe you should install the minor version of it, in your case : {nuke_version}")
 
     print("End Nuke Init as version 15+ !")
 

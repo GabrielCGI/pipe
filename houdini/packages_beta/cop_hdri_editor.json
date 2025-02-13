@@ -1,0 +1,5 @@
+{
+    "env": [
+        {"PYTHONPATH":"R:/pipeline/pipe_public/COP_hdri_editor/scripts;"}
+    ]
+}

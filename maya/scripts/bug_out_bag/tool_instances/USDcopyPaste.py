@@ -35,12 +35,26 @@ class USDCopyPaste(MultipleActionTool):
 
         maya_stage_node = cmds.ls(selection=True, l=True)
         if not len(maya_stage_node):
+            cmds.confirmDialog(
+                title='No layer selected',
+                message='Please select a layer',
+                button=['OK'],
+                defaultButton='OK'
+            )
+            cmds.warning('Please select a layer')
             print("Please select a layer")
             return None
         maya_stage_node = maya_stage_node[0]
 
         asset_stage = mayaUsd.ufe.getStage(maya_stage_node)
         if asset_stage is None:
+            cmds.confirmDialog(
+                title='No stage selected',
+                message='Please select a correct stage',
+                button=['OK'],
+                defaultButton='OK'
+            )
+            cmds.warning('Please select a layer')
             print("Please select a correct stage")
             return None
         
@@ -69,7 +83,13 @@ class USDCopyPaste(MultipleActionTool):
         with open(tmp_file_path, 'w') as tmp_file:
             tmp_file.write(tmp_file_raw)
         tmp_file.close()
-
+        
+        cmds.confirmDialog(
+            title='USD successfully exported',
+            message=f'Exported USD Edits in:\n {tmp_file_path}',
+            button=['OK'],
+            defaultButton='OK'
+        )
         print("Exported USD Edits in:\n", tmp_file_path)
         
     def __paste_USD_layer(self):
@@ -82,6 +102,12 @@ class USDCopyPaste(MultipleActionTool):
         tmp_file_path = os.path.join(tmp_dir, TMP_FILE_NAME)
         
         if not os.path.exists(tmp_file_path):
+            cmds.confirmDialog(
+                title='Could not find tmp file',
+                message=f'Could not find tmp file: \n {tmp_file_path}',
+                button=['OK'],
+                defaultButton='OK'
+            )
             raise FileNotFoundError(
                 f"Temporary file does not exist: {tmp_file_path}")
             
@@ -94,4 +120,11 @@ class USDCopyPaste(MultipleActionTool):
 
         session_layer = asset_stage.GetEditTarget().GetLayer()
         session_layer.ImportFromString(tmp_file_raw)
+        
+        cmds.confirmDialog(
+            title='USD successfully import',
+            message='USD Edits successfully imported to the target stage.',
+            button=['OK'],
+            defaultButton='OK'
+        )
         print("USD Edits successfully imported to the target stage.")

@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <shelfSet name="solaris_1" label="Solaris Geometry">
+    <memberToolshelf name="illogic_solaris6"/>
+    <memberToolshelf name="DEV"/>
+    <memberToolshelf name="prism"/>
+    <memberToolshelf name="polygon"/>
+    <memberToolshelf name="lop_oceans"/>
+    <memberToolshelf name="cloud"/>
+  </shelfSet>
+
+  <toolshelf name="illogic_solaris6" label="illogic_solaris">
+    <memberTool name="kmx"/>
+    <memberTool name="kmx_geosubset"/>
+    <memberTool name="material_finder"/>
+    <memberTool name="stage_manager_update"/>
+    <memberTool name="copy"/>
+    <memberTool name="paste"/>
+    <memberTool name="update_tex"/>
+    <memberTool name="autoconnect_ui"/>
+    <memberTool name="Lib_Importer"/>
+    <memberTool name="restart_houdini"/>
+    <memberTool name="automanifest"/>
+    <memberTool name="copy_light"/>
+    <memberTool name="domelight_create"/>
+    <memberTool name="set_node_parameters"/>
+    <memberTool name="blast"/>
+    <memberTool name="clean_light"/>
+    <memberTool name="automanifestv2"/>
+  </toolshelf>
+
+  <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
+
+import mtlximage_path_updatev2
+reload(mtlximage_path_updatev2)
+mtlximage_path_updatev2.run()]]></script>
+  </tool>
+
+  <tool name="material_finder" label="Get mat" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
+
+import materialFinder
+reload(materialFinder)
+materialFinder.run()]]></script>
+  </tool>
+
+  <tool name="kmx_geosubset" label="kmx_sub" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+
+import kma_mat_from_attr
+reload(kma_mat_from_attr)
+kma_mat_from_attr.execute(collectionMode=False)]]></script>
+  </tool>
+
+  <tool name="kmx" label="kmx_col" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+
+import kma_mat_from_attr
+reload(kma_mat_from_attr)
+kma_mat_from_attr.execute(collectionMode=True)]]></script>
+  </tool>
+
+  <tool name="paste" label="Paste" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\copy_paste")
+
+import copy_paste
+reload(copy_paste)
+copy_paste.paste()]]></script>
+  </tool>
+
+  <tool name="copy" label="Copy" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\copy_paste")
+
+import copy_paste
+reload(copy_paste)
+copy_paste.copy()]]></script>
+  </tool>
+
+  <tool name="stage_manager_update" label="Stage Manager Update" icon="hicon:/SVGIcons.index?BUTTONS_page_reload.svg">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+import stage_manager_update.stage_manager_update as stage_manager
+reload(stage_manager)
+stage_manager.checkUpdate()]]></script>
+  </tool>
+
+  <tool name="Lib_Importer" label="Lib Importer" icon="R:/pipeline/pipe/houdini/shelfs/icons/lib_importer.png">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\Lib_Importer")
+
+import Lib_Importer.Lib_Importer as Lib_Importer
+reload(Lib_Importer)
+print(dir(Lib_Importer))
+Lib_Importer.libImport()]]></script>
+  </tool>
+
+  <tool name="restart_houdini" label="Restart" icon="hicon:/SVGIcons.index?BUTTONS_cook.svg">
+    <script scriptType="python"><![CDATA[import restart.restart as restart
+
+restart.restart_houdini()]]></script>
+  </tool>
+
+  <tool name="automanifest" label="Auto Manifest" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[from imp import reload
+
+import automanifest.auto_manifest as auto_manifest
+reload(auto_manifest)
+auto_manifest.autoManifest()]]></script>
+  </tool>
+
+  <tool name="copy_light" label="Copy Light" icon="hicon:/SVGIcons.index?LOP_lightlinker.svg">
+    <script scriptType="python"><![CDATA[import imp
+import copylight.copylight as copylight
+
+imp.reload(copylight)
+
+copylight.copySelectedLights()]]></script>
+  </tool>
+
+  <tool name="autoconnect_ui" label="Auto Connect" icon="R:/pipeline/pipe/houdini/shelfs/icons/autoconnect.png">
+    <script scriptType="python"><![CDATA[from houdini_utils.houdini_utils import reloadAllModules
+import autoconnect_ui
+
+reloadAllModules(autoconnect_ui)
+
+autoconnect_ui.autoconnect_ui.showUI()]]></script>
+  </tool>
+
+  <tool name="domelight_create" label="Dome Light Create" icon="hicon:/SVGIcons.index?BUTTONS_add_light.svg">
+    <script scriptType="python"><![CDATA[import domelight_create.domelight_create as domelight
+
+domelight.create_domelight()]]></script>
+  </tool>
+
+  <tool name="set_node_parameters" label="Set Nodes Parameters" icon="hicon:/SVGIcons.index?VOP_complement.svg">
+    <script scriptType="python"><![CDATA[import set_lights_parameters.set_lights_parameters as set_lights
+from imp import reload
+
+reload(set_lights)
+
+set_lights.showUI()]]></script>
+  </tool>
+
+  <tool name="blast" label="Blast" icon="hicon:/SVGIcons.index?SOP_blast.svg">
+    <script scriptType="python"><![CDATA[import blast.blast as blast
+import blast.prim_tree as pt
+
+import imp
+
+imp.reload(blast)
+imp.reload(pt)
+blast.run()]]></script>
+  </tool>
+
+  <tool name="clean_light" label="Clean Light" icon="hicon:/SVGIcons.index?BUTTONS_clear.svg">
+    <script scriptType="python"><![CDATA[import clean_light.cleanlight as cleanlight
+import imp
+imp.reload(cleanlight)
+
+cleanlight.clean()]]></script>
+  </tool>
+
+  <tool name="automanifestv2" label="Auto Manifest V2" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[from imp import reload
+
+import automanifest.auto_manifest_dev as auto_manifest
+reload(auto_manifest)
+auto_manifest.run()]]></script>
+  </tool>
+</shelfDocument>

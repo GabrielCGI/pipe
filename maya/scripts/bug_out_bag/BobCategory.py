@@ -1,5 +1,7 @@
 import maya.cmds as cmds
 
+import time
+
 # Get the Maya version as an integer
 maya_version = int(cmds.about(version=True).split()[0])
 
@@ -45,6 +47,7 @@ class BobCategory(BobElement):
         Populate the category UI
         :return:
         """
+        
         scroll = QScrollArea()
         scroll.setFocusPolicy(Qt.NoFocus)
         widget = QWidget()
@@ -64,6 +67,7 @@ class BobCategory(BobElement):
         scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
         scroll.setWidgetResizable(True)
         scroll.setWidget(widget)
+        
         return scroll
 
     def on_selection_changed(self):

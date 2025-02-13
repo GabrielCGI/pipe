@@ -63,6 +63,7 @@ from .tool_instances.ShaderDuplicate import *
 from .tool_instances.DisplayColor import *
 from .tool_instances.Exposure import *
 from .tool_instances.USDcopyPaste import USDCopyPaste
+from .tool_instances.selectGeoToExport import GeoExport
 
 # ######################################################################################################################
 
@@ -87,45 +88,46 @@ class BobApp(QDialog):
         # Model attributes
         self.__bob_categories = [
             BobCategory("Utils", self.__prefs, [
-                LockTool(),
+                # LockTool(),
 
 
 
-                SplineStepTool(),
-                CharacterTimeSetTool(),
-                TraceSetTool(),
-                SelectBigObjects(),
-                SelectInvisibleObjects(),
-                PrintAbcLayer(),
+                # SplineStepTool(),
+                # CharacterTimeSetTool(),
+                # TraceSetTool(),
+                # SelectBigObjects(),
+                # SelectInvisibleObjects(),
+                # PrintAbcLayer(),
 
-                Orig(),
+                # Orig(),
                 Gate(),
-                IsolateTool(),
+                # IsolateTool(),
                 USDCopyPaste(),
+                GeoExport(),
 
             ]),
             BobCategory("Clean", self.__prefs, [
-                CleanFreezeTool(),
-                CleanerTool(),
-                TextureCheckTool(),
-                DeleteOrigTool(),
-                ShapeRenamerTool(),
+                # CleanFreezeTool(),
+                # CleanerTool(),
+                # TextureCheckTool(),
+                # DeleteOrigTool(),
+                # ShapeRenamerTool(),
 
-                OverrideKillerTool(),
-                HierarchyCheckTool(),
+                # OverrideKillerTool(),
+                # HierarchyCheckTool(),
             ]),
 
             BobCategory("Shading", self.__prefs, [
-                UVCopierTool(),
-                GlassShadow(),
-                ShaderTransferTool(),
-                RestPosToVertexColorTool(),
-                ViewportShader(),
-                FaceFromShader(),
+                # UVCopierTool(),
+                # GlassShadow(),
+                # ShaderTransferTool(),
+                # RestPosToVertexColorTool(),
+                # ViewportShader(),
+                # FaceFromShader(),
                 ShadingGroupRenamerTool(),
-                ShaderDuplicate(),
-                DisplayColor(),
-                Exposure()
+                # ShaderDuplicate(),
+                # DisplayColor(),
+                # Exposure()
 
             ]),
         ]
@@ -152,8 +154,11 @@ class BobApp(QDialog):
 
         # Create the layout, linking it to actions and refresh the display
         self.__create_ui()
+        
         self.__refresh_ui()
-
+        
+        
+        
     def __save_prefs(self):
         """
         Save preferences
@@ -227,12 +232,14 @@ class BobApp(QDialog):
         Refresh the ui according to the model attribute
         :return:
         """
+        
         current_index = self.__selected_category
         self.__tab_widget.clear()
         for bob_categ in self.__bob_categories:
             bob_categ_lyt = bob_categ.populate()
             self.__tab_widget.addTab(bob_categ_lyt, bob_categ.get_name())
         self.__tab_widget.setCurrentIndex(current_index)
+        
 
     def __on_selection_changed(self, *args, **kwargs):
         """

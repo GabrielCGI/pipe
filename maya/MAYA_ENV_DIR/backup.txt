@@ -1,0 +1,2 @@
+MAYA_SHELF_PATH : R:\pipeline\pipe\maya\shelfs\maya2025
+PYTHONPATH : R:\pipeline\pipe\maya\scripts;R:\pipeline\pipe\maya\scripts\abcPipeline;R:\pipeline\pipe\maya\scripts\scene;R:\pipeline\pipe\maya\scripts\tools;R:\pipeline\pipe\maya\scripts\startupSettings\;R:\pipeline\pipe\maya\scripts\shaderTransferTool;R:\pipeline\pipe\maya\scripts\assetBrowser;

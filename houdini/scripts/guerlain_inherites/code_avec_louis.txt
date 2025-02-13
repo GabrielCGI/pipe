@@ -1,0 +1,226 @@
+# Default Script
+node = hou.pwd()
+stage = node.editableStage()
+
+from pxr import Usd, Kind, UsdGeom
+
+def remove_prim_if_exists(stage, prim_path):
+    prim = stage.GetPrimAtPath(prim_path)
+    if prim and prim.IsValid():
+        stage.RemovePrim(prim_path)
+    else:
+        print(f"Error: Prim {prim_path} does not exist and cannot be removed.")
+        
+search_root = "/world/assets/"
+
+# List of asset names
+assets =[
+    # Props
+    "abeilleRoyale",
+    "aquaAllegoria",
+    "artMatiere",
+    "camRig",
+    "eauToilette",
+    "masterFioles",
+    "orchideeImperiale",
+    "pex",
+    "pexBee",
+    "pexMoon",
+    "roseauBladeAnimated",
+    "rougeG",
+    "shalimar",
+
+    # Sets
+    "armchairCharlotte",
+    "becher",
+    "bol",
+    "bookCover",
+    "bookPopUP",
+    "boxeLittle",
+    "boxes",
+    "branche",
+    "branches",
+    "brittany",
+    "cabinetBuiltIn",
+    "cabinetCentral",
+    "cabinetWall",
+    "cahier",
+    "coffeeTable",
+    "curtain",
+    "feuille",
+    "fioles",
+    "fiolesBig",
+    "flacons",
+    "jungle",
+    "lagoon",
+    "lampTable",
+    "loupe",
+    "loupeBras",
+    "lowGrass",
+    "moon",
+    "mouillette",
+    "pipette",
+    "plateauMetal",
+    "roseau",
+    "roseauBlade",
+    "roseauStem",
+    "roses",
+    "ruche",
+    "sapin",
+    "star",
+    "styloPlume",
+    "tableCoated",
+    "tableGlass",
+    "touchesParfum",
+    "windowClassic",
+
+]
+
+assets_in_stage=[]
+
+rule = hou.LopSelectionRule()
+rule.setTraversalDemands(hou.lopTraversalDemands.Default)
+
+
+
+
+for asset_name in assets:
+    asset_has_over= 0 
+
+    # Create Prim GRP
+    prim_path_grp = f"/world/assets/Sets/{asset_name}_GRP"
+    new_prim_grp = stage.DefinePrim(prim_path_grp, "Xform")
+    Usd.ModelAPI(new_prim_grp).SetKind(Kind.Tokens.group)
+    
+    #Create the Prim 0
+    prim_path_0 = f"/world/assets/Sets/{asset_name}_GRP/{asset_name}_0"
+    new_prim_0= stage.DefinePrim(prim_path_0, "Xform")
+    
+    
+    #Prim 0 set transform OP order fix
+    Usd.ModelAPI(new_prim_0).SetKind(Kind.Tokens.component)
+    inherits = new_prim_0.GetInherits()
+    inherits.AddInherit(f"/__class__/{asset_name}")
+    for attr in new_prim_0.GetAttributes():
+        attrName= attr.GetName()
+        if attrName.startswith("xformOp:transform:"):
+            opSuffix = attrName.split(":")[-1]
+            xform_prim = UsdGeom.Xformable(new_prim_0)
+            transform_op = xform_prim.AddTransformOp(opSuffix=opSuffix)
+            asset_has_over= 1
+            break
+    
+            
+    # If the asset_has_over is True then create the source primitive else remove the prim
+    # I did not find a way to check for over attributs in the stage. a bit dirty...
+    if asset_has_over:
+        prim_path_source = f"/world/assets/Sets/source/{asset_name}"
+        new_prim_source = stage.DefinePrim(prim_path_source, "Xform")
+        Usd.ModelAPI(new_prim_source).SetKind(Kind.Tokens.component)
+    else:
+        remove_prim_if_exists(stage, prim_path_0)
+        remove_prim_if_exists(stage, prim_path_grp)
+
+
+
+
+
+
+
+###############################################################################
+
+
+
+from pxr import Usd
+import hou
+
+
+target_names = [
+    # Props
+    "abeilleRoyale",
+    "aquaAllegoria",
+    "artMatiere",
+    "camRig",
+    "eauToilette",
+    "masterFioles",
+    "orchideeImperiale",
+    "pex",
+    "pexBee",
+    "pexMoon",
+    "roseauBladeAnimated",
+    "rougeG",
+    "shalimar",
+
+    # Sets
+    "armchairCharlotte",
+    "becher",
+    "bol",
+    "bookCover",
+    "bookPopUP",
+    "boxeLittle",
+    "boxes",
+    "branche",
+    "branches",
+    "brittany",
+    "cabinetBuiltIn",
+    "cabinetCentral",
+    "cabinetWall",
+    "cahier",
+    "coffeeTable",
+    "curtain",
+    "feuille",
+    "fioles",
+    "fiolesBig",
+    "flacons",
+    "jungle",
+    "lagoon",
+    "lampTable",
+    "loupe",
+    "loupeBras",
+    "lowGrass",
+    "moon",
+    "mouillette",
+    "pipette",
+    "plateauMetal",
+    "roseau",
+    "roseauBlade",
+    "roseauStem",
+    "roses",
+    "ruche",
+    "sapin",
+    "star",
+    "styloPlume",
+    "tableCoated",
+    "tableGlass",
+    "touchesParfum",
+    "windowClassic",
+    #Env
+    "perfumerAtelier",
+]
+class_path = "/__class__/"
+
+
+search_root = "/world/assets/"
+
+
+stage = hou.pwd().editableStage()
+
+
+rule = hou.LopSelectionRule()
+rule.setTraversalDemands(hou.lopTraversalDemands.Default)
+
+
+rule.setPathPattern(f"{search_root}*/* {search_root}*/*/*  ")
+prim_paths = rule.expandedPaths(lopnode=None, stage=stage)
+
+# Iterate over matched paths and apply inheritance
+for prim_path in prim_paths:
+    prim = stage.GetPrimAtPath(str(prim_path))
+
+    # Ensure the prim matches a target name
+    if prim and prim.GetName() in target_names:
+    
+        # Apply inheritance from corresponding class
+        inherits = prim.GetInherits()
+        inherits.AddInherit(f"{class_path}{prim.GetName()}")
+        print(f"Inheritance added: {prim_path} → {class_path}{prim.GetName()}")

@@ -5,8 +5,9 @@
 *.db
 *bak*.hip*
 *Thumbs.db
-*_recovered*.hipnc
-
+*recovered*.hip*
+*filecache*.bgeo.sc*
 *.db
-
+*.old
+*bak*.hda
 *GreyscalegorillaHoudiniConnect*

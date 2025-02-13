@@ -5,6 +5,7 @@ import hou
 
 def assetFinder(project, assetName, istr):
     assetFolder = project + '/03_Production/Assets/'
+    istrnew = 'neverFound'
     for item in os.listdir(assetFolder):
         for sub in os.listdir(assetFolder + '/'+ item):
             if sub == assetName:
@@ -13,31 +14,43 @@ def assetFinder(project, assetName, istr):
                 resolvedAsset = assetFolder + istrnew
                 print(resolvedAsset)
                 break
-            else:
+            if istrnew == 'neverFound':
                 istrnew = istr
                 resolvedAsset = assetFolder + istr
+                print('resolved is '+resolvedAsset)
         print('Asset not found in subfolder : '+ item)
     return istrnew, resolvedAsset
 
 def get_prims_at_path(stage, path):
-
+    
     prims = []
+    GRPprims = []
     
     
     def collect_prims(prim):
         
         #print('hello'+str(prim))
+        
+        for child in prim.GetAllChildren():
+            print('roots are : '+str(child))
+            for bb in child.GetAllChildren():
+                print('sub prims are : '+str(bb))
+                if bb.GetName().split('_')[-1] == 'GRP':
+                    print('GRP detected')
+                    for b in bb.GetAllChildren():
+                        print('prims in _GRP are : '+ str(b))
+                        GRPprims.append(b)
 
-        for child in prim.GetChildren():
-            print('coucou'+str(child))
-            for bb in child.GetChildren():
-                print('gouzi'+str(bb))
-                
-                if bb.GetName() == 'geo':
-                    
-                    break
                 else:
-                    prims.append(bb)
+                    print('no GRP detected')
+                    if bb.GetName() == 'geo':
+                    
+                        break
+                    else:
+                        prims.append(bb)
+#                    for a in bb.GetAllChildren():
+#                        print('sub_bb'+ str(a))
+#                        prims.append(a)
 
     root_prim = stage.GetPrimAtPath(path)
     if root_prim:
@@ -46,7 +59,7 @@ def get_prims_at_path(stage, path):
         hou.ui.displayMessage(f"Path '{path}' not found in stage.")
         
         
-    return prims
+    return prims, GRPprims
 
 def find_versions(directory):
     if not os.path.exists(directory):
@@ -92,44 +105,59 @@ def get_unique_asset(detected_prims):
     uniprims = []
     dupli = []
     duplicount = []
-    uniprims.append(prims[0])
+    if len(prims) > 0:
+        uniprims.append(prims[0])
+        prims.remove(prims[0])
+    else:
+        print('out of range')
     realnums = []
-    prims.remove(prims[0])
+    
     
     count = 1
     
     for child in prims:
         
         uniprimstest = uniprims[-1]
-        uniprimstest = re.sub(r"\d+", "", uniprimstest) 
+
+        uniprimstest = re.sub(r"\d+", "", uniprimstest)
+        print(uniprimstest) 
         childtest = child
         childtest = re.sub(r"\d+", "", childtest)
+        print(childtest)
     
         if childtest == uniprimstest:
             childint = re.findall(r'\d+', child)
             uniprimsint = re.findall(r'\d+', uniprims[-1])
+            print(uniprimsint)
             realnum = int(childint[0])- count
+            print(realnum)
     
 #            print(childint, uniprimsint,realnum)
-    
-            if realnum == int(uniprimsint[0]):
-                count += 1
-                if count > 2:
-                    dupli.remove(dupli[-1])
-                    dupli.append(childtest.split('/')[-1])
-                    duplicount.pop(-1)
-                    duplicount.append(count)
 
+            try: 
+                uniprimsint = uniprimsint[0]
+                print('end of uniprims')
+   
+                if realnum == int(uniprimsint[0]):
+                    count += 1
+                    if count > 2:
+                        dupli.remove(dupli[-1])
+                        dupli.append(childtest.split('/')[-1])
+                        duplicount.pop(-1)
+                        duplicount.append(count)
+
+                    else:
+                        dupli.append(childtest.split('/')[-1])
+                        duplicount.append(count)
+    #                    print('new duplicount = '+str(duplicount))
+            
                 else:
-                    dupli.append(childtest.split('/')[-1])
-                    duplicount.append(count)
-#                    print('new duplicount = '+str(duplicount))
-        
-            else:
-                
-                uniprims.append(child)
-                count = 1
-#                print('ahah')
+                    
+                    uniprims.append(child)
+                    count = 1
+    #                print('ahah')
+            except:
+                print('end of uniprims')
                 
                 
 #            print('prims already in collection')
@@ -145,9 +173,7 @@ def get_unique_asset(detected_prims):
 #    print(duplicount)
 #    print(realnums)
     return uniprims, dupli, duplicount, realnums
-    
-    
-   
+      
 
 def autoManifest():
     
@@ -157,19 +183,56 @@ def autoManifest():
     for node in nodes:
         stage = node.stage()  # Get the USD stage from the LOP node
     
-        prims = get_prims_at_path(stage, path)
-        if prims is None:
+        prims, GRPprims = get_prims_at_path(stage, path)
+        
+        if prims and GRPprims is None:
             sys.exit()
-            
+    
         primsname = []
-        
+        GRPprimsname = []
+        print(prims, GRPprims)
         for i in prims:
-            asset_name = str(i).split('/')[-2]+'/'+ str(i).split('/')[-1].split('>')[0]
+            if prims is None:
+                return
+            else:
+                asset_name = str(i).split('/')[-2]+'/'+ str(i).split('/')[-1].split('>')[0]
+                print('PRIMSNAME is '+ asset_name)
+                primsname.append(asset_name)
+                
+        uniprims, dupli, duplicount, realnums = get_unique_asset(primsname) 
+        GRPuniprims = []
+        for i in GRPprims:
+            if GRPprims is None:
+                return
+            else: 
+                print('base name is :' + str(i))
+                asset_name = str(i).split('/')[-3]+'/'+ str(i).split('/')[-1].split('>')[0]
+
+                asset_name = asset_name.replace('_', '')
+                print('GRP name is : '+ asset_name)
+                asset_name = re.sub(r'\d+', '', asset_name)+'_GRP'
+                
+                #GRPuniprims.append(asset_name)
+                try: 
+                    if asset_name == GRPuniprims[-1]:   
+                        print('=')
+                        #GRPuniprims.remove(GRPuniprims[0])
+                    else:
+                        print('!')
+                        GRPuniprims.append(asset_name)
+                except:
+
+                    print('except')
+                    print(str(i) + ' added to GRPprims')
+                    GRPuniprims.append(asset_name)
+                    
+
             
-            primsname.append(asset_name)
-    #        print('PRIMSNAME '+ str(primsname))
-        
-        uniprims, dupli, duplicount, realnums = get_unique_asset(primsname)  
+        print(GRPuniprims)
+
+        for i in GRPuniprims:
+            uniprims.append(i)
+ 
      
         if prims:
             print(f"Found {len(prims)} primitives at path '{path}', which are named {prims}.")
@@ -205,9 +268,20 @@ def autoManifest():
         unresolvedAssets = []
         unresolvedFiles = []
         pos = merge.position()
+
         for i in uniprims:
-            
+            print('uniprims = '+ str(i))
             istr = re.sub(r"\d+", "", i)
+            print('istr is '+ istr)
+            if istr.split('_')[-1] == 'GRP':
+                    istrID = istr
+                    istr = istr.replace('_GRP', '')
+                    print(' new istr is : '+ istr)
+            else:
+                istrID = istr+('_noGRP')
+            if i.split('_')[-1] == 'GRP':
+                i = i.replace('_GRP', '')
+            
             print('istr = '+istr)
             asset_path = '/world/assets/'+i
             print('asset_path = '+ asset_path)
@@ -215,12 +289,19 @@ def autoManifest():
             scene_path = hou.hipFile.path()
             root = scene_path.split('/')[0]+'/'+scene_path.split('/')[1]
 #           print(root)
-
+            istrcheck = 'None'
             wrongFilepath = 0
+            
             filepath = root+'/03_Production/Assets/'+istr+'/Export/USD/'
+
+                
             if not os.path.exists(filepath):
+                
+                
                 istrcheck = istr
+                print(istr)
                 istr, filepath = assetFinder(root, asset_name, istr)
+                print(istr, filepath)
             
                 filepath = filepath + '/Export/USD/'
                 wrongFilepath = 1
@@ -257,6 +338,20 @@ def autoManifest():
                         exist = 0
                         asset_import.setPosition(pos + hou.Vector2(3, 0))
                         pos = asset_import.position()
+
+                        if istrID.split('_')[-1] == 'GRP':
+                                    
+                            duplicate = sub.createNode('duplicate', asset_name +'_duplicates')
+                            duplicate.setPosition(pos + hou.Vector2(0, -1))
+                            duplicate.parm('sourceprims').set('`chs("../'+i.split('/')[-1]+'/parent")`')
+                            duplicate.parm('ncy').set(1) 
+                            duplicate.parm('separatesource').set(1)
+                            duplicate.parm('destinationprims').set('/world/assets/Sets/`@srcname`_GRP')
+                            duplicate.parm('modifysource').set('hide')
+                            duplicate.parm('makeinstances').set(1)
+                            duplicate.setInput(0, asset_import)
+
+
                         
 
                     final_path = final_path.replace(root, '$PRISM_JOB')
@@ -265,9 +360,37 @@ def autoManifest():
                     asset_import.parm('filepath').pressButton()
                     asset_import.parm('importAs').set('reference')
                     if wrongFilepath == 0:
-                        asset_import.parm('parent').set(asset_path.replace(istr,'`chs("entity")`'))
-                    else: 
+                        print('OLA1'+str(istr))
+                        if istrID.split('_')[-1] == 'GRP':
+                            asset_import.parm('parent').set(asset_path.replace(istr.split('/')[-1], 'source/')+istr.split('/')[-1])
+                            
+                        else:
+
+                            asset_import.parm('parent').set(asset_path.replace(istr,'`chs("entity")`'))
+                    else:
+
+                        assetFolder = root + '/03_Production/Assets/'
+                        checkfolder = 0
+                        print(istr)
+                        for item in os.listdir(assetFolder):
+                            if asset_path.split('/')[3] == item:
+                                checkfolder = 1
+                                print('match' + str(item)+str(asset_path.split('/')[3] ))
+                            else:
+                                print('no match')
+                        if checkfolder == 1:       
+                            print('no change')                     
+                            asset_path = asset_path
+                            if istrID.split('_')[-1] == 'GRP':
+                                asset_path = asset_path.replace(asset_path.split('/')[-1], 'source/')+istr.split('/')[-1]
+                        else:    
+                            print('changed')
+                            
+                            asset_path = '/'.join(asset_path.split('/')[:3])+'/'+istr.split('/')[0]+'/'+'/'.join(asset_path.split('/')[-2:])
+                        
+
                         asset_import.parm('parent').set(asset_path)
+                        print('OLA2'+str(istr))
                         print('asset path is : '+asset_path)
         #           print(asset_path.replace(istr,'`chs("entity")`'))    
                     
@@ -277,26 +400,35 @@ def autoManifest():
                     
                     if str(current) == '[]':
             #            print('current is at'+str(current))
-                        if exist == 0:               
-                            merge.setNextInput(asset_import)
+                        if exist == 0:
+                            if istrID.split('_')[-1] == 'GRP':
+                                    
+                                merge.setNextInput(duplicate)
+                            else:
+               
+                                merge.setNextInput(asset_import)
                         
                     else:
                         if asset_name == current[0]:
                             if wrongFilepath == 0:
+                                print('OLA3'+str(istr))
                                 asset_import.parm('parent').set(asset_path.replace(('/'.join(asset_path.split('/')[-2:])), '`chs("entity")`1')+'/'+asset_name)
                             else:    
+                                print('OLA4'+str(istr))
                                 asset_import.parm('parent').set('/world/assets/'+istr+'1/'+asset_name)
                             
                             if exist == 1 and hou.node(manifestPath + '/'+asset_name +'_duplicates'):
                                 duplicate = hou.node(manifestPath + '/'+asset_name +'_duplicates')
                             
                             else:
-
+                                
+                                
                                 duplicate = sub.createNode('duplicate', asset_name +'_duplicates')
                                 duplicate.setPosition(pos + hou.Vector2(0, -1))
                                 duplicate.parm('sourceprims').set('/world/assets/'+i)
                                 duplicate.parm('duplicatename').set(asset_name+'`@copy+1`')
                                 duplicate.parm('modifysource').set('')
+
                                 if exist == 1:
                                     
                                     for outConnection in asset_import.outputConnections():
@@ -308,16 +440,23 @@ def autoManifest():
                                             outNode.setInput(outIndex, duplicate, 0)
                                     
                                 duplicate.setInput(0, asset_import)
+                                
                                 merge.setNextInput(duplicate)
                                 
-                            
+                               
+
                             duplicate.parm('ncy').set(duplicount[0]) 
                             
                             current.remove(current[0])
                             duplicount.remove(duplicount[0])
                         
                         else:
-                            merge.setNextInput(asset_import)
+                            if istrID.split('_')[-1] == 'GRP':
+                                    
+                                merge.setNextInput(duplicate)
+                            else:
+               
+                                merge.setNextInput(asset_import)
                     
         output = hou.node(sub.path()+'/output0')
         output.setInput(0, merge)

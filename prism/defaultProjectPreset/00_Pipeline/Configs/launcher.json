@@ -1,20 +1,6 @@
 {
     "apps": [
         {
-            "label": "Project Browser",
-            "category": "Prism",
-            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Project Browser.png",
-            "versions": [
-                {
-                    "label": "Project Browser",
-                    "mode": "Python",
-                    "cmd": "core.projectBrowser()",
-                    "preferred": true
-                }
-            ],
-            "uid": "75fc7a70-5309-11ef-946f-d85ed35d00b3"
-        },
-        {
             "label": "Settings",
             "category": "Prism",
             "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Settings.png",
@@ -27,6 +13,20 @@
                 }
             ],
             "uid": "7600c90c-5309-11ef-ac4d-d85ed35d00b3"
+        },
+        {
+            "label": "Project Browser",
+            "category": "Prism",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Project Browser.png",
+            "versions": [
+                {
+                    "label": "Project Browser",
+                    "mode": "Python",
+                    "cmd": "core.projectBrowser()",
+                    "preferred": true
+                }
+            ],
+            "uid": "75fc7a70-5309-11ef-946f-d85ed35d00b3"
         },
         {
             "label": "Documentation",
@@ -143,10 +143,7 @@
                     "mode": "Shell Command",
                     "cmd": "C:\\Program Files\\Autodesk\\Maya2025\\bin\\maya.exe",
                     "preferred": true,
-                    "environment": {
-                        "MAYA_SHELF_PATH": "R:\\pipeline\\pipe\\maya\\shelfs\\maya2025",
-                        "PYTHONPATH": "R:\\pipeline\\pipe\\maya\\scripts;R:\\pipeline\\pipe\\maya\\scripts\\abcPipeline;R:\\pipeline\\pipe\\maya\\scripts\\scene;R:\\pipeline\\pipe\\maya\\scripts\\tools;R:\\pipeline\\pipe\\maya\\scripts\\startupSettings\\;R:\\pipeline\\pipe\\maya\\scripts\\shaderTransferTool;R:\\pipeline\\pipe\\maya\\scripts\\assetBrowser;"
-                    }
+                    "environment": {}
                 }
             ],
             "uid": "76258ec0-5309-11ef-983d-d85ed35d00b3"

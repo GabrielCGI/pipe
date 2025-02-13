@@ -1,0 +1,42 @@
+Lors d'une sélection d'objets avant l'activation du Bob cela ralentit l'affichage de Bob.
+
+Voici les performances observés sur une selection d'une centaines d'objets
+
+Durée total 3.0625 secondes
+
+Lock : 1.3125 s | 1,312,500,000 ns
+Clean Freeze : 0.625 s | 625,000,000 ns
+Shape Renamer : 0.21875 s | 218,750,000 ns
+Delete Orig : 0.1875 s | 187,500,000 ns
+UV Copier : 0.1875 s | 187,500,000 ns
+Character Time Setter : 0.15625 s | 156,250,000 ns
+Rest Pos to Vertex Color : 0.140625 s | 140,625,000 ns
+Spline Step : 0.0625 s | 62,500,000 ns
+Check Hierarchy : 0.0625 s | 62,500,000 ns
+Shader Transfer : 0.0625 s | 62,500,000 ns
+Trace Set Tool : 0.015625 s | 15,625,000 ns
+Select Geo To Export : 0.015625 s | 15,625,000 ns
+Cleaner : 0.015625 s | 15,625,000 ns
+Select Big Objects : 0.0 s | 0 ns
+Select Invisible Objects : 0.0 s | 0 ns
+Print Abc Layer : 0.0 s | 0 ns
+oRig Tool : 0.0 s | 0 ns
+Gate tool : 0.0 s | 0 ns
+Isolate : 0.0 s | 0 ns
+USD Copy Paste : 0.0 s | 0 ns
+Check Texture : 0.0 s | 0 ns
+Override Killer : 0.0 s | 0 ns
+Glass shadow : 0.0 s | 0 ns
+Viewport Shader : 0.0 s | 0 ns
+Face From Shader : 0.0 s | 0 ns
+Shading Group Renamer : 0.0 s | 0 ns
+Duplicate Shader : 0.0 s | 0 ns
+Display Color (selection) : 0.0 s | 0 ns
+Light Exposure Tools : 0.0 s | 0 ns
+
+Patch: Désactiver tous les outils sauf :
+
+USD Copy Paste
+Shading Group Rename
+Gate tool
+Select Geo To Export

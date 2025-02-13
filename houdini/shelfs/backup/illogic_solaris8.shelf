@@ -24,7 +24,6 @@
     <memberTool name="Lib_Importer"/>
     <memberTool name="restart_houdini"/>
     <memberTool name="automanifest"/>
-    <memberTool name="restart_houdini"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -71,7 +70,7 @@ reload(kma_mat_from_attr)
 kma_mat_from_attr.execute(collectionMode=True)]]></script>
   </tool>
 
-  <tool name="paste" label="paste" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
+  <tool name="paste" label="Paste" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
     <script scriptType="python"><![CDATA[import sys
 from imp import reload
 
@@ -82,7 +81,7 @@ reload(copy_paste)
 copy_paste.paste()]]></script>
   </tool>
 
-  <tool name="copy" label="copy" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
+  <tool name="copy" label="Copy" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
     <script scriptType="python"><![CDATA[import sys
 from imp import reload
 
@@ -93,7 +92,7 @@ reload(copy_paste)
 copy_paste.copy()]]></script>
   </tool>
 
-  <tool name="stage_manager_update" label="stage_manager_update" icon="hicon:/SVGIcons.index?BUTTONS_page_reload.svg">
+  <tool name="stage_manager_update" label="Stage Manager Update" icon="hicon:/SVGIcons.index?BUTTONS_page_reload.svg">
     <script scriptType="python"><![CDATA[import sys
 from imp import reload
 
@@ -116,12 +115,8 @@ reload(ressource)
 reload(auto)
 auto.run()]]></script>
   </tool>
-  <tool name="restart_houdini" label="Restart" icon="hicon:/SVGIcons.index?BUTTONS_cook.svg">
-    <script scriptType="python"><![CDATA[import restart.restart as restart
 
-restart.restart_houdini()]]></script>
-  </tool>
-  <tool name="Lib_Importer" label="Lib_Importer" icon="R:/pipeline/pipe/houdini/shelfs/icons/lib_importer.png">
+  <tool name="Lib_Importer" label="Lib Importer" icon="R:/pipeline/pipe/houdini/shelfs/icons/lib_importer.png">
     <script scriptType="python"><![CDATA[import sys
 from imp import reload
 
@@ -132,13 +127,16 @@ reload(Lib_Importer)
 Lib_Importer.libImport()]]></script>
   </tool>
 
+  <tool name="restart_houdini" label="Restart" icon="hicon:/SVGIcons.index?BUTTONS_cook.svg">
+    <script scriptType="python"><![CDATA[import restart.restart as restart
+
+restart.restart_houdini()]]></script>
+  </tool>
+
   <tool name="automanifest" label="Auto Manifest" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+    <script scriptType="python"><![CDATA[from imp import reload
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\automanifest")
-
-import auto_manifest
+import automanifest.auto_manifest as auto_manifest
 reload(auto_manifest)
 auto_manifest.autoManifest()]]></script>
   </tool>
