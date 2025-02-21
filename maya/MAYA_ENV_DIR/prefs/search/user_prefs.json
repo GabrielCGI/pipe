@@ -25,12 +25,14 @@
             "ToggleFaceNormalDisplay",
             "ToggleVertexNormalDisplay",
             "HotkeyPreferencesWindow",
-            "CreateReference",
             "MatchPivots",
-            "ReferenceEditor",
             "NamespaceEditor",
             "MatchTransform",
-            "ParentConstraint"
+            "ParentConstraint",
+            "ReferenceEditor",
+            "CreateReference",
+            "CreatePolygonCube",
+            "CreateSweepMesh"
         ],
         [],
         [],

@@ -8,6 +8,7 @@
 # coding: utf-8
 import sys
 import nuke
+import nukescripts
 import os.path
 
 
@@ -102,7 +103,7 @@ if nuke.NUKE_VERSION_MAJOR==12:
     print("End loading Nuke Menu as version 12...")
 
 
-elif nuke.NUKE_VERSION_MAJOR>=15:
+elif nuke.NUKE_VERSION_MAJOR>=13:
     print("Loading Nuke Menu as version 15+ ...")
 
     # ### -------------------------------------------------------------------------------------------
@@ -181,5 +182,4 @@ elif nuke.NUKE_VERSION_MAJOR>=15:
 			    DVP.addCommand( "{0}/{1}".format(key,item), "nuke.nodePaste(\"{0}{1}/{2}.nk\")".format(DVPath,key,item), icon="{0}.png".format(item) )
     ### end here ###
 
-    
     print("End loading Nuke Menu as version 15+ ...")

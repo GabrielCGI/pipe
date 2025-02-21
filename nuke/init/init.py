@@ -1,6 +1,7 @@
 ## Nuke Init for Illogic
 ## ValDo Edit 240903
 import nuke
+import nukescripts
 import os
 os.environ["OFX_PLUGIN_PATH"] = "D:/OFX_local"
 
@@ -10,7 +11,7 @@ if nuke.NUKE_VERSION_MAJOR==12:
     print("Nuke Init as version 12...")
     
     ### -------------------------------------------------------------------------------------------
-    ### ----------------------------------     Nuke 12      ---------------------------------------
+    ### ----------------------------------     Nuke 13      ---------------------------------------
     ### -------------------------------------------------------------------------------------------
 
     nuke.pluginAddPath ('R:/nukeGizmo')
@@ -41,14 +42,14 @@ if nuke.NUKE_VERSION_MAJOR==12:
     print("End Nuke Init as version 12!")
 
 print(nuke.NUKE_VERSION_MAJOR)
-if nuke.NUKE_VERSION_MAJOR >= 15:
+if nuke.NUKE_VERSION_MAJOR >= 13:
 
     #ATTENTION A NE PAS UTILISER DE FORMAT f{} -> FAIS CRASHER NUKE 12 !!!!
     nuke_version = str(nuke.NUKE_VERSION_MAJOR)+"."+str(nuke.NUKE_VERSION_MINOR)
 
     print("Nuke Init as version 15+ ...")
     # ### -------------------------------------------------------------------------------------------
-    # ### ----------------------------------     Nuke 15+      --------------------------------------
+    # ### ----------------------------------     Nuke 13-15+      --------------------------------------
     # ### -------------------------------------------------------------------------------------------
 
     # >>>PrismStart
@@ -113,22 +114,22 @@ if nuke.NUKE_VERSION_MAJOR >= 15:
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/stamps")
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/Deep2VP_v40")
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/pixelfudger3")
+    nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts/nukeToPack/", 'nukeToPack/icons')
 
-    if (nuke_version=="15.0"):
-        # Setting env var for optical flare : 
-        #os.environ["OPTICAL_FLARES_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\plugins\OpticalFlares_Nuke_15.0_Node-Locked_1.0.94\plugin\Windows"
-        #os.environ["OPTICAL_FLARES_PRESET_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\plugins\OpticalFlares_Nuke_15.0_Node-Locked_1.0.94\Textures-And-Presets"
-        #os.environ["OPTICAL_FLARES_VERBOSE_CONSOLE"]="True"
-        print('THIS VERSION SHOULD NOT BE USED ANYMORE!')
 
+   
     if (nuke_version=="15.1"):
         # Setting env var for optical flare : 
+        print("Setting up Optical Flares for Nuke 15.1")
+        os.environ["OPTICAL_FLARES_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OpticalFlares_Nuke_15.1_Node-Locked_1.0.94\plugin\Windows"
         os.environ["OPTICAL_FLARES_PRESET_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OpticalFlares_Nuke_15.1_Node-Locked_1.0.94\Textures-And-Presets"
         os.environ["OPTICAL_FLARES_VERBOSE_CONSOLE"]="True"
+        os.environ["OPTICAL_FLARES_NO_GPU"] = "True"
+        os.environ["OPTICAL_FLARES_LICENSE_PATH"] = r"C:\Program Files\Nuke15.1v5"
 
     else:
-        pass
-        #print(f"something went wrong with optical flare, maybe you should install the minor version of it, in your case : {nuke_version}")
+        print("something went wrong with optical flare, maybe you should install the minor version of it, in your case : " + nuke_version)
+
 
     print("End Nuke Init as version 15+ !")
 

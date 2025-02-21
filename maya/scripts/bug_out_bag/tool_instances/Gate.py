@@ -95,7 +95,7 @@ class Gate(MultipleActionTool):
 
 
 
-        camera.filmFit.set(0)
+        camera.filmFit.set(1)
         # Check for existing image planes attached to the camera
         image_planes = pm.listConnections(camera, type='imagePlane')
 
@@ -105,14 +105,14 @@ class Gate(MultipleActionTool):
             print(image_plane)
             pm.select(image_plane)
             image_plane.imageName.set(image_path)
-            image_plane.fit.set(1)
+            image_plane.fit.set(2)
             print(f"Updated image path for existing image plane on {camera}.")
         else:
             # If no image plane exists, create one and set attributes
             image_plane = pm.imagePlane(camera=camera, fileName=image_path, lookThrough=camera)[0]
             image_plane.depth.set(1)
             image_plane.alphaGain.set(0.5)
-            image_plane.fit.set(1)
+            image_plane.fit.set(2)
             print(f"Image plane created for {camera} with image {image_path}. Depth set to 1 and alphaGain set to 0.5.")
         current_mode = pm.evaluationManager(query=True, mode=True)[0]
         if current_mode == 'parallel':

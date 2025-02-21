@@ -32,6 +32,7 @@
     <memberTool name="blast"/>
     <memberTool name="clean_light"/>
     <memberTool name="automanifestv2"/>
+    <memberTool name="testSubprocess"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">

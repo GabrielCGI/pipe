@@ -1,7 +1,6 @@
 {
     "env": [
-        {"PYTHONPATH":"R:/pipeline/pipe_public/COP_hdri_editor/scripts;"},
-        {"HOUDINI_SCRIPT_PATH":"test"}
+        {"PYTHONPATH":"R:/pipeline/pipe_public/COP_hdri_editor/scripts;"}
 
     ]
 }

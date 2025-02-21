@@ -18,6 +18,7 @@ def paste():
     )
 
     if filepath:
+        active_pane.clearAllSelected()
         location.loadItemsFromFile(filepath)
         active_pane.homeToSelection()
         hou.ui.displayMessage(f"Items loaded from {filepath}")

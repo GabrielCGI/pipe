@@ -6,7 +6,7 @@ import math
 import hou
 import PrismInit
 
-SHOW_TIME = True
+SHOW_TIME = False
 
 FILEPATH_PARM = 'filepath'
 PARENT_PARM = 'parent'
@@ -224,10 +224,6 @@ def run():
         return
     
     commonAssets = getCommonAssets(all_assets, all_prims)
-    
-    print(f"Number of assets: {len(all_assets)}")
-    print(f"Number of prims: {len(all_prims)}")
-    print(f"Common prims: {len(commonAssets)}")
     
     isCancelled = hou.ui.displayMessage(
         f"Do you want to import {len(commonAssets)} assets?", buttons=('Confirm', 'Cancel'),
