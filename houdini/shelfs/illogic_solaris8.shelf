@@ -6,12 +6,12 @@
  a single file. -->
 
   <shelfSet name="solaris_1" label="Solaris Geometry">
-    <memberToolshelf name="illogic_solaris6"/>
     <memberToolshelf name="DEV"/>
     <memberToolshelf name="prism"/>
     <memberToolshelf name="polygon"/>
     <memberToolshelf name="lop_oceans"/>
     <memberToolshelf name="cloud"/>
+    <memberToolshelf name="illogic_solaris6"/>
   </shelfSet>
 
   <toolshelf name="illogic_solaris6" label="illogic_solaris">
