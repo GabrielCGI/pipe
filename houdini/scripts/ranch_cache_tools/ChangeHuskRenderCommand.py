@@ -28,7 +28,7 @@ class ChangeHuskRenderCommand:
             self.applyPatch(plugin)
 
     def applyPatch(self, plugin):
-        print("Patching HUSK Render Command to add path remapping for Ranch - autocrop mode")
+        print("Patching HUSK Render Command to add path remapping for Ranch - autocrop mode + pxr ar search path")
         # apply the monkeypatch to the "getHuskRenderScript" function of the USD plugin
         self.core.plugins.monkeyPatch(plugin.getHuskRenderScript, self.getHuskRenderScript, self, force=True)
 
@@ -137,10 +137,12 @@ def convert_path_local_ranch(original_path):
 usdFilePath = usdFilePath.replace("####", "$F4")
 
 
-
-env_copy = dict(os.environ)
-env_copy["HOUDINI_PACKAGE_DIR"] = "C:/tmp/houdinipackage/"
 os.environ["HOUDINI_PACKAGE_DIR"] = "C:/tmp/houdinipackage/"
+os.environ["PXR_AR_DEFAULT_SEARCH_PATH"] = "R:/;I:/"
+env_copy = dict(os.environ)
+
+
+
 env_vars = {key: os.environ[key] for key in os.environ.keys()}
 
 print ("Houdini package modificed")
@@ -151,8 +153,10 @@ print(env_vars)
 
 computer_name = os.getenv('COMPUTERNAME', '')  # Get the computer name
 if computer_name.startswith("RANCH") and "nocache" not in usdFilePath :
-
-    print("Ranch detected. Remapping USD path... (add nocache to prism lop render node name to prevent it)")
+    PXR_AR_DEFAULT_SEARCH_PATH_RANCH = "\\\\\\\\RANCH-111\\\\ranch_cache\\\\I\\\\;\\\\\\\\RANCH-111\\\\ranch_cache\\\\r\\\\"
+    env_copy["PXR_AR_DEFAULT_SEARCH_PATH"] = PXR_AR_DEFAULT_SEARCH_PATH_RANCH
+    print(f"overring PXR AR DEFAULT SEARCH PATH: {PXR_AR_DEFAULT_SEARCH_PATH_RANCH}")
+    print("Ranch detected. Remapping USD path... Add PXR_AR_Default_search_path (add nocache to prism lop render node name to prevent it)")
 
 
 
