@@ -5,13 +5,13 @@ import nukescripts
 import os
 os.environ["OFX_PLUGIN_PATH"] = "D:/OFX_local"
 
-
+print("---------- WARNING : BETA MODE ACTIVATED ---------")
 
 if nuke.NUKE_VERSION_MAJOR==12:
     print("Nuke Init as version 12...")
     
     ### -------------------------------------------------------------------------------------------
-    ### ----------------------------------     Nuke 12      ---------------------------------------
+    ### ----------------------------------     Nuke 13      ---------------------------------------
     ### -------------------------------------------------------------------------------------------
 
     nuke.pluginAddPath ('R:/nukeGizmo')
@@ -41,15 +41,14 @@ if nuke.NUKE_VERSION_MAJOR==12:
 
     print("End Nuke Init as version 12!")
 
-print(nuke.NUKE_VERSION_MAJOR)
 if nuke.NUKE_VERSION_MAJOR >= 13:
 
     #ATTENTION A NE PAS UTILISER DE FORMAT f{} -> FAIS CRASHER NUKE 12 !!!!
     nuke_version = str(nuke.NUKE_VERSION_MAJOR)+"."+str(nuke.NUKE_VERSION_MINOR)
 
-    print("Nuke Init as version 15+ ...")
+    print("Nuke Init as version 13+ ...\n")
     # ### -------------------------------------------------------------------------------------------
-    # ### ----------------------------------     Nuke 15+      --------------------------------------
+    # ### ----------------------------------     Nuke 13-15+      --------------------------------------
     # ### -------------------------------------------------------------------------------------------
 
     # >>>PrismStart
@@ -108,7 +107,7 @@ if nuke.NUKE_VERSION_MAJOR >= 13:
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/ToolSets')
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts')
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/icons')
-    nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins')
+    #nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins')
     nuke.pluginAddPath('R:/pipeline/pipe/nuke/script')
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/MagicDefocus2_v1.0.3")
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/stamps")
@@ -116,37 +115,54 @@ if nuke.NUKE_VERSION_MAJOR >= 13:
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/pixelfudger3")
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts/nukeToPack/", 'nukeToPack/icons')
 
-
-    if nuke.env['gui']:
-        
-        nuke.pluginAddPath("R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OpticalFlares_Nuke_15.1_Node-Locked_1.0.94\plugin\Windows")
-        os.environ["OPTICAL_FLARES_LICENSE_PATH"] = r"C:\Program Files\Nuke15.1v5"
-        
-    else:
-        nuke.pluginAddPath("R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OF_Render_15.1\plugin\Windows")
-        os.environ["OPTICAL_FLARES_LICENSE_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\licenses"
-        os.environ["OPTICAL_FLARES_NO_GPU"] = "True"
-    
-    
-    os.environ["OPTICAL_FLARES_PRESET_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OpticalFlares_Nuke_15.1_Node-Locked_1.0.94\Textures-And-Presets"
+    ### << Start Optical flare
     os.environ["OPTICAL_FLARES_VERBOSE_CONSOLE"]="True"
-    
-    
 
+    if(nuke_version=="13.1"):
+        
+        os.environ["OPTICAL_FLARES_PRESET_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OpticalFlares_Nuke_13.1_Node-Locked_1.0.9\Textures-And-Presets"
 
-    # Check Optical Flares plugin
-    optical_flares_path = os.getenv("OPTICAL_FLARES_PATH")
-    if not optical_flares_path or not os.path.exists(optical_flares_path):
-        print("[ERROR] Optical Flares plugin not found. Ensure OPTICAL_FLARES_PATH is set correctly.\n" + "Current path: " +optical_flares_path)
+        if nuke.env['gui']:
+            print("Nuke 13.1 GUI version")
+            nuke.pluginAddPath(r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OpticalFlares_Nuke_13.1_Node-Locked_1.0.9\plugin\Windows")
+            os.environ["OPTICAL_FLARES_LICENSE_PATH"] = r"C:\Program Files\Nuke13.1v5"
+        else:
+            print("Nuke 13.1 FARM version")
+            os.environ["OPTICAL_FLARES_NO_GPU"] = "True"
+            nuke.pluginAddPath(r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OF_Render_13.1\plugin\Windows")
+            os.environ["OPTICAL_FLARES_LICENSE_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\licenses"
+            
+    elif (nuke_version=="15.1"):
+        
+        # Common Optical flares env
+        os.environ["OPTICAL_FLARES_PRESET_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OpticalFlares_Nuke_15.1_Node-Locked_1.0.94\Textures-And-Presets"
+        
+
+        if nuke.env['gui']:
+            print("Nuke 15.1 GUI version")
+            
+            print("\nSetting up Optical Flares for Nuke 15.1\n")
+            nuke.pluginAddPath(r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OpticalFlares_Nuke_15.1_Node-Locked_1.0.94\plugin\Windows")
+            os.environ["OPTICAL_FLARES_LICENSE_PATH"] = r"C:\Program Files\Nuke15.1v5"
+
+        else:
+            print("Nuke 15.1 FARM version")
+            os.environ["OPTICAL_FLARES_NO_GPU"] = "True"
+            nuke.pluginAddPath(r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OF_Render_15.1\plugin\Windows")
+            os.environ["OPTICAL_FLARES_LICENSE_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\licenses"
+            # 
+        # Setting env var for optical flare : 
+        
+
     else:
-        print("Optical Flares plugin found at: " + optical_flares_path)
+        print("something went wrong with optical flare, maybe you should install the minor version of it, in your case : " + nuke_version)
 
-    # Check Optical Flares license
-    license_path = os.getenv("OPTICAL_FLARES_RENDER_LICENSE_PATH")
-    if not license_path or not os.path.exists(license_path):
-        print("[ERROR] Optical Flares license missing. Ensure OPTICAL_FLARES_RENDER_LICENSE_PATH is set correctly.\n" + "Current path: " +license_path)
-    else:
-        print("Optical Flares license found at: "+ license_path)
+    ### End Optical flare >>
 
-    print("End Nuke Init as version 15+ !")
+    nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins')
+
+
+
+
+    print("End Nuke Init as version 13+ !\n\n")
 

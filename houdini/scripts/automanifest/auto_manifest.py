@@ -412,7 +412,7 @@ def autoManifest():
                         if asset_name == current[0]:
                             if wrongFilepath == 0:
                                 print('OLA3'+str(istr))
-                                asse    t_import.parm('parent').set(asset_path.replace(('/'.join(asset_path.split('/')[-2:])), '`chs("entity")`1')+'/'+asset_name)
+                                asset_import.parm('parent').set(asset_path.replace(('/'.join(asset_path.split('/')[-2:])), '`chs("entity")`1')+'/'+asset_name)
                             else:    
                                 print('OLA4'+str(istr))
                                 asset_import.parm('parent').set('/world/assets/'+istr+'1/'+asset_name)

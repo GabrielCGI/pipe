@@ -6,7 +6,10 @@ class ChangeHuskRenderCommand:
     def __init__(self, core):
         self.core = core
         self.version = "v1.1.0"
-
+        
+        if self.core.appPlugin.pluginName not in ["Houdini", "Maya"]:
+              return
+          
         # check if USD plugin is loaded
         dlPlugin = self.core.getPlugin("USD")
         if dlPlugin:

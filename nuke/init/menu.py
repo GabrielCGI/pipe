@@ -104,7 +104,7 @@ if nuke.NUKE_VERSION_MAJOR==12:
 
 
 elif nuke.NUKE_VERSION_MAJOR>=13:
-    print("Loading Nuke Menu as version 15+ ...")
+    print("Loading Nuke MENU as version 13+ ...")
 
     # ### -------------------------------------------------------------------------------------------
     # ### ----------------------------------     Nuke 15+      --------------------------------------
@@ -160,6 +160,9 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     s.addCommand("Mask Buddy", "nuke.createNode(\"MaskBuddy\")") # >>> Add Mask Buddy tool
     s.addCommand("Projection Buddy", "nuke.createNode(\"ProjectionBuddy\")") # >>> Add Projection Buddy tool
     s.addCommand("Reflection Buddy", "nuke.createNode(\"ReflectionBuddy\")") # >>> Add Reflecrion Buddy tool
+    n=bloomMenu.addMenu("Nodes")
+    n.addCommand('expoglow', 'nuke.createNode("expoglow")')
+
 
     
     ### edit folder path here ###
@@ -182,4 +185,4 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
 			    DVP.addCommand( "{0}/{1}".format(key,item), "nuke.nodePaste(\"{0}{1}/{2}.nk\")".format(DVPath,key,item), icon="{0}.png".format(item) )
     ### end here ###
 
-    print("End loading Nuke Menu as version 15+ ...")
+    print("End loading Nuke MENU as version 13+ ...")
