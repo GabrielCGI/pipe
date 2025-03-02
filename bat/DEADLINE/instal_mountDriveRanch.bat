@@ -1,9 +1,9 @@
 @echo off
 REM Delete all .bat files in the specified Startup directory
-DEL "C:\Users\administrator\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\*.bat"
+DEL "C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\mountDriveRanch.bat"
 
 SET "sourcePath=R:\pipeline\pipe\bat\DEADLINE\mountDriveRanch.bat"
-SET "destinationPath=C:\Users\administrator\AppData\Roaming\Microsoft\Windows\Start Menu\Programs\Startup\mountDriveRanch.bat"
+SET "destinationPath=C:\ProgramData\Microsoft\Windows\Start Menu\Programs\StartUp\mountDriveRanch.bat"
 
 
 IF EXIST "%sourcePath%" (

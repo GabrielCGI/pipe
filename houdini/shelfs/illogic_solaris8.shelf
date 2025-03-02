@@ -6,7 +6,6 @@
  a single file. -->
 
   <shelfSet name="solaris_1" label="Solaris Geometry">
-    <memberToolshelf name="DEV"/>
     <memberToolshelf name="prism"/>
     <memberToolshelf name="polygon"/>
     <memberToolshelf name="lop_oceans"/>
@@ -33,6 +32,7 @@
     <memberTool name="clean_light"/>
     <memberTool name="automanifestv2"/>
     <memberTool name="testSubprocess"/>
+    <memberTool name="stress_test"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">

@@ -18,38 +18,59 @@ def main(*args, **kwargs):
 #    print(kwargs["scenefile"])
 #     print(kwargs["startframe"])
 #     print(kwargs["endframe"])
-    print(kwargs["outputpath"])
-    if core.appPlugin.pluginName == "Maya":
-        for i in kwargs["scenefile"].split('\\'):
-            if i == 'Anim':
-                print('In Maya Anim task.')
-                path = kwargs["outputpath"]
-                stage = usdApi.getStageFromFile(path)
-                prims = stage.TraverseAll()
+    comment = core.getStateManager().publishComment
+    if comment == 'noHook':
+        print('Hook deactivated')
+        return
 
-                for prim in prims:
-                    if prim.GetTypeName() == 'Mesh':
-                        prim.RemoveProperty("subdivisionScheme")
-                        parent = prim.GetParent()
-                        print(parent)
-                        if prim.GetAttribute('points').ValueMightBeTimeVarying() is True:
-                            print('deformed geo')                        
+    else:
+        print('Hook started')
+        if core.appPlugin.pluginName == "Maya":
+            for i in kwargs["scenefile"].split('\\'):
+                if i == 'Anim':
+                    print('In Maya Anim task.')
+                    path = kwargs["outputpath"]
+
+                    fileext = ['usd', 'usdc', 'usda']
+                    check = 0
+                    for i in fileext:
+                        
+                        if path.split('.')[-1] != i:
+                            print('not usd')
+                            
                         else:
-                            check = 0
-                            path = str(parent).replace('>)', '')
-                            path = path.split('/')
-                            for i in path:
-                                if i == 'skinned':
-                                    check = 1
-                            if check == 0:
-                                prim.RemoveProperty('faceVertexCounts')
-                                prim.RemoveProperty('faceVertexIndices')
-                                prim.RemoveProperty('points')
-                                prim.RemoveProperty('normals')
-       
-                usdApi.saveStage(stage)       
-            else: 
-                print('Not in Anim task.')
+                            check = 1
+                    if check == 0:
+                        print('not usd export')
+                        break
+                    print('in usd export')
+                    stage = usdApi.getStageFromFile(path)
+                    prims = stage.TraverseAll()
+
+                    for prim in prims:
+                        if prim.GetTypeName() == 'Mesh':
+                            prim.RemoveProperty("subdivisionScheme")
+                            parent = prim.GetParent()
+                            print(parent)
+                            if prim.GetAttribute('points').ValueMightBeTimeVarying() is True:
+                                print('deformed geo')                        
+                            else:
+                                check = 0
+                                path = str(parent).replace('>)', '')
+                                path = path.split('/')
+                                print(path)
+                                for i in path:
+                                    if i == 'skinned' or "fxPlants" or "extraPublish" in i:
+                                        check = 1
+                                if check == 0:
+                                    prim.RemoveProperty('faceVertexCounts')
+                                    prim.RemoveProperty('faceVertexIndices')
+                                    prim.RemoveProperty('points')
+                                    prim.RemoveProperty('normals')
+        
+                    usdApi.saveStage(stage)       
+                else: 
+                    None
 
 
 

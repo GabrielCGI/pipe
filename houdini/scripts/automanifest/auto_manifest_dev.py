@@ -55,12 +55,13 @@ def getPrims(selectedNode: hou.Node) -> list[str]:
     rule = hou.LopSelectionRule()
     rule.setTraversalDemands(hou.lopTraversalDemands.Default)
     rule.setPathPattern(
-        f"%kind:component {search_root}*/* {search_root}*/*/*  ")
+        f"%kind:component {search_root}*/* {search_root}*/*/*  {search_root}*/*/*/*")
     prim_paths = rule.expandedPaths(lopnode=None, stage=stage)
 
     prims = []
     for prim in prim_paths:
         prims.append(str(prim))
+        print(str(prim))
             
     return prims
 
@@ -72,13 +73,12 @@ def getAssets() -> list[str]:
     globpath = os.path.join(path, "*", "*")
     return glob.glob(globpath)
  
- 
 @timeElapsed
 def getCommonAssets(assets: list[str], prims: list[str]) -> list[str]:
     commonAssets = []
     for prim in prims:
         for asset in assets:
-            if os.path.basename(prim) == os.path.basename(asset):
+            if os.path.basename(prim) in os.path.basename(asset) :
                 commonAssets.append(asset)
                 
     commonAssets = list(set(commonAssets))

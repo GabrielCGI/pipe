@@ -481,7 +481,7 @@
             "value": "@playblastversion_path@/@sequence@-@shot@_@identifier@_@version@@.(frame)@@extension@"
         },
         "deadlineJobName": {
-            "value": "[expression,#  available variables:\n#  \"core\" - PrismCore\n#  \"context\" - dict\n\nif context.get(\"type\") == \"asset\":\n    base = \"@asset@\"\nelse:\n    base = \"@sequence@-@shot@\"\n\ntemplate = base + \"_@product@@identifier@_@version@\"]"
+            "value": "[expression,#  available variables:\n#  \"core\" - PrismCore\n#  \"context\" - dict\n\nif context.get(\"type\") == \"asset\":\n    base = \"@project_name@_@asset@\"\nelse:\n    base = \"@project_name@_@sequence@-@shot@\"\n\ntemplate = base + \"_@product@@identifier@_@version@\"]"
         },
         "houdini_HDAs": {
             "value": "@project_path@/04_Resources/HDAs"
@@ -754,7 +754,7 @@
     },
     "environmentVariables": {
         "PRISM_DEADLINE_HUSK_PATH": "C:\\Program Files\\Side Effects Software\\Houdini %HOUDINI_ILL_VERSION%\\bin\\husk.exe",
-        "PRISM_HUSK_DEADLINE_GROUP": "prism_plus"
+        "PRISM_HUSK_DEADLINE_GROUP": "husk_grp"
     },
     "export_paths": {},
     "render_paths": {},
@@ -781,38 +781,55 @@
         "poolPresets": [
             {
                 "name": "Rendering",
-                "pool": "hi_vram",
-                "secondaryPool": "low_vram",
-                "group": "houdini"
+                "pool": "none",
+                "secondaryPool": "none",
+                "group": "husk_grp"
             },
             {
                 "name": "Nuke",
-                "pool": "< Pool >",
-                "secondaryPool": "< Secondary Pool >",
-                "group": "nukegrp"
+                "pool": "nuke_pool",
+                "secondaryPool": "none",
+                "group": "nuke_grp"
             },
             {
-                "name": "HouFX",
-                "pool": "low_vram",
-                "secondaryPool": "hi_vram",
-                "group": "houdini"
+                "name": "HoudiniFX",
+                "pool": "hou_fx_pool",
+                "secondaryPool": "none",
+                "group": "houdini_fx_grp"
+            },
+            {
+                "name": "HoudiniNoFx",
+                "pool": "hou_no_fx_pool",
+                "secondaryPool": "none",
+                "group": "houdini_grp"
             }
         ],
         "pools": [
             "none",
-            "fast",
-            "gloutons",
+            "all",
             "hi_vram",
+            "hou_fx_pool",
+            "hou_no_fx_pool",
             "low_vram",
-            "slow"
+            "nuke_pool",
+            "p_guerlin_xmas25",
+            "p_ralphlauren",
+            "p_renault",
+            "p_renaultkwid",
+            "p_rogerdubuisww",
+            "p_swadisney",
+            "p_vca_flowerlace",
+            "ranch"
         ],
         "groups": [
             "none",
-            "all",
             "beta",
             "houdini",
-            "nukegrp",
-            "prism_plus"
+            "houdini_fx_grp",
+            "houdini_grp",
+            "husk_grp",
+            "nuke_grp",
+            "nukegrp"
         ]
     },
     "library": {

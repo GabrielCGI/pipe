@@ -5,7 +5,7 @@ import nukescripts
 import os
 os.environ["OFX_PLUGIN_PATH"] = "D:/OFX_local"
 
-print("---------- WARNING : BETA MODE ACTIVATED ---------")
+#print("---------- WARNING : BETA MODE ACTIVATED ---------")
 
 if nuke.NUKE_VERSION_MAJOR==12:
     print("Nuke Init as version 12...")
@@ -114,6 +114,7 @@ if nuke.NUKE_VERSION_MAJOR >= 13:
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/Deep2VP_v40")
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/pixelfudger3")
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts/nukeToPack/", 'nukeToPack/icons')
+    nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/aeRefractor')
 
     ### << Start Optical flare
     os.environ["OPTICAL_FLARES_VERBOSE_CONSOLE"]="True"
