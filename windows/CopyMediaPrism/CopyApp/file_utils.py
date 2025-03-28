@@ -14,7 +14,7 @@ json_default_path = os.path.join(os.path.expanduser("~"), "Documents", "departme
 
 # Default content for the JSON file
 default_identifiers = {
-    "COMPOSITING": ["compo", "comp", "nuke"],
+    "COMPOSITING": ["compo", "comp", "nuke","beauty"],
     "ANIM": ["anim", "anim_playblast"],
     "RLO": ["RoughtLayout", "Previz", "RoughLayout_playblast"]
 }

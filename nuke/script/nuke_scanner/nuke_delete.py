@@ -190,5 +190,8 @@ def run():
             
             for folder_path in folder_to_delete:
                 print("DELETING %s"%(folder_path))
-                shutil.rmtree(folder_path)
-                print("\t Folder deleted : --> " + folder_path)
+                try:
+                    shutil.rmtree(folder_path)
+                    print("\t Folder deleted : --> " + folder_path)
+                except Exception as e:
+                    print(f"Failed to delete:\n{e}")

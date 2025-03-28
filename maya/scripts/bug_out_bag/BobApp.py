@@ -107,7 +107,7 @@ class BobApp(QDialog):
 
             ]),
             BobCategory("Clean", self.__prefs, [
-                # CleanFreezeTool(),
+                CleanFreezeTool(),
                 # CleanerTool(),
                 # TextureCheckTool(),
                 # DeleteOrigTool(),
@@ -118,7 +118,7 @@ class BobApp(QDialog):
             ]),
 
             BobCategory("Shading", self.__prefs, [
-                # UVCopierTool(),
+                UVCopierTool(),
                 # GlassShadow(),
                 # ShaderTransferTool(),
                 # RestPosToVertexColorTool(),

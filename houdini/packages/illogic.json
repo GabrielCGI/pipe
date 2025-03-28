@@ -7,6 +7,7 @@
         {"HOUDINI_LMINFO_VERBOSE": 1},
         {"HOUDINI_SCRIPT_PATH":"R:/pipeline/pipe/houdini/scripts;"},
         {"HOUDINI_OTLSCAN_PATH":"R:/pipeline/pipe/houdini/hda;"},
+        {"HOUDINI_VIEWERSTATE_PATH": "R:/pipeline/pipe/houdini/viewer_states"},
         {"PYTHONPATH":"R:/pipeline/pipe/houdini/scripts;"}
     ]
 }

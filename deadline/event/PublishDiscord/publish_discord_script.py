@@ -33,6 +33,7 @@ async def on_ready():
         error = datas["error_count"]
         submit_time = datas["submit_time"]
         end_time = datas["end_time"]
+        avg_time = datas["avg_time"]
         render_time = datas["render_time"]
         video = datas["video"]
         username = datas["user"]
@@ -68,6 +69,7 @@ async def on_ready():
                     embed.add_field(name="\u200b", value="\u200b", inline=True)
                 embed.add_field(name="Render Time", value=render_time, inline=True)
                 embed.add_field(name="Submit Time", value=submit_time, inline=True)
+                embed.add_field(name="Average Time", value=avg_time, inline=True)
                 embed.add_field(name="\u200b", value="\u200b", inline=True)
                 embed.add_field(name="End Time", value=end_time, inline=True)
                 embed.add_field(name="Frames", value=frames, inline=not user_none)
@@ -84,4 +86,4 @@ async def on_ready():
         await client.close()
     await client.close()
 
-client.run('MTEzMjk2NTU2NjkzMjU4NjUzNw.Gp-JHT.XViBO4MinBlfj_MZNMpZh4Bpb8Xy2He7_Zx4ek')
+client.run('PUT DISCORD BOT TOKEN HERE')

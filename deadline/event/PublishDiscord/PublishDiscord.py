@@ -1,4 +1,4 @@
-from Deadline.Events import *
+from Deadline.Events import DeadlineEventListener
 from Deadline.Scripting import *
 import os
 import re
@@ -8,6 +8,52 @@ import json
 import random
 import tempfile
 import subprocess
+import logging
+import datetime
+from pathlib import Path
+
+PYTHON = r'R:\pipeline\networkInstall\python\Python310\python.exe'
+LOG_DIR = r'R:\devmaxime\discordbot\logs'
+LOG = None
+
+def setupLog(usdfile: str):
+    """Setup LOG basic config.
+
+    Args:
+        usdfile (str): USD path.
+    """
+    global LOG
+    global LOG_FILE
+    
+    basename = os.path.basename(usdfile)
+    name = os.path.splitext(basename)[0]
+    timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    
+    logname = sorted(Path(LOG_DIR).glob(f'log_{name}_*.txt'))
+    
+    if logname:
+        LOG_FILE = logname[0]
+    else:
+        logfilename = f"log_{name}_{timestamp}.txt"
+        LOG_FILE = os.path.join(LOG_DIR, logfilename)
+
+    os.makedirs(LOG_DIR, exist_ok=True)
+    
+    LOG = logging.getLogger(f"PrismPostExport_{name}")
+    LOG.setLevel(logging.INFO)
+
+    LOG.propagate = False
+
+    if LOG.hasHandlers():
+        LOG.handlers.clear()
+
+    file_handler = logging.FileHandler(LOG_FILE)
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s',
+                                  datefmt='%Y-%m-%d %H:%M:%S')
+    file_handler.setFormatter(formatter)
+    
+    LOG.addHandler(file_handler)
+    
 
 def GetDeadlineEventListener():
     """
@@ -29,6 +75,7 @@ class PublishDiscord(DeadlineEventListener):
     """
     def __init__(self):
         # Set up the event callbacks here
+        super().__init__()
         self.OnJobFinishedCallback += self.OnJobFinished
 
     def Cleanup(self):
@@ -59,6 +106,8 @@ class PublishDiscord(DeadlineEventListener):
         seconds = str(job.TotalRenderTime.Seconds).zfill(2)
         render_time = days + ":" + hours + ":" + minutes + ":" + seconds
         submit_time = job.JobSubmitDateTime.ToString()
+        avg_time = job.AverageTaskTime
+        LOG.info(avg_time)
         end_time = job.JobCompletedDateTime.ToString()
         error_count = job.ErrorReports
         # Get a random message within a list of premade ones
@@ -87,6 +136,7 @@ class PublishDiscord(DeadlineEventListener):
             "submit_time":submit_time,
             "end_time":end_time,
             "render_time":render_time,
+            "avg_time":avg_time,
             "error_count":error_count,
             "description":description,
             "video":video_path,
@@ -100,10 +150,10 @@ class PublishDiscord(DeadlineEventListener):
         tmp.close()
 
         # Launch with python >3.7 (here mayapy)
-        mayapy_path = "\"" + r"C:\Program Files\Autodesk\Maya2023\bin\mayapy.exe".replace("\\","/") + "\""
+        python_path = "\"" + PYTHON.replace("\\","/") + "\""
         publish_discord_script = r"R:\deadline\custom\events\PublishDiscord\publish_discord_script.py".replace("\\","/")
         tmp_filename = tmp.name
-        command =  mayapy_path +" "+ publish_discord_script+ " "+tmp_filename
+        command =  'python' +" "+ publish_discord_script+ " "+tmp_filename
 
         os.system(f"\"{command}\"")
         os.remove(tmp_filename)
@@ -114,7 +164,12 @@ class PublishDiscord(DeadlineEventListener):
         On Job finished launch Noice
         """
         match = re.match(r"^(.*)--no-pub-dc(.*)$",job.JobComment)
+        
         if match:
+            setupLog('Unpublished')
+            LOG.info('No publish. To publish automatically to discord remove --no-pub-dc to the comment of your job')
             print("No publish. To publish automatically to discord remove --no-pub-dc to the comment of your job")
             return
+        setupLog(job.JobName)
+        LOG.info('Job published')
         self.__submit_discord_publish(job)

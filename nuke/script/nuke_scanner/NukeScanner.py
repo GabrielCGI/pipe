@@ -135,6 +135,7 @@ class NukeScanner:
         :return:
         """
         read_nodes = nuke.allNodes("Read")
+        read_nodes += nuke.allNodes("DeepRead")
         for node in read_nodes:
             file_path = node["file"].value()
             # Test if in render_out
@@ -177,6 +178,8 @@ class NukeScanner:
         is_used, folders_to_delete = self.__check_folder_recursive(render_out_folder, False)
         dict_rename_folders = {}
         for folder_path in folders_to_delete:
+            if '_thumbs' in folder_path or '(mp4)' in folder_path:
+                continue
             folder_path= folder_path.replace("\\", "/")
             dirname, basename = os.path.split(folder_path)
             if not basename.startswith(_PREFIX_TO_DELETE):

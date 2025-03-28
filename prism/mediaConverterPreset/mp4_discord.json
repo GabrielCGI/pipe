@@ -1,0 +1,73 @@
+{
+    "name": "mp4_discord",
+    "category": "",
+    "settings": {
+        "autoOutputStartFrame": true,
+        "outputStartFrame": 1001,
+        "outputFormat": ".mp4",
+        "outputFormatOptions": {
+            "useProjectFps": true,
+            "fps": 25,
+            "crf": 30
+        },
+        "outputPath": "./sq010-sh010_LOCAL_RENDERING_v099_converted.mp4",
+        "modifiers": [
+            {
+                "type": "colorconversion",
+                "enabled": true,
+                "inputSpace": "auto",
+                "outputSpace": {
+                    "display": "sRGB - Display",
+                    "view": "ACES 1.0 - SDR Video"
+                }
+            },
+            {
+                "type": "overlay",
+                "enabled": true,
+                "overlayType": "Text",
+                "width": 1920,
+                "height": 200,
+                "text": "{rel_frame}/{num_frames} - {frame}",
+                "font": "arial",
+                "alignx": "Left",
+                "aligny": "Top",
+                "size": 50,
+                "filepath": "",
+                "usePercent": false,
+                "position": [
+                    0,
+                    0
+                ],
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            {
+                "type": "crop",
+                "enabled": false,
+                "cropLeft": 0,
+                "cropTop": 0,
+                "cropRight": 0,
+                "cropBottom": 0
+            },
+            {
+                "type": "scale",
+                "enabled": false,
+                "resolutionMode": "50% of source",
+                "customWidth": 1800,
+                "customHeight": 1013,
+                "lockRatio": true
+            },
+            {
+                "type": "slate",
+                "enabled": false,
+                "slatePreset": ""
+            }
+        ],
+        "inputPath": "I:\\prodTestRnd\\03_Production\\Shots\\sq010\\sh010\\Renders\\2dRender\\LOCAL_RENDERING\\v099\\sq010-sh010_LOCAL_RENDERING_v099.####.exr",
+        "path": "I:\\prodTestRnd\\03_Production\\Shots\\sq010\\sh010\\Renders\\2dRender\\LOCAL_RENDERING\\v099\\sq010-sh010_LOCAL_RENDERING_v099.####.exr"
+    }
+}

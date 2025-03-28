@@ -102,7 +102,7 @@ if nuke.NUKE_VERSION_MAJOR >= 13:
                 pcore = PrismCore.PrismCore(app="Nuke", prismArgs=["noUI"])
 
     # <<<PrismEnd
-
+    nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/NukeSurvivalToolkit/")
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos')
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/ToolSets')
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts')

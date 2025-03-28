@@ -44,8 +44,8 @@ def getPrims(selectedNode: hou.Node) -> list[str]:
     
     search_root = "/world/assets/"
     
-    lop_node = selectedNode  # Assume the first selected node
-    stage = lop_node.stage()  # Get the USD stage
+    lop_node = selectedNode 
+    stage = lop_node.stage()
 
     if not stage:
         hou.ui.displayMessage("No USD stage found in the selected node.",
@@ -78,7 +78,7 @@ def getCommonAssets(assets: list[str], prims: list[str]) -> list[str]:
     commonAssets = []
     for prim in prims:
         for asset in assets:
-            if os.path.basename(prim) in os.path.basename(asset) :
+            if os.path.basename(asset) in os.path.basename(prim) :
                 commonAssets.append(asset)
                 
     commonAssets = list(set(commonAssets))
@@ -221,13 +221,18 @@ def run():
     all_assets = getAssets()
     all_prims = getPrims(selectedNodes)
     if all_prims is None:
-        return
+        return 
     
     commonAssets = getCommonAssets(all_assets, all_prims)
     
+    details = ''
+    for asset in commonAssets:
+        details += f'{asset}\n'
+    
+    
     isCancelled = hou.ui.displayMessage(
         f"Do you want to import {len(commonAssets)} assets?", buttons=('Confirm', 'Cancel'),
-        default_choice=0, close_choice=1)
+        default_choice=0, close_choice=1, details=details)
 
     
     if not isCancelled:
