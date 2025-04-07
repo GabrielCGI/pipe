@@ -194,6 +194,8 @@ def get_existing_subnet(material_library: hou.Node, shader_name: str):
     hou.Node: Subnet with the shader's name
     """
     
+    if not material_library:
+        return None
     material_library_subnetworks = material_library.children()
     for subnet in material_library_subnetworks:
         if shader_name in subnet.name():
@@ -257,7 +259,7 @@ def create_shader_network(
 
     # Check existing subnetwork and create a new one if needed
     current_subnet = get_existing_subnet(material_library, shader.name)
-    if current_subnet is None:
+    if current_subnet is None and material_library is not None:
         material_library_subnetworks = material_library.children()
 
         for subnet in material_library_subnetworks:

@@ -56,6 +56,7 @@ if nuke.NUKE_VERSION_MAJOR >= 13:
         if "pcore" in locals():
             nuke.message("Prism is loaded multiple times. This can cause unexpected errors. Please clean this file from all Prism related content:/n/n%s/n/nYou can add a new Prism integration through the Prism Settings dialog" % __file__)
         else:
+            print(">>>PrismStart\n")
             import os
             import sys
 
@@ -118,6 +119,7 @@ if nuke.NUKE_VERSION_MAJOR >= 13:
 
     ### << Start Optical flare
     os.environ["OPTICAL_FLARES_VERBOSE_CONSOLE"]="True"
+
 
     if(nuke_version=="13.1"):
         

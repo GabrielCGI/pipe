@@ -128,16 +128,20 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
             import sys
 
             prismRoot = os.getenv("PRISM_ROOT")
+
             if not prismRoot:
                 prismRoot = "C:/ILLOGIC_APP/Prism/2.0.6/app"
 
             scriptDir = os.path.join(prismRoot, "Scripts")
+
             if scriptDir not in sys.path:
                 sys.path.append(scriptDir)
 
             import PrismCore
 
             pcore = PrismCore.PrismCore(app="Nuke")
+
+
     # <<<PrismEnd
 
     # ------ add the following lines to your menu.py file  ------ 
@@ -145,6 +149,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     toolbar = nuke.toolbar("Nodes")
     toolbar.addMenu("VideoCopilot", icon="VideoCopilot.png")
     toolbar.addCommand( "VideoCopilot/OpticalFlares", "nuke.createNode('OpticalFlares')", icon="OpticalFlares.png")
+
 
     panels.registerWidgetAsPanel("auto_comp_v2.AutoComp", 'AutoComp V2', 'illogic_studios.autocompV2')
     bloomMenu = nuke.menu("Nodes").addMenu("bloom", icon="bloom.png")
@@ -166,7 +171,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     n.addCommand('exponential glow', "nuke.createNode(\"exponentialGlow\")")
 
 
-    
+
     ### edit folder path here ###
     DVPath = "R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/Deep2VP_v40/asGroup/"
     
@@ -187,4 +192,16 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
 			    DVP.addCommand( "{0}/{1}".format(key,item), "nuke.nodePaste(\"{0}{1}/{2}.nk\")".format(DVPath,key,item), icon="{0}.png".format(item) )
     ### end here ###
 
+
+
     print("End loading Nuke MENU as version 13+ ...")
+    if nuke.NUKE_VERSION_MAJOR<=14:
+        #FORCE OCIO
+        custom_config_path = "R:/pipeline/networkInstall/OpenColorIO-Configs/aces_1.2/config.ocio"
+        os.environ["OCIO"] = custom_config_path
+        print("FORCE OCIO IN INIT.PY TO: %s"%(custom_config_path))
+        # Set the OCIO config to 'custom' mode
+        nuke.root()['OCIO_config'].setValue('custom')
+        # Set the path to the custom config
+        nuke.root()['customOCIOConfigPath'].setValue(custom_config_path)
+        print("End OCIO FIX ...")

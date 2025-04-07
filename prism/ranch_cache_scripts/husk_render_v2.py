@@ -230,6 +230,9 @@ def copy_exr_from_ranch_to_network(
 # --------------------------------------------------------------------------
 # MAIN SCRIPT
 # --------------------------------------------------------------------------
+
+print("OLD !")
+
 renderer       = sys.argv[6]
 render_settings= sys.argv[5]
 img_output     = sys.argv[4]

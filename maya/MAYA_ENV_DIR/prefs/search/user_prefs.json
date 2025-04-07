@@ -9,11 +9,14 @@
             "CreatePolygonCube",
             "CreatePolygonSphere",
             "NamespaceEditor",
-            "ParentConstraint",
             "HotkeyPreferencesWindow",
             "ToggleFaceNormalDisplay",
             "ToggleVertexNormalDisplay",
-            "MatchTransform"
+            "HypershadeWindow",
+            "ReferenceEditor",
+            "ParentConstraint",
+            "MatchTransform",
+            "MatchPivots"
         ],
         [],
         [],

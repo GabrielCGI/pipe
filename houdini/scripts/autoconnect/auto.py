@@ -10,7 +10,6 @@ import autoconnect.ressource as ressource
 import autoconnect.houdinilog as hlog
 
 
-
 def log_shaders(shaders):
     space = " "*3
     for sh in shaders:
