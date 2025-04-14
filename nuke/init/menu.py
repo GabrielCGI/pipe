@@ -112,6 +112,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     from crypto import crypto_extract
     import auto_compV2.AutoComp as auto_comp_v2
     from nuke_scanner.NukeScanner import NukeScanner
+    import nuke_scannerv2.NukeScanner as NukeScannerV2
     from nuke_scanner import select_unconnected_read
     from nuke_scanner import nuke_delete
     from nukescripts import panels
@@ -154,6 +155,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     panels.registerWidgetAsPanel("auto_comp_v2.AutoComp", 'AutoComp V2', 'illogic_studios.autocompV2')
     bloomMenu = nuke.menu("Nodes").addMenu("bloom", icon="bloom.png")
     bloomMenu.addCommand("Delete unused render", "NukeScanner().run()")
+    bloomMenu.addCommand("Delete unused render (new)", "NukeScannerV2.NukeScanner().run()")
     bloomMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
     bloomMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
     bloomMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")

@@ -2,6 +2,7 @@ import nuke
 import shutil
 import os
 import glob
+import threading
 from common.utils import *
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -171,7 +172,7 @@ def get_every_folder_to_delete(render_out_folder):
                     
     return folder_to_delete
 
-def run():
+def main():
     """
     Delete every folder that need to be deleted.
     """
@@ -180,6 +181,7 @@ def run():
         os.path.normpath(shot_dir), "Renders", "3dRender")
     
     folder_to_delete = get_every_folder_to_delete(render_out_folder)
+    folder_to_delete = list(set(folder_to_delete))
     
     render_out_folder_ui = shot_dir + "/Renders" + "/3dRender"
     
@@ -195,3 +197,10 @@ def run():
                     print("\t Folder deleted : --> " + folder_path)
                 except Exception as e:
                     print(f"Failed to delete:\n{e}")
+            
+            print(f'Has deleted {len(folder_to_delete)} files.')
+            
+def run():
+    
+    thread = threading.Thread(target=main)
+    thread.start()

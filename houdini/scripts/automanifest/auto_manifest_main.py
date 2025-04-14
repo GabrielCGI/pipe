@@ -11,6 +11,7 @@ SHOW_TIME = False
 FILEPATH_PARM = 'filepath'
 PARENT_PARM = 'parent'
 IMPORTAS_PARM = 'importAs'
+MUTE_DOWNSTREAM_PARAMETER = 'muteDownstreamDeps'
 IMPORTAS_REFERENCE_ID = 2
 USD_PLUGIN = PrismInit.pcore.getPlugin("USD")
 
@@ -91,7 +92,7 @@ def createSubnet(
         commonAssets: list[str]) -> list[hou.LopNode]:
     
     currentPosition = selectedNode.position()
-    offset = hou.Vector2(2, 0)
+    offset = hou.Vector2(-2, 1)
     
     stage = selectedNode.parent()
     subnet = stage.createNode(
@@ -99,6 +100,9 @@ def createSubnet(
         node_name='import_prism_manifest')
     
     subnet.setPosition(currentPosition + offset)
+    connectedNodes=selectedNode.inputs()
+    selectedNode.setInput(1, connectedNodes[0])
+    selectedNode.setInput(0, subnet)
     
     with hou.undos.disabler():
         asset_imports: list[hou.LopNode] = []
@@ -133,6 +137,7 @@ def createImport(subnet: hou.Node, assetPath: str) -> hou.LopNode:
     asset_import.parm(FILEPATH_PARM).set(filepath)
     asset_import.parm(FILEPATH_PARM).pressButton()
     asset_import.parm(IMPORTAS_PARM).set(IMPORTAS_REFERENCE_ID)
+    asset_import.parm(MUTE_DOWNSTREAM_PARAMETER).set(0)
     asset_import.parm(PARENT_PARM).setExpression(
         expression=expression, language=hou.exprLanguage.Python)
     
@@ -216,27 +221,27 @@ def run():
         hou.ui.displayMessage(text="Please select a shot node",
                               severity=hou.severityType.Message)
         return
-       
-    selectedNodes = selectedNodes[0]
+    
     all_assets = getAssets()
-    all_prims = getPrims(selectedNodes)
-    if all_prims is None:
-        return 
-    
-    commonAssets = getCommonAssets(all_assets, all_prims)
-    
-    details = ''
-    for asset in commonAssets:
-        details += f'{asset}\n'
-    
-    
-    isCancelled = hou.ui.displayMessage(
-        f"Do you want to import {len(commonAssets)} assets?", buttons=('Confirm', 'Cancel'),
-        default_choice=0, close_choice=1, details=details)
+    for node in selectedNodes:
+        all_prims = getPrims(node)
+        if all_prims is None:
+            return 
+        
+        commonAssets = getCommonAssets(all_assets, all_prims)
+        
+        details = ''
+        for asset in commonAssets:
+            details += f'{asset}\n'
+        
+        '''
+        isCancelled = hou.ui.displayMessage(
+            f"Do you want to import {len(commonAssets)} assets?", buttons=('Confirm', 'Cancel'),
+            default_choice=0, close_choice=1, details=details)
 
-    
-    if not isCancelled:
-        subnet, asset_imports = createSubnet(selectedNodes, commonAssets)
+        if not isCancelled:
+            '''
+        subnet, asset_imports = createSubnet(node, commonAssets)
         setupSubnet(subnet, asset_imports)
 
 

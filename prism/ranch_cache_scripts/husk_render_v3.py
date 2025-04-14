@@ -73,8 +73,9 @@ def remap_ranch_usd_and_output(usd_file_path, img_output, env_copy):
     Overwrite environment variables for RANCH usage and remap local I:/, R:/ 
     to UNC ranch cache paths. Also remaps I:/ in 'img_output' to 'C:/RANCH_OUT_EXR/'.
     """
-    PXR_AR_DEFAULT_SEARCH_PATH_RANCH = f"{UNC_RANCH_CACHE_I};{UNC_RANCH_CACHE_R}"
+    PXR_AR_DEFAULT_SEARCH_PATH_RANCH = f"{UNC_RANCH_CACHE_I};{UNC_RANCH_CACHE_R};I:/;R:/"
     env_copy["PXR_AR_DEFAULT_SEARCH_PATH"] = PXR_AR_DEFAULT_SEARCH_PATH_RANCH
+    print(f'PXR AR DEFAULT SEARCH PATH: {env_copy["PXR_AR_DEFAULT_SEARCH_PATH"]}')
     print("Ranch machine detected - remapping USD/file paths.")
 
     # Convert to UNC ranch cache if missing

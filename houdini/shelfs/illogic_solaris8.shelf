@@ -193,7 +193,7 @@ cleanlight.clean()]]></script>
   <tool name="automanifestv2" label="Auto Manifest V2" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[from imp import reload
 
-import automanifest.auto_manifest_main as auto_manifest
+import automanifest.auto_manifest_dev_louis as auto_manifest
 reload(auto_manifest)
 auto_manifest.run()]]></script>
   </tool>
