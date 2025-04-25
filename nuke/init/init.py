@@ -7,6 +7,8 @@ os.environ["OFX_PLUGIN_PATH"] = "D:/OFX_local"
 
 #print("---------- WARNING : BETA MODE ACTIVATED ---------")
 
+
+
 if nuke.NUKE_VERSION_MAJOR==12:
     print("Nuke Init as version 12...")
     

@@ -35,6 +35,7 @@
     <memberTool name="clean_light"/>
     <memberTool name="send_ranch_copy"/>
     <memberTool name="select_prim_with_attributes"/>
+    <memberTool name="sanity_check"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">

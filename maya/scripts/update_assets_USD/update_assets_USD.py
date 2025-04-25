@@ -103,12 +103,20 @@ class USDAUpdaterUI(QtWidgets.QDialog):
         self.run_button = QtWidgets.QPushButton("Run Update")
         self.run_button.clicked.connect(self.run_update)
         layout.addWidget(self.run_button)
-
+        # 🟢 Try to auto-load the latest mayaLayout.usda file
+        try:
+            default_usda = self.find_latest_maya_layout_usda()
+            if default_usda:
+                self.file_path_edit.setText(default_usda)
+                self.load_usda(default_usda)
+        except Exception as e:
+            self.log(f"⚠️ Error finding default USDA file: {e}")
+            
     def log(self, text):
         self.log_box.append(text)
 
     def browse_file(self):
-        start_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(cmds.file(q=True, sceneName=True))))) or "C:/"
+        start_dir = os.path.dirname(self.find_latest_maya_layout_usda()) or "C:/"
         file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Select USDA File",
@@ -118,6 +126,46 @@ class USDAUpdaterUI(QtWidgets.QDialog):
         if file_path:
             self.file_path_edit.setText(file_path)
             self.load_usda(file_path)
+
+    # 🔍 Finds the latest mayaLayout.usda file based on the current Maya scene
+    def find_latest_maya_layout_usda(self):
+        scene_path = cmds.file(q=True, sceneName=True)
+        if not scene_path:
+            print("⛔ No scene loaded.")
+            return None
+
+        match = re.search(r"Shots[\\/](?P<seq>[A-Z0-9]+)[\\/](?P<shot>\d+)", scene_path, re.IGNORECASE)
+        if not match:
+            print("⛔ Could not determine sequence and shot from path.")
+            return None
+
+        sequence = match.group("seq")
+        shot = match.group("shot")
+        shot_path = os.path.join("I:/ralphLauren_2412/03_Production/Shots", sequence, shot)
+        layout_dir = os.path.join(shot_path, "Export", "_layer_layout_layoutMaya")
+        print(layout_dir)
+
+        if not os.path.exists(layout_dir):
+            print(f"⛔ Layout directory not found: {layout_dir}")
+            return None
+
+        version_dirs = [d for d in os.listdir(layout_dir) if re.fullmatch(r"v\d{3}", d)]
+        if not version_dirs:
+            print("⛔ No version folders found.")
+            return None
+
+        latest_version = max(version_dirs)
+        latest_path = os.path.join(layout_dir, latest_version)
+        expected_name_pattern = rf"{sequence}-{shot}__layer_layout_layoutMaya_{latest_version}\.usda"
+
+        for fname in os.listdir(latest_path):
+            if re.fullmatch(expected_name_pattern, fname, re.IGNORECASE):
+                full_path = os.path.join(latest_path, fname)
+                print(f"✅ Found latest mayaLayout.usda: {full_path}")
+                return full_path
+
+        print("⛔ No matching USD file found in the latest version folder.")
+        return None
 
     def load_usda(self, usda_file, clear_log=True):  # ← paramètre ajouté
         self.usda_file = usda_file

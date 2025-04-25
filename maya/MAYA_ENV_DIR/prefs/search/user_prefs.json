@@ -2,20 +2,9 @@
     "context": "ttf",
     "history": [
         [
-            "PanelPreferencesWindow",
-            "CreateCurveFromPoly",
-            "Flare",
-            "CreatePolygonPlane",
-            "CreatePolygonCube",
-            "CreatePolygonSphere",
+            "GraphEditor",
             "NamespaceEditor",
-            "ToggleFaceNormalDisplay",
-            "ToggleVertexNormalDisplay",
-            "HypershadeWindow",
-            "MatchPivots",
             "HotkeyPreferencesWindow",
-            "NodeEditorWindow",
-            "ReferenceEditor",
             "MatchTransform",
             "ParentConstraint"
         ],
