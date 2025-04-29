@@ -26,8 +26,8 @@
     <memberTool name="autoconnect_ui"/>
     <memberTool name="Lib_Importer"/>
     <memberTool name="restart_houdini"/>
+    <memberTool name="batchrender"/>
     <memberTool name="automanifest"/>
-    <memberTool name="automanifestv2"/>
     <memberTool name="copy_light"/>
     <memberTool name="domelight_create"/>
     <memberTool name="set_node_parameters"/>
@@ -36,6 +36,7 @@
     <memberTool name="send_ranch_copy"/>
     <memberTool name="select_prim_with_attributes"/>
     <memberTool name="sanity_check"/>
+    <memberTool name="loprendertest"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -131,14 +132,6 @@ Lib_Importer.libImport()]]></script>
 restart.restart_houdini()]]></script>
   </tool>
 
-  <tool name="automanifest" label="Auto Manifest" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[from imp import reload
-
-import automanifest.auto_manifest as auto_manifest
-reload(auto_manifest)
-auto_manifest.autoManifest()]]></script>
-  </tool>
-
   <tool name="copy_light" label="Copy Light" icon="hicon:/SVGIcons.index?LOP_lightlinker.svg">
     <script scriptType="python"><![CDATA[import imp
 import copylight.copylight as copylight
@@ -191,14 +184,6 @@ imp.reload(cleanlight)
 cleanlight.clean()]]></script>
   </tool>
 
-  <tool name="automanifestv2" label="Auto Manifest V2" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[from imp import reload
-
-import automanifest.auto_manifest_dev_louis as auto_manifest
-reload(auto_manifest)
-auto_manifest.run()]]></script>
-  </tool>
-
   <tool name="send_ranch_copy" label="Send Ranch Copy" icon="hicon:/SVGIcons.index?BUTTONS_network_distribute_vertical.svg">
     <script scriptType="python"><![CDATA[import sendranchcopy
 import importlib
@@ -212,5 +197,21 @@ sendranchcopy.run()]]></script>
     <script scriptType="python"><![CDATA[import primselector
 
 primselector.run()]]></script>
+  </tool>
+
+  <tool name="batchrender" label="Batch Render (WIP)" icon="hicon:/SVGIcons.index?BUTTONS_render.svg">
+    <script scriptType="python"><![CDATA[import batchrender
+import importlib
+importlib.reload(batchrender)
+
+batchrender.main()]]></script>
+  </tool>
+
+  <tool name="automanifest" label="Auto Manifest" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[from imp import reload
+
+import automanifest.auto_manifest_dev_louis as auto_manifest
+reload(auto_manifest)
+auto_manifest.run()]]></script>
   </tool>
 </shelfDocument>

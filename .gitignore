@@ -11,3 +11,9 @@
 *.old
 *bak*.hda
 *GreyscalegorillaHoudiniConnect*
+nuke/init/Cattery/SegmentAnything/cat.json
+nuke/init/Cattery/SegmentAnything/cattery_segment_anything.py
+nuke/init/Cattery/SegmentAnything/sam_medium.cat
+nuke/init/Cattery/SegmentAnything/SegmentAnything@2x.png
+nuke/init/Cattery/SegmentAnything/SegmentAnything.png
+nuke/init/Cattery/SegmentAnything/SegmentAnything.gizmo

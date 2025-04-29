@@ -14,16 +14,6 @@ def restart_houdini():
         hou.ui.displayMessage("Please save your file before restarting Houdini.")
         return
     
-    try:
-        hou.hipFile.save()
-    except hou.Error as e:
-        hou.ui.displayMessage(f"Failed to save file: {str(e)}")
-        return
-    
-    # Get the Houdini executable and arguments
-    houdini_executable = sys.executable
-    
-
     # Ask the user if he really want to restart
     user_choice = hou.ui.displayMessage(
                 f"Do you really want to restart houdini ?\n{current_file}", buttons=('Confirm', 'Cancel'), 
@@ -32,6 +22,16 @@ def restart_houdini():
     if user_choice != 0:
         hou.ui.displayMessage("Restart cancelled by user")
         return
+    
+    try:
+        hou.hipFile.save()
+        print('Scene saved.')
+    except hou.Error as e:
+        hou.ui.displayMessage(f"Failed to save file: {str(e)}")
+        return
+    
+    # Get the Houdini executable and arguments
+    houdini_executable = sys.executable
 
     # Relaunch Houdini with the current file
     try:
