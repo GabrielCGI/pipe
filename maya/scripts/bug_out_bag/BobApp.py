@@ -64,6 +64,8 @@ from .tool_instances.DisplayColor import *
 from .tool_instances.Exposure import *
 from .tool_instances.USDcopyPaste import USDCopyPaste
 from .tool_instances.selectGeoToExport import GeoExport
+from .tool_instances.FixUsdColorspaceManagement import FixUsdColorspaceManagement
+
 
 # ######################################################################################################################
 
@@ -119,6 +121,7 @@ class BobApp(QDialog):
 
             BobCategory("Shading", self.__prefs, [
                 UVCopierTool(),
+                FixUsdColorspaceManagement(),
                 # GlassShadow(),
                 # ShaderTransferTool(),
                 # RestPosToVertexColorTool(),

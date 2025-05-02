@@ -6,6 +6,13 @@ LOP_RENDER = USD_PLUGIN.api.lopRender
 
 loprender_module = sys.modules[LOP_RENDER.__module__]
 
+DEBUG_MODE = False
+try:
+    sys.path.append(r'R:\devmaxime\virtualvens\sanitycheck\Lib\site-packages')
+    import debugpy
+except:
+    DEBUG_MODE = False
+
 class Farm_Submitter(loprender_module.Farm_Submitter):
     
     def __init__(self, origin, states, kwargs):
@@ -25,6 +32,7 @@ class Farm_Submitter(loprender_module.Farm_Submitter):
         )
 
         sm = self.core.getStateManager()
+        
         result = sm.publish(
             successPopup=False,
             executeState=True,

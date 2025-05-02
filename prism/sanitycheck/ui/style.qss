@@ -1,0 +1,108 @@
+*{
+    border:none;
+    padding:0;
+    margin:0;
+    color: TERTEARY_COLOR ;
+    background-color:  transparent ;
+}
+/*------------------------------------------------------------------- QScrollBar*/
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+    border:  BORDER_RADIUS ;
+}
+
+QScrollBar:vertical {
+    background-color:  MAIN_COLOR ;
+    width: 15px;
+    border: 1px solid  SECONDARY_COLOR ;
+    border:  BORDER_RADIUS ;
+}
+
+QScrollBar::handle:vertical {
+    background-color:  SECONDARY_COLOR ;
+    min-height: 20px;
+    border-radius:  BORDER_RADIUS ;
+}
+
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    background-color: transparent;
+    height: 10px;
+    border:  BORDER_RADIUS ;
+}
+
+/*------------------------------------------------------------------- QPushButton */
+
+QPushButton ,QToolButton{
+    background-color:  transparent ;
+    color:  TERTEARY_COLOR ;
+    border:  BORDER_SIZE  solid  MAIN_COLOR ; 
+    border-radius:  BORDER_RADIUS ;
+    padding: 7px;
+}
+
+QPushButton::hover ,QToolButton::hover{
+    background-color:  transparent ;
+    color:  TERTEARY_COLOR ;
+    border-radius:  BORDER_RADIUS ;
+}
+
+QPushButton::disabled {
+    background-color:  COLOR_4 ;
+    color:  MAIN_COLOR ;
+    border-radius:  BORDER_RADIUS ;
+}
+
+#toggle_button{
+    background-color:  transparent ;
+    color:  TERTEARY_COLOR ;
+    border:  BORDER_SIZE  solid  MAIN_COLOR ; 
+    border-radius:  BORDER_RADIUS ;
+    padding: 7px;
+}
+
+#toggle_button::hover{
+    background-color: rgba(0, 0, 0, 20);
+    color:  TERTEARY_COLOR ;
+    border:  BORDER_SIZE  solid  MAIN_COLOR ; 
+    border-radius:  BORDER_RADIUS ;
+    padding: 7px;
+}
+
+#cancelButton, #acceptButton, #fixAllButton {
+    border-radius:  BORDER_RADIUS ;
+    background-color:  SECONDARY_COLOR ;
+}
+#cancelButton::hover, #acceptButton::hover, #fixAllButton::hover {
+    border-radius:  BORDER_RADIUS ;
+    background-color: rgba(0, 0, 0, 20);
+}
+#cancelButton::pressed, #acceptButton::pressed, #fixAllButton::pressed {
+    border-radius:  BORDER_RADIUS ;
+    background-color: rgba(0, 0, 0, 40);
+}
+
+
+/*------------------------------------------------------------------- other */
+#option_window_container, #scroll_widget {
+    border-radius:  BORDER_RADIUS ;
+    background-color:  MAIN_COLOR ;
+}
+
+#headerWidget{
+    border-radius:  BORDER_RADIUS ;
+    background-color:  SECONDARY_COLOR ;
+    padding: 10px;
+}
+
+#contentWidget{
+    border-top-left-radius: 0px;
+    border-top-right-radius: 0px;
+    border-bottom-left-radius: BORDER_RADIUS;
+    border-bottom-right-radius: BORDER_RADIUS;
+    background-color:  COLOR_4 ;
+    padding: 10px;
+}
+
+
+
+

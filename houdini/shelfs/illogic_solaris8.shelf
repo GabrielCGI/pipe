@@ -27,6 +27,7 @@
     <memberTool name="Lib_Importer"/>
     <memberTool name="restart_houdini"/>
     <memberTool name="batchrender"/>
+    <memberTool name="sanity_check"/>
     <memberTool name="automanifest"/>
     <memberTool name="copy_light"/>
     <memberTool name="domelight_create"/>
@@ -35,7 +36,6 @@
     <memberTool name="clean_light"/>
     <memberTool name="send_ranch_copy"/>
     <memberTool name="select_prim_with_attributes"/>
-    <memberTool name="sanity_check"/>
     <memberTool name="loprendertest"/>
   </toolshelf>
 
@@ -213,5 +213,32 @@ batchrender.main()]]></script>
 import automanifest.auto_manifest_dev_louis as auto_manifest
 reload(auto_manifest)
 auto_manifest.run()]]></script>
+  </tool>
+
+  <tool name="sanity_check" label="Sanity Check" icon="R:/pipeline/pipe/prism/sanitycheck/ui/Icons/sanitycheck.png">
+    <script scriptType="python"><![CDATA[import os
+import sys
+import PrismInit
+
+SANITYCHECK_PATH = "R:/pipeline/pipe/prism"
+
+def run():
+    sys.path.append(SANITYCHECK_PATH)
+    try:
+        import sanitycheck
+    except Exception as e:
+        print(e)
+        return
+    
+    try:
+        YAML_LOCATION = os.environ['SANITY_CHECK_CONFIG']
+    except:
+        YAML_LOCATION = 'None'
+        
+    sm = PrismInit.pcore.getStateManager()
+    res = sanitycheck.main(*(sm, YAML_LOCATION))
+    
+run()
+]]></script>
   </tool>
 </shelfDocument>

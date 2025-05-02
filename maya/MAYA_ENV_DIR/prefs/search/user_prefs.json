@@ -4,9 +4,11 @@
         [
             "GraphEditor",
             "NamespaceEditor",
+            "CreatePolygonCube",
             "HotkeyPreferencesWindow",
             "MatchTransform",
-            "ParentConstraint"
+            "ParentConstraint",
+            "ToggleEditPivot"
         ],
         [],
         [],

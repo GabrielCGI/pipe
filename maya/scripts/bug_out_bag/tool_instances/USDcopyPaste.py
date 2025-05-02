@@ -68,8 +68,9 @@ class USDCopyPaste(MultipleActionTool):
     def __copy_USD_layer(self):
         """
         Copy the selected layer in USD Layer Editor to a tempfile.usda.
+        Replace #sdf 1.4.32 with #usda 1.0 if the first line starts with #usda 1.0.
         """
-    
+
         asset_stage = self.__get_selected_stage()
         if asset_stage is None:
             return
@@ -80,10 +81,18 @@ class USDCopyPaste(MultipleActionTool):
         session_layer = asset_stage.GetEditTarget().GetLayer()
         tmp_file_raw = session_layer.ExportToString()
 
+        # Check if the first line starts with #usda 1.0 and replace #sdf 1.4.32
+        lines = tmp_file_raw.splitlines()
+        if lines and lines[0].startswith("#usda 1.0"):
+            print("replace usda 1.0 to #sdf 1.4.32 ")
+            lines[0] = lines[0].replace( "#usda 1.0","#sdf 1.4.32")
+
+        # Rejoin the lines and write to the temporary file
+        tmp_file_modified = "\n".join(lines)
+
         with open(tmp_file_path, 'w') as tmp_file:
-            tmp_file.write(tmp_file_raw)
-        tmp_file.close()
-        
+            tmp_file.write(tmp_file_modified)
+            
         cmds.confirmDialog(
             title='USD successfully exported',
             message=f'Exported USD Edits in:\n {tmp_file_path}',
@@ -91,7 +100,8 @@ class USDCopyPaste(MultipleActionTool):
             defaultButton='OK'
         )
         print("Exported USD Edits in:\n", tmp_file_path)
-        
+        os.startfile(tmp_file_path)
+            
     def __paste_USD_layer(self):
         """
         Paste to the selected layer in USD Layer Editor the currently copied

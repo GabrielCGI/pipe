@@ -1,0 +1,40 @@
+QTreeWidget {
+    margin: 10px;
+    /* border: 1px solid #000000; */
+    background-color: #3a3a3a;
+    font-size: 13pt;
+}
+
+QTreeWidget::item {
+    padding: 8px;
+    margin: 1px;
+    border: 1px solid black;
+}
+
+QTreeWidget::item:hover, QTreeWidget::branch:hover{
+    background-color: #4c4c4c;
+}
+
+QTreeWidget::item:selected{
+    background-color: #545454;
+    outline: none;
+}
+
+QTreeView::item:selected:active{
+    background-color: #545454;
+    outline: none;
+}
+
+QTreeWidget::branch {
+    background-color: transparent;
+}
+
+QTreeWidget::branch:selected {
+    background-color: transparent;
+    outline: none;
+}
+
+QTreeWidget::branch:selected-active {
+    background-color: #3a3a3a;
+    outline: none;
+}
