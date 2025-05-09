@@ -1,11 +1,11 @@
 
 
 import abc
-from enum import Enum
+from enum import IntEnum
 
-class Severity(Enum):
-    WARNING = 7123
-    ERROR = 7124
+class Severity(IntEnum):
+    ERROR = 0
+    WARNING = 1
 
 
 class Check(abc.ABC):

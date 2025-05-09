@@ -36,7 +36,6 @@
     <memberTool name="clean_light"/>
     <memberTool name="send_ranch_copy"/>
     <memberTool name="select_prim_with_attributes"/>
-    <memberTool name="loprendertest"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -199,7 +198,7 @@ sendranchcopy.run()]]></script>
 primselector.run()]]></script>
   </tool>
 
-  <tool name="batchrender" label="Batch Render (WIP)" icon="hicon:/SVGIcons.index?BUTTONS_render.svg">
+  <tool name="batchrender" label="Batch Render" icon="hicon:/SVGIcons.index?BUTTONS_render.svg">
     <script scriptType="python"><![CDATA[import batchrender
 import importlib
 importlib.reload(batchrender)

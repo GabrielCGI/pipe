@@ -280,16 +280,21 @@ class MainDialog(QDialog):
         self.mainLayout.addWidget(self.bottomButton_layout_widget)
 
     def refresh(self):
-        logger.info('Refresh check list with '
-                    f'{len(self.checkList)} new checks.')
+        logger.info(
+            'Refresh check list with '
+            f'{len(self.checkList)} new checks.')
         # Pass check again
         self.has_error = False
         self.has_no_error = True
         self.has_warning = False
         self.failed_check=[]
         self.success_check=[]
+
         for check in self.checkList:
-            check.run(self.stateManager)
+            try:
+                check.run(self.stateManager)
+            except Exception as e:
+                logger.error(e)
             if not check.status:
                 self.failed_check.append(check)
                 self.has_no_error = False
@@ -299,6 +304,11 @@ class MainDialog(QDialog):
                     self.has_warning = True
             else:
                 self.success_check.append(check)
+
+        self.failed_check.sort(key=lambda x: x.severity)
+
+        self.checkList = self.failed_check + self.success_check
+
         self.acceptButton.setEnabled(not self.has_error)
         
         # Create new check
@@ -335,8 +345,10 @@ class MainDialog(QDialog):
     def run_fix(self):
         for check in self.checkList:
             if not check.status and check.have_fix:
-                check.fix(self.stateManager)
-                
+                try:
+                    check.fix(self.stateManager)
+                except Exception as e:
+                    logger.error(e)
         self.refresh()
 
     def connect_buttons(self):

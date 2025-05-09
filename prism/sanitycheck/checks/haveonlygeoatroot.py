@@ -7,10 +7,10 @@ class HaveOnlyGeoAtRoot(check.Check):
         super().__init__(
             name='have_only_geo_at_root',
             label='Have Only Geo At Root',
-            severity=check.Severity.ERROR,
+            severity=check.Severity.WARNING,
             have_fix=False)
-        self.documentation = 'in this scene you should only have the geo group at the root, nothing else'
-        self.fixComment = 'you need to delete the other nodes, or rename your main group'
+        self.documentation = "in this scene you should only have the geo group at the root, you can also have a 'sandbox' group to put some temp stuff , but nothing else"
+        self.fixComment = "you need to delete the other nodes, or rename your main group , you can put all the node temp in a group named, 'sandbox'"
 
     def run(self, stateManager):
         core = stateManager.core
@@ -19,9 +19,11 @@ class HaveOnlyGeoAtRoot(check.Check):
         else:
             self.message = 'Check only on Maya, skipped.'
             return True
-    
+
     def mayarun(self, stateManager):
         import maya.cmds as cmds
+
+
         
         rootNodesList = cmds.ls(assemblies=True)
         # lets remove all the camera at the root of our maya hierarchy
@@ -36,16 +38,19 @@ class HaveOnlyGeoAtRoot(check.Check):
                         cameraDetectedList.append(node)
         cleanRootNodesList = list(set(rootNodesList)-set(cameraDetectedList))
 
-        if cleanRootNodesList != ['geo']:
-            self.message = ('there should only have geo at the root of your hierarchy,'
-                            ' there is nothing in the root or something'
-                            f' else has been detected :{cleanRootNodesList}')
-            self.status = False
-            return False
-        else:
-            self.message = 'there is only geo in the root of your hierarchy'
+        if set(cleanRootNodesList) == set(['geo']) or set(cleanRootNodesList) == set(['geo','sandbox']):
+            self.message = "there is only 'geo' nor 'sandbox' in the root of your hierarchy"
             self.status = True
             return True
+        else:
+            messageStr= "there should only have 'geo' nor 'sandbox' at the root of your hierarchy, there is nothing in the root or something else has been detected :\n"
+            for nodes in cleanRootNodesList:
+                messageStr += f' - {nodes} \n'
+            
+            self.message = messageStr.rstrip('\n')
+
+            self.status = False
+            return False
     
     def fix(self, stateManager):
         pass

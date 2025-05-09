@@ -202,7 +202,7 @@ def clean_str(str):
     clean_str = re.sub(r'[^A-Za-z0-9_-]', '_', str)
     return clean_str
 
-def get_material_list_from_attr(node_path, attr="shop_materialpath"):
+def get_material_list_from_attr(node_path, attr="usdmaterialpath"):
     """
     Retrieve the values of an attribute (ie: shop_materialpath) from a given node.
 
@@ -438,11 +438,15 @@ def execute(collectionMode=True):
           
     if (collectionMode==True):
 
-        build_collection(default_output_path, attr, componentgeometry, componentmaterial )
-        connect_prim_and_mat(componentmaterial, mtl_list, collectionMode=True)
+        #build_collection(default_output_path, attr, componentgeometry, componentmaterial )
+        #connect_prim_and_mat(componentmaterial, mtl_list, collectionMode=True)
+        componentgeometry.parm('bindmaterials').set("createbind")
+        pass
 
     else:
-        componentgeometry.parm("partitionattribs").set(attr)
+        componentgeometry.parm('bindmaterials').set("nobind")
+        componentgeometry.parm('materialbindsubsets').set(1)
+        #componentgeometry.parm("partitionattribs").set("1")
         connect_prim_and_mat(componentmaterial, mtl_list, collectionMode=False)
     print("Set Update Mode back to: %s"%(mode.name()))
     hou.setUpdateMode(mode)

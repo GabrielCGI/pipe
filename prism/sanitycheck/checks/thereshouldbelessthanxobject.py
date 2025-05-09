@@ -6,7 +6,7 @@ class ThereShouldBeLessThanXObject(check.Check):
     du check doit être égale au nom du fichier (peu importe la casse)
     Le nom du fichier doit être en miniscule (lowercase)
     """
-    
+
     def __init__(self):
         super().__init__(
             name='thereshouldbelessthanxobject',
@@ -17,7 +17,7 @@ class ThereShouldBeLessThanXObject(check.Check):
         self.limit=10000
         self.documentation = f'to be optimized you should have less than {self.limit} object in your scene'
         self.fixComment = ''
-        self.condition = False
+        self.condition = True
 
     def run(self, stateManager):
         core = stateManager.core

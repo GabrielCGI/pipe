@@ -11,18 +11,18 @@ class SMIsWellSetForModeling(check.Check):
         super().__init__(
             name='state_manager_is_well_set_for_modeling',
             label='state manager is well set for modeling',
-            severity=check.Severity.ERROR,
+            severity=check.Severity.WARNING,
             have_fix=False
             )
-        self.documentation = 'when you export your modeling you need to follow exactly the export settings described in the documention on miro'
+        self.documentation = 'when you export your modeling you need to follow exactly the export settings described in the documentation on notion'
         self.fixComment = ''
         # severity est une enum qui indique le niveau de danger de l'erreur.
         # Il y a deux niveaux, Severity.WARNING et Severity.ERROR
         
         # Attribut propre au check (comme un objet classique)
-        self.condition = False
+        self.condition = True
         
-        
+
     def run(self, stateManager):
         core = stateManager.core
         # Un check doit renvoyer True ou False.
@@ -80,8 +80,11 @@ class SMIsWellSetForModeling(check.Check):
         smdict=stateManager.getStateSettings()
         data = json.loads(smdict)
         stateList=data["states"][1:]
-        if len(stateList) != 1:
-            self.message = 'there should be only one state in the state manager'
+        for state in stateList:
+            if state 'stateclass': 'ImportFile'
+        print(stateList)
+        if len(stateList) > 2:
+            self.message = f'there should be max two state in the state manager, the usd one ,and the rigging one but {len(stateList)} have been detected'
             self.status = False
             return False
         usdState=stateList[0]
@@ -107,4 +110,3 @@ class SMIsWellSetForModeling(check.Check):
     def fix(self, stateManager):
         print("Fix Check")
         self.condition = True
-    

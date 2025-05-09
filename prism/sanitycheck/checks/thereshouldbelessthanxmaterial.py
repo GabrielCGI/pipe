@@ -17,7 +17,7 @@ class ThereShouldBeLessThanXMaterial(check.Check):
         self.limit=100
         self.documentation = f'to be optimized you should have less than {self.limit} material in your scene'
         self.fixComment = 'you need to merge similar object or delete useless ones'
-        self.condition = False
+        self.condition = True
 
     def run(self, stateManager):
         core = stateManager.core

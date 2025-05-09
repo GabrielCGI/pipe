@@ -7,7 +7,7 @@ class NamingShadingGroup(check.Check):
         super().__init__(
             name='naming_shading_group',
             label='naming shading group',
-            severity=check.Severity.ERROR,
+            severity=check.Severity.WARNING,
             have_fix=True)
         
         self.documentation = 'in houdini, shader will be named like the maya shader group, so you need to name them well here. there name should be <materialName>+_mat '

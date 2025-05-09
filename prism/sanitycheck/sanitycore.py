@@ -45,44 +45,44 @@ def getProductionPath(core):
     return str(Path(*path))
 
 
-def parseRules(rulePath: str, rulesDatas: dict):
+def parseChecks(checkPath: str, checksDatas: dict):
     
-    rules = []
-    rulesDatas = rulesDatas['Production']
-    if rulesDatas['rules']:
-        rules += rulesDatas['rules'] 
-    for depth in Path(rulePath).parts:
-        rulesDatas = rulesDatas.get(depth, None)
-        if not rulesDatas:
-            return rules
-        current_rules = rulesDatas.get('rules', [])
-        if current_rules:
-            rules += current_rules
+    checks = []
+    checksDatas = checksDatas['Production']
+    if checksDatas['rules']:
+        checks += checksDatas['rules']
+    for depth in Path(checkPath).parts:
+        checksDatas = checksDatas.get(depth, None)
+        if not checksDatas:
+            return checks
+        current_checks = checksDatas.get('rules', [])
+        if current_checks:
+            checks += current_checks
             
-    return list(set(rules))
+    return list(set(checks))
 
 
-def getCheck(rules):
+def getCheck(checks):
     
     module = f'{__package__}.checks.check'
     check_module = importlib.import_module(module)
     
     checklist = []
-    for rule in rules:
+    for check in checks:
         try:
-            module = f'{__package__}.checks.{rule.lower()}'
+            module = f'{__package__}.checks.{check.lower()}'
             check_module = importlib.import_module(module)
             importlib.reload(check_module)
             try:
-                check = getattr(check_module, rule)()
+                check = getattr(check_module, check)()
                 checklist.append(check)
             except Exception as e:
                 logger.warning(e)
-                logger.warning(f'Did not find {rule} in {check_module.__name__}')
+                logger.warning(f'Did not find {check} in {check_module.__name__}')
                 continue
         except Exception as e:
             logger.warning(e)
-            logger.warning(f'Did not find {rule.lower()}.py in checks')
+            logger.warning(f'Did not find {check.lower()}.py in checks')
             continue
         
     return checklist
@@ -91,7 +91,10 @@ def getCheck(rules):
 def execChecks(stateManager, checklist):
       
     for check in checklist:
-        check.run(stateManager)
+        try:
+            check.run(stateManager)
+        except Exception as e:
+            logger.error(e)
         
 
 def main(*args):
@@ -105,14 +108,13 @@ def main(*args):
         return True
 
     data = core.readYaml(yaml_config)
-    print(yaml_config)
     logger.info(f'Successfully read data from {yaml_config}')
 
     path = getProductionPath(core)
-    rules = parseRules(path, data)
-    logger.info(f'Parsed rules for {path}')
+    checks = parseChecks(path, data)
+    logger.info(f'Parsed checks for {path}')
         
-    checklist = getCheck(rules)
+    checklist = getCheck(checks)
     logger.info(f'Get {len(checklist)} checks.')
     
     sanityui = importlib.import_module(f'{__package__}.ui.sanityui')

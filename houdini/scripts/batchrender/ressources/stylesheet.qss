@@ -1,27 +1,47 @@
-QTreeWidget {
+* {
+    background-color: MAIN_COLOR;
+    font-size: 11pt;
+}
+
+/* EXECUTION STYLESHEET */
+
+QWidget#w_execution {
     margin: 10px;
-    /* border: 1px solid #000000; */
-    background-color: #3a3a3a;
-    font-size: 13pt;
+    border: 1px solid BLACK;
+    border-radius: 10px;
+    background-color: SECONDARY_COLOR;
+    /* font-size: 13pt; */
+}
+
+QTreeWidget {
+    padding-right: -2px;
+    padding: 2px;
+    border: 1px solid BLACK;
+    border-radius: 10px;
+    background-color: MAIN_COLOR;
 }
 
 QTreeWidget::item {
     padding: 8px;
     margin: 1px;
-    border: 1px solid black;
+    background-color: SECONDARY_COLOR;
+    border: 1px solid BLACK;
+    border-radius: 10px;
 }
 
 QTreeWidget::item:hover, QTreeWidget::branch:hover{
-    background-color: #4c4c4c;
+    background-color: TERTIARY_COLOR;
 }
 
 QTreeWidget::item:selected{
-    background-color: #545454;
+    background-color: SELECTED_COLOR;
+    border: 1px solid SELECTED_BORDER_COLOR;
     outline: none;
 }
 
 QTreeView::item:selected:active{
-    background-color: #545454;
+    background-color: SELECTED_COLOR;
+    border: 1px solid SELECTED_BORDER_COLOR;
     outline: none;
 }
 
@@ -35,6 +55,40 @@ QTreeWidget::branch:selected {
 }
 
 QTreeWidget::branch:selected-active {
-    background-color: #3a3a3a;
+    background-color: MAIN_COLOR;
     outline: none;
 }
+
+QTreeWidget::indicator {
+    width: 18px;
+    height: 18px;
+}
+
+QTreeWidget::indicator:unchecked {
+    image: url("R:/pipeline/pipe/houdini/scripts/batchrender/ressources/icons/checkbox_off.svg");
+}
+
+QTreeWidget::indicator:checked {
+    image: url("R:/pipeline/pipe/houdini/scripts/batchrender/ressources/icons/checkbox_on.svg");
+}
+
+QTreeWidget::indicator:checked:hover {
+    image: url("R:/pipeline/pipe/houdini/scripts/batchrender/ressources/icons/checkbox_on_hover.svg");
+}
+
+/* DESCRIPTION STYLESHEET */
+
+QWidget#w_description {
+    margin: 10px;
+    border: 1px solid BLACK;
+    border-radius: 10px;
+    background-color: SECONDARY_COLOR;
+    /* font-size: 13pt; */
+}
+
+/* QLabel {
+    padding: 10px;
+    background: MAIN_COLOR;
+    border: 1px solid BLACK;
+    border-radius: 10px;
+} */

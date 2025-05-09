@@ -3,12 +3,14 @@
     "history": [
         [
             "GraphEditor",
-            "NamespaceEditor",
             "CreatePolygonCube",
             "HotkeyPreferencesWindow",
             "MatchTransform",
+            "NamespaceEditor",
+            "ScaleConstraint",
             "ParentConstraint",
-            "ToggleEditPivot"
+            "ToggleEditPivot",
+            "MultiCutTool"
         ],
         [],
         [],

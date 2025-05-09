@@ -11,16 +11,16 @@ class AllGeoShouldHaveATRSof0(check.Check):
         super().__init__(
             name='AllGeoShouldHaveATRSof0',
             label='all geo should have a trs of 0',
-            severity=check.Severity.ERROR,
+            severity=check.Severity.WARNING,
             have_fix=True
             )
-        self.documentation = 'all your object should have a freezed transforms'
-        self.fixComment = 'freeze the transform of all objets'
+        self.documentation = 'all your objects in the geo group should have a freezed transforms'
+        self.fixComment = 'freeze the transform of all objets in the geo group'
         # severity est une enum qui indique le niveau de danger de l'erreur.
         # Il y a deux niveaux, Severity.WARNING et Severity.ERROR
         
         # Attribut propre au check (comme un objet classique)
-        self.condition = False
+        self.condition = True
         
         
     def run(self, stateManager):
@@ -77,7 +77,9 @@ class AllGeoShouldHaveATRSof0(check.Check):
         """  
         import maya.cmds as cmds
         # List all transform nodes
-        all_transforms = cmds.ls(type='transform')
+        all_transforms = cmds.listRelatives('geo', allDescendents=True, type='transform', fullPath=True) or []
+        all_transforms += ['|geo']
+        print(f"all_transform={all_transforms}")
 
         if not all_transforms:
             cmds.warning("No transform nodes found.")
@@ -86,8 +88,16 @@ class AllGeoShouldHaveATRSof0(check.Check):
         transformed = []
 
         for obj in all_transforms:
-            if obj in ['persp', 'top', 'front', 'side']:
+            if obj in ["persp","top","front","side","geo","left","back","bottom"]:
                 continue  # skip cameras
+            
+            shapes = cmds.listRelatives(obj, shapes=True, fullPath=True)
+            if shapes:
+                shapetype=cmds.objectType(shapes[0])
+                if shapetype =='imagePlane':
+                    continue  # skip imageplane
+            
+
 
             # Get transform attributes
             t = cmds.getAttr(obj + ".translate")[0]
