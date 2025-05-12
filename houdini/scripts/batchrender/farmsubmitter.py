@@ -1,8 +1,9 @@
 import sys
 import PrismInit
-
+    
 USD_PLUGIN = PrismInit.pcore.getPlugin('USD')
 LOP_RENDER = USD_PLUGIN.api.lopRender
+LOP_FILECACHE = USD_PLUGIN.api.usdExport
 
 loprender_module = sys.modules[LOP_RENDER.__module__]
 
@@ -38,6 +39,22 @@ class Farm_Submitter(loprender_module.Farm_Submitter):
             state.ui.gb_prioJob.setChecked(submit_high_prio_job)
             state.ui.sp_highPrio.setValue(int(high_prio_job_priority))
             state.ui.e_highPrioFrames.setText(high_prio_job_frames)
+    
+    
+    def pre_filecache(self):
+        filecache_states = []
+        for state in self.states:
+            node = state.ui.node
+            filecache = node.input(1)
+            
+            if not (filecache
+                and filecache.type().name() == 'prism::lop_filecache::1.0'):
+                continue
+            
+            fstate = LOP_FILECACHE.getStateFromNode({'node': filecache})
+            filecache_states.append(fstate)
+            
+        self.states = filecache_states + self.states
             
     
     def submit(self):
@@ -46,7 +63,8 @@ class Farm_Submitter(loprender_module.Farm_Submitter):
         self.state.ui.gb_submit.setChecked(True)
         
         self.set_states()
-
+        self.pre_filecache()
+        
         sanityChecks = bool(self.kwargs["node"].parm("sanityChecks").eval())
         version = 'next'
         saveScene = bool(self.kwargs["node"].parm("saveScene").eval())

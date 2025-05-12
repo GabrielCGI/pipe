@@ -341,6 +341,10 @@ class MainDialog(QDialog):
             warningColor=palettedata['SUCCESS_COLOR_VERY_LIGHT']
             self.titleLabel.setStyleSheet(f"color: {warningColor};")
         self.titleLabel.setText(text)
+
+        # update the publish button
+        if self.has_no_error == True:
+            self.acceptButton.setText('Publish')
             
     def run_fix(self):
         for check in self.checkList:

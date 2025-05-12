@@ -1,6 +1,7 @@
 import os
 import hou
 import json 
+import sys
 
 import PrismInit
 
@@ -33,28 +34,30 @@ with open(style_path, "r") as file:
 for key, value in palettedata.items():
     STYLE_CONTENT = STYLE_CONTENT.replace(key, value)
 
-# DEBUG_MODE = False
-# try:
-#     sys.path.append(r'R:\devmaxime\virtualvens\sanitycheck\Lib\site-packages')
-#     import debugpy
-# except:
-#     DEBUG_MODE = False
+## set this variable to True to enable debug
+## WARNING: DEBUG MODE will deadlock houdini if not catch by a distant debugger
+DEBUG_MODE = False
+try:
+    sys.path.append(r'R:\devmaxime\virtualvens\sanitycheck\Lib\site-packages')
+    import debugpy
+except:
+    DEBUG_MODE = False
 
 
-# def debug():
-#     if not DEBUG_MODE:
-#         return
+def debug():
+    if not DEBUG_MODE:
+        return
     
-#     hython = r"C:\Program Files\Side Effects Software\Houdini 20.5.548\bin\hython3.11.exe"
-#     debugpy.configure(python=hython)
-#     try:
-#         debugpy.listen(5678)
-#     except Exception as e:
-#         print(e)
-#         print("Already attached")
+    hython = r"C:\Program Files\Side Effects Software\Houdini 20.5.548\bin\hython3.11.exe"
+    debugpy.configure(python=hython)
+    try:
+        debugpy.listen(5678)
+    except Exception as e:
+        print(e)
+        print("Already attached")
     
-#     print("Waiting for debugger attach")
-#     debugpy.wait_for_client()
+    print("Waiting for debugger attach")
+    debugpy.wait_for_client()
 
     
 class BatchSelector(QtWidgets.QDialog):
@@ -345,16 +348,24 @@ class BatchSelector(QtWidgets.QDialog):
             
             if shot.checkState(0) != QtCore.Qt.CheckState.Checked:
                 continue
-
+            
+            has_no_execution = True
+            
             for id_exec in range(shot.childCount()):
                 execution = shot.child(id_exec)
                 execution_data = execution.data(0, QtCore.Qt.UserRole)
+                parm_name = ('execution_enabled_'
+                                f'{execution_data}')
+                execution_parm = node.parm(parm_name)
                 
                 if execution.checkState(0) != QtCore.Qt.CheckState.Checked:
-                    parm_name = ('execution_enabled_'
-                                 f'{execution_data}')
-                    node.parm(parm_name).set(0)
+                    execution_parm.set(0)
                     continue
+                
+                has_no_execution = False
+                
+            if has_no_execution:
+                continue
                 
             if kwargs is None:
                 kwargs = {'node': node}
@@ -375,6 +386,7 @@ class BatchSelector(QtWidgets.QDialog):
 
 def main():
     
+    debug()
     render_nodes = list(
         hou.lopNodeTypeCategory()
         .nodeType('prism::LOP_Render::1.0')

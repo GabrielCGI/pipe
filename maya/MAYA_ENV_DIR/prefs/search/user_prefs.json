@@ -5,12 +5,12 @@
             "GraphEditor",
             "CreatePolygonCube",
             "HotkeyPreferencesWindow",
-            "MatchTransform",
             "NamespaceEditor",
             "ScaleConstraint",
+            "MultiCutTool",
+            "MatchTransform",
             "ParentConstraint",
-            "ToggleEditPivot",
-            "MultiCutTool"
+            "ToggleEditPivot"
         ],
         [],
         [],

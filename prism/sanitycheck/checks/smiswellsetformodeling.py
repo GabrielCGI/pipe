@@ -8,6 +8,7 @@ class SMIsWellSetForModeling(check.Check):
     """
 
     def __init__(self):
+        
         super().__init__(
             name='state_manager_is_well_set_for_modeling',
             label='state manager is well set for modeling',
@@ -25,6 +26,7 @@ class SMIsWellSetForModeling(check.Check):
 
     def run(self, stateManager):
         core = stateManager.core
+        
         # Un check doit renvoyer True ou False.
 
         # Ce code ce lance peu importe le DCC
@@ -80,22 +82,35 @@ class SMIsWellSetForModeling(check.Check):
         smdict=stateManager.getStateSettings()
         data = json.loads(smdict)
         stateList=data["states"][1:]
-        for state in stateList:
-            if state 'stateclass': 'ImportFile'
         print(stateList)
-        if len(stateList) > 2:
-            self.message = f'there should be max two state in the state manager, the usd one ,and the rigging one but {len(stateList)} have been detected'
+        for obj in stateList:
+            print(f"")
+            print(f"")
+            print(f"")
+            for key, value in obj.items():
+                print(f"{key}: {value}")
+        # for state in stateList:
+        #     if state 'stateclass': 'ImportFile':
+        export_states = [state for state in stateList if state.get("stateclass") == "Export" or state.get("stateclass") == "USD Export"]
+        maxState=2
+        if len(export_states) > maxState:
+            self.message = f'there should be max {maxState} state in the state manager, the usd one ,and the rigging one but {len(stateList)} have been detected'
             self.status = False
             return False
+        print("hey")
         usdState=stateList[0]
         product=usdState.get("product")
         all_sets = cmds.ls(type='objectSet')
+        
 
         for set in all_sets:
+            print(set)
+            print(product)
             if set ==product:
                 members = cmds.sets(set, q=True)
                 if members != ['geo']:
-                    str = 'there is other stuff than geo selected in your product {product} :\n'
+                    print("hey")
+                    str = f'there is other stuff than geo selected in your product {product} :\n'
                     for member in members:
                         str += f' - {member} \n'
                     str += ' and there should only have geo'
@@ -103,6 +118,7 @@ class SMIsWellSetForModeling(check.Check):
                     self.status = False
                     return False
                 else:
+                    print("hey")
                     self.message = f'you only have {members} selected to export! nice'
                     self.status = True
                     return True

@@ -1,16 +1,18 @@
+# Merged USDA Updater with Maya Work Layer Support
+
 import os
 import re
 import shutil
+import tempfile
 from PySide6 import QtWidgets, QtCore
 from maya import OpenMayaUI, cmds
 from shiboken6 import wrapInstance
-print("yo2")
-# ✅ Set this to your project-specific base asset path (slashes can be forward or back)
+from pxr import Usd
+import mayaUsd
+
 BASE_ASSET_PATH = "I:/ralphLauren_2412/03_Production/Assets/"
 
-def maya_main_window():
-    main_window_ptr = OpenMayaUI.MQtUtil.mainWindow()
-    return wrapInstance(int(main_window_ptr), QtWidgets.QWidget)
+TMP_FILE_NAME = "USD_Maya_copy_paste_script_tmp.usda"
 
 class AssetItem:
     def __init__(self, original_path, updated_path, from_version, to_version):
@@ -20,24 +22,29 @@ class AssetItem:
         self.to_version = to_version
         self.should_update = True
 
+def maya_main_window():
+    main_window_ptr = OpenMayaUI.MQtUtil.mainWindow()
+    return wrapInstance(int(main_window_ptr), QtWidgets.QWidget)
+
 def find_latest_version_path(original_path):
     match = re.match(
-        r"@(?P<base>.+/Export/USD)/v(?P<version>\d{3})/(?P<filename>(?P<asset>[^/_]+)_USD_v\d{3}\.(usd[ac]))@",
-        original_path
+        r"@(?P<base>.+?/Export/USD)/v(?P<version>\d{3})/(?P<filename>.+_USD_v\d{3}\.usd[ac])@",
+        original_path,
+        re.IGNORECASE
     )
     if not match:
         return None
 
     base_dir = match.group("base").replace("/", os.sep)
-    asset_name = match.group("asset")
     current_version = int(match.group("version"))
+    filename = match.group("filename")
+    asset_name = filename.split("_USD_")[0]
 
     if not os.path.exists(base_dir):
         return None
 
     versions = [int(folder[1:]) for folder in os.listdir(base_dir)
                 if re.fullmatch(r"v\d{3}", folder)]
-
     if not versions:
         return None
 
@@ -45,9 +52,8 @@ def find_latest_version_path(original_path):
     latest_str = f"v{latest_version:03d}"
     latest_folder = os.path.join(base_dir, latest_str)
 
-    # Cherche le fichier correspondant au nom de l’asset, peu importe l’extension
     for fname in os.listdir(latest_folder):
-        if re.fullmatch(f"{asset_name}_USD_{latest_str}\\.usd[ac]", fname, re.IGNORECASE):
+        if re.fullmatch(f"{re.escape(asset_name)}_USD_{latest_str}\\.usd[ac]", fname, re.IGNORECASE):
             latest_path = f"@{match.group('base')}/{latest_str}/{fname}@"
             return AssetItem(
                 original_path=original_path,
@@ -58,29 +64,36 @@ def find_latest_version_path(original_path):
 
     return None
 
+
 class USDAUpdaterUI(QtWidgets.QDialog):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("USD Payload Updater")
         self.setMinimumSize(900, 800)
         self.asset_items = []
-        self.usda_file = None
         self.checkbox_widgets = []
+        self.usda_file = None
+        self.mode = 'file'  # or 'maya'
         self.init_ui()
 
     def init_ui(self):
         layout = QtWidgets.QVBoxLayout(self)
 
+        # Mode selector
+        self.mode_selector = QtWidgets.QComboBox()
+        self.mode_selector.addItems(["Update from USDA file", "Update Maya Work Layer"])
+        self.mode_selector.currentIndexChanged.connect(self.update_mode)
+        layout.addWidget(self.mode_selector)
+
         # File selection
-        file_layout = QtWidgets.QHBoxLayout()
         self.file_path_edit = QtWidgets.QLineEdit()
         self.file_browse_btn = QtWidgets.QPushButton("Browse...")
         self.file_browse_btn.clicked.connect(self.browse_file)
+        file_layout = QtWidgets.QHBoxLayout()
         file_layout.addWidget(self.file_path_edit)
         file_layout.addWidget(self.file_browse_btn)
         layout.addLayout(file_layout)
 
-        # List + buttons
         self.list_widget = QtWidgets.QListWidget()
         layout.addWidget(self.list_widget)
 
@@ -93,171 +106,254 @@ class USDAUpdaterUI(QtWidgets.QDialog):
         select_btns_layout.addWidget(self.deselect_all_btn)
         layout.addLayout(select_btns_layout)
 
-        # Log box
         self.log_box = QtWidgets.QTextEdit()
         self.log_box.setReadOnly(True)
         self.log_box.setFixedHeight(250)
         layout.addWidget(self.log_box)
 
-        # Run button
         self.run_button = QtWidgets.QPushButton("Run Update")
         self.run_button.clicked.connect(self.run_update)
         layout.addWidget(self.run_button)
-        # 🟢 Try to auto-load the latest mayaLayout.usda file
-        try:
-            default_usda = self.find_latest_maya_layout_usda()
-            if default_usda:
-                self.file_path_edit.setText(default_usda)
-                self.load_usda(default_usda)
-        except Exception as e:
-            self.log(f"⚠️ Error finding default USDA file: {e}")
-            
+
+        self.update_mode()
+
     def log(self, text):
         self.log_box.append(text)
 
+    def update_mode(self):
+        self.mode = 'maya' if self.mode_selector.currentIndex() == 1 else 'file'
+        self.file_path_edit.setEnabled(self.mode == 'file')
+        self.file_browse_btn.setEnabled(self.mode == 'file')
+        self.list_widget.clear()
+        self.asset_items.clear()
+        self.checkbox_widgets.clear()
+        if self.mode == 'file':
+            try:
+                default_file = self.find_latest_maya_layout_usda()
+                self.log(f"default file: {default_file}")
+                if default_file:
+                    self.file_path_edit.setText(default_file)
+                    self.load_usda(default_file)
+            except Exception as e:
+                self.log(f"⚠️ Error loading USDA file: {e}")
+        else:
+            self.load_maya_work_layer()
+
     def browse_file(self):
-        start_dir = os.path.dirname(self.find_latest_maya_layout_usda()) or "C:/"
-        file_path, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self,
-            "Select USDA File",
-            start_dir,
-            "USDA Files (*.usda)"
-        )
-        if file_path:
-            self.file_path_edit.setText(file_path)
-            self.load_usda(file_path)
+        path, _ = QtWidgets.QFileDialog.getOpenFileName(self, "Select USDA File", "C:/", "USDA Files (*.usda)")
+        if path:
+            self.file_path_edit.setText(path)
+            self.load_usda(path)
 
-    # 🔍 Finds the latest mayaLayout.usda file based on the current Maya scene
+
+
     def find_latest_maya_layout_usda(self):
+        print("Fetching current Maya scene path...")
         scene_path = cmds.file(q=True, sceneName=True)
-        if not scene_path:
-            print("⛔ No scene loaded.")
-            return None
+        print(f"Scene path: {scene_path}")
 
+        print("Attempting to extract sequence and shot from the scene path...")
         match = re.search(r"Shots[\\/](?P<seq>[A-Z0-9]+)[\\/](?P<shot>\d+)", scene_path, re.IGNORECASE)
         if not match:
-            print("⛔ Could not determine sequence and shot from path.")
+            print("No match found for sequence and shot in the scene path.")
             return None
 
-        sequence = match.group("seq")
+        seq = match.group("seq")
         shot = match.group("shot")
-        shot_path = os.path.join("I:/ralphLauren_2412/03_Production/Shots", sequence, shot)
-        layout_dir = os.path.join(shot_path, "Export", "_layer_layout_layoutMaya")
-        print(layout_dir)
+        print(f"Extracted sequence: {seq}, shot: {shot}")
+
+        layout_dir = os.path.join("I:/ralphLauren_2412/03_Production/Shots", seq, shot, "Export", "_layer_layout_layoutMaya")
+        print(f"Constructed layout directory path: {layout_dir}")
 
         if not os.path.exists(layout_dir):
-            print(f"⛔ Layout directory not found: {layout_dir}")
+            print(f"Layout directory does not exist: {layout_dir}")
             return None
 
+        print("Listing version directories in layout directory...")
         version_dirs = [d for d in os.listdir(layout_dir) if re.fullmatch(r"v\d{3}", d)]
+        print(f"Found version directories: {version_dirs}")
+
         if not version_dirs:
-            print("⛔ No version folders found.")
+            print("No version directories found.")
             return None
 
-        latest_version = max(version_dirs)
-        latest_path = os.path.join(layout_dir, latest_version)
-        expected_name_pattern = rf"{sequence}-{shot}__layer_layout_layoutMaya_{latest_version}\.usda"
+        latest = max(version_dirs)
+        print(f"Latest version directory: {latest}")
 
-        for fname in os.listdir(latest_path):
-            if re.fullmatch(expected_name_pattern, fname, re.IGNORECASE):
-                full_path = os.path.join(latest_path, fname)
-                print(f"✅ Found latest mayaLayout.usda: {full_path}")
-                return full_path
+        target_dir = os.path.join(layout_dir, latest)
+        print(f"Looking for USDA file in: {target_dir}")
+        expected_filename = f"{seq}-{shot}__layer_layout_layoutMaya_{latest}.usda"
+        print(f"Expecting file: {expected_filename}")
+        for f in os.listdir(target_dir):
+            print(f"Checking file: {f}")
+            if f.lower() == expected_filename.lower():
+                usda_path = os.path.join(target_dir, f)
+                print(f"Found matching USDA file: {usda_path}")
+                return usda_path
 
-        print("⛔ No matching USD file found in the latest version folder.")
+        print("No matching USDA file found.")
         return None
 
-    def load_usda(self, usda_file, clear_log=True):  # ← paramètre ajouté
-        self.usda_file = usda_file
+
+    def load_usda(self, filepath):
+        self.usda_file = filepath
         self.asset_items.clear()
         self.checkbox_widgets.clear()
         self.list_widget.clear()
+        self.log_box.clear()
 
-        if clear_log:
-            self.log_box.clear()
-
-        self.log(f"🔍 Parsing: {usda_file}")
-
-        with open(usda_file, "r", encoding="utf-8") as f:
+        with open(filepath, 'r', encoding='utf-8') as f:
             content = f.read()
 
-        escaped_path = re.escape(BASE_ASSET_PATH.replace("\\", "/"))
-        pattern = rf"@{escaped_path}.+?/Export/USD/v\d{{3}}/[^@]+?_USD_v\d{{3}}\.usd[ac]@"
-        matches = re.findall(pattern, content, re.IGNORECASE)
+        self.parse_payloads(content)
 
-        self.log(f"Found {len(matches)} payload(s)")
+    def load_maya_work_layer(self):
+        self.asset_items.clear()
+        self.checkbox_widgets.clear()
+        self.list_widget.clear()
+        self.log_box.clear()
 
-        added = set()
-        for match in matches:
-            match_normalized = match.lower()
-            if match_normalized in added:
-                continue
-            added.add(match_normalized)
-            item = find_latest_version_path(match)
-            if item and item.from_version != item.to_version:
-                self.asset_items.append(item)
-                self.add_list_item(item)
+        stage = self.get_selected_stage()
+        if not stage:
+            self.log("⛔ No valid USD stage selected in Maya.")
+            return
+
+        layer = stage.GetEditTarget().GetLayer()
+        content = layer.ExportToString()
+        self.parse_payloads(content)
+
+    def get_selected_stage(self):
+        """
+        Return the selected USD stage if it's a mayaUsdProxyShape,
+        or fallback to the first mayaUsdProxyShape in the scene.
+        """
+        maya_stage_node = cmds.ls(selection=True, l=True)
+
+        if maya_stage_node:
+            selected_node = maya_stage_node[0]
+            node_type = cmds.nodeType(selected_node)
+            print(f"Selected node: {selected_node}, type: {node_type}")
+            
+            if node_type != "mayaUsdProxyShape":
+                print("Selected node is not of type mayaUsdProxyShape. Searching for a valid one...")
+                selected_node = None
             else:
-                self.log(f"🟰 Skipping (already latest or invalid): {match}")
-    def add_list_item(self, item: AssetItem):
+                print("Selected node is a valid mayaUsdProxyShape.")
+        else:
+            print("No selection found.")
+            selected_node = None
+
+        if not selected_node:
+            proxy_shapes = cmds.ls(type="mayaUsdProxyShape", l=True)
+            if not proxy_shapes:
+                cmds.confirmDialog(
+                    title='No stage found',
+                    message='No mayaUsdProxyShape found in the scene',
+                    button=['OK'],
+                    defaultButton='OK'
+                )
+                cmds.warning('No mayaUsdProxyShape found in the scene')
+                print("No mayaUsdProxyShape found in the scene")
+                return None
+            selected_node = proxy_shapes[0]
+            print(f"Using first mayaUsdProxyShape: {selected_node}")
+
+        asset_stage = mayaUsd.ufe.getStage(selected_node)
+        if asset_stage is None:
+            cmds.confirmDialog(
+                title='Invalid stage',
+                message='Could not get stage from the selected node',
+                button=['OK'],
+                defaultButton='OK'
+            )
+            cmds.warning('Could not get stage from the selected node')
+            print("Could not get stage from the selected node")
+            return None
+
+        print("Successfully retrieved stage.")
+        return asset_stage
+
+ 
+    def parse_payloads(self, content):
+        escaped_base = re.escape(BASE_ASSET_PATH.replace('\\', '/'))
+        pattern = r"@[^@]+\.usd[ac]@(?:<[^>]+>)?"  # Simplified: focus only on @...usd[ac]@
+        matches = re.findall(pattern, content, re.IGNORECASE)
+        seen = set()
+        self.log(f"Found {len(matches)} payload(s)")
+        for m in matches:
+            clean_path = re.sub(r"<[^>]+>$", "", m)  # Remove optional target path
+            m_norm = clean_path.lower()
+            if m_norm in seen:
+                continue
+            seen.add(m_norm)
+            item = find_latest_version_path(clean_path)
+            if item:
+                if item.from_version != item.to_version:
+                    self.asset_items.append(item)
+                    self.add_list_item(item)
+                else:
+                    self.log(f"🟰 Skipping up-to-date: {item.original_path}")
+            else:
+                self.log(f"❌ Skipped (invalid or unresolvable): {clean_path}")
+
+
+    def add_list_item(self, item):
         checkbox = QtWidgets.QCheckBox(
             f"{item.original_path}\n➡ v{item.from_version:03d} → v{item.to_version:03d}"
         )
         checkbox.setChecked(True)
-        checkbox.stateChanged.connect(
-            lambda state, i=item: setattr(i, 'should_update', state == QtCore.Qt.Checked)
-        )
-
+        checkbox.stateChanged.connect(lambda state, i=item: setattr(i, 'should_update', state == QtCore.Qt.Checked))
         list_item = QtWidgets.QListWidgetItem()
         self.list_widget.addItem(list_item)
         self.list_widget.setItemWidget(list_item, checkbox)
         list_item.setSizeHint(checkbox.sizeHint())
-
         self.checkbox_widgets.append(checkbox)
 
-    def set_all_checkboxes(self, value: bool):
+    def set_all_checkboxes(self, value):
         for cb in self.checkbox_widgets:
             cb.setChecked(value)
 
     def run_update(self):
-        print("yo5")
-        if not self.usda_file:
-            self.log("⛔ No USDA file selected.")
-            return
+        if self.mode == 'file':
+            if not self.usda_file:
+                self.log("⛔ No USDA file selected.")
+                return
+            with open(self.usda_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            backup = self.usda_file + ".bak"
+            shutil.copy2(self.usda_file, backup)
+            self.log(f"🗂️ Backup created: {backup}")
+        else:
+            stage = self.get_selected_stage()
+            if not stage:
+                self.log("⛔ No valid USD stage.")
+                return
+            layer = stage.GetEditTarget().GetLayer()
+            content = layer.ExportToString()
 
-        # Backup
-        backup_path = self.usda_file + ".bak"
-        shutil.copy2(self.usda_file, backup_path)
-        self.log(f"🗂️ Backup created: {backup_path}")
-
-        # Read and update
-        with open(self.usda_file, "r", encoding="utf-8") as f:
-            content = f.read()
-
-        changes_made = False
-
+        self.log(f"Asset items ready: {len(self.asset_items)}")
+        
+        changed = False
         for item in self.asset_items:
-            if item.should_update:
-                if item.original_path in content:
-                    content = content.replace(item.original_path, item.updated_path)
-                    self.log(f"✅ Updated: {item.original_path} → {item.updated_path}")
-                    changes_made = True
-                else:
-                    self.log(f"⚠️ Skipped (not found in file): {item.original_path}")
+            if item.should_update and item.original_path in content:
+                content = content.replace(item.original_path, item.updated_path)
+                self.log(f"✅ Updated: {item.original_path} → {item.updated_path}")
+                changed = True
 
-        if changes_made:
-            with open(self.usda_file, "w", encoding="utf-8") as f:
-                f.write(content)
-            self.log("🎉 All selected payloads successfully updated.")
-            
+        if changed:
+            if self.mode == 'file':
+                with open(self.usda_file, 'w', encoding='utf-8') as f:
+                    f.write(content)
+            else:
+                layer.ImportFromString(content)
+            self.log("🎉 Update complete.")
         else:
             self.log("✅ Nothing to update.")
 
-        # Refresh UI
-        # Refresh UI
-        self.log("🔁 Refreshing asset list...")
-        self.load_usda(self.usda_file, clear_log=False)  # ← flag passé à False
-
+        if self.mode == 'file':
+            self.load_usda(self.usda_file)
+        else:
+            self.load_maya_work_layer()
 
 def show_usda_updater_in_maya():
     global updater_window
@@ -266,10 +362,6 @@ def show_usda_updater_in_maya():
         updater_window.deleteLater()
     except:
         pass
-
     updater_window = USDAUpdaterUI(parent=maya_main_window())
     updater_window.show()
-
-# 👉 To launch, run this:
-# show_usda_updater_in_maya()
-
+show_usda_updater_in_maya()

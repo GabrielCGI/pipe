@@ -13,6 +13,7 @@ class HaveOnlyGeoAtRoot(check.Check):
         self.fixComment = "you need to delete the other nodes, or rename your main group , you can put all the node temp in a group named, 'sandbox'"
 
     def run(self, stateManager):
+        print("running HaveOnlyGeoAtRoot check")
         core = stateManager.core
         if core.appPlugin.pluginName == 'Maya':
             return self.mayarun(stateManager)
