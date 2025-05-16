@@ -1,8 +1,8 @@
 import re
 import os
 
-import autoconnect_ui.ressource as ressource
-import autoconnect_ui.houdinilog as hlog
+from . import ressource as ressource
+from . import houdinilog as hlog
 
 VERSION_PATTERN = r"v\d{3,9}"
 UDIM_PATTERN = r"\d{4}$"

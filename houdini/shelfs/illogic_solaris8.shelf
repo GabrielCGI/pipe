@@ -11,7 +11,7 @@
     <memberToolshelf name="lop_oceans"/>
     <memberToolshelf name="cloud"/>
     <memberToolshelf name="hairtools"/>
-    <memberToolshelf name="shelf_1"/>
+    <memberToolshelf name="dev"/>
     <memberToolshelf name="illogic_solaris6"/>
   </shelfSet>
 
@@ -36,7 +36,7 @@
     <memberTool name="clean_light"/>
     <memberTool name="send_ranch_copy"/>
     <memberTool name="select_prim_with_attributes"/>
-    <memberTool name="batch_render_dev"/>
+    <memberTool name="louis create materials"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -218,14 +218,30 @@ auto_manifest.run()]]></script>
   <tool name="sanity_check" label="Sanity Check" icon="R:/pipeline/pipe/prism/sanitycheck/ui/Icons/sanitycheck.png">
     <script scriptType="python"><![CDATA[import os
 import sys
+import importlib
 import PrismInit
 
-SANITYCHECK_PATH = "R:/pipeline/pipe/prism"
+SANITYCHECK_PATH = r"R:\pipeline\pipe_public\sanitycheck"
+
+def deletefromcontext(module_name):
+    sanitycheck = []
+    for i in sys.modules:
+        if module_name == i or i.startswith(f'{module_name}.'):
+            sanitycheck.append(i)
+
+    for i in sanitycheck:
+        del sys.modules[i]
+        
+        
 
 def run():
-    sys.path.append(SANITYCHECK_PATH)
+    deletefromcontext('sanitycheck')
+    if not SANITYCHECK_PATH in sys.path:
+        sys.path.append(SANITYCHECK_PATH)
+    
     try:
         import sanitycheck
+        importlib.reload(sanitycheck)
     except Exception as e:
         print(e)
         return
@@ -237,6 +253,12 @@ def run():
         
     sm = PrismInit.pcore.getStateManager()
     res = sanitycheck.main(*(sm, YAML_LOCATION))
+
+    try:
+        sys.path.remove(SANITYCHECK_PATH)
+    except Exception as e:
+        print(e)
+        pass
     
 run()
 ]]></script>

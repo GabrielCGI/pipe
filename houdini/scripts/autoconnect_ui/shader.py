@@ -1,7 +1,7 @@
 import re
 import os
 
-import autoconnect_ui.map as mp
+from . import map as mp
 
 class Shader:
     

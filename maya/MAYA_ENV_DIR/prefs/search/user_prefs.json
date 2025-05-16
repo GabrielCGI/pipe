@@ -8,9 +8,12 @@
             "NamespaceEditor",
             "ScaleConstraint",
             "MultiCutTool",
+            "ToggleEditPivot",
+            "MatchPivots",
+            "ToggleVertexNormalDisplay",
+            "ToggleFaceNormalDisplay",
             "MatchTransform",
-            "ParentConstraint",
-            "ToggleEditPivot"
+            "ParentConstraint"
         ],
         [],
         [],

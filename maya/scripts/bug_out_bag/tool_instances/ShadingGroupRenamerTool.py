@@ -25,7 +25,7 @@ class ShadingGroupRenamerTool(ActionTool):
                     old_name = sg.name()
                     shader = surface_shader[0]
                     # Rename the shading group based on the surface shader's name
-                    new_sg_name = shader.nodeName() + '_SG'
+                    new_sg_name = shader.nodeName() + '_mat'
                     pm.rename(sg, new_sg_name)
                     print(f'Renamed {old_name} to {new_sg_name}')
                 else:

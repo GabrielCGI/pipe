@@ -2,11 +2,12 @@ import os
 import re
 import glob
 import hou
+from pathlib import Path
 
-import autoconnect_ui.houdinilog as hlog
-import autoconnect_ui.auto as auto
-import autoconnect_ui.shader as sh
-import autoconnect_ui.map as mp
+from . import houdinilog as hlog
+from . import auto
+from . import shader as sh
+from . import map as mp
 
 from PySide2 import QtCore
 from PySide2 import QtWidgets
@@ -441,9 +442,10 @@ class AutoConnectUI(QtWidgets.QMainWindow):
         self.shaderWidgets: ShaderWidget = []
         
         self.initializeCentralWidget()
-        
         self.onRefresh()
         self.initializeToolbar()
+        
+        self.initialized = not self.material_library is None
         
     def initializeStyleSheet(self):
         """
@@ -456,6 +458,7 @@ class AutoConnectUI(QtWidgets.QMainWindow):
                 self.setStyleSheet(stylesheet)
         except Exception as e:
             hlog.pdebug(f"Could not load stylesheet:\n\t{e}")
+
 
     def initializeCentralWidget(self):
         """
@@ -482,6 +485,7 @@ class AutoConnectUI(QtWidgets.QMainWindow):
         self.central.setLayout(self.vbox)
         self.scrollarea.setWidget(self.central)
         self.setCentralWidget(self.scrollarea)
+
 
     def initializeToolbar(self):
         """
@@ -518,6 +522,7 @@ class AutoConnectUI(QtWidgets.QMainWindow):
         
         self.toolbar.setMovable(False)
         self.addToolBar(QtCore.Qt.BottomToolBarArea, self.toolbar)
+    
     
     def initializeShaderWidgets(self):
         """
@@ -567,6 +572,7 @@ class AutoConnectUI(QtWidgets.QMainWindow):
                     shader.name, listMapWidgets, versioning=False)
                 self.shaderWidgets.append(shaderWidget)      
             
+            
     def setupShaderWidgets(self):
         """
         Add shader widget to vbox layout.
@@ -613,6 +619,7 @@ class AutoConnectUI(QtWidgets.QMainWindow):
                 QtWidgets.QSizePolicy.Fixed)
             
             self.vbox.addWidget(shaderWidget)
+    
     
     def readShaders(self):
         """
@@ -675,12 +682,15 @@ class AutoConnectUI(QtWidgets.QMainWindow):
                 if not anyMapChecked:
                     self.shadersToUpdate.pop()
     
+    
     def checkSelectedNodes(self):
         # Check if the material library node is selected
         selectedNodes = hou.selectedNodes()
         
         if not len(selectedNodes):
-            hlog.pinfo("Material library node is not selected.")
+            hlog.pinfo("Please selected a material library or some shaders.")
+            hou.ui.displayMessage("Please selected a material "
+                                  "library or some shaders")
             return []
         
         material_library_selected = False
@@ -691,7 +701,7 @@ class AutoConnectUI(QtWidgets.QMainWindow):
         elif selectedNodes[0].parent().type().name() == 'materiallibrary':
             shaders_selected = True
         else:
-            hlog.pinfo("Please selected a material library or some shaders")
+            hlog.pinfo("Please selected a material library or some shaders.")
             hou.ui.displayMessage("Please selected a material "
                                   "library or some shaders")
             return []
@@ -704,20 +714,6 @@ class AutoConnectUI(QtWidgets.QMainWindow):
             self.selectedShaders = []
             for subnet in self.material_library.children():
                 self.selectedShaders.append(subnet.name())
-            
-            # Active network panel and focus material library
-            netpane = None
-            for pane in hou.ui.paneTabs():
-                if pane.type() == hou.paneTabType.NetworkEditor:
-                    netpane = pane
-                    break
-
-            if netpane is None:
-                hlog.pdebug("Network panel is not active.")
-                hou.ui.displayMessage("Network panel is not active.")
-                return
-            else:
-                netpane.setPwd(self.material_library)
             
         elif shaders_selected:
             self.material_library = selectedNodes[0].parent()
@@ -734,6 +730,26 @@ class AutoConnectUI(QtWidgets.QMainWindow):
             return []
         
         return subnets
+    
+    
+    def changeActivePane(self):
+        """
+        Active network panel and focus material library.
+        """
+        
+        netpane = None
+        for pane in hou.ui.paneTabs():
+            if pane.type() == hou.paneTabType.NetworkEditor:
+                netpane = pane
+                break
+
+        if netpane is None:
+            hlog.pdebug("Network panel is not active.")
+            hou.ui.displayMessage("Network panel is not active.")
+            return []
+        else:
+            netpane.setPwd(self.material_library)
+    
     
     def findDirectory(self, subnets):
         """
@@ -787,6 +803,8 @@ class AutoConnectUI(QtWidgets.QMainWindow):
         if not auto.ask_confirmation(self.shadersToUpdate):
             return
         
+        self.changeActivePane()
+        
         for shader in self.shadersToUpdate:
             color = None
             for shaderWidget in self.shaderWidgets:
@@ -799,13 +817,29 @@ class AutoConnectUI(QtWidgets.QMainWindow):
             self.refreshFromDirectory()
         else:
             self.onRefresh()
+            
+    
     
     def onRefresh(self):
         self.selectedShaders = None
         self.subnets = self.checkSelectedNodes()
         files_list_per_subnet = self.findDirectory(self.subnets)
         self.refreshFromFiles(files_list_per_subnet)
+        
     
+    def getLibrariesShaders(self):
+        scenefile = Path(hou.hipFile.path())
+        if len(scenefile.parts) < 4:
+            return []
+        asset_path = Path(*(scenefile.parts[:-4]))
+        library_path = asset_path / Path('Libraries')
+        if not os.path.exists(library_path):
+            return []
+        
+        shaders = auto.get_shaders_from_dir(library_path)
+        return shaders
+        
+        
     def clearVBOX(self):
         """
         Clear all shaders widgets in VBoxLayout.
@@ -826,21 +860,22 @@ class AutoConnectUI(QtWidgets.QMainWindow):
             if shader:
                 self.shaders.append(shader[0])
         
-        # print(self.shaders)
-        # print(self.selectedShaders)
-        
+        library_shaders = self.getLibrariesShaders()
+        for lib_shader in library_shaders:
+            can_be_added = True
+            for shader in self.shaders:
+                if lib_shader.name == shader.name:
+                    can_be_added = False
+            if can_be_added:
+                self.shaders.append(lib_shader)
+                
+        self.shaders
         if self.selectedShaders is not None and self.shaders:
-            
-            for i, shaderName in enumerate(self.selectedShaders):
+            for i, _ in enumerate(self.selectedShaders):
                 if not len(files_list_per_subnet[i]):
                     self.selectedShaders.pop(i)
-        
-            for i, shaderName in enumerate(self.selectedShaders):
+            for i, _ in enumerate(self.selectedShaders):
                 self.shaders[i].name = self.selectedShaders[i]
-                    
-            
-            # for i, shader in enumerate(self.shaders):
-            #     shader.name = self.selectedShaders[i]
                 
         self.shaderWidgets: ShaderWidget = []
         
@@ -902,5 +937,7 @@ def showUI():
     """
     
     dialog = AutoConnectUI(material_library=None)
+    if not dialog.initialized:
+        return
     dialog.setParent(hou.qt.mainWindow(), QtCore.Qt.Window)
     dialog.show()

@@ -6,10 +6,10 @@ import colorsys
 import hou
 import voptoolutils
 
-import autoconnect_ui.map as mp
-import autoconnect_ui.shader as sh
-import autoconnect_ui.ressource as ressource
-import autoconnect_ui.houdinilog as hlog
+from . import map as mp
+from . import shader as sh
+from . import ressource as ressource
+from . import houdinilog as hlog
 
 def log_shaders(shaders):
     """Simple function to log shaders

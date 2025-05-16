@@ -211,15 +211,20 @@ settingsFile = sys.argv[3]
 endFrame = int(sys.argv[2])
 startFrame = int(sys.argv[1])
 
-executable = os.getenv("HUSK_PATH")
+husk_path = os.getenv("HUSK_PATH")
+prism_husk_path = os.getenv("PRISM_DEADLINE_HUSK_PATH")
+
+executable = husk_path
 if not executable or not os.path.exists(executable):
-    executable = os.getenv("PRISM_DEADLINE_HUSK_PATH")
+    executable = prism_husk_path
     if not executable or not os.path.exists(executable):
         raise Exception(
-            "The Husk render executable is not defined or doesn't exist."
-            " Use \"HUSK_PATH\" or \"PRISM_DEADLINE_HUSK_PATH\" "
-            " environment varialbe to specify a path.")
-
+            "The Husk render executable is not defined or doesn't exist.\n"
+            f"HUSK_PATH: {husk_path}\n"
+            f"PRISM_DEADLINE_HUSK_PATH: {prism_husk_path}\n"
+            "Use \"HUSK_PATH\" or \"PRISM_DEADLINE_HUSK_PATH\" "
+            "environment variable to specify a valid path."
+        )
 with open(os.path.dirname(__file__) + "/" + settingsFile, "r") as f:
     settings = json.load(f)
 

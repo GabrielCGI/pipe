@@ -85,6 +85,12 @@
                     "mode": "Shell Command",
                     "cmd": "C:\\Program Files\\Blender Foundation\\Blender 3.5\\blender.exe",
                     "preferred": true
+                },
+                {
+                    "label": "Blender 4.4",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Blender Foundation\\Blender 4.4\\blender.exe",
+                    "preferred": false
                 }
             ],
             "uid": "7619a05e-5309-11ef-a854-d85ed35d00b3"
@@ -95,16 +101,9 @@
             "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Houdini.png",
             "versions": [
                 {
-                    "label": "20.5.360",
-                    "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.5.360\\bin\\houdini.exe",
-                    "preferred": false,
-                    "environment": {}
-                },
-                {
                     "label": "Latest",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini %HOUDINI_ILL_VERSION%\\bin\\houdini.exe",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini %HOUDINI_ILL_VERSION%\\bin\\houdinicore.exe",
                     "preferred": true,
                     "environment": {}
                 }
@@ -154,25 +153,20 @@
             "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Nuke.png",
             "versions": [
                 {
-                    "label": "Nuke 11.3v4",
+                    "label": "Nuke 13",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Nuke11.3v4\\Nuke11.3.exe"
+                    "cmd": "C:\\Program Files\\Nuke13.1v5\\Nuke13.1.exe",
+                    "preferred": false,
+                    "environment": {
+                        "OCIO": "R:\\pipeline\\networkInstall\\OpenColorIO-Configs\\cg-config-v1.0.0_aces-v1.3_ocio-v2.0.ocio"
+                    }
                 },
                 {
-                    "label": "Nuke 12.1v5",
+                    "label": "Nuke 15.1",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Nuke12.1v5\\Nuke12.1.exe"
-                },
-                {
-                    "label": "Nuke 15.0v4",
-                    "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Nuke15.0v4\\Nuke15.0.exe"
-                },
-                {
-                    "label": "Nuke 15.0v4",
-                    "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Nuke15.0v4\\Nuke15.0.exe",
-                    "preferred": true
+                    "cmd": "C:\\Program Files\\Nuke15.1v5\\Nuke15.1.exe",
+                    "preferred": true,
+                    "environment": {}
                 }
             ],
             "uid": "76296957-5309-11ef-ae6f-d85ed35d00b3"
@@ -221,6 +215,12 @@
                     "mode": "Shell Command",
                     "cmd": "C:\\Program Files\\Adobe\\Adobe Photoshop 2023\\Photoshop.exe",
                     "preferred": true
+                },
+                {
+                    "label": "Photoshop 2025",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Adobe\\Adobe Photoshop 2025\\Photoshop.exe",
+                    "preferred": false
                 }
             ],
             "uid": "7631d25e-5309-11ef-b2f2-d85ed35d00b3"
@@ -252,6 +252,21 @@
                 }
             ],
             "uid": "763971ad-5309-11ef-8229-d85ed35d00b3"
+        },
+        {
+            "label": "RV",
+            "category": "2D",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\RV.png",
+            "versions": [
+                {
+                    "label": "Version 1",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\ILLOGIC_APP\\OpenRV\\bin\\rv.exe",
+                    "preferred": true,
+                    "environment": {}
+                }
+            ],
+            "uid": "59fc7696-3180-11f0-8a3b-d8bbc13f16c2"
         }
     ]
 }

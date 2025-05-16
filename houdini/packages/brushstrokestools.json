@@ -1,9 +1,8 @@
 {
-    "env": [
-        {
-            "brushstrokestools": "R:/pipeline/networkInstall/brushstrokestools",
-            "PYTHONPATH": "$brushstrokestools/python3.11libs"
-        }
-    ],
-    "HOUDINI_OTLSCAN_PATH": "$brushstrokestools/otls"
+"env":[
+{
+"brushstrokestools": "R:/pipeline/networkInstall/brushstrokestools"
+},
+],
+"path": "$brushstrokestools"
 }
