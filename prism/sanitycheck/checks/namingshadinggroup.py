@@ -1,6 +1,9 @@
 
 from . import check
 from ..fixes import renameshader
+import logging
+
+logger = logging.getLogger(__name__)
 
 class NamingShadingGroup(check.Check):
     def __init__(self):
@@ -23,10 +26,31 @@ class NamingShadingGroup(check.Check):
     
     def mayarun(self, stateManager):
         import maya.cmds as cmds
-        
-        shading_groups = cmds.ls(type="shadingEngine")
+        logger.info(f'running the maya function of the check naming_shading_group')
+        #-------------------------------------
+        def is_local(node):
+            try:
+                return not cmds.referenceQuery(node, isNodeReferenced=True)
+            except RuntimeError:
+                return True  # Treat problematic nodes as local
+
+        local_sgs = set()
+
+        # Get all DAG objects
+        all_objs = cmds.ls(dag=True, long=True)
+
+        for obj in all_objs:
+            if is_local(obj):
+                # Get shading groups connected to the object
+                sgs = cmds.listConnections(obj, type="shadingEngine") or []
+                for sg in sgs:
+                    local_sgs.add(sg)
+
+        # Convert to list and print
+        local_sg_list = list(local_sgs)
+        #-------------------------------------
         wrongShaderGroup=[]
-        for sg in shading_groups:
+        for sg in local_sg_list:
             connected_mat = cmds.listConnections(sg + ".surfaceShader", source=True, destination=False)
             if connected_mat:
                 mat_name = connected_mat[0]

@@ -1,0 +1,9 @@
+{
+"env":[
+    {
+    "brushstrokestools": "R:/pipeline/networkInstall/brushstrokestools",
+    "HOUDINI_SCRIPT_PATH": "$brushstrokestools/python3.11libs/", 
+    "HOUDINI_OTLSCAN_PATH": "$brushstrokestools/otls/"
+    }
+    ]
+}

@@ -557,7 +557,7 @@ global proc shelf_Illogic2025 () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 39
         -height 34
         -manage 1
         -visible 1
@@ -615,7 +615,7 @@ global proc shelf_Illogic2025 () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "import os\nimport sys\nimport PrismInit\n\nSANITYCHECK_PATH = \"R:/pipeline/pipe/prism\"\n\ndef run():\n    sys.path.append(SANITYCHECK_PATH)\n    try:\n        import sanitycheck\n    except Exception as e:\n        print(e)\n        return\n    \n    try:\n        YAML_LOCATION = os.environ['SANITY_CHECK_CONFIG']\n    except:\n        YAML_LOCATION = 'None'\n        \n    sm = PrismInit.pcore.getStateManager()\n    res = sanitycheck.main(*(sm, YAML_LOCATION))\n    \nrun()\n" 
+        -command "import os\nimport sys\nimport importlib\nimport PrismInit\n\nSANITYCHECK_PATH = r\"R:\\pipeline\\pipe_public\\sanitycheck\"\n\n\ndef deletefromcontext(module_name):\n    sanitycheck = []\n    for i in sys.modules:\n        if module_name == i or i.startswith(f'{module_name}.'):\n            sanitycheck.append(i)\n\n    for i in sanitycheck:\n        del sys.modules[i]\n              \n\ndef run():\n    deletefromcontext('sanitycheck')\n    if not SANITYCHECK_PATH in sys.path:\n        sys.path.append(SANITYCHECK_PATH)\n    \n    try:\n        import sanitycheck\n        importlib.reload(sanitycheck)\n    except Exception as e:\n        print(e)\n        return\n    \n    try:\n        YAML_LOCATION = os.environ['SANITY_CHECK_CONFIG']\n    except:\n        YAML_LOCATION = 'None'\n        \n    sm = PrismInit.pcore.getStateManager()\n    res = sanitycheck.main(*(sm, YAML_LOCATION, True))\n\n    try:\n        sys.path.remove(SANITYCHECK_PATH)\n    except Exception as e:\n        print(e)\n        pass\n    \n\nrun()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

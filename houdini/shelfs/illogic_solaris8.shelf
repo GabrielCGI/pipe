@@ -18,6 +18,7 @@
   <toolshelf name="illogic_solaris6" label="illogic_solaris">
     <memberTool name="kmx"/>
     <memberTool name="kmx_geosubset"/>
+    <memberTool name="kma_mat_char"/>
     <memberTool name="material_finder"/>
     <memberTool name="stage_manager_update"/>
     <memberTool name="copy"/>
@@ -36,7 +37,6 @@
     <memberTool name="clean_light"/>
     <memberTool name="send_ranch_copy"/>
     <memberTool name="select_prim_with_attributes"/>
-    <memberTool name="louis create materials"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -207,7 +207,7 @@ importlib.reload(batchrender)
 batchrender.main()]]></script>
   </tool>
 
-  <tool name="automanifest" label="Auto Manifest" icon="PLASMA_App">
+  <tool name="automanifest" label="Auto Manifest" icon="hicon:/SVGIcons.index?MISC_sketchbook.svg">
     <script scriptType="python"><![CDATA[from imp import reload
 
 import automanifest.auto_manifest_dev_louis as auto_manifest
@@ -223,6 +223,7 @@ import PrismInit
 
 SANITYCHECK_PATH = r"R:\pipeline\pipe_public\sanitycheck"
 
+
 def deletefromcontext(module_name):
     sanitycheck = []
     for i in sys.modules:
@@ -231,8 +232,7 @@ def deletefromcontext(module_name):
 
     for i in sanitycheck:
         del sys.modules[i]
-        
-        
+              
 
 def run():
     deletefromcontext('sanitycheck')
@@ -252,7 +252,7 @@ def run():
         YAML_LOCATION = 'None'
         
     sm = PrismInit.pcore.getStateManager()
-    res = sanitycheck.main(*(sm, YAML_LOCATION))
+    res = sanitycheck.main(*(sm, YAML_LOCATION, True))
 
     try:
         sys.path.remove(SANITYCHECK_PATH)
@@ -260,7 +260,18 @@ def run():
         print(e)
         pass
     
-run()
-]]></script>
+
+run()]]></script>
+  </tool>
+
+  <tool name="kma_mat_char" label="kmx_char" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
+    <script scriptType="python"><![CDATA[import sys
+import importlib
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_char")
+
+import kmxChar
+importlib.reload(kmxChar)
+kmxChar.execute()]]></script>
   </tool>
 </shelfDocument>

@@ -15,3 +15,4 @@ def main():
     pcam_facing_ratio_np.main()
     time_s = time.monotonic() - start
     logger.info(f"Time taken: {time_s} s")
+    

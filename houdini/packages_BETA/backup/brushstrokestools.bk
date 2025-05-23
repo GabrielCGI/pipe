@@ -1,0 +1,8 @@
+{
+	"env":[
+		{
+			"brushstrokestools": "R:/pipeline/networkInstall/brushstrokestools"
+		},
+	],
+	"path": "$brushstrokestools"
+}

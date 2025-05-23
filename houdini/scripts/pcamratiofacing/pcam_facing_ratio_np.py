@@ -54,6 +54,46 @@ def calculate_facing_ratio_faceVarying_np(camera_pos, normals_np, face_vertex_in
     return accum / count
 
 
+def compute_facing_ratio(camera_position, points_world_np, prim, timecode):
+    normals_attr = prim.GetAttribute("normals")
+    if not normals_attr:
+        logger.info(f"Could not determine normal attribute on {prim.GetPath()}")
+        return
+    normals_data = normals_attr.Get(timecode)
+    if not normals_data:
+        logger.info(f"Could not determine normal data on {prim.GetPath()}")
+        return
+    normal_interp = normals_attr.GetMetadata("interpolation")
+    if not normal_interp:
+        logger.info(
+            "Could not determine normal interpolation"
+            f" on {prim.GetPath()}, defaulting to 'vertex'"
+        )
+        normal_interp = "vertex"
+
+    if normal_interp == UsdGeom.Tokens.vertex:
+        logger.info("vertex (point in Houdini) detected")
+        normals_np = np.array(normals_data, dtype=np.float32)
+        facing_ratios = calculate_facing_ratio_vertex_np(
+            camera_position,
+            normals_np,
+            points_world_np
+        )
+    else:
+        logger.info("faceVarying (vertex in Houdini) detected")
+        mesh = UsdGeom.Mesh(prim)
+        face_vertex_indices = mesh.GetFaceVertexIndicesAttr().Get(timecode)
+        face_vertex_indices = np.array(face_vertex_indices, dtype=np.int32)
+        normals_np = np.array(normals_data, dtype=np.float32)
+        facing_ratios = calculate_facing_ratio_faceVarying_np(
+            camera_position,
+            normals_np,
+            face_vertex_indices,
+            points_world_np
+        )
+    return facing_ratios
+
+
 def main():
     node = hou.pwd()
     stage = node.editableStage()
@@ -114,16 +154,14 @@ def main():
             continue
 
         points_attr = prim.GetAttribute("points")
-        normals_attr = prim.GetAttribute("normals")
 
-        if not points_attr or not normals_attr:
-            logger.info(f"Missing points or normals on {primpath}, skipping.")
+        if not points_attr:
+            logger.info(f"Missing points on {primpath}, skipping.")
             continue
 
         points_data = points_attr.Get(timecode)
-        normals_data = normals_attr.Get(timecode)
 
-        if not points_data or not normals_data:
+        if not points_data:
             logger.info(f"Missing data on {primpath}, skipping.")
             continue
 
@@ -132,25 +170,13 @@ def main():
         points_np = np.array(points_data, dtype=np.float64)
         points_world_np = (np.c_[points_np, np.ones(len(points_np))] @ np.array(obj_xform))[:, :3]
 
-        normal_interp = normals_attr.GetMetadata("interpolation")
-        if not normal_interp:
-            logger.info(f"Could not determine normal interpolation on {primpath}, defaulting to 'vertex'")
-            normal_interp = "vertex"
-
-        if normal_interp == UsdGeom.Tokens.vertex:
-            logger.info("vertex (point in Houdini) detected")
-            normals_np = np.array(normals_data, dtype=np.float32)
-            facing_ratios = calculate_facing_ratio_vertex_np(camera_position, normals_np, points_world_np)
-        else:
-            logger.info("faceVarying (vertex in Houdini) detected")
-            mesh = UsdGeom.Mesh(prim)
-            face_vertex_indices = mesh.GetFaceVertexIndicesAttr().Get(timecode)
-            face_vertex_indices = np.array(face_vertex_indices, dtype=np.int32)
-            normals_np = np.array(normals_data, dtype=np.float32)
-            facing_ratios = calculate_facing_ratio_faceVarying_np(camera_position, normals_np, face_vertex_indices, points_world_np)
+        facing_ratios = compute_facing_ratio(camera_position, points_world_np, prim, timecode)
 
         uv_out = pinhole_uv_projection_np(camera_inv, points_world_np, focal_mm, haperture_mm, vaperture_mm)
-        combined = np.hstack([uv_out, facing_ratios[:, None]])
+        if facing_ratios is None:
+            combined = np.c_[uv_out, np.ones(len(points_np))]        
+        else:
+            combined = np.hstack([uv_out, facing_ratios[:, None]])
 
         vt_array = Vt.Vec3fArray.FromNumpy(combined.astype(np.float32))
 
