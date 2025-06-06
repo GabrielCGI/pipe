@@ -1,16 +1,5 @@
 import math, json, sys
-import maya.cmds as cmds
-# Retrieve the version of Maya currently in use
-maya_version = cmds.about(version=True)
-
-if maya_version.startswith("2022"):
-    # Using PySide2 for Maya 2022
-    from PySide2 import QtCore, QtWidgets, QtGui
-elif maya_version.startswith("2025"):
-    # Using PySide6 for Maya 2025
-    # Note: QAction and QShortcut have moved from QtWidgets to QtGui in PySide6
-    from PySide6 import QtCore, QtWidgets, QtGui
-
+from PySide6 import QtWidgets, QtCore, QtGui
 import pymel.core as pm
 from gf_animUI import ui_tools as uiUtils
 
@@ -43,7 +32,7 @@ class CustomButton(QtWidgets.QPushButton):
         if isinstance(color, (tuple, list)):
             color = QtGui.QColor(*color)
         super(CustomButton, self).__init__(parent=parent)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
         # self.setFixedSize(width, height)
         self.setGeometry(x, y, width, height)
         self._label = label
@@ -201,7 +190,7 @@ class CustomButton(QtWidgets.QPushButton):
             super(CustomButton, self).mousePressEvent(event)
             return
 
-        if event.button() == QtCore.Qt.MidButton:
+        if event.button() == QtCore.Qt.MiddleButton:
             self.__mousePressPos = event.globalPos()
             self.__mouseMovePos = event.globalPos()
 
@@ -215,7 +204,7 @@ class CustomButton(QtWidgets.QPushButton):
         if not self._EDIT:
             super(CustomButton, self).mouseMoveEvent(event)
         else:
-            if event.buttons() == QtCore.Qt.MidButton:
+            if event.buttons() == QtCore.Qt.MiddleButton:
 
 
                 globalPos = event.globalPos()
@@ -277,8 +266,8 @@ class CustomButton(QtWidgets.QPushButton):
             widget = QtWidgets.QDialog(self.parentWidget())
         else:
             widget = QtWidgets.QFrame()
-            widget.setFrameShape(QtWidgets.QFrame.StyledPanel)
-            widget.setFrameShadow(QtWidgets.QFrame.Plain)
+            widget.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+            widget.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
             widget.setLineWidth(1)
             widget.setMidLineWidth(0)
         layout = QtWidgets.QVBoxLayout(widget)
@@ -655,7 +644,7 @@ class LayerButton(QtWidgets.QPushButton):
     editRequested = QtCore.Signal()
     def __init__(self, x, y, size, color=QtGui.QColor(100,255,100), parent=None):
         super(LayerButton, self).__init__(parent=parent)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
         self.setGeometry(x, y, size, size)
         self.setCheckable(True)
         self._color = color

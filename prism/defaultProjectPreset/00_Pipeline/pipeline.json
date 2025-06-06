@@ -405,7 +405,8 @@
             }
         ],
         "presetScenes": [],
-        "useEpisodes": false
+        "useEpisodes": false,
+        "defaultImportStateName": "{entity}_{task}_{version}"
     },
     "folder_structure": {
         "pipeline": {

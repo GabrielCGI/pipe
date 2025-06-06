@@ -1,17 +1,6 @@
 """Extracted From GF_AutoRig"""
-import maya.cmds as cmds
-# Retrieve the version of Maya currently in use
-maya_version = cmds.about(version=True)
 
-if maya_version.startswith("2022"):
-    # Using PySide2 for Maya 2022
-    from PySide2 import QtCore, QtWidgets, QtGui
-elif maya_version.startswith("2025"):
-    # Using PySide6 for Maya 2025
-    # Note: QAction and QShortcut have moved from QtWidgets to QtGui in PySide6
-    from PySide6 import QtCore, QtWidgets, QtGui
-
-
+from PySide6 import QtWidgets, QtGui, QtCore
 import pymel.core as pm
 import pymel.core.datatypes as dt
 import maya.cmds as cmds
@@ -20,10 +9,11 @@ import sys
 import maya.api.OpenMaya as om
 
 
+
 class CompactLabeledField(QtWidgets.QWidget):
     def __init__(self, name, suffix=None, parent=None):
         super(CompactLabeledField, self).__init__(parent=parent)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Fixed, QtWidgets.QSizePolicy.Fixed)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Fixed, QtWidgets.QSizePolicy.Policy.Fixed)
 
         # Layout Setup
         self.layout = QtWidgets.QHBoxLayout(self)
@@ -470,13 +460,7 @@ class EditableNodeView(QtWidgets.QWidget):
             self.filterField = QtWidgets.QLineEdit()
             self.layout.addWidget(self.filterField)
             self.proxyModel = QtCore.QSortFilterProxyModel()
-            # Assuming filterField and proxyModel are already defined
-            if int(maya_version) >= 2025:
-                # For Maya 2025 or newer, using PySide6
-                self.filterField.textChanged.connect(self.proxyModel.setFilterRegularExpression)
-            else:
-                # For Maya versions older than 2025, using PySide2
-                self.filterField.textChanged.connect(self.proxyModel.setFilterRegExp)
+            self.filterField.textChanged.connect(self.proxyModel.setFilterRegularExpression)
             self.proxyModel.setSourceModel(self.model)
             self.listView.setModel(self.proxyModel)
 
@@ -503,8 +487,8 @@ class SplitterFrame(QtWidgets.QSplitter):
     def __init__(self, parent=None, orientation=QtCore.Qt.Horizontal):
         QtWidgets.QSplitter.__init__(self, orientation, parent)
 
-        self.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+        self.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
         self.setLineWidth(1)
         self.setMidLineWidth(0)
 
@@ -561,11 +545,11 @@ class WrapWidget(QtWidgets.QFrame):
     def __init__(self, parent=None):
         QtWidgets.QFrame.__init__(self, parent)
 
-        self.setFrameShape(QtWidgets.QFrame.StyledPanel)
-        self.setFrameShadow(QtWidgets.QFrame.Plain)
+        self.setFrameShape(QtWidgets.QFrame.Shape.StyledPanel)
+        self.setFrameShadow(QtWidgets.QFrame.Shadow.Plain)
         self.setLineWidth(1)
         self.setMidLineWidth(0)
-        self.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Fixed)
+        self.setSizePolicy(QtWidgets.QSizePolicy.Policy.Expanding, QtWidgets.QSizePolicy.Policy.Fixed)
 
         self.layout = QtWidgets.QVBoxLayout(self)
         self.buttonGroup = QtWidgets.QButtonGroup(self)
@@ -977,13 +961,7 @@ class StandardNodeListWidget(QtWidgets.QWidget):
         self.layout.addWidget(self.listView)
 
         self.proxyModel = QtCore.QSortFilterProxyModel()
-        # Assuming filterField and proxyModel are already defined
-        if int(maya_version) >= 2025:
-            # For Maya 2025 or newer, using PySide6
-            self.filterField.textChanged.connect(self.proxyModel.setFilterRegularExpression)
-        else:
-            # For Maya versions older than 2025, using PySide2
-            self.filterField.textChanged.connect(self.proxyModel.setFilterRegExp)
+        self.filterField.textChanged.connect(self.proxyModel.setFilterRegularExpression)
         self.listView.setModel(self.proxyModel)
 
         self.listView.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)

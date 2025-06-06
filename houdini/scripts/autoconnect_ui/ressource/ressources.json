@@ -29,6 +29,14 @@
         "normal" : {
             "keywords": ["normal"],
             "signature": "vector3"
+        },
+        "opacity" : {
+            "keywords": ["opacity"],
+            "signature": "default"
+        },
+        "subsurface" : {
+            "keywords": ["sss"],
+            "signature": "default"
         }
     },
 

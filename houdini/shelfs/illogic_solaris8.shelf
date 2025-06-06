@@ -19,6 +19,7 @@
     <memberTool name="kmx"/>
     <memberTool name="kmx_geosubset"/>
     <memberTool name="kma_mat_char"/>
+    <memberTool name="CreateAutoVariant"/>
     <memberTool name="material_finder"/>
     <memberTool name="stage_manager_update"/>
     <memberTool name="copy"/>
@@ -26,10 +27,12 @@
     <memberTool name="update_tex"/>
     <memberTool name="autoconnect_ui"/>
     <memberTool name="Lib_Importer"/>
+    <memberTool name="update_assets_USD"/>
     <memberTool name="restart_houdini"/>
     <memberTool name="batchrender"/>
     <memberTool name="sanity_check"/>
     <memberTool name="automanifest"/>
+    <memberTool name="automanifestv2"/>
     <memberTool name="copy_light"/>
     <memberTool name="domelight_create"/>
     <memberTool name="set_node_parameters"/>
@@ -48,6 +51,24 @@ sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
 import mtlximage_path_updatev2
 reload(mtlximage_path_updatev2)
 mtlximage_path_updatev2.run()]]></script>
+  </tool>
+
+  <tool name="update_assets_USD" label="update_assets_USD" icon="hicon:/SVGIcons.index?NETVIEW_lop_info.svg">
+    <script scriptType="python"><![CDATA[import importlib
+import sys
+sys.path.append(r'R:\\pipeline\\pipe\\prism\\update_assets_USD')
+import updateAssetsUSD as UD
+importlib.reload(UD)
+
+UD.startUpdateAssetsUSD('houdini')]]></script>
+  </tool>
+
+  <tool name="CreateAutoVariant" label="CAV" icon="hicon:/SVGIcons.index?CROWDS_popsteeralign.svg">
+    <script scriptType="python"><![CDATA[import CreateAutoVariant as cav
+from imp import reload
+
+reload(cav)
+cav.autoVariant()]]></script>
   </tool>
 
   <tool name="material_finder" label="Get mat" icon="PLASMA_App">
@@ -142,12 +163,9 @@ copylight.copySelectedLights()]]></script>
   </tool>
 
   <tool name="autoconnect_ui" label="Auto Connect" icon="R:/pipeline/pipe/houdini/shelfs/icons/autoconnect.png">
-    <script scriptType="python"><![CDATA[from houdini_utils.houdini_utils import reloadAllModules
-import autoconnect_ui
+    <script scriptType="python"><![CDATA[import autoconnect_ui
 
-reloadAllModules(autoconnect_ui)
-
-autoconnect_ui.autoconnect_ui.showUI()]]></script>
+autoconnect_ui.main()]]></script>
   </tool>
 
   <tool name="domelight_create" label="Dome Light Create" icon="hicon:/SVGIcons.index?BUTTONS_add_light.svg">
@@ -187,10 +205,9 @@ cleanlight.clean()]]></script>
   <tool name="send_ranch_copy" label="Send Ranch Copy" icon="hicon:/SVGIcons.index?BUTTONS_network_distribute_vertical.svg">
     <script scriptType="python"><![CDATA[import sendranchcopy
 import importlib
-import sendranchcopy.ranchExporter as ranchexporter
-importlib.reload(ranchexporter)
 
-sendranchcopy.run()]]></script>
+sendranchcopy.run()
+]]></script>
   </tool>
 
   <tool name="select_prim_with_attributes" label="Select Prims With Attributes" icon="hicon:/SVGIcons.index?book.svg">
@@ -210,7 +227,7 @@ batchrender.main()]]></script>
   <tool name="automanifest" label="Auto Manifest" icon="hicon:/SVGIcons.index?MISC_sketchbook.svg">
     <script scriptType="python"><![CDATA[from imp import reload
 
-import automanifest.auto_manifest_dev_louis as auto_manifest
+import automanifest.auto_manifest_dev_v1 as auto_manifest
 reload(auto_manifest)
 auto_manifest.run()]]></script>
   </tool>
@@ -273,5 +290,13 @@ sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_char")
 import kmxChar
 importlib.reload(kmxChar)
 kmxChar.execute()]]></script>
+  </tool>
+
+  <tool name="automanifestv2" label="Auto Manifest V2" icon="hicon:/SVGIcons.index?MISC_sketchbook.svg">
+    <script scriptType="python"><![CDATA[from imp import reload
+
+import automanifest.auto_manifest_dev_v2 as auto_manifest
+reload(auto_manifest)
+auto_manifest.run()]]></script>
   </tool>
 </shelfDocument>

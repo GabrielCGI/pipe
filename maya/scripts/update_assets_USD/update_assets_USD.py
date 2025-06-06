@@ -147,53 +147,63 @@ class USDAUpdaterUI(QtWidgets.QDialog):
 
 
 
+
     def find_latest_maya_layout_usda(self):
         print("Fetching current Maya scene path...")
-        scene_path = cmds.file(q=True, sceneName=True)
+        scene_path = cmds.file(q=True, sceneName=True).replace("\\", "/")
         print(f"Scene path: {scene_path}")
 
-        print("Attempting to extract sequence and shot from the scene path...")
-        match = re.search(r"Shots[\\/](?P<seq>[A-Z0-9]+)[\\/](?P<shot>\d+)", scene_path, re.IGNORECASE)
-        if not match:
-            print("No match found for sequence and shot in the scene path.")
+        print("Extracting project root, sequence, and shot...")
+        parts = scene_path.split("/")
+        if len(parts) < 6:
+            print("Scene path is too short to extract project structure.")
             return None
 
-        seq = match.group("seq")
-        shot = match.group("shot")
+        project_root = "/".join(parts[:4])  # I:/intermarche/03_Production/Shots
+        seq = parts[4]
+        shot = parts[5]
+
+        print(f"Extracted project root: {project_root}")
         print(f"Extracted sequence: {seq}, shot: {shot}")
 
-        layout_dir = os.path.join("I:/ralphLauren_2412/03_Production/Shots", seq, shot, "Export", "_layer_layout_layoutMaya")
-        print(f"Constructed layout directory path: {layout_dir}")
+        layout_patterns = ["_layer_layout_layoutMaya", "_layer_lay_main","_layer_mod_mayaLayout"]
 
-        if not os.path.exists(layout_dir):
-            print(f"Layout directory does not exist: {layout_dir}")
-            return None
+        for layout_pattern in layout_patterns:
+            layout_dir = os.path.join(project_root, seq, shot, "Export", layout_pattern)
+            print(f"Checking layout directory: {layout_dir}")
 
-        print("Listing version directories in layout directory...")
-        version_dirs = [d for d in os.listdir(layout_dir) if re.fullmatch(r"v\d{3}", d)]
-        print(f"Found version directories: {version_dirs}")
+            if not os.path.exists(layout_dir):
+                print(f"Layout directory does not exist: {layout_dir}")
+                continue
 
-        if not version_dirs:
-            print("No version directories found.")
-            return None
+            version_dirs = [d for d in os.listdir(layout_dir) if re.fullmatch(r"v\d{3}", d)]
+            print(f"Found version directories: {version_dirs}")
 
-        latest = max(version_dirs)
-        print(f"Latest version directory: {latest}")
+            if not version_dirs:
+                print("No version directories found.")
+                continue
 
-        target_dir = os.path.join(layout_dir, latest)
-        print(f"Looking for USDA file in: {target_dir}")
-        expected_filename = f"{seq}-{shot}__layer_layout_layoutMaya_{latest}.usda"
-        print(f"Expecting file: {expected_filename}")
-        for f in os.listdir(target_dir):
-            print(f"Checking file: {f}")
-            if f.lower() == expected_filename.lower():
-                usda_path = os.path.join(target_dir, f)
-                print(f"Found matching USDA file: {usda_path}")
-                return usda_path
+            latest = max(version_dirs)
+            print(f"Latest version directory: {latest}")
 
-        print("No matching USDA file found.")
+            target_dir = os.path.join(layout_dir, latest)
+            expected_filename = f"{seq}-{shot}_{layout_pattern}_{latest}.usda"
+            print(f"Expecting file: {expected_filename}")
+
+            for f in os.listdir(target_dir):
+                print(f"Checking file: {f}")
+                if f.lower() == expected_filename.lower():
+                    usda_path = os.path.join(target_dir, f)
+                    print(f"Found matching USDA file: {usda_path}")
+                    return usda_path
+                print("--------------------------------------")
+                print (f.lower().split("-")[-1])
+                if f.lower() in expected_filename.lower():
+                    usda_path = os.path.join(target_dir, f)
+                    print(f"Found matching USDA file: {usda_path}")
+                    return usda_path
+        print("No matching USDA file found in any pattern.")
         return None
-
 
     def load_usda(self, filepath):
         self.usda_file = filepath

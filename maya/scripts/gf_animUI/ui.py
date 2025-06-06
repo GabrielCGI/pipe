@@ -1,32 +1,14 @@
 import json
 import os, sys
 from functools import partial
-
+from shiboken6 import wrapInstance
 import sys
 
 import maya.OpenMayaUI as mui
 from maya import cmds
 import pymel.core as pm
 import pymel.core.datatypes as dt
-
-
-# Retrieve the version of Maya currently in use
-maya_version = cmds.about(version=True)
-
-if maya_version.startswith("2022"):
-    # Using PySide2 for Maya 2022
-    from PySide2 import QtCore, QtWidgets, QtGui
-elif maya_version.startswith("2025"):
-    # Using PySide6 for Maya 2025
-    # Note: QAction and QShortcut have moved from QtWidgets to QtGui in PySide6
-    from PySide6 import QtCore, QtWidgets, QtGui
-
-if maya_version.startswith("2022"):
-    # Using Shiboken2 for Maya 2022
-    from shiboken2 import wrapInstance
-elif maya_version.startswith("2025"):
-    # Using Shiboken6 for Maya 2025
-    from shiboken6 import wrapInstance
+from PySide6 import QtWidgets, QtCore, QtGui
 
 from gf_animUI import object_sets as objSets
 from gf_animUI import ui_tools as uiUtils
@@ -227,6 +209,7 @@ class PickerTab(QtWidgets.QWidget):
         self._layerDict[layer].append(button)
         # Connect edit signal to attribute
         button.buttonEdited.connect(lambda x: attr.set(json.dumps(x)))
+        button.buttonEdited.connect(print)
         button.shapeChangeRequested.connect(lambda shp: self.changeButtonShape(shp, button))
         button.deleteRequested.connect(lambda: self.deleteButton(button))
 
@@ -466,7 +449,7 @@ class PickerTab(QtWidgets.QWidget):
 
                 menu.exec_(event.globalPos())
 
-            if event.buttons() == QtCore.Qt.MidButton:
+            if event.buttons() == QtCore.Qt.MiddleButton:
                 self.__mousePressPos = event.globalPos()
                 self.__mouseMovePos = event.globalPos()
 
@@ -480,7 +463,7 @@ class PickerTab(QtWidgets.QWidget):
         if self._rubberBandActive:
             self.rubberBand.setGeometry(QtCore.QRect(self.rbOrigin, event.pos()).normalized())
 
-        if self._EDIT and event.buttons() == QtCore.Qt.MidButton:
+        if self._EDIT and event.buttons() == QtCore.Qt.MiddleButton:
             globalPos = event.globalPos()
             diff = globalPos - self.__mouseMovePos
             for btn in self.getAllCheckedButtons():

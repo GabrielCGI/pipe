@@ -1,7 +1,14 @@
+import os
 import hou
+import PrismInit
 import threading
 
-from . import ranchExporter
+RANCH_EXPORTER_PATH = "R:/pipeline/pipe/prism/ranch_cache_scripts"
+import sys
+sys.path.append(RANCH_EXPORTER_PATH)
+
+LOP_FILECACHE = PrismInit.pcore.getPlugin('USD').api.usdExport
+import ranchExporter
 
 def run():
     
@@ -15,17 +22,29 @@ def run():
     
     selected_node = selected_nodes[0]
     
-    stage = selected_node.stage()
+    try:
+        state = LOP_FILECACHE.getStateFromNode({'node': selected_node}).ui
+    except Exception as e:
+        hou.ui.displayMessage(
+            text=(
+                'Could not retrieve state from selected '
+                'node, please select a LOP Filecache'
+            ),
+            severity=hou.severityType.Warning,
+            details=e)
+        return
     
-    if not stage:
+    scenefile = hou.hipFile.name()
+    kwargs = {'state': state, 'scenefile': scenefile}
+    name = os.path.basename(hou.hipFile.name())
+    
+    if not name:
         hou.ui.displayMessage(
             text='Could not retrieve USD stage from selected node.',
             severity=hou.severityType.Warning)
         return
-        
-    scene_path = hou.hipFile.path()
     
-    startCopy(stage, scene_path)
+    startCopy(name, kwargs)
     
     
 def startCopy(stage, scene_path):

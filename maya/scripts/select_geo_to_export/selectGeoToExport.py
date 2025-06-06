@@ -1,5 +1,7 @@
 import maya.cmds as cmds
 
+
+
 def select_all_geo(parent):
     """cette fonction a pour but de seletctionner rapidement tous les dossier, qui s'appellent geo(en ignorant le namespace) et qui sont une reference"""
     geo_objects = []
@@ -31,14 +33,16 @@ def select_all_geo(parent):
 
 def on_button_click(*args):
     cmds.select(clear=1)
-    if cmds.checkBox('Characters', query=True, value=True):
-        select_all_geo('Characters')
-    if cmds.checkBox('Props', query=True, value=True):
-        select_all_geo('Props')
+    if cmds.checkBox('characters', query=True, value=True):
+        select_all_geo('characters')
+    if cmds.checkBox('props', query=True, value=True):
+        select_all_geo('props')
     if cmds.checkBox('world', query=True, value=True):
         select_all_geo('world')
     if cmds.checkBox('Sets', query=True, value=True):
         select_all_geo('Sets')
+
+
 
 if cmds.window('selectGeoUI', exists=True):
     cmds.deleteUI('selectGeoUI')
@@ -49,8 +53,8 @@ cmds.text('result_label', label='Select checkboxes and click Submit')
 cmds.text('gap',label='')
 cmds.checkBox('world', label=f'all')
 cmds.text('gap2',label='')
-cmds.checkBox('Characters', label=f'Characters', value=True)
-cmds.checkBox('Props', label=f'Props', value=True)
+cmds.checkBox('Characters', label=f'characters', value=True)
+cmds.checkBox('Props', label=f'props', value=True)
 cmds.checkBox('Sets', label=f'Sets', value=False)
 
 cmds.button(label='select', command=on_button_click)

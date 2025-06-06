@@ -1,0 +1,10 @@
+[run]
+source = r:/pipeline/pipe/prism/ranch_cache_scripts
+omit = 
+    *hou.session
+    */site-packages/*
+    */test/*
+    *PythonModule
+
+[report]
+ignore_errors = true

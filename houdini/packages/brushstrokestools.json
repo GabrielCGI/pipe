@@ -1,8 +1,8 @@
 {
-"env":[
-{
-"brushstrokestools": "R:/pipeline/networkInstall/brushstrokestools"
-},
-],
-"path": "$brushstrokestools"
+    "enable" : true,
+    "env":[
+        {"brushstrokestools": "R:/pipeline/networkInstall/houdini/brushstrokestools"}, 
+        {"HOUDINI_SCRIPT_PATH": "$brushstrokestools;"},
+        {"HOUDINI_OTLSCAN_PATH": "$brushstrokestools/otls;"}
+        ]
 }

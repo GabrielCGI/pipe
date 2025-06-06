@@ -55,10 +55,10 @@ class GeoExport(MultipleActionTool):
 
     def on_button_click(self,*args):
         cmds.select(clear=1)
-        if cmds.checkBox('Characters', query=True, value=True):
-            self.select_all_geo('Characters')
-        if cmds.checkBox('Props', query=True, value=True):
-            self.select_all_geo('Props')
+        if cmds.checkBox('characters', query=True, value=True):
+            self.select_all_geo('characters')
+        if cmds.checkBox('props', query=True, value=True):
+            self.select_all_geo('props')
         if cmds.checkBox('world', query=True, value=True):
             self.select_all_geo('world')
         if cmds.checkBox('Sets', query=True, value=True):
@@ -75,8 +75,8 @@ class GeoExport(MultipleActionTool):
         cmds.text('gap',label='')
         cmds.checkBox('world', label=f'all')
         cmds.text('gap2',label='')
-        cmds.checkBox('Characters', label=f'Characters', value=True)
-        cmds.checkBox('Props', label=f'Props', value=True)
+        cmds.checkBox('characters', label=f'Characters', value=True)
+        cmds.checkBox('props', label=f'Props', value=True)
         cmds.checkBox('Sets', label=f'Sets', value=False)
 
         cmds.button(label='select', command=self.on_button_click)

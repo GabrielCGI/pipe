@@ -122,6 +122,7 @@ class BatchSelector(QtWidgets.QDialog):
         tree.setSelectionMode(QtWidgets.QAbstractItemView.MultiSelection)
         
         items_list = []
+        self.render_nodes.sort(key=lambda node:node.name())
         for node in self.render_nodes:
             nb_exec = node.parm('executions')
             

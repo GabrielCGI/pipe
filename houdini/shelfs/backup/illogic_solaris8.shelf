@@ -6,24 +6,38 @@
  a single file. -->
 
   <shelfSet name="solaris_1" label="Solaris Geometry">
-    <memberToolshelf name="illogic_solaris6"/>
-    <memberToolshelf name="DEV"/>
     <memberToolshelf name="prism"/>
     <memberToolshelf name="polygon"/>
+    <memberToolshelf name="lop_oceans"/>
+    <memberToolshelf name="cloud"/>
+    <memberToolshelf name="hairtools"/>
+    <memberToolshelf name="dev"/>
+    <memberToolshelf name="illogic_solaris6"/>
   </shelfSet>
 
   <toolshelf name="illogic_solaris6" label="illogic_solaris">
     <memberTool name="kmx"/>
     <memberTool name="kmx_geosubset"/>
+    <memberTool name="kma_mat_char"/>
     <memberTool name="material_finder"/>
     <memberTool name="stage_manager_update"/>
     <memberTool name="copy"/>
     <memberTool name="paste"/>
     <memberTool name="update_tex"/>
-    <memberTool name="auto_connect"/>
+    <memberTool name="autoconnect_ui"/>
     <memberTool name="Lib_Importer"/>
     <memberTool name="restart_houdini"/>
+    <memberTool name="batchrender"/>
+    <memberTool name="sanity_check"/>
     <memberTool name="automanifest"/>
+    <memberTool name="automanifestv2"/>
+    <memberTool name="copy_light"/>
+    <memberTool name="domelight_create"/>
+    <memberTool name="set_node_parameters"/>
+    <memberTool name="blast"/>
+    <memberTool name="clean_light"/>
+    <memberTool name="send_ranch_copy"/>
+    <memberTool name="select_prim_with_attributes"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -96,24 +110,9 @@ copy_paste.copy()]]></script>
     <script scriptType="python"><![CDATA[import sys
 from imp import reload
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\stage_manager_update")
-
-import stage_manager_update
-reload(stage_manager_update)
-stage_manager_update.checkUpdate()]]></script>
-  </tool>
-
-  <tool name="auto_connect" label="Auto Connect" icon="R:/pipeline/pipe/houdini/shelfs/icons/autoconnect.png">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\autoconnect")
-
-import auto
-import ressource
-reload(ressource)
-reload(auto)
-auto.run()]]></script>
+import stage_manager_update.stage_manager_update as stage_manager
+reload(stage_manager)
+stage_manager.checkUpdate()]]></script>
   </tool>
 
   <tool name="Lib_Importer" label="Lib Importer" icon="R:/pipeline/pipe/houdini/shelfs/icons/lib_importer.png">
@@ -122,8 +121,9 @@ from imp import reload
 
 sys.path.append(r"R:\pipeline\pipe\houdini\scripts\Lib_Importer")
 
-import Lib_Importer
+import Lib_Importer.Lib_Importer as Lib_Importer
 reload(Lib_Importer)
+print(dir(Lib_Importer))
 Lib_Importer.libImport()]]></script>
   </tool>
 
@@ -133,11 +133,150 @@ Lib_Importer.libImport()]]></script>
 restart.restart_houdini()]]></script>
   </tool>
 
-  <tool name="automanifest" label="Auto Manifest" icon="PLASMA_App">
+  <tool name="copy_light" label="Copy Light" icon="hicon:/SVGIcons.index?LOP_lightlinker.svg">
+    <script scriptType="python"><![CDATA[import imp
+import copylight.copylight as copylight
+
+imp.reload(copylight)
+
+copylight.copySelectedLights()]]></script>
+  </tool>
+
+  <tool name="autoconnect_ui" label="Auto Connect" icon="R:/pipeline/pipe/houdini/shelfs/icons/autoconnect.png">
+    <script scriptType="python"><![CDATA[import autoconnect_ui
+
+autoconnect_ui.main()]]></script>
+  </tool>
+
+  <tool name="domelight_create" label="Dome Light Create" icon="hicon:/SVGIcons.index?BUTTONS_add_light.svg">
+    <script scriptType="python"><![CDATA[import domelight_create.domelight_create as domelight
+
+domelight.create_domelight()]]></script>
+  </tool>
+
+  <tool name="set_node_parameters" label="Set Nodes Parameters" icon="hicon:/SVGIcons.index?VOP_complement.svg">
+    <script scriptType="python"><![CDATA[import set_lights_parameters.set_lights_parameters as set_lights
+from imp import reload
+
+reload(set_lights)
+
+set_lights.showUI()]]></script>
+  </tool>
+
+  <tool name="blast" label="Blast" icon="hicon:/SVGIcons.index?SOP_blast.svg">
+    <script scriptType="python"><![CDATA[import blast.blast as blast
+import blast.prim_tree as pt
+
+import imp
+
+imp.reload(blast)
+imp.reload(pt)
+blast.run()]]></script>
+  </tool>
+
+  <tool name="clean_light" label="Clean Light" icon="hicon:/SVGIcons.index?BUTTONS_clear.svg">
+    <script scriptType="python"><![CDATA[import clean_light.cleanlight as cleanlight
+import imp
+imp.reload(cleanlight)
+
+cleanlight.clean()]]></script>
+  </tool>
+
+  <tool name="send_ranch_copy" label="Send Ranch Copy" icon="hicon:/SVGIcons.index?BUTTONS_network_distribute_vertical.svg">
+    <script scriptType="python"><![CDATA[import sendranchcopy
+import importlib
+
+sendranchcopy.run()
+]]></script>
+  </tool>
+
+  <tool name="select_prim_with_attributes" label="Select Prims With Attributes" icon="hicon:/SVGIcons.index?book.svg">
+    <script scriptType="python"><![CDATA[import primselector
+
+primselector.run()]]></script>
+  </tool>
+
+  <tool name="batchrender" label="Batch Render" icon="hicon:/SVGIcons.index?BUTTONS_render.svg">
+    <script scriptType="python"><![CDATA[import batchrender
+import importlib
+importlib.reload(batchrender)
+
+batchrender.main()]]></script>
+  </tool>
+
+  <tool name="automanifest" label="Auto Manifest" icon="hicon:/SVGIcons.index?MISC_sketchbook.svg">
     <script scriptType="python"><![CDATA[from imp import reload
 
-import automanifest.auto_manifest as auto_manifest
+import automanifest.auto_manifest_dev_v1 as auto_manifest
 reload(auto_manifest)
-auto_manifest.autoManifest()]]></script>
+auto_manifest.run()]]></script>
+  </tool>
+
+  <tool name="sanity_check" label="Sanity Check" icon="R:/pipeline/pipe/prism/sanitycheck/ui/Icons/sanitycheck.png">
+    <script scriptType="python"><![CDATA[import os
+import sys
+import importlib
+import PrismInit
+
+SANITYCHECK_PATH = r"R:\pipeline\pipe_public\sanitycheck"
+
+
+def deletefromcontext(module_name):
+    sanitycheck = []
+    for i in sys.modules:
+        if module_name == i or i.startswith(f'{module_name}.'):
+            sanitycheck.append(i)
+
+    for i in sanitycheck:
+        del sys.modules[i]
+              
+
+def run():
+    deletefromcontext('sanitycheck')
+    if not SANITYCHECK_PATH in sys.path:
+        sys.path.append(SANITYCHECK_PATH)
+    
+    try:
+        import sanitycheck
+        importlib.reload(sanitycheck)
+    except Exception as e:
+        print(e)
+        return
+    
+    try:
+        YAML_LOCATION = os.environ['SANITY_CHECK_CONFIG']
+    except:
+        YAML_LOCATION = 'None'
+        
+    sm = PrismInit.pcore.getStateManager()
+    res = sanitycheck.main(*(sm, YAML_LOCATION, True))
+
+    try:
+        sys.path.remove(SANITYCHECK_PATH)
+    except Exception as e:
+        print(e)
+        pass
+    
+
+run()]]></script>
+  </tool>
+
+  <tool name="kma_mat_char" label="kmx_char" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
+    <script scriptType="python"><![CDATA[import sys
+import importlib
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_char")
+
+import kmxChar
+importlib.reload(kmxChar)
+kmxChar.execute()]]></script>
+  </tool>
+
+  <tool name="automanifestv2" label="Auto Manifest V2" icon="hicon:/SVGIcons.index?MISC_sketchbook.svg">
+    <script scriptType="python"><![CDATA[from imp import reload
+
+import automanifest.auto_manifest_dev_v2 as auto_manifest
+reload(auto_manifest)
+auto_manifest.run()]]></script>
   </tool>
 </shelfDocument>

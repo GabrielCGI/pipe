@@ -1,0 +1,44 @@
+{
+    "Extension" :
+    [
+        ".exr",
+        ".tif",
+        ".jpg",
+        ".jpeg",
+        ".png"
+    ],
+
+    "Map_tags" : 
+    {
+        "base_color" : {
+            "keywords": ["basecolor", "albedo"],
+            "signature": "color3"
+        },
+        "specular_roughness" : {
+            "keywords": ["roughness"],
+            "signature": "default"
+        },
+        "metalness" : {
+            "keywords": ["metallic"],
+            "signature": "default"
+        },
+        "Height" : {
+            "keywords": ["height"],
+            "signature": "default"
+        },
+        "normal" : {
+            "keywords": ["normal"],
+            "signature": "vector3"
+        },
+        "opacity" : {
+            "keywords": ["opacity"],
+            "signature": "default"
+        }
+    },
+
+    "Thumbnails_dir" :
+    [
+        "_thumbs",
+        "Thumbs"
+    ]
+}

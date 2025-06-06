@@ -1,0 +1,15 @@
+{
+    "productions_root": "\\\\Il-mpl-fs-01\\PROD2\\ranch_cache2\\i",
+    "version_to_save": {
+        "export": 10,
+        "renders": 3,
+        "playblasts": 3,
+        "scenefiles": 3
+    },
+    "filters": {
+        "exclude": [
+        ]
+    },
+    "target_asset": true,
+    "target_shot": true
+}

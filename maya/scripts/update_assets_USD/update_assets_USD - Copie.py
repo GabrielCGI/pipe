@@ -4,6 +4,7 @@ import os
 import re
 import shutil
 import tempfile
+from datetime import datetime
 from PySide6 import QtWidgets, QtCore
 from maya import OpenMayaUI, cmds
 from shiboken6 import wrapInstance
@@ -28,7 +29,7 @@ def maya_main_window():
 
 def find_latest_version_path(original_path):
     match = re.match(
-        r"@(?P<base>.+?/Export/USD)/v(?P<version>\d{3})/(?P<filename>.+_USD_v\d{3}\.usd[ac])@",
+        r"@(?P<base>.+?/Export/.+?/)v(?P<version>\d{3})/(?P<asset_name>.+)_.+?_(v\d{3}\.usd[ac])@",
         original_path,
         re.IGNORECASE
     )
@@ -37,8 +38,7 @@ def find_latest_version_path(original_path):
 
     base_dir = match.group("base").replace("/", os.sep)
     current_version = int(match.group("version"))
-    filename = match.group("filename")
-    asset_name = filename.split("_USD_")[0]
+    asset_name = match.group("asset_name")
 
     if not os.path.exists(base_dir):
         return None
@@ -53,13 +53,13 @@ def find_latest_version_path(original_path):
     latest_folder = os.path.join(base_dir, latest_str)
 
     for fname in os.listdir(latest_folder):
-        if re.fullmatch(f"{re.escape(asset_name)}_USD_{latest_str}\\.usd[ac]", fname, re.IGNORECASE):
+        if re.fullmatch(f"{re.escape(asset_name)}_.+?_{latest_str}\\.usd[ac]", fname, re.IGNORECASE):
             latest_path = f"@{match.group('base')}/{latest_str}/{fname}@"
             return AssetItem(
-                original_path=original_path,
-                updated_path=latest_path,
-                from_version=current_version,
-                to_version=latest_version
+                original_path,
+                latest_path,
+                current_version,
+                latest_version
             )
 
     return None
@@ -320,7 +320,11 @@ class USDAUpdaterUI(QtWidgets.QDialog):
                 return
             with open(self.usda_file, 'r', encoding='utf-8') as f:
                 content = f.read()
-            backup = self.usda_file + ".bak"
+            
+            # Generate timestamp string: YYYYMMDD_HHMMSS
+            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+            backup = f"{self.usda_file}.{timestamp}.bak"
+            
             shutil.copy2(self.usda_file, backup)
             self.log(f"🗂️ Backup created: {backup}")
         else:

@@ -43,6 +43,7 @@ def versioning_parse(file: str, shaders: list[sh.Shader]):
         shader_name =  file_name[:first_key_span[0]-1]
 
         found = False
+        
         for shader in shaders:
             if shader.name == shader_name:
                 if not isinstance(shader, sh.VersionShader):
@@ -127,6 +128,7 @@ def get_shaders_from_filepaths(filepaths: list[str]):
         
         # Try to get a versions from file path with v#### format
         version_match = re.search(mp.VERSION_PATTERN, file)
+        
         if version_match is None:
             # Parse shader without caring about version
             shaders = general_parse(file, shaders)
@@ -317,8 +319,10 @@ def create_shader_network(
         if already_exist:
             continue
         
-        node_map = current_subnet.createNode(node_type_name='mtlximage',
-                                             node_name=map.name)
+        node_map = current_subnet.createNode(
+            node_type_name='mtlximage',
+            node_name=map.name,
+            force_valid_node_name=True)
         node_map.parm('signature').set(map.signature)
         node_map.parm('file').set(map.path)
 

@@ -1,15 +1,4 @@
-import maya.cmds as cmds
-# Retrieve the version of Maya currently in use
-maya_version = cmds.about(version=True)
-
-if maya_version.startswith("2022"):
-    # Using PySide2 for Maya 2022
-    from PySide2 import QtGui
-elif maya_version.startswith("2025"):
-    # Using PySide6 for Maya 2025
-    # Note: QAction and QShortcut have moved from QtWidgets to QtGui in PySide6
-    from PySide6 import QtGui
-
+from PySide6 import QtGui
 import os
 
 iconDir = os.path.dirname(__file__)

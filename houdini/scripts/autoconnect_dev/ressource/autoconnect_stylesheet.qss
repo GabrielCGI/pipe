@@ -1,0 +1,52 @@
+QTreeWidget::branch {
+    background: transparent;
+}
+
+QTreeWidget::branch:selected {
+    background: transparent;
+    outline: none;
+}
+
+QTreeWidget::branch:selected-active {
+    background: transparent;
+}
+
+QTreeWidget::item {
+    border: 1px solid black;
+}
+
+QTreeWidget::item:selected {
+    background: transparent;
+    outline: none;
+}
+
+QToolBar {
+    margin: 5px;
+}
+
+QToolBar > QPushButton {
+    margin: 5px;
+}
+
+QScrollArea#scrollarea {
+    margin: 15px;
+}
+
+QWidget#centralWidget {
+    background: #3a3a3a;
+    border: 2px solid black;
+}
+
+QWidget#colorWidget {
+    margin: 25px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+}
+
+QLabel#shaderName {
+    font-weight: bold;
+}
+
+QTreeWidget {
+    border: 1px solid black;
+}
