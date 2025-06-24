@@ -21,7 +21,7 @@ import threading
 from . import stresstest_utils as stu
 
 # Used to get USD dependencies
-from pxr import Usd, Sdf, UsdUtils
+from pxr import Ar, Usd, Sdf, UsdUtils
 
 DEBUG_SCENE = False
 # Turn True if you want to see performance of decorate function
@@ -32,6 +32,8 @@ ROOT_CACHE_RANCH = os.path.join("I:", os.sep, "ranch_cache2")
 PROD_DISK = 'i'
 
 # This variable store globally deps found
+CURRENT_LAYER_PATH = None
+LAYER_DONE = []
 DEPS = []
 
 LOG_DIR = os.path.join(ROOT_CACHE_RANCH, "logs")
@@ -152,25 +154,28 @@ def is_light_cache(kwargs) -> bool:
 
 
 def filter_not_USD(assetPathProcessed):
-    if not 'usd' in assetPathProcessed:
+    if 'bgeo' in assetPathProcessed:
         global DEPS
-        DEPS.append(os.path.normpath(assetPathProcessed))
+        resolver = Ar.GetResolver()
+        if not CURRENT_LAYER_PATH:
+            DEPS.append(os.path.normpath(assetPathProcessed))
+            return ''
+        abs_path = CURRENT_LAYER_PATH.ComputeAbsolutePath(assetPathProcessed)
+        resolved_path = resolver.Resolve(abs_path)
+        DEPS.append(resolved_path.GetPathString())
         # Return an empty string to remove the asset path
         return ''
     return assetPathProcessed
     
     
 def apply_filter(layer, dependencyInfo):
+    global CURRENT_LAYER_PATH, LAYER_DONE
     layer.Reload(force=True)
-    UsdUtils.ModifyAssetPaths(layer, filter_not_USD)
+    if not layer.identifier in LAYER_DONE:
+        CURRENT_LAYER_PATH = layer
+        LAYER_DONE.append(layer.identifier)
+        UsdUtils.ModifyAssetPaths(layer, filter_not_USD)
     return dependencyInfo
-
-
-def deep_copy_stage(layer):
-    temp_file = tempfile.NamedTemporaryFile(suffix=".usd", delete=False).name
-    layer.Export(temp_file)
-    copied_stage = Usd.Stage.Open(temp_file)
-    return copied_stage, temp_file
 
 
 @stu.timeElapsed
@@ -191,10 +196,18 @@ def getDependencies(asset_path: Sdf.AssetPath) -> list[str]:
 
     global DEPS
     DEPS = []
-
-    UsdUtils.ModifyAssetPaths(layer, filter_not_USD)
-    
-    dependencies = UsdUtils.ComputeAllDependencies(layer.identifier, apply_filter)
+    ctx = os.environ.get('PXR_AR_DEFAULT_SEARCH_PATH', False)
+    if not ctx:
+        ctx = ["I:/", "R:/"]
+        LOG.info(f'Did not found context in env and fallback to {ctx}')
+    else:
+        ctx = ctx.split(';')
+        LOG.info(f'Found context in {ctx} in env: PXR_AR_DEFAULT_SEARCH_PATH')
+    ar_ctx = Ar.DefaultResolverContext(ctx)
+    with Ar.ResolverContextBinder(ar_ctx):
+        UsdUtils.ModifyAssetPaths(layer, filter_not_USD)
+        
+        dependencies = UsdUtils.ComputeAllDependencies(layer.identifier, apply_filter)
     layers, assets, unresolved_paths = dependencies
     
     layers_path = []
@@ -281,6 +294,11 @@ def resolveExternalDependencies(usd_path: str) -> list[str]:
                 break
         if not found_in_drive:       
             unresolved_deps.append(path)
+    
+    LOG.info('Unresolved dependencies:')
+    for path in unresolved_deps:
+        LOG.info(f" - {path}")
+            
     return abs_deps
 
 
@@ -587,6 +605,10 @@ def copyToRanch(deps_path, start_time=0.0):
     
     to_copy = getPathToCopy(deps_path)
     
+    LOG.info('Path to copy:')
+    for path in to_copy:
+        LOG.info(f" - {path}")
+        
     time_ns = time.monotonic_ns() - start
     time_sec = time_ns / 1000000000
     LOG.info(f"Path parsing completed in: {time_sec} s | {time_ns} ns\n")
@@ -651,28 +673,6 @@ def parseAndCopyToRanch(usdpath, kwargs):
     time_ns = time.monotonic_ns() - start
     time_sec = time_ns / 1000000000
     LOG.info(f"Parsing completed in: {time_sec} s | {time_ns} ns\n")
-    
-    # start = time.monotonic_ns()
-    # LOG.info('Getting paths to copy ...')
-    
-    # to_copy = getPathToCopy(abs_paths)
-    
-    # time_ns = time.monotonic_ns() - start
-    # time_sec = time_ns / 1000000000
-    # LOG.info(f"Path parsing completed in: {time_sec} s | {time_ns} ns\n")
-    
-    # start = time.monotonic_ns()
-    # LOG.info('Start copy ...')
-    # copyToCacheranchV2(to_copy)
-    
-    # time_ns = time.monotonic_ns() - start
-    # time_sec = time_ns / 1000000000
-        
-    # LOG.info(f"Copy completed in: {time_sec} s | {time_ns} ns")
-    
-    # logRecap()
-    # full_time = time.monotonic() - start_full
-    # print(f'INFO: Ranch export ended in {full_time} s.')
     
     thread_copy = threading.Thread(target=copyToRanch, args=(abs_paths, start_full))
     thread_copy.start()

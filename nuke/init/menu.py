@@ -198,8 +198,8 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
 
     print("End loading Nuke MENU as version 13+ ...")
     if nuke.NUKE_VERSION_MAJOR<=14:
-        #FORCE OCIO
-        custom_config_path = "R:/pipeline/networkInstall/OpenColorIO-Configs/aces_1.2/config.ocio"
+        print("skip hack ocio")
+        custom_config_path = "R:/pipeline/networkInstall/OpenColorIO-Configs/cg-config-v1.0.0_aces-v1.3_ocio-v2.0.ocio"
         os.environ["OCIO"] = custom_config_path
         print("FORCE OCIO IN INIT.PY TO: %s"%(custom_config_path))
         # Set the OCIO config to 'custom' mode

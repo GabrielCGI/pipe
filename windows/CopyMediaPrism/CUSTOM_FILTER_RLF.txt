@@ -1,0 +1,21 @@
+{
+    "COMPOSITING": [
+        "compo",
+        "comp",
+        "nuke",
+        "Compo",
+        "CompoSquare"
+    ],
+  
+    "ANIM": [
+        "anim",
+        "anim_playblast"
+    ],
+    "RLO": [
+        "RoughtLayout",
+        "layout",
+        "Layout",
+        "Previz",
+        "RoughLayout_playblast"
+    ]
+}

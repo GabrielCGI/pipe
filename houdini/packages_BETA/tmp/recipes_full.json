@@ -1,8 +1,8 @@
 {
     "env": [
-        {"HOUDINI_CUSTOM_RECIPE_DIR":"R:\\pipeline\\pipe\\houdini\\recipes"}, 
+        {"HOUDINI_CUSTOM_RECIPE_DIR":"C:\\ILLOGIC_APP\\R\\pipeline\\pipe\\houdini\\recipes"}, 
         {"HOUDINI_CUSTOM_RECIPE_LIBRARY":"ill_recipes_share"}, 
-        {"HOUDINI_OTLSCAN_PATH":"R:/pipeline/pipe/houdini/recipes/otls"}
+        {"HOUDINI_OTLSCAN_PATH":"C:/ILLOGIC_APP/R/pipeline/pipe/houdini/recipes/otls"}
     ]
 }
 

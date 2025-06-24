@@ -140,7 +140,7 @@ def main():
     
     # Select matching mesh prims
     lop_sel = hou.LopSelectionRule()
-    lop_sel.setPathPattern(primpattern + " & %type:Mesh")
+    lop_sel.setPathPattern(primpattern + " & (%type:Mesh | %type:Curves)")
     matching_paths = lop_sel.expandedPaths(stage=stage)
 
     logger.info("=== Matching Meshes ===")
@@ -174,7 +174,7 @@ def main():
 
         uv_out = pinhole_uv_projection_np(camera_inv, points_world_np, focal_mm, haperture_mm, vaperture_mm)
         if facing_ratios is None:
-            combined = np.c_[uv_out, np.ones(len(points_np))]        
+            combined = np.c_[uv_out, np.zeros(len(points_np))]        
         else:
             combined = np.hstack([uv_out, facing_ratios[:, None]])
 

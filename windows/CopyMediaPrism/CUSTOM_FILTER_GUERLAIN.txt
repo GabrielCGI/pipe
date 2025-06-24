@@ -1,0 +1,94 @@
+{
+    "COMPOSITING": [
+        "compo",
+        "comp",
+        "nuke",
+        "Compo"
+    ],
+    "COMPOSQUARE": [
+        "CompoSquare"
+    ],
+    "MASK_CHARA": [
+        "ID_CHARA"
+    ],
+    "MASK_CHAR": [
+        "ID_CHAR"
+    ],
+    "MASK_TREE": [
+        "ID_TREE"
+    ],
+    "MASK_BG": [
+        "ID_BG"
+    ],
+    "MASK_BG_01": [
+        "ID_BG_01"
+    ],
+    "MASK_BG02": [
+        "ID_BG_02"
+    ],
+    "MASK_FG": [
+        "ID_FG"
+    ],
+    "MASK_MID": [
+        "ID_MID"
+    ],
+    "MASK_MID02": [
+        "ID_MID02"
+    ],
+    "MASK_PRODUCT_01": [
+        "ID_PRODUCT_01"
+    ],
+    "MASK_PRODUCT01": [
+        "ID_PRODUCT01"
+    ],
+    "MASK_PRODUCT02": [
+        "ID_PRODUCT02"
+    ],
+    "MASK_PRODUCT_02": [
+        "ID_PRODUCT_02"
+    ],
+    "MASK_PRODUCT03": [
+        "ID_PRODUCT03"
+    ],
+    "MASK_PRODUCT_03": [
+        "ID_PRODUCT_03"
+    ],
+    "MASK_PRODUCT": [
+        "ID_PRODUCT"
+    ],
+    "MASK_WINDOW": [
+        "ID_WINDOW"
+    ],
+    "MASK_TABLE": [
+        "ID_TABLE"
+    ],
+    "MASK_BOXES": [
+        "ID_BOXES"
+    ],
+    "MASK_ENV": [
+        "ID_ENV"
+    ],
+    "MASK_LETTRAGE": [
+        "ID_LETTRAGE"
+    ],
+    "MASK_ALL": [
+        "ID_ALL"
+    ],
+    "MASK_LOUPE": [
+        "ID_LOUPE"
+    ],
+    "MASK_ENV_CHAR": [
+        "ID_ENV_CHAR"
+    ],
+    "ANIM": [
+        "anim",
+        "anim_playblast"
+    ],
+    "RLO": [
+        "RoughtLayout",
+        "layout",
+        "Layout",
+        "Previz",
+        "RoughLayout_playblast"
+    ]
+}

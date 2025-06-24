@@ -1,0 +1,22 @@
+{
+    "hpath": [
+        "$SIDEFXLABS",
+        {
+            "houdini_os == 'windows'": "$SIDEFXLABS/platform_specific/windows"
+        },
+        {
+            "houdini_os == 'macos'": "$SIDEFXLABS/platform_specific/macos"
+        },
+        {
+            "houdini_os == 'linux'": "$SIDEFXLABS/platform_specific/linux"
+        }
+    ],
+    "load_package_once": true,
+    "enable": "houdini_version >= '20.5' and houdini_version < '20.6'",
+    "version": "20.5.591",
+    "env": [
+        {
+            "SIDEFXLABS": "C:/Program Files/Side Effects Software/sidefx_packages/SideFXLabs20.5"
+        }
+    ]
+}

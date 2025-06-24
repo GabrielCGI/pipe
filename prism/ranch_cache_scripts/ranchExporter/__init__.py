@@ -1,4 +1,5 @@
 from . import ranchExporter
+
 import importlib
 
 def parseAndCopyToRanch(usdpath, kwargs):
@@ -16,3 +17,8 @@ def parseAndCopyToRanchDev(usdpath, kwargs):
     from . import ranchExporter_dev
     importlib.reload(ranchExporter_dev)
     ranchExporter_dev.parseAndCopyToRanch(usdpath, kwargs)
+
+def parseAndCopyLop(usdpath, kwargs):
+    from . import ranchExporterLop
+    importlib.reload(ranchExporterLop)
+    ranchExporterLop.parseAndCopyToRanch(usdpath, kwargs)

@@ -44,6 +44,8 @@ def run():
             severity=hou.severityType.Warning)
         return
     
+    # from . import debug
+    #ranchExporter.parseAndCopyToRanchDev(name, kwargs)
     startCopy(name, kwargs)
     
     

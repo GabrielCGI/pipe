@@ -13,6 +13,7 @@
     <memberToolshelf name="hairtools"/>
     <memberToolshelf name="dev"/>
     <memberToolshelf name="illogic_solaris6"/>
+    <memberToolshelf name="shelf_1"/>
   </shelfSet>
 
   <toolshelf name="illogic_solaris6" label="illogic_solaris">

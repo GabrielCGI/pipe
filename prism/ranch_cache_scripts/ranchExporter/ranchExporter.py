@@ -19,7 +19,7 @@ import time
 from . import stresstest_utils as stu
 
 # Used to get USD dependencies
-from pxr import Usd, Sdf, UsdUtils
+from pxr import Ar, Usd, Sdf, UsdUtils
 
 DEBUG_SCENE = False
 # Turn True if you want to see performance of decorate function
@@ -217,7 +217,17 @@ def getDependencies(asset_path: Sdf.AssetPath) -> list[str]:
     """
     
     LOG.info(f'Compute dependencies from {asset_path}')
-    dependencies = UsdUtils.ComputeAllDependencies(asset_path)
+    
+    ctx = os.environ.get('PXR_AR_DEFAULT_SEARCH_PATH', False)
+    if not ctx:
+        ctx = ["I:/", "R:/"]
+        LOG.info(f'Did not found context in env and fallback to {ctx}')
+    else:
+        ctx = ctx.split(';')
+        LOG.info(f'Found context in {ctx} in env: PXR_AR_DEFAULT_SEARCH_PATH')
+    ar_ctx = Ar.DefaultResolverContext(ctx)
+    with Ar.ResolverContextBinder(ar_ctx):
+        dependencies = UsdUtils.ComputeAllDependencies(asset_path)
     
     layers, assets, unresolved_paths = dependencies
     
@@ -580,7 +590,7 @@ def parseAndCopyToRanch(usdpath, kwargs):
 
     setupLog(usdpath)
 
-    LOG.info("Started a copy. Please wait...")
+    LOG.info("Started a copy OLD PIPE. Please wait...")
     
     lop_node = kwargs['state'].node
     

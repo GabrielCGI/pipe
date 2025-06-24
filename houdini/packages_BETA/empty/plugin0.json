@@ -1,0 +1,6 @@
+{
+    "enable" : true,
+    "env":[
+        {"HOUDINI_SCRIPT_PATH": "C:/tmp2/plugin0"}
+        ]
+}

@@ -1,0 +1,8 @@
+{
+    "env": [
+        {"PRISM_ROOT": "${PRISM_ROOT}"
+        }
+    ],
+    "path" : "$PRISM_PLUGIN_SEARCH_PATHS/Houdini/Integration",
+    "load_package_once": true
+}
