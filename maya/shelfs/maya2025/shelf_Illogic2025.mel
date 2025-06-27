@@ -562,18 +562,19 @@ global proc shelf_Illogic2025 () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "import importlib\nimport update_assets_USD\nimport update_assets_USD.update_assets_USD\n\nimportlib.reload(update_assets_USD.update_assets_USD)\nimportlib.reload(update_assets_USD)\n\nupdate_assets_USD.show_usda_updater_in_maya()" 
+        -annotation "Asset Updater" 
         -enableBackground 0
         -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "import importlib\nimport update_assets_USD\nimport update_assets_U..." 
+        -label "Asset Updater" 
         -labelOffset 0
         -rotation 0
         -flipX 0
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
+        -imageOverlayLabel "Asset Updater" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
         -image "USD.svg" 
@@ -616,6 +617,41 @@ global proc shelf_Illogic2025 () {
         -marginWidth 0
         -marginHeight 1
         -command "import os\nimport sys\nimport importlib\nimport PrismInit\n\nSANITYCHECK_PATH = r\"R:\\pipeline\\pipe_public\\sanitycheck\"\n\n\ndef deletefromcontext(module_name):\n    sanitycheck = []\n    for i in sys.modules:\n        if module_name == i or i.startswith(f'{module_name}.'):\n            sanitycheck.append(i)\n\n    for i in sanitycheck:\n        del sys.modules[i]\n              \n\ndef run():\n    deletefromcontext('sanitycheck')\n    if not SANITYCHECK_PATH in sys.path:\n        sys.path.append(SANITYCHECK_PATH)\n    \n    try:\n        import sanitycheck\n        importlib.reload(sanitycheck)\n    except Exception as e:\n        print(e)\n        return\n    \n    try:\n        YAML_LOCATION = os.environ['SANITY_CHECK_CONFIG']\n    except:\n        YAML_LOCATION = 'None'\n        \n    sm = PrismInit.pcore.getStateManager()\n    res = sanitycheck.main(*(sm, YAML_LOCATION, True))\n\n    try:\n        sys.path.remove(SANITYCHECK_PATH)\n    except Exception as e:\n        print(e)\n        pass\n    \n\nrun()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 39
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Asset Updater (dev)" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Asset Updater (dev)" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "Asset Updater (dev)" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "USD.svg" 
+        -image1 "USD.svg" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nimport sys\nsys.path.append(r'R:\\pipeline\\pipe\\prism\\update_assets_USD')\nimport updateAssetsUSD_dev as UD\nimportlib.reload(UD)\n\nUD.startUpdateAssetsUSD('maya')" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

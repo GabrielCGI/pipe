@@ -179,19 +179,19 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     
     ### MJTLab - Deep2VP v4.0 ###
     DVPFam = {"general" : ["Deep2VP","DVPToImage","DVPortal","DVPColorCorrect"] , 
-	    	"matte" : ["DVPmatte","DVPattern","DVProjection"] , 
-		    "lighting" : ["DVPsetLight","DVPscene","DVPrelight","DVPrelightPT","DVPfresnel"] , 
-		    "shader" : ["DVP_Shader","DVP_ToonShader"]
-		    }   
+            "matte" : ["DVPmatte","DVPattern","DVProjection"] , 
+            "lighting" : ["DVPsetLight","DVPscene","DVPrelight","DVPrelightPT","DVPfresnel"] , 
+            "shader" : ["DVP_Shader","DVP_ToonShader"]
+            }   
     ### hard code. Don't change it ###
     toolbar = nuke.toolbar("Nodes")
     DVP = toolbar.addMenu("Deep2VP", icon="Deep2VP.png")
     for key,value in DVPFam.items() :
-	    for item in value :
-		    if key == "general" :
-			    DVP.addCommand( "{0}".format(item), "nuke.nodePaste(\"{0}{1}.nk\")".format(DVPath,item), icon="{0}.png".format(item) )
-		    else :
-			    DVP.addCommand( "{0}/{1}".format(key,item), "nuke.nodePaste(\"{0}{1}/{2}.nk\")".format(DVPath,key,item), icon="{0}.png".format(item) )
+        for item in value :
+            if key == "general" :
+                DVP.addCommand( "{0}".format(item), "nuke.nodePaste(\"{0}{1}.nk\")".format(DVPath,item), icon="{0}.png".format(item) )
+            else:
+                DVP.addCommand( "{0}/{1}".format(key,item), "nuke.nodePaste(\"{0}{1}/{2}.nk\")".format(DVPath,key,item), icon="{0}.png".format(item) )
     ### end here ###
 
 

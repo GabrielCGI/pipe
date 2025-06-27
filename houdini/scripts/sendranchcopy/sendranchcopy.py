@@ -10,7 +10,7 @@ sys.path.append(RANCH_EXPORTER_PATH)
 LOP_FILECACHE = PrismInit.pcore.getPlugin('USD').api.usdExport
 import ranchExporter
 
-def run():
+def run(dev=False):
     
     selected_nodes = hou.selectedNodes()
     
@@ -44,9 +44,12 @@ def run():
             severity=hou.severityType.Warning)
         return
     
-    # from . import debug
-    #ranchExporter.parseAndCopyToRanchDev(name, kwargs)
-    startCopy(name, kwargs)
+    if dev:
+        print('Start parse and copy in dev mode')
+        ranchExporter.parseAndCopyToRanchDev(name, kwargs)
+    else:
+        print('Start parse and copy in main mode')
+        startCopy(name, kwargs)
     
     
 def startCopy(stage, scene_path):

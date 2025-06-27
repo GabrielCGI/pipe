@@ -14,10 +14,11 @@
             "MatchTranslation",
             "MatchPivots",
             "ToggleEditPivot",
-            "NamespaceEditor",
             "DeleteMotionPaths",
-            "MatchTransform",
+            "AttachToPath",
             "HypershadeWindow",
+            "NamespaceEditor",
+            "MatchTransform",
             "ParentConstraint"
         ],
         [],

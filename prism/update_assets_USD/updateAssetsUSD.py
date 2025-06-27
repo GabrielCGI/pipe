@@ -2,6 +2,10 @@ try:
     from shiboken6 import wrapInstance
 except:
     pass
+try:
+    from shiboken2 import wrapInstance
+except:
+    pass
 
 from datetime import datetime
 import glob
@@ -364,10 +368,39 @@ class mainInterface(Qt.QMainWindow):
         
         self.parse_payloads(content)
 
+    def convert_to_resolver_path(self):
+        with open(self.pathFile, 'r', encoding='utf-8') as f:
+            content = f.read()
+
+        # Match only payloads starting with drive letters (e.g., @I:/...)
+        pattern = r"@[A-Z]:/[^@]+\.usd[ac]@(?:<[^>]+>)?"
+        matches = re.findall(pattern, content, re.IGNORECASE)
+
+        seen = set()
+        self.set_log(f"🔍 Found {len(matches)} absolute-path payload(s) to fix.")
+
+        for match in matches:
+            if match in seen:
+                continue
+            seen.add(match)
+
+            # Remove the drive letter and colon
+            updated = re.sub(r'@[A-Z]:/', '@', match)
+
+            if updated != match:
+                self.set_log(f"🚚 Path fixed: {match} ➜ {updated}")
+                content = re.sub(re.escape(match), updated, content)
+
+        with open(self.pathFile, 'w', encoding='utf-8') as f:
+            f.write(content)
+
+        return content
+    
     def parse_payloads(self, content):
         pattern = r"@[^@]+\.usd[ac]@(?:<[^>]+>)?"  # Simplified: focus only on @...usd[ac]@
         matches = re.findall(pattern, content, re.IGNORECASE)
         seen = set()
+        self.set_log("debug")
         self.set_log(f"Found {len(matches)} payload(s)")
         
         for m in matches:
@@ -396,47 +429,85 @@ class mainInterface(Qt.QMainWindow):
         list_item.setSizeHint(checkbox.sizeHint())
         self.checkboxWidgetPayload.append(checkbox)
 
+
     def find_latest_version_path(self, original_path):
-        match = re.match(
-            r"@(?P<base>.+?/Export/.+?/)v(?P<version>\d{3})/(?P<asset_name>.+)_.+?_(v\d{3}\.usd[ac])@",
-            original_path,
-            re.IGNORECASE
-        )
-        if not match:
-            return None
+        raw_path = original_path.strip("@")
+        is_relative = not os.path.isabs(raw_path) and not raw_path.startswith("/")
+        resolver_roots = ["I:/", "R:/"]  # AR_PXR_DEFAULT_RESOLVER
 
-        base_dir = match.group("base").replace("/", os.sep)
-        current_version = int(match.group("version"))
-        asset_name = match.group("asset_name")
+        candidate_paths = []
 
-        if not os.path.exists(base_dir):
-            return None
+        if is_relative:
+            # Relative to USDA file
+            if self.pathFile:
+                rel_base = os.path.normpath(os.path.join(os.path.dirname(self.pathFile), raw_path))
+                candidate_paths.append((rel_base, "relative"))
 
-        versions = [int(folder[1:]) for folder in os.listdir(base_dir)
-                    if re.fullmatch(r"v\d{3}", folder)]
-        if not versions:
-            return None
+            # Logical path via resolver roots
+            for root in resolver_roots:
+                combined = os.path.normpath(os.path.join(root, raw_path))
+                candidate_paths.append((combined, root))
+        else:
+            candidate_paths.append((os.path.normpath(raw_path), None))
 
-        latest_version = max(versions)
-        latest_str = f"v{latest_version:03d}"
-        latest_folder = os.path.join(base_dir, latest_str)
+        for resolved_path, source in candidate_paths:
+            normalized_path = resolved_path.replace("\\", "/")
+            match = re.match(
+                r"(.+/Export/.+?/)(v\d{3})/([^/]+)_.+?_(v\d{3}\.usd[ac])$",
+                normalized_path,
+                re.IGNORECASE
+            )
+            if not match:
+                continue
 
-        for fname in os.listdir(latest_folder):
-            if re.fullmatch(f"{re.escape(asset_name)}_.+?_{latest_str}\\.usd[ac]", fname, re.IGNORECASE):
-                latest_path = f"@{match.group('base')}/{latest_str}/{fname}@"
-                return AssetItem(
-                    original_path,
-                    latest_path,
-                    current_version,
-                    latest_version
-                )
+            base_dir = os.path.normpath(match.group(1))
+            current_version = int(match.group(2)[1:])
+            asset_name = match.group(3)
+
+            if not os.path.exists(base_dir):
+                continue
+
+            versions = [int(f[1:]) for f in os.listdir(base_dir) if re.fullmatch(r"v\d{3}", f)]
+            if not versions:
+                continue
+
+            latest_version = max(versions)
+            latest_str = f"v{latest_version:03d}"
+            latest_folder = os.path.join(base_dir, latest_str)
+
+            for fname in os.listdir(latest_folder):
+                if re.fullmatch(rf"{re.escape(asset_name)}_.+?_{latest_str}\.usd[ac]", fname, re.IGNORECASE):
+                    updated_abs_path = os.path.join(base_dir, latest_str, fname)
+
+                    # Compute updated_path safely (avoid backslashes in f-strings)
+                    if source == "relative":
+                        rel_path = os.path.relpath(updated_abs_path, os.path.dirname(self.pathFile))
+                        rel_path = rel_path.replace("\\", "/")
+                        updated_path = "@{}@".format(rel_path)
+                    elif source in resolver_roots:
+                        logical_part = os.path.relpath(updated_abs_path, source)
+                        logical_part = logical_part.replace("\\", "/")
+                        updated_path = "@{}@".format(logical_part)
+                    else:
+                        abs_path = updated_abs_path.replace("\\", "/")
+                        updated_path = "@{}@".format(abs_path)
+
+                    return AssetItem(
+                        original_path=original_path,
+                        updated_path=updated_path,
+                        from_version=current_version,
+                        to_version=latest_version
+                    )
 
         return None
+
+
 
     def run_update(self):
         statute = self.typeUpdate.currentIndex()
         self.QlistUSDNeedUpdate.clear()
         self.logBox.clear()
+        self.set_log("debug")
 
 
 
@@ -492,6 +563,8 @@ class mainInterface(Qt.QMainWindow):
             self.load_USDa()
         else:
             self.load_maya_work_layer()
+        
+        self.convert_to_resolver_path()
 
 
         

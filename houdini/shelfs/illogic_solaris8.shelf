@@ -13,7 +13,7 @@
     <memberToolshelf name="hairtools"/>
     <memberToolshelf name="dev"/>
     <memberToolshelf name="illogic_solaris6"/>
-    <memberToolshelf name="shelf_1"/>
+    <memberToolshelf name="develop"/>
   </shelfSet>
 
   <toolshelf name="illogic_solaris6" label="illogic_solaris">
@@ -54,7 +54,7 @@ reload(mtlximage_path_updatev2)
 mtlximage_path_updatev2.run()]]></script>
   </tool>
 
-  <tool name="update_assets_USD" label="update_assets_USD" icon="hicon:/SVGIcons.index?NETVIEW_lop_info.svg">
+  <tool name="update_assets_USD" label="Update Assets USD" icon="hicon:/SVGIcons.index?NETVIEW_lop_info.svg">
     <script scriptType="python"><![CDATA[import importlib
 import sys
 sys.path.append(r'R:\\pipeline\\pipe\\prism\\update_assets_USD')
