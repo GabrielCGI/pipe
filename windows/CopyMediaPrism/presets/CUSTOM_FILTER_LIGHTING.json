@@ -1,0 +1,42 @@
+{
+    "filters": {
+        "COMPOSITING": [
+            "compo",
+            "comp",
+            "nuke",
+            "Compo",
+            "CompoSquare"
+        ],
+        "LIGHTING_1": [
+            "FG"
+        ],
+        "LIGHTING_2": [
+            "MID"
+        ],
+        "LIGHTING_3": [
+            "FX",
+            "FX_A",
+            "FX_B"
+        ],
+        "LIGHTING_4": [
+            "VOLUME"
+        ],
+        "LIGHTING_5": [
+            "BG"
+        ],
+        "MASK": [
+            "ID"
+        ],
+        "ANIM": [
+            "anim",
+            "anim_playblast"
+        ],
+        "RLO": [
+            "RoughtLayout",
+            "layout",
+            "Layout",
+            "Previz",
+            "RoughLayout_playblast"
+        ]
+    }
+}

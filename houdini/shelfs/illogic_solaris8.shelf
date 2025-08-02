@@ -12,8 +12,11 @@
     <memberToolshelf name="cloud"/>
     <memberToolshelf name="hairtools"/>
     <memberToolshelf name="dev"/>
-    <memberToolshelf name="illogic_solaris6"/>
     <memberToolshelf name="develop"/>
+    <memberToolshelf name="model"/>
+    <memberToolshelf name="shelf_1"/>
+    <memberToolshelf name="RenderManRIS"/>
+    <memberToolshelf name="illogic_solaris6"/>
   </shelfSet>
 
   <toolshelf name="illogic_solaris6" label="illogic_solaris">
@@ -34,6 +37,7 @@
     <memberTool name="sanity_check"/>
     <memberTool name="automanifest"/>
     <memberTool name="automanifestv2"/>
+    <memberTool name="inheriteclass"/>
     <memberTool name="copy_light"/>
     <memberTool name="domelight_create"/>
     <memberTool name="set_node_parameters"/>
@@ -41,6 +45,7 @@
     <memberTool name="clean_light"/>
     <memberTool name="send_ranch_copy"/>
     <memberTool name="select_prim_with_attributes"/>
+    <memberTool name="tool_1"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -55,13 +60,16 @@ mtlximage_path_updatev2.run()]]></script>
   </tool>
 
   <tool name="update_assets_USD" label="Update Assets USD" icon="hicon:/SVGIcons.index?NETVIEW_lop_info.svg">
-    <script scriptType="python"><![CDATA[import importlib
-import sys
-sys.path.append(r'R:\\pipeline\\pipe\\prism\\update_assets_USD')
-import updateAssetsUSD as UD
-importlib.reload(UD)
+    <script scriptType="python"><![CDATA[import sys
 
-UD.startUpdateAssetsUSD('houdini')]]></script>
+MODULE_PATH = "r:/pipeline/pipe/prism"
+    
+if not MODULE_PATH in sys.path:
+        sys.path.append(MODULE_PATH)
+
+import USDToolBox_pck
+
+USDToolBox_pck.updateAssetsUSD.startUpdateAssetsUSD('houdini')]]></script>
   </tool>
 
   <tool name="CreateAutoVariant" label="CAV" icon="hicon:/SVGIcons.index?CROWDS_popsteeralign.svg">
@@ -299,5 +307,48 @@ kmxChar.execute()]]></script>
 import automanifest.auto_manifest_dev_v2 as auto_manifest
 reload(auto_manifest)
 auto_manifest.run()]]></script>
+  </tool>
+
+  <tool name="inheriteclass" label="inherite Class" icon="hicon:/SVGIcons.index?ENGINE_asset_help.svg">
+    <script scriptType="python"><![CDATA[import importlib
+import hou
+import inheriteClassVariant as icv
+importlib.reload(icv)
+
+
+
+START = True
+FORCED = False
+nodes = hou.selectedNodes()
+
+if not nodes or len(nodes) >=2:
+    hou.ui.displayMessage("Select 1 LOP_import node", buttons=("OK",) ,severity=hou.severityType.Error)
+    START = False
+
+
+if START and nodes[0].type().name() != "prism::LOP_Import::1.0":
+    hou.ui.displayMessage("Select 1 LOP_import node", buttons=("OK",) ,severity=hou.severityType.Error)
+    START = False
+
+    
+
+    
+    
+if START:
+    print("find value")
+    path = nodes[0].parm("filepath").eval()
+    entity = nodes[0].parm("entity").eval()
+    if "sh" in entity.lower() and "sq" in entity.lower():
+        FORCED = True
+        
+    elif "testShot" in path:
+        FORCED = hou.ui.displayMessage(f"is not a shot: it's {entity}\n\nDo you want forced the script?", buttons=("No", "Yes") , close_choice=0)
+    
+    if FORCED:
+        icv.inheriteClassAttr(path)]]></script>
+  </tool>
+
+  <tool name="tool_1" label="New Tool" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[print("gat y")]]></script>
   </tool>
 </shelfDocument>

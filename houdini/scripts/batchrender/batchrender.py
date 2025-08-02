@@ -224,6 +224,17 @@ class BatchSelector(QtWidgets.QDialog):
             state = data['state']
             range_type = state.ui.cb_rangeType.currentText()
             frame_range = state.ui.getFrameRange(range_type)
+            if len(frame_range) < 2:
+                f1 = node.parm('f1')
+                f2 = node.parm('f2')
+                if f1 and f2:
+                    frame_range = [f1.eval(), f2.eval()]
+                else:
+                    frame_range = [None, None]
+                    
+            if not frame_range[0] or not frame_range[1]:
+                print('Did not found frame range')
+                frame_range = [0, 0]
             shot_description = (
                 f'<li><b>{node.name()}</b> : '
                 f"({frame_range[0]} - {frame_range[1]})</li>"

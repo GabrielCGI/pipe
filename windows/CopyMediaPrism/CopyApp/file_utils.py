@@ -1,8 +1,10 @@
 import os
 import re
 import json
+import glob
 import hashlib
 import shutil
+from pathlib import Path
 from datetime import datetime
 import time
 import concurrent.futures
@@ -10,7 +12,10 @@ import concurrent.futures
 debug = False
 
 # Path to store the JSON in the user's preferences
-json_default_path = os.path.join(os.path.expanduser("~"), "Documents", "department_identifiers.json")
+JSON_DIRECTORY = os.path.join(os.path.expanduser("~"), "Documents", "CopyApp")
+# JSON_DIRECTORY = "C:/Users/m.beldjilali/Documents/copyappdev/presets"
+JSON_DIRECTORY = "R:/pipeline/pipe/windows/CopyMediaPrism/presets"
+json_default_name = os.path.join(JSON_DIRECTORY, "department_identifiers.json")
 
 # Default content for the JSON file
 default_identifiers = {
@@ -21,7 +26,8 @@ default_identifiers = {
 added_seq_log_end = []
 
 # Function to create or load the department identifier JSON file
-def load_or_create_department_identifiers(json_path=json_default_path):
+def load_or_create_department_identifiers(json_path=json_default_name):
+    os.makedirs(os.path.dirname(JSON_DIRECTORY), exist_ok=True)
     # Check if the directory exists, create it if it doesn't
     documents_dir = os.path.dirname(json_path)
     if not os.path.exists(documents_dir):
@@ -44,7 +50,7 @@ def load_or_create_department_identifiers(json_path=json_default_path):
 
 
 # Function to save modified department identifiers
-def save_department_identifiers(data, json_path=json_default_path):
+def save_department_identifiers(data, json_path=json_default_name):
     with open(json_path, 'w') as f:
         json.dump(data, f, indent=4)
 
@@ -63,6 +69,7 @@ def find_shots_directory(project_dir, log_func=None):
         return None
 
 # Function to find all media files based on department identifiers, keeping only the highest version for each identifier
+
 def find_files(source_dir, department_identifiers, exclusions=None, log_func=None):
     if exclusions is None:
         exclusions = []  # Default to an empty list if no exclusions are provided
@@ -70,65 +77,77 @@ def find_files(source_dir, department_identifiers, exclusions=None, log_func=Non
     exclusions.append("_thumbs")
 
     files_dict = {}
-    pattern_version = re.compile(r'_v(\d+)')  # Regular expression to find version numbers like _v001
-    pattern_frame_number = re.compile(r'(\d+)\.(\w+)$')  # Detect frame numbers for sequences
+    # Regular expression to find version numbers like _v001
+    pattern_version = re.compile(r'_v(\d+)')
 
-    for root, dirs, files in os.walk(source_dir):
-        rel_path = os.path.relpath(root, source_dir).split(os.sep)
+    playblast_pattern = source_dir + "/*/*/Playblasts/**"
+    renders2d_pattern = source_dir + "/*/*/Renders/2dRender/**"
+    renders3d_pattern = source_dir + "/*/*/Renders/3dRender/**"
+    
+    paths1 = glob.glob(playblast_pattern)
+    paths2 = glob.glob(renders2d_pattern)
+    paths3 = glob.glob(renders3d_pattern)
+    paths = paths1 + paths2 + paths3
+
+    for id_path in paths:
 
         # Check for excluded sequences or shots, only if exclusions are not empty
-        if exclusions and any(exclusion in rel_path for exclusion in exclusions):
+        if exclusions and any(exclusion in id_path for exclusion in exclusions):
             if log_func and debug is True:
-                log_func(f"Skipping excluded path: {root}")
+                log_func(f"Skipping excluded path: {id_path}")
             continue
-
-        # Check for Playblasts hierarchy
-        if len(rel_path) >= 4 and rel_path[2] == 'Playblasts':
-            seq_name = rel_path[0]
-            plan_name = rel_path[1]
-            identifier = rel_path[3].lower()
-
-        # Check for 2dRender and 3dRender hierarchy under "Renders"
-        elif len(rel_path) >= 5 and rel_path[2] == 'Renders' and rel_path[3] in ['2dRender', '3dRender']:
-            seq_name = rel_path[0]
-            plan_name = rel_path[1]
-            identifier = rel_path[4].lower()
+        
+        id_path = Path(id_path)
+        if "Playblasts" in id_path.as_posix() and len(id_path.parts) > 7:
+            seq_name = id_path.parts[4]
+            plan_name = id_path.parts[5]
+            identifier = id_path.parts[7].lower()  
+        elif "Renders" in id_path.as_posix() and len(id_path.parts) > 8:
+            seq_name = id_path.parts[4]
+            plan_name = id_path.parts[5]
+            identifier = id_path.parts[8].lower()
         else:
             continue
+
 
         # For each department, check if the identifier (lowercased) is in the list of identifiers (also lowercased)
         for departement, identifiers in department_identifiers.items():
             if identifier in [i.lower() for i in identifiers]:
-                for file in files:
-                    # Skip excluded files, only if exclusions are not empty
-                    if exclusions and any(exclusion in file for exclusion in exclusions):
-                        if log_func and debug is True:
-                            log_func(f"Skipping excluded file: {file}")
-                        continue
+                # Look for version numbers in the filename
+                
+                versions = [v_path for v_path in  id_path.glob("*")]
+                versions.sort(reverse=True)
+                if versions:
+                    found = False
+                    for version in versions:
+                        if found:
+                            break
+                        if version.as_posix().endswith(")"):
+                            continue
+                        
+                        for v_path in version.glob("*"):
+                            match = pattern_version.search(v_path.as_posix())
+                            if match:
+                                version = int(match.group(1))
+                                base_name = f"{seq_name}_{plan_name}_{departement}"
 
-                    # Look for version numbers in the filename
-                    match = pattern_version.search(file)
-                    if match:
-                        version = int(match.group(1))
-                        base_name = f"{seq_name}_{plan_name}_{departement}"
-
-                        # Keep only the highest version for each identifier in the department
-                        if base_name not in files_dict or version > files_dict[base_name]['version']:
-                            files_dict[base_name] = {
-                                'path': os.path.join(root, file),
-                                'version': version,
-                                'departement': departement,
-                                'identifier': identifier,
-                                'sequence': seq_name,
-                                'plan': plan_name,
-                            }
+                                # Keep only the highest version for each identifier in the department
+                                if base_name not in files_dict or version > files_dict[base_name]['version']:
+                                    files_dict[base_name] = {
+                                        'path': v_path.as_posix(),
+                                        'version': version,
+                                        'departement': departement,
+                                        'identifier': identifier,
+                                        'sequence': seq_name,
+                                        'plan': plan_name,
+                                    }
+                                    found = True
 
     if log_func and debug is True:
         for base_name, info in files_dict.items():
             log_func(f"Found file: {base_name}, version: {info['version']}, departement: {info['departement']}")
 
     return files_dict
-
 
 # Function to calculate the MD5 checksum of a file
 def calculate_md5(file_path):
@@ -218,7 +237,7 @@ def delete_video_file(video_file_path, log_func=None):
     else:
         pass
 
-def copy_files(source_files, dest_dir, log_func=None, update_overall_progress=None, update_file_progress=None):
+def copy_files(source_files, dest_dir, log_func=None, enable_md5=True, update_overall_progress=None, update_file_progress=None):
     
     total_files = len(source_files)
     files_copied = 0
@@ -292,8 +311,12 @@ def copy_files(source_files, dest_dir, log_func=None, update_overall_progress=No
             elif debug is True:
                 log_func("Séquence d'images complète")
 
-            # Comparer les fichiers de la séquence avec MD5 en parallèle
-            md5_results_source = compare_md5_in_parallel(files_to_copy, directory, log_func)
+            if enable_md5:
+                # Comparer les fichiers de la séquence avec MD5 en parallèle
+                md5_results_source = compare_md5_in_parallel(files_to_copy, directory, log_func)
+            else:
+                size_list = [os.path.getsize(os.path.join(directory, file)) for file in files_to_copy]
+                
 
             # Variable pour suivre si toute la séquence est identique
             all_skipped = True
@@ -310,13 +333,18 @@ def copy_files(source_files, dest_dir, log_func=None, update_overall_progress=No
                     dest_file = os.path.join(image_sequence_folder, new_filename)
 
                 if os.path.exists(dest_file):
-                    dest_md5 = calculate_md5_fast(dest_file)
-                    source_md5 = md5_results_source[i]
-                    if source_md5 == dest_md5:
+                    if enable_md5:
+                        source_id = md5_results_source[i]
+                        dest_id = calculate_md5_fast(dest_file)
+                    else:
+                        source_id = size_list[i]
+                        dest_id = os.path.getsize(dest_file)
+                    if source_id == dest_id:
                         continue  # Passer si les fichiers sont identiques
                     else:
                         all_skipped = False  # Si une image n'est pas identique, on ne skippe pas la séquence entière
-
+                else:
+                    all_skipped = False
                 shutil.copy2(full_file_path, dest_file)
 
                 if update_file_progress:

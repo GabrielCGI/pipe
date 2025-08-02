@@ -84,7 +84,7 @@
         ],
         "departments_shot": [
             {
-                "abbreviation": "ppd",
+                "abbreviation": "prd",
                 "defaultTasks": [
                     "Storyboard"
                 ],
@@ -93,10 +93,16 @@
             {
                 "abbreviation": "lay",
                 "defaultTasks": [
-                    "RoughLayout",
-                    "SetDressing"
+                    "Layout"
                 ],
                 "name": "Layout"
+            },
+            {
+                "abbreviation": "set",
+                "defaultTasks": [
+                    "SetDress"
+                ],
+                "name": "SetDress"
             },
             {
                 "abbreviation": "anm",
@@ -104,13 +110,6 @@
                     "Anim"
                 ],
                 "name": "Anim"
-            },
-            {
-                "abbreviation": "cfx",
-                "defaultTasks": [
-                    "cfx"
-                ],
-                "name": "CFX"
             },
             {
                 "abbreviation": "fx",
@@ -130,18 +129,9 @@
                 "abbreviation": "cmp",
                 "defaultTasks": [
                     "MattePaint",
-                    "CleanPlate",
-                    "TrackingRoto",
                     "Compo"
                 ],
-                "name": "Compositing"
-            },
-            {
-                "abbreviation": "edit",
-                "defaultTasks": [
-                    "Editing"
-                ],
-                "name": "Editing"
+                "name": "Compo"
             }
         ],
         "prism_version": "v2.0.9",
@@ -756,7 +746,8 @@
     "environmentVariables": {
         "PRISM_DEADLINE_HUSK_PATH": "C:\\Program Files\\Side Effects Software\\Houdini %HOUDINI_ILL_VERSION%\\bin\\husk.exe",
         "PRISM_HUSK_DEADLINE_GROUP": "husk_grp",
-        "PXR_AR_DEFAULT_SEARCH_PATH": "R:/;I:/"
+        "PXR_AR_DEFAULT_SEARCH_PATH": "R:/;I:/",
+        "SANITY_CHECK_CONFIG": "I:/intermarche/00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml"
     },
     "export_paths": {},
     "render_paths": {},

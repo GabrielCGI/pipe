@@ -1,0 +1,21 @@
+{
+    "filters": {
+        "COMPOSITING": [
+            "compo",
+            "comp",
+            "nuke",
+            "beauty"
+        ],
+        "ANIM": [
+            "anim",
+            "anim_playblast"
+        ],
+        "RLO": [
+            "RoughtLayout",
+            "Previz",
+            "RoughLayout_playblast"
+        ]
+    },
+    "source_path": "I:/2406_chickenverse",
+    "dest_path": ""
+}

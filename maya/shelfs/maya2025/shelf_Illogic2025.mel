@@ -562,19 +562,18 @@ global proc shelf_Illogic2025 () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "Asset Updater" 
+        -annotation "import importlib\nimport update_assets_USD\nimport update_assets_USD.update_assets_USD\n\nimportlib.reload(update_assets_USD.update_assets_USD)\nimportlib.reload(update_assets_USD)\n\nupdate_assets_USD.show_usda_updater_in_maya()" 
         -enableBackground 0
         -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "Asset Updater" 
+        -label "import importlib\nimport update_assets_USD\nimport update_assets_U..." 
         -labelOffset 0
         -rotation 0
         -flipX 0
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
-        -imageOverlayLabel "Asset Updater" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
         -image "USD.svg" 
@@ -582,7 +581,7 @@ global proc shelf_Illogic2025 () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "import importlib\nimport sys\nsys.path.append(r'R:\\pipeline\\pipe\\prism\\update_assets_USD')\nimport updateAssetsUSD as UD\nimportlib.reload(UD)\n\nUD.startUpdateAssetsUSD('maya')" 
+        -command "import importlib\nimport sys\n\nMODULE_PATH = \"r:/pipeline/pipe/prism\"\n\nif not MODULE_PATH in sys.path:\n\tsys.path.append(MODULE_PATH)\n\nimport USDToolBox_pck\n\nUSDToolBox_pck.updateAssetsUSD.startUpdateAssetsUSD('maya')" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -626,32 +625,100 @@ global proc shelf_Illogic2025 () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 39
+        -width 35
         -height 34
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "Asset Updater (dev)" 
+        -annotation "Object mask" 
         -enableBackground 0
         -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "Asset Updater (dev)" 
+        -label "Object mask" 
         -labelOffset 0
         -rotation 0
         -flipX 0
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
-        -imageOverlayLabel "Asset Updater (dev)" 
+        -imageOverlayLabel "Mask" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "USD.svg" 
-        -image1 "USD.svg" 
+        -image "Mask.png" 
+        -image1 "Mask.png" 
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "import importlib\nimport sys\nsys.path.append(r'R:\\pipeline\\pipe\\prism\\update_assets_USD')\nimport updateAssetsUSD_dev as UD\nimportlib.reload(UD)\n\nUD.startUpdateAssetsUSD('maya')" 
+        -command "selectMode -object; selectType -handle 1 -ikHandle 1 -joint 1 -nurbsCurve 1 -cos 1 -stroke 1 -nurbsSurface 1 -polymesh 1 -subdiv 1 -plane 1 -lattice 1 -cluster 1 -sculpt 1 -nonlinear 1 -particleShape 1 -emitter 1 -field 1 -spring 1 -rigidBody 1 -fluid 1 -hairSystem 1 -follicle 1 -nCloth 1 -nRigid 1 -dynamicConstraint 1 -rigidConstraint 1 -collisionModel 1 -light 1 -camera 1 -texture 1 -ikEndEffector 1 -locator 1 -dimension 1;selectType -byName gpuCache 0;" 
+        -sourceType "mel" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Sticky Mod" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Sticky Mod" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "addWrapInfluence.png" 
+        -image1 "addWrapInfluence.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import js_stickyMod.ui\njs_stickyMod.ui.ui()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Reconstruct State Manager" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Reconstruct State Manager" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "revealSelected.png" 
+        -image1 "revealSelected.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import reconstructStateManager as rsm\nrsm.run()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

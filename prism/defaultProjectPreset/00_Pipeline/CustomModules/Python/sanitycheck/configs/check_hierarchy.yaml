@@ -1,0 +1,68 @@
+---
+# Rule hierarchy yaml
+IsEnable: on
+Production:
+  rules:
+    # - TemplateCheck|ERROR|WARNING
+  Assets:
+    rules:
+    Modeling:
+      rules:
+      Modeling:
+        rules:
+          # - HaveOnlyGeoAtRoot|WARNING
+          - NamingHierarchyModeling|WARNING
+          - NamingShadingGroup|WARNING
+          # - SMIsWellSetForModeling|WARNING
+          - AllGeoShouldHaveATRSof0|WARNING
+          - ThereShouldBeLessThanXObject|WARNING
+          - ThereShouldBeLessThanXMaterial|WARNING
+          - ExportPresetsClean|WARNING
+
+    Rigging:
+      rules:
+      Rigging:
+        rules:
+          - ExportPresetsClean|WARNING
+          - FindKeyAnimeRigAndTrsZero|WARNING
+    
+    Shading:
+      rules:
+      Lookdev:
+        rules:
+          # - HaveMaterialPreviewCheck
+          - NamingVariantAndComponent|WARNING
+          - CharacterShadingGoodExport|WARNING
+
+
+
+  Shots:
+    rules:
+    Lighting:
+      rules:
+      Lighting:
+        rules:
+          - HaveAllRenderNodeSetToXpu|WARNING
+          - layerBreaksMuteDep|WARNING
+    
+    lgt:
+      rules:
+      Lighting:
+        rules:
+          - HaveAllRenderNodeSetToXpu|WARNING
+          - layerBreaksMuteDep|WARNING
+    
+    Anim:
+      rules:
+      Anim:
+        rules:
+          - NamingHierarchyAnimation
+          - ExportPresetsClean|WARNING
+          - NamingCamera
+    Layout:
+      rules:
+      Layout:
+        rules:
+          # - NamingHierarchyLayout
+          - NamingCamera
+          - ExportPresetsClean|WARNING

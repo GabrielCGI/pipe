@@ -9,12 +9,7 @@ import json
 import sys
 import os
 import re
-    
-import socket
-# if socket.gethostname() == "RACOON-01":
-#     import debug
-#     debug.debug()
-    # debug.debugpy.breakpoint()
+
     
 # DEBUG ENV - TO DELETE LATER
 try:    
@@ -26,7 +21,7 @@ try:
         datefmt="%Y-%m-%d %H:%M:%S")
     # log handler setup
     fileHandler = logging.FileHandler(
-        os.path.join(LOG_DIRECTORY, f"log_update_usd.log"),
+        os.path.join(LOG_DIRECTORY, f"log_update_main_usd.log"),
         mode='w')
     fileHandler.setFormatter(formatter)
     streamHandler = logging.StreamHandler()
@@ -84,21 +79,21 @@ else:
 
 #import USD libs
 try:
-    from pxr import UsdUtils, Sdf, Ar
+    from pxr import UsdUtils, Sdf, Ar, Usd
 except:
     pass
 
 #import for maya 
 try:
-    from maya import OpenMayaUI, cmds
-    import mayaUsd
+    from maya import OpenMayaUI, cmds # type: ignore
+    import mayaUsd # type: ignore
     from shiboken6 import wrapInstance
 except:
     pass
 
 #import for houdini 
 try:
-    import hou
+    import hou # type: ignore
 except:
     pass
 
@@ -107,12 +102,20 @@ MAYA_LAYOUT_JSON = "R:/pipeline/pipe/prism/update_assets_USD/maya_layout.json"
 
 
 class AssetItem:
-    def __init__(self, original_path, updated_path, from_version, to_version):
+    def __init__(
+            self,
+            original_path,
+            updated_path,
+            from_version,
+            to_version
+        ):
         self.original_path = original_path
         self.updated_path = updated_path
         self.from_version = from_version
         self.to_version = to_version
-        self.should_update = True
+        self.layer_path = None
+        self.can_be_updated = True
+        self.should_be_updated = True
         
 
 class mainInterface(Qt.QMainWindow):
@@ -120,7 +123,7 @@ class mainInterface(Qt.QMainWindow):
         super(mainInterface, self).__init__(parent)
         self.setWindowTitle("USD Payload Updater 1.0")
         self.resize(900, 800)
-        self.listAssetsNeedUpdate = []
+        self.listAssetsNeedUpdate: list[AssetItem] = []
         self.checkboxWidgetPayload = []
         self.openType = openType
         self.pathFile = None
@@ -128,25 +131,30 @@ class mainInterface(Qt.QMainWindow):
         
         logger.info('Open USD updater in dev mode')
 
-        #------------------------------------------------ Create interface ------------------------------------------------
+        # --------------------------Create interface--------------------------
         Mainwindow = Qt.QWidget()
         self.setCentralWidget(Mainwindow)
         mainLayout = Qt.QVBoxLayout(Mainwindow)
 
-        #--------------------type Update  Worklayer  ou USDA file--------------------
+        # -----------------type Update Worklayer ou USDA file-----------------
         self.typeUpdate = Qt.QComboBox()
         if self.openType == 'maya':
-            self.typeUpdate.addItems(["Update from USDA file", "Update Current Work Layer"])
+            self.typeUpdate.addItems(
+                ["Update from USDA file",
+                 "Update Current Work Layer"]
+            )
         else:
             self.typeUpdate.addItems(["Update from USDA file"])
         if self.openType in ['maya']:
             self.typeUpdate.setCurrentIndex(1)
         else:
             self.typeUpdate.setCurrentIndex(0)
-        self.typeUpdate.currentIndexChanged.connect(self.find_USD_File_To_Update)
+        self.typeUpdate.currentIndexChanged.connect(
+            self.find_USD_File_To_Update
+        )
         mainLayout.addWidget(self.typeUpdate)
         
-        #--------------------choisir quelle layer d'USD choisir à modiffier--------------------
+        # -----------choisir quelle layer d'USD choisir à modiffier-----------
         file_layout = Qt.QHBoxLayout()
 
         self.USDFileNeedUpdate = Qt.QLineEdit()
@@ -156,28 +164,64 @@ class mainInterface(Qt.QMainWindow):
         self.filePathBtn.clicked.connect(self.browse_file)
         file_layout.addWidget(self.filePathBtn)
         mainLayout.addLayout(file_layout)
+        
+        # enable/disable possibility to update (useful for recursiveness)
+        self.enable_recursion = False
+        self.enable_update = True
 
-        #---------------------------list de tout ce qu'il faut update dans la stack USD---------------------------
+        # ---------list de tout ce qu'il faut update dans la stack US---------
         self.QlistUSDNeedUpdate = Qt.QListWidget()
         mainLayout.addWidget(self.QlistUSDNeedUpdate)
 
-        #-----------------------------------------layout des boutton-----------------------------------------
+        # -------------------------layout des boutton-------------------------
         self.layoutButon = Qt.QHBoxLayout()
         mainLayout.addLayout(self.layoutButon)
         
         self.selAllBtm = Qt.QPushButton("Select All")
-        self.selAllBtm.clicked.connect(lambda: self.set_all_checkboxes(True))
+        self.selAllBtm.clicked.connect(
+            lambda: self.set_all_checkboxes(True)
+        )
         self.layoutButon.addWidget(self.selAllBtm)
 
         self.deselAllBtm = Qt.QPushButton("Deselect All")
-        self.deselAllBtm.clicked.connect(lambda: self.set_all_checkboxes(False))
+        self.deselAllBtm.clicked.connect(
+            lambda: self.set_all_checkboxes(False)
+        )
         self.layoutButon.addWidget(self.deselAllBtm)
 
         self.runBtm = Qt.QPushButton("Update")
         self.runBtm.clicked.connect(self.run_update)
         self.layoutButon.addWidget(self.runBtm)
+        
+        # --------------------layout des options avancees--------------------
+        
+        # Enable recursion mode only if Usd Version allow it (24.03)
+        # commit: https://github.com/PixarAnimationStudios/OpenUSD/commit/830fe92f96e730b2deae70e9e476770ea8265bbb
+        _, major_version, minor_version = Usd.GetVersion()
+        
+        self.layoutAdvOptions = Qt.QHBoxLayout()
+        mainLayout.addLayout(self.layoutAdvOptions)
+        
+        if major_version >= 24:
+            self.checkboxRecursion = Qt.QCheckBox('Enable Recursion')
+            self.checkboxRecursion.setChecked(False)
+            self.checkboxRecursion.stateChanged.connect(self.onChangedRecursive)
+            self.layoutAdvOptions.addWidget(self.checkboxRecursion, 50)
+        else:
+            self.warningRecursion = Qt.QLabel(
+                'Recursion only available for USD version higher '
+                f'than 24.03 (current {major_version}.{minor_version})'
+            )
+            self.layoutAdvOptions.addWidget(self.warningRecursion, 50)
+        
+        self.parseButton = Qt.QPushButton('Parse Dependencies')
+        self.parseButton.clicked.connect(
+            lambda: 
+                self.find_USD_File_To_Update()
+        )
+        self.layoutAdvOptions.addWidget(self.parseButton, 50)
 
-        #---------------------------box de log après le run du script---------------------------
+        # -----------------box de log après le run du script-----------------
         self.logBox = Qt.QTextEdit()
         self.logBox.setReadOnly(True)
         self.logBox.setFixedHeight(250)
@@ -185,6 +229,8 @@ class mainInterface(Qt.QMainWindow):
 
         self.find_USD_File_To_Update()
 
+    def onChangedRecursive(self):
+        self.enable_recursion = self.checkboxRecursion.isChecked()
 
     def clearInterfaceData(self, pathfile=True):
         self.checkboxWidgetPayload.clear()
@@ -207,13 +253,19 @@ class mainInterface(Qt.QMainWindow):
     def browse_file(self):
         #trouver le path 
         if self.pathFile:
-            chosePlaceSplit = self.pathFile.replace("\\", "/")
-            chosePlaceSplit = chosePlaceSplit.split("/")[:-1]
-            chosePlace = "/".join(chosePlaceSplit)
+            choosePlaceSplit = self.pathFile.replace("\\", "/")
+            choosePlaceSplit = choosePlaceSplit.split("/")[:-1]
+            choosePlace = "/".join(choosePlaceSplit)
         else:
-            chosePlace = "c:/"
+            choosePlace = "c:/"
         
-        path, _ = Qt.QFileDialog.getOpenFileName(self, "Select USDA File", chosePlace, "USD Files (*.usda, *.usdc)") # possibiliter de détécter auto le path
+        path, _ = Qt.QFileDialog.getOpenFileName(
+            self,
+            "Select USDA File",
+            choosePlace,
+            "USD Files (*.usda *.usdc)"
+        ) # possibiliter de détécter auto le path
+        
         if path:
             self.clearInterfaceData()
             self.USDFileNeedUpdate.setText(path)
@@ -242,7 +294,10 @@ class mainInterface(Qt.QMainWindow):
             elif self.openType == "houdini":
                 self.load_houdini_work_layer()
             elif self.openType == "prism":
-                self.set_log("⛔ Impossible défectuer cette option dans prism. Valable uniquement dans maya et houdini")
+                self.set_log(
+                    "⛔ Impossible défectuer cette option dans prism."
+                    " Valable uniquement dans maya et houdini"
+                )
 
 
     def load_maya_layout_pattern(self):
@@ -269,22 +324,29 @@ class mainInterface(Qt.QMainWindow):
             scene_path = cmds.file(q=True, sceneName=True)
         elif self.openType == "houdini":
             scene_path = hou.hipFile.path()
-
         elif self.openType == "prism":
             logger.debug("--------------------------- file prism")
-            return self.pathPrism.replace("\\", "/") # le passe que prism va donner 
+            # le chemin que prism va donner 
+            return self.pathPrism.replace("\\", "/") 
         else:
-            logger.warning(f"Error loading USDA file : pas de file scene donné")
-            self.set_log(f"⚠️ Error loading USDA file : pas de file scene donné")
+            logger.warning(
+                f"Error loading USDA file : pas de file scene donné"
+            )
+            self.set_log(
+                f"⚠️ Error loading USDA file : pas de file scene donné"
+            )
             return None
         
         logger.debug("Extracting project root, sequence, and shot...")
         parts = scene_path.split("/")
         if len(parts) < 6:
-            logger.debug("Scene path is too short to extract project structure.")
+            logger.debug(
+                "Scene path is too short to extract project structure."
+            )
             return None
 
-        project_root = "/".join(parts[:4])  # I:/intermarche/03_Production/Shots
+        # I:/intermarche/03_Production/Shots
+        project_root = "/".join(parts[:4])  
         seq = parts[4]
         shot = parts[5]
 
@@ -296,14 +358,19 @@ class mainInterface(Qt.QMainWindow):
         logger.debug(f"Patterns:\n{layout_patterns}")
         
         for layout_pattern in layout_patterns:
-            layout_dir = os.path.join(project_root, seq, shot, "Export", layout_pattern)
+            layout_dir = os.path.join(
+                project_root, seq, shot, "Export", layout_pattern
+                )
             logger.debug(f"Checking layout directory: {layout_dir}")
 
             if not os.path.exists(layout_dir):
                 logger.debug(f"Layout directory does not exist: {layout_dir}")
                 continue
 
-            version_dirs = [d for d in os.listdir(layout_dir) if re.fullmatch(r"v\d{3}", d)]
+            version_dirs = [
+                d for d in os.listdir(layout_dir)
+                if re.fullmatch(r"v\d{3}", d)
+            ]
             logger.debug(f"Found version directories: {version_dirs}")
 
             if not version_dirs:
@@ -333,7 +400,7 @@ class mainInterface(Qt.QMainWindow):
         return None
 
 
-    # ----------------------------------script for maya ----------------------------------
+    # ----------------------------script for Maya----------------------------
     def load_maya_work_layer(self):
         stage = self.get_selected_stageMaya()
         if not stage:
@@ -341,10 +408,9 @@ class mainInterface(Qt.QMainWindow):
             return
 
         layer = stage.GetEditTarget().GetLayer()
-        # content = layer.ExportToString()
-        # self.parse_payloads(content)
-        self.pathFile = ''
-        self.parse_dependencies(layer)
+        content = layer.ExportToString()
+        self.parse_payloads(content)
+        #self.parse(layer)
 
 
     def get_selected_stageMaya(self):
@@ -400,7 +466,7 @@ class mainInterface(Qt.QMainWindow):
         return asset_stage
     
 
-    # ----------------------------------script for houdini ----------------------------------
+    # ---------------------------script for Houdini---------------------------
     def load_houdini_work_layer(self):
         stage = self.get_selected_stageHoudini()
         if not stage:
@@ -408,7 +474,7 @@ class mainInterface(Qt.QMainWindow):
             return
         try:
             layer = stage.GetRootLayer()
-            self.parse_dependencies(layer)
+            self.parse(layer)
         except Exception as e:
             logger.warning(f'Did not get layer or dependencies: {e}')
             self.set_log(f'Did not get layer or dependencies: {e}')
@@ -442,15 +508,15 @@ class mainInterface(Qt.QMainWindow):
         return True
 
 
-    # ----------------------------------for all----------------------------------
+    # --------------------------------for all--------------------------------
     def resolve_path(self, assetPathProcessed: str) -> Path:
         asset_path = Path(assetPathProcessed)
         if asset_path.is_absolute():
-            return asset_path
+            return asset_path.resolve()
         else:
             relative_to_layer_path = self.dirname / asset_path
             if relative_to_layer_path.exists():
-                return relative_to_layer_path
+                return relative_to_layer_path.resolve()
             try:
                 resolver = Ar.GetResolver()
                 resolved_path = resolver.Resolve(assetPathProcessed)
@@ -462,7 +528,8 @@ class mainInterface(Qt.QMainWindow):
                 parent_resolved = resolver.Resolve(parent_path.as_posix())
                 parent_resolved = parent_resolved.GetPathString()
                 if os.path.exists(parent_resolved):
-                    return Path(parent_resolved).parts[0] / Path(*resolved_path.parts[1:])
+                    return (Path(parent_resolved).parts[0]
+                            / Path(*resolved_path.parts[1:]))
             except Exception as e:
                 logger.warning(e)
             return relative_to_layer_path
@@ -485,12 +552,14 @@ class mainInterface(Qt.QMainWindow):
             None,
             None
         )
+        item.layer_path = Path(self.previousLayer.realPath).as_posix()
+        item.can_be_updated = self.enable_update
         
         # check extension for USD files
         extension = resolved_path.suffix
         if not extension in ['.usdc', '.usda']:
             logger.debug(' - not an USD file')
-            self.add_list_item_abs(item)
+            self.add_item_list_abs(item)
             return assetPathProcessed
         
         # parse alternate versions paths
@@ -499,12 +568,18 @@ class mainInterface(Qt.QMainWindow):
             .sub(r'v\d{2,9}', 'v*', resolved_path.as_posix())
             .replace(extension, '.usd*')
         )
-        versions = glob.glob(glob_pattern)
+        glob_versions = glob.glob(glob_pattern)
+        versions = []
+        for version in glob_versions:
+            if not '.bak' in version:
+                versions.append(version)
         versions.sort()
         if not versions:
-            self.set_log(f"❌ Did not found others versions: {assetPathProcessed}")
+            self.set_log(
+                f"❌ Did not found others versions: {assetPathProcessed}"
+            )
             logger.debug(' - did not found others versions')
-            self.add_list_item_abs(item)
+            self.add_item_list_abs(item)
             return assetPathProcessed
         
         # parse versions digits
@@ -512,9 +587,11 @@ class mainInterface(Qt.QMainWindow):
         latest_match = re.search(version_pattern, versions[-1])
         current_match = re.search(version_pattern, assetPathProcessed)
         if not current_match or not latest_match:
-            self.set_log(f"❌ Skipped (invalid or unresolvable): {assetPathProcessed}")
+            self.set_log(
+                f"❌ Skipped (invalid or unresolvable): {assetPathProcessed}"
+            )
             logger.debug(' - skipped (invalid or unresolvable)')
-            self.add_list_item_abs(item)
+            self.add_item_list_abs(item)
             return assetPathProcessed
         
         # check if the current asset is the latest
@@ -523,30 +600,39 @@ class mainInterface(Qt.QMainWindow):
         if latest_version == current_version:
             logger.debug(' - Already updated')
             self.set_log(f"🟰 Skipping up-to-date: {assetPathProcessed}")
-            self.add_list_item_abs(item)
+            self.add_item_list_abs(item)
             return assetPathProcessed
             
         # update item to show latest and current version
         logger.debug(' - Can be updated')
-        updatedPath = re.sub(
-            r'v\d{2,9}', f'v{latest_match.group(1)}',
-            relative_path.as_posix()
-        )
+        if not Path(assetPathProcessed).is_absolute():
+            updatedPath = re.sub(
+                r'v\d{2,9}', f'v{latest_match.group(1)}',
+                assetPathProcessed
+            )
+        else:
+            updatedPath = re.sub(
+                r'v\d{2,9}', f'v{latest_match.group(1)}',
+                relative_path.as_posix()
+            )
+        latest_extension = os.path.splitext(versions[-1])[1]
+        updatedPath = os.path.splitext(updatedPath)[0] + latest_extension
+        
         item.updated_path = updatedPath
         item.from_version = current_version
         item.to_version = latest_version
-        self.add_list_item_once(item)
+        self.add_item_list_once(item)
         return assetPathProcessed
     
     
     def apply_parse_filter(self, layer, depInfos):
-        if layer.identifier == self.previousLayer:
+        if layer.identifier == self.previousLayer.identifier:
             return depInfos
         path = layer.resolvedPath.GetPathString()
         if not path:
             return depInfos
         self.dirname = Path(path).parent
-        self.previousLayer = layer.identifier
+        self.previousLayer = layer
         UsdUtils.ModifyAssetPaths(layer, self.parse_filter)
         self.dirname = ''
         return depInfos
@@ -556,59 +642,153 @@ class mainInterface(Qt.QMainWindow):
         layer = Sdf.Layer.FindOrOpen(self.pathFile)
         layer.Reload(True)
         if layer:
-            self.parse_dependencies(layer)
+            self.parse(layer)
+            self.build_item_list()
     
     
-    def recursive_parse_dependencies(self, layer):
-        self.dirname = Path((self.pathFile)).parent
-        UsdUtils.ModifyAssetPaths(layer, self.parse_filter)
-        self.previousLayer = layer.identifier
-        UsdUtils.ComputeAllDependencies(layer.identifier, self.apply_parse_filter)    
-        self.dirname = ''
-        
-            
-    def parse_dependencies(self, layer):
+    def parse(self, layer):
         self.ar_context = Ar.DefaultResolverContext(["I:/", "R:/"])
         with Ar.ResolverContextBinder(self.ar_context):
             self.dirname = Path((self.pathFile)).parent
-            UsdUtils.ModifyAssetPaths(layer, self.parse_filter)
-            self.previousLayer = layer.identifier
+            if self.enable_recursion:
+                logger.debug('Start recursive parsing')
+                self.recursive_parse_dependencies(layer)
+            else:
+                logger.debug('Start normal parsing')
+                self.parse_dependencies(layer)
             self.dirname = ''
+    
+    
+    def recursive_parse_dependencies(self, layer):
+        self.enable_update = False
+        UsdUtils.ModifyAssetPaths(layer, self.parse_filter)
+        self.previousLayer = layer
+        UsdUtils.ComputeAllDependencies(
+            layer.identifier,
+            self.apply_parse_filter
+        )    
+        self.enable_update = True
+        
+            
+    def parse_dependencies(self, layer):
+        self.previousLayer = layer
+        UsdUtils.ModifyAssetPaths(layer, self.parse_filter)
 
 
-    def add_list_item_once(self, item):
+    def add_item_list_once(self, item):
         # add item to update list if new
         if (item not in self.listAssetsNeedUpdate):
             self.listAssetsNeedUpdate.append(item)
-            self.add_list_item(item)
         
     
-    def add_list_item_abs(self, item):
+    def add_item_list_abs(self, item):
         # add item to update list if new and absolute
         if (item not in self.listAssetsNeedUpdate
             and os.path.isabs(item.original_path)):
             self.listAssetsNeedUpdate.append(item)
-            self.add_list_item(item)
         
 
-    def add_list_item(self, item):
-        if not item.from_version:
-            checkbox = Qt.QCheckBox(f"{item.original_path}\n➡ make relative")
+    def add_item_list(self, item: AssetItem):
+        
+        item_widget = Qt.QWidget()
+        item_hbox = Qt.QHBoxLayout()
+        item_hbox.setContentsMargins(0, 0, 0, 0)
+        item_widget.setLayout(item_hbox)
+        
+        if item.from_version and item.to_version:
+            text = (
+                f"<em>{item.original_path}</em><br>"
+                "➡ <b><span style='color: red;'>"
+                f"v{item.from_version:03d}</span></b> "
+                "→ <b><span style='color: green;'>"
+                f"v{item.to_version:03d}</span></b>"
+            )
         else:
-            checkbox = Qt.QCheckBox(f"{item.original_path}\n➡ v{item.from_version:03d} → v{item.to_version:03d}")
-        checkbox.setChecked(True)
-        checkbox.stateChanged.connect(lambda state, i=item: setattr(i, 'should_update', state == Qtc.Qt.Checked))
+            text = f"{item.original_path}\n➡ make relative"
+        item_label = Qt.QLabel(text)
+            
+        checkbox = Qt.QCheckBox()
+        checkbox.setObjectName('item_checkbox')
+        if item.can_be_updated:
+            checkbox.setChecked(True)
+            checkbox.stateChanged.connect(
+                lambda state, i=item: 
+                    setattr(i, 'should_be_updated', state == Qtc.Qt.Checked)
+            )
+        else:
+            item.should_be_updated = False
+            checkbox.setChecked(False)
+            checkbox.setCheckable(False)
+            
+        item_hbox.addWidget(checkbox, 1)
+        item_hbox.addWidget(item_label, 99)
+
         list_item = Qt.QListWidgetItem()
         self.QlistUSDNeedUpdate.addItem(list_item)
-        self.QlistUSDNeedUpdate.setItemWidget(list_item, checkbox)
-        list_item.setSizeHint(checkbox.sizeHint())
+        self.QlistUSDNeedUpdate.setItemWidget(list_item, item_widget)
+        list_item.setSizeHint(item_widget.sizeHint())
         self.checkboxWidgetPayload.append(checkbox)
+        
 
+    def add_item_text(self, text):
+        layer_item = Qt.QListWidgetItem()
+        label = Qt.QLabel(text=text)
+        label.setContentsMargins(10, 0, 5, 0)
+        self.QlistUSDNeedUpdate.addItem(layer_item)
+        self.QlistUSDNeedUpdate.setItemWidget(layer_item, label)
+        layer_item.setSizeHint(label.sizeHint() + Qtc.QSize(0, 5))
+     
+     
+    def onItemClicked(self, item):
+        try:
+            widget = self.QlistUSDNeedUpdate.itemWidget(item)
+            if widget.metaObject().className() == 'QWidget':
+                checkbox: Qt.QCheckBox = widget.findChild(
+                    Qt.QCheckBox,
+                    'item_checkbox'
+                )
+                if checkbox.isCheckable():
+                    checkbox.setChecked(not checkbox.isChecked())
+        except Exception as e:
+            logger.warning(e)
+            return    
+
+
+    def build_item_list(self):
+        
+        # clean tree
+        self.QlistUSDNeedUpdate.clear()
+        try: self.QlistUSDNeedUpdate.itemChanged.disconnect()
+        except: pass
+
+        # add callback on click to check/uncheck items
+        self.QlistUSDNeedUpdate.itemClicked.connect(self.onItemClicked)
+        
+        for i, item in enumerate(self.listAssetsNeedUpdate):            
+            # add layer header if current reference is in a new layer
+            if i == 0:
+                previous_layer = self.listAssetsNeedUpdate[0].layer_path
+                self.add_item_text(
+                    f"Current layer : <b>{previous_layer}</b>"
+                )
+            elif item.layer_path != previous_layer:
+                previous_layer = item.layer_path
+                self.add_item_text(
+                    f"Current layer : <b>{previous_layer}</b>"
+                )
+            
+            # add item to tree
+            self.add_item_list(item)
+            
 
     def update_filter(self, assetPathProcessed):
         asset_path = Path(assetPathProcessed)
         extension = asset_path.suffix
 
+        # prevent all update if in recursion mode
+        if self.enable_recursion:
+            return assetPathProcessed
+        
         # remove drive if the path has a drive to help ar resolver 
         if asset_path.is_absolute() and len(asset_path.parts) > 2:
             asset_path = Path(*asset_path.parts[1:]).as_posix()
@@ -620,8 +800,15 @@ class mainInterface(Qt.QMainWindow):
         
         # check if the assetPathProcessed should be update
         for item in self.listAssetsNeedUpdate:
-            if item.should_update and item.original_path == assetPathProcessed:
-                self.set_log(f"✅ Updated: {item.original_path} → {item.updated_path}")
+            if not item.can_be_updated:
+                continue
+            if not item.should_be_updated:
+                continue
+            if item.original_path == assetPathProcessed:
+                self.set_log(
+                    f"✅ Updated: {item.original_path} "
+                    f"→ {item.updated_path}"
+                )
                 self.changed = True
                 return item.updated_path
 
@@ -629,12 +816,12 @@ class mainInterface(Qt.QMainWindow):
     
     
     def apply_update_filter(self, layer, depInfos):
-        if layer.identifier == self.previousLayer:
+        if layer.identifier == self.previousLayer.identifier:
             return depInfos
         path = layer.resolvedPath.GetPathString()
         if not path:
             return depInfos
-        self.previousLayer = layer.identifier
+        self.previousLayer = layer
         self.changed = False
         UsdUtils.ModifyAssetPaths(layer, self.update_filter)
         if self.changed:
@@ -668,8 +855,11 @@ class mainInterface(Qt.QMainWindow):
         self.changed = False
         UsdUtils.ModifyAssetPaths(layer, self.update_filter)
         changed = self.changed
-        self.previousLayer = layer.identifier
-        UsdUtils.ComputeAllDependencies(layer.identifier, self.apply_update_filter)
+        self.previousLayer = layer
+        UsdUtils.ComputeAllDependencies(
+            layer.identifier,
+            self.apply_update_filter
+        )
         if changed:
             layer.Save()
             self.set_log("🎉 Update complete.")
@@ -712,7 +902,9 @@ class mainInterface(Qt.QMainWindow):
             layer = stage.GetEditTarget().GetLayer()
             
         if layer:
-            self.set_log(f"Asset items ready: {len(self.listAssetsNeedUpdate)}")
+            self.set_log(
+                f"Asset items ready: {len(self.listAssetsNeedUpdate)}"
+            )
             self.update_layer(layer)
             layer.Reload(True)
             
@@ -724,7 +916,10 @@ class mainInterface(Qt.QMainWindow):
                 elif self.openType == "houdini":
                     self.load_houdini_work_layer()
                 elif self.openType == "prism":
-                    self.set_log("⛔ Impossible défectuer cette option dans prism. Valable uniquement dans maya et houdini")
+                    self.set_log(
+                        "⛔ Impossible défectuer cette option dans prism. "
+                        "Valable uniquement dans maya et houdini"
+                    )
         else:
             self.set_log(f"Could not get USD layer")
             return    
@@ -732,13 +927,15 @@ class mainInterface(Qt.QMainWindow):
     
     # ----------------------------------OLD----------------------------------
     def parse_payloads(self, content):
-        pattern = r"@[^@]+\.usd[ac]@(?:<[^>]+>)?"  # Simplified: focus only on @...usd[ac]@
+        # Simplified: focus only on @...usd[ac]@
+        pattern = r"@[^@]+\.usd[ac]@(?:<[^>]+>)?"  
         matches = re.findall(pattern, content, re.IGNORECASE)
         seen = set()
         self.set_log(f"Found {len(matches)} payload(s)")
         
         for m in matches:
-            clean_path = re.sub(r"<[^>]+>$", "", m)  # Remove optional target path
+            # Remove optional target path
+            clean_path = re.sub(r"<[^>]+>$", "", m) 
             m_norm = clean_path.lower()
             if m_norm in seen:
                 continue
@@ -747,16 +944,26 @@ class mainInterface(Qt.QMainWindow):
             if item:
                 if item.from_version != item.to_version:
                     self.listAssetsNeedUpdate.append(item)
-                    self.add_list_item(item)
+                    self.add_item_list(item)
                 else:
-                    self.set_log(f"🟰 Skipping up-to-date: {item.original_path}")
+                    self.set_log(
+                        f"🟰 Skipping up-to-date: {item.original_path}"
+                    )
             else:
-                self.set_log(f"❌ Skipped (invalid or unresolvable): {clean_path}")
+                self.set_log(
+                    f"❌ Skipped (invalid or unresolvable): {clean_path}"
+                )
                 
                 
     def find_latest_version_path(self, original_path):
+        path_pattern = (
+            r"@(?P<base>.+?/Export/.+?/)"
+            r"v(?P<version>\d{3})/"
+            r"(?P<asset_name>.+)_.+?_"
+            r"(v\d{3}\.usd[ac])@"
+        )
         match = re.match(
-            r"@(?P<base>.+?/Export/.+?/)v(?P<version>\d{3})/(?P<asset_name>.+)_.+?_(v\d{3}\.usd[ac])@",
+            path_pattern,
             original_path,
             re.IGNORECASE
         )
@@ -780,7 +987,12 @@ class mainInterface(Qt.QMainWindow):
         latest_folder = os.path.join(base_dir, latest_str)
 
         for fname in os.listdir(latest_folder):
-            if re.fullmatch(f"{re.escape(asset_name)}_.+?_{latest_str}\\.usd[ac]", fname, re.IGNORECASE):
+            fullmatch = re.fullmatch(
+                f"{re.escape(asset_name)}_.+?_{latest_str}\\.usd[ac]",
+                fname,
+                re.IGNORECASE
+            )
+            if fullmatch:
                 latest_path = f"@{match.group('base')}/{latest_str}/{fname}@"
                 return AssetItem(
                     original_path,

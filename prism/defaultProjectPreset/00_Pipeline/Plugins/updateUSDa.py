@@ -5,23 +5,30 @@ import os
 import socket
 import importlib
 
-DEV_LIST = ['SPRINTER-04']
+DEV_LIST = ['F0X-04']
+# DEV_LIST = ['RACOON-01']
+
+
+
 
 try:
     if socket.gethostname() in DEV_LIST:
         sys.path.append("R:/devmaxime/dev/python/prism/update_assets_USD_dev")
         import updateAssetsUSD_dev as UD
+        importlib.reload(UD)
     else:
         sys.path.append("R:/pipeline/pipe/prism/update_assets_USD")
-        import updateAssetsUSD as UD
-except:
-    pass
+        import updateAssetsUSD_dev as UD
+        # importlib.reload(UD)
+except Exception as e:
+    print(f"Import failed: {e}")
 
 
-
-
-LOCAL = r"I:/intermarche/"
-CLOUD = r"I:/intermarche/04_Resources/googleCache"
+#va trouver le chemin de ou ce situe ce fichier python pour pouvoir setup dans les variable local et global le porjet
+file_path = os.path.abspath(__file__)
+porjet = file_path.split("\\")[1]
+LOCAL = rf"I:/{porjet}"
+CLOUD = rf"I:/{porjet}/04_Resources/googleCache"
 name = "updateUSDa"
 classname = "updateUSDa"
 
@@ -91,5 +98,5 @@ class updateUSDa:
                 break
         
         
-        importlib.reload(UD)
+        #importlib.reload(UD)
         UD.startUpdateAssetsUSD("prism", THE_File)

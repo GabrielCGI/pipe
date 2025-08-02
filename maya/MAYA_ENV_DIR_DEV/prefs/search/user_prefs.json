@@ -6,7 +6,6 @@
             "CreatePolygonCube",
             "MultiCutTool",
             "ScaleConstraint",
-            "ReferenceEditor",
             "HotkeyPreferencesWindow",
             "ToggleFaceNormalDisplay",
             "ToggleVertexNormalDisplay",
@@ -14,11 +13,13 @@
             "MatchTranslation",
             "MatchPivots",
             "ToggleEditPivot",
-            "NamespaceEditor",
             "DeleteMotionPaths",
+            "AttachToPath",
             "HypershadeWindow",
+            "NamespaceEditor",
             "MatchTransform",
-            "ParentConstraint"
+            "ParentConstraint",
+            "ReferenceEditor"
         ],
         [],
         [],

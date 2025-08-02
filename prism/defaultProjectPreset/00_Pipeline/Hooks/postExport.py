@@ -8,7 +8,9 @@
 #import usdApi
 
 RANCH_EXPORTER_PATH = "R:/pipeline/pipe/prism/ranch_cache_scripts"
+PRXOY_SHADER        = "R:/pipeline/pipe/prism/proxyShaders"
 import sys
+import socket
 sys.path.append(RANCH_EXPORTER_PATH)
 
 def main(*args, **kwargs):
@@ -31,10 +33,15 @@ def main(*args, **kwargs):
         if core.appPlugin.pluginName == "Maya":
 
             for i in kwargs["scenefile"].split('\\'):
-                if i == 'Anim':
+                print("try:")
+                if i == 'Anim' or i == "Layout":
                     print('In Maya Anim task.')
                     path = kwargs["outputpath"]
+                    if not "\Export\_layer_anm_" in path:
+                        continue
 
+                    print('je suis le bon path -------------------------------------')
+                    print(path)
                     fileext = ['usd', 'usdc', 'usda']
                     check = 0
                     for i in fileext:
@@ -65,7 +72,7 @@ def main(*args, **kwargs):
 
                                 for i in path:
 
-                                    if i == 'skinned' or i == "fxPlants" or i =="extraPublish":
+                                    if i == 'skinned' or i == "fxPlants" or i =="extraPublish" or i == "characters":
                                         check = 1
                                         print(i + 'is in a folder')
        
@@ -87,29 +94,46 @@ def main(*args, **kwargs):
         import hou
         import importlib
         
-        
         if not hou.isUIAvailable():
             print("Houdini is not in GUI mode. Skipping ranchExporter in postRender.")
             return
         else: 
-            print("Houdini is  in GUI mode. Starting ranchExporter in post Render.")
-            
+            print("Houdini is in GUI mode. Starting ranchExporter in postRender.")
             import threading
             import ranchExporter
             importlib.reload(ranchExporter)
             
-            import socket
-            hostname = socket.gethostname()
-            if hostname in ['SPRINTER-04']:
-                print(f'Currently debugging on {hostname}')
-                usdpath = ranchExporter.getUsdPath(kwargs)
-                ranchExporter.parseAndCopyToRanchDev(usdpath, kwargs,)
-                # thread = threading.Thread(target=ranchExporter.parseAndCopyToRanchDev, args=(usdpath, kwargs,))
-                # thread.start()
-                return
-        
-            # usdpath = ranchExporter.getUsdPath(kwargs)
-            # ranchExporter.parseAndCopyToRanchDev(usdpath, kwargs,)
+            # import socket
+            # hostname = socket.gethostname()
+            # if hostname in ['RACOON-01']:
+            #     print(f'Currently debugging on {hostname}')
+            #     usdpath = ranchExporter.getUsdPath(kwargs)
+            #     ranchExporter.parseAndCopyToRanchDev(usdpath, kwargs)
+                
+            #     # thread = threading.Thread(target=ranchExporter.parseAndCopyToRanchDev, args=(usdpath, kwargs,))
+            #     # thread.start()
+            #     return
+            
             usdpath = ranchExporter.getUsdPath(kwargs)
             thread = threading.Thread(target=ranchExporter.parseAndCopyToRanch, args=(usdpath, kwargs,))
             thread.start()
+
+
+
+        #create proxy variant in the mtl.usdc file for props and assets
+        """if socket.gethostname() != "FALCON-01":
+            return
+
+        print(socket.gethostname())"""
+        file = kwargs["outputpath"]
+        scenefile = kwargs["scenefile"].split("\\")
+        stateManager = kwargs["state"]
+
+        if stateManager.getRenderNode().type().name() == "componentoutput" and str(stateManager.getRenderNode()) in scenefile:
+            print("-----converte le fichier mtl.usdc------------------")
+            sys.path.append(PRXOY_SHADER)
+            import createProxyShader as cps
+            folder = "/".join(file.split("/")[:-1])
+            print(folder)
+            cps.setProxyShd(folder)
+            print("convertion terminée")

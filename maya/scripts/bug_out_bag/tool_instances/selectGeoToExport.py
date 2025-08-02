@@ -24,7 +24,7 @@ class GeoExport(MultipleActionTool):
             pref_name="select_geo_to_export",
             actions=actions, stretch=1, tooltip=tooltip)
 
-    def select_all_geo(self,parent):
+    def select_all_geo(self, parent):
         """cette fonction a pour but de seletctionner rapidement tous les dossier, qui s'appellent geo(en ignorant le namespace) et qui sont une reference"""
         geo_objects = []
         real_geoObject=[]
@@ -59,8 +59,8 @@ class GeoExport(MultipleActionTool):
             self.select_all_geo('characters')
         if cmds.checkBox('props', query=True, value=True):
             self.select_all_geo('props')
-        if cmds.checkBox('world', query=True, value=True):
-            self.select_all_geo('world')
+        """if cmds.checkBox('world', query=True, value=True):
+            self.select_all_geo('world')"""
         if cmds.checkBox('Sets', query=True, value=True):
             self.select_all_geo('Sets')
 
@@ -68,17 +68,16 @@ class GeoExport(MultipleActionTool):
 
         if cmds.window('selectGeoUI', exists=True):
             cmds.deleteUI('selectGeoUI')
-        window = cmds.window('selectGeoUI', title='select geo', widthHeight=(300, 150))
+        window = cmds.window('selectGeoUI', title='Select geo', widthHeight=(300, 150))
         cmds.columnLayout(adjustableColumn=True)
 
-        cmds.text('result_label', label='Select checkboxes and click Submit')
-        cmds.text('gap',label='')
-        cmds.checkBox('world', label=f'all')
-        cmds.text('gap2',label='')
+        cmds.text('result_label', label='Select checkboxes and click Select')
+        cmds.text('gap',label='\n\n')
+        # cmds.checkBox('world', label=f'all')
         cmds.checkBox('characters', label=f'Characters', value=True)
         cmds.checkBox('props', label=f'Props', value=True)
         cmds.checkBox('Sets', label=f'Sets', value=False)
 
-        cmds.button(label='select', command=self.on_button_click)
+        cmds.button(label='Select', command=self.on_button_click)
 
         cmds.showWindow(window)

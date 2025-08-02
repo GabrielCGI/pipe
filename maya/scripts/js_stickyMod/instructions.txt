@@ -1,0 +1,7 @@
+1. Unzip and copy the "js_stickyMod" folder into "maya/scripts".
+2. Restart Maya.
+3. Run the code below in a Python tab, or make a shelf button
+   by middle-mouse-dragging from the script editor to a shelf.
+
+import js_stickyMod.ui
+js_stickyMod.ui.ui ()

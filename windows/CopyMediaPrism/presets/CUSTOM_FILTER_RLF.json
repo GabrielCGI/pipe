@@ -1,0 +1,24 @@
+{
+    "filters": {
+        "COMPOSITING": [
+            "compo",
+            "comp",
+            "nuke",
+            "Compo"
+        ],
+        "ANIM": [
+            "anim",
+            "anim_playblast"
+        ],
+        "RLO": [
+            "RoughtLayout",
+            "layout",
+            "Layout",
+            "Previz",
+            "RoughLayout_playblast"
+        ]
+    },
+    "source_path": "I:/ralphLauren_2412",
+    "dest_path": "D:/cache_resolve/ralphLauren_2412",
+    "production": "RLF"
+}

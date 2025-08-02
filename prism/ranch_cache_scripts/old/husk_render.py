@@ -1,43 +1,29 @@
-#!/usr/bin/env python3
-# husk_render.py
-
 import os
 import sys
 import subprocess
+import json
+
+# --------------------------------------------------------------------------
+# ILLOGIC CUSTOM PART
+# --------------------------------------------------------------------------
 import shutil
 import logging
 import datetime
 
-# --------------------------------------------------------------------------
-# GLOBAL CONSTANTS
-# --------------------------------------------------------------------------
-# Remap USD & COP
 LOCAL_DRIVE_I       = "I:/"
 LOCAL_DRIVE_R       = "R:/"
-UNC_RANCH_CACHE_I   = "\\\\RANCH-SERVER\\ranch_cache2\\I\\"
-UNC_RANCH_CACHE_R   = "\\\\RANCH-SERVER\\ranch_cache2\\r\\"
+
 LOCAL_RANCH_CACHE_I = "I:/ranch_cache2/I/"
 
-# Copy EXR
+UNC_RANCH_CACHE_I   = "\\\\RANCH-SERVER\\ranch_cache2\\I\\"
+UNC_RANCH_CACHE_R   = "\\\\RANCH-SERVER\\ranch_cache2\\r\\"   
+
 RANCH_OUT_EXR_DIR     = "C:/RANCH_OUT_EXR/"
 RANCH_OUT_EXR_LOG_DIR = "C:/RANCH_OUT_EXR_log/"
-LOCAL_EXR_COPY_DIR    = "I:/" # /!\/!\/!\/!\/!\/!\ CHANGE THIS TO SOMETHING LIKE "C:/test/" if you need to modify this code. 
+LOCAL_EXR_COPY_DIR    = "I:/" # /!\/!\/!\/!\/!\/!\ CHANGE THIS TO SOMETHING LIKE "C:/test/" if you need to modify this code.
 IS_EXR_COPY_ONLY_TEST_MODE = False
 DELETE_LOCAL_EXR_AFTER_COPY = True
-# --------------------------------------------------------------------------
-# HELPER FUNCTIONS
-# --------------------------------------------------------------------------
-def read_stdout(proc):
-    """Reads lines from a subprocess; prints progress if found."""
-    while True:
-        line = proc.stdout.readline().decode("utf-8", errors="ignore")
-        if "ALF_PROGRESS" in line:
-            print("Progress:", line.replace("ALF_PROGRESS ", "").strip())
-        if line == '' and proc.poll() is not None:
-            break
-        print(line.rstrip('\n'))
 
-    
 def copy_if_missing(src, dst):
     """Copy 'src' to 'dst' only if 'dst' doesn't exist."""
     if os.path.exists(dst):
@@ -51,7 +37,7 @@ def copy_if_missing(src, dst):
             shutil.copytree(src, dst)
     except Exception as e:
         print(f"Error copying '{src}': {e}")
-
+        
 def copy_cop_textures(src_path, dst_path):
     """
     Copy any '.textures' directories next to 'src_path' into:
@@ -71,7 +57,7 @@ def copy_cop_textures(src_path, dst_path):
         if os.path.isdir(item_path) and item.endswith('.textures'):
             copy_if_missing(item_path, os.path.join(dst_parent, item))
             copy_if_missing(item_path, os.path.join(ranchcache_dir, item))
-
+        
 def replace_prefix(path, replacements):
     """
     Replace the first matching prefix from 'replacements' dict in 'path'.
@@ -87,8 +73,9 @@ def remap_ranch_usd_and_output(usd_file_path, img_output, env_copy):
     Overwrite environment variables for RANCH usage and remap local I:/, R:/ 
     to UNC ranch cache paths. Also remaps I:/ in 'img_output' to 'C:/RANCH_OUT_EXR/'.
     """
-    PXR_AR_DEFAULT_SEARCH_PATH_RANCH = f"{UNC_RANCH_CACHE_I};{UNC_RANCH_CACHE_R}"
+    PXR_AR_DEFAULT_SEARCH_PATH_RANCH = f"{UNC_RANCH_CACHE_I};{UNC_RANCH_CACHE_R};I:/;R:/"
     env_copy["PXR_AR_DEFAULT_SEARCH_PATH"] = PXR_AR_DEFAULT_SEARCH_PATH_RANCH
+    print(f'PXR AR DEFAULT SEARCH PATH: {env_copy["PXR_AR_DEFAULT_SEARCH_PATH"]}')
     print("Ranch machine detected - remapping USD/file paths.")
 
     # Convert to UNC ranch cache if missing
@@ -215,23 +202,69 @@ def copy_exr_from_ranch_to_network(
                         log_error(f"Unexpected error copying '{src_file}' -> '{dst_file}': {e}")
 
     log_info("Script finished.")
+
 # --------------------------------------------------------------------------
 # MAIN SCRIPT
 # --------------------------------------------------------------------------
-renderer       = sys.argv[6]
-render_settings= sys.argv[5]
-img_output     = sys.argv[4]
-usd_file_path  = sys.argv[3]
-end_frame      = int(sys.argv[2])
-start_frame    = int(sys.argv[1])
 
-# Locate Husk
-executable = os.getenv("HUSK_PATH") or os.getenv("PRISM_DEADLINE_HUSK_PATH")
+settingsFile = sys.argv[3]
+endFrame = int(sys.argv[2])
+startFrame = int(sys.argv[1])
+
+husk_path = os.getenv("HUSK_PATH")
+prism_husk_path = os.getenv("PRISM_DEADLINE_HUSK_PATH")
+
+executable = husk_path
 if not executable or not os.path.exists(executable):
-    raise RuntimeError("Husk not found. Set HUSK_PATH or PRISM_DEADLINE_HUSK_PATH env var.")
+    executable = prism_husk_path
+    if not executable or not os.path.exists(executable):
+        raise Exception(
+            "The Husk render executable is not defined or doesn't exist.\n"
+            f"HUSK_PATH: {husk_path}\n"
+            f"PRISM_DEADLINE_HUSK_PATH: {prism_husk_path}\n"
+            "Use \"HUSK_PATH\" or \"PRISM_DEADLINE_HUSK_PATH\" "
+            "environment variable to specify a valid path."
+        )
+with open(os.path.dirname(__file__) + "/" + settingsFile, "r") as f:
+    settings = json.load(f)
 
-# Replace #### with $F4
-usd_file_path = usd_file_path.replace("####", "$F4")
+renderer = settings["renderer"]
+renderSettings = settings["rendersettings"]
+imgOutput = settings["outputpath"]
+usdFilePath = settings["usdfile"]
+frameCount = str(endFrame-startFrame+1)
+useTiles = settings.get("useTiles", False)
+tilesX = settings.get("tilesX", 1)
+tilesY = settings.get("tilesY", 1)
+if useTiles:
+    tileFrame = int(settings.get("startFrame", 1))
+    tileIdx = startFrame - tileFrame
+    startFrame = endFrame = tileFrame
+    frameCount = "1"
+    base, ext = os.path.splitext(imgOutput)
+    if "$F4" in imgOutput:
+        base = base.replace("$F4", "%04d" % startFrame).strip(".")
+        ext = base[-5:] + ext
+        base = base[:-5]
+
+    xtile = tileIdx % tilesX
+    ytile = int(tileIdx/tilesY)
+    tileSuffix = "_tile_%sx%s_%sx%s_" % (xtile+1, ytile+1, tilesX, tilesY)
+
+def readStdout(proc):
+    while True:
+        line = proc.stdout.readline()
+        line = line.decode("utf-8", errors="ignore")
+        if "ALF_PROGRESS" in line:
+            print("Progress: %s" % line.replace("ALF_PROGRESS ", ""))
+
+        if line == '' and proc.poll() is not None:
+            break
+
+        print(line)
+
+
+usdFilePath = usdFilePath.replace("####", "$F4")
 
 # Setup environment
 os.environ["HOUDINI_PACKAGE_DIR"] = "C:/tmp/houdinipackage/"
@@ -242,54 +275,63 @@ print("HOUDINI_PACKAGE_DIR:", os.environ["HOUDINI_PACKAGE_DIR"])
 print("ENV keys:", list(env_copy.keys()))
 
 computer_name = os.getenv('COMPUTERNAME', '')
-if computer_name.startswith("RANCH") and "nocache" not in usd_file_path:
-    usd_file_path, img_output, env_copy = remap_ranch_usd_and_output(usd_file_path, img_output, env_copy)
+if computer_name.startswith("RANCH") and "nocache" not in usdFilePath: 
+    usdFilePath, imgOutput, env_copy = remap_ranch_usd_and_output(usdFilePath, imgOutput, env_copy)
 else:
     print(f"No ranch path mapping for {computer_name}")
 
-# Build Husk command
 args = [
-    executable, usd_file_path,
-    "--output", img_output,
-    "--frame", str(start_frame),
-    "--frame-count", str(end_frame - start_frame + 1),
-    "--renderer", renderer,
-    "--verbose", "aC6",
-    "--settings", render_settings,
+    executable,
+    usdFilePath,
+    "--output",
+    imgOutput,
+    "--frame",
+    str(startFrame),
+    "--frame-count",
+    frameCount,
+    "--renderer",
+    renderer,
+    "--verbose",
+    "aC6",
+    "--settings",
+    renderSettings,
+#   "--windows-console",
+#    "wait",
     "--exrmode", "1",
     "--autocrop", "C,A",
 ]
 
-# Optional camera
-if len(sys.argv) > 7:
-    camera = sys.argv[7]
-    if camera:
-        args += ["--camera", camera]
+if settings.get("camera"):
+    args += ["--camera", settings.get("camera")]
 
-# Optional resolution
-if len(sys.argv) > 9:
-    try:
-        width, height = int(sys.argv[8]), int(sys.argv[9])
-        if width and height:
-            args += ["--res", str(width), str(height)]
-    except:
-        pass
+if settings.get("width") and settings.get("height"):
+    width = settings.get("width")
+    height = settings.get("height")
+    args += ["--res", str(width), str(height)]
 
-print("command args:", args)
-proc = subprocess.Popen(args, stdout=subprocess.PIPE, env=env_copy)
-read_stdout(proc)
+if useTiles:
+    args += ["--tile-count", str(tilesX), str(tilesY)]
+    args += ["--tile-index", str(tileIdx)]
+    args += ["--tile-suffix", tileSuffix]
 
-# Validate the final frame
-last_frame = img_output.replace("$F4", f"{end_frame:04d}")
-if proc.returncode:
-    raise RuntimeError(f"Renderer exited with code {proc.returncode}")
-elif not os.path.exists(last_frame):
-    raise RuntimeError(f"Missing expected output: {last_frame}")
+print("command args: %s" % (args))
+p = subprocess.Popen(args, stdout=subprocess.PIPE, env=env_copy)
+readStdout(p)
+
+lastFrame = imgOutput.replace("$F4", "%04d" % (endFrame))
+if useTiles:
+    base, ext = os.path.splitext(lastFrame)
+    lastFrame = base + tileSuffix + ext
+
+if p.returncode:
+    raise RuntimeError("renderer exited with code %s" % p.returncode)
+elif not os.path.exists(lastFrame):
+    raise RuntimeError("expected output doesn't exist %s" % (lastFrame))
 else:
     # If on RANCH, copy EXRs back to network
     if computer_name.startswith("RANCH"):
         print("Start copying EXRs back to network...")
-        shot_dir = os.path.dirname(img_output)
+        shot_dir = os.path.dirname(imgOutput)
         copy_exr_from_ranch_to_network(
             ranch_shot_exr_dir=shot_dir,
             ranch_out_exr_dir=RANCH_OUT_EXR_DIR,
@@ -298,5 +340,5 @@ else:
         )
     else:
         print("Skipping EXR copy-back")
-
-    print("Task completed successfully")
+    
+    print("task completed successfully")

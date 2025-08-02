@@ -1,0 +1,975 @@
+#usda 1.0
+(
+    defaultPrim = "cabaneRoomShell1"
+    framesPerSecond = 25
+    metersPerUnit = 1
+    timeCodesPerSecond = 25
+    upAxis = "Y"
+)
+
+over "ASSET_mtl_componentmaterial1"
+{
+    def Scope "mtl"
+    {
+        def Material "metal_mat" (
+            prepend inherits = </__class_mtl__/metal_mat>
+        )
+        {
+            token outputs:kma:surface.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/mtlxstandard_surface.outputs:out>
+            token outputs:surface.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/mtlxstandard_preview.outputs:surface>
+
+            def Shader "mtlxstandard_surface"
+            {
+                uniform token info:id = "ND_standard_surface_surfaceshader"
+                float inputs:base (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 1
+                            string ogl_diff_intensity = "1"
+                        }
+                    }
+                )
+                color3f inputs:base_color (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double3 default_value = (0.8, 0.8, 0.8)
+                            string ogl_diff = "1"
+                        }
+                    }
+                )
+                color3f inputs:base_color.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/metal_mat_BaseColor_ACEScg.outputs:out>
+                float inputs:coat (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_coat_intensity = "1"
+                        }
+                    }
+                )
+                float inputs:coat_roughness (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0.1
+                            string ogl_coat_rough = "1"
+                        }
+                    }
+                )
+                float inputs:emission (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_emit_intensity = "1"
+                        }
+                    }
+                )
+                color3f inputs:emission_color (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double3 default_value = (1, 1, 1)
+                            string ogl_emit = "1"
+                        }
+                    }
+                )
+                float inputs:metalness (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_metallic = "1"
+                        }
+                    }
+                )
+                float inputs:metalness.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/metal_mat_Metallic_Raw.outputs:out>
+                vector3f inputs:normal.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/mtlxnormalmap1.outputs:out>
+                color3f inputs:opacity.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/alpha_brush.outputs:out>
+                float inputs:specular (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 1
+                            string ogl_spec_intensity = "1"
+                        }
+                    }
+                )
+                color3f inputs:specular_color (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double3 default_value = (1, 1, 1)
+                            string ogl_spec = "1"
+                        }
+                    }
+                )
+                float inputs:specular_IOR (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 1.5
+                            string ogl_ior = "1"
+                        }
+                    }
+                )
+                float inputs:specular_roughness (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0.2
+                            string ogl_rough = "1"
+                        }
+                    }
+                )
+                float inputs:specular_roughness.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/metal_mat_Roughness_Raw.outputs:out>
+                float inputs:transmission (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_transparency = "1"
+                        }
+                    }
+                )
+                token outputs:out
+            }
+
+            def Shader "metal_mat_BaseColor_ACEScg"
+            {
+                uniform token info:id = "ND_image_color3"
+                asset inputs:file = @./textures/metal_mat_BaseColor_ACEScg.<UDIM>.exr@
+                color3f outputs:out
+            }
+
+            def Shader "metal_mat_Metallic_Raw"
+            {
+                uniform token info:id = "ND_image_float"
+                asset inputs:file = @./textures/metal_mat_Metallic_Raw.<UDIM>.exr@
+                float outputs:out
+            }
+
+            def Shader "metal_mat_Roughness_Raw"
+            {
+                uniform token info:id = "ND_image_float"
+                asset inputs:file = @./textures/metal_mat_Roughness_Raw.<UDIM>.exr@
+                float outputs:out
+            }
+
+            def NodeGraph "alpha_brush"
+            {
+                float outputs:out.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/alpha_brush/mtlxswitch1.outputs:out>
+
+                def Shader "mtlxswitch1"
+                {
+                    uniform token info:id = "ND_switch_floatI"
+                    float inputs:in1 = 1
+                    float inputs:in1.connect = None
+                    float inputs:in2.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/alpha_brush/mtlxremap1.outputs:out>
+                    int inputs:which.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/alpha_brush/mtlxgeompropvalue2.outputs:out>
+                    float outputs:out
+                }
+
+                def Shader "mtlxremap1"
+                {
+                    uniform token info:id = "ND_remap_float"
+                    float inputs:in.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/alpha_brush/mtlxinvert1.outputs:out>
+                    float inputs:outhigh = 0.6
+                    float outputs:out
+                }
+
+                def Shader "mtlxinvert1"
+                {
+                    uniform token info:id = "ND_invert_float"
+                    float inputs:in.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/alpha_brush/mtlximage1.outputs:out>
+                    float outputs:out
+                }
+
+                def Shader "mtlximage1"
+                {
+                    uniform token info:id = "ND_image_float"
+                    asset inputs:file = @./textures/oil_paint-dry_loaded.exr.rat@
+                    float2 inputs:texcoord.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/alpha_brush/mtlxgeompropvalue1.outputs:out>
+                    float outputs:out
+                }
+
+                def Shader "mtlxgeompropvalue1"
+                {
+                    uniform token info:id = "ND_geompropvalue_vector2"
+                    string inputs:geomprop = "uv2"
+                    float2 outputs:out
+                }
+
+                def Shader "mtlxgeompropvalue2"
+                {
+                    uniform token info:id = "ND_geompropvalue_integer"
+                    string inputs:geomprop = "brush"
+                    int outputs:out
+                }
+            }
+
+            def Shader "mtlxnormalmap1"
+            {
+                uniform token info:id = "ND_normalmap"
+                vector3f inputs:in.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/metal_mat_Normal_Raw.outputs:out>
+                vector3f outputs:out
+            }
+
+            def Shader "metal_mat_Normal_Raw"
+            {
+                uniform token info:id = "ND_image_vector3"
+                asset inputs:file = @./textures/metal_mat_Normal_Raw.<UDIM>.exr@
+                vector3f outputs:out
+            }
+
+            def Shader "mtlxstandard_preview" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                float inputs:clearcoatRoughness = 0.1
+                color3f inputs:diffuseColor = (0.8, 0.8, 0.8)
+                color3f inputs:diffuseColor.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/mtlxstandard_preview_texture_diffuseColor.outputs:rgb>
+                float inputs:roughness = 0.2
+                float inputs:roughness.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/mtlxstandard_preview_texture_roughness.outputs:r>
+                color3f inputs:specularColor = (1, 1, 1)
+                token outputs:surface
+            }
+
+            def Shader "mtlxstandard_preview_uv" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdPrimvarReader_float2"
+                float2 inputs:fallback = (0, 0)
+                token inputs:varname = "st"
+                float2 outputs:result
+            }
+
+            def Shader "mtlxstandard_preview_texture_diffuseColor" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @./textures/metal_mat_BaseColor_ACEScg.<UDIM>.exr@
+                custom string inputs:sourceColorSpace = "raw"
+                float2 inputs:st.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/mtlxstandard_preview_uv.outputs:result>
+                color3f outputs:rgb
+            }
+
+            def Shader "mtlxstandard_preview_texture_roughness" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @./textures/metal_mat_Roughness_Raw.<UDIM>.exr@
+                custom string inputs:sourceColorSpace = "raw"
+                float2 inputs:st.connect = </ASSET_mtl_componentmaterial1/mtl/metal_mat/mtlxstandard_preview_uv.outputs:result>
+                float outputs:r
+            }
+        }
+
+        def Material "stone_mat" (
+            prepend inherits = </__class_mtl__/stone_mat>
+        )
+        {
+            token outputs:kma:surface.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/mtlxstandard_surface.outputs:out>
+            token outputs:surface.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/mtlxstandard_preview.outputs:surface>
+
+            def Shader "mtlxstandard_surface"
+            {
+                uniform token info:id = "ND_standard_surface_surfaceshader"
+                float inputs:base (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 1
+                            string ogl_diff_intensity = "1"
+                        }
+                    }
+                )
+                color3f inputs:base_color (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double3 default_value = (0.8, 0.8, 0.8)
+                            string ogl_diff = "1"
+                        }
+                    }
+                )
+                color3f inputs:base_color.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/stone_mat_BaseColor_ACEScg.outputs:out>
+                float inputs:coat (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_coat_intensity = "1"
+                        }
+                    }
+                )
+                float inputs:coat_roughness (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0.1
+                            string ogl_coat_rough = "1"
+                        }
+                    }
+                )
+                float inputs:emission (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_emit_intensity = "1"
+                        }
+                    }
+                )
+                color3f inputs:emission_color (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double3 default_value = (1, 1, 1)
+                            string ogl_emit = "1"
+                        }
+                    }
+                )
+                float inputs:metalness (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_metallic = "1"
+                        }
+                    }
+                )
+                vector3f inputs:normal.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/mtlxnormalmap1.outputs:out>
+                color3f inputs:opacity.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/alpha_brush.outputs:out>
+                float inputs:specular (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 1
+                            string ogl_spec_intensity = "1"
+                        }
+                    }
+                )
+                color3f inputs:specular_color (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double3 default_value = (1, 1, 1)
+                            string ogl_spec = "1"
+                        }
+                    }
+                )
+                float inputs:specular_IOR (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 1.5
+                            string ogl_ior = "1"
+                        }
+                    }
+                )
+                float inputs:specular_roughness (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0.2
+                            string ogl_rough = "1"
+                        }
+                    }
+                )
+                float inputs:specular_roughness.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/stone_mat_Roughness_Raw.outputs:out>
+                float inputs:transmission (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_transparency = "1"
+                        }
+                    }
+                )
+                token outputs:out
+            }
+
+            def Shader "stone_mat_BaseColor_ACEScg"
+            {
+                uniform token info:id = "ND_image_color3"
+                asset inputs:file = @./textures/stone_mat_BaseColor_ACEScg.<UDIM>.exr@
+                color3f outputs:out
+            }
+
+            def Shader "stone_mat_Roughness_Raw"
+            {
+                uniform token info:id = "ND_image_float"
+                asset inputs:file = @./textures/stone_mat_Roughness_Raw.<UDIM>.exr@
+                float outputs:out
+            }
+
+            def NodeGraph "alpha_brush"
+            {
+                float outputs:out.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/alpha_brush/mtlxswitch1.outputs:out>
+
+                def Shader "mtlxswitch1"
+                {
+                    uniform token info:id = "ND_switch_floatI"
+                    float inputs:in1 = 1
+                    float inputs:in1.connect = None
+                    float inputs:in2.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/alpha_brush/mtlxremap1.outputs:out>
+                    int inputs:which.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/alpha_brush/mtlxgeompropvalue2.outputs:out>
+                    float outputs:out
+                }
+
+                def Shader "mtlxremap1"
+                {
+                    uniform token info:id = "ND_remap_float"
+                    float inputs:in.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/alpha_brush/mtlxinvert1.outputs:out>
+                    float inputs:outhigh = 0.5
+                    float outputs:out
+                }
+
+                def Shader "mtlxinvert1"
+                {
+                    uniform token info:id = "ND_invert_float"
+                    float inputs:in.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/alpha_brush/mtlximage1.outputs:out>
+                    float outputs:out
+                }
+
+                def Shader "mtlximage1"
+                {
+                    uniform token info:id = "ND_image_float"
+                    asset inputs:file = @./textures/oil_paint-dry_loaded.exr.rat@
+                    float2 inputs:texcoord.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/alpha_brush/mtlxgeompropvalue1.outputs:out>
+                    float outputs:out
+                }
+
+                def Shader "mtlxgeompropvalue1"
+                {
+                    uniform token info:id = "ND_geompropvalue_vector2"
+                    string inputs:geomprop = "uv2"
+                    float2 outputs:out
+                }
+
+                def Shader "mtlxgeompropvalue2"
+                {
+                    uniform token info:id = "ND_geompropvalue_integer"
+                    string inputs:geomprop = "brush"
+                    int outputs:out
+                }
+            }
+
+            def Shader "mtlxnormalmap1"
+            {
+                uniform token info:id = "ND_normalmap"
+                vector3f inputs:in.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/stone_mat_Normal_Raw.outputs:out>
+                vector3f outputs:out
+            }
+
+            def Shader "stone_mat_Normal_Raw"
+            {
+                uniform token info:id = "ND_image_vector3"
+                asset inputs:file = @./textures/stone_mat_Normal_Raw.<UDIM>.exr@
+                vector3f outputs:out
+            }
+
+            def Shader "mtlxstandard_preview" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                float inputs:clearcoatRoughness = 0.1
+                color3f inputs:diffuseColor = (0.8, 0.8, 0.8)
+                color3f inputs:diffuseColor.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/mtlxstandard_preview_texture_diffuseColor.outputs:rgb>
+                float inputs:roughness = 0.2
+                float inputs:roughness.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/mtlxstandard_preview_texture_roughness.outputs:r>
+                color3f inputs:specularColor = (1, 1, 1)
+                token outputs:surface
+            }
+
+            def Shader "mtlxstandard_preview_uv" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdPrimvarReader_float2"
+                float2 inputs:fallback = (0, 0)
+                token inputs:varname = "st"
+                float2 outputs:result
+            }
+
+            def Shader "mtlxstandard_preview_texture_diffuseColor" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @./textures/stone_mat_BaseColor_ACEScg.<UDIM>.exr@
+                custom string inputs:sourceColorSpace = "raw"
+                float2 inputs:st.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/mtlxstandard_preview_uv.outputs:result>
+                color3f outputs:rgb
+            }
+
+            def Shader "mtlxstandard_preview_texture_roughness" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @./textures/stone_mat_Roughness_Raw.<UDIM>.exr@
+                custom string inputs:sourceColorSpace = "raw"
+                float2 inputs:st.connect = </ASSET_mtl_componentmaterial1/mtl/stone_mat/mtlxstandard_preview_uv.outputs:result>
+                float outputs:r
+            }
+        }
+
+        def Material "wood_mat" (
+            prepend inherits = </__class_mtl__/wood_mat>
+        )
+        {
+            token outputs:kma:surface.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/mtlxstandard_surface.outputs:out>
+            token outputs:surface.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/mtlxstandard_preview.outputs:surface>
+
+            def Shader "mtlxstandard_surface"
+            {
+                uniform token info:id = "ND_standard_surface_surfaceshader"
+                float inputs:base (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 1
+                            string ogl_diff_intensity = "1"
+                        }
+                    }
+                )
+                color3f inputs:base_color (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double3 default_value = (0.8, 0.8, 0.8)
+                            string ogl_diff = "1"
+                        }
+                    }
+                )
+                color3f inputs:base_color.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/wood_mat_BaseColor_ACEScg.outputs:out>
+                float inputs:coat (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_coat_intensity = "1"
+                        }
+                    }
+                )
+                float inputs:coat_roughness (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0.1
+                            string ogl_coat_rough = "1"
+                        }
+                    }
+                )
+                float inputs:emission (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_emit_intensity = "1"
+                        }
+                    }
+                )
+                color3f inputs:emission_color (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double3 default_value = (1, 1, 1)
+                            string ogl_emit = "1"
+                        }
+                    }
+                )
+                float inputs:metalness (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_metallic = "1"
+                        }
+                    }
+                )
+                float inputs:metalness.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/wood_mat_Metallic_Raw.outputs:out>
+                vector3f inputs:normal.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/mtlxnormalmap1.outputs:out>
+                color3f inputs:opacity.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/alpha_brush.outputs:out>
+                float inputs:specular (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 1
+                            string ogl_spec_intensity = "1"
+                        }
+                    }
+                )
+                color3f inputs:specular_color (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double3 default_value = (1, 1, 1)
+                            string ogl_spec = "1"
+                        }
+                    }
+                )
+                float inputs:specular_IOR (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 1.5
+                            string ogl_ior = "1"
+                        }
+                    }
+                )
+                float inputs:specular_roughness (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0.2
+                            string ogl_rough = "1"
+                        }
+                    }
+                )
+                float inputs:specular_roughness.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/wood_mat_Roughness_Raw.outputs:out>
+                float inputs:transmission (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_transparency = "1"
+                        }
+                    }
+                )
+                token outputs:out
+            }
+
+            def Shader "wood_mat_BaseColor_ACEScg"
+            {
+                uniform token info:id = "ND_image_color3"
+                asset inputs:file = @./textures/wood_mat_BaseColor_ACEScg.<UDIM>.exr@
+                color3f outputs:out
+            }
+
+            def Shader "wood_mat_Metallic_Raw"
+            {
+                uniform token info:id = "ND_image_float"
+                asset inputs:file = @./textures/wood_mat_Metallic_Raw.<UDIM>.exr@
+                float outputs:out
+            }
+
+            def Shader "wood_mat_Roughness_Raw"
+            {
+                uniform token info:id = "ND_image_float"
+                asset inputs:file = @./textures/wood_mat_Roughness_Raw.<UDIM>.exr@
+                float outputs:out
+            }
+
+            def NodeGraph "alpha_brush"
+            {
+                float outputs:out.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/alpha_brush/mtlxswitch1.outputs:out>
+
+                def Shader "mtlxswitch1"
+                {
+                    uniform token info:id = "ND_switch_floatI"
+                    float inputs:in1 = 1
+                    float inputs:in1.connect = None
+                    float inputs:in2.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/alpha_brush/mtlxremap1.outputs:out>
+                    int inputs:which.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/alpha_brush/mtlxgeompropvalue2.outputs:out>
+                    float outputs:out
+                }
+
+                def Shader "mtlxremap1"
+                {
+                    uniform token info:id = "ND_remap_float"
+                    float inputs:in.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/alpha_brush/mtlxinvert1.outputs:out>
+                    float inputs:outhigh = 0.5
+                    float outputs:out
+                }
+
+                def Shader "mtlxinvert1"
+                {
+                    uniform token info:id = "ND_invert_float"
+                    float inputs:in.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/alpha_brush/mtlximage1.outputs:out>
+                    float outputs:out
+                }
+
+                def Shader "mtlximage1"
+                {
+                    uniform token info:id = "ND_image_float"
+                    asset inputs:file = @./textures/oil_paint-dry_loaded.exr.rat@
+                    float2 inputs:texcoord.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/alpha_brush/mtlxgeompropvalue1.outputs:out>
+                    float outputs:out
+                }
+
+                def Shader "mtlxgeompropvalue1"
+                {
+                    uniform token info:id = "ND_geompropvalue_vector2"
+                    string inputs:geomprop = "uv2"
+                    float2 outputs:out
+                }
+
+                def Shader "mtlxgeompropvalue2"
+                {
+                    uniform token info:id = "ND_geompropvalue_integer"
+                    string inputs:geomprop = "brush"
+                    int outputs:out
+                }
+            }
+
+            def Shader "mtlxnormalmap1"
+            {
+                uniform token info:id = "ND_normalmap"
+                vector3f inputs:in.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/wood_mat_Normal_Raw.outputs:out>
+                vector3f outputs:out
+            }
+
+            def Shader "wood_mat_Normal_Raw"
+            {
+                uniform token info:id = "ND_image_vector3"
+                asset inputs:file = @./textures/wood_mat_Normal_Raw.<UDIM>.exr@
+                vector3f outputs:out
+            }
+
+            def Shader "mtlxstandard_preview" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                float inputs:clearcoatRoughness = 0.1
+                color3f inputs:diffuseColor = (0.8, 0.8, 0.8)
+                color3f inputs:diffuseColor.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/mtlxstandard_preview_texture_diffuseColor.outputs:rgb>
+                float inputs:roughness = 0.2
+                float inputs:roughness.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/mtlxstandard_preview_texture_roughness.outputs:r>
+                color3f inputs:specularColor = (1, 1, 1)
+                token outputs:surface
+            }
+
+            def Shader "mtlxstandard_preview_uv" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdPrimvarReader_float2"
+                float2 inputs:fallback = (0, 0)
+                token inputs:varname = "st"
+                float2 outputs:result
+            }
+
+            def Shader "mtlxstandard_preview_texture_diffuseColor" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @./textures/wood_mat_BaseColor_ACEScg.<UDIM>.exr@
+                custom string inputs:sourceColorSpace = "raw"
+                float2 inputs:st.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/mtlxstandard_preview_uv.outputs:result>
+                color3f outputs:rgb
+            }
+
+            def Shader "mtlxstandard_preview_texture_roughness" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdUVTexture"
+                asset inputs:file = @./textures/wood_mat_Roughness_Raw.<UDIM>.exr@
+                custom string inputs:sourceColorSpace = "raw"
+                float2 inputs:st.connect = </ASSET_mtl_componentmaterial1/mtl/wood_mat/mtlxstandard_preview_uv.outputs:result>
+                float outputs:r
+            }
+        }
+
+        def Material "preview_mat" (
+            prepend inherits = </__class_mtl__/preview_mat>
+        )
+        {
+            token outputs:kma:surface.connect = </ASSET_mtl_componentmaterial1/mtl/preview_mat/mtlxstandard_surface.outputs:out>
+            token outputs:surface.connect = </ASSET_mtl_componentmaterial1/mtl/preview_mat/mtlxstandard_preview.outputs:surface>
+
+            def Shader "mtlxstandard_surface"
+            {
+                uniform token info:id = "ND_standard_surface_surfaceshader"
+                float inputs:base (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 1
+                            string ogl_diff_intensity = "1"
+                        }
+                    }
+                )
+                color3f inputs:base_color = (0.5, 0, 1) (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double3 default_value = (0.8, 0.8, 0.8)
+                            string ogl_diff = "1"
+                        }
+                    }
+                )
+                color3f inputs:base_color.connect = </ASSET_mtl_componentmaterial1/mtl/preview_mat/mtlxgeomcolor1.outputs:out>
+                float inputs:coat (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_coat_intensity = "1"
+                        }
+                    }
+                )
+                float inputs:coat_roughness (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0.1
+                            string ogl_coat_rough = "1"
+                        }
+                    }
+                )
+                float inputs:emission (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_emit_intensity = "1"
+                        }
+                    }
+                )
+                color3f inputs:emission_color (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double3 default_value = (1, 1, 1)
+                            string ogl_emit = "1"
+                        }
+                    }
+                )
+                float inputs:metalness (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_metallic = "1"
+                        }
+                    }
+                )
+                float inputs:specular = 0 (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 1
+                            string ogl_spec_intensity = "1"
+                        }
+                    }
+                )
+                color3f inputs:specular_color (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double3 default_value = (1, 1, 1)
+                            string ogl_spec = "1"
+                        }
+                    }
+                )
+                float inputs:specular_IOR (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 1.5
+                            string ogl_ior = "1"
+                        }
+                    }
+                )
+                float inputs:specular_roughness = 0.522 (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0.2
+                            string ogl_rough = "1"
+                        }
+                    }
+                )
+                float inputs:transmission (
+                    customData = {
+                        dictionary HoudiniPreviewTags = {
+                            double default_value = 0
+                            string ogl_transparency = "1"
+                        }
+                    }
+                )
+                token outputs:out
+            }
+
+            def Shader "mtlxgeomcolor1"
+            {
+                uniform token info:id = "ND_geomcolor_color3"
+                color3f outputs:out
+            }
+
+            def Shader "mtlxstandard_preview" (
+                customData = {
+                    bool HoudiniIsAutoCreatedShader = 1
+                }
+            )
+            {
+                uniform token info:id = "UsdPreviewSurface"
+                float inputs:clearcoatRoughness = 0.1
+                color3f inputs:diffuseColor = (0.5, 0, 1)
+                float inputs:roughness = 0.522
+                token outputs:surface
+            }
+        }
+    }
+}
+
+def Xform "cabaneRoomShell1" (
+    prepend references = </ASSET_mtl_componentmaterial1>
+    variants = {
+        string mtl = "componentmaterial1"
+    }
+    prepend variantSets = "mtl"
+)
+{
+    def Scope "mtl"
+    {
+        over "metal_mat"
+        {
+            over "mtlxstandard_preview_texture_roughness" (
+                active = false
+            )
+            {
+            }
+
+            over "mtlxstandard_preview"
+            {
+                float inputs:roughness = 0.5
+                delete float inputs:roughness.connect = </cabaneRoomShell1/mtl/metal_mat/mtlxstandard_preview_texture_roughness.outputs:r>
+            }
+        }
+
+        over "stone_mat"
+        {
+            over "mtlxstandard_preview_texture_roughness" (
+                active = false
+            )
+            {
+            }
+
+            over "mtlxstandard_preview"
+            {
+                float inputs:roughness = 0.5
+                delete float inputs:roughness.connect = </cabaneRoomShell1/mtl/stone_mat/mtlxstandard_preview_texture_roughness.outputs:r>
+            }
+        }
+
+        over "wood_mat"
+        {
+            over "mtlxstandard_preview_texture_roughness" (
+                active = false
+            )
+            {
+            }
+
+            over "mtlxstandard_preview"
+            {
+                float inputs:roughness = 0.5
+                delete float inputs:roughness.connect = </cabaneRoomShell1/mtl/wood_mat/mtlxstandard_preview_texture_roughness.outputs:r>
+            }
+        }
+
+        over "preview_mat"
+        {
+            over "mtlxstandard_preview"
+            {
+                float inputs:roughness = 0.5
+            }
+        }
+    }
+    variantSet "mtl" = {
+        "componentmaterial1" {
+
+        }
+    }
+}
+
