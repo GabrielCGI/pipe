@@ -131,9 +131,3 @@ def main(*args, **kwargs):
 
         if stateManager.getRenderNode().type().name() == "componentoutput" and str(stateManager.getRenderNode()) in scenefile:
             print("-----converte le fichier mtl.usdc------------------")
-            sys.path.append(PRXOY_SHADER)
-            import createProxyShader as cps
-            folder = "/".join(file.split("/")[:-1])
-            print(folder)
-            cps.setProxyShd(folder)
-            print("convertion terminée")

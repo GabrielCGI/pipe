@@ -1,0 +1,137 @@
+{
+    "env": [
+        {
+            "GROOMBEAR_USER_PATH": "C:/ILLOGIC_APP/R/pipeline/networkInstall/houdinI/groombear_FX_1_2_59/"
+        },
+        {
+            "GROOMBEAR_HOME": "$HOME"
+        },
+        {
+            "GROOMBEAR_PACKAGE_BUILD": [
+                {
+                    "houdini_version =='17.5'": "Houdini_17.5.000"
+                },
+                {
+                    "houdini_version =='18.0'": "Houdini_18.0.000"
+                },
+                {
+                    "houdini_version =='18.5'": "Houdini_18.0.000"
+                },
+                {
+                    "houdini_version =='19.0'": "Houdini_18.0.000"
+                },
+                {
+                    "houdini_version =='19.5'": "Houdini_18.0.000"
+                },
+                {
+                    "houdini_version =='20.0'": "Houdini_18.0.000"
+                },
+                {
+                    "houdini_version =='20.5'": "Houdini_18.0.000"
+                }
+            ]
+        },
+        {
+            "GROOMBEAR_CONFIG_NAME":
+            [
+                {"houdini_os == 'windows'" : "groombear"},
+                {"houdini_os == 'linux'" : ".groombear"}
+            ]
+        },
+        {
+            "GROOMBEAR_DSO_BUILD": [
+                {
+                    "houdini_version >= '17.5.229' and houdini_version <= '17.5.9999'": "17.5.000"
+                },
+                {
+                    "houdini_version >= '18.0.287' and houdini_version <= '18.0.348'": "18.0.000"
+                },
+                {
+                    "houdini_version >= '18.0.349' and houdini_version <= '18.0.463'": "18.0.349"
+                },
+                {
+                    "houdini_version >= '18.0.464' and houdini_version <= '18.0.559'": "18.0.464"
+                },
+                {
+                    "houdini_version >= '18.0.560' and houdini_version <= '18.0.9999'": "18.0.560"
+                },
+                {
+                    "houdini_version >= '18.5.351' and houdini_version <= '18.5.498'": "18.5.000"
+                },
+                {
+                    "houdini_version >= '18.5.477' and houdini_version <= '18.5.9999'": "18.5.477"
+                },
+                {
+                    "houdini_version >= '19.0.383' and houdini_version <= '19.0.9999'": "19.0.000"
+                },
+                {
+                    "houdini_version >= '19.5.303' and houdini_version <= '19.5.9999'": "19.5.000"
+                },
+                {
+                    "houdini_version >= '20.0.506' and houdini_version <= '20.0.9999'": "20.0.000"
+                },
+                {
+                    "houdini_version >= '20.5.278' and houdini_version <= '20.5.9999'": "20.5.000"
+                }
+            ]
+        },
+        {
+            "GROOMBEAR_PATH": "$GROOMBEAR_USER_PATH/$GROOMBEAR_PACKAGE_BUILD/groombear_package/"
+        },
+        {
+            "HOUDINI_PATH": {
+                "method": "append",
+                "value": "$GROOMBEAR_PATH"
+            }
+        },
+        {
+            "GROOMBEAR_ICONS": {
+                "method": "replace",
+                "value": "$GROOMBEAR_PATH/icons"
+            }
+        },
+        {
+            "HOUDINI_DSO_PATH": {
+                "method": "append",
+                "value": "$GROOMBEAR_PATH/dso_builds/$GROOMBEAR_DSO_BUILD/"
+            }
+        },
+        {
+            "GROOMBEAR_HOTKEYS_PATH": {
+                "method": "replace",
+                "value": "$GROOMBEAR_HOME/$GROOMBEAR_CONFIG_NAME/toolbar/hotkeys/"
+            }
+        },
+        {
+            "HOUDINI_TOOLBAR_PATH": {
+                "method": "append",
+                "value": "$GROOMBEAR_HOTKEYS_PATH"
+            }
+        },
+        {
+            "GROOMBEAR_VEX_VERSION": [
+                {
+                    "houdini_version =='17.5'": "17"
+                },
+                {
+                    "houdini_version =='18.0'": "18"
+                },
+                {
+                    "houdini_version =='18.5'": "18"
+                },
+                {
+                    "houdini_version =='19.0'": "19"
+                },
+                {
+                    "houdini_version =='19.5'": "19"
+                },
+                {
+                    "houdini_version =='20.0'": "20"
+                },
+                {
+                    "houdini_version =='20.5'": "20"
+                }
+            ]
+        }
+    ]
+}

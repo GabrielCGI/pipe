@@ -103,7 +103,7 @@
                 {
                     "label": "Latest",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini %HOUDINI_ILL_VERSION%\\bin\\houdinicore.exe",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.5.674\\bin\\houdinicore.exe",
                     "preferred": true,
                     "environment": {}
                 }
@@ -268,5 +268,19 @@
             ],
             "uid": "59fc7696-3180-11f0-8a3b-d8bbc13f16c2"
         }
-    ]
+    ],
+    "prismVersions": [
+        {
+            "name": "v2.0.18",
+            "path": "C:/ILLOGIC_APP/Prism/2.0.18/app",
+            "envVars": {
+                "MAYA_MODULE_PATH": "R:\\pipeline\\pipe\\maya\\modules\\Prism\\2.0.18",
+                "PRISM_PLUGIN_SEARCH_PATHS": "C:\\ILLOGIC_APP\\Prism\\2.0.18\\plugins",
+                "PRISM_ROOT": "C:\\ILLOGIC_APP\\Prism\\2.0.18\\app"
+            }
+        }
+    ],
+    "settings": {
+        "dftPrismVersion": "v2.0.18"
+    }
 }

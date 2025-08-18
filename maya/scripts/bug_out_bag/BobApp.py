@@ -65,6 +65,7 @@ from .tool_instances.Exposure import *
 from .tool_instances.USDcopyPaste import USDCopyPaste
 from .tool_instances.selectGeoToExport import GeoExport
 from .tool_instances.FixUsdColorspaceManagement import FixUsdColorspaceManagement
+from .tool_instances.matchTransformUSD import *
 
 
 # ######################################################################################################################
@@ -106,6 +107,7 @@ class BobApp(QDialog):
                 # IsolateTool(),
                 USDCopyPaste(),
                 GeoExport(),
+                MatchTransform(),
 
             ]),
             BobCategory("Clean", self.__prefs, [

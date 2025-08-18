@@ -75,13 +75,7 @@ def remap_ranch_usd_and_output(usd_file_path, img_output, env_copy):
     """
     PXR_AR_DEFAULT_SEARCH_PATH_RANCH = f"{UNC_RANCH_CACHE_I};{UNC_RANCH_CACHE_R};I:/;R:/"
     env_copy["PXR_AR_DEFAULT_SEARCH_PATH"] = PXR_AR_DEFAULT_SEARCH_PATH_RANCH
-    print(env_copy["KARMA_XPU_MAX_LIGHTING_TEXTURE_RES"])
-    del env_copy["KARMA_XPU_MAX_LIGHTING_TEXTURE_RES"]
-    del env_copy["KARMA_XPU_MAX_SHADER_TEXTURE_RES"]
-    try:
-        print(env_copy["KARMA_XPU_MAX_LIGHTING_TEXTURE_RES"])
-    except:
-        print('---------------plus de vraiable')
+    
     print(f'PXR AR DEFAULT SEARCH PATH: {env_copy["PXR_AR_DEFAULT_SEARCH_PATH"]}')
     print("Ranch machine detected - remapping USD/file paths.")
 

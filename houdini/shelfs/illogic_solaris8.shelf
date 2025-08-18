@@ -6,17 +6,18 @@
  a single file. -->
 
   <shelfSet name="solaris_1" label="Solaris Geometry">
-    <memberToolshelf name="prism"/>
     <memberToolshelf name="polygon"/>
     <memberToolshelf name="lop_oceans"/>
     <memberToolshelf name="cloud"/>
     <memberToolshelf name="hairtools"/>
     <memberToolshelf name="dev"/>
-    <memberToolshelf name="develop"/>
     <memberToolshelf name="model"/>
-    <memberToolshelf name="shelf_1"/>
     <memberToolshelf name="RenderManRIS"/>
+    <memberToolshelf name="prism"/>
+    <memberToolshelf name="simplefx"/>
+    <memberToolshelf name="toto"/>
     <memberToolshelf name="illogic_solaris6"/>
+    <memberToolshelf name="develop"/>
   </shelfSet>
 
   <toolshelf name="illogic_solaris6" label="illogic_solaris">
@@ -46,6 +47,7 @@
     <memberTool name="send_ranch_copy"/>
     <memberTool name="select_prim_with_attributes"/>
     <memberTool name="tool_1"/>
+    <memberTool name="enableTexture"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -103,14 +105,19 @@ kma_mat_from_attr.execute(collectionMode=False)]]></script>
   </tool>
 
   <tool name="kmx" label="kmx_col" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+    <script scriptType="python"><![CDATA[from imp import reload
+import socket
+import sys
+
+
 
 sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+import kma_mat_from_attr as kmfa
+reload(kmfa)
 
-import kma_mat_from_attr
-reload(kma_mat_from_attr)
-kma_mat_from_attr.execute(collectionMode=True)]]></script>
+
+
+kmfa.execute(collectionMode=True)]]></script>
   </tool>
 
   <tool name="paste" label="Paste" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
@@ -241,13 +248,16 @@ reload(auto_manifest)
 auto_manifest.run()]]></script>
   </tool>
 
-  <tool name="sanity_check" label="Sanity Check" icon="R:/pipeline/pipe/prism/sanitycheck/ui/Icons/sanitycheck.png">
+  <tool name="sanity_check" label="Sanity Check" icon="R:/pipeline/pipe_public/sanitycheck/sanitycheck/ui/Icons/sanitycheck.png">
     <script scriptType="python"><![CDATA[import os
 import sys
 import importlib
 import PrismInit
-
+import socket
 SANITYCHECK_PATH = r"R:\pipeline\pipe_public\sanitycheck"
+
+if socket.gethostname() == "FALCON-01":
+    SANITYCHECK_PATH = r"R:\devFred\sanitycheck"
 
 
 def deletefromcontext(module_name):
@@ -263,7 +273,7 @@ def deletefromcontext(module_name):
 def run():
     deletefromcontext('sanitycheck')
     if not SANITYCHECK_PATH in sys.path:
-        sys.path.append(SANITYCHECK_PATH)
+        sys.path.insert(0, SANITYCHECK_PATH)
     
     try:
         import sanitycheck
@@ -274,8 +284,14 @@ def run():
     
     try:
         YAML_LOCATION = os.environ['SANITY_CHECK_CONFIG']
+        if socket.gethostname() == "FALCON-01":
+            YAML_LOCATION = r"R:\devFred\yaml\check_hierarchy.yaml"
+        
     except:
         YAML_LOCATION = 'None'
+        
+    print(SANITYCHECK_PATH)
+    print(YAML_LOCATION)
         
     sm = PrismInit.pcore.getStateManager()
     res = sanitycheck.main(*(sm, YAML_LOCATION, True))
@@ -350,5 +366,82 @@ if START:
 
   <tool name="tool_1" label="New Tool" icon="PLASMA_App">
     <script scriptType="python"><![CDATA[print("gat y")]]></script>
+  </tool>
+
+  <tool name="enableTexture" label="Enable Texture" icon="hicon:/SVGIcons.index?BUTTONS_visible.svg">
+    <script scriptType="python"><![CDATA[import hou
+import shutil
+import os
+
+def run(*args):
+    desktop = hou.ui.desktop("Solaris")
+    pane = desktop.paneTabOfType(hou.paneTabType.SceneViewer)
+    if not pane:
+        return 
+    
+    viewport = pane.curViewport()
+    settings = viewport.settings()
+    version = ".".join(hou.applicationVersionString().split(".")[:-1])
+    user = os.getlogin()
+    src = "R:/pipeline/pipe/houdini/pref"
+    dst = f"C:/Users/{user}/Documents/houdini{version}"
+    if not os.path.exists(dst):
+        print('source pref introuvable', dst)
+        return
+    """for tab in desktop.paneTabs():
+        if tab.type() == hou.paneTabType.SceneViewer:
+            tab.close()"""
+    
+    shutil.copy(f"{src}/default/scenegraphview.pref", dst)
+    
+    
+    #----------------------  |  Background  |  --------------------
+    #-- colorScheme------------------
+    settings.setColorScheme(hou.viewportColorScheme.Light)
+    
+    
+    
+    
+    
+    
+    
+    #------------------------  |  Texture  |  ---------------------
+    #-- General ---------------------
+    settings.setDisplayTextures(1)
+    settings.setDisplayTextureLayers(1)
+    settings.setDisplayProjectedTextures(1)
+    settings.setTextureMipmapping(1)
+    settings.setTextureAnisotropicFilter(4)
+    
+    
+    # -- Texture 2D ------------------
+    settings.setTextureResLimit2D(True)
+    settings.setTextureMaxRes2D((2048, 2048))
+    settings.setTextureBitDepthLimit2D(hou.viewportTextureDepth.HDR16)
+    settings.setTextureScale2D(1)
+    
+    
+    # -- Texture Cache ---------------
+    settings.setTextureCacheSize(4096)
+    settings.setTextureMaxMemory(256)
+    settings.setTextureAutoReduce2D(False)
+    settings.setTextureAutoReduce3D(False)
+    
+    
+    # -- Texture 3D (volumes) --------
+    settings.setTextureResLimit3D(True)
+    settings.setTextureMaxRes3D((256, 256, 256))
+    settings.setTexture2DSettingsFor3D(False)
+    settings.setTextureScale3D(1)
+    
+    
+         
+    
+    
+    """pane = desktop.paneTabs()[0].pane()
+    pane.createTab(hou.paneTabType.SceneViewer)"""
+    
+    
+run()]]></script>
   </tool>
 </shelfDocument>

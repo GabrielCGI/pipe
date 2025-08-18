@@ -12,15 +12,15 @@
             "DeleteMotionPaths",
             "AttachToPath",
             "ToggleEditPivot",
-            "HypershadeWindow",
             "ToggleVertexNormalDisplay",
             "ToggleFaceNormalDisplay",
             "CharacterAnimationEditor",
             "HotkeyPreferencesWindow",
+            "HypershadeWindow",
             "NamespaceEditor",
-            "MatchTransform",
             "ReferenceEditor",
-            "ParentConstraint"
+            "ParentConstraint",
+            "MatchTransform"
         ],
         [],
         [],

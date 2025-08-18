@@ -73,9 +73,9 @@ class Prism_IllogicCustomPrefs_Functions(object):
             # asset search
             data['showAssetSearch'] = True
             # Media player
-            data['globals']['mediaPlayerName'] = "MRV2"
-            data['globals']['mediaPlayerPath'] = "C:\\ILLOGIC_APP\\mrv2\\bin\\mrv2.exe"
-
+            data['globals']['mediaPlayerName'] = "RV"
+            data['globals']['mediaPlayerPath'] = "C:\\ILLOGIC_APP\\OpenRV\\bin\\rv.exe"
+            print ("Prism Illogic Custom Prefs done working")
 
 
             # Sauvegarde les modifications dans le fichier JSON

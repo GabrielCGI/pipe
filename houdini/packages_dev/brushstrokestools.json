@@ -1,0 +1,8 @@
+{
+    "enable" : true,
+    "env":[
+        {"brushstrokestools": "C:/ILLOGIC_APP/R/pipeline/networkInstall/houdinI/brushstrokestools"}, 
+        {"HOUDINI_SCRIPT_PATH": "$brushstrokestools;"},
+        {"HOUDINI_OTLSCAN_PATH": "$brushstrokestools/otls;"}
+        ]
+}

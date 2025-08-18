@@ -139,6 +139,10 @@ class inheriteClassAttr():
         for primRef in ref.Traverse():
             getVarRef = primRef.GetVariantSets().GetVariantSet("geo").GetVariantNames()
 
+        if not getVarRef:
+            print("_|_|_| WARNING |_|_|_ not variant found")
+            return
+        
         if not variant in getVarRef:
             print("_|_|_| WARNING |_|_|_ not same variant beteewn usdClass and Rig", getVarRef, visible)
             print("set default variant:", getVarRef[0])
@@ -236,7 +240,13 @@ class inheriteClassAttr():
     def pathReference(self, primName):
         pathUSD = None
         for element in ["Props", "Characters", "Sets"]:
-            dosAsset = rf"{self.projet}/03_Production/Assets/{element}/{primName}/Export/USD"
+            USD = "USD"
+            if primName == "dishOmeletFull":
+                primName =  "dishOmelet"
+                USD = "dishOmeletFull"
+            
+            dosAsset = rf"{self.projet}/03_Production/Assets/{element}/{primName}/Export/{USD}"
+            
             versionUSD = None
             isProps = None
             if not os.path.exists(dosAsset):
@@ -245,12 +255,12 @@ class inheriteClassAttr():
 
             lastVersion, _ = self.FindLastVersion(dosAsset)
             for filename in os.listdir(dosAsset + "/" + lastVersion):
-                if filename.startswith(f"{primName}_USD_{lastVersion}.usd"):
+                if filename.startswith(f"{primName}_{USD}_{lastVersion}.usd"):
                     versionUSD = filename
                 elif filename.startswith("geo.usd"):
                     isProps = True
             
-            pathUSD = rf"{self.projet}/03_Production/Assets/{element}/{primName}/Export/USD/{lastVersion}/{versionUSD}"
+            pathUSD = rf"{self.projet}/03_Production/Assets/{element}/{primName}/Export/{USD}/{lastVersion}/{versionUSD}"
             if not os.path.exists(pathUSD):
                 print("ERROR path not foud.........................")
                 print(pathUSD)

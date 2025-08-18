@@ -30,7 +30,9 @@ class ConfirmationNukeScanner(QDialog):
         self.__ui_height = 400
         self.__ui_min_width = 300
         self.__ui_min_height = 300
-        self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width, self.__ui_height) / 2
+        center = QDesktopWidget().availableGeometry().center()
+        offset = QPoint(int(self.__ui_width / 2), int(self.__ui_height / 2))
+        self.__ui_pos = center - offset
         self.__tab_widget = None
 
         # name the window

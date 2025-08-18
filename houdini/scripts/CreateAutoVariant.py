@@ -1,20 +1,20 @@
 import hou
 from pxr import Usd, UsdGeom
 
-
 class autoVariant():
     def __init__(self):
-        if len(hou.selectedNodes()) != 3:
+        sel = hou.selectedNodes()
+        if len(sel) != 3:
             hou.ui.displayMessage("Select 3 nodes in this order: Prism LOP import / componentIN / componentOUT", buttons=("OK",) ,severity=hou.severityType.Error)
             return
 
-        self.importLOP = hou.selectedNodes()[0]
-        self.refDupi = hou.selectedNodes()[1]
-        self.compOUT = hou.selectedNodes()[2]
+        self.importLOP = sel[0]
+        self.refDupi = sel[1]
+        self.compOUT = sel[2]
 
-        self.list_variant = []
+        self.list_variantPath = {}
         self.pasDecal = 2
-        self.pasTrsDecal = 10
+        self.pasTrsDecal = 1
         self.mergeToRig = hou.node("/stage/merge4")
         self.mergeToSusbtance = hou.node("/stage/merge5")
         
@@ -23,40 +23,68 @@ class autoVariant():
             return
         
         scenepath = hou.hipFile.path()
+        if not scenepath:
+            hou.ui.displayMessage("the scene is not save please save your scene in the good assets folder", buttons=("OK",) ,severity=hou.severityType.Error)
+            return
         nameAssets = scenepath.split("/Assets/")[1].split("/")[1]
         self.compOUT.setName(nameAssets, unique_name=True)
         
-        self.find_variant(withVar)
-        compoGeo = self.create_variant()
-        if len(self.list_variant) != 1:
+        list_variant = self.find_variant(withVar)
+        compoGeo = self.create_variant(list_variant.copy(), withVar)
+        if len(list_variant) != 1:
             compoGeo.bypass(False)
-            self.make_separate_variant()
+            self.make_separate_variant(list_variant, withVar)
         else:
             compoGeo.bypass(True)
             self.bypass_connection()
     
-    def create_variant(self):
+    def create_variant(self, list_variant, withVar):
         ref = self.refDupi
         tmp_ref = ref.parent()
+        listMatRef = []
+        modif = False
+        Dref = ref
         
-        matRef = ref.outputs()[0]
-        tmp_ref = matRef.parent()
+        if not withVar:
+            stage = hou.node('/stage')
+            allChild = stage.children()
+            for node in allChild:
+                if node.type().name() == "componentgeometry":
+                    try:
+                        lopimport = hou.node(f"stage/{node}/sopnet/geo/modeling")
+                        var = lopimport.parm("primpattern").eval()
+                        if var in self.list_variantPath.keys():
+                            modif = True
+                            list_variant.remove(self.list_variantPath[var][0])
+                    except Exception as e:
+                        print(e)
         
-        compoGeo = matRef.outputs()[0]
+        for i in range(3):
+            Dref = Dref.outputs()[0]
+            listMatRef.append(Dref)
+            if Dref.type().name() == "componentmaterial":
+                break
         
-
-        for i, var in enumerate(self.list_variant):
-            if i !=0:
+        compoGeo = listMatRef[-1].outputs()[0]
+        nmbStart = len(compoGeo.inputs())
+        
+        for i, var in enumerate(list_variant):
+            if i !=0 or nmbStart != 1 or modif:
+                add = 1 if nmbStart !=1 else 0
                 ref = ref.copyTo(tmp_ref)
                 pos = ref.position()
                 ref.setPosition([pos[0] + self.pasDecal, pos[1]])
+                toCon = ref
                 
-                
-                matRef = matRef.copyTo(tmp_ref)
-                pos = matRef.position()
-                matRef.setPosition([pos[0] + self.pasDecal, pos[1]])
-                matRef.setInput(0, ref)
-                compoGeo.setInput(i, matRef)
+                for matRef in listMatRef:
+                    NmatRef = matRef.copyTo(tmp_ref)
+                    pos = NmatRef.position()
+                    if modif and nmbStart ==1:
+                        add += 1
+                    NmatRef.setPosition([pos[0] + self.pasDecal*(i + add), pos[1]])
+                    NmatRef.setInput(0, toCon)
+                    toCon = NmatRef
+                    compoGeo.setInput(i + nmbStart, NmatRef)
                 
                
             lopimport = hou.node(f"stage/{ref}/sopnet/geo/modeling")
@@ -66,7 +94,8 @@ class autoVariant():
         return compoGeo
 
     def find_variant(self, withVar):
-        self.list_variant.clear()
+        list_variant =[]
+        old_decalTRS = 0
         nmb_var = 0
         
         lopimport = hou.node(f"stage/{self.refDupi}/sopnet/geo/modeling")
@@ -75,21 +104,26 @@ class autoVariant():
         
         stage = lop_node.stage()
         for prim in stage.Traverse():
-            print(prim)
             if prim.GetPath().pathString.startswith("/geo/xform/"):
                 if len(str(prim.GetPath()).split("/")) == 4:
                     print(" trouver  ", prim.GetPath())
-                    self.list_variant.append(prim)
+                    list_variant.append(prim)
+                    transform = self.calcul_DecalTransform(prim)
+                    if nmb_var == 0:
+                        transform = 0
+                    self.list_variantPath[str(prim.GetPath())] = [prim, old_decalTRS + transform + self.pasTrsDecal]
+                    old_decalTRS += transform + self.pasTrsDecal
                     nmb_var += 1
             
             if str(prim.GetPath()) == "/geo":
                 source = prim
-        
 
         if nmb_var == 1 or withVar == 1:
             print("-------------- qu'un seul variant creer base: /geo")
-            self.list_variant.clear()
-            self.list_variant.append(source)
+            list_variant.clear()
+            list_variant.append(source)
+        
+        return list_variant
 
     def bypass_connection(self):
         configurePrim = self.compOUT.outputs()[0]
@@ -97,59 +131,70 @@ class autoVariant():
         self.mergeToRig.setInput(0, configurePrim)
         self.mergeToSusbtance.setInput(0, configurePrim)
 
-
-    def make_separate_variant(self):
+    def make_separate_variant(self, list_variant, withVar):
         where = hou.node("/stage")
+        modif = False
 
+        enterMergeToRig = self.mergeToRig.inputs()
         configurePrim = self.compOUT.outputs()[0]
         pos_ref = self.compOUT.position()
-        decal = (len(self.list_variant) * self.pasDecal) + 5
+        nmbInput = 0
+        if enterMergeToRig:
+            if enterMergeToRig[0] != configurePrim:
+                nmbInput = len(self.mergeToRig.inputs())
+            
         
-        old_decalTRS = 0
+        for node in configurePrim.outputs():
+            if node.type().name() == "setvariant":
+                try:
+                    path = "/geo/xform/" + str(node.parm("variantname1").eval())
+                    if path in self.list_variantPath.keys():
+                        modif = True
+                        list_variant.remove(self.list_variantPath[path][0])
+                except Exception as e:
+                    print(e)
 
-        for i, var in enumerate(self.list_variant):
+
+        decal = (1+ len(list_variant) * self.pasDecal) + 5
+
+        for i, var in enumerate(list_variant):
             setVar = where.createNode("setvariant")
             setVar.parm("variantset1").set("geo")
             setVar.parm("variantname1").set(var.GetName())
-            setVar.setPosition([pos_ref[0] - decal + (self.pasDecal * i), pos_ref[1] - 10])
+            setVar.setPosition([pos_ref[0] - decal + (self.pasDecal * (i + nmbInput)), pos_ref[1] - 10])
             setVar.setInput(0, configurePrim)
             
             confLayer = where.createNode("configurelayer")
             confLayer.parm("flattenop").set("stage")
-            confLayer.setPosition([pos_ref[0] - decal + (self.pasDecal * i), pos_ref[1] - 11])
+            confLayer.setPosition([pos_ref[0] - decal + (self.pasDecal * (i + nmbInput)), pos_ref[1] - 11])
             confLayer.setInput(0, setVar)
-            self.mergeToRig.setInput(i, confLayer)
+            self.mergeToRig.setInput(i + nmbInput, confLayer)
 
-
-            decalTRS = self.calcul_DecalTransform(var)
-            if i != 0:
+            if i != 0 or modif:
                 trs = where.createNode("xform")
-                trs.parm("tx").set(old_decalTRS + decalTRS + self.pasTrsDecal)
+                trs.parm("tx").set(self.list_variantPath[str(var.GetPath())][1])
                 trs.parm("primpattern").set(f"/{self.compOUT.name()}/geo/render/xform/*")
-                trs.setPosition([pos_ref[0] - decal + (self.pasDecal * i) + 1, pos_ref[1] - 13])
+                trs.setPosition([pos_ref[0] - decal + (self.pasDecal * (i + nmbInput)) + 1, pos_ref[1] - 13])
                 trs.setInput(0, confLayer)
 
-                old_decalTRS += decalTRS + self.pasTrsDecal
-                self.mergeToSusbtance.setInput(i, trs)
+                self.mergeToSusbtance.setInput(i + nmbInput, trs)
             else:
-                old_decalTRS = decalTRS
-                self.mergeToSusbtance.setInput(i, confLayer)
+                self.mergeToSusbtance.setInput(i + nmbInput, confLayer)
 
     def calcul_DecalTransform(self, var):
         if var.IsA(UsdGeom.Xform):
-            boxMax = []
-            boxMin = []
+            totalSize = 0.0
             for child in var.GetChildren():
                 boundable = UsdGeom.Boundable(child)
                 bound = UsdGeom.Boundable.ComputeExtentFromPlugins(boundable, Usd.TimeCode.Default())
-                boxMax.append(abs(bound[0][0]))
-                boxMin.append(abs(bound[1][0]))
-            
-            transform = max(boxMax) + max(boxMin)
+                size_x = (bound[1][0] - bound[0][0]) * 1.2
+                totalSize = max(totalSize, size_x)
+
+            transform = totalSize
 
         else:
             boundable = UsdGeom.Boundable(var)
             bound = UsdGeom.Boundable.ComputeExtentFromPlugins(boundable, Usd.TimeCode.Default())
-            transform = abs(bound[0][0]) + abs(bound[1][0])
+            transform = (bound[1][0] - bound[0][0]) * 1.2
 
         return transform

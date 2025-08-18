@@ -111,7 +111,7 @@ class USDParser():
         
         # check extension for USD files
         extension = resolved_path.suffix
-        if not extension in ['.usdc', '.usda']:
+        if not extension in ['.usdc', '.usda', ".usd"]: # modif fred ajout de ".usd"
             logger.debug(' - not an USD file')
             self._add_item_list_abs(item)
             return assetPathProcessed
@@ -236,7 +236,7 @@ class USDParser():
         else:
             asset_path = assetPathProcessed
             
-        if not extension in ['.usdc', '.usda']:
+        if not extension in ['.usdc', '.usda', ".usd"]:
             return asset_path
         
         # check if the assetPathProcessed should be update
@@ -315,7 +315,7 @@ class USDParser():
         self._assets_to_update.clear()
         
         # Simplified: focus only on @...usd[ac]@
-        pattern = r"@[^@]+\.usd[ac]@(?:<[^>]+>)?"  
+        pattern = r"@[^@]+\.usd[ac]?@(?:<[^>]+>)?"  #modif Fred je suis passer de \.usd[ac]@ a -> \.usd[ac]?@ j'ai ajouter un ? pour parser les fichier .usd .usda .usdc
         matches = re.findall(pattern, content, re.IGNORECASE)
         seen = set()
         self._log(f"Found {len(matches)} payload(s)")
@@ -346,7 +346,7 @@ class USDParser():
             r"@(?P<base>.+?/Export/.+?/)"
             r"v(?P<version>\d{3})/"
             r"(?P<asset_name>.+)_.+?_"
-            r"(v\d{3}\.usd[ac])@"
+            r"(v\d{3}\.usd[ac]?)@"
         )
         match = re.match(
             path_pattern,
@@ -374,7 +374,7 @@ class USDParser():
 
         for fname in os.listdir(latest_folder):
             fullmatch = re.fullmatch(
-                f"{re.escape(asset_name)}_.+?_{latest_str}\\.usd[ac]",
+                f"{re.escape(asset_name)}_.+?_{latest_str}\\.usd[ac]?",
                 fname,
                 re.IGNORECASE
             )

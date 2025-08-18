@@ -582,6 +582,9 @@ class MainInterface(Qt.QMainWindow):
             logger.debug("---------Fetching current Maya scene path---------")
             scene_path = self.get_path_from_houdini_node()
             if not scene_path:
+                if os.path.exists(self.pathPrism):
+                    logger.debug(f'Path provided: {self.pathPrism}')
+                    return [self.pathPrism]
                 logger.debug(
                     'Did not found path from'
                     ' node fallback to scenepath'

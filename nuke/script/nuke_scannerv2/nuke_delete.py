@@ -31,7 +31,9 @@ class ConfirmationNukeScanner(QDialog):
         self.__ui_height = 400
         self.__ui_min_width = 300
         self.__ui_min_height = 300
-        self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width, self.__ui_height) / 2
+        center = QDesktopWidget().availableGeometry().center()
+        offset = QPoint(int(self.__ui_width / 2), int(self.__ui_height / 2))
+        self.__ui_pos = center - offset
         self.__tab_widget = None
 
         # name the window
@@ -44,36 +46,6 @@ class ConfirmationNukeScanner(QDialog):
         self.__create_ui()
         self.__refresh_ui()
 
-    def __create_ui(self):
-        """
-        Create the ui
-        :return:
-        """
-        # Reinit attributes of the UI
-        self.setMinimumSize(self.__ui_min_width, self.__ui_min_height)
-        self.resize(self.__ui_width, self.__ui_height)
-        self.move(self.__ui_pos)
-
-        # Main Layout
-        main_lyt = QVBoxLayout()
-        self.setLayout(main_lyt)
-        main_lyt.setContentsMargins(5, 8, 5, 8)
-
-        title = QLabel("Are you sure you want to delete all these files?")
-        main_lyt.addWidget(title, alignment=Qt.AlignCenter)
-
-        self.__ui_list_folders = QListWidget()
-        main_lyt.addWidget(self.__ui_list_folders)
-
-        btn_lyt = QHBoxLayout()
-        main_lyt.addLayout(btn_lyt)
-
-        close_btn = QPushButton("Cancel")
-        close_btn.clicked.connect(self.close)
-        btn_lyt.addWidget(close_btn)
-        accept_btn = QPushButton("Accept")
-        accept_btn.clicked.connect(self.accept)
-        btn_lyt.addWidget(accept_btn)
 
     def __create_ui(self):
         """
