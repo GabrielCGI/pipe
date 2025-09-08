@@ -320,7 +320,7 @@ class CopyApp:
                     with open(self.preset_path.get(), mode='w') as f:
                         json.dump(self.department_identifiers, f, indent=4)
                 else:
-                    with filedialog.asksaveasfile(defaultextension=".json") as f:
+                    with filedialog.asksaveasfile(initialdir=file_utils.JSON_DIRECTORY, defaultextension=".json") as f:
                         json.dump(self.department_identifiers, f, indent=4)
             except:
                 self.log("Save cancelled")

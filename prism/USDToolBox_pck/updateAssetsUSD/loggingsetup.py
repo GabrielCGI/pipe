@@ -30,28 +30,32 @@ def setup_log(
     Returns:
         bool: return false if log could not be setup
     """
+    try:
     
-    log_config = None
-    with open(logConfigPath, 'r') as log_file:
-        log_config = json.load(log_file)
-    if not log_config:
-        print('No config', file=sys.stderr)
-        return False
-    
-    
-    sanitized_name = sanitize_filename(logName)
-    if with_time:
-        import datetime
-        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-        log_name = f"log_{sanitized_name}_{timestamp}.log"
-    else:
-        log_name = f"log_{sanitized_name}.log"
+        log_config = None
+        with open(logConfigPath, 'r') as log_file:
+            log_config = json.load(log_file)
+        if not log_config:
+            print('No config', file=sys.stderr)
+            return False
+        
+        
+        sanitized_name = sanitize_filename(logName)
+        if with_time:
+            import datetime
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            log_name = f"log_{sanitized_name}_{timestamp}.log"
+        else:
+            log_name = f"log_{sanitized_name}.log"
 
-    log_file = os.path.join(logDirectory, log_name)
-    
-    os.makedirs(logDirectory, exist_ok=True)
-    
-    log_config['handlers']['file']['filename'] = log_file
-    
-    logging.config.dictConfig(log_config)
-    return True
+        log_file = os.path.join(logDirectory, log_name)
+        
+        os.makedirs(logDirectory, exist_ok=True)
+        
+        log_config['handlers']['file']['filename'] = log_file
+        
+        logging.config.dictConfig(log_config)
+        return True
+
+    except:
+        return False

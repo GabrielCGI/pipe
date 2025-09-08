@@ -17,7 +17,7 @@
     <memberToolshelf name="simplefx"/>
     <memberToolshelf name="toto"/>
     <memberToolshelf name="illogic_solaris6"/>
-    <memberToolshelf name="develop"/>
+    <memberToolshelf name="shelf_2"/>
   </shelfSet>
 
   <toolshelf name="illogic_solaris6" label="illogic_solaris">
@@ -33,6 +33,7 @@
     <memberTool name="autoconnect_ui"/>
     <memberTool name="Lib_Importer"/>
     <memberTool name="update_assets_USD"/>
+    <memberTool name="usd_update_check"/>
     <memberTool name="restart_houdini"/>
     <memberTool name="batchrender"/>
     <memberTool name="sanity_check"/>
@@ -62,6 +63,10 @@ mtlximage_path_updatev2.run()]]></script>
   </tool>
 
   <tool name="update_assets_USD" label="Update Assets USD" icon="hicon:/SVGIcons.index?NETVIEW_lop_info.svg">
+    <helpText><![CDATA[= USD Updater =
+
+"""Check and update USD layers."""
+]]></helpText>
     <script scriptType="python"><![CDATA[import sys
 
 MODULE_PATH = "r:/pipeline/pipe/prism"
@@ -164,6 +169,10 @@ Lib_Importer.libImport()]]></script>
   </tool>
 
   <tool name="restart_houdini" label="Restart" icon="hicon:/SVGIcons.index?BUTTONS_cook.svg">
+    <helpText><![CDATA[= Restart =
+
+"""Save current scene then restart Houdini."""
+]]></helpText>
     <script scriptType="python"><![CDATA[import restart.restart as restart
 
 restart.restart_houdini()]]></script>
@@ -351,17 +360,21 @@ if START and nodes[0].type().name() != "prism::LOP_Import::1.0":
     
     
 if START:
-    print("find value")
     path = nodes[0].parm("filepath").eval()
     entity = nodes[0].parm("entity").eval()
-    if "sh" in entity.lower() and "sq" in entity.lower():
+    if "03_production/shots" in path.lower():
         FORCED = True
         
     elif "testShot" in path:
         FORCED = hou.ui.displayMessage(f"is not a shot: it's {entity}\n\nDo you want forced the script?", buttons=("No", "Yes") , close_choice=0)
     
     if FORCED:
-        icv.inheriteClassAttr(path)]]></script>
+        inClass = icv.inheriteClassAttr(path)
+        if inClass.result:
+            hou.ui.displayMessage("Everything went well\nReload Prism Import", buttons=("OK",) ,severity=hou.severityType.Message)
+        else:
+            hou.ui.displayMessage("Error check the Houdini console for more information", buttons=("OK",) ,severity=hou.severityType.Error)
+    ]]></script>
   </tool>
 
   <tool name="tool_1" label="New Tool" icon="PLASMA_App">
@@ -443,5 +456,41 @@ def run(*args):
     
     
 run()]]></script>
+  </tool>
+
+  <tool name="usd_update_checker" label="USD Update Checker" icon="hicon:/SVGIcons.index?NETVIEW_reload_needsupdate.svg">
+    <script scriptType="python"><![CDATA[import sys
+import importlib
+
+MODULE_PATH = "R:/devmaxime/dev/python/prism/USD-Updater"
+    
+if not MODULE_PATH in sys.path:
+    sys.path.insert(0, MODULE_PATH)
+
+import updateAssetsUSD as UD
+importlib.reload(UD)
+
+UD.reload_modules()
+UD.checkHoudiniImportsUpdates()]]></script>
+  </tool>
+
+  <tool name="usd_update_check" label="Check USD Update" icon="hicon:/SVGIcons.index?NETVIEW_reload_needsupdate.svg">
+    <helpText><![CDATA[= Check USD update =
+
+"""Flag import node when there is new USD updates."""
+]]></helpText>
+    <script scriptType="python"><![CDATA[import sys
+import importlib
+
+MODULE_PATH = "r:/pipeline/pipe/prism"
+    
+if not MODULE_PATH in sys.path:
+    sys.path.insert(0, MODULE_PATH)
+
+import USDToolBox_pck.updateAssetsUSD as UD
+importlib.reload(UD)
+
+UD.reload_modules()
+UD.checkHoudiniImportsUpdates()]]></script>
   </tool>
 </shelfDocument>

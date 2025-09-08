@@ -1,0 +1,126 @@
+name = "CopyToCloud"
+classname = "CopyToCloud"
+
+import os
+import sys
+import shutil
+from qtpy.QtWidgets import QAction
+from PrismUtils.Decorators import err_catcher_plugin as err_catcher
+
+
+
+file_path = os.path.abspath(__file__)
+porjet = file_path.split("\\")[1]
+LOCAL = rf"I:/{porjet}"
+CLOUD = rf"I:/{porjet}/04_Resources/googleCache"
+
+class CopyToCloud:
+    def __init__(self, core):
+        self.core = core
+        self.version = "v1.0.0"
+
+        self.core.registerCallback("openPBFileContextMenu", self.contextMenu, plugin=self)
+        self.core.registerCallback("productSelectorContextMenuRequested", self.productContextMenu, plugin=self)
+        self.core.registerCallback("textureLibraryTextureContextMenuRequested", self.textureLibraryTextureContextMenuRequested, plugin=self)
+        self.core.registerCallback("openPBListContextMenu", self.mediaContextMenuRequested, plugin=self)
+
+
+
+    def normalize_path(self, path):
+        return os.path.normpath(path)
+
+    def is_valid_local_path(self, path):
+        if not path or not os.path.exists(path):
+            return False
+
+        norm_path = self.normalize_path(path)
+        return norm_path.startswith(self.normalize_path(LOCAL)) and not norm_path.startswith(self.normalize_path(CLOUD))
+
+    def is_valid_cloud_path(self, path):
+        if not path or not os.path.exists(path):
+            return False
+
+        norm_path = self.normalize_path(path)
+        return norm_path.startswith(self.normalize_path(CLOUD))
+
+    @err_catcher(name=__name__)
+    def contextMenu(self, origin, menu, path):
+        self.add_copy_actions(menu, path)
+
+    @err_catcher(name=__name__)
+    def productContextMenu(self, productbrowser, lw, pos, menu):
+        if lw != productbrowser.tw_versions:
+            return
+
+        data = productbrowser.getCurrentVersion()
+        path = data.get("filename") or data.get("path") if data else None
+        self.add_copy_actions(menu, path)
+
+    @err_catcher(name=__name__)
+    def textureLibraryTextureContextMenuRequested(self, origin, menu):
+        if type(origin).__name__ != "TextureWidget" and type(origin).__name__ != "TextureStackWidget" :
+            return
+
+        path = getattr(origin, "path", None)
+        self.add_copy_actions(menu, path)
+    
+    @err_catcher(name=__name__)
+    def mediaContextMenuRequested(self, mediaBrowser, menu, lw, item, path):
+        if lw.objectName() == "tw_identifier":
+            if item.childCount() >= 1:
+                return
+        
+        self.add_copy_actions(menu, path)
+
+    def add_copy_actions(self, menu, path):
+        if self.is_valid_local_path(path):
+            act_cloud = menu.addAction("Copy to cloud")
+            act_cloud.triggered.connect(lambda: self.copy_to_cloud(path))
+        elif self.is_valid_cloud_path(path):
+            act_local = menu.addAction("Copy to local")
+            act_local.triggered.connect(lambda: self.copy_to_local(path))
+
+    def copy_to_cloud(self, src):
+        self.copy_to(src, LOCAL, CLOUD)
+
+    def copy_to_local(self, src):
+        self.copy_to(src, CLOUD, LOCAL)
+
+    def copy_to(self, src, src_root, dest_root):
+        norm_src = self.normalize_path(src)
+        norm_src_root = self.normalize_path(src_root)
+
+        if not norm_src.startswith(norm_src_root):
+            self.core.popup(
+                f"Source path doesn't match expected prefix.\n"
+                f"Path:   {src}\n"
+                f"Prefix: {src_root}",
+                severity="error"
+            )
+            return
+
+        relative_path = norm_src[len(norm_src_root):].lstrip("\\/")
+        dst = os.path.join(dest_root, relative_path)
+
+        if os.path.exists(dst):
+            self.core.popup(f"Copy aborted: destination already exists:\n{dst}", severity="warning")
+            return
+
+        try:
+            os.makedirs(os.path.dirname(dst), exist_ok=True)
+
+            if os.path.isfile(src):
+                shutil.copy2(src, dst)
+                explorer_target = os.path.dirname(dst)
+            elif os.path.isdir(src):
+                shutil.copytree(src, dst)
+                explorer_target = dst
+            else:
+                self.core.popup("Invalid source type (not a file or folder)", severity="error")
+                return
+
+            self.core.popup(f"Copied successfully to:\n{dst}")
+            os.startfile(explorer_target)
+
+        except Exception as e:
+            self.core.popup(f"Copy failed:\n{e}", severity="error")

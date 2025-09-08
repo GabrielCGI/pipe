@@ -185,10 +185,13 @@ class autoVariant():
         if var.IsA(UsdGeom.Xform):
             totalSize = 0.0
             for child in var.GetChildren():
-                boundable = UsdGeom.Boundable(child)
-                bound = UsdGeom.Boundable.ComputeExtentFromPlugins(boundable, Usd.TimeCode.Default())
-                size_x = (bound[1][0] - bound[0][0]) * 1.2
-                totalSize = max(totalSize, size_x)
+                if child.IsA(UsdGeom.Xform):
+                    totalSize = max(totalSize, self.calcul_DecalTransform(child))
+                else:
+                    boundable = UsdGeom.Boundable(child)
+                    bound = UsdGeom.Boundable.ComputeExtentFromPlugins(boundable, Usd.TimeCode.Default())
+                    size_x = (bound[1][0] - bound[0][0]) * 1.2
+                    totalSize = max(totalSize, size_x)
 
             transform = totalSize
 

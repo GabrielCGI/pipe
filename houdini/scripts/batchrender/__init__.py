@@ -10,9 +10,3 @@ def main():
     batchrender.main()
     
 
-def debug():
-    import houdiniutils
-    importlib.reload(houdiniutils)
-    houdiniutils.debug()
-    houdiniutils.breakpoint()
-    main()

@@ -8,8 +8,6 @@ import re
 
 # package deps
 from . import assetitem as at
-import importlib
-importlib.reload(at)
 
 #import USD libs
 try:
@@ -31,7 +29,10 @@ class USDParser():
             self.__log_func = print
         self.ar_context = ["I:/", "R:/"]
         self._enable_update = True
-            
+        self._isupdate = True
+    
+    def isUpdate(self) -> bool:
+        return bool(self._isupdate)
             
     def get_assets_to_update(self) -> list[at.AssetItem]:
         return list(self._assets_to_update)
@@ -89,8 +90,11 @@ class USDParser():
             
     # -------------------------------Parse USD-------------------------------
         
-    def _parse_filter(self, assetPathProcessed): 
+    def _parse_filter(self, assetPathProcessed):
         logger.debug(f'Parse {assetPathProcessed}')
+        
+        if self.update_check_only and not self._isupdate:
+            return assetPathProcessed
         
         # resolve path from context or layer if needed
         resolved_path = self._resolve_path(assetPathProcessed)
@@ -161,6 +165,7 @@ class USDParser():
             
         # update item to show latest and current version
         logger.debug(' - Can be updated')
+        self._isupdate = False
         if not Path(assetPathProcessed).is_absolute():
             updatedPath = re.sub(
                 r'v\d{2,9}', f'v{latest_match.group(1)}',
@@ -210,11 +215,17 @@ class USDParser():
         self._enable_update = True
         
 
-    def parse(self, layer: Sdf.Layer , enable_recursion: bool=False):
+    def parse(
+            self,
+            layer: Sdf.Layer,
+            enable_recursion: bool=False,
+            check_mode=False):
+
         self._assets_to_update.clear()
         ar_context = Ar.DefaultResolverContext(self.ar_context)
         with Ar.ResolverContextBinder(ar_context):
             self.dirname = Path((layer.realPath)).parent
+            self.update_check_only = check_mode
             if enable_recursion:
                 logger.debug('Start recursive parsing')
                 self._recursive_parse_dependencies(layer)

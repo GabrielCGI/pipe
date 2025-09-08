@@ -156,9 +156,11 @@ def run():
     render_out_folder_ui = shot_dir + "/Renders" + "/3dRender"
     
     if len(folder_to_delete)>0:
-        if ConfirmationNukeScanner(
-            render_out_folder_ui,
-            folder_to_delete).exec_():
+        # if ConfirmationNukeScanner(
+        #     render_out_folder_ui,
+        #     folder_to_delete).exec_():
+            
+        if nuke.ask(f"Do you want to delete all these {len(folder_to_delete)} files ?"):
             
             for folder_path in folder_to_delete:
                 print("DELETING %s"%(folder_path))

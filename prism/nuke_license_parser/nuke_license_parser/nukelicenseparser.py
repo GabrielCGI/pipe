@@ -60,11 +60,21 @@ class NukeLicenseParser(Qt.QDialog):
         except Exception as e:
             print(f"Could not load stylesheet:\n\t{e}")
 
-        self.data = nuke_requests.main()
+        self.mainLayout = Qt.QVBoxLayout()
 
-        self.mainLayout = Qt.QHBoxLayout()
+        self.refreshButton = Qt.QPushButton(text="Refresh")
+        self.refreshButton.clicked.connect(self.create_list_license)
+        self.mainLayout.addWidget(self.refreshButton)
 
         self.listLicenses = Qt.QTableWidget()
+        self.create_list_license()
+        
+        
+        self.setLayout(self.mainLayout)
+
+
+    def create_list_license(self):
+        self.data = nuke_requests.main()
         self.listLicenses.setColumnCount(4)
         self.listLicenses.setRowCount(len(self.data))
         self.listLicenses.setHorizontalHeaderLabels(
@@ -82,7 +92,7 @@ class NukeLicenseParser(Qt.QDialog):
             license_pool = Qt.QTableWidgetItem(pool)
             license_usage = Qt.QTableWidgetItem('X' if data.get('used') else "")
             license_limited = Qt.QTableWidgetItem('X' if data.get('limited') else "")
-            license_user = Qt.QTableWidgetItem('X' if data.get('user') else "")
+            license_user = Qt.QTableWidgetItem(data.get('user') if data.get('user') else "")
             license_pool.setTextAlignment(Qtc.Qt.AlignmentFlag.AlignCenter)
             license_usage.setTextAlignment(Qtc.Qt.AlignmentFlag.AlignCenter)
             license_limited.setTextAlignment(Qtc.Qt.AlignmentFlag.AlignCenter)
@@ -101,9 +111,8 @@ class NukeLicenseParser(Qt.QDialog):
         self.listLicenses.horizontalHeader().setSectionResizeMode(Qt.QHeaderView.ResizeMode.Stretch)
 
         self.mainLayout.addWidget(self.listLicenses)
-        self.setLayout(self.mainLayout)
-            
-            
+        
+        
 def main():
     app = Qt.QApplication.instance()
 

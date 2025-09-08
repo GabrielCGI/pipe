@@ -95,12 +95,12 @@ def parse_license(request: requests.models.Response):
         licenses_data[pool] = {
             'used': bool(int(inuse))
         }
-        if inuse != '1':
-            continue
         if state == 'permanent':
             licenses_data[pool]['limited'] = True
         else:
             licenses_data[pool]['limited'] = False 
+        if inuse != '1':
+            continue
         usage_params = parse_params(row)
         if len(usage_params):
             licenses_data[pool]['query_params'] = usage_params

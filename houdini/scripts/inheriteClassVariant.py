@@ -19,6 +19,7 @@ class inheriteClassAttr():
         self.projet = "/".join(self.filePathImport.split("\\")[:2])
         self.root = None
         self.NewLayer = None
+        self.result = True
         self.NameFolder = "_layer_anm_class"
         self.run()
         
@@ -52,7 +53,7 @@ class inheriteClassAttr():
 
 
         print("\n\nnow find charaters and props....")
-        allPathPrim = self.getAllPrimPath(self.root, ["/assets/props/", "/assets/characters/"])
+        allPathPrim = self.getAllPrimPath(self.root, ["/assets/props/", "/assets/propsSkin", "/assets/characters/"])
         if not allPathPrim:
             print("no props and no characters")
             return
@@ -61,7 +62,7 @@ class inheriteClassAttr():
         print(f"{self.prefix} USD-----------------------------------------------------------------------------------------------")
         self.NewLayer.RemovePrim("/__class__")
         if not self.clearFile:
-            self.NewLayer.DefinePrim("/__class__", "Xform")
+            self.NewLayer.CreateClassPrim(f"/__class__")
 
        
         for prim in allPathPrim:
@@ -76,6 +77,7 @@ class inheriteClassAttr():
             
             if not primReference:
                 print("error ", primReference, namePrim, "prim reference not found")
+                self.result = False
                 continue
 
             print(f"\n{self.prefix} Set variant for:    ", namePrim, "---------------------------------------")
@@ -95,8 +97,8 @@ class inheriteClassAttr():
 
         print("\n\nsave file....")
         self.NewLayer.GetRootLayer().Save()
-
-        print("nice your publish is finish :)")
+        print("nice your update is finish :)")
+        return self.result
 
     def showAllChild(self, prim):
         imageable = UsdGeom.Imageable(prim)
@@ -264,6 +266,7 @@ class inheriteClassAttr():
             if not os.path.exists(pathUSD):
                 print("ERROR path not foud.........................")
                 print(pathUSD)
+                self.result = False
                 pathUSD = None
 
             break

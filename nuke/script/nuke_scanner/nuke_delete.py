@@ -172,6 +172,19 @@ def get_every_folder_to_delete(render_out_folder):
                     
     return folder_to_delete
 
+
+def deleteAll(folder_to_delete):
+    for folder_path in folder_to_delete:
+        print("DELETING %s"%(folder_path))
+        try:
+            shutil.rmtree(folder_path)
+            print("\t Folder deleted : --> " + folder_path)
+        except Exception as e:
+            print(f"Failed to delete:\n{e}")
+    
+    print(f'Has deleted {len(folder_to_delete)} files.')
+    
+    
 def main():
     """
     Delete every folder that need to be deleted.
@@ -190,17 +203,9 @@ def main():
             render_out_folder_ui,
             folder_to_delete).exec_():
             
-            for folder_path in folder_to_delete:
-                print("DELETING %s"%(folder_path))
-                try:
-                    shutil.rmtree(folder_path)
-                    print("\t Folder deleted : --> " + folder_path)
-                except Exception as e:
-                    print(f"Failed to delete:\n{e}")
-            
-            print(f'Has deleted {len(folder_to_delete)} files.')
+        # if nuke.ask(f"Do you want to delete all these {len(folder_to_delete)} files ?"):
+            thread = threading.Thread(target=deleteAll, args=(folder_to_delete,))
+            thread.start()
             
 def run():
-    
-    thread = threading.Thread(target=main)
-    thread.start()
+    main()

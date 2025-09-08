@@ -18,11 +18,14 @@
             "HotkeyPreferencesWindow",
             "HypershadeWindow",
             "NamespaceEditor",
-            "ReferenceEditor",
             "ParentConstraint",
-            "MatchTransform"
+            "OpenNodeAttrRef",
+            "MatchTransform",
+            "ReferenceEditor"
         ],
-        [],
+        [
+            "share"
+        ],
         [],
         []
     ],

@@ -4,7 +4,7 @@ import sys
 
 SANITYCHECK_PATH = "R:/pipeline/pipe_public/sanitycheck"
 ENABLE_SANITY_CHECK = True
-sys.path.append(SANITYCHECK_PATH)
+sys.path.insert(0, SANITYCHECK_PATH)
 try:
     import sanitycheck
 except:
@@ -16,7 +16,6 @@ except:
     YAML_LOCATION = "None"
     
 def main(*args):
-
     if ENABLE_SANITY_CHECK:
         args = (*args, YAML_LOCATION)
         res = sanitycheck.main(*args)
@@ -29,3 +28,5 @@ def main(*args):
             popup = sm.core.waitPopup(sm.core, msg)
             with popup:
                 time.sleep(0.5)
+    
+    

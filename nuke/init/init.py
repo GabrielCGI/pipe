@@ -119,9 +119,15 @@ if nuke.NUKE_VERSION_MAJOR >= 13:
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts/nukeToPack/", 'nukeToPack/icons')
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/aeRefractor')
 
+    # << Start Illogic custom plugins
+    if nuke.NUKE_VERSION_MAJOR == 13:
+        nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/custom_illogic/nuke_13")
+    elif nuke.NUKE_VERSION_MAJOR == 15:
+        nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/custom_illogic/nuke_15")
+    # << End Illogic custom plugins 
+    
     ### << Start Optical flare
     os.environ["OPTICAL_FLARES_VERBOSE_CONSOLE"]="True"
-
 
     if(nuke_version=="13.1"):
         

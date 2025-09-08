@@ -1,0 +1,23 @@
+{
+    "filters": {
+        "COMPOSITING": [
+            "compo",
+            "comp",
+            "Compo",
+            "nuke",
+            "beauty"
+        ],
+        "ANIM": [
+            "anim",
+            "anim_playblast"
+        ],
+        "RLO": [
+            "RoughtLayout",
+            "Previz",
+            "RoughLayout_playblast"
+        ]
+    },
+    "source_path": "I:/intermarche",
+    "dest_path": "D:/cache_resolve",
+    "production": ""
+}

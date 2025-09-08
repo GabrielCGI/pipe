@@ -252,3 +252,5 @@ class NukeScanner:
                     print("RENAMING %s -> %s"%(folder_path, new_path))
                     os.rename(folder_path, new_path)
                     print(folder_path + "\n\t--> " + new_path)
+        else:
+            nuke.alert("Already clean !")

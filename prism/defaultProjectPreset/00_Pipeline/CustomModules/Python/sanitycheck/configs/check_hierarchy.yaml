@@ -31,8 +31,8 @@ Production:
       Lookdev:
         rules:
           # - HaveMaterialPreviewCheck
-          - NamingVariantAndComponent|WARNING
-          - CharacterShadingGoodExport|WARNING
+          - NamingVariantAndComponent
+          - CharacterShadingGoodExport
 
 
 
@@ -56,13 +56,12 @@ Production:
       rules:
       Anim:
         rules:
-          - NamingHierarchyAnimation
+          - CameraSelExport|WARNING
           - ExportPresetsClean|WARNING
-          - NamingCamera
+    
     Layout:
       rules:
       Layout:
         rules:
-          # - NamingHierarchyLayout
-          - NamingCamera
+          - CameraSelExport|WARNING
           - ExportPresetsClean|WARNING

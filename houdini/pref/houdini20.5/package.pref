@@ -1,3 +1,0 @@
-pkg.active := 1;
-pkg.autoload := 0;
-pkg.locked := 0;

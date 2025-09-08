@@ -34,30 +34,8 @@ with open(style_path, "r") as file:
 for key, value in palettedata.items():
     STYLE_CONTENT = STYLE_CONTENT.replace(key, value)
 
-## set this variable to True to enable debug
-## WARNING: DEBUG MODE will deadlock houdini if not catch by a distant debugger
-DEBUG_MODE = False
-try:
-    sys.path.append(r'R:\devmaxime\virtualvens\sanitycheck\Lib\site-packages')
-    import debugpy
-except:
-    DEBUG_MODE = False
 
 
-def debug():
-    if not DEBUG_MODE:
-        return
-    
-    hython = r"C:\Program Files\Side Effects Software\Houdini 20.5.548\bin\hython3.11.exe"
-    debugpy.configure(python=hython)
-    try:
-        debugpy.listen(5678)
-    except Exception as e:
-        print(e)
-        print("Already attached")
-    
-    print("Waiting for debugger attach")
-    debugpy.wait_for_client()
 
     
 class BatchSelector(QtWidgets.QDialog):
@@ -398,7 +376,6 @@ class BatchSelector(QtWidgets.QDialog):
 
 def main():
     
-    debug()
     render_nodes = list(
         hou.lopNodeTypeCategory()
         .nodeType('prism::LOP_Render::1.0')

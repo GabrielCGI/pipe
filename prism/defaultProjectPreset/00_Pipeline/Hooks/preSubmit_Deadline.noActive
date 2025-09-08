@@ -1,0 +1,52 @@
+import socket
+import random
+
+
+
+
+
+
+def main(origin, Settings, pluginInfos, arguments):
+    #object Prism_Deadline = origin       is a object
+    #data send to Deadline = Settings     is a dict
+    #husk_settings.json = pluginInfos     is a dict
+    #data job_info.job = arguments        is a dict
+
+    core = origin.core
+    if core.appPlugin.pluginName != "Houdini":
+        return
+    
+    print("custom info Deadline")
+    #Settings["Comment"] = "je suis un gentil Commentaire =)"
+    #Settings["BatchName"] = "je suis un batch Deadline"
+    #Settings["Name"] = "je suis un job Deadline" + test
+    
+    #trouver toute les environments variables qui bride le mapping des textures
+    AllEnvVariable = []
+    copySettings = Settings.copy()
+    for key, value in copySettings.items():
+        if key.startswith("EnvironmentKeyValue"):
+            if not "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES" in value and not "KARMA_XPU_MAX_SHADER_TEXTURE_RES" in value:
+                AllEnvVariable.append(value)
+            del Settings[key]
+
+
+    for i, data in enumerate(AllEnvVariable):
+        Settings[f"EnvironmentKeyValue{i}"] = data
+
+
+
+
+    if socket.gethostname() != "FALCON-01":
+        return
+    
+    return
+
+    #ajouter une low resollution des texture pour les volume ou autre
+    Settings["Comment"] = "test rendu Variable"
+    Settings["Name"] = "test_rendu_volume_limite_512_rm" + str(random.randint(1, 100))
+    if Settings["BatchName"].split('_')[-2] in ["VOLUMEcut"]:
+        print("add environment variable for the volume")
+        for value in ["KARMA_XPU_MAX_LIGHTING_TEXTURE_RES=512", "KARMA_XPU_MAX_SHADER_TEXTURE_RES=128"]:
+            i += 1
+            Settings[f"EnvironmentKeyValue{i}"] = value

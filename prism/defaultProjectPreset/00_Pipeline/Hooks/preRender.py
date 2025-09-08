@@ -15,11 +15,19 @@
 #     print(kwargs["scenefile"])
 #     print(kwargs["settings"])
 
+import socket
 
 
 KARMA_RENDER_SETTING_TYPE = 'karmarenderproperties'
 DWA_B = 'zips'
 EXR_COMPRESSION_TYPE = 'image_exr_compression'
+
+# TO enable print again set DEBUG to True
+DEBUG = False
+def pdebug(msg):
+    if DEBUG:
+        print(msg)
+
 try:
     import hou
     import loputils
@@ -27,9 +35,9 @@ except:
     print("Skipping import hou...")
 
 def set_parm_expression_to_python(parm):
-    print("DEBUG: postrender parm =", parm)
+    pdebug("DEBUG: postrender parm =", parm)
     if not parm:
-        print("DEBUG: No 'postrender' parameter found; nothing to do.")
+        pdebug("DEBUG: No 'postrender' parameter found; nothing to do.")
         return
 
     # Check for keyframes or expression
@@ -39,41 +47,41 @@ def set_parm_expression_to_python(parm):
     if len(keyframes) == 0:
         # If 0 keyframes, forcibly create a Python expression
         current_value = parm.evalAsString()
-        print(f"DEBUG: Set postrender parm expression to python")
+        pdebug(f"DEBUG: Set postrender parm expression to python")
         parm.setExpression(current_value, language=hou.exprLanguage.Python)
     else: 
-        print(f"DEBUG: Parm postrender already a Python expression")       
+        pdebug(f"DEBUG: Parm postrender already a Python expression")       
 
 def set_output_processors_search_path(kwargs):
   
 
     node = hou.node(kwargs["state"].node.path())
-    print("DEBUG: Root node =", node)
+    pdebug(f"DEBUG: Root node = {node}")
 
     # Check if the node is locked, unlock if necessary
     if node and node.isLockedHDA():
         node.allowEditingOfContents(True)
-        print("DEBUG: Unlocked HDA for editing.")
+        pdebug("DEBUG: Unlocked HDA for editing.")
 
 
     if not node:
-        print("Error: Fail to get node Lop Render to update... The ouputprocessor SEARCH_PATH will not be added")
+        pdebug("Error: Fail to get node Lop Render to update... The ouputprocessor SEARCH_PATH will not be added")
 
     usd_rop_node = node.node("usd_rop")
     usdrender_rop_node = node.node("usdrender_rop1")
 
 
     if not usd_rop_node or not usdrender_rop_node:
-        print("DEBUG: No usd_rop node or usdrender_rop_node found; early return.")
+        pdebug("DEBUG: No usd_rop node or usdrender_rop_node found; early return.")
         return
 
     # --- Existing Logic to set "outputprocessors" parameter ---
-    print("\n Debug: ------ Output processors processing -------- ")
+    pdebug("\n Debug: ------ Output processors processing -------- ")
     parm = usd_rop_node.parm("outputprocessors")
-    print("DEBUG: outputprocessors parm =", parm)
+    pdebug(f"DEBUG: outputprocessors parm = {parm}")
     if parm:
         try:
-            print("DEBUG: Setting outputprocessors to 'usesearchpaths'")
+            pdebug("DEBUG: Setting outputprocessors to 'usesearchpaths'")
             parm.set("usesearchpaths")
             
             processor_kwargs = {
@@ -83,20 +91,20 @@ def set_output_processors_search_path(kwargs):
                 "script_multiparm_index": 0
             }
             loputils.handleOutputProcessorAdd(processor_kwargs)
-            print("DEBUG: handleOutputProcessorAdd success.")
+            pdebug("DEBUG: handleOutputProcessorAdd success.")
         except hou.OperationFailed as e:
-            print("DEBUG: Skip add output processor - Already exist:")
+            pdebug("DEBUG: Skip add output processor - Already exist:")
 
         search_path_parm = usd_rop_node.parm("usesearchpaths_searchpath")
         if search_path_parm:
             search_path_parm.set("i:/;r:/;I:/;R:/;")
-            print("DEBUG: Set search path parm to i:/;r:/;I:/;R:/;")
+            pdebug("DEBUG: Set search path parm to i:/;r:/;I:/;R:/;")
 
         simple_relative_paths_parm = usd_rop_node.parm("enableoutputprocessor_simplerelativepaths")
-        print("DEBUG: enableoutputprocessor_simplerelativepaths parm =", simple_relative_paths_parm)
+        pdebug(f"DEBUG: enableoutputprocessor_simplerelativepaths parm = {simple_relative_paths_parm}")
         if simple_relative_paths_parm:
             simple_relative_paths_parm.set(0)
-            print("DEBUG: Disabled simplerelativepaths processor.")
+            pdebug("DEBUG: Disabled simplerelativepaths processor.")
 
     # --- New Logic for "postrender" parameter ---
     #print("\nDebug: ------ Python expression processing --------")
@@ -160,8 +168,8 @@ def main(*args, **kwargs):
             print("Houdini is not in GUI mode. Skipping processor & exr compression.")
             return
         else: 
-            print("Houdini is GUI mode. Strating processor & exr compression in pre-render.")
+            print("Pre-render output processors search path desactivated.")
             # updateContextOptions(kwargs)
-            changeEXRCompression(kwargs)
-            set_output_processors_search_path(kwargs)
-            hou.hipFile.save()
+            #changeEXRCompression(kwargs)
+            #set_output_processors_search_path(kwargs)
+            #hou.hipFile.save()

@@ -13,11 +13,10 @@
         "RLO": [
             "RoughtLayout",
             "Previz",
-            "RoughLayout_playblast",
-            "layout"
+            "RoughLayout_playblast"
         ]
     },
     "source_path": "I:/intermarche",
     "dest_path": "D:/cache_resolve/intermarche",
-    "production": "INTER"
+    "production": ""
 }
