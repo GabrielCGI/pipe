@@ -27,24 +27,27 @@ class inheriteClassAttr():
 
     def run(self):
         print("openning file.....")
+        
         stage = Usd.Stage.Open(self.filePathImport)
 
         print("\nfind Good Layer.....")
         infoLay, layerPath, masterLayer = self.FindGoodLayer(stage, "/_layer_anm_main/", "/_layer_anm_master/")
         if not infoLay:
+            self.result = False
             print('!!ERROR!! no layer found in this stack usd')
             return
-        print(layerPath)
 
         
         newPath = self.createLayerClass(layerPath)
         if not newPath:
+            self.result = False
             print("error new path invalide")
             return
         
         print(f"\nCreate new layer  here: {newPath}")
         self.NewLayer = Usd.Stage.CreateNew(newPath)
         self.root = Usd.Stage.Open(self.filePathImport)
+        print(self.filePathImport, self.NewLayer, self.root)
 
 
 
@@ -60,8 +63,8 @@ class inheriteClassAttr():
         
 
         print(f"{self.prefix} USD-----------------------------------------------------------------------------------------------")
-        self.NewLayer.RemovePrim("/__class__")
         if not self.clearFile:
+            #self.NewLayer.DefinePrim("/__class__", "Xform")
             self.NewLayer.CreateClassPrim(f"/__class__")
 
        
@@ -295,9 +298,12 @@ class inheriteClassAttr():
         over.GetInherits().AddInherit(inheritPath, position=Usd.ListPositionFrontOfPrependList)
 
     def AppendLayer(self, layer, sublayer):
-        for pathlayer in layer.subLayerPaths:
+        ORlist = list(layer.subLayerPaths)
+        for pathlayer in ORlist:
             if self.NameFolder in pathlayer:
-                layer.subLayerPaths.remove(pathlayer)
+                try:
+                    layer.subLayerPaths.remove(pathlayer)
+                except:pass
         
 
         sublayer = f"../../{self.NameFolder}/" + sublayer.split(f"\\{self.NameFolder}\\")[-1].replace("\\", "/")

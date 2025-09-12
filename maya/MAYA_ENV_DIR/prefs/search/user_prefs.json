@@ -1,5 +1,5 @@
 {
-    "context": "ttf",
+    "context": "select",
     "history": [
         [
             "GraphEditor",
@@ -18,9 +18,10 @@
             "HotkeyPreferencesWindow",
             "HypershadeWindow",
             "NamespaceEditor",
-            "ParentConstraint",
             "OpenNodeAttrRef",
+            "CreateImagePlane",
             "MatchTransform",
+            "ParentConstraint",
             "ReferenceEditor"
         ],
         [

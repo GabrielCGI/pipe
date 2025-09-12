@@ -80,8 +80,8 @@ class NukeLicenseParser(Qt.QDialog):
         self.listLicenses.setHorizontalHeaderLabels(
             [
                 'Pool',
-                'is Used ?',
-                'Limited to nuke 13.x ?',
+                'Nuke 15+',
+                'Nuke 13',
                 'Users'
             ]
         )
@@ -90,7 +90,7 @@ class NukeLicenseParser(Qt.QDialog):
         for i, pool in enumerate(self.data):
             data = self.data[pool]
             license_pool = Qt.QTableWidgetItem(pool)
-            license_usage = Qt.QTableWidgetItem('X' if data.get('used') else "")
+            license_usage = Qt.QTableWidgetItem('X' if not(data.get('limited')) else "")
             license_limited = Qt.QTableWidgetItem('X' if data.get('limited') else "")
             license_user = Qt.QTableWidgetItem(data.get('user') if data.get('user') else "")
             license_pool.setTextAlignment(Qtc.Qt.AlignmentFlag.AlignCenter)

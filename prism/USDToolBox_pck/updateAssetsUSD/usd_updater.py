@@ -27,7 +27,7 @@ if DEBUG_MODE:
 LOG_DIRECTORY = 'R:/logs/update_usd_logs'
 LOG_CONFIG = os.path.join(os.path.dirname(__file__), "config/logconfig.json")
 
-#---------------------------- pb ----------------------------
+
 if not socket.gethostname() == 'ROLL4':
     is_log_setup = loggingsetup.setup_log(
         logName='update_usd',
@@ -38,7 +38,6 @@ if not socket.gethostname() == 'ROLL4':
 else:
     is_log_setup = False
 
-#---------------------------- pb ----------------------------
 
 if not is_log_setup:
     if not socket.gethostname() == 'ROLL4':

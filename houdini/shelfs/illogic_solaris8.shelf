@@ -18,6 +18,7 @@
     <memberToolshelf name="toto"/>
     <memberToolshelf name="illogic_solaris6"/>
     <memberToolshelf name="shelf_2"/>
+    <memberToolshelf name="labs_toolset"/>
   </shelfSet>
 
   <toolshelf name="illogic_solaris6" label="illogic_solaris">

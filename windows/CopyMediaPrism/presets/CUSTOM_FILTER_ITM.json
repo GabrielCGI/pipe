@@ -14,6 +14,9 @@
             "RoughtLayout",
             "Previz",
             "RoughLayout_playblast"
+        ],
+        "FX": [
+            "test_fx"
         ]
     },
     "source_path": "I:/intermarche",

@@ -110,6 +110,7 @@ if nuke.NUKE_VERSION_MAJOR >= 13:
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/ToolSets')
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts')
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/icons')
+    nuke.pluginAddPath('R:/pipeline/pipe/nuke/cameraMetadata')
     #nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins')
     nuke.pluginAddPath('R:/pipeline/pipe/nuke/script')
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/MagicDefocus2_v1.0.3")
@@ -171,9 +172,20 @@ if nuke.NUKE_VERSION_MAJOR >= 13:
     ### End Optical flare >>
 
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins')
-
+    
 
 
 
     print("End Nuke Init as version 13+ !\n\n")
 
+
+## edit 2025.09.12  (YY.MM.DD)
+##  set some node defalut configs
+
+##  write nodes
+
+nuke.knobDefault('Write.exr.compression', '8')
+nuke.knobDefault('Write.exr.dw_compression_level', '85')
+nuke.knobDefault('Write.exr.interleave', '2')
+
+##  write nodes

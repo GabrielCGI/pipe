@@ -116,6 +116,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     from nuke_scanner import select_unconnected_read
     from nuke_scanner import nuke_delete
     from nukescripts import panels
+    import importCamFromMetadata
 
     import stamps
     # >>>PrismStart
@@ -168,6 +169,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     s.addCommand("Projection Buddy", "nuke.createNode(\"ProjectionBuddy\")") # >>> Add Projection Buddy tool
     s.addCommand("Reflection Buddy", "nuke.createNode(\"ReflectionBuddy\")") # >>> Add Reflecrion Buddy tool
     s.addCommand("aeRefractor", "nuke.createNode(\"aeRefracTHOR\")",  icon="aeRefracTHOR.png")
+    s.addCommand("Import Cam from Metadata", "importCamFromMetadata.main()")
     n=bloomMenu.addMenu("Nodes")
     n.addCommand('expoglow', 'nuke.createNode("expoglow")')
     n.addCommand('exponential glow', "nuke.createNode(\"exponentialGlow\")")

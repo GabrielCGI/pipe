@@ -11,8 +11,8 @@ def infoP(msg):
     print(msg, file=sys.stdout)
 
 def error(msg):
-    print("ILLOGIC ERROR : " + msg, file=sys.stderr)
     print(msg)
+    print("ILLOGIC ERROR : " + msg, file=sys.stderr)
 
 def catch_error(dataEnv):
     if not dataEnv or type(dataEnv) != dict:
@@ -121,7 +121,32 @@ def hierarchie():
                 if not Nodes:
                     continue
 
+def createLastScene(PathScene):
+    def findLastVersionScene(path, scene):
+        max_version = -1
+        latest_file = None
+        version = 0
+        for filename in os.listdir(path):
+            if not filename:
+                continue
+            if not filename.startswith(scene) or not filename.endswith(".ma"):
+                 continue
 
+            v = re.findall(r'\d+', filename.split("_")[-1])[0]
+            version = int(v)
+            if version > max_version:
+                max_version = version
+                latest_file = filename
+        
+        name_scene = "_".join(latest_file.split("_")[:-1]) + "_v" + str(max_version + 1).zfill(3) + ".ma"
+        return name_scene
+    
+    splitPath = PathScene.split("\\")[:-1]
+    scene = "_".join(PathScene.split("\\")[-1].split("_")[:-1])
+    folderPath = "\\".join(splitPath)
+    new_scene = findLastVersionScene(folderPath, scene)
+
+    return folderPath + "\\" + new_scene
 
 
 def ImportReference(Projet, dataRef):
@@ -162,6 +187,9 @@ def UpdateReference(Projet, refInScene):
 def CoreStandalone():
     dataEnv = eval(sys.argv[1])
     dataRef = eval(sys.argv[2])
+    sys.stdout = open('CONOUT$', 'w')
+    sys.stderr = open('CONOUT$', 'w')
+    sys.stdin = open('CONIN$', 'r')
 
     if catch_error(dataEnv):
         return False
@@ -201,7 +229,13 @@ def CoreStandalone():
     hierarchie()
 
     infoP("\n//ILLOGIC------------    save scene...")
-    cmds.file(save=True)
+    try:
+        new_file = createLastScene(scene)
+        print("scene save :", new_file)
+        cmds.file(rename=new_file)
+        cmds.file(save=True, type='mayaAscii')
+    except Exception as e:
+        pass
 
     infoP('\n\nEnd   ------------------------------ILLOGIC REFERENCE UPDTE/IMPORT------------------------------------\n\n')
 

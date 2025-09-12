@@ -184,16 +184,12 @@ class SubprocessWorker(qtc.QThread):
 
     def run(self):
         if self.debug:
-            window = subprocess.CREATE_NEW_CONSOLE
+            result = subprocess.run(self.command, stderr=subprocess.PIPE,
+                                    text=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
         else:
-            window = subprocess.CREATE_NO_WINDOW #subprocess.CREATE_NEW_CONSOLE
+            result = subprocess.run(self.command, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
         
         try:
-            result = subprocess.run(self.command, 
-                                    stderr=subprocess.PIPE,
-                                    text=True,
-                                    creationflags=window) #§§ attention §§ subprocess.CREATE_NO_WINDOW uniquement pour windows
-            
             cleaned_stderr_lines = self.filtrageSTDERR(result.stderr)# Filtrage des lignes stderr
             self.finished.emit(cleaned_stderr_lines)
         except subprocess.CalledProcessError as e:
