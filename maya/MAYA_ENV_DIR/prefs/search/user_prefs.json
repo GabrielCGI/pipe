@@ -1,5 +1,5 @@
 {
-    "context": "select",
+    "context": "ttf",
     "history": [
         [
             "GraphEditor",
@@ -17,9 +17,11 @@
             "CharacterAnimationEditor",
             "HotkeyPreferencesWindow",
             "HypershadeWindow",
-            "NamespaceEditor",
             "OpenNodeAttrRef",
             "CreateImagePlane",
+            "NamespaceEditor",
+            "RepeatLast",
+            "CreatePolygonType",
             "MatchTransform",
             "ParentConstraint",
             "ReferenceEditor"

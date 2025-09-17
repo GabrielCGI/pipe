@@ -18,49 +18,31 @@ from .assetitem import AssetItem
 from . import loggingsetup
 from . import usd_check
 
-UD_MODULE_ROOT = os.path.dirname(__file__)
-UD_ROOT = os.path.dirname(UD_MODULE_ROOT)
-
-_ENV_ENABLE_DEBUG = bool(int(os.environ.get("UD_DEBUG", False)))
-_ENV_LOG_DIR = os.environ.get("UD_LOG_DIR", False)
-_ENV_QT_FROM_PRISM = bool(int(os.environ.get("UD_QT_FROM_PRISM", False)))
-
-"""
-Debug environnement specification
-DEV_LIST hold list of machine name that are allowed to debug
-DEBUG_MODE can be set manually and 
-work only when debug module is present
-"""
-DEV_LIST = [
-    'FOX-04'
-]
-_DEBUG_MODE = _ENV_ENABLE_DEBUG and socket.gethostname() in DEV_LIST
-if _DEBUG_MODE:
-    try:
-        from . import debug
-    except:
-        _DEBUG_MODE = False
+# TODO DELETE DEBUG PACKAGE
+DEBUG_MODE = False and socket.gethostname() == 'FOX-04'
+if DEBUG_MODE:
+    from . import debug
 
 # logger setups using logconfig.json parameters
 LOG_DIRECTORY = 'R:/logs/update_usd_logs'
 LOG_CONFIG = os.path.join(os.path.dirname(__file__), "config/logconfig.json")
 
-# Logger setups using logconfig.json parameters
-LOG_CONFIG = os.path.join(UD_MODULE_ROOT, "config/logconfig.json")
 
-_DEFAULT_LOG_DIR = os.path.join(UD_ROOT, "logs")
-LOG_DIRECTORY = _ENV_LOG_DIR if _ENV_LOG_DIR else _DEFAULT_LOG_DIR
-LOG_ERROR_FILE = os.path.join(LOG_DIRECTORY, "error_log.txt")
+if not socket.gethostname() == 'ROLL4':
+    is_log_setup = loggingsetup.setup_log(
+        logName='update_usd',
+        logConfigPath=LOG_CONFIG,
+        logDirectory=LOG_DIRECTORY,
+        with_time=False
+    )
+else:
+    is_log_setup = False
 
-is_log_setup = loggingsetup.setup_log(
-    logName='update_usd',
-    logConfigPath=LOG_CONFIG,
-    logDirectory=LOG_DIRECTORY,
-    with_time=False
-)
+
 if not is_log_setup:
-    with open(LOG_ERROR_FILE, 'w') as error_log:
-        error_log.write(f'Could not setup log from {LOG_CONFIG}')
+    if not socket.gethostname() == 'ROLL4':
+        with open(r"R:/logs/update_usd_logs/error_log.txt", 'w') as error_log:
+            error_log.write(f'Could not setup log from {LOG_CONFIG}')
 
 logger = logging.getLogger(__name__)
 logger.info('Module loaded')
@@ -94,17 +76,12 @@ def import_qtpy():
 
 # Import qt with qtpy of prism to match any version of qt found
 # https://pypi.org/project/QtPy/
-if _ENV_QT_FROM_PRISM:
-    if not import_qtpy():
-        logger.error(f'qtpy not found in C:/ILLOGIC_APP/Prism')
-        sys.exit(1)
-        
-try:
+if import_qtpy():
     from qtpy import QtWidgets as Qt
     from qtpy import QtCore as Qtc
     from qtpy import QtGui as Qtg
-except ImportError as e:
-    logger.error(str(e))
+else:
+    logger.error(f'qtpy not found in C:/ILLOGIC_APP/Prism', file=sys.stderr)
     sys.exit(1)
     
 
@@ -286,12 +263,6 @@ class MainInterface(Qt.QMainWindow):
         self.filePathBtn = Qt.QPushButton("Add Layer...")
         self.filePathBtn.clicked.connect(self.browse_file)
         file_layout.addWidget(self.filePathBtn)
-    
-        if self.openType == "houdini":
-            self.reloadButton = Qt.QPushButton("Reload From Nodes")
-            self.reloadButton.clicked.connect(self.find_USD_file_to_update)
-            file_layout.addWidget(self.reloadButton)
-        
         mainLayout.addLayout(file_layout)
         
         # ---------list de tout ce qu'il faut update dans la stack US---------
@@ -317,26 +288,22 @@ class MainInterface(Qt.QMainWindow):
         self.layoutButon = Qt.QHBoxLayout()
         mainLayout.addLayout(self.layoutButon)
         
-        self.selAllButton = Qt.QPushButton("Select All")
-        self.selAllButton.clicked.connect(
+        self.selAllBtm = Qt.QPushButton("Select All")
+        self.selAllBtm.clicked.connect(
             lambda: self.set_all_checkboxes(True)
         )
-        self.layoutButon.addWidget(self.selAllButton)
+        self.layoutButon.addWidget(self.selAllBtm)
 
-        self.deselAllButton = Qt.QPushButton("Deselect All")
-        self.deselAllButton.clicked.connect(
+        self.deselAllBtm = Qt.QPushButton("Deselect All")
+        self.deselAllBtm.clicked.connect(
             lambda: self.set_all_checkboxes(False)
         )
-        self.layoutButon.addWidget(self.deselAllButton)
+        self.layoutButon.addWidget(self.deselAllBtm)
 
-        self.runButton = Qt.QPushButton("Update")
-        self.runButton.clicked.connect(self.run_update)
-        self.layoutButon.addWidget(self.runButton)
+        self.runBtm = Qt.QPushButton("Update")
+        self.runBtm.clicked.connect(self.run_update)
+        self.layoutButon.addWidget(self.runBtm)
         
-        self.updateAllButton = Qt.QPushButton("Update All")
-        self.updateAllButton.clicked.connect(self.update_all)
-        self.layoutButon.addWidget(self.updateAllButton)
-            
         # --------------------layout des options avancees--------------------
         
         # Enable recursion mode only if Usd Version allow it (24.03)
@@ -360,7 +327,7 @@ class MainInterface(Qt.QMainWindow):
             )
             self.layoutAdvOptions.addWidget(self.warningRecursion, 50)
         
-        if _DEBUG_MODE:
+        if DEBUG_MODE:
             self.debugbutton = Qt.QPushButton("DEBUG")
             self.debugbutton.clicked.connect(self.debug)
             self.layoutAdvOptions.addWidget(self.debugbutton)
@@ -381,10 +348,9 @@ class MainInterface(Qt.QMainWindow):
 
 
     def debug(self):
-        if _DEBUG_MODE:
-            logger.debug('Enable debug mode')
-            debug_log_path = os.path.join(LOG_DIRECTORY, 'debug.log')
-            debug.debug(log_file=debug_log_path)
+        if DEBUG_MODE:
+            logger.debug('Enter debug mode')
+            debug.debug()
             debug.debugpy.breakpoint()
             pass
         
@@ -502,7 +468,7 @@ class MainInterface(Qt.QMainWindow):
 
 
     def log(self, text):
-        # TODO Ameliorer pour prendre en compte les emotes
+        # TODO Ameliorer pour prendre en compte les smileys
         # et log selon la severité
         self.logBox.append(text)
     
@@ -529,8 +495,17 @@ class MainInterface(Qt.QMainWindow):
             "Select USDA File",
             choosePlace,
             "USD Files (*.usd *.usda *.usdc)"
-        )
-        self.default_parse(path)
+        ) # possibiliter de détécter auto le path
+        
+        if path:
+            try:
+                layer = Sdf.Layer.FindOrOpen(path)
+                if layer in self._layers:
+                    return
+            except Exception:
+                return
+            self.USDFileNeedUpdate.setText(path)
+            self.load_USD(path)
 
 
     def reload_dependencies(self):
@@ -539,30 +514,22 @@ class MainInterface(Qt.QMainWindow):
         
 
     #----find layer on maya/houdini/prism----
-    def default_parse(self, pathfile: str):
-        try:
-            self._pathFiles = self.find_lastest_layout_usda(pathfile)
-            for path in self._pathFiles:
-                logger.debug(f'Start parsing of {path}')
-                if path:
-                    self.log(f"default file: {path}")
-                    self.load_USD(path)
-        except Exception as e:
-            logger.warning(f"Error loading USDA file: {e}")
-            self.log(f"⚠️ Error loading USDA file: {e}")
-    
-    
     def find_USD_file_to_update(self):
         self.clearInterfaceData()
         current_mode = self.updateMode.currentIndex()
 
         if current_mode == 0:
-            if self.openType == "houdini":
-                usd_paths = self.get_path_from_houdini_node()
-                for path in usd_paths:
-                    self.default_parse(path)
-            else:
-                self.default_parse(self.pathPrism)
+            try:
+                self._pathFiles = self.find_lastest_layout_usda()
+                for path in self._pathFiles:
+                    logger.debug(f'Start parsing of {path}')
+                    if path:
+                        self.USDFileNeedUpdate.setText(path)
+                        self.log(f"default file: {path}")
+                        self.load_USD(path)
+            except Exception as e:
+                logger.warning(f"Error loading USDA file: {e}")
+                self.log(f"⚠️ Error loading USDA file: {e}")
         elif current_mode == 1:
             if self.openType == "maya":
                 self.load_maya_work_layer()
@@ -598,46 +565,45 @@ class MainInterface(Qt.QMainWindow):
         nodes = hou.selectedNodes()
         if not nodes:
             self.log("No node selected, could not parse usd export path")
-            return []
+            return ''
         node: hou.LopNode = nodes[0]
-        usd_paths = []
-        for node in nodes:
-            if node.type().name() == 'prism::LOP_Import::1.0':
-                try:
-                    source_parm: hou.Parm = node.parm('filepath')
-                    source_path = source_parm.eval()
-                    usd_paths.append(source_path)
-                except Exception as e:
-                    logger.warning(
-                        'Could not find file path in'
-                        f' parm of node {node.name()}'
-                    )
-            stage: Usd.Stage = node.stage()
+        if node.type().name() == 'prism::LOP_Import::1.0':
             try:
-                prism_metadata = stage.GetPrimAtPath('/prism_metadata')
-                source_attribute = prism_metadata.GetAttribute('prism_sources')
-                source_path = source_attribute.Get()[0]
-                usd_paths.append(source_path)
+                source_parm: hou.Parm = node.parm('filepath')
+                source_path = source_parm.eval()
+                return source_path
             except Exception as e:
-                self.log(
-                    "Warning : Could not found usd"
-                    f" export from node {node.name()}"
+                logger.warning(
+                    'Could not find file path in'
+                    f' parm of node {node.name()}'
                 )
-                logger.warning(e)
-        return usd_paths        
+        stage: Usd.Stage = node.stage()
+        try:
+            prism_metadata = stage.GetPrimAtPath('/prism_metadata')
+            source_attribute = prism_metadata.GetAttribute('prism_sources')
+            source_path = source_attribute.Get()[0]
+            return source_path
+        except Exception as e:
+            self.log(
+                "Warning : Could not found usd"
+                f" export from node {node.name()}"
+            )
+            logger.warning(e)
+            return ''
+        
 
     #---trouve le dernier publish de la scene maya en question---
-    def find_lastest_layout_usda(self, filepath: str) -> list[str]:
+    def find_lastest_layout_usda(self) -> list[str]:
         exports_path = []
         if self.openType == "maya":
             logger.debug("---------Fetching current Maya scene path---------")
             scene_path = cmds.file(q=True, sceneName=True)
         elif self.openType == "houdini":
             logger.debug("---------Fetching current Maya scene path---------")
-            scene_path = filepath
+            scene_path = self.get_path_from_houdini_node()
             if not scene_path:
-                if os.path.exists(str(filepath)):
-                    scene_path = filepath
+                if os.path.exists(str(self.pathPrism)):
+                    scene_path = self.pathPrism
                 else:
                     logger.debug(
                         'Did not found path from'
@@ -647,9 +613,7 @@ class MainInterface(Qt.QMainWindow):
         elif self.openType == "prism":
             logger.debug("---------------Get file from Prism---------------")
             # le chemin que prism va donner 
-            if not filepath:
-                return []
-            scene_path = filepath
+            scene_path = self.pathPrism
             exports_path.append(scene_path)
         else:
             logger.warning(
@@ -813,7 +777,6 @@ class MainInterface(Qt.QMainWindow):
                 self.add_layer_tab(layer, asset_list)
             is_updated = not len(self._assetsToUpdate[layer.identifier])
             self.setUpdatedLayer(layer, is_updated)
-            
 
     def add_item_list(self, listwidget:AssetListWidget, item: AssetItem):
         
@@ -929,57 +892,8 @@ class MainInterface(Qt.QMainWindow):
         layer_item.setSizeHint(layer_widget.sizeHint())
         
 
-    def update_all(self):
-        self.logBox.clear()
-        current_mode = self.updateMode.currentIndex()
-
-        for tab_idx in range(self.QTabLayers.count()):
-            current_tab: AssetListWidget = self.QTabLayers.widget(tab_idx)
-            if not isinstance(current_tab, AssetListWidget):
-                continue
-            current_layer = current_tab.layer
-            if not current_tab.can_be_updated:
-                self.log("⛔ Cannot update recursive found dependencies")
-                continue
-            
-            assets_to_update = self._assetsToUpdate[current_layer.identifier]
-            if not (assets_to_update):
-                self.log(f"Already updated: {current_layer.identifier}")
-                continue
-            # Generate timestamp string: YYYYMMDD_HHMMSS
-            timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-            backup = f"{current_layer.realPath}.{timestamp}.bak"
-            
-            shutil.copy2(current_layer.realPath, backup)
-            self.log(f"🗂️ Backup created: {backup}")
-        
-            self.log(
-                f"Asset items ready: {len(assets_to_update)}"
-            )
-            self._usd_parser.set_assets_to_update(assets_to_update)
-            self._usd_parser.update_layer(current_layer)
-            current_layer.Reload(True)
-                
-            if current_mode == 0:
-                self.load_USD(current_layer.identifier)
-            elif current_mode == 1:
-                if self.openType == "maya":
-                    self.load_maya_work_layer()
-                elif self.openType == "prism":
-                    self.log(
-                        "⛔ Impossible défectuer cette option dans prism. "
-                        "Valable uniquement dans maya et houdini"
-                    )
-            else:
-                logger.error("Invalid update mode (How ???)")
-                self.log("Invalid update mode (How ???)")
-                continue
-        if current_mode == 0:
-            if self.openType == 'houdini':
-                usd_check.checkEveryNodes()
-                
-
     def run_update(self):
+        
         self.logBox.clear()
 
         current_layer = self.getCurrentLayer()
@@ -989,6 +903,7 @@ class MainInterface(Qt.QMainWindow):
             self.log("⛔ Cannot update recursive found dependencies")
             return
         
+        # for layer in self._layers:
         # Generate timestamp string: YYYYMMDD_HHMMSS
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup = f"{current_layer.realPath}.{timestamp}.bak"

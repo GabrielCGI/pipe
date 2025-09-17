@@ -1,8 +1,6 @@
 from . import usd_updater
 from . import usd_check
 import importlib
-
-
 def reload_modules():
     from . import usd_updater
     from . import usd_parser

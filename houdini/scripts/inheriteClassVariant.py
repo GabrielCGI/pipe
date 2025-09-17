@@ -1,10 +1,15 @@
 from pxr import Sdf, Usd, Kind, UsdGeom
+from datetime import datetime
 from pathlib import Path
+import socket
 import shutil
+import sys
 import os
 import re
-from datetime import datetime
-import socket
+
+
+DEBUG = 0
+LIST_MACHINE_DEBUG = ["FOX-03", "FALCON-01", "FOX-04"]
 
 
 class inheriteClassAttr():
@@ -23,9 +28,15 @@ class inheriteClassAttr():
         self.NameFolder = "_layer_anm_class"
         self.run()
         
-
+    def debugger(self):
+        if socket.gethostname() in LIST_MACHINE_DEBUG and DEBUG:
+            sys.path.append("R:/pipeline/networkInstall/python_shares/python_debug_pkgs/Lib/site-packages")
+            import debug
+            debug.debug()
+            debug.debugpy.breakpoint()
 
     def run(self):
+        self.debugger() # appeller le debugger
         print("openning file.....")
         
         stage = Usd.Stage.Open(self.filePathImport)
@@ -127,13 +138,16 @@ class inheriteClassAttr():
         
         path = prim.GetPath()
         visible, hidden = self.getVariant(path)
-
         if not visible and not hidden:
             print("not virant")
             return
         elif not hidden:
             print("there are no variant")
             return
+        elif not visible and hidden:
+            print("_|_|_| WARNING |_|_|_ Shape hide in maya")
+            return
+        
 
         if len(visible) >=2:
             print("_|_|_| WARNING |_|_|_ multiple variant in: ", visible)

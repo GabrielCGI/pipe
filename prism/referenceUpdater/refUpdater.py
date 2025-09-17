@@ -11,6 +11,7 @@ import re
 
 __ROOT__ = Path(__file__).parent
 PYTHON_SCRIPT_MAYA = f"{__ROOT__}/mayaCode_updateImportRef.py"
+PYTHON_SCRIPT_TEST = f"{__ROOT__}/test.py"
 MAYAPY = "C:/Program Files/Autodesk/Maya2025/bin/mayapy.exe"
 
 
@@ -183,14 +184,14 @@ class SubprocessWorker(qtc.QThread):
         ] # Filtrage des lignes stderr
 
     def run(self):
-        if self.debug:
-            result = subprocess.run(self.command, stderr=subprocess.PIPE,
-                                    text=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
-        else:
-            result = subprocess.run(self.command, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-        
         try:
-            cleaned_stderr_lines = self.filtrageSTDERR(result.stderr)# Filtrage des lignes stderr
+            if self.debug:
+                result = subprocess.run(self.command, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
+                cleaned_stderr_lines = self.filtrageSTDERR(result.stderr)# Filtrage des lignes stderr
+            else:
+                result = subprocess.run(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
+                cleaned_stderr_lines = self.filtrageSTDERR(result.stderr)# Filtrage des lignes stderr
+
             self.finished.emit(cleaned_stderr_lines)
         except subprocess.CalledProcessError as e:
             self.error.emit(e.stderr or f"Error code {e.returncode}")
@@ -231,7 +232,7 @@ class instanceWorker():
         
         arguments = None
         if self.DCC == "Maya":
-            arguments = [MAYAPY, PYTHON_SCRIPT_MAYA, str(environement), str(self.dataRef)]
+            arguments = [MAYAPY, PYTHON_SCRIPT_MAYA, str(environement), str(self.dataRef)] #
         elif self.DCC == "Houdini":
             pass
         

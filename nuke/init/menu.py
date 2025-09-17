@@ -132,7 +132,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
             prismRoot = os.getenv("PRISM_ROOT")
 
             if not prismRoot:
-                prismRoot = "C:/ILLOGIC_APP/Prism/2.0.6/app"
+                prismRoot = "C:/ILLOGIC_APP/Prism/2.0.16/app"
 
             scriptDir = os.path.join(prismRoot, "Scripts")
 

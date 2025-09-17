@@ -1,0 +1,14 @@
+{
+    "layout": [
+        "_layer_layout_layoutMaya",
+        "_layer_lay_main",
+        "_layer_mod_mayaLayout"
+    ],
+    "setdress": [
+		"_layer_set_main"
+        
+    ],
+    "animation": [
+        "_layer_anm_class"
+    ]
+}

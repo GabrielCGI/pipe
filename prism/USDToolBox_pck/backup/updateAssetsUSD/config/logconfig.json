@@ -1,0 +1,36 @@
+{ 
+    "version": 1,
+    "disable_existing_loggers": true,
+    "formatters": { 
+        "standard": { 
+            "format": "%(asctime)s [%(levelname)s] %(module)s: %(message)s",
+            "datefmt": "%Y-%m-%d %H:%M:%S"
+        },
+        "short": { 
+            "format": "%(asctime)s [%(levelname)s]: %(message)s",
+            "datefmt": "%H:%M:%S"
+        }
+    },
+    "handlers": { 
+        "default": { 
+            "class": "logging.StreamHandler",
+            "formatter": "short",
+            "level": "WARNING",
+            "stream": "ext://sys.stdout"
+        },
+        "file": {
+            "class": "logging.FileHandler",
+            "formatter": "short",
+            "level": "DEBUG",
+            "mode": "w",
+            "filename": "R:/logs/update_usd_logs/log_update_usd.log"
+        }
+    },
+    "loggers": { 
+        "updateAssetsUSD_dev": {
+            "handlers": ["default", "file"],
+            "level": "DEBUG",
+            "propagate": false
+        }
+    } 
+}

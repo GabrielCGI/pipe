@@ -101,6 +101,7 @@ def main():
     # Retrieve node parameters
     primpattern   = node.parm('primpat').eval()
     sourceframe   = int(node.parm('src_frame').eval())
+    tc = Usd.TimeCode(sourceframe)
     primvarname   = node.parm('attr_name').eval()
     camera_path   = node.parm('camera').eval()
 
@@ -116,9 +117,10 @@ def main():
         raise ValueError(f"Invalid camera: {camera_path}")
 
     usd_camera       = UsdGeom.Camera(camera_prim)
-    focal_length     = usd_camera.GetFocalLengthAttr().Get()
-    h_aperture       = usd_camera.GetHorizontalApertureAttr().Get()
-    v_aperture       = usd_camera.GetVerticalApertureAttr().Get()
+    
+    focal_length     = usd_camera.GetFocalLengthAttr().Get(tc)
+    h_aperture       = usd_camera.GetHorizontalApertureAttr().Get(tc)
+    v_aperture       = usd_camera.GetVerticalApertureAttr().Get(tc)
 
     SCALE_TO_MM = 100.0
     focal_mm    = focal_length * SCALE_TO_MM

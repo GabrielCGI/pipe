@@ -1,6 +1,8 @@
 import maya.cmds as cmds
 import maya.standalone
+import ctypes
 import msvcrt
+import socket
 import sys
 import re
 import os
@@ -8,11 +10,18 @@ import os
 
 
 def infoP(msg):
-    print(msg, file=sys.stdout)
+    print(str(msg), file=sys.stdout)
 
 def error(msg):
-    print(msg)
-    print("ILLOGIC ERROR : " + msg, file=sys.stderr)
+    print("ILLOGIC ERROR : " + str(msg), file=sys.stdout)
+    print("ILLOGIC ERROR : " + str(msg), file=sys.stderr)
+    
+
+def debugger():
+    sys.path.append("R:/pipeline/networkInstall/python_shares/python311_debug_pkgs/Lib/site-packages")
+    from debug import debug
+    debug.debug()
+    debug.debugpy.breakpoint()
 
 def catch_error(dataEnv):
     if not dataEnv or type(dataEnv) != dict:
@@ -178,18 +187,16 @@ def UpdateReference(Projet, refInScene):
                     cmds.file(last_scene, loadReference=refNode)
                     infoP(f"Référence Update  new scene: {last_scene}\n")
                 except Exception as e:
-                    error(f"\Erreur lors de l'import de la référence: {e}\n")
-
-
-
+                    error(f"Erreur lors de l'import de la référence :{last_scene} {e}\n")
 
 
 def CoreStandalone():
     dataEnv = eval(sys.argv[1])
     dataRef = eval(sys.argv[2])
-    sys.stdout = open('CONOUT$', 'w')
-    sys.stderr = open('CONOUT$', 'w')
-    sys.stdin = open('CONIN$', 'r')
+    if dataEnv["DEBUG"]:
+        ctypes.windll.kernel32.AllocConsole()
+        sys.stdout = open('CONOUT$', 'w')
+        sys.stdin = open('CONIN$', 'r')
 
     if catch_error(dataEnv):
         return False
@@ -231,7 +238,6 @@ def CoreStandalone():
     infoP("\n//ILLOGIC------------    save scene...")
     try:
         new_file = createLastScene(scene)
-        print("scene save :", new_file)
         cmds.file(rename=new_file)
         cmds.file(save=True, type='mayaAscii')
     except Exception as e:
@@ -249,7 +255,9 @@ def CoreStandalone():
 
 
 maya.standalone.initialize(name='python')
+
 result = CoreStandalone()
 if not result:
     sys.exit(1)
+
 maya.standalone.uninitialize()

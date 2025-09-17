@@ -6,7 +6,7 @@ import importlib
 import logging
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.WARNING)
+logger.setLevel(logging.INFO)
 
 def main():
     start = time.monotonic()
