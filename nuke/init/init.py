@@ -62,13 +62,19 @@ if nuke.NUKE_VERSION_MAJOR >= 13:
             import os
             import sys
 
-            try:
-                from PySide2.QtCore import *
-                from PySide2.QtGui import *
-                from PySide2.QtWidgets import *
-            except:
-                from PySide.QtCore import *
-                from PySide.QtGui import *
+            if nuke.NUKE_VERSION_MAJOR in [13, 15]:
+                try:
+                    from PySide2.QtCore import *
+                    from PySide2.QtGui import *
+                    from PySide2.QtWidgets import *
+                except:
+                        from PySide.QtCore import *
+                        from PySide.QtGui import *
+                        from PySide.QtWidgets import *
+            if nuke.NUKE_VERSION_MAJOR in [16]:
+                from PySide6.QtCore import *
+                from PySide6.QtGui import *
+                from PySide6.QtWidgets import *
 
             prismRoot = os.getenv("PRISM_ROOT")
             if not prismRoot:
@@ -103,7 +109,7 @@ if nuke.NUKE_VERSION_MAJOR >= 13:
             else:
                 import PrismCore
                 pcore = PrismCore.PrismCore(app="Nuke", prismArgs=["noUI"])
-
+    
     # <<<PrismEnd
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/NukeSurvivalToolkit/")
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos')
@@ -113,12 +119,15 @@ if nuke.NUKE_VERSION_MAJOR >= 13:
     nuke.pluginAddPath('R:/pipeline/pipe/nuke/cameraMetadata')
     #nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins')
     nuke.pluginAddPath('R:/pipeline/pipe/nuke/script')
-    nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/MagicDefocus2_v1.0.3")
-    nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/stamps")
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/Deep2VP_v40")
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/pixelfudger3")
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts/nukeToPack/", 'nukeToPack/icons')
     nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/aeRefractor')
+    nuke.pluginAddPath('R:/devmaxime/dev/nuke/nuke_path/plugins')
+
+    if nuke.NUKE_VERSION_MAJOR in [13, 15]:
+        nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/MagicDefocus2_v1.0.3")
+        nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/stamps")
 
     # << Start Illogic custom plugins
     if nuke.NUKE_VERSION_MAJOR == 13:

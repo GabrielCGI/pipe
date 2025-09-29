@@ -17,9 +17,10 @@
     <memberToolshelf name="simplefx"/>
     <memberToolshelf name="toto"/>
     <memberToolshelf name="illogic_solaris6"/>
-    <memberToolshelf name="shelf_2"/>
     <memberToolshelf name="labs_toolset"/>
     <memberToolshelf name="develop"/>
+    <memberToolshelf name="shelf_2"/>
+    <memberToolshelf name="quentin_illogic"/>
   </shelfSet>
 
   <toolshelf name="illogic_solaris6" label="illogic_solaris">
@@ -337,6 +338,7 @@ auto_manifest.run()]]></script>
   </tool>
 
   <tool name="inheriteclass" label="inherite Class" icon="hicon:/SVGIcons.index?ENGINE_asset_help.svg">
+    <helpText><![CDATA["""'The inherited variant' is a tool used to link USD container assets with their corresponding animations, enabling the merging of textures, fur, lighting, rigging, and more with the animation exported from Maya."""]]></helpText>
     <script scriptType="python"><![CDATA[import importlib
 import hou
 import inheriteClassVariant as icv
@@ -345,7 +347,6 @@ importlib.reload(icv)
 
 
 START = True
-FORCED = False
 nodes = hou.selectedNodes()
 
 if not nodes or len(nodes) >=2:
@@ -357,25 +358,17 @@ if START and nodes[0].type().name() != "prism::LOP_Import::1.0":
     hou.ui.displayMessage("Select 1 LOP_import node", buttons=("OK",) ,severity=hou.severityType.Error)
     START = False
 
-    
 
     
     
 if START:
     path = nodes[0].parm("filepath").eval()
-    entity = nodes[0].parm("entity").eval()
     if "03_production/shots" in path.lower():
-        FORCED = True
-        
-    elif "testShot" in path:
-        FORCED = hou.ui.displayMessage(f"is not a shot: it's {entity}\n\nDo you want forced the script?", buttons=("No", "Yes") , close_choice=0)
-    
-    if FORCED:
         inClass = icv.inheriteClassAttr(path)
         if inClass.result:
             hou.ui.displayMessage("Everything went well\nReload Prism Import", buttons=("OK",) ,severity=hou.severityType.Message)
         else:
-            hou.ui.displayMessage("Error check the Houdini console for more information", buttons=("OK",) ,severity=hou.severityType.Error)
+            hou.ui.displayMessage(inClass.message , buttons=("OK",) ,severity=inClass.error_type)
     ]]></script>
   </tool>
 

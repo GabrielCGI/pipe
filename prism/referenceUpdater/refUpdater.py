@@ -1,26 +1,23 @@
 import qtpy.QtWidgets as qt
 import qtpy.QtCore as qtc
+from importlib import reload
 from pathlib import Path
 import subprocess
-import socket
 import sys
 import os
-import re
 
 
 
 __ROOT__ = Path(__file__).parent
 PYTHON_SCRIPT_MAYA = f"{__ROOT__}/mayaCode_updateImportRef.py"
-PYTHON_SCRIPT_TEST = f"{__ROOT__}/test.py"
 MAYAPY = "C:/Program Files/Autodesk/Maya2025/bin/mayapy.exe"
 
 
 
 class startWithRef(qt.QMainWindow):
-    def __init__(self, Core, DCC, scenePath, debug=False):
+    def __init__(self, Core, DCC, scenePath, ProjetPath, debug=False):
         super().__init__()
-        scene = Path(scenePath)
-        self.ProjetPath = str(Path(*scene.parts[:2]).as_posix())
+        self.ProjetPath = ProjetPath
         self.scenePath = scenePath
         self.tables = []
         self.DCC = DCC
@@ -28,7 +25,7 @@ class startWithRef(qt.QMainWindow):
 
 
         self.setWindowTitle("import assets in the start of the scene")
-        self.resize(500, 300)
+        self.resize(500, 800)
         windo = qt.QWidget(self)
         self.setCentralWidget(windo)
         layout = qt.QVBoxLayout(windo)
@@ -72,31 +69,48 @@ class startWithRef(qt.QMainWindow):
         table = qt.QTableWidget()
         table.setObjectName(titre)
         self.tables.append(table)
-        table.setColumnCount(2)
+        table.setColumnCount(3)
         table.setColumnWidth(0, 150)
-        table.setColumnWidth(1, 150)
-        table.setHorizontalHeaderLabels([titre, "Nombre d'importations"])
-        items = self.findAllAssets(titre)
+        table.setColumnWidth(1, 200)
+        table.setColumnWidth(1, 100)
+        table.setHorizontalHeaderLabels([titre, "Nombre d'importations", "version"])
+        items, path = self.findAllAssets(titre)
         table.setRowCount(len(items))
         
         for row, item_name in enumerate(items):
             item = qt.QTableWidgetItem(item_name)
             table.setItem(row, 0, item)
 
+
             spin = NoWheelSpinBox()
             spin.setMinimum(0)
             spin.setMaximum(100)
             table.setCellWidget(row, 1, spin)
+
+
+            Qversion = qt.QLabel()
+            Qversion.setAlignment(qtc.Qt.AlignCenter)
+            table.setCellWidget(row, 2, Qversion)
+
+
+            if not os.path.exists(f"{path}/{item_name}/Export/Rigging"):
+                item.setFlags(qtc.Qt.NoItemFlags)
+                spin.setEnabled(False)
+                Qversion.setText("no Rigging")
+                continue
+            
+            version = sorted(os.listdir(f"{path}/{item_name}/Export/Rigging"))[-1]
+            Qversion.setText(str(version))
 
         self.tabs.addTab(table, titre)
 
     def findAllAssets(self, assetType):
         path = self.ProjetPath + "/03_Production/Assets/" + assetType
         if not os.path.exists(path):
-            print("error path note valide")
+            print("error path note valide", path)
             return []
         
-        return os.listdir(path)
+        return os.listdir(path), path
 
     def findScene(self):
         path = None
@@ -132,10 +146,9 @@ class startWithRef(qt.QMainWindow):
 
         if not dataRef and not self.udpdateref.isChecked():
             return
-
         #environement = {"Projet": self.ProjetPath, "Scene": self.scenePath, "addition":self.addRef.isChecked(), "Update":self.udpdateref.isChecked()}
-        self.worker = instanceWorker( self.Core, self.DCC, self.scenePath, self.addRef.isChecked(), self.udpdateref.isChecked(), dataRef, debug=self.consoleMode.isChecked())
-        self.worker.runUpdate()
+        self.worker = instanceWorker( self.Core, self.DCC, self.scenePath, self.ProjetPath, self.addRef.isChecked(), self.udpdateref.isChecked(), dataRef, debug=self.consoleMode.isChecked())
+        self.worker.runUpdate(True)
         if not self.consoleMode.isChecked():
             self.Core.waiter = LoadingWindow("waite the script process...")
             self.Core.waiter.show()
@@ -147,6 +160,7 @@ class startWithRef(qt.QMainWindow):
 class NoWheelSpinBox(qt.QSpinBox):
     def wheelEvent(self, event):
         event.ignore()
+
 
 
 class LoadingWindow(qt.QWidget):
@@ -186,11 +200,11 @@ class SubprocessWorker(qtc.QThread):
     def run(self):
         try:
             if self.debug:
-                result = subprocess.run(self.command, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NEW_CONSOLE)
-                cleaned_stderr_lines = self.filtrageSTDERR(result.stderr)# Filtrage des lignes stderr
+                result = subprocess.run(self.command, text=True, creationflags=subprocess.CREATE_NEW_CONSOLE)#, stdout=subprocess.PIPE
+                cleaned_stderr_lines = self.filtrageSTDERR(result.stdout)# Filtrage des lignes stderr
             else:
                 result = subprocess.run(self.command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, creationflags=subprocess.CREATE_NO_WINDOW)
-                cleaned_stderr_lines = self.filtrageSTDERR(result.stderr)# Filtrage des lignes stderr
+                cleaned_stderr_lines = self.filtrageSTDERR(result.stdout)# Filtrage des lignes stderr
 
             self.finished.emit(cleaned_stderr_lines)
         except subprocess.CalledProcessError as e:
@@ -207,7 +221,7 @@ class SubprocessWorker(qtc.QThread):
     def filtrageSTDERR(self, std):
         msg = ""
         for line in std.splitlines():
-            if not self.should_ignore(line):
+            if "ILLOGIC ERROR :"  in line:
                 msg += line + "\n"
         
         return msg
@@ -215,19 +229,19 @@ class SubprocessWorker(qtc.QThread):
 
 
 class instanceWorker():
-    def __init__(self, Core, DCC, scenePath, addition = False, update = True,  dataRef:dict = {}, debug=False):
-        self.DCC = DCC
+    def __init__(self, Core, DCC, scenePath, ProjetPath, addition = False, update = True,  dataRef:dict = {}, debug=False):
+        self.ProjetPath = ProjetPath
         self.scenePath = scenePath
         self.addition = addition
-        self.update = update
         self.dataRef = dataRef
-        self.Core = Core
+        self.update = update
         self.debug = debug
+        self.Core = Core
+        self.DCC = DCC
+
     
-    def runUpdate(self):
-        scene = Path(self.scenePath)
-        ProjetPath = str(Path(*scene.parts[:2]).as_posix())
-        environement = {"Projet": ProjetPath, "Scene": self.scenePath, "addition":self.addition, "Update":self.update, "DEBUG":self.debug}
+    def runUpdate(self, standalone: bool, forceDep:str = "Rigging"):
+        environement = {"Projet": self.ProjetPath, "Scene": self.scenePath, "addition":self.addition, "Update":self.update, "DEBUG":self.debug, "standalone":standalone, "department":forceDep}
 
         
         arguments = None
@@ -240,9 +254,24 @@ class instanceWorker():
             return False
         
         print("start worker...")
-        self.worker = SubprocessWorker(arguments, self.debug)
-        self.worker.finished.connect(self.Core.handleResult)
-        self.worker.error.connect(self.Core.handleError)
-        self.worker.start()
+        if standalone:
+            self.worker = SubprocessWorker(arguments, self.debug)
+            self.worker.finished.connect(self.Core.handleResult)
+            self.worker.error.connect(self.Core.handleError)
+            self.worker.start()
 
-    
+        else:
+            if len(sys.argv) <= 1:
+                sys.argv.append(str(environement))
+            else:
+                sys.argv[1] = str(environement)
+            
+            if len(sys.argv) <= 2:
+                sys.argv.append(str(self.dataRef))
+            else:
+                sys.argv[2] = str(self.dataRef)
+            
+
+            import mayaCode_updateImportRef as update
+            reload(update)
+            update.CoreStandalone()

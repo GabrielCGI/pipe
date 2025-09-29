@@ -2,15 +2,30 @@ import os
 import re
 import sys
 
-from PySide2 import QtCore
-from PySide2 import QtGui
-from PySide2 import QtWidgets
-from PySide2.QtWidgets import *
-from PySide2.QtCore import *
-from PySide2.QtGui import *
+try:
+    from PySide2 import QtCore
+    from PySide2 import QtGui
+    from PySide2 import QtWidgets
+    from PySide2.QtWidgets import *
+    from PySide2.QtCore import *
+    from PySide2.QtGui import *
+except:
+    try:
+        from PySide6 import QtCore
+        from PySide6 import QtGui
+        from PySide6 import QtWidgets
+        from PySide6.QtWidgets import *
+        from PySide6.QtCore import *
+        from PySide6.QtGui import *
+    except:
+        sys.exit(1)
 
 from functools import partial
-from shiboken2 import wrapInstance
+
+try:
+    from shiboken2 import wrapInstance
+except:
+    from shiboken6 import wrapInstance
 
 from common.utils import *
 from common.Prefs import *

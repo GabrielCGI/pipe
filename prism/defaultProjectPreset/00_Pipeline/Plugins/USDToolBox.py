@@ -10,23 +10,25 @@ DEV_LIST = ['FOX-04']
 DEBUG_MODE = False and socket.gethostname() in DEV_LIST
 MODULES_SEARCH_PATH = [
     "R:/pipeline/pipe/prism",
-    "R:/pipeline/pipe/prism/update_assets_USD"
-]
+    ] #"R:/pipeline/pipe/prism/update_assets_USD"
 
 try:
     if DEBUG_MODE:
         MODULES_SEARCH_PATH[1] = "R:/devmaxime/dev/python/prism/USD-Updater"
         sys.path.insert(0, MODULES_SEARCH_PATH[1])
+    
     for module_path in MODULES_SEARCH_PATH:
         if not module_path in sys.path:
             sys.path.append(module_path)
+    
     import USDToolBox_pck
-
+    #import updateAssetsUSD as UD
+    #importlib.reload(UD)
 except Exception as e:
     print(f"Import failed: {e}")
 
 
-#---------------------------------find the project Folder---------------------------------
+#va trouver le chemin de ou ce situe ce fichier python pour pouvoir setup dans les variable local et global le projet
 script_path = Path(__file__)
 project_path = Path(*script_path.parts[:-3]).as_posix()
 LOCAL = os.path.normpath(f"{project_path}")
@@ -54,8 +56,6 @@ class USDToolBox:
         self.toolbox_menu = QMenu("USD Tool Box")
         self.toolbox_menu.setObjectName('USD_tool_box')
         
-
-        #-----------------------------------------add Button on the Qmen-----------------------------------------
         self.add_menu_action(
             "Update selected USD file",
             self.updateDependencies
@@ -64,7 +64,6 @@ class USDToolBox:
             "Clean preview material",
             self.cleanMaterialAttributes
         )
-        #-----------------------------------------add Button on the Qmen-----------------------------------------
         
         
     def add_menu_action(self, name: str, method, menu: QMenu=None):
@@ -135,6 +134,8 @@ class USDToolBox:
             menu.addMenu(self.toolbox_menu)
    
    
+
+    
     def updateDependencies(self, product_directory: str):
         """
         Entry point of USD updater, a tool that simplify
@@ -150,11 +151,13 @@ class USDToolBox:
             if ".usd" in file and not file.endswith(".bak"):
                 usd_path = os.path.join(product_directory, file)
                 break
+
         if DEBUG_MODE:
             import updateAssetsUSD as UD
             importlib.reload(UD)
             UD.startUpdateAssetsUSD("prism", usd_path)
         else:
+            
             USDToolBox_pck.updateAssetsUSD.startUpdateAssetsUSD("prism", usd_path)
         
     

@@ -34,9 +34,6 @@ with open(style_path, "r") as file:
 for key, value in palettedata.items():
     STYLE_CONTENT = STYLE_CONTENT.replace(key, value)
 
-
-
-
     
 class BatchSelector(QtWidgets.QDialog):
     

@@ -921,6 +921,10 @@
         "useSublayerMasters": false,
         "departmentOrder": [
             {
+                "abbreviation": "Init",
+                "name": "initialisation"
+            },
+            {
                 "abbreviation": "edit",
                 "name": "Editing"
             },

@@ -17,16 +17,24 @@ class autoVariant():
         self.pasTrsDecal = 1
         self.mergeToRig = hou.node("/stage/merge4")
         self.mergeToSusbtance = hou.node("/stage/merge5")
+
+
+        scenepath = hou.hipFile.path()
+        if not scenepath:
+            hou.ui.displayMessage("the scene is not save please save your scene in the good assets folder", buttons=("OK",) ,severity=hou.severityType.ImportantMessage)
+            return
+        try:
+            nameAssets = scenepath.split("/Assets/")[1].split("/")[1]
+        except:
+            hou.ui.displayMessage("To use the tool, you must be in the lookdev scene of the asset", buttons=("OK",) ,severity=hou.severityType.ImportantMessage)
+            return
         
+
         withVar = hou.ui.displayMessage("it's variant ?", buttons=("Yes", "No", "skip") , close_choice=2)
         if withVar == 2:
             return
         
-        scenepath = hou.hipFile.path()
-        if not scenepath:
-            hou.ui.displayMessage("the scene is not save please save your scene in the good assets folder", buttons=("OK",) ,severity=hou.severityType.Error)
-            return
-        nameAssets = scenepath.split("/Assets/")[1].split("/")[1]
+    
         self.compOUT.setName(nameAssets, unique_name=True)
         
         list_variant = self.find_variant(withVar)

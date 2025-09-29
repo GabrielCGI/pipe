@@ -16,15 +16,15 @@
             "ToggleFaceNormalDisplay",
             "CharacterAnimationEditor",
             "HotkeyPreferencesWindow",
-            "HypershadeWindow",
             "OpenNodeAttrRef",
             "CreateImagePlane",
-            "NamespaceEditor",
             "RepeatLast",
             "CreatePolygonType",
             "MatchTransform",
-            "ParentConstraint",
-            "ReferenceEditor"
+            "NamespaceEditor",
+            "HypershadeWindow",
+            "ReferenceEditor",
+            "ParentConstraint"
         ],
         [
             "share"

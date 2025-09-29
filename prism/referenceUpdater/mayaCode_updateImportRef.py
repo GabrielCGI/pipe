@@ -8,6 +8,15 @@ import re
 import os
 
 
+dataEnv = eval(sys.argv[1])
+dataRef = eval(sys.argv[2])
+departement = dataEnv["department"]
+if dataEnv["DEBUG"] and True:
+    ctypes.windll.kernel32.AllocConsole()
+    sys.stdout = open('CONOUT$', 'w')
+    sys.stdin = open('CONIN$', 'r')
+
+
 
 def infoP(msg):
     print(str(msg), file=sys.stdout)
@@ -15,7 +24,6 @@ def infoP(msg):
 def error(msg):
     print("ILLOGIC ERROR : " + str(msg), file=sys.stdout)
     print("ILLOGIC ERROR : " + str(msg), file=sys.stderr)
-    
 
 def debugger():
     sys.path.append("R:/pipeline/networkInstall/python_shares/python311_debug_pkgs/Lib/site-packages")
@@ -39,19 +47,24 @@ def catch_error(dataEnv):
      
     return False
 
+
 def findLastScene(Projet, nameSpace, Type):
-    dosAsset = rf"{Projet}/03_Production/Assets/{Type}/{nameSpace}/Export/Rigging"
-    versionUSD = None
+    dosAsset = rf"{Projet}03_Production/Assets/{Type}/{nameSpace}/Export/{departement}"
+    last_file = None
     fileRef = None
+
     if not os.path.exists(dosAsset):
         return None
 
-    lastVersion, _ = findLastVersion(dosAsset)
-    for filename in os.listdir(dosAsset + "/" + lastVersion):
-        if filename.startswith(f"{nameSpace}_Rigging_{lastVersion}.ma"):
-            versionUSD = filename
+    last_Version, _ = findLastVersion(dosAsset)
+    extention = None
+    if departement == "Rigging":
+        extention = "ma"
+    elif departement == "toRig":
+        extention = "usdc"
     
-    fileRef = rf"{Projet}/03_Production/Assets/{Type}/{nameSpace}/Export/Rigging/{lastVersion}/{versionUSD}"
+    last_file = f"{nameSpace}_{departement}_{last_Version}.{extention}"
+    fileRef = rf"{Projet}03_Production/Assets/{Type}/{nameSpace}/Export/{departement}/{last_Version}/{last_file}"
     if not os.path.exists(fileRef):
         error("ERROR path not foud.........................")
         error(fileRef)
@@ -77,27 +90,35 @@ def findLastVersion(path):
 
 def findRefInScene():
     refNodes = cmds.ls(type='reference')
-    dataRefInscene = {}
-    elementInScene = []
+    data_ref_in_scene = {}
+    element_in_scene = []
     for refNode in refNodes:
+        if refNode == "sharedReferenceNode":
+            continue
+        
         try:
-            file_path = cmds.referenceQuery(refNode, filename=True).split(".ma")[0] + ".ma"
+            file_path = cmds.referenceQuery(refNode, f=True, wcn=True)
         except:
             continue
-        asset = file_path.split("/")[-5]
-        cat = file_path.split("/")[-6]
         
-        if asset in elementInScene:
-            dataRefInscene[cat][asset].append(refNode)
+        try:
+            asset = file_path.split("/")[-5]
+            cat = file_path.split("/")[-6]
+        except:
+            error("impossible to find asset and asset Type for :" + refNode)
+            continue
+        
+        if asset in element_in_scene:
+            data_ref_in_scene[cat][asset].append(refNode)
         else:
-            if cat in dataRefInscene:
-                dataRefInscene[cat][asset] = [refNode]
-                elementInScene.append(asset)
+            if cat in data_ref_in_scene:
+                data_ref_in_scene[cat][asset] = [refNode]
+                element_in_scene.append(asset)
             else:
-                dataRefInscene[cat] = {asset:[refNode]}
-                elementInScene.append(asset)
+                data_ref_in_scene[cat] = {asset:[refNode]}
+                element_in_scene.append(asset)
 
-    return dataRefInscene
+    return data_ref_in_scene
 
 def makeDifference(dataInScene, dataRef):
     for cat in dataInScene:
@@ -112,23 +133,6 @@ def makeDifference(dataInScene, dataRef):
                 del dataRef[cat][asset]
             else:
                 dataRef[cat][asset] = new_nmb
-
-def hierarchie():
-    refInScene = findRefInScene()
-    if not cmds.objExists("|assets"):
-        cmds.createNode("transform", n="assets", ss=True)
-    if not cmds.objExists("|assets|characters"):
-        cmds.createNode("transform", n="characters", ss=True, p="|assets")
-    if not cmds.objExists("|assets|props"):
-        cmds.createNode("transform", n="props", ss=True, p="|assets")
-
-    #------------------WIP------------------
-    for cat in refInScene:
-        for asset in refInScene[cat]:
-            for reference in refInScene[cat][asset]:
-                Nodes = cmds.referenceQuery(reference, nodes=True, dp=True)
-                if not Nodes:
-                    continue
 
 def createLastScene(PathScene):
     def findLastVersionScene(path, scene):
@@ -157,16 +161,61 @@ def createLastScene(PathScene):
 
     return folderPath + "\\" + new_scene
 
+def hierarchie():
+    refInScene = findRefInScene()
+    #------------------WIP------------------
+    for cat in refInScene:
+        for asset in refInScene[cat]:
+            for reference in refInScene[cat][asset]:
+                all_ref = cmds.referenceQuery(reference, nodes=True, dp=True)
+                if not all_ref:
+                    continue
+                    
+                all_nodes = [n for n in all_ref if cmds.nodeType(n) == 'transform' and not n.count('|')>= 2]
+                if not all_nodes:
+                    continue
+                
+                nodes_root = [root for root in all_nodes if not cmds.listRelatives(root, parent=True, fullPath=True)]
+                if not nodes_root:
+                    continue
+
+                for node in nodes_root:
+                    try:
+                        if departement == "Rigging":
+                            parent = None
+                            if "camRig" in reference or "camRig" in asset:
+                                parent = "cameras"
+                            else:
+                                parent = f"assets|{cat.lower()}"
+
+                            infoP(f'hierarchie of {node} in {parent}')
+                            cmds.parent(node, parent)
+                        
+                        elif departement == "toRig":
+                            infoP(f'hierarchie of rig in {node}')
+                            cmds.parent("rig", node)
+                        
+                        else:
+                            infoP("no department find to connect hierarchie")
+                        
+                    except:
+                        error(f"impossible de parenter : {node}")
+
+
 
 def ImportReference(Projet, dataRef):
     for cat in dataRef:
         for name in dataRef[cat]:
-            nameSpace = name + "_Rigging"
+            nameSpace = name + "_" + departement
+            if departement == "toRig":
+                nameSpace = ":"
+            
             ref_path = findLastScene(Projet, name, cat)
             if not ref_path:
+                infoP(f"no path found for {cat}->{name}")
                 continue
 
-            for i in range(dataRef[cat][name]):
+            for _ in range(dataRef[cat][name]):
                 try:
                     cmds.file(ref_path, reference=True, namespace=nameSpace)
                     infoP(f"Référence importée avec le namespace '{nameSpace}': {ref_path}\n")
@@ -180,8 +229,8 @@ def UpdateReference(Projet, refInScene):
                 last_scene = findLastScene(Projet, asset, cat)
                 if not last_scene:
                     continue
-
-                if last_scene == cmds.referenceQuery(refNode, filename=True).split(".ma")[0] + ".ma":
+                scene_split = cmds.referenceQuery(refNode, f=True, wcn=True)
+                if last_scene == scene_split:
                     continue
                 try:
                     cmds.file(last_scene, loadReference=refNode)
@@ -191,23 +240,18 @@ def UpdateReference(Projet, refInScene):
 
 
 def CoreStandalone():
-    dataEnv = eval(sys.argv[1])
-    dataRef = eval(sys.argv[2])
-    if dataEnv["DEBUG"]:
-        ctypes.windll.kernel32.AllocConsole()
-        sys.stdout = open('CONOUT$', 'w')
-        sys.stdin = open('CONIN$', 'r')
-
     if catch_error(dataEnv):
         return False
     
     scene = dataEnv["Scene"]
     if not os.path.isfile(scene):
+        infoP("no scene find")
         return False
 
     infoP('\n\n\n\nSTART ------------------------------ILLOGIC REFERENCE UPDTE/IMPORT------------------------------------')
-    infoP("//ILLOGIC    open the scene without loading reference...")
-    cmds.file(scene, open=True, force=True, loadReferenceDepth="none")
+    if dataEnv["standalone"]:
+        infoP("//ILLOGIC    Open scene...")
+        cmds.file(scene, open=True, force=True, loadReferenceDepth="none")
 
     infoP("\n//ILLOGIC------------    find Reference in the scene...")
     refInScene = findRefInScene()
@@ -226,22 +270,26 @@ def CoreStandalone():
         infoP("\n//ILLOGIC------------    Update all reference...")
         UpdateReference(dataEnv["Projet"], refInScene)
 
+
     if dataRef:
         infoP("\n//ILLOGIC------------    import Reference...")
         if dataEnv["addition"]:
             makeDifference(refInScene, dataRef)
         ImportReference(dataEnv["Projet"], dataRef)
 
-    infoP("\n//ILLOGIC------------    organise hierarchie...")
+    infoP("\n//ILLOGIC------------    make hierarchie...")
     hierarchie()
 
-    infoP("\n//ILLOGIC------------    save scene...")
-    try:
-        new_file = createLastScene(scene)
-        cmds.file(rename=new_file)
-        cmds.file(save=True, type='mayaAscii')
-    except Exception as e:
-        pass
+    if dataEnv["standalone"]:
+        infoP("\n//ILLOGIC------------    save scene...")
+        try:
+            new_file = createLastScene(scene)
+            cmds.file(rename=new_file)
+            cmds.file(save=True, type='mayaAscii')
+        except Exception as e:
+            error(e)
+            pass
+    
 
     infoP('\n\nEnd   ------------------------------ILLOGIC REFERENCE UPDTE/IMPORT------------------------------------\n\n')
 
@@ -251,13 +299,15 @@ def CoreStandalone():
 
     return True
 
+if __name__ == "__main__":
+    if dataEnv["standalone"]:
+        import maya.cmds as cmds
+        maya.standalone.initialize(name='python')
+        import pymel.core as pm
+
+    CoreStandalone()
+
+    if dataEnv["standalone"]:
+        maya.standalone.uninitialize()
 
 
-
-maya.standalone.initialize(name='python')
-
-result = CoreStandalone()
-if not result:
-    sys.exit(1)
-
-maya.standalone.uninitialize()

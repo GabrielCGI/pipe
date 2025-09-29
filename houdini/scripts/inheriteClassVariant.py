@@ -2,7 +2,7 @@ from pxr import Sdf, Usd, Kind, UsdGeom
 from datetime import datetime
 from pathlib import Path
 import socket
-import shutil
+import hou # type: ignore
 import sys
 import os
 import re
@@ -16,102 +16,120 @@ class inheriteClassAttr():
     def __init__(self, filePathImport, clearFile=False):
         if not os.path.exists(filePathImport):
             print("no file found")
-            return
+            return 
+        
+        self.message = "Everything went well\nReload Prism Import"
+        
+        self.result = True
         
         self.filePathImport = str(Path(filePathImport))
+        self.projet = "/".join(self.filePathImport.split("\\")[:2])
         self.clearFile = clearFile
         self.prefix = "CLEAR" if clearFile else "ADD"
-        self.projet = "/".join(self.filePathImport.split("\\")[:2])
-        self.root = None
         self.NewLayer = None
-        self.result = True
+        self.root = None
         self.NameFolder = "_layer_anm_class"
         self.run()
         
     def debugger(self):
-        if socket.gethostname() in LIST_MACHINE_DEBUG and DEBUG:
-            sys.path.append("R:/pipeline/networkInstall/python_shares/python_debug_pkgs/Lib/site-packages")
+        if socket.gethostname() in LIST_MACHINE_DEBUG:
+            sys.path.append("R:/pipeline/networkInstall/python_shares/python311_debug_pkgs/Lib/site-packages/debug")
             import debug
             debug.debug()
             debug.debugpy.breakpoint()
 
-    def run(self):
-        self.debugger() # appeller le debugger
-        print("openning file.....")
+    def sendError(self, msg, type):
+        self.message = msg
+        print(msg)
+
+        if type == "error":
+            self.error_type = hou.severityType.Error
+        elif type == "warning":
+            self.error_type = hou.severityType.Warning
+        elif type == "importMessage":
+            self.error_type = hou.severityType.ImportantMessage
+        else:
+            print("---------------blablabal")
         
-        stage = Usd.Stage.Open(self.filePathImport)
+        self.result = False
+
+    def run(self):
+        print("openning file.....")
+        try:
+            stage = Usd.Stage.Open(self.filePathImport)
+        except Exception as e:
+            self.message = str(e)
+            self.result = False
+            return
 
         print("\nfind Good Layer.....")
-        infoLay, layerPath, masterLayer = self.FindGoodLayer(stage, "/_layer_anm_main/", "/_layer_anm_master/")
-        if not infoLay:
-            self.result = False
-            print('!!ERROR!! no layer found in this stack usd')
+        infoLay, layerPath, masterLayer, layersParsing = self.FindGoodLayer(stage, "/_layer_anm_main", "/_layer_anm_master/")
+        if not infoLay or not layerPath:
+            self.sendError('no layer "/_layer_anm_main/" found in this stack usd', "error")
             return
 
         
-        newPath = self.createLayerClass(layerPath)
+        newPath = self.createLayerClass(layerPath[0])
         if not newPath:
-            self.result = False
-            print("error new path invalide")
+            self.sendError("inpossible to create /layer_anm_class/", "error")
             return
         
         print(f"\nCreate new layer  here: {newPath}")
         self.NewLayer = Usd.Stage.CreateNew(newPath)
-        self.root = Usd.Stage.Open(self.filePathImport)
-        print(self.filePathImport, self.NewLayer, self.root)
+        for layerParse in layersParsing:
+            self.root = Usd.Stage.Open(layerParse)
+            print(layerParse, self.NewLayer, self.root)
 
 
 
-        print(f"\nadd subLayer in _layer_anm_master")
-        self.AppendLayer(masterLayer, newPath)
+            print(f"\nadd subLayer in _layer_anm_master")
+            self.AppendLayer(masterLayer, newPath)
 
 
-        print("\n\nnow find charaters and props....")
-        allPathPrim = self.getAllPrimPath(self.root, ["/assets/props/", "/assets/propsSkin", "/assets/characters/"])
-        if not allPathPrim:
-            print("no props and no characters")
-            return
+            print("\n\nnow find charaters and props....")
+            allPathPrim = self.getAllPrimPath(self.root, ["/assets/props/", "/assets/propsSkin/", "/assets/characters/"])
+            if not allPathPrim:
+                self.sendError("no props and no characters", "importMessage")
+                return
+            
+
+            print(f"{self.prefix} USD-----------------------------------------------------------------------------------------------")
+            if not self.clearFile:
+                self.NewLayer.CreateClassPrim(f"/__class__")
+
         
+            for prim in allPathPrim:
+                if not prim.IsValid():
+                    print("no valid", prim.GetPrimStack())
+                    continue
+                
 
-        print(f"{self.prefix} USD-----------------------------------------------------------------------------------------------")
-        if not self.clearFile:
-            #self.NewLayer.DefinePrim("/__class__", "Xform")
-            self.NewLayer.CreateClassPrim(f"/__class__")
+                namePrim = prim.GetName()
+                if not self.clearFile:
+                    primReference, isProps = self.pathReference(namePrim)
+                
+                if not primReference:
+                    self.sendError(f"warning {namePrim} prim reference not found\nfor the object: {namePrim}\nPrim path: {str(prim.GetPath())}", "importMessage")
+                    continue
 
-       
-        for prim in allPathPrim:
-            if not prim.IsValid():
-                print("no valid", prim.GetPrimStack())
-                continue
-            
+                print(f"\n{self.prefix} Set variant for:    ", namePrim, "---------------------------------------")
+                self.setVariant(prim, primReference)
 
-            namePrim = prim.GetName()
-            if not self.clearFile:
-                primReference, isProps = self.pathReference(namePrim)
-            
-            if not primReference:
-                print("error ", primReference, namePrim, "prim reference not found")
-                self.result = False
-                continue
+                print(f"\n{self.prefix} Inherit class for:  ", namePrim, "---------------------------------------")
+                self.inheriteComponent(namePrim, prim)
 
-            print(f"\n{self.prefix} Set variant for:    ", namePrim, "---------------------------------------")
-            self.setVariant(prim, primReference)
+                print(f"\n{self.prefix} Reference path for: ", namePrim, "---------------------------------------")
+                if not self.clearFile:
+                    self.addReferenceUSD(namePrim, primReference[3:], isProps)
 
-            print(f"\n{self.prefix} Inherit class for:  ", namePrim, "---------------------------------------")
-            self.inheriteComponent(namePrim, prim)
-
-            print(f"\n{self.prefix} Reference path for: ", namePrim, "---------------------------------------")
-            if not self.clearFile:
-                self.addReferenceUSD(namePrim, primReference[3:], isProps)
-
-            
-            print("\n")
+                
+                print("\n")
 
 
 
         print("\n\nsave file....")
         self.NewLayer.GetRootLayer().Save()
-        print("nice your update is finish :)")
+        print("ingerite class finish.")
         return self.result
 
     def showAllChild(self, prim):
@@ -132,16 +150,24 @@ class inheriteClassAttr():
 
         for child in prim.GetChildren():
             self.showAllChild(child)
+    
+    def showProxyAndRender(self, prim):
+        imageable = UsdGeom.Imageable(prim)
+        if imageable:
+            if not "/characters/" in str(prim.GetPath()):
+                for purpose in ["render", "proxy"]:
+                    over_proxy = self.NewLayer.OverridePrim(str(prim.GetPath()) + "/geo/" + purpose)
+                    overImage = UsdGeom.Imageable(over_proxy)
+                    overImage.CreateVisibilityAttr().Set("inherited")
 
     def setVariant(self, prim, refPrim):
-        self.showAllChild(prim)
-        
         path = prim.GetPath()
         visible, hidden = self.getVariant(path)
         if not visible and not hidden:
             print("not virant")
             return
         elif not hidden:
+            self.showProxyAndRender(prim)
             print("there are no variant")
             return
         elif not visible and hidden:
@@ -152,7 +178,7 @@ class inheriteClassAttr():
         if len(visible) >=2:
             print("_|_|_| WARNING |_|_|_ multiple variant in: ", visible)
         
-        
+        self.showAllChild(prim)
         variant = visible[0]
         ref = Usd.Stage.Open(refPrim)
         for primRef in ref.Traverse():
@@ -220,22 +246,22 @@ class inheriteClassAttr():
 
     def FindGoodLayer(self, root, layerName_main, layerName_master):
         used_layers = root.GetUsedLayers()
-        self.filePathImport = None
+        layerFilePath = []
         infoLay = None
-        layerPath = None
+        layerPath = []
         layerMaster = None
         for layer in used_layers:
             if layerName_main in layer.identifier and not "Assets" in layer.identifier:
                 infoLay = layer.identifier.split("/")[-1]
-                self.filePathImport = layer.identifier
-                layerPath = layer.realPath
+                layerFilePath.append(layer.identifier)
+                layerPath.append(layer.realPath)
             elif layerName_master in layer.identifier and not "Assets" in layer.identifier:
                 layerMaster = layer
         
-            if layerMaster and layerPath and infoLay:
-                break
+            """if layerMaster and layerPath and infoLay:
+                break"""
         
-        return infoLay, layerPath, layerMaster
+        return infoLay, layerPath, layerMaster, layerFilePath
 
     def getAllPrimPath(self, stage, ListFinds):
         matchedPaths = []

@@ -48,6 +48,40 @@ global proc shelf_Illogic2025 () {
         -manage 1
         -visible 1
         -preventOverride 0
+        -annotation "User Script" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "scene Builder" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png" 
+        -image1 "R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nimport PrismInit\nimport sys\n\n\nsys.path.append(\"R:/pipeline/pipe_public/prism-scene-builder\")\nimport sceneBuilder\nimportlib.reload(sceneBuilder)\n\nprism_core = PrismInit.pcore\npath = prism_core.getCurrentFileName()\nproject_path = prism_core.projectPath\n\n\nyaml_path       = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml\"\nroutine_path    = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/templates\"\n\n\ndcc ={\"name\": \"MAYA\", \"pathSoft\": \"\", \"pathPy\": \"\"}\nshotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path)\nshotbuild.main(path, dcc, False)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
         -annotation "Asset Browser" 
         -enableBackground 0
         -backgroundColor 0 0 0 
@@ -591,7 +625,7 @@ global proc shelf_Illogic2025 () {
         -flexibleWidthType 3
         -flexibleWidthValue 32
         -enable 1
-        -width 35
+        -width 39
         -height 34
         -manage 1
         -visible 1

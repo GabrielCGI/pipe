@@ -11,7 +11,6 @@ import nuke
 import nukescripts
 import os.path
 
-
 if nuke.NUKE_VERSION_MAJOR==12:
     print("Loading Nuke Menu as version 12...")
     ### -------------------------------------------------------------------------------------------
@@ -100,8 +99,21 @@ if nuke.NUKE_VERSION_MAJOR==12:
 
     nuke.menu('Nodes').addCommand('Image/WriteLocal', 'create_write_local()')
 
-    print("End loading Nuke Menu as version 12...")
+    # === Select all Write nodes (Nuke 12) ===
+    def select_all_writes():
+        # deselect everything first
+        for n in nuke.allNodes():
+            n.setSelected(False)
+        # select all Write nodes
+        for w in nuke.allNodes('Write'):
+            w.setSelected(True)
 
+    # Ajoute la commande dans le menu Nuke (avec raccourci Ctrl+Alt+W)
+    nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, 'ctrl+alt+w')
+    # Si tu préfères SANS raccourci : remplace la ligne ci-dessus par :
+    # nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, '')
+
+    print("End loading Nuke Menu as version 12...")
 
 elif nuke.NUKE_VERSION_MAJOR>=13:
     print("Loading Nuke MENU as version 13+ ...")
@@ -174,11 +186,9 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     n.addCommand('expoglow', 'nuke.createNode("expoglow")')
     n.addCommand('exponential glow', "nuke.createNode(\"exponentialGlow\")")
 
-
-
     ### edit folder path here ###
     DVPath = "R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/Deep2VP_v40/asGroup/"
-    
+
     ### MJTLab - Deep2VP v4.0 ###
     DVPFam = {"general" : ["Deep2VP","DVPToImage","DVPortal","DVPColorCorrect"] , 
             "matte" : ["DVPmatte","DVPattern","DVProjection"] , 
@@ -196,7 +206,19 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
                 DVP.addCommand( "{0}/{1}".format(key,item), "nuke.nodePaste(\"{0}{1}/{2}.nk\")".format(DVPath,key,item), icon="{0}.png".format(item) )
     ### end here ###
 
+    # === Select all Write nodes (Nuke 13+) ===
+    def select_all_writes():
+        # deselect everything first
+        for n in nuke.allNodes():
+            n.setSelected(False)
+        # select all Write nodes
+        for w in nuke.allNodes('Write'):
+            w.setSelected(True)
 
+    # Ajoute la commande dans le menu Nuke (avec raccourci Ctrl+Alt+W)
+    nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, 'ctrl+alt+w')
+    # Si tu préfères SANS raccourci : remplace la ligne ci-dessus par :
+    # nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, '')
 
     print("End loading Nuke MENU as version 13+ ...")
     if nuke.NUKE_VERSION_MAJOR<=14:

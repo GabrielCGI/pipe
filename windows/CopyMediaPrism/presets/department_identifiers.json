@@ -8,15 +8,17 @@
         ],
         "ANIM": [
             "anim",
-            "anim_playblast"
+            "anim_playblast",
+            "playblast"
         ],
         "RLO": [
             "RoughtLayout",
+            "layout",
             "Previz",
             "RoughLayout_playblast"
         ]
     },
-    "source_path": "I:/intermarche",
-    "dest_path": "D:/cache_resolve/intermarche",
+    "source_path": "I:/swaWicked_2506",
+    "dest_path": "D:/cache_resolve/swaWicked_2506",
     "production": ""
 }
