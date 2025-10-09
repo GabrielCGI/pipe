@@ -4,9 +4,18 @@ import hou
 
 import blast.prim_tree as pt
 
-from PySide2 import QtCore
-from PySide2 import QtWidgets
-
+try:
+    from PySide2 import QtCore
+    from PySide2 import QtWidgets
+    QT_FOUND = True
+except:
+    try:
+        from PySide6 import QtCore
+        from PySide6 import QtWidgets
+        QT_FOUND = True
+    except:
+        QT_FOUND = False
+        
 UNPACK_NODE_TYPE = 'unpackusd::2.0'
 BLAST_NODE_TYPE = 'blast'
 MERGE_NODE_TYPE = 'merge'
@@ -212,6 +221,13 @@ class Blast(QtWidgets.QWidget):
 def run():
     """Small routine to start the UI and link it to houdini window.
     """    
+    
+    if not QT_FOUND:
+        hou.ui.displayMessage(
+            text='No QT Found !',
+            severity=hou.severityType.Error
+        )
+        return
     
     dialog = Blast()
     if dialog.initialize:

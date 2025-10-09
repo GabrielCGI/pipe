@@ -6,6 +6,12 @@ import hou
 def libImport():
     r = Tk()
     filepath = r.clipboard_get()
+    if not filepath:
+        hou.ui.displayMessage(
+            "No path in clipboard",
+            severity=hou.severityType.Warning
+        )
+        return
     filepath = '/'.join(filepath.split('\\'))
 
     filepath = filepath+'/Export/MAT/'
@@ -13,7 +19,11 @@ def libImport():
     def find_versions(directory):
         if not os.path.exists(directory):
             print(f"Error: The directory '{directory}' does not exist.")
-            return None, 0
+            hou.ui.displayMessage(
+                f"The directory '{directory}' does not exist.",
+                severity=hou.severityType.Warning
+            )
+            return None
         versions = {}
         folder_count = 0  # Initialize the counter
 
@@ -34,7 +44,7 @@ def libImport():
                             version_number = int(match.group(1))
                             folder_path = dir_path.replace('\\', '/')
                             versions[current_folder].append((version_number, folder_path))
-                            print('coucou'+versions)
+                            print('Version: '+versions)
 
                             
 
@@ -48,7 +58,8 @@ def libImport():
 
         return folder # Return both the versions dictionary and the folder count
     version = find_versions(filepath)
-
+    if not version:
+        return
     file = filepath + '/'+ version + '/'
     finalFile = file + os.listdir(file)[0]
 
@@ -57,7 +68,14 @@ def libImport():
     active_pane = hou.ui.paneTabOfType(hou.paneTabType.NetworkEditor)
     location = active_pane.pwd()
 
-    location.loadItemsFromFile(finalFile)
+    try:
+        location.loadItemsFromFile(finalFile)
+    except Exception as e:
+        hou.ui.displayMessage(
+            f"Could not load library {filepath}:\n{e}",
+            severity=hou.severityType.Warning
+        )
+        return
     
     active_pane.homeToSelection()
 

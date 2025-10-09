@@ -9,7 +9,7 @@ import re
 
 
 DEBUG = 0
-LIST_MACHINE_DEBUG = ["FOX-03", "FALCON-01", "FOX-04"]
+LIST_MACHINE_DEBUG = ["FOX-03", "FALCON-01"]
 
 
 class inheriteClassAttr():

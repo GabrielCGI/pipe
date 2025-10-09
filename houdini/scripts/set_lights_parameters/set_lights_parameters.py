@@ -1,9 +1,22 @@
 
+from PySide6.QtCore import Qt
 import hou
 
-from PySide2 import QtCore
-from PySide2 import QtWidgets
-from PySide2 import QtGui
+try:
+    from PySide2 import QtCore
+    from PySide2 import QtWidgets
+    from PySide2 import QtGui
+    QT_FOUND = True
+except:
+    try:
+        from PySide6 import QtCore
+        from PySide6 import QtWidgets
+        from PySide6 import QtGui
+        QT_FOUND = True
+    except:
+        QT_FOUND = False
+        
+        
 
 class SliderLineEdit(QtWidgets.QLineEdit):
     
@@ -332,6 +345,13 @@ def showUI():
     """
     Basic routine to initialize the dialog.
     """
+    
+    if not QT_FOUND:
+        hou.ui.displayMessage(
+            "Error: No QT Found",
+            severity=hou.severityType.Error
+        )
+        return
     
     selectedNodes = hou.selectedNodes()
     

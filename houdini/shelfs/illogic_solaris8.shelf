@@ -13,17 +13,19 @@
     <memberToolshelf name="dev"/>
     <memberToolshelf name="model"/>
     <memberToolshelf name="RenderManRIS"/>
-    <memberToolshelf name="prism"/>
     <memberToolshelf name="simplefx"/>
-    <memberToolshelf name="toto"/>
-    <memberToolshelf name="illogic_solaris6"/>
     <memberToolshelf name="labs_toolset"/>
+    <memberToolshelf name="illogic_solaris6"/>
+    <memberToolshelf name="prism"/>
+    <memberToolshelf name="toto"/>
+    <memberToolshelf name="tdtools"/>
+    <memberToolshelf name="volume"/>
     <memberToolshelf name="develop"/>
     <memberToolshelf name="shelf_2"/>
-    <memberToolshelf name="quentin_illogic"/>
   </shelfSet>
 
   <toolshelf name="illogic_solaris6" label="illogic_solaris">
+    <memberTool name="sceneBuilder"/>
     <memberTool name="kmx"/>
     <memberTool name="kmx_geosubset"/>
     <memberTool name="kma_mat_char"/>
@@ -50,7 +52,6 @@
     <memberTool name="clean_light"/>
     <memberTool name="send_ranch_copy"/>
     <memberTool name="select_prim_with_attributes"/>
-    <memberTool name="tool_1"/>
     <memberTool name="enableTexture"/>
   </toolshelf>
 
@@ -167,7 +168,6 @@ sys.path.append(r"R:\pipeline\pipe\houdini\scripts\Lib_Importer")
 
 import Lib_Importer.Lib_Importer as Lib_Importer
 reload(Lib_Importer)
-print(dir(Lib_Importer))
 Lib_Importer.libImport()]]></script>
   </tool>
 
@@ -372,10 +372,6 @@ if START:
     ]]></script>
   </tool>
 
-  <tool name="tool_1" label="New Tool" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[print("gat y")]]></script>
-  </tool>
-
   <tool name="enableTexture" label="Enable Texture" icon="hicon:/SVGIcons.index?BUTTONS_visible.svg">
     <script scriptType="python"><![CDATA[import hou
 import shutil
@@ -487,5 +483,29 @@ importlib.reload(UD)
 
 UD.reload_modules()
 UD.checkHoudiniImportsUpdates()]]></script>
+  </tool>
+
+  <tool name="sceneBuilder" label="Scene Builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
+    <script scriptType="python"><![CDATA[import importlib
+import PrismInit
+import sys
+
+
+sys.path.insert(0, "R:/pipeline/pipe_public/prism-scene-builder")
+import sceneBuilder
+importlib.reload(sceneBuilder)
+
+prism_core = PrismInit.pcore
+path = prism_core.getCurrentFileName()
+project_path = prism_core.projectPath
+
+
+yaml_path       = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml"
+routine_path    = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/templates"
+
+
+dcc ={"name": "HOUDINI", "pathSoft": "", "pathPy": ""}
+shotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path)
+shotbuild.main(path, dcc, False, False)]]></script>
   </tool>
 </shelfDocument>

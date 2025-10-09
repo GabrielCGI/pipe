@@ -1,6 +1,21 @@
 {
     "apps": [
         {
+            "label": "Miro",
+            "category": "URL",
+            "icon": "I:\\VCA_Perlee_2510\\/00_Pipeline/Configs\\LauncherIcons\\Miro.png",
+            "versions": [
+                {
+                    "label": "Version 1",
+                    "mode": "URL",
+                    "cmd": "",
+                    "preferred": true,
+                    "environment": {}
+                }
+            ],
+            "uid": "a2ba9b3c-a35e-11f0-90b2-d85ed35d00a7"
+        },
+        {
             "label": "Settings",
             "category": "Prism",
             "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Settings.png",
@@ -101,10 +116,40 @@
             "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Houdini.png",
             "versions": [
                 {
-                    "label": "Latest",
+                    "label": "houdini21.0.440",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.5.674\\bin\\houdinicore.exe",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.440\\bin\\houdinicore.exe",
                     "preferred": true,
+                    "environment": {
+                        "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "4096",
+                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "2048"
+                    }
+                },
+                {
+                    "label": "shaderMax1024",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.440\\bin\\houdinicore.exe",
+                    "preferred": false,
+                    "environment": {
+                        "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "2048",
+                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "1024"
+                    }
+                },
+                {
+                    "label": "shaderMax512",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.440\\bin\\houdinicore.exe",
+                    "preferred": false,
+                    "environment": {
+                        "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "1024",
+                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "512"
+                    }
+                },
+                {
+                    "label": "Full",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.440\\bin\\houdinicore.exe",
+                    "preferred": false,
                     "environment": {}
                 }
             ],
@@ -116,17 +161,40 @@
             "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Houdini FX.png",
             "versions": [
                 {
-                    "label": "20.5.360",
+                    "label": "houdini",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 20.0.360\\bin\\houdinifx.exe",
-                    "preferred": false,
-                    "environment": {}
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.489\\bin\\houdinifx.exe",
+                    "preferred": true,
+                    "environment": {
+                        "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "4096",
+                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "2048"
+                    }
                 },
                 {
-                    "label": "Latest",
+                    "label": "shaderMax1024",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini %HOUDINI_ILL_VERSION%\\bin\\houdinifx.exe",
-                    "preferred": true,
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.489\\bin\\houdinifx.exe",
+                    "preferred": false,
+                    "environment": {
+                        "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "2048",
+                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "1024"
+                    }
+                },
+                {
+                    "label": "shaderMax512",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.489\\bin\\houdinifx.exe",
+                    "preferred": false,
+                    "environment": {
+                        "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "1024",
+                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "512"
+                    }
+                },
+                {
+                    "label": "Full",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.489\\bin\\houdinifx.exe",
+                    "preferred": false,
                     "environment": {}
                 }
             ],
@@ -267,6 +335,36 @@
                 }
             ],
             "uid": "59fc7696-3180-11f0-8a3b-d8bbc13f16c2"
+        },
+        {
+            "label": "Check Nuke License",
+            "category": "Other",
+            "icon": "I:\\intermarche\\/00_Pipeline/Configs\\LauncherIcons\\Check Nuke License.png",
+            "versions": [
+                {
+                    "label": "Version 1",
+                    "mode": "Shell Command",
+                    "cmd": "\"R:\\pipeline\\networkInstall\\python_shares\\python311_nuke_requets_pkgs\\Scripts\\python.exe\" R:\\pipeline\\pipe\\prism\\nuke_license_parser\\exec_license_parser.py ",
+                    "preferred": true,
+                    "environment": {}
+                }
+            ],
+            "uid": "3424217f-6eee-11f0-a200-e848b8c82000"
+        },
+        {
+            "label": "Kitsu",
+            "category": "URL",
+            "icon": "I:\\VCA_Perlee_2510\\/00_Pipeline/Configs\\LauncherIcons\\Kitsu.png",
+            "versions": [
+                {
+                    "label": "Version 1",
+                    "mode": "URL",
+                    "cmd": "",
+                    "preferred": true,
+                    "environment": {}
+                }
+            ],
+            "uid": "ef741bf8-a35e-11f0-9953-d85ed35d00a7"
         }
     ],
     "prismVersions": [

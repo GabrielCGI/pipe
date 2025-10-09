@@ -1,8 +1,10 @@
 import nuke
 import re
 import os
+import sys
 import glob
 from common.utils import *
+
 try:
     from PySide2 import QtCore
     from PySide2 import QtGui
@@ -10,6 +12,7 @@ try:
     from PySide2.QtWidgets import *
     from PySide2.QtCore import *
     from PySide2.QtGui import *
+    QT_FOUND = True
 except:
     try:
         from PySide6 import QtCore
@@ -18,7 +21,9 @@ except:
         from PySide6.QtWidgets import *
         from PySide6.QtCore import *
         from PySide6.QtGui import *
+        QT_FOUND = True
     except:
+        QT_FOUND = False
         sys.exit(1)
 
 # ######################################################################################################################

@@ -149,7 +149,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
             scriptDir = os.path.join(prismRoot, "Scripts")
 
             if scriptDir not in sys.path:
-                sys.path.append(scriptDir)
+                sys.path.insert(0, scriptDir)
 
             import PrismCore
 

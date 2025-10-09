@@ -108,7 +108,7 @@ class startWithRef(qt.QMainWindow):
         path = self.ProjetPath + "/03_Production/Assets/" + assetType
         if not os.path.exists(path):
             print("error path note valide", path)
-            return []
+            return [], None
         
         return os.listdir(path), path
 

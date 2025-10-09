@@ -1,5 +1,6 @@
 import os
 import re
+import sys
 import glob
 import hou
 from pathlib import Path
@@ -9,9 +10,18 @@ from . import auto
 from . import shader as sh
 from . import map as mp
 
-from PySide2 import QtCore
-from PySide2 import QtWidgets
-
+try:
+    from PySide2 import QtCore
+    from PySide2 import QtWidgets
+    QT_FOUND = True
+except:
+    try:
+        from PySide6 import QtCore
+        from PySide6 import QtWidgets
+        QT_FOUND = True
+    except:
+        QT_FOUND = False
+    
 from enum import Enum
 
 QSS_STYLESHEET_PATH = os.path.join(
@@ -951,6 +961,12 @@ def showUI():
     """
     Method called to display autoconnect UI.
     """
+    if not QT_FOUND:
+        hou.ui.displayMessage(
+            "Error: No QT Found",
+            severity=hou.severityType.Error
+        )
+        return
     
     dialog = AutoConnectUI(material_library=None)
     if not dialog.initialized:

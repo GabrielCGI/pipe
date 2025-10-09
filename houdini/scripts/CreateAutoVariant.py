@@ -2,10 +2,14 @@ import hou
 from pxr import Usd, UsdGeom
 
 class autoVariant():
-    def __init__(self):
-        sel = hou.selectedNodes()
+    def __init__(self, sel=None, ui=True):
+        self.statue = {"statue": True, "mesage": ""}
+        if not sel: 
+            sel = hou.selectedNodes()
         if len(sel) != 3:
-            hou.ui.displayMessage("Select 3 nodes in this order: Prism LOP import / componentIN / componentOUT", buttons=("OK",) ,severity=hou.severityType.Error)
+            if ui:
+                hou.ui.displayMessage("Select 3 nodes in this order: Prism LOP import / componentIN / componentOUT", buttons=("OK",) ,severity=hou.severityType.Error)
+            self.statue = {"statue": False, "mesage": "Select 3 nodes in this order: Prism LOP import / componentIN / componentOUT"}
             return
 
         self.importLOP = sel[0]
@@ -21,23 +25,33 @@ class autoVariant():
 
         scenepath = hou.hipFile.path()
         if not scenepath:
-            hou.ui.displayMessage("the scene is not save please save your scene in the good assets folder", buttons=("OK",) ,severity=hou.severityType.ImportantMessage)
+            if ui:
+                hou.ui.displayMessage("the scene is not save please save your scene in the good assets folder", buttons=("OK",) ,severity=hou.severityType.ImportantMessage)
+            self.statue = {"statue": False, "mesage": "the scene is not save please save your scene in the good assets folder"}
             return
+        
         try:
             nameAssets = scenepath.split("/Assets/")[1].split("/")[1]
         except:
-            hou.ui.displayMessage("To use the tool, you must be in the lookdev scene of the asset", buttons=("OK",) ,severity=hou.severityType.ImportantMessage)
+            if ui:
+                hou.ui.displayMessage("To use the tool, you must be in the lookdev scene of the asset", buttons=("OK",) ,severity=hou.severityType.ImportantMessage)
+            self.statue = {"statue": False, "mesage": "To use the tool, you must be in the lookdev scene of the asset"}
             return
         
 
-        withVar = hou.ui.displayMessage("it's variant ?", buttons=("Yes", "No", "skip") , close_choice=2)
+
+        if ui:
+            withVar = hou.ui.displayMessage("it's variant ?", buttons=("Yes", "No", "skip") , close_choice=2)
+        else:
+            withVar = 1
+        
         if withVar == 2:
             return
         
     
         self.compOUT.setName(nameAssets, unique_name=True)
         
-        list_variant = self.find_variant(withVar)
+        list_variant = self.find_variant(withVar, nameAssets)
         compoGeo = self.create_variant(list_variant.copy(), withVar)
         if len(list_variant) != 1:
             compoGeo.bypass(False)
@@ -101,7 +115,7 @@ class autoVariant():
         
         return compoGeo
 
-    def find_variant(self, withVar):
+    def find_variant(self, withVar, nameAssets):
         list_variant =[]
         old_decalTRS = 0
         nmb_var = 0
@@ -111,9 +125,17 @@ class autoVariant():
         lop_node = hou.node(self.importLOP.path())
         
         stage = lop_node.stage()
+        search_path = "/geo/xform/"
+        path_source = "/geo"
+        incre = 4
         for prim in stage.Traverse():
-            if prim.GetPath().pathString.startswith("/geo/xform/"):
-                if len(str(prim.GetPath()).split("/")) == 4:
+            if not prim.GetPath().pathString.startswith(path_source):
+                search_path = f"/{nameAssets}/geo/render/xform"
+                path_source = "/" + nameAssets + "/geo"
+                incre = 6
+            
+            if prim.GetPath().pathString.startswith(search_path):
+                if len(str(prim.GetPath()).split("/")) == incre:
                     print(" trouver  ", prim.GetPath())
                     list_variant.append(prim)
                     transform = self.calcul_DecalTransform(prim)
@@ -123,7 +145,7 @@ class autoVariant():
                     old_decalTRS += transform + self.pasTrsDecal
                     nmb_var += 1
             
-            if str(prim.GetPath()) == "/geo":
+            if str(prim.GetPath()) == path_source:
                 source = prim
 
         if nmb_var == 1 or withVar == 1:

@@ -6,7 +6,9 @@
     ],
     "setdress": [
 		"_layer_set_main"
-        
+    ],
+    "setextras": [
+        "_layer_set_extras"
     ],
     "animation": [
         "_layer_anm_class"

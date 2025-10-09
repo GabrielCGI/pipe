@@ -1,0 +1,2531 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Deadline Statistics Report - Dernières 24h</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .timestamp {
+            opacity: 0.8;
+            font-size: 0.9em;
+        }
+        
+        .section {
+            padding: 30px;
+        }
+        
+        h2 {
+            color: #2d3748;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #667eea;
+            font-size: 1.8em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        thead {
+            background: linear-gradient(135deg, #2d3748 0%, #1a202c 100%);
+            color: white;
+        }
+        
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 0.95em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        td {
+            padding: 12px 15px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        
+        tbody tr:hover {
+            background-color: #f7fafc;
+            transition: background-color 0.2s;
+        }
+        
+        tbody tr:nth-child(even) {
+            background-color: #f8f9fa;
+        }
+        
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #718096;
+            font-style: italic;
+        }
+        
+        .error-highlight {
+            color: #e53e3e;
+            font-weight: bold;
+        }
+        
+        .success-highlight {
+            color: #38a169;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Deadline Statistics Report</h1>
+            <div class="timestamp">Dernières 24 heures - Généré le 08/10/2025 à 11:10:49</div>
+        </header>
+        
+        <div class="section">
+            <h2>💼 Workers Status</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Rendering</div>
+                    <div class="stat-value">16</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Idle</div>
+                    <div class="stat-value">2</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Stalled</div>
+                    <div class="stat-value">2</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Offline</div>
+                    <div class="stat-value">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Disabled</div>
+                    <div class="stat-value">7</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2>✅ Jobs Complétés (24h)</h2>
+            
+        <table>
+            <thead>
+                <tr>
+                    <th>Job Name</th>
+                    <th>User</th>
+                    <th>Avg Frame Time</th>
+                    <th>Wasted Error Time</th>
+                    <th>Pool</th>
+                    <th>Plugin</th>
+                    <th>Frames</th>
+                    <th>Errors</th>
+                    <th>Finish Date</th>
+                </tr>
+            </thead>
+            <tbody>
+                
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_BG_v005_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 08m 12s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 11:11:55</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_CHARS_v005_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 46s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 11:15:04</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0690_MG_v015_high_prio_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 04m 17s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 11:56:07</td>
+            </tr>
+            <tr>
+                <td>harveyNichols_2025_FILM-wideStoreUk_FullFormat_v004</td>
+                <td>b.mourgues</td>
+                <td>00d 00h 00m 15s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>nuke_pool</td>
+                <td>Nuke</td>
+                <td>121</td>
+                <td class="">0</td>
+                <td>2025/10/07 12:02:15</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ070-SH0330_CHARS_v016_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 10m 40s</td>
+                <td class="error-highlight">00d 00h 24m 08s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>33</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 12:23:47</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0690_MG_v015_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 03m 35s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>14</td>
+                <td class="">0</td>
+                <td>2025/10/07 12:26:16</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_VOLUME_v007_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 00m 45s</td>
+                <td class="error-highlight">00d 00h 00m 56s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 13:03:07</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_CHARS_v004_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 30s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:11:16</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_VOLUME_v004_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 00m 52s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:14:16</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-050_MG_v003_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 01m 32s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:19:21</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-050_CHARS_v003_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 01m 00s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:22:53</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ010-SH0150_cfx_test_SH150_v012_high_prio_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 04m 21s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:26:39</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ010-SH0010_QC_v026_usd_export</td>
+                <td>t.courtois</td>
+                <td>00d 00h 00m 00s</td>
+                <td class="error-highlight">00d 00h 01m 53s</td>
+                <td>p_intermarche</td>
+                <td>Houdini</td>
+                <td>44</td>
+                <td class="error-highlight">7</td>
+                <td>2025/10/07 13:27:09</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-030_MG_v006_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 01m 44s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:28:36</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0690__layer_cfx_cloth_v007</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 10s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Houdini</td>
+                <td>18</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:30:19</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0690__layer_cfx_cloth_v007_usdLayerUpdate</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 26s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:33:04</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0620_CFX_Preview_v001_high_prio_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 01m 32s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:36:46</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ010-SH0060_FX_v002_high_prio_render</td>
+                <td>t.courtois</td>
+                <td>00d 00h 05m 44s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:38:09</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-010_MG_v013_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 04m 04s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:41:14</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0620_CFX_Preview_v001_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 50s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>29</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:42:33</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0620_CFX_Preview_v001_cleanup</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:48:59</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ010-SH0150_cfx_test_SH150_v012_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 04m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>31</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:50:34</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0900_VOLUME_v006_high_prio_render__OPTI1024</td>
+                <td>i.martin</td>
+                <td>00d 00h 08m 51s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:51:03</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ010-SH0150_cfx_test_SH150_v012_cleanup</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:51:33</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0690_FX_v009_high_prio_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 04m 48s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 13:57:00</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0690_MG_v016_high_prio_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 11m 11s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 14:07:52</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0900_CHARS_v006_high_prio_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 31m 30s</td>
+                <td class="error-highlight">00d 00h 01m 27s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 14:50:18</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-050_VOLUME_v008_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 00m 39s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 15:52:19</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-050_MG_v004_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 09m 26s</td>
+                <td class="error-highlight">00d 00h 01m 30s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 15:54:33</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-050_CHARS_v005_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 04m 07s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 15:56:30</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ110-SH0500_CFX_Preview_v005_high_prio_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 01m 48s</td>
+                <td class="error-highlight">00d 00h 01m 34s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 15:56:36</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0640_CFX_Preview_v002_high_prio_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 01m 06s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 15:58:17</td>
+            </tr>
+            <tr>
+                <td>harveyNichols_2025_FILM-wideDesert_FullFormat_v002</td>
+                <td>b.mourgues</td>
+                <td>00d 00h 00m 25s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>nuke_pool</td>
+                <td>Nuke</td>
+                <td>121</td>
+                <td class="">0</td>
+                <td>2025/10/07 15:58:42</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0640_CFX_Preview_v002_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 28s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>13</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:09:02</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-050_BG_v004_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 12m 11s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:09:39</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0640__layer_cfx_groomAlbert_v002</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 05s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Houdini</td>
+                <td>17</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:10:07</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0640_CFX_Preview_v002_cleanup</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:10:28</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ110-SH0500_CFX_Preview_v005_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 53s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>46</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:11:09</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0640__layer_cfx_groomAlbert_v002_usdLayerUpdate</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 45s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:12:35</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-010_MG_v014_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 09m 51s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:35:53</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_MG_v005_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 37s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:40:10</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_CHARS_v006_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 19s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:40:36</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-010_CHARS_v012_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 39s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:41:27</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_CHARS_v008_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 56s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:46:28</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_VOLUME_v004_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 00m 58s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:47:37</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-010_BG_v008_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 08m 46s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 16:52:51</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_MG_v007_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 04m 22s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 17:21:37</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_FX_v001_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 23s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 17:26:17</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_VOLUME_v005_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 03m 26s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 17:27:03</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_VOLUME_v008_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 00m 52s</td>
+                <td class="error-highlight">00d 00h 01m 19s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="error-highlight">2</td>
+                <td>2025/10/07 17:29:14</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-050_VOLUME_v009_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 11s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 17:29:23</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-010_VOLUME_v010_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 03m 33s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 17:31:20</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_CHARS_v007_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 28s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 17:45:59</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_VOLUME_v008_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 35s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 17:47:58</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_CHARS_v010_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 24s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 17:54:03</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_MG_v008_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 05m 04s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 17:58:53</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_CHARS_v005_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 03m 57s</td>
+                <td class="error-highlight">00d 00h 32m 10s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>42</td>
+                <td class="error-highlight">2</td>
+                <td>2025/10/07 18:00:08</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_BG_v011_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 06m 26s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:02:42</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-050_VOLUME_v010_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 23s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:03:07</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_VOLUME_v009_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 05m 11s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:07:08</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_VOLUME_v009_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 07m 17s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:13:04</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ100-SH0440_CFX_Preview_v007_high_prio_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 57s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:17:57</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-010_MG_v012_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 07m 15s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:25:28</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-010_BG_v009_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 02m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:32:18</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ110-SH0500_CFX_Preview_v005_cleanup</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:35:52</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ100-SH0440_CFX_Preview_v007_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 26s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>64</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:36:40</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-010_VOLUME_v009_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 01m 31s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:37:17</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ100-SH0440_CFX_Preview_v007_cleanup</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:37:26</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-010_CHARS_v010_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 01m 09s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:41:09</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-020_MG_v005_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 02m 07s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:47:55</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-020_BG_v003_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 03m 01s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 18:57:25</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-020_VOLUME_v002_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 01m 29s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:02:39</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-020_CHARS_v003_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 00m 53s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:05:43</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-030_MG_v007_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 01m 14s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:09:48</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0620_CFX_Preview_v002_high_prio_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 01m 12s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:12:07</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-030_CHARS_v005_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 00m 50s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:18:52</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0620_CFX_Preview_v002_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 35s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>29</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:21:14</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0620_CFX_Preview_v002_cleanup</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:21:48</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-030_BG_v005_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 07m 39s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:29:18</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-010_EXTRA_v001_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 22s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:30:31</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-050_VOLUME_v011_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 41s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:32:04</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-040_MG_v006_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 04m 29s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:33:59</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-040_BG_v003_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 03m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:37:26</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_VOLUME_v010_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 04m 11s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:40:09</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-040_VOLUME_v002_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 01m 22s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:40:12</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-040_CHARS_v004_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 00m 43s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:41:12</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-050_MG_v004_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 05m 04s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>162</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:43:09</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-050_MG_v004_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 01m 38s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:43:54</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_CHARS_v009_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 05s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:47:41</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_VOLUME_v012_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 34s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:52:16</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0950_VOLUME_v003_high_prio_render__OPTI1024</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 33m 23s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:54:04</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-050_VOLUME_v003_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 01m 16s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:56:45</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-050_CHARS_v004_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 00m 52s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 19:59:46</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-050_BG_v003_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 08m 16s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:00:05</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-030_VOLUME_v005_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 01m 04s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:02:06</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0950_FOGPAINT_v003_high_prio_render__OPTI1024</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 20m 46s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:15:04</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0950_CHARS_v003_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 14m 23s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:35:20</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-010_CHARS_v012_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 14s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>107</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:40:15</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0900_VOLUME_v007_high_prio_render__OPTI1024</td>
+                <td>i.martin</td>
+                <td>00d 00h 04m 54s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:40:44</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-050_BG_v004_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 04m 22s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>162</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:44:32</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0900_CHARS_v007_high_prio_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 05m 10s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:47:13</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_CHARS_v006_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 00m 36s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>37</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:49:00</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_VOLUME_v005_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 22s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>67</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:51:53</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0650_MG_v013_high_prio_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 05m 09s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:56:48</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_FX_v001_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 05s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>67</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:57:22</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0650_CHARS_v013_high_prio_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 02m 40s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 20:59:49</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-010_VOLUME_v010_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 31s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>107</td>
+                <td class="">0</td>
+                <td>2025/10/07 21:07:51</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-010_MG_v014_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 05m 52s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>107</td>
+                <td class="">0</td>
+                <td>2025/10/07 21:10:07</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_CHARS_v007_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 00m 37s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>37</td>
+                <td class="">0</td>
+                <td>2025/10/07 21:15:28</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0790_CHARS_FG_v008_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 08m 11s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 21:15:28</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_MG_v008_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 03m 09s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>67</td>
+                <td class="">0</td>
+                <td>2025/10/07 21:26:06</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_CHARS_v010_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 51s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>67</td>
+                <td class="">0</td>
+                <td>2025/10/07 21:40:18</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_VOLUME_v009_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 55s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>42</td>
+                <td class="">0</td>
+                <td>2025/10/07 21:42:00</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-050_VOLUME_v011_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 28s</td>
+                <td class="error-highlight">00d 00h 01m 29s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>162</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 22:03:22</td>
+            </tr>
+            <tr>
+                <td>intermarche_STILL-SH010_FOGPAINT_v001_high_prio_render__OPTI512</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 12m 32s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 22:04:40</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_BG_v011_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 04m 33s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>67</td>
+                <td class="">0</td>
+                <td>2025/10/07 22:07:53</td>
+            </tr>
+            <tr>
+                <td>intermarche_STILL-SH010_BG_v001_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 27m 01s</td>
+                <td class="error-highlight">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 22:17:22</td>
+            </tr>
+            <tr>
+                <td>intermarche_STILL-SH010_VOLUME_v001_high_prio_render__OPTI512</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 25m 39s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 22:17:23</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0950_VOLUME_v004_high_prio_render__OPTI1024</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 33m 45s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 22:18:46</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-050_CHARS_v005_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 04s</td>
+                <td class="error-highlight">00d 03h 00m 08s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>162</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 22:20:02</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0950_FOGPAINT_v004_high_prio_render__OPTI1024</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 28m 10s</td>
+                <td class="error-highlight">00d 00h 09m 07s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 22:20:40</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_CHARS_v009_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 00m 56s</td>
+                <td class="error-highlight">00d 00h 01m 24s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>37</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 22:21:14</td>
+            </tr>
+            <tr>
+                <td>intermarche_STILL-SH010_FG_v001_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 31m 13s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 22:22:46</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0840_CHARS_v007_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 05m 33s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 22:29:15</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0860_MG_v009_high_prio_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 46m 32s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/07 22:33:20</td>
+            </tr>
+            <tr>
+                <td>intermarche_STILL-SH010_MG_v001_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 42m 39s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 22:33:49</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0920_VOLUME_v003_render__OPTI1024</td>
+                <td>i.martin</td>
+                <td>00d 00h 02m 41s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>20</td>
+                <td class="">0</td>
+                <td>2025/10/07 22:53:54</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0920_FOGPAINT_v001_render__OPTI1024</td>
+                <td>i.martin</td>
+                <td>00d 00h 01m 20s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>20</td>
+                <td class="">0</td>
+                <td>2025/10/07 23:02:03</td>
+            </tr>
+            <tr>
+                <td>intermarche_STILL-SH010_CHARS_v001_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 01h 05m 08s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 23:10:12</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0860_FOGPAINT_v002_render__OPTI1024</td>
+                <td>i.martin</td>
+                <td>00d 00h 01m 11s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>28</td>
+                <td class="">0</td>
+                <td>2025/10/07 23:27:00</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0860_VOLUME_v006_render__OPTI1024</td>
+                <td>i.martin</td>
+                <td>00d 00h 04m 18s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>28</td>
+                <td class="">0</td>
+                <td>2025/10/07 23:39:56</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0870_QC_v012_usd_export</td>
+                <td>q.costagliola</td>
+                <td>00d 00h 00m 01s</td>
+                <td class="error-highlight">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Houdini</td>
+                <td>41</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 23:41:36</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0800_QC_v012_usd_export</td>
+                <td>q.costagliola</td>
+                <td>00d 00h 00m 00s</td>
+                <td class="error-highlight">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Houdini</td>
+                <td>47</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 23:42:15</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-020_VOLUME_v012_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 03m 19s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>37</td>
+                <td class="">0</td>
+                <td>2025/10/07 23:49:24</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795_CHARS_v006_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 08m 17s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>42</td>
+                <td class="">0</td>
+                <td>2025/10/07 23:49:29</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795_CHARS_v006_cleanup</td>
+                <td>i.martin</td>
+                <td>00d 00h 00m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/07 23:50:21</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-010_BG_v008_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 08m 28s</td>
+                <td class="error-highlight">00d 03h 00m 11s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>107</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/07 23:52:21</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-010_MG_v012_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 06m 18s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>102</td>
+                <td class="">0</td>
+                <td>2025/10/07 23:53:35</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0870_QC_v012_render</td>
+                <td>q.costagliola</td>
+                <td>00d 00h 01m 30s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>41</td>
+                <td class="">0</td>
+                <td>2025/10/08 00:09:13</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0870_QC_v012_cleanup</td>
+                <td>q.costagliola</td>
+                <td>00d 00h 00m 02s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/08 00:10:52</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0800_QC_v012_render</td>
+                <td>q.costagliola</td>
+                <td>00d 00h 01m 07s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>47</td>
+                <td class="">0</td>
+                <td>2025/10/08 00:15:42</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0800_QC_v012_cleanup</td>
+                <td>q.costagliola</td>
+                <td>00d 00h 00m 02s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/08 00:16:09</td>
+            </tr>
+            <tr>
+                <td>intermarche_dishProvencal_turntable_v003_render</td>
+                <td>a.rosa</td>
+                <td>00d 00h 00m 45s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>50</td>
+                <td class="">0</td>
+                <td>2025/10/08 00:17:36</td>
+            </tr>
+            <tr>
+                <td>intermarche_dishProvencal_turntable_v003_cleanup</td>
+                <td>a.rosa</td>
+                <td>00d 00h 00m 02s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/08 00:18:10</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0690_FX_v009_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 01m 39s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>14</td>
+                <td class="">0</td>
+                <td>2025/10/08 00:28:36</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-010_EXTRA_v001_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 00m 37s</td>
+                <td class="error-highlight">00d 03h 00m 08s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>107</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/08 00:29:46</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-010_BG_v009_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 01m 39s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>102</td>
+                <td class="">0</td>
+                <td>2025/10/08 00:31:07</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0690_MG_v016_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 04m 13s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>14</td>
+                <td class="">0</td>
+                <td>2025/10/08 00:43:18</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795_VOLUME_v006_render__OPTI1024</td>
+                <td>i.martin</td>
+                <td>00d 00h 09m 54s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>42</td>
+                <td class="">0</td>
+                <td>2025/10/08 00:46:29</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795_VOLUME_v006_cleanup</td>
+                <td>i.martin</td>
+                <td>00d 00h 00m 02s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/08 00:47:10</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-010_VOLUME_v009_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 00m 51s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>102</td>
+                <td class="">0</td>
+                <td>2025/10/08 00:53:10</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-010_CHARS_v010_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 00m 23s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>102</td>
+                <td class="">0</td>
+                <td>2025/10/08 01:02:34</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-020_MG_v005_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 01m 35s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>22</td>
+                <td class="">0</td>
+                <td>2025/10/08 01:11:59</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-020_BG_v003_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 02m 45s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>22</td>
+                <td class="">0</td>
+                <td>2025/10/08 01:27:48</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-020_VOLUME_v002_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 01m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>22</td>
+                <td class="">0</td>
+                <td>2025/10/08 01:34:09</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-020_CHARS_v003_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 00m 28s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>22</td>
+                <td class="">0</td>
+                <td>2025/10/08 01:36:15</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0860_CHARS_v008_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 19m 55s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>28</td>
+                <td class="">0</td>
+                <td>2025/10/08 01:48:30</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795_FOGPAINT_v003_render__OPTI1024</td>
+                <td>i.martin</td>
+                <td>00d 00h 09m 10s</td>
+                <td class="error-highlight">00d 06h 00m 19s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>42</td>
+                <td class="error-highlight">2</td>
+                <td>2025/10/08 02:01:35</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795_FOGPAINT_v003_cleanup</td>
+                <td>i.martin</td>
+                <td>00d 00h 00m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/08 02:02:43</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-030_MG_v007_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 00m 41s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>147</td>
+                <td class="">0</td>
+                <td>2025/10/08 02:03:02</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0950_MG_v002_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 08m 31s</td>
+                <td class="error-highlight">00d 00h 48m 16s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>88</td>
+                <td class="error-highlight">3</td>
+                <td>2025/10/08 02:39:51</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-030_BG_v005_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 02m 29s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>147</td>
+                <td class="">0</td>
+                <td>2025/10/08 03:37:58</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-030_CHARS_v005_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 00m 25s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>147</td>
+                <td class="">0</td>
+                <td>2025/10/08 03:50:47</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-040_MG_v006_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 04m 05s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>33</td>
+                <td class="">0</td>
+                <td>2025/10/08 04:31:15</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-040_BG_v003_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 02m 48s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>33</td>
+                <td class="">0</td>
+                <td>2025/10/08 04:49:34</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-040_VOLUME_v002_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 00m 58s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>33</td>
+                <td class="">0</td>
+                <td>2025/10/08 04:56:53</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-040_CHARS_v004_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 00m 25s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>33</td>
+                <td class="">0</td>
+                <td>2025/10/08 05:00:07</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0950_CHARS_FG_v002_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 08m 33s</td>
+                <td class="error-highlight">00d 00h 42m 56s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>88</td>
+                <td class="error-highlight">3</td>
+                <td>2025/10/08 05:10:58</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-050_MG_v004_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 01m 04s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>117</td>
+                <td class="">0</td>
+                <td>2025/10/08 05:32:33</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0840_CHARS_v006_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 04m 05s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>27</td>
+                <td class="">0</td>
+                <td>2025/10/08 05:34:07</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795_BG_v006_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 12m 03s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>42</td>
+                <td class="">0</td>
+                <td>2025/10/08 07:16:45</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795_BG_v006_cleanup</td>
+                <td>i.martin</td>
+                <td>00d 00h 00m 02s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/08 07:22:36</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0840_CHARS_v007_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 04m 00s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>27</td>
+                <td class="">0</td>
+                <td>2025/10/08 07:38:56</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0920_CHARS_v004_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 23m 57s</td>
+                <td class="error-highlight">00d 06h 00m 23s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>20</td>
+                <td class="error-highlight">2</td>
+                <td>2025/10/08 07:45:18</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0950_VOLUME_v003_render__OPTI1024</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 39m 41s</td>
+                <td class="error-highlight">00d 04h 25m 38s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>88</td>
+                <td class="error-highlight">9</td>
+                <td>2025/10/08 08:09:57</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_CHARS_v011_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 54s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 08:35:35</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0900_VOLUME_v007_render__OPTI1024</td>
+                <td>i.martin</td>
+                <td>00d 00h 06m 34s</td>
+                <td class="error-highlight">00d 15h 00m 55s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>47</td>
+                <td class="error-highlight">5</td>
+                <td>2025/10/08 08:42:57</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_VOLUME_v010_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 55s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 08:43:06</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_CHARS_v006_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 05m 52s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 08:46:08</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_CHARS_v011_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 41s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>47</td>
+                <td class="">0</td>
+                <td>2025/10/08 08:58:26</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_CHARS_v012_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 54s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 09:02:40</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_CHARS_v007_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 54s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 09:06:19</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-050_CHARS_v006_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 00m 45s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 09:06:23</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_VOLUME_v011_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 03m 11s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 09:10:26</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-010_CHARS_v013_high_prio_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 07m 13s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 09:14:07</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-015_CHARS_v012_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 01m 33s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>47</td>
+                <td class="">0</td>
+                <td>2025/10/08 09:30:17</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0900_CHARS_v007_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 16m 52s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>47</td>
+                <td class="">0</td>
+                <td>2025/10/08 09:33:11</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_VOLUME_v011_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 02m 18s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>42</td>
+                <td class="">0</td>
+                <td>2025/10/08 09:39:37</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0650_MG_v013_render</td>
+                <td>i.martin</td>
+                <td>00d 00h 11m 41s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>16</td>
+                <td class="">0</td>
+                <td>2025/10/08 09:40:24</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0650_MG_v013_cleanup</td>
+                <td>i.martin</td>
+                <td>00d 00h 00m 02s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/08 09:45:14</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-050_BG_v003_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 07m 33s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>117</td>
+                <td class="">0</td>
+                <td>2025/10/08 09:46:54</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795__layer_cfx_groomRabbitMale_v001</td>
+                <td>m.herrera</td>
+                <td>00d 00h 00m 01s</td>
+                <td class="error-highlight">00d 00h 02m 38s</td>
+                <td>p_intermarche</td>
+                <td>Houdini</td>
+                <td>46</td>
+                <td class="error-highlight">3</td>
+                <td>2025/10/08 09:53:51</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_PARADE-030_CHARS_v007_render</td>
+                <td>g.bergon</td>
+                <td>00d 00h 04m 11s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>urgent</td>
+                <td>Python</td>
+                <td>42</td>
+                <td class="">0</td>
+                <td>2025/10/08 09:54:45</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795__layer_cfx_groomRabbitMale_v001_usdLayerUpdate</td>
+                <td>m.herrera</td>
+                <td>00d 00h 00m 18s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:03:20</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0950_BG_v001_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 29m 39s</td>
+                <td class="error-highlight">00d 00h 17m 08s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="error-highlight">1</td>
+                <td>2025/10/08 10:14:32</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0950_BG_v001_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 21m 13s</td>
+                <td class="error-highlight">00d 00h 32m 18s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>88</td>
+                <td class="error-highlight">3</td>
+                <td>2025/10/08 10:16:38</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-020_CHARS_v004_high_prio_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 00m 46s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:24:15</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0790_CFX_Preview_v007_high_prio_render</td>
+                <td>m.herrera</td>
+                <td>00d 00h 02m 11s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:25:27</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0620_CFX_Preview_v003_high_prio_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 02m 07s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:29:01</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795_CFX_Preview_v002_high_prio_render</td>
+                <td>m.herrera</td>
+                <td>00d 00h 01m 33s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:34:21</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-050_VOLUME_v003_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 00m 47s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>117</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:35:36</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0790_CFX_Preview_v007_render</td>
+                <td>m.herrera</td>
+                <td>00d 00h 01m 11s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>55</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:43:27</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0790_CFX_Preview_v007_cleanup</td>
+                <td>m.herrera</td>
+                <td>00d 00h 00m 02s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:44:57</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0790__layer_cfx_groomRabbitScaled_v003</td>
+                <td>m.herrera</td>
+                <td>00d 00h 00m 01s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Houdini</td>
+                <td>59</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:45:39</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0790__layer_cfx_groomRabbitScaled_v003_usdLayerUpdate</td>
+                <td>m.herrera</td>
+                <td>00d 00h 00m 25s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:47:14</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795__layer_cfx_groomRabbitMale_v002</td>
+                <td>m.herrera</td>
+                <td>00d 00h 00m 01s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Houdini</td>
+                <td>46</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:50:09</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795__layer_cfx_groomRabbitMale_v002_usdLayerUpdate</td>
+                <td>m.herrera</td>
+                <td>00d 00h 00m 23s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>1</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:50:47</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ140-SH0795_CFX_Preview_v002_render</td>
+                <td>m.herrera</td>
+                <td>00d 00h 00m 36s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>42</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:50:52</td>
+            </tr>
+            <tr>
+                <td>intermarche_SQ130-SH0620_CFX_Preview_v003_render</td>
+                <td>j.lefebvre</td>
+                <td>00d 00h 00m 58s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>p_intermarche</td>
+                <td>Python</td>
+                <td>29</td>
+                <td class="">0</td>
+                <td>2025/10/08 10:55:37</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-010_MG_v013_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 04m 25s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 11:02:34</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-010_FG_v001_high_prio_render</td>
+                <td>a.nedellec</td>
+                <td>00d 00h 01m 05s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>3</td>
+                <td class="">0</td>
+                <td>2025/10/08 11:03:59</td>
+            </tr>
+            <tr>
+                <td>swaChristmas_2025_JENGA-050_CHARS_v004_render</td>
+                <td>m.brun</td>
+                <td>00d 00h 00m 26s</td>
+                <td class="">00d 00h 00m 00s</td>
+                <td>none</td>
+                <td>Python</td>
+                <td>117</td>
+                <td class="">0</td>
+                <td>2025/10/08 11:04:49</td>
+            </tr>
+            </tbody>
+        </table>
+        <div style="margin-top: 20px; color: #718096;">
+            Total: 212 job(s) complété(s)
+        </div>
+        
+        </div>
+    </div>
+</body>
+</html>

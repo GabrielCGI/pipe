@@ -53,7 +53,7 @@ global proc shelf_Illogic2025 () {
         -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "scene Builder" 
+        -label "sceneBuilder" 
         -labelOffset 0
         -rotation 0
         -flipX 0
@@ -67,7 +67,7 @@ global proc shelf_Illogic2025 () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "import importlib\nimport PrismInit\nimport sys\n\n\nsys.path.append(\"R:/pipeline/pipe_public/prism-scene-builder\")\nimport sceneBuilder\nimportlib.reload(sceneBuilder)\n\nprism_core = PrismInit.pcore\npath = prism_core.getCurrentFileName()\nproject_path = prism_core.projectPath\n\n\nyaml_path       = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml\"\nroutine_path    = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/templates\"\n\n\ndcc ={\"name\": \"MAYA\", \"pathSoft\": \"\", \"pathPy\": \"\"}\nshotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path)\nshotbuild.main(path, dcc, False)" 
+        -command "import importlib\nimport PrismInit\nimport sys\n\n\nsys.path.insert(0, \"R:/pipeline/pipe_public/prism-scene-builder\")\nimport sceneBuilder\nimportlib.reload(sceneBuilder)\n\nprism_core = PrismInit.pcore\npath = prism_core.getCurrentFileName()\nproject_path = prism_core.projectPath\n\n\nyaml_path       = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml\"\nroutine_path    = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/templates\"\n\n\ndcc ={\"name\": \"MAYA\", \"pathSoft\": \"\", \"pathPy\": \"\"}\nshotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path)\nshotbuild.main(path, dcc, False)" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

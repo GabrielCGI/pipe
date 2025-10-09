@@ -5,9 +5,18 @@ import sys
 
 import PrismInit
 
-from PySide2 import QtCore
-from PySide2 import QtWidgets
-
+try:
+    from PySide2 import QtCore
+    from PySide2 import QtWidgets
+    QT_FOUND = True
+except:
+    try:
+        from PySide6 import QtCore
+        from PySide6 import QtWidgets
+        QT_FOUND = True
+    except:
+        QT_FOUND = False
+        
 from . import farmsubmitter
 import importlib
 importlib.reload(farmsubmitter)
@@ -372,7 +381,12 @@ class BatchSelector(QtWidgets.QDialog):
             
 
 def main():
-    
+    if not QT_FOUND:
+        hou.ui.displayMessage(
+            text='No QT Found !',
+            severity=hou.severityType.Error
+        )
+        return
     render_nodes = list(
         hou.lopNodeTypeCategory()
         .nodeType('prism::LOP_Render::1.0')
