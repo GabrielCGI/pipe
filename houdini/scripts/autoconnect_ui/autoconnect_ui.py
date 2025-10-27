@@ -11,8 +11,8 @@ from . import shader as sh
 from . import map as mp
 
 try:
-    from PySide2 import QtCore
-    from PySide2 import QtWidgets
+    from PySide2 import QtCore #type: ignore
+    from PySide2 import QtWidgets #type: ignore
     QT_FOUND = True
 except:
     try:
@@ -373,7 +373,7 @@ class ShaderWidget(QtWidgets.QTreeWidget):
         
         # Offset to avoid scrollbar
         rowHeight += 1
-        if not self.isItemExpanded(self.mainItem):
+        if not self.mainItem.isExpanded():
             self.setFixedHeight(rowHeight)
         else:
             self.setFixedHeight(rowHeight * (len(self.mapWidgets)+1))

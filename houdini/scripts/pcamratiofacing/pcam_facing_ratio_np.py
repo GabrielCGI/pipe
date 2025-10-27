@@ -149,8 +149,11 @@ def main():
     for mp in matching_paths:
         logger.info(f"  {mp}")
 
+    matching_paths = list(set(matching_paths))
+    matching_paths.sort()
+
     for primpath in matching_paths:
-        prim = stage.GetPrimAtPath(primpath)
+        prim: Usd.Prim = stage.GetPrimAtPath(primpath)
         if not prim or not prim.IsValid():
             logger.info(f"Skipping invalid prim: {primpath}")
             continue
@@ -172,7 +175,12 @@ def main():
         points_np = np.array(points_data, dtype=np.float64)
         points_world_np = (np.c_[points_np, np.ones(len(points_np))] @ np.array(obj_xform))[:, :3]
 
-        facing_ratios = compute_facing_ratio(camera_position, points_world_np, prim, timecode)
+        try:
+            facing_ratios = compute_facing_ratio(camera_position, points_world_np, prim, timecode)
+        except Exception as e:
+            logger.warning(prim.GetPath())
+            logger.warning(f"Could not compute facing ratio:\n{e}")
+            continue
 
         uv_out = pinhole_uv_projection_np(camera_inv, points_world_np, focal_mm, haperture_mm, vaperture_mm)
         if facing_ratios is None:

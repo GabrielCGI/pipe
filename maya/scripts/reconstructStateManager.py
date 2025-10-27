@@ -1,7 +1,8 @@
 import maya.cmds as cmds
+import socket
 import uuid
 import json
-
+import sys
 
 def show_save_reopen_popup():
     message = "Save the scene and reopen it."
@@ -14,7 +15,7 @@ def show_save_reopen_popup():
     )
 
 
-def run(*args):
+def run(UI=True):
     fileinfo = cmds.fileInfo("PrismStates", q=True)
     if not fileinfo:
         return
@@ -31,7 +32,7 @@ def run(*args):
             print("error: note fonde", e, info)
         new_statScene.append(info)
 
-
+    
     references = cmds.file(query=True, reference=True)
     new_import = []
     BIGDADA = StateScene
@@ -43,15 +44,18 @@ def run(*args):
         data = [new_txt, ref]
         UUID = uuid.uuid4()
         ref_node = cmds.referenceQuery(i, referenceNode=True)
-
+        test = []
         State = {"stateparent":"None", "stateclass":"ImportFile", 
-        "uuid":f"{UUID.hex}", "statename":"{entity}_{product}_{version}", 
+        "uuid": UUID.hex, 
+        "statename":"{entity}_{product}_{version}", 
         "statemode":"ImportFile", 
-        "filepath":f"{new_txt}","autoUpdate":"False", 
-        "keepedits":"True", "autonamespaces":"False", 
-        "updateabc":"False", "trackobjects":"True", 
-        "connectednodes":[[ref_node, ref_node]], 
-        "taskname":f"{taskName}", "nodenames":str([ref_node]), "setname":f"Import_{ref}_"}
+        "filepath": new_txt,"autoUpdate":"False",
+        "keepedits":"True", "autonamespaces":"False",
+        "updateabc":"False", "trackobjects":"True",
+        "connectednodes":[ref_node, ref_node],
+        "taskname": taskName, 
+        "nodenames": str([ref_node]),
+        "setname":f"Import_{ref}_"}
         
         new_import.append(data)
         BIGDADA.append(State)
@@ -59,7 +63,9 @@ def run(*args):
     final_data = {
         "states": BIGDADA
     }
-    cmds.fileInfo("PrismStates", json.dumps(final_data, indent=4))
+    toPush = json.dumps(final_data, indent=2, ensure_ascii=False)
+    cmds.fileInfo("PrismStates", toPush)
     cmds.fileInfo("PrismImports", str(new_import))
 
-    show_save_reopen_popup()
+    if UI:
+        show_save_reopen_popup()

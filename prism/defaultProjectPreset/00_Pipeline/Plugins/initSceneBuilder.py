@@ -78,8 +78,8 @@ class InitsceneBuilder:
 
             importlib.reload(sceneBuilder)
             if modifiers & qtc.Qt.ControlModifier:
-                shotbuild = sceneBuilder.sceneBuilder(entityPrism, yaml_path, routine_path)
-                shotbuild.main(path, dcc, True, W_CTYPES, DEBUG)
+                shotbuild = sceneBuilder.sceneBuilder(entityPrism, yaml_path, routine_path, True, W_CTYPES, DEBUG)
+                shotbuild.main(path, dcc, UI=False)
         else:
             self.core.popup("sceneBuilder not init")
 

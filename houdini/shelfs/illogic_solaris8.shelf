@@ -11,8 +11,8 @@
     <memberToolshelf name="cloud"/>
     <memberToolshelf name="hairtools"/>
     <memberToolshelf name="dev"/>
-    <memberToolshelf name="model"/>
     <memberToolshelf name="RenderManRIS"/>
+    <memberToolshelf name="model"/>
     <memberToolshelf name="simplefx"/>
     <memberToolshelf name="labs_toolset"/>
     <memberToolshelf name="illogic_solaris6"/>
@@ -52,7 +52,8 @@
     <memberTool name="clean_light"/>
     <memberTool name="send_ranch_copy"/>
     <memberTool name="select_prim_with_attributes"/>
-    <memberTool name="enableTexture"/>
+    <memberTool name="shotBuilder"/>
+    <memberTool name="generate_rat_files"/>
   </toolshelf>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -372,83 +373,6 @@ if START:
     ]]></script>
   </tool>
 
-  <tool name="enableTexture" label="Enable Texture" icon="hicon:/SVGIcons.index?BUTTONS_visible.svg">
-    <script scriptType="python"><![CDATA[import hou
-import shutil
-import os
-
-def run(*args):
-    desktop = hou.ui.desktop("Solaris")
-    pane = desktop.paneTabOfType(hou.paneTabType.SceneViewer)
-    if not pane:
-        return 
-    
-    viewport = pane.curViewport()
-    settings = viewport.settings()
-    version = ".".join(hou.applicationVersionString().split(".")[:-1])
-    user = os.getlogin()
-    src = "R:/pipeline/pipe/houdini/pref"
-    dst = f"C:/Users/{user}/Documents/houdini{version}"
-    if not os.path.exists(dst):
-        print('source pref introuvable', dst)
-        return
-    """for tab in desktop.paneTabs():
-        if tab.type() == hou.paneTabType.SceneViewer:
-            tab.close()"""
-    
-    shutil.copy(f"{src}/default/scenegraphview.pref", dst)
-    
-    
-    #----------------------  |  Background  |  --------------------
-    #-- colorScheme------------------
-    settings.setColorScheme(hou.viewportColorScheme.Light)
-    
-    
-    
-    
-    
-    
-    
-    #------------------------  |  Texture  |  ---------------------
-    #-- General ---------------------
-    settings.setDisplayTextures(1)
-    settings.setDisplayTextureLayers(1)
-    settings.setDisplayProjectedTextures(1)
-    settings.setTextureMipmapping(1)
-    settings.setTextureAnisotropicFilter(4)
-    
-    
-    # -- Texture 2D ------------------
-    settings.setTextureResLimit2D(True)
-    settings.setTextureMaxRes2D((2048, 2048))
-    settings.setTextureBitDepthLimit2D(hou.viewportTextureDepth.HDR16)
-    settings.setTextureScale2D(1)
-    
-    
-    # -- Texture Cache ---------------
-    settings.setTextureCacheSize(4096)
-    settings.setTextureMaxMemory(256)
-    settings.setTextureAutoReduce2D(False)
-    settings.setTextureAutoReduce3D(False)
-    
-    
-    # -- Texture 3D (volumes) --------
-    settings.setTextureResLimit3D(True)
-    settings.setTextureMaxRes3D((256, 256, 256))
-    settings.setTexture2DSettingsFor3D(False)
-    settings.setTextureScale3D(1)
-    
-    
-         
-    
-    
-    """pane = desktop.paneTabs()[0].pane()
-    pane.createTab(hou.paneTabType.SceneViewer)"""
-    
-    
-run()]]></script>
-  </tool>
-
   <tool name="usd_update_checker" label="USD Update Checker" icon="hicon:/SVGIcons.index?NETVIEW_reload_needsupdate.svg">
     <script scriptType="python"><![CDATA[import sys
 import importlib
@@ -505,7 +429,29 @@ routine_path    = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder
 
 
 dcc ={"name": "HOUDINI", "pathSoft": "", "pathPy": ""}
-shotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path)
-shotbuild.main(path, dcc, False, False)]]></script>
+shotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path, False)
+if kwargs["ctrlclick"]:
+    shotbuild.main(path, dcc, UI=True)
+else:
+    shotbuild.main(path, dcc, UI=False)]]></script>
+  </tool>
+
+  <tool name="shotBuilder" label="Shot Builder" icon="hicon:/SVGIcons.index?BUTTONS_visible.svg">
+    <script scriptType="python"><![CDATA[from imp import reload
+import PrismInit
+
+import shotBuilder
+reload(shotBuilder)
+
+
+
+core = PrismInit.pcore
+entity = core.getScenefileData(core.getCurrentFileName())
+data_shots = core.entities.getShotsFromSequence(entity["sequence"])
+shots = []
+for Dshot in data_shots:
+    shots.append(Dshot["shot"])
+
+shotBuilder.ShotBuilder(hou.selectedItems(), shots)]]></script>
   </tool>
 </shelfDocument>

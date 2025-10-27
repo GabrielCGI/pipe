@@ -34,7 +34,6 @@ class EditPreviewUSD():
 
 
             self.superPrint("\ntry to remove connection on roughness----------")
-            materialMtlPath
             for mat in materials:
                 primMaterial = file_mtl.GetPrimAtPath(Sdf.Path(f"{materialMtlPath.path}/{mat}"))
                 for shd in shader_names:

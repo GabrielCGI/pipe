@@ -1,6 +1,11 @@
-import nuke
+import os
 import shutil
+import threading
+import subprocess
+import datetime
 from pathlib import Path
+
+import nuke
 
 # flags to parse prism path
 PRODUCTION_FLAG = "03_Production"
@@ -8,6 +13,11 @@ RENDER_FLAG = "Renders"
 
 MAX_MSG_LIMIT = 5
 
+LOG_DIR = "R:/logs/nuke_cleaner_logs"
+
+IGNORE_LIST = [
+    "I:/intermarche/03_Production/Shots/SQ080/SH0400/Renders/2dRender/PAINT_CHARS_IN/v001/SQ080-SH0400_PAINT_CHARS_IN_v001.1001.psd"
+]
 
 def get_connected_nodes(node: nuke.Node, collected=None) -> set:
     """
@@ -97,6 +107,21 @@ def getShotSequences(filepath: Path):
     return (sequence, shot)
 
 
+def openReport(report: str):
+    try:
+        timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+        log_name = f"logs_nuke_cleaner_{timestamp}.log"
+        os.makedirs(LOG_DIR, exist_ok=True)
+        log_file = os.path.join(LOG_DIR, log_name)
+        with open(log_file, "w+") as f:
+            f.writelines(report)
+        command = ["notepad.exe", log_file]
+        subprocess.run(command)
+    except Exception as e:
+        print(e)
+        return
+
+
 def main(debug_mode=False, silent_mode=False):
     """Clean current nuke by copying to shot external shots references.
 
@@ -117,7 +142,7 @@ def main(debug_mode=False, silent_mode=False):
     shot_data = getShotSequences(scene_path)
     if shot_data is None:
         if debug_mode:
-            nuke.alert("Could not found sequence and shot in scenefile path")
+            nuke.alert("Cannot find Sequence/Shots pattern in scenefile path")
         return
     scene_sequence, scene_shot = shot_data
     scene_shot_idx = scene_path.parts.index(scene_shot)
@@ -130,6 +155,16 @@ def main(debug_mode=False, silent_mode=False):
     for read in read_nodes:
         read_filepath_knob: nuke.File_Knob = read.knob("file")
         read_filepath = Path(read_filepath_knob.getText())
+        
+        ignore = False
+        for ignore_pattern in IGNORE_LIST:
+            if ignore_pattern == read_filepath.as_posix():
+                ignore = True
+                break
+        if ignore:
+            continue
+                
+        
         read_data = getShotSequences(read_filepath)
         if not read_data:
             continue
@@ -158,7 +193,7 @@ def main(debug_mode=False, silent_mode=False):
     
     if not len(pair_to_copy):
         if debug_mode:
-            nuke.alert("You don't any read from other shots")
+            nuke.alert("You don't have any reads from other shots")
         return
     
     if not silent_mode:
@@ -169,6 +204,8 @@ def main(debug_mode=False, silent_mode=False):
         )
         
         if not accepted:
+            thread = threading.Thread(target=openReport, args=(msg,))
+            thread.start()
             return
     
     for node, src, dst in pair_to_copy:

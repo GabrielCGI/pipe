@@ -208,6 +208,8 @@ class CopyApp:
         json_paths = glob.glob(glob_pattern)
         json_filters = []
         for json_path in json_paths:
+            if 'department_identifiers' in json_path:
+                continue
             with open(json_path, "r") as js:
                 data: dict = json.load(js)
                 # not a redondant check because empty dict are evaluated False

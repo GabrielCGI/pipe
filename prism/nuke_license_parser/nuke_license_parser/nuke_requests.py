@@ -52,6 +52,29 @@ def parse_user(usage_requests: requests.models.Response):
     user = cells[3]
     return user
 
+def parse_handles(usage_requests: requests.models.Response):
+    if usage_requests.status_code != 200:
+        return None
+    
+    soup = bs4.BeautifulSoup(usage_requests.text, 'html.parser')
+    tables = soup.find_all('table')
+    if not tables:
+        return None
+    
+    handles = []
+    usage_table = tables[0]
+    rows = usage_table.find_all("tr")
+    # skip header row if present
+    for row in rows[1:]:
+        cells = row.find_all("td")
+        if not cells:
+            continue
+        last_td = cells[-1]
+        handle_input = last_td.find("input", attrs={"name": "handle"})
+        handle = handle_input['value']
+        handles.append(handle)
+    return handles
+
 
 def query_entry(item: tuple):
     _, license_data = item
@@ -104,7 +127,7 @@ def parse_license(request: requests.models.Response):
         usage_params = parse_params(row)
         if len(usage_params):
             licenses_data[pool]['query_params'] = usage_params
-                 
+                         
     query_usage(licenses_data)
     
     for pool in licenses_data:
@@ -117,6 +140,9 @@ def parse_license(request: requests.models.Response):
             continue
         user = user.replace('.', ' ').title().replace(' ', '.')
         license_data['user'] = user
+
+        handles = parse_handles(usage_request)
+        license_data['handles'] = handles
         
     for pool in licenses_data:
         license_data = licenses_data[pool]

@@ -1,0 +1,21 @@
+{
+    "filters": {
+        "COMPOSITING": [
+            "compo",
+            "comp",
+            "nuke",
+            "beauty"
+        ],
+        "ANIM": [
+            "anim",
+            "anim_playblast",
+            "playblast"
+        ],
+        "LAYOUT": [
+            "upscaled_layout"
+        ]
+    },
+    "source_path": "I:/VCA_Perlee_2510",
+    "dest_path": "D:/cache_resolve/VCA_Perlee_2510",
+    "production": "VCA_PERLEE"
+}

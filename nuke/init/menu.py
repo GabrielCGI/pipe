@@ -129,6 +129,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     from nuke_scanner import nuke_delete
     from nukescripts import panels
     import importCamFromMetadata
+    import cleanexternalreads
 
     import stamps
     # >>>PrismStart
@@ -172,6 +173,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     bloomMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
     bloomMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
     bloomMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
+    bloomMenu.addCommand("Clean external reads", "cleanexternalreads.main(debug_mode=True)")
     s=bloomMenu.addMenu("Tools")
     s.addCommand("Anim Buddy", "nuke.createNode(\"AnimVuddy\")") # >>> Add Anim Buddy tool
     s.addCommand("Card Buddy", "nuke.createNode(\"CardBuddy\")") # >>> Add Card Buddy tool

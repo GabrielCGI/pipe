@@ -1,7 +1,7 @@
 {
     "env": [
         {
-            "GROOMBEAR_USER_PATH": "C:/ILLOGIC_APP/R/pipeline/networkInstall/houdinI/groombear_FX_1_2_59/"
+            "GROOMBEAR_USER_PATH": "R:/pipeline/networkInstall/houdinI/groombear_FX_1_2_59/"
         },
         {
             "GROOMBEAR_HOME": "$HOME"
@@ -28,6 +28,9 @@
                 },
                 {
                     "houdini_version =='20.5'": "Houdini_18.0.000"
+                },
+                {
+                    "houdini_version =='21.0'": "Houdini_18.0.000"
                 }
             ]
         },
@@ -72,6 +75,9 @@
                 },
                 {
                     "houdini_version >= '20.5.278' and houdini_version <= '20.5.9999'": "20.5.000"
+                },
+                {
+                    "houdini_version >= '21.0.278' and houdini_version <= '21.0.9999'": "21.0.000"
                 }
             ]
         },
@@ -130,6 +136,9 @@
                 },
                 {
                     "houdini_version =='20.5'": "20"
+                },
+                {
+                    "houdini_version =='21.0'": "21"
                 }
             ]
         }

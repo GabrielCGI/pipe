@@ -10,10 +10,8 @@ Production:
       rules:
       Modeling:
         rules:
-          # - HaveOnlyGeoAtRoot|WARNING
-          - NamingHierarchyModeling|WARNING
+          #- NamingHierarchyModeling|WARNING
           - NamingShadingGroup|WARNING
-          # - SMIsWellSetForModeling|WARNING
           - AllGeoShouldHaveATRSof0|WARNING
           - ThereShouldBeLessThanXObject|WARNING
           - ThereShouldBeLessThanXMaterial|WARNING
@@ -58,6 +56,8 @@ Production:
         rules:
           - CameraSelExport|WARNING
           - ExportPresetsClean|WARNING
+          - muteGroupInAnim|WARNING
+          - RigNoUpdate|WARNING
     
     Layout:
       rules:
@@ -65,3 +65,5 @@ Production:
         rules:
           - CameraSelExport|WARNING
           - ExportPresetsClean|WARNING
+          - muteGroupInAnim|WARNING
+          - RigNoUpdate|WARNING

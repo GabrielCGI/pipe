@@ -5,12 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Débogueur Python : Fichier actuel avec arguments",
+            "name": "Débogueur Python : Daily Report Publish",
             "type": "debugpy",
             "request": "launch",
-            "program": "${workspaceFolder}/publish_daily_report.py",
+            "program": "${workspaceFolder}/exec_daily_report.py",
             "console": "integratedTerminal",
-            "args": ["${workspaceFolder}/__deadline_report_2025-10-08.html"]
+            "args": []
         }
     ]
 }

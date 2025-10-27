@@ -25,6 +25,11 @@ class Gate(MultipleActionTool):
                 "action": self.__fullB,
                 "row": 0
             },
+            "__vca": {
+                "text": "VCA",
+                "action": self.__vca,
+                "row": 0
+            },
             "del": {
                 "text": "Remove",
                 "action": self.__del,
@@ -52,6 +57,10 @@ class Gate(MultipleActionTool):
     def __fullB(self):
         # Usage
         image_path = "R:/pipeline/pipe/maya/scripts/bug_out_bag/textures/fullBleed.jpg"
+        self.create_imageplane(image_path)
+    def __vca(self):
+        # Usage
+        image_path = "R:/pipeline/pipe/maya/scripts/bug_out_bag/textures/Guides_6000square2048_C.png"
         self.create_imageplane(image_path)
     def __del(self):
         # List all image plane nodes

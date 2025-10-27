@@ -24,6 +24,11 @@ LOCAL_EXR_COPY_DIR    = "I:/" # /!\/!\/!\/!\/!\/!\ CHANGE THIS TO SOMETHING LIKE
 IS_EXR_COPY_ONLY_TEST_MODE = False
 DELETE_LOCAL_EXR_AFTER_COPY = True
 
+BAN_LINES = [
+    'No cameras found in the USD file',
+    'No licenses could be found to run this application.'
+]
+
 def copy_if_missing(src, dst):
     """Copy 'src' to 'dst' only if 'dst' doesn't exist."""
     if os.path.exists(dst):
@@ -261,7 +266,18 @@ def readStdout(proc):
 
         if line == '' and proc.poll() is not None:
             break
-
+        
+        # Fix temporaire pour les rendus se bloquant a 100% sur certaines 
+        # machines depuis le 13/10/2025.
+        # TODO Trouver un fix plus propre et la 
+        # veritable raison derriere ce bloquage
+        if 'Running postrender procedurals script' in line:
+            break
+        
+        for ban_l in BAN_LINES:    
+            if ban_l in line:
+                raise RuntimeError("found a ban lines %s" % line)
+        
         print(line)
 
 

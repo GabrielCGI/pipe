@@ -129,7 +129,7 @@ class inheriteClassAttr():
 
         print("\n\nsave file....")
         self.NewLayer.GetRootLayer().Save()
-        print("ingerite class finish.")
+        print("inherite class finish.")
         return self.result
 
     def showAllChild(self, prim):

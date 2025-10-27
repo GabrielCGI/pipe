@@ -23,8 +23,8 @@
             "MatchTransform",
             "NamespaceEditor",
             "HypershadeWindow",
-            "ReferenceEditor",
-            "ParentConstraint"
+            "ParentConstraint",
+            "ReferenceEditor"
         ],
         [
             "share"
