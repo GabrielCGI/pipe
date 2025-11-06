@@ -25,9 +25,9 @@ class PluginReferenceUpdater:
         self.core.registerCallback("openPBFileContextMenu", self.sceneContextMenu, plugin=self)
 
     @err_catcher(name=__name__)
-    def sceneContextMenu(self, origin, menu, path):
-        print(path)
-        self.add_actions(menu, path)
+    def sceneContextMenu(self, origin, menu, path:  str):
+        if path.endswith(".ma") or path.endswith(".mb"):
+            self.add_actions(menu, path)
 
     def add_actions(self, menu, path):
         action = menu.addAction("Update Reference")

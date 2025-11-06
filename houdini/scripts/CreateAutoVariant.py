@@ -10,6 +10,7 @@ import sys
 class autoVariant():
     def __init__(self, sel=None, ui=True):
         self.statue = {"statue": True, "mesage": ""}
+        self.UI = ui
         if not sel: 
             sel = hou.selectedNodes()
         if len(sel) != 3:
@@ -58,6 +59,9 @@ class autoVariant():
         self.compOUT.setName(nameAssets, unique_name=True)
         
         list_variant = self.find_variant(withVar, nameAssets)
+        if not list_variant:
+            return
+
         compoGeo = self.create_variant(list_variant.copy(), withVar)
         if len(list_variant) != 1:
             compoGeo.bypass(False)
@@ -80,7 +84,7 @@ class autoVariant():
             for node in allChild:
                 if node.type().name() == "componentgeometry":
                     try:
-                        lopimport = hou.node(f"stage/{node}/sopnet/geo/modeling")
+                        lopimport = hou.node(f"/stage/{node}/sopnet/geo/modeling")
                         var = lopimport.parm("primpattern").eval()
                         if var in self.list_variantPath.keys():
                             modif = True
@@ -116,7 +120,7 @@ class autoVariant():
                     compoGeo.setInput(i + nmbStart, NmatRef)
                 
                
-            lopimport = hou.node(f"stage/{ref}/sopnet/geo/modeling")
+            lopimport = hou.node(f"/stage/{ref}/sopnet/geo/modeling")
             lopimport.parm("primpattern").set(str(var.GetPath()))
             ref.setName(var.GetName(), unique_name=True)
         
@@ -127,7 +131,13 @@ class autoVariant():
         old_decalTRS = 0
         nmb_var = 0
         
-        lopimport = hou.node(f"stage/{self.refDupi}/sopnet/geo/modeling")
+        lopimport = hou.node(f"/stage/{self.refDupi}/sopnet/geo/modeling")
+        if not lopimport:
+            if self.UI:
+                hou.ui.displayMessage("lop import not found: " + f"/stage/{self.refDupi}/sopnet/geo/modeling", buttons=("OK",) ,severity=hou.severityType.ImportantMessage)
+            self.statue = {"statue": False, "mesage": "lop import not found: " + f"/stage/{self.refDupi}/sopnet/geo/modeling"}
+            return None
+
         lopimport.parm('loppath').set(self.importLOP.path())
         lop_node = hou.node(self.importLOP.path())
         

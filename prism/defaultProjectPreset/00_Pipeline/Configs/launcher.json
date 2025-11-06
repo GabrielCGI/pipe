@@ -267,12 +267,8 @@
                 {
                     "label": "Version 1",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Nuke13.1v5\\Nuke13.1.exe",
-                    "preferred": true,
-                    "environment": {
-                        "foundry_LICENSE": "4201@rlm-illogic",
-                        "OCIO": "R:\\pipeline\\networkInstall\\OpenColorIO-Configs\\cg-config-v1.0.0_aces-v1.3_ocio-v2.0.ocio"
-                    }
+                    "cmd": "R:/pipeline/pipe/bat/Nuke13_Launcher.bat",
+                    "preferred": true
                 }
             ],
             "uid": "225e366b-baf3-11f0-a35a-d2f6d41e3a90"

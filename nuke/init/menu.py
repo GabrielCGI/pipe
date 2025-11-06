@@ -114,7 +114,7 @@ if nuke.NUKE_VERSION_MAJOR==12:
 
     # Ajoute la commande dans le menu Nuke (avec raccourci Ctrl+Alt+W)
     nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, 'ctrl+alt+w')
-    # Si tu préfères SANS raccourci : remplace la ligne ci-dessus par :
+    # Si tu preferes SANS raccourci : remplace la ligne ci-dessus par :
     # nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, '')
 
     print("End loading Nuke Menu as version 12...")
@@ -225,7 +225,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
 
     # Ajoute la commande dans le menu Nuke (avec raccourci Ctrl+Alt+W)
     nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, 'ctrl+alt+w')
-    # Si tu préfères SANS raccourci : remplace la ligne ci-dessus par :
+    # Si tu preferes SANS raccourci : remplace la ligne ci-dessus par :
     # nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, '')
 
     print("End loading Nuke MENU as version 13+ ...")
