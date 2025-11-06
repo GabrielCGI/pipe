@@ -22,6 +22,7 @@
     <memberToolshelf name="volume"/>
     <memberToolshelf name="develop"/>
     <memberToolshelf name="shelf_2"/>
+    <memberToolshelf name="mathis"/>
   </shelfSet>
 
   <toolshelf name="illogic_solaris6" label="illogic_solaris">

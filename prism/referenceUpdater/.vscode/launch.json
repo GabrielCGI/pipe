@@ -25,6 +25,27 @@
                     "remoteRoot": "${workspaceFolder}"
                 }
             ]
+        },
+        {
+            "name": "Launch Prism2.0.18",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "C:/ILLOGIC_APP/Prism/2.0.18/app/Python311/Prism.exe",
+            "args": [
+                "C:/ILLOGIC_APP/Prism/2.0.18/app/Scripts/PrismTray.py",
+                "projectBrowser"
+            ],
+            "stopAtEntry": false,
+            "cwd": "${fileDirname}",
+            "environment": [
+                {
+                    "name": "PRISM_PLUGIN_SEARCH_PATHS", "value": "C:/ILLOGIC_APP/Prism/2.0.18/plugins"
+                }, 
+                {
+                    "name": "PRISM_PLUGIN_PATHS", "value": "R:/devFred/code/plugins/prism/initSceneBuilder/Scripts"
+                }
+            ],
+            "console": "externalTerminal"
         }
     ]
 }

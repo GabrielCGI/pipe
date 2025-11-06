@@ -2,7 +2,6 @@ import maya.cmds as cmds
 import maya.standalone
 import ctypes
 import msvcrt
-import socket
 import sys
 import re
 import os
@@ -48,8 +47,19 @@ def catch_error(dataEnv):
     return False
 
 
-def findLastScene(Projet, nameSpace, Type):
-    dosAsset = rf"{Projet}03_Production/Assets/{Type}/{nameSpace}/Export/{departement}"
+def findLastScene(Projet, nameSpace, Type, path_file_in_scene = None):
+
+    extention = None
+    product = departement
+    if departement == "Rigging":
+        new_rigging = findSplitVariant(rf"{Projet}03_Production/Assets/{Type}/{nameSpace}/Export", "Rigging", path_file_in_scene)
+        if new_rigging is not None:
+            product = new_rigging
+        extention = "ma"
+    elif departement == "toRig":
+        extention = "usdc"
+    
+    dosAsset = rf"{Projet}03_Production/Assets/{Type}/{nameSpace}/Export/{product}"
     last_file = None
     fileRef = None
 
@@ -57,20 +67,32 @@ def findLastScene(Projet, nameSpace, Type):
         return None
 
     last_Version, _ = findLastVersion(dosAsset)
-    extention = None
-    if departement == "Rigging":
-        extention = "ma"
-    elif departement == "toRig":
-        extention = "usdc"
     
-    last_file = f"{nameSpace}_{departement}_{last_Version}.{extention}"
-    fileRef = rf"{Projet}03_Production/Assets/{Type}/{nameSpace}/Export/{departement}/{last_Version}/{last_file}"
+    last_file = f"{nameSpace}_{product}_{last_Version}.{extention}"
+    fileRef = rf"{Projet}03_Production/Assets/{Type}/{nameSpace}/Export/{product}/{last_Version}/{last_file}"
     if not os.path.exists(fileRef):
-        error("ERROR path not foud.........................")
-        error(fileRef)
+        error("ERROR path not foud.........................\n" + fileRef)
         fileRef = None
     
     return fileRef
+
+def findSplitVariant(product_path, new_product_default, path_file_in_scene):
+    if not os.path.exists(product_path):
+        error("product_path not found")
+        return None
+
+    all_folder = os.listdir(product_path)
+    new_product = new_product_default
+    for folder in all_folder:
+        if folder.startswith("Rigging_"):
+            new_product = folder
+            if not path_file_in_scene:
+                break
+            if folder in path_file_in_scene:
+                break
+
+    return new_product
+
 
 def findLastVersion(path):
         max_version = -1
@@ -189,7 +211,8 @@ def hierarchie():
                                 parent = f"assets|{cat.lower()}"
 
                             infoP(f'hierarchie of {node} in {parent}')
-                            cmds.parent(node, parent)
+                            box = cmds.createNode("transform", n=node.split(":")[-1], ss=True, p=parent)
+                            cmds.parent(node, box)
                         
                         elif departement == "toRig":
                             infoP(f'hierarchie of rig in {node}')
@@ -222,16 +245,20 @@ def ImportReference(Projet, dataRef):
                 except Exception as e:
                     error(f"\Erreur lors de l'import de la référence: {e}\n")
 
-def UpdateReference(Projet, refInScene):
+def UpdateReference(Projet, refInScene: dict[dict], notWantUpdate: list[str]) -> None:
     for cat in refInScene:
         for asset in refInScene[cat]:
             for refNode in refInScene[cat][asset]:
-                last_scene = findLastScene(Projet, asset, cat)
+                scene_split = cmds.referenceQuery(refNode, f=True, wcn=True)
+                last_scene = findLastScene(Projet, asset, cat, scene_split)
                 if not last_scene:
                     continue
-                scene_split = cmds.referenceQuery(refNode, f=True, wcn=True)
                 if last_scene == scene_split:
                     continue
+                if refNode in notWantUpdate:
+                    continue
+
+                
                 try:
                     cmds.file(last_scene, loadReference=refNode)
                     infoP(f"Référence Update  new scene: {last_scene}\n")
@@ -268,7 +295,7 @@ def CoreStandalone():
 
     if dataEnv["Update"]:
         infoP("\n//ILLOGIC------------    Update all reference...")
-        UpdateReference(dataEnv["Projet"], refInScene)
+        UpdateReference(dataEnv["Projet"], refInScene, dataEnv["notWantUpdate"])
 
 
     if dataRef:

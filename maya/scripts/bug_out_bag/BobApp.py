@@ -66,6 +66,8 @@ from .tool_instances.USDcopyPaste import USDCopyPaste
 from .tool_instances.selectGeoToExport import GeoExport
 from .tool_instances.FixUsdColorspaceManagement import FixUsdColorspaceManagement
 from .tool_instances.matchTransformUSD import *
+from .tool_instances.RiggingTools import RiggingTools
+from .tool_instances.AnimLayoutTools import AnimLayoutTools
 
 
 # ######################################################################################################################
@@ -134,6 +136,10 @@ class BobApp(QDialog):
                 # DisplayColor(),
                 # Exposure()
 
+            ]),
+            BobCategory("Tools", self.__prefs, [
+                RiggingTools(),
+                AnimLayoutTools()
             ]),
         ]
         self.__selected_category = 0

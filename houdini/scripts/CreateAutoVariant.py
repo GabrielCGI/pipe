@@ -1,5 +1,11 @@
-import hou
 from pxr import Usd, UsdGeom
+import socket
+import hou
+import sys
+
+
+
+
 
 class autoVariant():
     def __init__(self, sel=None, ui=True):
@@ -55,7 +61,8 @@ class autoVariant():
         compoGeo = self.create_variant(list_variant.copy(), withVar)
         if len(list_variant) != 1:
             compoGeo.bypass(False)
-            self.make_separate_variant(list_variant, withVar)
+            if self.mergeToRig is not None and self.mergeToRig is not None: 
+                self.make_separate_variant(list_variant, withVar)
         else:
             compoGeo.bypass(True)
             self.bypass_connection()

@@ -118,7 +118,7 @@ class ShotBuilder():
                 continue
 
             if to_rename == "_FetchLightCache":
-                node.parm("loppath").set(f"../{name_shots}_LightCache")
+                node.parm("loppath").set(f"../{name_shots}_LightingCache")
             elif to_rename == "_FetchLightingLive":
                 node.parm("loppath").set(f"../{name_shots}_Lighting")
 

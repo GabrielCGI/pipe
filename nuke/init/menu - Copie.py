@@ -3,15 +3,12 @@
 #  Copyright (c) 2014, 2015, 2016, 2017 Psyop Media Company, LLC
 #  See license.txt
 #
-# Pablo Edit 251105
 
 # coding: utf-8
 import sys
 import nuke
 import nukescripts
 import os.path
-
-print('Version 251105')
 
 if nuke.NUKE_VERSION_MAJOR==12:
     print("Loading Nuke Menu as version 12...")

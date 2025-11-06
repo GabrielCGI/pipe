@@ -9,7 +9,7 @@ import re
 
 
 DEBUG = 0
-LIST_MACHINE_DEBUG = ["FOX-03", "FALCON-01"]
+LIST_MACHINE_DEBUG = ["FALCON-01"]
 
 
 class inheriteClassAttr():
@@ -151,6 +151,15 @@ class inheriteClassAttr():
         for child in prim.GetChildren():
             self.showAllChild(child)
     
+    def compareWithSource(self, refPrim):
+        ref = Usd.Stage.Open(refPrim)
+        for primRef in ref.Traverse():
+            getVarRef = primRef.GetVariantSets().GetVariantSet("geo").GetVariantNames()
+            if getVarRef:
+                break
+        
+        return getVarRef
+
     def showProxyAndRender(self, prim):
         imageable = UsdGeom.Imageable(prim)
         if imageable:
@@ -166,11 +175,12 @@ class inheriteClassAttr():
         if not visible and not hidden:
             print("not virant")
             return
-        elif not hidden:
+        getVarRef = self.compareWithSource(refPrim)
+        if not hidden and not getVarRef:
             self.showProxyAndRender(prim)
             print("there are no variant")
             return
-        elif not visible and hidden:
+        if not visible and hidden:
             print("_|_|_| WARNING |_|_|_ Shape hide in maya")
             return
         
@@ -180,9 +190,7 @@ class inheriteClassAttr():
         
         self.showAllChild(prim)
         variant = visible[0]
-        ref = Usd.Stage.Open(refPrim)
-        for primRef in ref.Traverse():
-            getVarRef = primRef.GetVariantSets().GetVariantSet("geo").GetVariantNames()
+        
 
         if not getVarRef:
             print("_|_|_| WARNING |_|_|_ not variant found")
@@ -201,9 +209,12 @@ class inheriteClassAttr():
         print("variant set:", variant)
         
     def getVariant(self, path):
+        #self.debugger()
         xform_prim = self.root.GetPrimAtPath(f"{path}/geo/render/xform")
         if not xform_prim.IsValid():
-            return None, None
+            xform_prim = self.root.GetPrimAtPath(f"{path}/geo/proxy/xform")
+            if not xform_prim.IsValid():
+                return None, None
         
 
         visible = []

@@ -74,6 +74,12 @@ if ((not nuke.env["studio"]) or nuke.env["indie"]) and not nuke.env.get("gui"):
 nuke_version = str(nuke.NUKE_VERSION_MAJOR)+"."+str(nuke.NUKE_VERSION_MINOR)
 
 # >>>Variable Serveur Licence Start
+if nuke_version == "13.1":
+    os.environ["foundry_LICENSE"] = "4201@10.16.34.175"
+    
+else:
+    os.environ["foundry_LICENSE"] = "4101@10.16.34.175"
+    
 print("Serveur de licence:", os.environ.get('foundry_LICENSE'))   
 # <<<Variable Serveur Licence End
 

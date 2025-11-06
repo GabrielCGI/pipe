@@ -1,7 +1,7 @@
 {
     "env": [
         {
-            "GROOMBEAR_USER_PATH": "R:/pipeline/networkInstall/houdinI/groombear_FX_1_2_59/"
+            "GROOMBEAR_USER_PATH": "R:/pipeline/networkInstall/houdinI/"
         },
         {
             "GROOMBEAR_HOME": "$HOME"
@@ -31,6 +31,19 @@
                 },
                 {
                     "houdini_version =='21.0'": "Houdini_18.0.000"
+                }
+            ]
+        },
+        {
+            "VERSION_GROOMBEAR": [
+                {
+                    "houdini_version =='20.0'": "groombear_FX_1_2_59"
+                },
+                {
+                    "houdini_version =='20.5'": "groombear_FX_1_2_59"
+                },
+                {
+                    "houdini_version =='21.0'": "groombear_FX_1_2_61"
                 }
             ]
         },
@@ -82,7 +95,7 @@
             ]
         },
         {
-            "GROOMBEAR_PATH": "$GROOMBEAR_USER_PATH/$GROOMBEAR_PACKAGE_BUILD/groombear_package/"
+            "GROOMBEAR_PATH": "$GROOMBEAR_USER_PATH/$VERSION_GROOMBEAR/$GROOMBEAR_PACKAGE_BUILD/groombear_package/"
         },
         {
             "HOUDINI_PATH": {

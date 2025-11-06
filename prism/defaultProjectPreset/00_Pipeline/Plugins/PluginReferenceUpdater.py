@@ -1,37 +1,27 @@
 from PrismUtils.Decorators import err_catcher_plugin as err_catcher
+from importlib import reload
 import qtpy.QtWidgets as qt
-from pathlib import Path
-from imp import reload
-import importlib
-import socket
+import traceback
 import sys
-import os
 
-DEBUG = 0
-MODULES_SEARCH_PATH = ["R:/pipeline/pipe/prism/referenceUpdater"]
+
+MODULES_SEARCH_PATH = ["R:/pipeline/pipe/prism"]
 for module_path in MODULES_SEARCH_PATH:
     if not module_path in sys.path:
-        sys.path.append(module_path)
+        sys.path.insert(0, module_path)
 
-try:
-    import refUpdater as refUp
-except:
-    pass
 
-name = "Reference Updater"
-classname = "ReferenceUpdater"
 
-if socket.gethostname() == "FALCON-01" and DEBUG:
-    import ctypes
-    ctypes.windll.kernel32.AllocConsole()
-    sys.stdout = open('CONOUT$', 'w')
-    sys.stderr = open('CONOUT$', 'w')
-    sys.stdin = open('CONIN$', 'r')
+name = "Plugin Reference Updater"
+classname = "PluginReferenceUpdater"
 
-class ReferenceUpdater:
+
+
+class PluginReferenceUpdater:
     def __init__(self, core):
         self.core = core
         self.version = "v1.0.0"
+        
         self.core.registerCallback("openPBFileContextMenu", self.sceneContextMenu, plugin=self)
 
     @err_catcher(name=__name__)
@@ -48,22 +38,25 @@ class ReferenceUpdater:
     
     def updateReference(self, path):
         try:
+            import referenceUpdater as refUp
             reload(refUp)
             self.worker = refUp.instanceWorker(self, "Maya", path, self.core.projectPath)
             self.worker.runUpdate(True)
-            self.waiter = refUp.LoadingWindow("waite the script process...")
+            self.waiter = refUp.loadingScreen("waite the script process...")
             self.waiter.show()
         except:
             self.core.popup("module refUpdater not found")
 
     def updateReferenceWithUI(self, path):
         try:
+            import referenceUpdater as refUp
             reload(refUp)
             self.waiter = None
-            self.win = refUp.startWithRef(self, "Maya", path, self.core.projectPath)
+            self.win = refUp.mainUI(self, "Maya", path, self.core.projectPath, True)
             self.win.show()
         except Exception as e:
             print(e)
+            print(traceback.format_exc())
             self.core.popup(f"module refUpdater not found")
 
 
@@ -85,4 +78,3 @@ class ReferenceUpdater:
             self.core.popup(f"tout c'est bien passer", severity="info")
         else:
             self.core.popup(f"Error" + msg, severity="error")
-        
