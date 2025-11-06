@@ -221,15 +221,6 @@
             "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Nuke.png",
             "versions": [
                 {
-                    "label": "Nuke 13",
-                    "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Nuke13.1v5\\Nuke13.1.exe",
-                    "preferred": false,
-                    "environment": {
-                        "OCIO": "R:\\pipeline\\networkInstall\\OpenColorIO-Configs\\cg-config-v1.0.0_aces-v1.3_ocio-v2.0.ocio"
-                    }
-                },
-                {
                     "label": "Nuke 15.1",
                     "mode": "Shell Command",
                     "cmd": "C:\\Program Files\\Nuke15.1v5\\Nuke15.1.exe",
@@ -267,6 +258,24 @@
                 }
             ],
             "uid": "762d5ee4-5309-11ef-aa5e-d85ed35d00b3"
+        },
+        {
+            "label": "Nuke 13",
+            "category": "2D",
+            "icon": "I:\\swaChristmas_2025\\/00_Pipeline/Configs\\LauncherIcons\\Nuke 13.png",
+            "versions": [
+                {
+                    "label": "Version 1",
+                    "mode": "Shell Command",
+                    "cmd": "C:\\Program Files\\Nuke13.1v5\\Nuke13.1.exe",
+                    "preferred": true,
+                    "environment": {
+                        "foundry_LICENSE": "4201@rlm-illogic",
+                        "OCIO": "R:\\pipeline\\networkInstall\\OpenColorIO-Configs\\cg-config-v1.0.0_aces-v1.3_ocio-v2.0.ocio"
+                    }
+                }
+            ],
+            "uid": "225e366b-baf3-11f0-a35a-d2f6d41e3a90"
         },
         {
             "label": "Photoshop",
