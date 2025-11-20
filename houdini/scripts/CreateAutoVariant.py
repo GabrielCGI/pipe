@@ -65,19 +65,39 @@ class autoVariant():
         compoGeo = self.create_variant(list_variant.copy(), withVar)
         if len(list_variant) != 1:
             compoGeo.bypass(False)
-            if self.mergeToRig is not None and self.mergeToRig is not None: 
+            if self.mergeToRig is not None and self.mergeToSusbtance is not None: 
                 self.make_separate_variant(list_variant, withVar)
         else:
             compoGeo.bypass(True)
             self.bypass_connection()
+        
+        #creer les materieaux auto
+        #self.createMaterials() fonctionne pas
     
+    def createMaterials(self):
+        stage = hou.node('/stage')
+        allChild = stage.children()
+        hou.clearAllSelected()
+        
+        have_matlib = False
+        for node in allChild:
+            if node.type().name() == "componentgeometry":
+                node.setSelected(True)
+            elif node.type().name() == "materiallibrary" and not have_matlib:
+                node.setSelected(True)
+                have_matlib = True
+
+
+        import kma_mat_from_attr.kma_mat_from_attr as kmfa
+        kmfa.execute(collectionMode=True)
+
     def create_variant(self, list_variant, withVar):
+        tmp_ref = self.refDupi.parent()
         ref = self.refDupi
-        tmp_ref = ref.parent()
         listMatRef = []
         modif = False
         Dref = ref
-        
+
         if not withVar:
             stage = hou.node('/stage')
             allChild = stage.children()
@@ -92,7 +112,7 @@ class autoVariant():
                     except Exception as e:
                         print(e)
         
-        for i in range(3):
+        for i in range(5):
             Dref = Dref.outputs()[0]
             listMatRef.append(Dref)
             if Dref.type().name() == "componentmaterial":
@@ -175,8 +195,9 @@ class autoVariant():
     def bypass_connection(self):
         configurePrim = self.compOUT.outputs()[0]
 
-        self.mergeToRig.setInput(0, configurePrim)
-        self.mergeToSusbtance.setInput(0, configurePrim)
+        if self.mergeToRig is not None or self.mergeToSusbtance is not None: 
+            self.mergeToRig.setInput(0, configurePrim)
+            self.mergeToSusbtance.setInput(0, configurePrim)
 
     def make_separate_variant(self, list_variant, withVar):
         where = hou.node("/stage")

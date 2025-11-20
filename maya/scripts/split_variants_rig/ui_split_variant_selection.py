@@ -201,11 +201,10 @@ class UISelectExport(qt.QDialog):
         if not self.list_QWidget_items.isEnabled():
             return
         
+        rig = []
         if cmds.objExists(f'{self.name_asset}|rig'):
-            rig = f'{self.name_asset}|rig'
-        else:
-            rig = None
-
+            rig.append(f'{self.name_asset}|rig')
+        
         all_vairant = cmds.attributeQuery(self.name_variant, node=self.name_ctrl, listEnum=True)
         if all_vairant is None:
             return
@@ -213,9 +212,18 @@ class UISelectExport(qt.QDialog):
 
         varaints = {}
         for variant in all_vairant[0].split(":"):
-            if cmds.objExists(variant):
-                all_variant = cmds.ls(variant, long=True)
-                varaints[variant] = {"rig": [rig], "geo": all_variant}
+            if not cmds.objExists(variant):
+                continue
+            
+            all_variant = cmds.ls(variant, long=True)
+            clean_variant = []
+            for pathVariant in all_variant:
+                if "|rig|" in pathVariant:
+                    continue
+
+                clean_variant.append(pathVariant)
+            
+            varaints[variant] = {"rig": rig, "geo": clean_variant}
 
         self.createDataSet(varaints)
     

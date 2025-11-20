@@ -7,9 +7,6 @@ REM ================================================
 
 ECHO [PIPELINE] Lancement de Nuke 13.1...
 
-REM Licence Foundry
-SET foundry_LICENSE=4201@rlm-illogic
-
 REM OCIO
 SET OCIO=
 SET OCIO_ACTIVE_DISPLAYS=

@@ -1,7 +1,7 @@
 {
     "env": [
         {"HOUDINI_USER_PREF_DIR": "R:/pipeline/pipe/houdini/pref/houdini20.5"},
-        {"HOUDINI_TOOLBAR_PATH":"R:/pipeline/pipe/houdini/shelfs;"}, 
+        {"HOUDINI_TOOLBAR_PATH":"R:/pipeline/pipe/houdini/shelfs;"},
         {"HOUDINI_NO_START_PAGE_SPLASH":1},
         {"HOUDINI_GL_USE_MATERIALX":0},
         {"HOUDINI_EXTERNAL_HELP_BROWSER": 0},

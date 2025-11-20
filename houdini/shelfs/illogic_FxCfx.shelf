@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+   <!-- gestion des differents outils présent dans la shelf illogic FX CFX-->
+  <toolshelf name="illogicFxCfx" label="Illogic FX CFX">
+    <memberTool name="sceneBuilder"/>
+  </toolshelf>
+   <!-- gestion des differents outils présent dans la shelf illogic FX CFX-->
+
+
+
+
+
+  <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
+    <script scriptType="python"><![CDATA[import importlib
+import PrismInit
+import sys
+
+
+sys.path.insert(0, "R:/pipeline/pipe_public/prism-scene-builder")
+import sceneBuilder
+importlib.reload(sceneBuilder)
+
+prism_core = PrismInit.pcore
+path = prism_core.getCurrentFileName()
+project_path = prism_core.projectPath
+
+
+yaml_path       = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml"
+routine_path    = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/templates"
+
+
+dcc ={"name": "HOUDINI", "pathSoft": "", "pathPy": ""}
+shotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path, False)
+if kwargs["ctrlclick"]:
+    shotbuild.main(path, dcc, UI=True)
+else:
+    shotbuild.main(path, dcc, UI=False)]]></script>
+  </tool>
+
+</shelfDocument>

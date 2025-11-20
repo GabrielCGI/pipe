@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- gestion des differents outils présent dans la shelf illogic Shading-->
+  <toolshelf name="illogicLighting" label="Illogic Lighting">
+    <memberTool name="sceneBuilder"/>
+    <memberTool name="copy_light"/>
+    <memberTool name="inheriteclass"/>
+    <memberTool name="domelight_create"/>
+    <memberTool name="clean_light"/>
+    <memberTool name="batchrender"/>
+    <memberTool name="send_ranch_copy"/>
+    <memberTool name="shotBuilder"/>
+  </toolshelf>
+  <!-- gestion des differents outils présent dans la shelf illogic Shading-->
+
+
+
+
+  <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
+    <script scriptType="python"><![CDATA[import importlib
+import PrismInit
+import sys
+
+
+sys.path.insert(0, "R:/pipeline/pipe_public/prism-scene-builder")
+import sceneBuilder
+importlib.reload(sceneBuilder)
+
+prism_core = PrismInit.pcore
+path = prism_core.getCurrentFileName()
+project_path = prism_core.projectPath
+
+
+yaml_path       = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml"
+routine_path    = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/templates"
+
+
+dcc ={"name": "HOUDINI", "pathSoft": "", "pathPy": ""}
+shotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path, False)
+if kwargs["ctrlclick"]:
+    shotbuild.main(path, dcc, UI=True)
+else:
+    shotbuild.main(path, dcc, UI=False)]]></script>
+  </tool>
+
+  <tool name="copy_light" label="Copy Light" icon="hicon:/SVGIcons.index?LOP_lightlinker.svg">
+    <script scriptType="python"><![CDATA[import imp
+import copylight.copylight as copylight
+
+imp.reload(copylight)
+
+copylight.copySelectedLights()]]></script>
+  </tool>
+
+  <tool name="inheriteclass" label="inherite Class" icon="hicon:/SVGIcons.index?ENGINE_asset_help.svg">
+    <helpText><![CDATA["""'The inherited variant' is a tool used to link USD container assets with their corresponding animations, enabling the merging of textures, fur, lighting, rigging, and more with the animation exported from Maya."""]]></helpText>
+    <script scriptType="python"><![CDATA[import importlib
+import hou
+import inheriteClassVariant as icv
+importlib.reload(icv)
+
+
+
+START = True
+nodes = hou.selectedNodes()
+
+if not nodes or len(nodes) >=2:
+    hou.ui.displayMessage("Select 1 LOP_import node", buttons=("OK",) ,severity=hou.severityType.Error)
+    START = False
+
+
+if START and nodes[0].type().name() != "prism::LOP_Import::1.0":
+    hou.ui.displayMessage("Select 1 LOP_import node", buttons=("OK",) ,severity=hou.severityType.Error)
+    START = False
+
+
+    
+    
+if START:
+    path = nodes[0].parm("filepath").eval()
+    if "03_production/shots" in path.lower():
+        inClass = icv.inheriteClassAttr(path, "Houdini")
+        hou.ui.displayMessage(inClass.message , buttons=("OK",) ,severity=inClass.error_type)
+    ]]></script>
+  </tool>
+
+  <tool name="domelight_create" label="Dome Light Create" icon="hicon:/SVGIcons.index?BUTTONS_add_light.svg">
+    <script scriptType="python"><![CDATA[import domelight_create.domelight_create as domelight
+
+domelight.create_domelight()]]></script>
+  </tool>
+
+  <tool name="clean_light" label="Clean Light" icon="hicon:/SVGIcons.index?BUTTONS_clear.svg">
+    <script scriptType="python"><![CDATA[import clean_light.cleanlight as cleanlight
+import imp
+imp.reload(cleanlight)
+
+cleanlight.clean()]]></script>
+  </tool>
+
+  <tool name="batchrender" label="Batch Render" icon="hicon:/SVGIcons.index?BUTTONS_render.svg">
+    <script scriptType="python"><![CDATA[import batchrender
+import importlib
+importlib.reload(batchrender)
+
+batchrender.main()]]></script>
+  </tool>
+
+  <tool name="send_ranch_copy" label="Send Ranch Copy" icon="hicon:/SVGIcons.index?BUTTONS_network_distribute_vertical.svg">
+    <script scriptType="python"><![CDATA[import sendranchcopy
+import importlib
+
+sendranchcopy.run()
+]]></script>
+  </tool>
+
+  <tool name="shotBuilder" label="Shot Builder" icon="hicon:/SVGIcons.index?BUTTONS_visible.svg">
+    <script scriptType="python"><![CDATA[from imp import reload
+import PrismInit
+
+import shotBuilder
+reload(shotBuilder)
+
+
+
+core = PrismInit.pcore
+entity = core.getScenefileData(core.getCurrentFileName())
+data_shots = core.entities.getShotsFromSequence(entity["sequence"])
+shots = []
+for Dshot in data_shots:
+    shots.append(Dshot["shot"])
+
+shotBuilder.ShotBuilder(hou.selectedItems(), shots)]]></script>
+  </tool>
+
+</shelfDocument>

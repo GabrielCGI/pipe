@@ -62,6 +62,13 @@ def main(origin, Settings, pluginInfos, arguments):
         print(f"add environment variable for the job:\n   ---> {name}\n   ---> resolution set: {res}\n")
 
 
+    #force env var for foundry license 
+    if jobInfos["Plugin"] == "Nuke":
+        origin.addEnvironmentItem(jobInfos, "foundry_LICENSE", "4101@rlm-illogic")
+        # force deadline license limit for Nuke
+        jobInfos["LimitGroups"] = "nukelimit"
+
+
 
 def editVarEnviron(Setting, res, i):
     for value in [f"KARMA_XPU_MAX_LIGHTING_TEXTURE_RES={str(int(res)*2)}", f"KARMA_XPU_MAX_SHADER_TEXTURE_RES={res}"]:

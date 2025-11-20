@@ -27,6 +27,9 @@ class splitVariantsRig():
         
         have_variant = True
         self.findNameCtrlVariant()
+        if not self.name_variant or not self.name_ctrl:
+            return 
+        
         data = self.getDataInScene("IllogicVariantRIG")
         if data is None:
             data, have_variant = self.getAutoData()
@@ -119,6 +122,7 @@ class splitVariantsRig():
         for variant in all_vairant[0].split(":"):
             if cmds.objExists(variant):
                 all_variant = cmds.ls(variant, long=True)
+                print(all_vairant)
                 data[variant] = {"rig": [rig], "geo": [all_variant]}
         
         return data, True

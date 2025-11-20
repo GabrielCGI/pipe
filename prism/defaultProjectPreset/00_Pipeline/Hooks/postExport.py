@@ -6,11 +6,11 @@
 # If the main function exists in this script, it will be called.
 # The "kwargs" argument is a dictionary with usefull information about Prism and the current export.
 #import usdApi
-
-import sys
+from importlib import reload
 import socket
+import sys
 
-MODULES_SEARCH_PATH = ["R:/pipeline/pipe/prism/ranch_cache_scripts", "R:/pipeline/pipe/prism/proxyShaders", "R:/pipeline/pipe/prism/USDToolBox_pck"]
+MODULES_SEARCH_PATH = ["R:/pipeline/pipe/prism/ranch_cache_scripts", "R:/pipeline/pipe/prism/proxyShaders", "R:/pipeline/pipe/prism/USDToolBox_pck", "R:/pipeline/pipe/maya/scripts"]
 for customPath in MODULES_SEARCH_PATH:
     if not customPath in sys.path:
         sys.path.append(customPath)
@@ -18,83 +18,25 @@ for customPath in MODULES_SEARCH_PATH:
 
 
 def main(*args, **kwargs):
-    # print(args)
-    # print(kwargs)
-    # print(kwargs["core"])
-    # print(kwargs["scenefile"])
-    # print(kwargs["startframe"])
-    # print(kwargs["endframe"])
     core = kwargs["core"]
-    usdApi = core.getPlugin("USD").api
     comment = core.getStateManager().publishComment
-
     if comment == 'noHook':
         print('Hook deactivated')
         return
-
-    else:
-        print('Hook started')
-        if core.appPlugin.pluginName == "Maya":
-            for i in kwargs["scenefile"].split('\\'):
-                if i == 'Anim' or i == "Layout":
-                    path = kwargs["outputpath"]
-                    if not "\Export\_layer_anm_" in path:
-                        continue
-
-
-                    fileext = ['usd', 'usdc', 'usda']
-                    check = 0
-                    for i in fileext:
-                        
-                        if path.split('.')[-1] != i:
-                            None
-                            
-                        else:
-                            check = 1
-                    if check == 0:
-                        print('not usd export')
-                        break
-                    print('in usd export')
-                    stage = usdApi.getStageFromFile(path)
-                    prims = stage.TraverseAll()
-                    
-                    for prim in prims:
-                        if prim.GetName() == "assets":
-                            prim.SetKind("")
-                        
-                        if prim.GetTypeName() == 'Mesh':
-
-                            prim.RemoveProperty("subdivisionScheme")
-                            parent = prim.GetParent()
-
-                            if prim.GetAttribute('points').ValueMightBeTimeVarying() is True:
-                                print(str(prim) + ' is deformed geo')                        
-                            else:
-                                check = 0
-                                path = str(parent).replace('>)', '')
-                                path = path.split('/')
-                                for i in path:
-
-                                    if i == 'propsSkin' or i == "fxPlants" or i =="extraPublish" or i == "characters":
-                                        check = 1
-                                        print(i + 'is in a folder')
-       
-                                if check == 0:
-                                    prim.RemoveProperty('faceVertexCounts')
-                                    prim.RemoveProperty('faceVertexIndices')
-                                    prim.RemoveProperty('points')
-                                    prim.RemoveProperty('normals')
-                                    print('properties removed on : '+ str(prim))
-                    
+    
+    
+    elif core.appPlugin.pluginName == "Maya":
+        path = kwargs["outputpath"]
+        if not "\Export\_layer_anm_" in path:
+            return
         
-                    usdApi.saveStage(stage)
-                    print(str(stage)+ 'successfully saved !')       
-                else: 
-                    None
+        #utilise un package qui permet de parcourir le fichier anm exporter pour pouvoir clean le layer d'anim comme on le veux / de plus on fait torner l'inherite class a se moment la
+        import usd_chaser
+        usd_chaser.chaser_layer_anim(kwargs["outputpath"])
+        usd_chaser.create_inheriteClass(core)
 
 
-
-    if core.appPlugin.pluginName == 'Houdini':
+    elif core.appPlugin.pluginName == 'Houdini':
         # import hou
         # import importlib
         

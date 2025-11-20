@@ -6,66 +6,57 @@
  a single file. -->
 
   <shelfSet name="solaris_1" label="Solaris Geometry">
-    <memberToolshelf name="polygon"/>
     <memberToolshelf name="lop_oceans"/>
-    <memberToolshelf name="cloud"/>
     <memberToolshelf name="hairtools"/>
-    <memberToolshelf name="dev"/>
-    <memberToolshelf name="RenderManRIS"/>
     <memberToolshelf name="model"/>
     <memberToolshelf name="simplefx"/>
     <memberToolshelf name="labs_toolset"/>
-    <memberToolshelf name="illogic_solaris6"/>
+    <memberToolshelf name="illogicLighting"/>
+    <memberToolshelf name="illogicShading"/>
+    <memberToolshelf name="illogicSolaris"/>
     <memberToolshelf name="prism"/>
-    <memberToolshelf name="toto"/>
-    <memberToolshelf name="tdtools"/>
-    <memberToolshelf name="volume"/>
-    <memberToolshelf name="develop"/>
-    <memberToolshelf name="shelf_2"/>
-    <memberToolshelf name="mathis"/>
   </shelfSet>
 
-  <toolshelf name="illogic_solaris6" label="illogic_solaris">
+  <toolshelf name="illogicSolaris" label="Illogic Solaris">
     <memberTool name="sceneBuilder"/>
-    <memberTool name="kmx"/>
-    <memberTool name="kmx_geosubset"/>
-    <memberTool name="kma_mat_char"/>
-    <memberTool name="CreateAutoVariant"/>
-    <memberTool name="material_finder"/>
     <memberTool name="stage_manager_update"/>
     <memberTool name="copy"/>
     <memberTool name="paste"/>
-    <memberTool name="update_tex"/>
     <memberTool name="autoconnect_ui"/>
     <memberTool name="Lib_Importer"/>
     <memberTool name="update_assets_USD"/>
     <memberTool name="usd_update_check"/>
     <memberTool name="restart_houdini"/>
-    <memberTool name="batchrender"/>
-    <memberTool name="sanity_check"/>
-    <memberTool name="automanifest"/>
-    <memberTool name="automanifestv2"/>
-    <memberTool name="inheriteclass"/>
-    <memberTool name="copy_light"/>
-    <memberTool name="domelight_create"/>
     <memberTool name="set_node_parameters"/>
     <memberTool name="blast"/>
-    <memberTool name="clean_light"/>
-    <memberTool name="send_ranch_copy"/>
     <memberTool name="select_prim_with_attributes"/>
-    <memberTool name="shotBuilder"/>
-    <memberTool name="generate_rat_files"/>
   </toolshelf>
 
-  <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+  <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
+    <script scriptType="python"><![CDATA[import importlib
+import PrismInit
+import sys
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
 
-import mtlximage_path_updatev2
-reload(mtlximage_path_updatev2)
-mtlximage_path_updatev2.run()]]></script>
+sys.path.insert(0, "R:/pipeline/pipe_public/prism-scene-builder")
+import sceneBuilder
+importlib.reload(sceneBuilder)
+
+prism_core = PrismInit.pcore
+path = prism_core.getCurrentFileName()
+project_path = prism_core.projectPath
+
+
+yaml_path       = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml"
+routine_path    = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/templates"
+
+
+dcc ={"name": "HOUDINI", "pathSoft": "", "pathPy": ""}
+shotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path, False)
+if kwargs["ctrlclick"]:
+    shotbuild.main(path, dcc, UI=True)
+else:
+    shotbuild.main(path, dcc, UI=False)]]></script>
   </tool>
 
   <tool name="update_assets_USD" label="Update Assets USD" icon="hicon:/SVGIcons.index?NETVIEW_lop_info.svg">
@@ -83,52 +74,6 @@ if not MODULE_PATH in sys.path:
 import USDToolBox_pck
 
 USDToolBox_pck.updateAssetsUSD.startUpdateAssetsUSD('houdini')]]></script>
-  </tool>
-
-  <tool name="CreateAutoVariant" label="CAV" icon="hicon:/SVGIcons.index?CROWDS_popsteeralign.svg">
-    <script scriptType="python"><![CDATA[import CreateAutoVariant as cav
-from imp import reload
-
-reload(cav)
-cav.autoVariant()]]></script>
-  </tool>
-
-  <tool name="material_finder" label="Get mat" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
-
-import materialFinder
-reload(materialFinder)
-materialFinder.run()]]></script>
-  </tool>
-
-  <tool name="kmx_geosubset" label="kmx_sub" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
-
-import kma_mat_from_attr
-reload(kma_mat_from_attr)
-kma_mat_from_attr.execute(collectionMode=False)]]></script>
-  </tool>
-
-  <tool name="kmx" label="kmx_col" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
-    <script scriptType="python"><![CDATA[from imp import reload
-import socket
-import sys
-
-
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
-import kma_mat_from_attr as kmfa
-reload(kmfa)
-
-
-
-kmfa.execute(collectionMode=True)]]></script>
   </tool>
 
   <tool name="paste" label="Paste" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
@@ -183,25 +128,10 @@ Lib_Importer.libImport()]]></script>
 restart.restart_houdini()]]></script>
   </tool>
 
-  <tool name="copy_light" label="Copy Light" icon="hicon:/SVGIcons.index?LOP_lightlinker.svg">
-    <script scriptType="python"><![CDATA[import imp
-import copylight.copylight as copylight
-
-imp.reload(copylight)
-
-copylight.copySelectedLights()]]></script>
-  </tool>
-
   <tool name="autoconnect_ui" label="Auto Connect" icon="R:/pipeline/pipe/houdini/shelfs/icons/autoconnect.png">
     <script scriptType="python"><![CDATA[import autoconnect_ui
 
 autoconnect_ui.main()]]></script>
-  </tool>
-
-  <tool name="domelight_create" label="Dome Light Create" icon="hicon:/SVGIcons.index?BUTTONS_add_light.svg">
-    <script scriptType="python"><![CDATA[import domelight_create.domelight_create as domelight
-
-domelight.create_domelight()]]></script>
   </tool>
 
   <tool name="set_node_parameters" label="Set Nodes Parameters" icon="hicon:/SVGIcons.index?VOP_complement.svg">
@@ -224,34 +154,10 @@ imp.reload(pt)
 blast.run()]]></script>
   </tool>
 
-  <tool name="clean_light" label="Clean Light" icon="hicon:/SVGIcons.index?BUTTONS_clear.svg">
-    <script scriptType="python"><![CDATA[import clean_light.cleanlight as cleanlight
-import imp
-imp.reload(cleanlight)
-
-cleanlight.clean()]]></script>
-  </tool>
-
-  <tool name="send_ranch_copy" label="Send Ranch Copy" icon="hicon:/SVGIcons.index?BUTTONS_network_distribute_vertical.svg">
-    <script scriptType="python"><![CDATA[import sendranchcopy
-import importlib
-
-sendranchcopy.run()
-]]></script>
-  </tool>
-
   <tool name="select_prim_with_attributes" label="Select Prims With Attributes" icon="hicon:/SVGIcons.index?book.svg">
     <script scriptType="python"><![CDATA[import primselector
 
 primselector.run()]]></script>
-  </tool>
-
-  <tool name="batchrender" label="Batch Render" icon="hicon:/SVGIcons.index?BUTTONS_render.svg">
-    <script scriptType="python"><![CDATA[import batchrender
-import importlib
-importlib.reload(batchrender)
-
-batchrender.main()]]></script>
   </tool>
 
   <tool name="automanifest" label="Auto Manifest" icon="hicon:/SVGIcons.index?MISC_sketchbook.svg">
@@ -262,116 +168,12 @@ reload(auto_manifest)
 auto_manifest.run()]]></script>
   </tool>
 
-  <tool name="sanity_check" label="Sanity Check" icon="R:/pipeline/pipe_public/sanitycheck/sanitycheck/ui/Icons/sanitycheck.png">
-    <script scriptType="python"><![CDATA[import os
-import sys
-import importlib
-import PrismInit
-import socket
-SANITYCHECK_PATH = r"R:\pipeline\pipe_public\sanitycheck"
-
-if socket.gethostname() == "FALCON-01":
-    SANITYCHECK_PATH = r"R:\devFred\sanitycheck"
-
-
-def deletefromcontext(module_name):
-    sanitycheck = []
-    for i in sys.modules:
-        if module_name == i or i.startswith(f'{module_name}.'):
-            sanitycheck.append(i)
-
-    for i in sanitycheck:
-        del sys.modules[i]
-              
-
-def run():
-    deletefromcontext('sanitycheck')
-    if not SANITYCHECK_PATH in sys.path:
-        sys.path.insert(0, SANITYCHECK_PATH)
-    
-    try:
-        import sanitycheck
-        importlib.reload(sanitycheck)
-    except Exception as e:
-        print(e)
-        return
-    
-    try:
-        YAML_LOCATION = os.environ['SANITY_CHECK_CONFIG']
-        if socket.gethostname() == "FALCON-01":
-            YAML_LOCATION = r"R:\devFred\yaml\check_hierarchy.yaml"
-        
-    except:
-        YAML_LOCATION = 'None'
-        
-    print(SANITYCHECK_PATH)
-    print(YAML_LOCATION)
-        
-    sm = PrismInit.pcore.getStateManager()
-    res = sanitycheck.main(*(sm, YAML_LOCATION, True))
-
-    try:
-        sys.path.remove(SANITYCHECK_PATH)
-    except Exception as e:
-        print(e)
-        pass
-    
-
-run()]]></script>
-  </tool>
-
-  <tool name="kma_mat_char" label="kmx_char" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
-    <script scriptType="python"><![CDATA[import sys
-import importlib
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_char")
-
-import kmxChar
-importlib.reload(kmxChar)
-kmxChar.execute()]]></script>
-  </tool>
-
   <tool name="automanifestv2" label="Auto Manifest V2" icon="hicon:/SVGIcons.index?MISC_sketchbook.svg">
     <script scriptType="python"><![CDATA[from imp import reload
 
 import automanifest.auto_manifest_dev_v2 as auto_manifest
 reload(auto_manifest)
 auto_manifest.run()]]></script>
-  </tool>
-
-  <tool name="inheriteclass" label="inherite Class" icon="hicon:/SVGIcons.index?ENGINE_asset_help.svg">
-    <helpText><![CDATA["""'The inherited variant' is a tool used to link USD container assets with their corresponding animations, enabling the merging of textures, fur, lighting, rigging, and more with the animation exported from Maya."""]]></helpText>
-    <script scriptType="python"><![CDATA[import importlib
-import hou
-import inheriteClassVariant as icv
-importlib.reload(icv)
-
-
-
-START = True
-nodes = hou.selectedNodes()
-
-if not nodes or len(nodes) >=2:
-    hou.ui.displayMessage("Select 1 LOP_import node", buttons=("OK",) ,severity=hou.severityType.Error)
-    START = False
-
-
-if START and nodes[0].type().name() != "prism::LOP_Import::1.0":
-    hou.ui.displayMessage("Select 1 LOP_import node", buttons=("OK",) ,severity=hou.severityType.Error)
-    START = False
-
-
-    
-    
-if START:
-    path = nodes[0].parm("filepath").eval()
-    if "03_production/shots" in path.lower():
-        inClass = icv.inheriteClassAttr(path)
-        if inClass.result:
-            hou.ui.displayMessage("Everything went well\nReload Prism Import", buttons=("OK",) ,severity=hou.severityType.Message)
-        else:
-            hou.ui.displayMessage(inClass.message , buttons=("OK",) ,severity=inClass.error_type)
-    ]]></script>
   </tool>
 
   <tool name="usd_update_checker" label="USD Update Checker" icon="hicon:/SVGIcons.index?NETVIEW_reload_needsupdate.svg">
@@ -408,51 +210,5 @@ importlib.reload(UD)
 
 UD.reload_modules()
 UD.checkHoudiniImportsUpdates()]]></script>
-  </tool>
-
-  <tool name="sceneBuilder" label="Scene Builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
-    <script scriptType="python"><![CDATA[import importlib
-import PrismInit
-import sys
-
-
-sys.path.insert(0, "R:/pipeline/pipe_public/prism-scene-builder")
-import sceneBuilder
-importlib.reload(sceneBuilder)
-
-prism_core = PrismInit.pcore
-path = prism_core.getCurrentFileName()
-project_path = prism_core.projectPath
-
-
-yaml_path       = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml"
-routine_path    = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/templates"
-
-
-dcc ={"name": "HOUDINI", "pathSoft": "", "pathPy": ""}
-shotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path, False)
-if kwargs["ctrlclick"]:
-    shotbuild.main(path, dcc, UI=True)
-else:
-    shotbuild.main(path, dcc, UI=False)]]></script>
-  </tool>
-
-  <tool name="shotBuilder" label="Shot Builder" icon="hicon:/SVGIcons.index?BUTTONS_visible.svg">
-    <script scriptType="python"><![CDATA[from imp import reload
-import PrismInit
-
-import shotBuilder
-reload(shotBuilder)
-
-
-
-core = PrismInit.pcore
-entity = core.getScenefileData(core.getCurrentFileName())
-data_shots = core.entities.getShotsFromSequence(entity["sequence"])
-shots = []
-for Dshot in data_shots:
-    shots.append(Dshot["shot"])
-
-shotBuilder.ShotBuilder(hou.selectedItems(), shots)]]></script>
   </tool>
 </shelfDocument>

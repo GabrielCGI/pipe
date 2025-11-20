@@ -79,7 +79,7 @@
                 {
                     "label": "Media Converter",
                     "mode": "Python",
-                    "cmd": "core.getPlugin(\"MediaExtension\").openConverter()",
+                    "cmd": "import os\nos.environ[\"OCIO\"] = \"R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio\"\ncore.getPlugin(\"MediaExtension\").openConverter()",
                     "preferred": true
                 }
             ],
@@ -93,19 +93,29 @@
                 {
                     "label": "Blender 2.93",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Blender Foundation\\Blender 2.93\\blender.exe"
+                    "cmd": "C:\\Program Files\\Blender Foundation\\Blender 2.93\\blender.exe",
+                    "preferred": false,
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 },
                 {
                     "label": "Blender 3.5",
                     "mode": "Shell Command",
                     "cmd": "C:\\Program Files\\Blender Foundation\\Blender 3.5\\blender.exe",
-                    "preferred": true
+                    "preferred": true,
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 },
                 {
                     "label": "Blender 4.4",
                     "mode": "Shell Command",
                     "cmd": "C:\\Program Files\\Blender Foundation\\Blender 4.4\\blender.exe",
-                    "preferred": false
+                    "preferred": false,
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 }
             ],
             "uid": "7619a05e-5309-11ef-a854-d85ed35d00b3"
@@ -116,41 +126,46 @@
             "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Houdini.png",
             "versions": [
                 {
-                    "label": "houdini21.0.440",
+                    "label": "houdini 21.0.512",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.440\\bin\\houdinicore.exe",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.512\\bin\\houdinicore.exe",
                     "preferred": true,
                     "environment": {
                         "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "4096",
-                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "2048"
+                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "2048",
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
                     }
                 },
                 {
                     "label": "shaderMax1024",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.440\\bin\\houdinicore.exe",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.512\\bin\\houdinicore.exe",
                     "preferred": false,
                     "environment": {
                         "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "2048",
-                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "1024"
+                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "1024",
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
                     }
                 },
                 {
                     "label": "shaderMax512",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.440\\bin\\houdinicore.exe",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.512\\bin\\houdinicore.exe",
                     "preferred": false,
                     "environment": {
                         "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "1024",
-                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "512"
+                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "512",
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
                     }
                 },
                 {
                     "label": "Full",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.440\\bin\\houdinicore.exe",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.512\\bin\\houdinicore.exe",
                     "preferred": false,
-                    "environment": {}
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 }
             ],
             "uid": "761da243-5309-11ef-9b47-d85ed35d00b3"
@@ -167,7 +182,8 @@
                     "preferred": true,
                     "environment": {
                         "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "4096",
-                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "2048"
+                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "2048",
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
                     }
                 },
                 {
@@ -177,7 +193,8 @@
                     "preferred": false,
                     "environment": {
                         "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "2048",
-                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "1024"
+                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "1024",
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
                     }
                 },
                 {
@@ -187,7 +204,8 @@
                     "preferred": false,
                     "environment": {
                         "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "1024",
-                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "512"
+                        "KARMA_XPU_MAX_SHADER_TEXTURE_RES": "512",
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
                     }
                 },
                 {
@@ -195,7 +213,9 @@
                     "mode": "Shell Command",
                     "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.489\\bin\\houdinifx.exe",
                     "preferred": false,
-                    "environment": {}
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 }
             ],
             "uid": "76218c66-5309-11ef-83da-d85ed35d00b3"
@@ -210,7 +230,9 @@
                     "mode": "Shell Command",
                     "cmd": "C:\\Program Files\\Autodesk\\Maya2025\\bin\\maya.exe",
                     "preferred": true,
-                    "environment": {}
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 }
             ],
             "uid": "76258ec0-5309-11ef-983d-d85ed35d00b3"
@@ -225,7 +247,10 @@
                     "mode": "Shell Command",
                     "cmd": "C:\\Program Files\\Nuke15.1v5\\Nuke15.1.exe",
                     "preferred": true,
-                    "environment": {}
+                    "environment": {
+                        "foundry_LICENSE": "4101@rlm-illogic",
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 }
             ],
             "uid": "76296957-5309-11ef-ae6f-d85ed35d00b3"
@@ -238,23 +263,38 @@
                 {
                     "label": "Nuke 11.3v4",
                     "mode": "Shell Command",
-                    "cmd": "\"C:\\Program Files\\Nuke11.3v4\\Nuke11.3.exe\" --nukex"
+                    "cmd": "\"C:\\Program Files\\Nuke11.3v4\\Nuke11.3.exe\" --nukex",
+                    "preferred": false,
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 },
                 {
                     "label": "Nuke 12.1v5",
                     "mode": "Shell Command",
-                    "cmd": "\"C:\\Program Files\\Nuke12.1v5\\Nuke12.1.exe\" --nukex"
-                },
-                {
-                    "label": "Nuke 15.0v4",
-                    "mode": "Shell Command",
-                    "cmd": "\"C:\\Program Files\\Nuke15.0v4\\Nuke15.0.exe\" --nukex"
+                    "cmd": "\"C:\\Program Files\\Nuke12.1v5\\Nuke12.1.exe\" --nukex",
+                    "preferred": false,
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 },
                 {
                     "label": "Nuke 15.0v4",
                     "mode": "Shell Command",
                     "cmd": "\"C:\\Program Files\\Nuke15.0v4\\Nuke15.0.exe\" --nukex",
-                    "preferred": true
+                    "preferred": false,
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
+                },
+                {
+                    "label": "Nuke 15.0v4",
+                    "mode": "Shell Command",
+                    "cmd": "\"C:\\Program Files\\Nuke15.0v4\\Nuke15.0.exe\" --nukex",
+                    "preferred": true,
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 }
             ],
             "uid": "762d5ee4-5309-11ef-aa5e-d85ed35d00b3"
@@ -268,7 +308,11 @@
                     "label": "Version 1",
                     "mode": "Shell Command",
                     "cmd": "R:/pipeline/pipe/bat/Nuke13_Launcher.bat",
-                    "preferred": true
+                    "preferred": true,
+                    "environment": {
+                        "foundry_LICENSE": "4201@rlm-illogic",
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.0.ocio"
+                    }
                 }
             ],
             "uid": "225e366b-baf3-11f0-a35a-d2f6d41e3a90"
@@ -281,19 +325,29 @@
                 {
                     "label": "Photoshop 2024",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Adobe\\Adobe Photoshop 2024\\Photoshop.exe"
+                    "cmd": "C:\\Program Files\\Adobe\\Adobe Photoshop 2024\\Photoshop.exe",
+                    "preferred": false,
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 },
                 {
                     "label": "Photoshop 2023",
                     "mode": "Shell Command",
                     "cmd": "C:\\Program Files\\Adobe\\Adobe Photoshop 2023\\Photoshop.exe",
-                    "preferred": true
+                    "preferred": true,
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 },
                 {
                     "label": "Photoshop 2025",
                     "mode": "Shell Command",
                     "cmd": "C:\\Program Files\\Adobe\\Adobe Photoshop 2025\\Photoshop.exe",
-                    "preferred": false
+                    "preferred": false,
+                    "environment": {
+                        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                    }
                 }
             ],
             "uid": "7631d25e-5309-11ef-b2f2-d85ed35d00b3"

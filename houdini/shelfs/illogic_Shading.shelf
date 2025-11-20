@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- gestion des differents outils présent dans la shelf illogic Shading-->
+  <toolshelf name="illogicShading" label="Illogic Shading">
+    <memberTool name="sceneBuilder"/>
+    <memberTool name="kmx"/>
+    <memberTool name="kmx_geosubset"/>
+    <memberTool name="kma_mat_char"/>
+    <memberTool name="CreateAutoVariant"/>
+    <memberTool name="material_finder"/>
+    <memberTool name="update_tex"/>
+  </toolshelf>
+  <!-- gestion des differents outils présent dans la shelf illogic Shading-->
+
+
+
+
+  <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
+    <script scriptType="python"><![CDATA[import importlib
+import PrismInit
+import sys
+
+
+sys.path.insert(0, "R:/pipeline/pipe_public/prism-scene-builder")
+import sceneBuilder
+importlib.reload(sceneBuilder)
+
+prism_core = PrismInit.pcore
+path = prism_core.getCurrentFileName()
+project_path = prism_core.projectPath
+
+
+yaml_path       = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml"
+routine_path    = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/templates"
+
+
+dcc ={"name": "HOUDINI", "pathSoft": "", "pathPy": ""}
+shotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path, False)
+if kwargs["ctrlclick"]:
+    shotbuild.main(path, dcc, UI=True)
+else:
+    shotbuild.main(path, dcc, UI=False)]]></script>
+  </tool>
+
+  <tool name="kmx" label="kmx_col" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
+    <script scriptType="python"><![CDATA[from imp import reload
+import socket
+import sys
+
+
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+import kma_mat_from_attr as kmfa
+reload(kmfa)
+
+
+
+kmfa.execute(collectionMode=True)]]></script>
+  </tool>
+
+  <tool name="kmx_geosubset" label="kmx_sub" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+
+import kma_mat_from_attr
+reload(kma_mat_from_attr)
+kma_mat_from_attr.execute(collectionMode=False)]]></script>
+  </tool>
+  
+  <tool name="kma_mat_char" label="kmx_char" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
+    <script scriptType="python"><![CDATA[import sys
+import importlib
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_char")
+
+import kmxChar
+importlib.reload(kmxChar)
+kmxChar.execute()]]></script>
+  </tool>
+  
+  <tool name="CreateAutoVariant" label="CAV" icon="hicon:/SVGIcons.index?CROWDS_popsteeralign.svg">
+    <script scriptType="python"><![CDATA[import CreateAutoVariant as cav
+from imp import reload
+
+reload(cav)
+cav.autoVariant()]]></script>
+  </tool>
+
+  <tool name="material_finder" label="Get mat" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
+
+import materialFinder
+reload(materialFinder)
+materialFinder.run()]]></script>
+  </tool>
+
+  <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
+    <script scriptType="python"><![CDATA[import sys
+from imp import reload
+
+sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
+
+import mtlximage_path_updatev2
+reload(mtlximage_path_updatev2)
+mtlximage_path_updatev2.run()]]></script>
+  </tool>
+
+</shelfDocument>

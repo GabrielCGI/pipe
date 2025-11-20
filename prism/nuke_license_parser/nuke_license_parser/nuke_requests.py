@@ -9,7 +9,8 @@ import bs4
 
 sys.path.remove(REQUEST_DEPS_PATH)
 
-URL = '10.16.34.37:4102'
+# URL = '10.16.34.37:4102'
+URL = '10.16.34.175:4102'
 PARAMS = {
     'wb': 'rlmstat',
     'isv': 'foundry',

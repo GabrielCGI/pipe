@@ -33,8 +33,10 @@ kma_mat_from_attr.execute()
 __author__ = "Valentin ValDo Dornel"
 __credits__ = ["Gabriel Grapperon"]
 __license__ = "MIT License 2024"
-__version__ = "1.0"
+__version__ = "1.1"
 __status__ = "Production"
+
+# editer par frédéric dewit  pourquoi ?: pouvoir l'executer plusieur avec une selection multiple 
 
 import hou
 import voptoolutils
@@ -65,25 +67,39 @@ def check_selection():
     """
 
     selection= hou.selectedNodes()
-    if len(selection)>=3:
-
-        componentgeometry=None
-        materiallibrary=None
-
-        for node in selection:
-            if node.type().name()=="componentgeometry":
-                componentgeometry = node
-            if node.type().name()=="materiallibrary":
-                materiallibrary = node
-            if node.type().name()=="componentmaterial":
-                componentmaterial = node
-
-        if componentgeometry!=None and materiallibrary!=None:
-            return componentgeometry, materiallibrary, componentmaterial
-        else:
-            hou.ui.displayMessage("Error while finding nodes, check your selection")
-    else:
+    if not len(selection)>=2:
         hou.ui.displayMessage("Select three nodes : component geometry, material library node and component material.")
+        return None, None, None
+    
+    componentgeometry = []
+    materiallibrary   = []
+    componentmaterial = []
+
+    for node in selection:
+        if node.type().name()=="componentgeometry":
+            componentgeometry.append(node)
+        if node.type().name()=="materiallibrary":
+            materiallibrary = node
+
+
+    # parser tout les node componentgeometry pour trouver les componentmaterial qui sont ratacher aux componentgeometry
+    for node in componentgeometry:
+        Dref = node
+        for _ in range(5):
+            Dref = Dref.outputs()[0]
+            if Dref.type().name() == "componentmaterial":
+                componentmaterial.append(Dref)
+                break
+
+    
+    if not componentgeometry and not materiallibrary:
+        hou.ui.displayMessage("Error while finding nodes, check your selection")
+        return None, None, None
+    if len(componentgeometry) != len(componentmaterial):
+        hou.ui.displayMessage("Error while finding nodes, check your selection")
+        return None, None, None
+        
+    return componentgeometry, materiallibrary, componentmaterial
 
 def list_primitive_attributes(node_path):
     # Obtenir le nœud à partir du chemin spécifié
@@ -400,56 +416,59 @@ def execute(collectionMode=True):
     """
     Main execution function
     """
+    attr = "usdmaterialpath"
+    
 
     # start to check selection
     componentgeometry, materiallibrary, componentmaterial=check_selection()
+    if not componentgeometry and not materiallibrary and not componentmaterial:
+        return
 
     pdebug(componentgeometry)
     pdebug(materiallibrary)
     pdebug(componentmaterial)
 
-    ## Search the default node in component geo  :
-    default_output_path = f"{componentgeometry.path()}/sopnet/geo/default"
+    for i in range(len(componentgeometry)):
+        ## Search the default node in component geo  :
+        
+        default_output_path = f"{componentgeometry[i].path()}/sopnet/geo/default"
 
 
-    ### Create a window to ask to the attr to create mat from
-    # Define the dropdown menu options
-    attrs = list_primitive_attributes(default_output_path)
-    # Show the dropdown dialog
-    choice = hou.ui.selectFromList(attrs, exclusive=True, title="Choose an Option", message="Choose an attribute to create material from. One mat will be created per attribute")
+        ### Create a window to ask to the attr to create mat from
+        # Define the dropdown menu options
+        # attrs = list_primitive_attributes(default_output_path)
+        # Show the dropdown dialog
+        # choice = hou.ui.selectFromList(attrs, exclusive=True, title="Choose an Option", message="Choose an attribute to create material from. One mat will be created per attribute")
 
-    # Check if the user made a choice
-    if choice:
-        attr = attrs[choice[0]]
-    else:
-        return
-
-    mode = hou.updateModeSetting()
-    hou.setUpdateMode(hou.updateMode.Manual) 
-    mtl_list=create_karma_mat(default_output_path, attr, materiallibrary)
-    how_many_mtl = len(mtl_list)
-    pdebug(f"Total mtl: {how_many_mtl}")
-    if how_many_mtl>20:
-        cancelUi = hou.ui.displayMessage(f"There is {how_many_mtl} materials to create, it will take some time, wanna continue?", severity = hou.severityType.ImportantMessage, buttons=('Sure, lets go! (Yes)','Damn really? I will double check (Cancel)'))
-        if cancelUi==0:
-            pass
+        # Check if the user made a choice
+        # if choice:
+        #     attr = attrs[choice[0]]
+        # else:
+        #     return
+        
+        mode = hou.updateModeSetting()
+        hou.setUpdateMode(hou.updateMode.Manual) 
+        mtl_list=create_karma_mat(default_output_path, attr, materiallibrary)
+        how_many_mtl = len(mtl_list)
+        pdebug(f"Total mtl: {how_many_mtl}")
+        if how_many_mtl>20:
+            cancelUi = hou.ui.displayMessage(f"There is {how_many_mtl} materials to create, it will take some time, wanna continue?", severity = hou.severityType.ImportantMessage, buttons=('Sure, lets go! (Yes)','Damn really? I will double check (Cancel)'))
+            if cancelUi==0:
+                pass
+            else:
+                return
+            
+        if (collectionMode==True):
+            componentgeometry[i].parm('bindmaterials').set("createbind")
         else:
-            return
-          
-    if (collectionMode==True):
-
-        #build_collection(default_output_path, attr, componentgeometry, componentmaterial )
-        #connect_prim_and_mat(componentmaterial, mtl_list, collectionMode=True)
-        componentgeometry.parm('bindmaterials').set("createbind")
-        pass
-
-    else:
-        componentgeometry.parm('bindmaterials').set("nobind")
-        componentgeometry.parm('materialbindsubsets').set(1)
-        #componentgeometry.parm("partitionattribs").set("1")
-        connect_prim_and_mat(componentmaterial, mtl_list, collectionMode=False)
+            componentgeometry[i].parm('bindmaterials').set("nobind")
+            componentgeometry[i].parm('materialbindsubsets').set(1)
+            #componentgeometry.parm("partitionattribs").set("1")
+            connect_prim_and_mat(componentmaterial[i], mtl_list, collectionMode=False)
+        
+        hou.setUpdateMode(mode)
+    
     print("Set Update Mode back to: %s"%(mode.name()))
-    hou.setUpdateMode(mode)
 
 if __name__ != "__main__":
     pdebug("\n\n-- New Exec --\n\n")

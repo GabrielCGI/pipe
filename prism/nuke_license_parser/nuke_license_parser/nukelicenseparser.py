@@ -6,9 +6,10 @@ import concurrent.futures
 
 
 STYLESHEET = ''
-URL = '10.16.34.37'
-PORT = 46119
-
+# URL = '10.16.34.37'
+# PORT = 46119
+URL = '10.16.34.175'
+PORT = 6101
 
 def import_qtpy():
     """

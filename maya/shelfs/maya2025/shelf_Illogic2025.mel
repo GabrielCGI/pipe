@@ -758,5 +758,75 @@ global proc shelf_Illogic2025 () {
         -commandRepeatable 1
         -flat 1
     ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "# Maya Python (Script Editor ? Python tab)\n# Creates:\n# /assets\n#   +- characters\n#   +- props\n#        +- jewels\n#        +- vegetation\n#             +- berries\n#             +- branches\n#             +- leaves\n#\n# If a group already exists at the target path, it is skipped.\n\nimport maya.cmds as cmds\n\ndef ensure_group(name, parent=None):\n    \"\"\"\n    Ensure a transform 'group' named `name` exists under `parent`.\n    Returns the long path of the group (e.g. '|assets|props').\n    If it already exists at that path, returns it without creating a new one.\n    \"\"\"\n    # Build full path we expect\n    full = f\"{parent}|{name}\" if parent else f\"|{name}\"\n\n    if cmds.objExists(full):\n        # Already exists at the intended path ? skip creation\n        # (Optional sanity: make sure it's a transform)\n        if cmds.nodeType(full) != 'transform':\n            cmds.warning(\"Node exists but is not a transform: {}\".format(full))\n        return full\n\n    # Create the group under parent (empty transform)\n    grp = cmds.group(empty=True, name=name, parent=parent) if parent else cmds.group(empty=True, name=name)\n    return cmds.ls(grp, long=True)[0]\n\ndef build_tree(tree, parent=None):\n    \"\"\"\n    Recursively build a dict-based hierarchy.\n    tree: {\"groupName\": {subtree}, ...}\n    \"\"\"\n    for name, children in tree.items():\n        here = ensure_group(name, parent)\n        if isinstance(children, dict) and children:\n            build_tree(children, here)\n\n# ----- Define the desired hierarchy -----\nhierarchy = {\n    \"assets\": {\n        \"characters\": {},\n        \"props\": {\n            \"jewels\": {},\n            \"vegetation\": {\n                \"berries\": {},\n                \"branches\": {},\n                \"leaves\": {},\n            }\n        }\n    }\n}\n\n# Run it\ncmds.undoInfo(openChunk=True)\ntry:\n    build_tree(hierarchy, parent=None)\n    print(\"Hierarchy ensured. Existing groups were left untouched.\")\nfinally:\n    cmds.undoInfo(closeChunk=True)\n" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "# Maya Python (Script Editor ? Python tab)\n# Creates:\n# /assets\n..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "vca_hierachy" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "hierOn.png" 
+        -image1 "hierOn.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "# Maya Python (Script Editor ? Python tab)\n# Creates:\n# /assets\n#   +- characters\n#   +- props\n#        +- jewels\n#        +- vegetation\n#             +- berries\n#             +- branches\n#             +- leaves\n#\n# If a group already exists at the target path, it is skipped.\n\nimport maya.cmds as cmds\n\ndef ensure_group(name, parent=None):\n    \"\"\"\n    Ensure a transform 'group' named `name` exists under `parent`.\n    Returns the long path of the group (e.g. '|assets|props').\n    If it already exists at that path, returns it without creating a new one.\n    \"\"\"\n    # Build full path we expect\n    full = f\"{parent}|{name}\" if parent else f\"|{name}\"\n\n    if cmds.objExists(full):\n        # Already exists at the intended path ? skip creation\n        # (Optional sanity: make sure it's a transform)\n        if cmds.nodeType(full) != 'transform':\n            cmds.warning(\"Node exists but is not a transform: {}\".format(full))\n        return full\n\n    # Create the group under parent (empty transform)\n    grp = cmds.group(empty=True, name=name, parent=parent) if parent else cmds.group(empty=True, name=name)\n    return cmds.ls(grp, long=True)[0]\n\ndef build_tree(tree, parent=None):\n    \"\"\"\n    Recursively build a dict-based hierarchy.\n    tree: {\"groupName\": {subtree}, ...}\n    \"\"\"\n    for name, children in tree.items():\n        here = ensure_group(name, parent)\n        if isinstance(children, dict) and children:\n            build_tree(children, here)\n\n# ----- Define the desired hierarchy -----\nhierarchy = {\n    \"assets\": {\n        \"characters\": {},\n        \"props\": {\n            \"jewels\": {},\n            \"vegetation\": {\n                \"berries\": {},\n                \"branches\": {},\n                \"leaves\": {},\n            }\n        }\n    }\n}\n\n# Run it\ncmds.undoInfo(openChunk=True)\ntry:\n    build_tree(hierarchy, parent=None)\n    print(\"Hierarchy ensured. Existing groups were left untouched.\")\nfinally:\n    cmds.undoInfo(closeChunk=True)\n" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "from importlib import reload\nimport leafScale as lf\nreload(lf)\n\nlf.run()\nlf.root_select()" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "from importlib import reload\nimport leafScale as lf\nreload(lf)\n\n..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "leaf" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "greenSelect.png" 
+        -image1 "greenSelect.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from importlib import reload\nimport leafScale as lf\nreload(lf)\n\nlf.run()\nlf.root_select()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
 
 } 

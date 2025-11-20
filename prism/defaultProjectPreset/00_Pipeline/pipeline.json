@@ -744,10 +744,12 @@
         ]
     },
     "environmentVariables": {
-        "PRISM_DEADLINE_HUSK_PATH": "C:\\Program Files\\Side Effects Software\\Houdini %HOUDINI_ILL_VERSION%\\bin\\husk.exe",
-        "PRISM_HUSK_DEADLINE_GROUP": "husk_grp",
+        "PRISM_DEADLINE_HUSK_PATH": "C:/Program Files/Side Effects Software/Houdini %HOUDINI_ILL_VERSION%/bin/husk.exe",
+        "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio",
+        "SANITY_CHECK_CONFIG": "I://00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml",
         "PXR_AR_DEFAULT_SEARCH_PATH": "R:/;I:/",
-        "SANITY_CHECK_CONFIG": "I:/intermarche/00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml"
+        "PRISM_HUSK_DEADLINE_GROUP": "husk_grp",
+        "HOUDINI_BUFFEREDSAVE": "1"
     },
     "export_paths": {},
     "render_paths": {},
@@ -897,7 +899,8 @@
             "husk_grp",
             "nuke_grp",
             "nukegrp"
-        ]
+        ],
+        "jobEnvVars": {}
     },
     "library": {
         "useMasterTextureVersion": false,
@@ -979,6 +982,14 @@
             {
                 "abbreviation": "cpt",
                 "name": "Concept"
+            },
+            {
+                "abbreviation": "set",
+                "name": "SetDress"
+            },
+            {
+                "abbreviation": "prd",
+                "name": "Preprod"
             }
         ],
         "renderer": [
@@ -990,7 +1001,12 @@
             "GL"
         ],
         "autoUpdateLayers": true,
-        "useSimplifiedAssetStructure": true
+        "useSimplifiedAssetStructure": true,
+        "useKarmaDeadlinePlugin": false,
+        "useUpAxis": false,
+        "upAxis": "Y",
+        "useMetersPerUnit": false,
+        "metersPerUnit": 0.01
     },
     "maya": {
         "setPrefix": ""

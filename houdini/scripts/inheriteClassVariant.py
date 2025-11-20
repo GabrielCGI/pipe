@@ -2,7 +2,6 @@ from pxr import Sdf, Usd, Kind, UsdGeom
 from datetime import datetime
 from pathlib import Path
 import socket
-import hou # type: ignore
 import sys
 import os
 import re
@@ -13,14 +12,21 @@ LIST_MACHINE_DEBUG = ["FALCON-01"]
 
 
 class inheriteClassAttr():
-    def __init__(self, filePathImport, clearFile=False):
+    def __init__(self, filePathImport, soft, clearFile=False):
         if not os.path.exists(filePathImport):
             print("no file found")
             return 
         
-        self.message = "Everything went well\nReload Prism Import"
-        
         self.result = True
+        self.soft = soft
+        if self.soft == "Houdini":
+            import hou
+            self.message = "Everything went well\nReload Prism Import"
+            self.error_type = hou.severityType.Message
+        elif self.soft == "Maya":
+            self.message = "inherite Class:\nEverything went well"
+            self.error_type = "info"
+
         
         self.filePathImport = str(Path(filePathImport))
         self.projet = "/".join(self.filePathImport.split("\\")[:2])
@@ -41,17 +47,29 @@ class inheriteClassAttr():
     def sendError(self, msg, type):
         self.message = msg
         print(msg)
-
-        if type == "error":
-            self.error_type = hou.severityType.Error
-        elif type == "warning":
-            self.error_type = hou.severityType.Warning
-        elif type == "importMessage":
-            self.error_type = hou.severityType.ImportantMessage
-        else:
-            print("---------------blablabal")
+        if self.soft == "Houdini":
+            import hou # type: ignore
+            if type == "error":
+                self.error_type = hou.severityType.Error
+            elif type == "warning":
+                self.error_type = hou.severityType.Warning
+            elif type == "importMessage":
+                self.error_type = hou.severityType.ImportantMessage
+            else:
+                print("---------------blablabal")
+            
+        elif self.soft == "Maya":
+            if type == "error":
+                self.error_type = "error"
+            elif type == "warning":
+                self.error_type = "warning"
+            elif type == "importMessage":
+                self.error_type = "warning"
+            else:
+                print("---------------blablabal")
         
         self.result = False
+
 
     def run(self):
         print("openning file.....")
