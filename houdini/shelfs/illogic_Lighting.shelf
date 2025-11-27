@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <shelfDocument>
-  <!-- gestion des differents outils présent dans la shelf illogic Shading-->
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
   <toolshelf name="illogicLighting" label="Illogic Lighting">
     <memberTool name="sceneBuilder"/>
     <memberTool name="copy_light"/>
@@ -10,11 +14,8 @@
     <memberTool name="batchrender"/>
     <memberTool name="send_ranch_copy"/>
     <memberTool name="shotBuilder"/>
+    <memberTool name="tool_1"/>
   </toolshelf>
-  <!-- gestion des differents outils présent dans la shelf illogic Shading-->
-
-
-
 
   <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
     <script scriptType="python"><![CDATA[import importlib
@@ -133,4 +134,11 @@ for Dshot in data_shots:
 shotBuilder.ShotBuilder(hou.selectedItems(), shots)]]></script>
   </tool>
 
+  <tool name="tool_1" label="COP baker" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import baked_hdri_cop
+import importlib
+importlib.reload(baked_hdri_cop)
+
+baked_hdri_cop.run()]]></script>
+  </tool>
 </shelfDocument>

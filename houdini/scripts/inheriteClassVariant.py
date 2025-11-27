@@ -105,7 +105,7 @@ class inheriteClassAttr():
 
 
             print("\n\nnow find charaters and props....")
-            allPathPrim = self.getAllPrimPath(self.root, ["/assets/props/", "/assets/propsSkin/", "/assets/characters/"])
+            allPathPrim = self.getAllPrimPath(self.root, ["/assets/props/", "/assets/sets/", "/assets/characters/"])
             if not allPathPrim:
                 self.sendError("no props and no characters", "importMessage")
                 return
@@ -188,6 +188,7 @@ class inheriteClassAttr():
                     overImage.CreateVisibilityAttr().Set("inherited")
 
     def setVariant(self, prim, refPrim):
+        #self.debugger()
         path = prim.GetPath()
         visible, hidden = self.getVariant(path)
         if not visible and not hidden:

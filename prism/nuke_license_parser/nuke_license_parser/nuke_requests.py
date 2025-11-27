@@ -10,7 +10,9 @@ import bs4
 sys.path.remove(REQUEST_DEPS_PATH)
 
 # URL = '10.16.34.37:4102'
-URL = '10.16.34.175:4102'
+URL = 'rlm-illogic'
+PORT_NUKE = "4102"
+PORT_NUKE_13 = "4202"
 PARAMS = {
     'wb': 'rlmstat',
     'isv': 'foundry',
@@ -159,8 +161,10 @@ def parse_license(request: requests.models.Response):
     return licenses_data
 
 
-def main():
-    url_license = f'http://{URL}/goform/rlmstat_isv'
+def getData(domain):
+    global USAGE_URL
+    USAGE_URL = f"http://{domain}/goform/rlmstat_lic_process"
+    url_license = f'http://{domain}/goform/rlmstat_isv'
     license_request = SESSION.get(
             url_license,
             params=PARAMS,
@@ -174,6 +178,27 @@ def main():
         
     licenses_data = parse_license(license_request)
     return licenses_data
+
+
+def main():
+    nuke_13_datas = getData(f"{URL}:{PORT_NUKE_13}")
+    nuke_datas = getData(f"{URL}:{PORT_NUKE}")
+
+    try:
+        fst = int(sorted(list(nuke_datas.keys()))[-1])+1
+    except:
+        return nuke_13_datas
+
+    value_to_add = []
+    for key, value in nuke_13_datas.items():
+        value_to_add.append(value)
+
+    cnt = 0
+    for value in value_to_add:
+        nuke_datas[str(fst+cnt)] = value
+        cnt += 1
+        
+    return nuke_datas
 
 
 if __name__ == '__main__':

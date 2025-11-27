@@ -319,7 +319,7 @@ args = [
 #    "wait",
 #  MODIF exr mode set to 0 to debug draft assembly tile
     "--exrmode", multiPartExr ,
-    "--autocrop", "C,A",
+    "--autocrop", "C,A,holdout_shadows",
 ]
 
 if settings.get("camera"):

@@ -55,9 +55,14 @@ class AnimLayoutTools(MultipleActionTool):
             return
 
         try:
-            path = self.core.getCurrentFileName()
-            
-            self.win = refUp.mainUI(self, "Maya", path, self.core.projectPath, False)
+            from maya import OpenMayaUI
+            from shiboken6 import wrapInstance
+            from PySide6.QtWidgets import QWidget
+
+            main_window_ptr = OpenMayaUI.MQtUtil.mainWindow()
+            instance = wrapInstance(int(main_window_ptr), QWidget)
+            self.win = refUp.mainUI(self, "Maya", self.core.getCurrentFileName(), self.core.projectPath, False, False, instance)
             self.win.show()
+
         except Exception as e:
             print(e)

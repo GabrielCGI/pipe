@@ -204,22 +204,24 @@ class NukeScanner:
         to_delete = []
         dependencies = ';'.join(self.__folders)
         for layer in layer_list:
-            
+            if _PREFIX_TO_DELETE in layer:
+                continue
             pattern_version = os.path.join(layer, 'v*[0-9]')
             version_list = glob.glob(pattern_version)
             
             delete_layer = True
             
             # Force to save at least nb_version_to_save
+            version_list.sort()
             if nb_version_to_save:
                 delete_layer = False
-                version_list.sort()
                 version_list = version_list[:-nb_version_to_save]
             
             version_to_delete = []
             for version in version_list:
                 if version.replace('\\', '/') in dependencies:
                     delete_layer = False
+                    break
                 else:
                     version_to_delete.append(version)
                     

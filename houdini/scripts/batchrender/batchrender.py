@@ -1,21 +1,21 @@
 import os
 import hou
 import json 
-import sys
 
 import PrismInit
 
-try:
+HOUDINI_MAJOR = hou.applicationVersion()[0]
+
+if HOUDINI_MAJOR == 20:
     from PySide2 import QtCore
     from PySide2 import QtWidgets
     QT_FOUND = True
-except:
-    try:
-        from PySide6 import QtCore
-        from PySide6 import QtWidgets
-        QT_FOUND = True
-    except:
-        QT_FOUND = False
+elif HOUDINI_MAJOR == 21:
+    from PySide6 import QtCore
+    from PySide6 import QtWidgets
+    QT_FOUND = True
+else:
+    QT_FOUND = False
         
 from . import farmsubmitter
 import importlib
@@ -53,7 +53,7 @@ class BatchSelector(QtWidgets.QDialog):
         
         super().__init__(parent)
         self.setWindowTitle('Batch Render')
-        self.setMinimumSize(QtCore.QSize(1000, 650))
+        self.setMinimumSize(QtCore.QSize(1100, 650))
         self.setWindowFlags(self.windowFlags() & ~QtCore.Qt.WindowContextHelpButtonHint)
         self.render_nodes = render_nodes
         self.render_nodes.sort(key=lambda x: x.name())
@@ -78,22 +78,40 @@ class BatchSelector(QtWidgets.QDialog):
         
         exec_shot = None
         exec_layer = None
+
         for id_context in range(1, nb_contexts.eval()+1):
             name_context = node.parm(f'contextOptionsName_{id_exec}_{id_context}')
             value_context = node.parm(f'contextOptionsValue_{id_exec}_{id_context}')
             if not name_context or not value_context:
-                return
+                continue
             
+            name = name_context.eval()
+            value = value_context.eval()
+            if name == LAYER_IDENTIFIER: 
+                exec_layer = value
+
+        edit_context_option = [
+            n for n in node.inputs()
+            if n.type().name() == 'editcontextoptions'
+        ]
+        if not len(edit_context_option):
+            return
+        edit_context_option: hou.LopNode = edit_context_option[0]
+        for i in range(1, edit_context_option.parm("optioncount").eval()+1):
+            name_context = edit_context_option.parm(f'optionname{i}')
+            value_context = edit_context_option.parm(f'optionstrvalue{i}')
+            if not name_context or not value_context:
+                continue
             name = name_context.eval()
             value = value_context.eval()
             if name == SHOT_IDENTIFIER: 
                 exec_shot = value
-            elif name == LAYER_IDENTIFIER: 
-                exec_layer = value
+
         
-        if not exec_shot or not exec_layer:
+        if not exec_shot:
             return
-        
+        if not exec_layer:
+            return
         return (exec_shot, exec_layer)          
             
             
@@ -399,5 +417,6 @@ def main():
             severity=hou.severityType.Warning
         )
 
-    batch_selector = BatchSelector(render_nodes, hou.qt.mainWindow())
+    batch_selector = BatchSelector(render_nodes)
+    batch_selector.setParent(hou.qt.mainWindow(), QtCore.Qt.Window)
     batch_selector.show()

@@ -20,15 +20,20 @@ reload(refUpdater)
 
 
 class startWithRef(qt.QMainWindow):
-    def __init__(self, Core, DCC, scenePath, ProjetPath, standalone, debug=False):
-        super().__init__()
+    def __init__(self, Core, DCC, scenePath, ProjetPath, standalone, debug=False, parent=None):
+        super(startWithRef, self).__init__(parent)
+        entity = Core.core.getScenefileData(scenePath)
+        self.departement = "Rigging"
         self.ProjetPath = ProjetPath
-        self.scenePath = scenePath
         self.standalone = standalone
+        self.scenePath = scenePath
         self.toUp_reference = []
         self.tables = []
-        self.DCC = DCC
         self.Core = Core
+        self.DCC = DCC
+        if entity:
+            if entity.get("department") == "Rigging":
+                self.departement = "toRig"
 
 
         self.setWindowTitle("import  and update assets in the scene")
@@ -112,7 +117,6 @@ class startWithRef(qt.QMainWindow):
 
         table.setRowCount(len(self.all_reference))
         for row, data_ref in enumerate(self.all_reference):
-            print(data_ref["reference"], data_ref["path"])
             asset_name = data_ref["reference"].split("_")[0]
             item = qt.QLabel(asset_name)
             table.setCellWidget(row, 0, item)
@@ -217,9 +221,9 @@ class startWithRef(qt.QMainWindow):
         self.tabs.addTab(table, titre)
 
     def findAllAssets(self, assetType):
-        path = self.ProjetPath + "/03_Production/Assets/" + assetType
+        path = self.ProjetPath + "03_Production/Assets/" + assetType
         if not os.path.exists(path):
-            print("error path not valide", path)
+            print("path not found", path)
             return [], None
         
         return os.listdir(path), path
@@ -268,7 +272,7 @@ class startWithRef(qt.QMainWindow):
             return
 
         self.worker = refUpdater.instanceWorker( self.Core, self.DCC, self.scenePath, self.ProjetPath, self.addRef.isChecked(), need_update, not_want_update, dataRef, debug=self.consoleMode.isChecked())
-        self.worker.runUpdate(self.standalone)
+        self.worker.runUpdate(self.standalone, self.departement)
         if not self.consoleMode.isChecked() and self.standalone:
             self.Core.waiter = UI_loadingScreen.LoadingWindow("waite the script process...")
             self.Core.waiter.show()

@@ -102,7 +102,6 @@ class instanceWorker():
             else:
                 sys.argv[2] = str(self.dataRef)
             
-
             from . import mayaCode_updateImportRef as update
             reload(update)
             update.CoreStandalone()

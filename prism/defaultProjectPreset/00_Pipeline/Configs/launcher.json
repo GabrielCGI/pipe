@@ -424,6 +424,21 @@
                 }
             ],
             "uid": "ef741bf8-a35e-11f0-9953-d85ed35d00a7"
+        },
+        {
+            "label": "wiki",
+            "category": "URL",
+            "icon": "I:\\mikes_2511\\/00_Pipeline/Configs\\LauncherIcons\\wiki.png",
+            "versions": [
+                {
+                    "label": "Version 1",
+                    "mode": "URL",
+                    "cmd": "https://illogic.notion.site/Wiki-2f062f644c404c19b3f74aca2f7aab05",
+                    "preferred": true,
+                    "environment": {}
+                }
+            ],
+            "uid": "eb272e42-c918-11f0-8ad0-581122d38c57"
         }
     ],
     "prismVersions": [

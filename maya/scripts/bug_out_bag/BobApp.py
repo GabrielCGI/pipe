@@ -68,6 +68,7 @@ from .tool_instances.FixUsdColorspaceManagement import FixUsdColorspaceManagemen
 from .tool_instances.matchTransformUSD import *
 from .tool_instances.RiggingTools import RiggingTools
 from .tool_instances.AnimLayoutTools import AnimLayoutTools
+from .tool_instances.ApplyPeak import ApplyPeak
 
 
 # ######################################################################################################################
@@ -139,7 +140,8 @@ class BobApp(QDialog):
             ]),
             BobCategory("Tools", self.__prefs, [
                 RiggingTools(),
-                AnimLayoutTools()
+                AnimLayoutTools(),
+                ApplyPeak()
             ]),
         ]
         self.__selected_category = 0

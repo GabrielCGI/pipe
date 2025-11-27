@@ -38,7 +38,7 @@ if _HAS_HOU:
             path = node.parm('filepath').eval()
             instance = hou.qt.mainWindow()
             updater = usd_updater.MainInterface(
-                openType='houdini',
+                openType='prism',
                 pathPrism=path,
                 ar_context=None,
                 check_update_only=True,
@@ -48,9 +48,11 @@ if _HAS_HOU:
             if updater.isUpdate():
                 node.setColor(PRISM_BASE_COLOR)
                 logger.info(f"{node.name()} is updated")
+                print(f"{node.name()} is updated")
             else:
                 node.setColor(TO_UPDATE_COLOR)
                 logger.info(f"{node.name()} need to be updated")
+                print(f"{node.name()} need to be updated")
 
         if selected_nodes:
             for node in selected_nodes:

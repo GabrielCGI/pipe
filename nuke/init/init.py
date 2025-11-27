@@ -97,8 +97,16 @@ nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/pixel
 nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts/nukeToPack/", 'nukeToPack/icons')
 nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/aeRefractor')
 nuke.pluginAddPath('R:/devmaxime/dev/nuke/nuke_path/plugins')
-nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/MagicDefocus2_v1.0.3")
 nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/stamps")
+
+# ### load magic defocus only if nuke 13 ou 16
+if nuke.NUKE_VERSION_MAJOR == 13:
+    nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/MagicDefocus2_v1.0.3")
+elif nuke.NUKE_VERSION_MAJOR == 15:
+    nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/MagicDefocus2_v1.0.3")
+else :
+    print ("passing magic defocus 2")
+
 
 # << Start Illogic custom plugins
 if nuke.NUKE_VERSION_MAJOR == 13:

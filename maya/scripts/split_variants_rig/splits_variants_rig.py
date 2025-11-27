@@ -97,7 +97,7 @@ class splitVariantsRig():
         #permet de trouver le bon controller world et de trouver le bon attribute qui à le bon nom
         self.name_variant = None
         self.name_ctrl = None
-        for ctrl in  ["ctrl_world", "c_world", "World_Ctr"]:
+        for ctrl in  ["ctrl_world", "c_world", "World_Ctr", "world_Ctr"]:
             if cmds.objExists(ctrl):
                 self.name_ctrl = ctrl
                 break
@@ -121,9 +121,8 @@ class splitVariantsRig():
         data = {}
         for variant in all_vairant[0].split(":"):
             if cmds.objExists(variant):
-                all_variant = cmds.ls(variant, long=True)
-                print(all_vairant)
-                data[variant] = {"rig": [rig], "geo": [all_variant]}
+                name_variant = cmds.ls(variant, long=True)
+                data[variant] = {"rig": [rig], "geo": name_variant}
         
         return data, True
 

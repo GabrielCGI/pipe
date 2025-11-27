@@ -61,8 +61,8 @@ class GeoExport(MultipleActionTool):
             self.select_all_geo('props')
         """if cmds.checkBox('world', query=True, value=True):
             self.select_all_geo('world')"""
-        if cmds.checkBox('Sets', query=True, value=True):
-            self.select_all_geo('Sets')
+        if cmds.checkBox('sets', query=True, value=True):
+            self.select_all_geo('sets')
 
     def run(self):
 
@@ -76,7 +76,7 @@ class GeoExport(MultipleActionTool):
         # cmds.checkBox('world', label=f'all')
         cmds.checkBox('characters', label=f'Characters', value=True)
         cmds.checkBox('props', label=f'Props', value=True)
-        cmds.checkBox('Sets', label=f'Sets', value=False)
+        cmds.checkBox('sets', label=f'Sets', value=False)
 
         cmds.button(label='Select', command=self.on_button_click)
 

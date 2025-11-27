@@ -86,9 +86,17 @@ def findSplitVariant(product_path, new_product_default, path_file_in_scene):
     for folder in all_folder:
         if folder.startswith("Rigging_"):
             new_product = folder
+            find = False
             if not path_file_in_scene:
+                print("dd")
                 break
-            if folder in path_file_in_scene:
+            print("blabla", folder, path_file_in_scene)
+            for split_folder in path_file_in_scene.split("/"):
+                if folder == split_folder:
+                    print("trouver")
+                    find = True
+                    break
+            if find:
                 break
 
     return new_product
@@ -207,11 +215,12 @@ def hierarchie():
                             parent = None
                             if "camRig" in reference or "camRig" in asset:
                                 parent = "cameras"
+                                box = parent
                             else:
                                 parent = f"assets|{cat.lower()}"
+                                box = cmds.createNode("transform", n=node.split(":")[-1], ss=True, p=parent)
 
                             infoP(f'hierarchie of {node} in {parent}')
-                            box = cmds.createNode("transform", n=node.split(":")[-1], ss=True, p=parent)
                             cmds.parent(node, box)
                         
                         elif departement == "toRig":
@@ -249,13 +258,14 @@ def UpdateReference(Projet, refInScene: dict[dict], notWantUpdate: list[str]) ->
     for cat in refInScene:
         for asset in refInScene[cat]:
             for refNode in refInScene[cat][asset]:
+                if refNode in notWantUpdate:
+                    continue
+
                 scene_split = cmds.referenceQuery(refNode, f=True, wcn=True)
                 last_scene = findLastScene(Projet, asset, cat, scene_split)
                 if not last_scene:
                     continue
                 if last_scene == scene_split:
-                    continue
-                if refNode in notWantUpdate:
                     continue
 
                 

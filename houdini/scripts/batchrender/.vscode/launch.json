@@ -5,6 +5,12 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Débogueur Python : Joindre à l'aide de l'ID de processus",
+            "type": "debugpy",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        },
+        {
             "name": "Débogueur Python : Attachement à distance",
             "type": "debugpy",
             "request": "attach",
@@ -15,7 +21,7 @@
             "pathMappings": [
                 {
                     "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "."
+                    "remoteRoot": "${workspaceFolder}"
                 }
             ]
         }
