@@ -128,7 +128,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
 
 
     from crypto import crypto_extract
-    import auto_compV2.AutoComp as auto_comp_v2
+    import auto_comp as auto_comp
     from nuke_scanner.NukeScanner import NukeScanner
     import nuke_scannerv2.NukeScanner as NukeScannerV2
     from nuke_scanner import select_unconnected_read
@@ -136,6 +136,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     from nukescripts import panels
     import importCamFromMetadata
     import cleanexternalreads
+    import VCA_cryptoExtractor
 
     import stamps
     # >>>PrismStart
@@ -172,15 +173,17 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     toolbar.addCommand( "VideoCopilot/OpticalFlares", "nuke.createNode('OpticalFlares')", icon="OpticalFlares.png")
 
 
-    panels.registerWidgetAsPanel("auto_comp_v2.AutoComp", 'AutoComp V2', 'illogic_studios.autocompV2')
+    panels.registerWidgetAsPanel("auto_comp.main(False)", 'AutoComp', 'illogic_studios.autocomp')
     bloomMenu = nuke.menu("Nodes").addMenu("bloom", icon="bloom.png")
     bloomMenu.addCommand("Delete unused render", "NukeScanner().run()")
     bloomMenu.addCommand("Delete unused render (new)", "NukeScannerV2.NukeScanner().run()")
     bloomMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
     bloomMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
+    bloomMenu.addCommand("VCA Cryptomatte Extractor", "VCA_cryptoExtractor.create_cryptomatte_nodes()")
     bloomMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
     bloomMenu.addCommand("Clean external reads", "cleanexternalreads.main(debug_mode=True)")
     s=bloomMenu.addMenu("Tools")
+    s.addCommand("Magnific upscale" , "nuke.nodePaste(\"R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/nukeToMagnific/nuke_magnific/Magnific.nk\")")
     s.addCommand("Anim Buddy", "nuke.createNode(\"AnimVuddy\")") # >>> Add Anim Buddy tool
     s.addCommand("Card Buddy", "nuke.createNode(\"CardBuddy\")") # >>> Add Card Buddy tool
     s.addCommand("DepthBuddy", "nuke.createNode(\"DepthBuddy\")") # >>> Add Depth Buddy tool

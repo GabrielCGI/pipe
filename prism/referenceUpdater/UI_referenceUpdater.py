@@ -32,7 +32,7 @@ class startWithRef(qt.QMainWindow):
         self.Core = Core
         self.DCC = DCC
         if entity:
-            if entity.get("department") == "Rigging":
+            if entity.get("task") == "Rigging":
                 self.departement = "toRig"
 
 

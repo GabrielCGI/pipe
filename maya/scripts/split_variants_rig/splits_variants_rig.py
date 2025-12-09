@@ -152,7 +152,6 @@ class splitVariantsRig():
             folder_product = self.core.products.createProduct(self.entity, pur_name).replace("\\", "/")
             data_next_version = self.core.products.getNextAvailableVersion(self.entity, pur_name)
             all_last_version_product.append(data_next_version)
-            print(folder_product, data_next_version)
 
         real_next_version = sorted(all_last_version_product)[-1]
 
@@ -187,20 +186,21 @@ class splitVariantsRig():
 
         return data_path
             
-    def detecShape(self, node):
+    def detecShape(self, nodes):
         add_shape = []
-        all_parent = reversed(cmds.ls(node, long=True)[0].split("|"))
-        for parent in all_parent:
-            parent_path = cmds.listRelatives(parent, parent=True, fullPath=True)
-            if not parent_path:
-                break
+        for node in nodes:
+            fullPath_parent = cmds.ls(node, long=True)[0]
+            Parent = ""
+            for child in fullPath_parent.split("|")[1:]:
+                Parent += "|" + child
+                if not Parent:
+                    continue
 
-            shapes = cmds.listRelatives(parent_path, s=True)
-            if not shapes:
-                continue
-
-            for i in shapes:
-                add_shape.append(i)
+                shapes = cmds.listRelatives(Parent, s=True)
+                if not shapes:
+                    continue
+                for i in shapes:
+                    add_shape.append(i)
         
         return add_shape
 

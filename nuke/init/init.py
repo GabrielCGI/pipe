@@ -5,6 +5,7 @@
 import nuke
 import nukescripts
 import os
+import sys
 os.environ["OFX_PLUGIN_PATH"] = "D:/OFX_local"
 
 #print("---------- WARNING : BETA MODE ACTIVATED ---------")
@@ -167,8 +168,20 @@ else:
     print("End Nuke Init as version 13+ !\n\n")
 
 
+
+##  edit 2025.12.04 Nuke to Magnific AI API ##
+
+NUKE_TO_MAGNIFIC_PATH = "R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/nukeToMagnific/src"
+if not NUKE_TO_MAGNIFIC_PATH in sys.path:
+    sys.path.insert(0, NUKE_TO_MAGNIFIC_PATH)
+nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/nukeToMagnific/plugins")
+
+##  edit 2025.12.04 Nuke to Magnific AI API ##
+
+
+
 ## edit 2025.09.12  (YY.MM.DD)
-##  set some node defalut configs
+##  set some node default configs
 
 ##  write nodes
 
@@ -179,3 +192,10 @@ nuke.knobDefault('Write.exr.interleave', '2')
 ##  write nodes
 
 print("End Nuke Init as version 13+")
+
+## edit 2025.12.02  (YY.MM.DD)
+##  set some node default configs
+
+##  Shuffle Nodes default
+nuke.knobDefault("Shuffle.label", "[value in]")
+nuke.knobDefault("Shuffle2.label", "[value in1]")

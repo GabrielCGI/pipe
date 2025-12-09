@@ -5,15 +5,9 @@ from common.utils import *
 
 _MARGIN_BACKDROP = (30, 40, 30, 30)
 _DEFAULT_FONT_SIZE_BACKDROP = 40
-_DEFAULT_COLOR_BACKDROP = (150, 150, 150)
-_DEFAULT_LAYOUT_BACKDROP = "v"
-
-_NODE_WIDTH = 80
-_NODE_HEIGHT = 66
 _BASE_DISTANCE = 120
 
-
-# ######################################################################################################################
+# ##################################################################################################################
 
 
 class LayoutManager:
@@ -65,7 +59,7 @@ class LayoutManager:
         Compute the bounding box of the graph to know where to place new graph
         :return:
         """
-        nodes = nuke.allNodes(recurseGroups=True)
+        nodes: list[nuke.Node] = nuke.allNodes(recurseGroups=True)
         if len(nodes) == 0: return 0, 0, 0, 0
         min_x = float('inf')
         min_y = float('inf')
@@ -213,10 +207,10 @@ class LayoutManager:
                 node_to_place_y -= node_to_place.screenHeight() / 2.0
                 node_to_place.setXpos(int(node_to_place_x))
                 node_to_place.setYpos(int(node_to_place_y))
-            else:
-                # If node not positionned set it to 0-0
-                node_to_place.setXpos(0)
-                node_to_place.setYpos(0)
+            # else:
+            #     # If node not positionned set it to 0-0
+            #     node_to_place.setXpos(0)
+            #     node_to_place.setYpos(0)
 
         for node in self.__nodes_layout_data.keys():
             node.screenWidth(), node.screenHeight()
@@ -258,10 +252,10 @@ class LayoutManager:
                     n_y = node.ypos()
                     n_x2 = n_x + node.screenWidth()
                     n_y2 = n_y + node.screenHeight()
-                    if bd_x > n_x or bd_x is None: bd_x = n_x
-                    if bd_y > n_y or bd_y is None: bd_y = n_y
-                    if bd_x2 < n_x2 or bd_x2 is None: bd_x2 = n_x2
-                    if bd_y2 < n_y2 or bd_y2 is None: bd_y2 = n_y2
+                    if bd_x is None or bd_x > n_x: bd_x = n_x
+                    if bd_y is None or bd_y > n_y: bd_y = n_y
+                    if bd_x2 is None or bd_x2 < n_x2: bd_x2 = n_x2
+                    if bd_y2 is None or bd_y2 < n_y2: bd_y2 = n_y2
                 # CHILDREN BACKDROPS
                 for child_bd_data in backdrops.values():
                     # Call recursively to compute the backdrop layout
@@ -271,10 +265,10 @@ class LayoutManager:
                     child_bd_x, child_bd_y, child_bd_w, child_bd_h = data_child_bd_layout_backdrop
                     child_bd_x2 = child_bd_x + child_bd_w
                     child_bd_y2 = child_bd_y + child_bd_h
-                    if bd_x > child_bd_x or bd_x is None: bd_x = child_bd_x
-                    if bd_y > child_bd_y or bd_y is None: bd_y = child_bd_y
-                    if bd_x2 < child_bd_x2 or bd_x2 is None: bd_x2 = child_bd_x2
-                    if bd_y2 < child_bd_y2 or bd_y2 is None: bd_y2 = child_bd_y2
+                    if bd_x is None or bd_x > child_bd_x: bd_x = child_bd_x
+                    if bd_y is None or bd_y > child_bd_y: bd_y = child_bd_y
+                    if bd_x2 is None or bd_x2 < child_bd_x2: bd_x2 = child_bd_x2
+                    if bd_y2 is None or bd_y2 < child_bd_y2: bd_y2 = child_bd_y2
                 if displayed:
                     # If has a display then add the margins
                     bd_x -= margin_left

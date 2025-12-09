@@ -439,6 +439,21 @@
                 }
             ],
             "uid": "eb272e42-c918-11f0-8ad0-581122d38c57"
+        },
+        {
+            "label": "Account Licence",
+            "category": "URL",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Account Licence.png",
+            "versions": [
+                {
+                    "label": "Version 1",
+                    "mode": "URL",
+                    "cmd": "https://www.notion.so/illogic/Accounts-Softs-Illogics-1f6ba86df68e479f8714932f893e5e70",
+                    "preferred": true,
+                    "environment": {}
+                }
+            ],
+            "uid": "2a495ae7-d1ea-11f0-bd4e-74d02b2741ff"
         }
     ],
     "prismVersions": [

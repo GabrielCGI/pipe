@@ -1,4 +1,5 @@
 from pxr import Usd, UsdGeom
+from importlib import reload
 import socket
 import hou
 import sys
@@ -72,7 +73,7 @@ class autoVariant():
             self.bypass_connection()
         
         #creer les materieaux auto
-        #self.createMaterials() fonctionne pas
+        self.createMaterials()
     
     def createMaterials(self):
         stage = hou.node('/stage')
@@ -80,16 +81,20 @@ class autoVariant():
         hou.clearAllSelected()
         
         have_matlib = False
+        all_Nodes = []
         for node in allChild:
             if node.type().name() == "componentgeometry":
-                node.setSelected(True)
+                all_Nodes.append(node)
+                node.cook(force=True)
+
             elif node.type().name() == "materiallibrary" and not have_matlib:
-                node.setSelected(True)
+                all_Nodes.append(node)
                 have_matlib = True
 
 
         import kma_mat_from_attr.kma_mat_from_attr as kmfa
-        kmfa.execute(collectionMode=True)
+        reload(kmfa)
+        kmfa.execute(collectionMode=True, sel=all_Nodes)
 
     def create_variant(self, list_variant, withVar):
         tmp_ref = self.refDupi.parent()

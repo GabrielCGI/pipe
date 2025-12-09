@@ -58,15 +58,16 @@ def pdebug(toPrint):
     else:
         pass
 
-def check_selection():
+def check_selection(selection=None):
     """
     We ask the user to select three nodes: a component geo, a material lib, and a component material.
     It checks that we have what we need to execute the script.
 
     Return : node componentgeometry, node materiallibrary, node componentmaterial
     """
-
-    selection= hou.selectedNodes()
+    if not selection:
+        selection= hou.selectedNodes()
+    
     if not len(selection)>=2:
         hou.ui.displayMessage("Select three nodes : component geometry, material library node and component material.")
         return None, None, None
@@ -412,7 +413,7 @@ def create_karma_mat(default_output_path, attr, materiallibrary):
     network_editor.setPwd(lop_network)
     return mtl_list
 
-def execute(collectionMode=True):
+def execute(collectionMode=True, sel=None):
     """
     Main execution function
     """
@@ -420,7 +421,7 @@ def execute(collectionMode=True):
     
 
     # start to check selection
-    componentgeometry, materiallibrary, componentmaterial=check_selection()
+    componentgeometry, materiallibrary, componentmaterial=check_selection(sel)
     if not componentgeometry and not materiallibrary and not componentmaterial:
         return
 
@@ -460,6 +461,7 @@ def execute(collectionMode=True):
             
         if (collectionMode==True):
             componentgeometry[i].parm('bindmaterials').set("createbind")
+            componentgeometry[i].parm('materialbindsubsets').set(0)
         else:
             componentgeometry[i].parm('bindmaterials').set("nobind")
             componentgeometry[i].parm('materialbindsubsets').set(1)

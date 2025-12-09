@@ -30,6 +30,7 @@
     <memberTool name="set_node_parameters"/>
     <memberTool name="blast"/>
     <memberTool name="select_prim_with_attributes"/>
+    <memberTool name="create OUT"/>
   </toolshelf>
 
   <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
@@ -210,5 +211,93 @@ importlib.reload(UD)
 
 UD.reload_modules()
 UD.checkHoudiniImportsUpdates()]]></script>
+  </tool>
+
+  <tool name="create OUT" label="Create a out null and object merge" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import hou
+import random
+
+def create_out_and_merge_from_selection():
+    # Get selected nodes
+    sel = hou.selectedNodes()
+    if not sel:
+        hou.ui.displayMessage("Please select at least one node.")
+        return
+
+    # === SINGLE SELECTION: prompt for name ===
+    if len(sel) == 1:
+        src = sel[0]
+
+        # Ask user for name, default is selected node name
+        button, text = hou.ui.readInput(
+            "Enter a base name:",
+            buttons=("OK", "Cancel"),
+            initial_contents=src.name()
+        )
+
+        if button != 0:  # user hit Cancel
+            return
+
+        base_name = text.strip()
+        if not base_name:
+            hou.ui.displayMessage("Name cannot be empty.")
+            return
+
+        parent = src.parent()
+
+        # Build names
+        null_name = f"OUT_{base_name}"
+        merge_name = f"merge_out_{base_name}"
+
+        # Create OUT null
+        out_null = parent.createNode("null", null_name)
+        out_null.setInput(0, src)
+        out_null.moveToGoodPosition()
+
+        # Create object merge
+        obj_merge = parent.createNode("object_merge", merge_name)
+        obj_merge.parm("objpath1").set(out_null.path())
+        obj_merge.parm("xformtype").set(1)
+
+        # Position object merge directly below the OUT null
+        pos = out_null.position()
+        obj_merge.setPosition((pos[0], pos[1] - 1.5))
+
+        # Random color
+        col = hou.Color((random.random(), random.random(), random.random()))
+        out_null.setColor(col)
+        obj_merge.setColor(col)
+
+    # === MULTI-SELECTION: auto, no prompt ===
+    else:
+        for src in sel:
+            parent = src.parent()
+            base_name = src.name()
+
+            null_name = f"OUT_{base_name}"
+            merge_name = f"merge_out_{base_name}"
+
+            # Create OUT null
+            out_null = parent.createNode("null", null_name)
+            out_null.setInput(0, src)
+            out_null.moveToGoodPosition()
+
+            # Create object merge
+            obj_merge = parent.createNode("object_merge", merge_name)
+            obj_merge.parm("objpath1").set(out_null.path())
+            obj_merge.parm("xformtype").set(1)
+
+            # Position object merge directly below the OUT null
+            pos = out_null.position()
+            obj_merge.setPosition((pos[0], pos[1] - 1.5))
+
+            # Random color
+            col = hou.Color((random.random(), random.random(), random.random()))
+            out_null.setColor(col)
+            obj_merge.setColor(col)
+
+# Run it
+create_out_and_merge_from_selection()
+]]></script>
   </tool>
 </shelfDocument>

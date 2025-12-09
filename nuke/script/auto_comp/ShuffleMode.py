@@ -1,19 +1,24 @@
 import nuke
 from common.utils import *
-from .RuleSet import Variable
 from .LayoutManager import LayoutManager
-from .UnpackMode import BACKDROP_LAYER, BACKDROP_MERGE, BACKDROP_LAYER_SHUFFLE
 
 # ######################################################################################################################
+
+BACKDROP_LAYER = "LAYER"
+BACKDROP_MERGE = "MERGE"
+BACKDROP_LAYER_SHUFFLE = "SHUFFLE"
 
 _SHUFFLE_LAYER_KEY = "shuffle_layer"
 _PREFIX_SHUFFLE = "shuffle_"
 _PREFIX_MERGE_SHUFFLE = "merge_shuffle_"
 _PREFIX_MERGE_SHUFFLED = "shuffled_"
 _PREFIX_DOT = "dot_"
-_DISTANCE_COLUMN_SHUFFLE = 2
+_DISTANCE_CLOSE_HEIGHT = 0.25
+_DISTANCE_FIRST_MERGE = 1.0
+_DISTANCE_COLUMN_SHUFFLE = 1.75
 _DISTANCE_READ_TO_SHUFFLE = 1.7
-_HEIGHT_COLUMN_SHUFFLE = 3
+_DISTANCE_FIRST_SHUFFLE = 1.0
+_HEIGHT_COLUMN_SHUFFLE = 2
 _DISTANCE_OUTPUT_SHUFFLE = 1.7
 _PERCENT_HEIGHT_SHUFFLE = 1/4.0
 _EXTRA_CHANNELS = ["emission", "emission_indirect"]
@@ -35,7 +40,7 @@ class ShuffleMode:
         channels = []
         for channel in detailed_channels:
             channel_split = channel.split(".")[0]
-            if (channel_split.startswith("RGBA_") or channel_split in _EXTRA_CHANNELS) and channel_split not in visited_channels:
+            if (channel_split.startswith("C_") or channel_split in _EXTRA_CHANNELS) and channel_split not in visited_channels:
                 channels.append(channel_split)
                 visited_channels.append(channel_split)
         return channels
@@ -68,7 +73,7 @@ class ShuffleMode:
         for node in nuke.allNodes("Shuffle2"):
             __check_node(node, node)
 
-        return map(lambda x: x.knob("in1").value(), child_nodes)
+        return [node['in1'].value() for node in child_nodes]
 
     def __init__(self, layout_manager, shuffle_data=None):
         """
@@ -76,7 +81,7 @@ class ShuffleMode:
         :param layout_manager
         :param shuffle_data
         """
-        self._layout_manager = layout_manager
+        self._layout_manager: LayoutManager = layout_manager
         self._var_set = None
         self.__shuffle_layer_option = shuffle_data[_SHUFFLE_LAYER_KEY] if shuffle_data is not None else None
         self._var_by_name = {}
@@ -167,31 +172,35 @@ class ShuffleMode:
 
         lg_channels = []
         # for each channel create input and connect to the last to create a chain
-        for channel in channels:
-            if len(lg_channels) == 0:
-                dist = _DISTANCE_READ_TO_SHUFFLE / 2.0
+        self.first_node = nuke.nodes.Dot(inputs=[node_var])
+        prev_node = self.first_node
+        self._layout_manager.add_node_layout_relation(node_var, prev_node, LayoutManager.POS_BOTTOM, _DISTANCE_READ_TO_SHUFFLE / 2.0)
+        for i, channel in enumerate(channels):
+            if i == 0:
+                dist = _DISTANCE_FIRST_SHUFFLE
             else:
                 dist = _DISTANCE_COLUMN_SHUFFLE
-
+            dot_node = nuke.nodes.Dot(inputs=[prev_node])
+            self._layout_manager.add_node_layout_relation(prev_node, dot_node, LayoutManager.POS_LEFT, dist)
             prev_node = dot_node
-            if prev_node is None:
-                dot_node = nuke.nodes.Dot(name=_PREFIX_DOT + layer)
-            else:
-                dot_node = nuke.nodes.Dot(name=_PREFIX_DOT + layer, inputs=[prev_node])
-                self._layout_manager.add_node_layout_relation(prev_node, dot_node, LayoutManager.POS_RIGHT, dist)
-
-            self._layout_manager.add_nodes_to_backdrop(shuffle_backdrop_longname, [dot_node])
-
             lg_channels.append((channel, dot_node))
 
         # Shuffle all the inputs created and set the varaible to unactive
         if len(lg_channels) > 0:
             self._shuffle_nodes[layer] = []
             for lg_channel, node in lg_channels:
-                self.__shuffle_channel(node, var, lg_channel, shuffle_backdrop_longname)
+                layer_var = var.get_layer()
+                shuffle_node = self.__shuffle_channel(node, lg_channel)
+                self._shuffle_nodes[layer_var].append(shuffle_node)
+
             self._var_set.active_var(var, False)
 
-    def __shuffle_channel(self, input_node, var, channel, shuffle_backdrop_longname):
+    def __shuffle_channel(
+            self,
+            input_node,
+            channel,
+            position=LayoutManager.POS_BOTTOM,
+            dist=_HEIGHT_COLUMN_SHUFFLE * _PERCENT_HEIGHT_SHUFFLE) -> nuke.Node:
         """
         Shuffle a Channel
         :param input_node
@@ -200,18 +209,18 @@ class ShuffleMode:
         :param shuffle_backdrop_longname
         :return:
         """
-        layer_var = var.get_layer()
-        shuffle_node = nuke.createNode("Shuffle2")
+        shuffle_node = nuke.nodes.Shuffle2(inputs=[input_node])
         shuffle_node["in1"].setValue(channel)
-        shuffle_node["postage_stamp"].setValue(True)
-        shuffle_node.setName(_PREFIX_SHUFFLE + layer_var + "_" + channel.replace("RGBA_", ""))
-        shuffle_node.setInput(0, input_node)
-        self._layout_manager.add_nodes_to_backdrop(shuffle_backdrop_longname, [shuffle_node])
-        self._layout_manager.add_node_layout_relation(input_node, shuffle_node, LayoutManager.POS_BOTTOM,
-                                                      _HEIGHT_COLUMN_SHUFFLE * _PERCENT_HEIGHT_SHUFFLE)
-        self._shuffle_nodes[layer_var].append(shuffle_node)
+        shuffle_node["out1"].setValue("rgb")
+        shuffle_node['label'].setText('[value in1]')
+        self._layout_manager.add_node_layout_relation(
+            input_node,
+            shuffle_node,
+            position,
+            dist)
+        return shuffle_node
 
-    def __merge_shuffle(self, only_core_shuffle):
+    def __merge_shuffle(self, only_core_shuffle=False):
         """
         Merge the shuffled nodes for each variable
         :param only_core_shuffle
@@ -219,32 +228,76 @@ class ShuffleMode:
         """
         if len(self._shuffle_nodes)== 0: return
 
-        half_height_col = _HEIGHT_COLUMN_SHUFFLE * (1 - _PERCENT_HEIGHT_SHUFFLE)
-
+        low_height_col = _DISTANCE_CLOSE_HEIGHT
+        high_height_col = _DISTANCE_FIRST_MERGE
         for var_layer, var_shuffle_nodes in self._shuffle_nodes.items():
-            shuffle_backdrop_longname = ".".join([BACKDROP_LAYER, var_layer, BACKDROP_LAYER_SHUFFLE])
-            first = True
-            current_node = None
+            last_merge = None
             # For each shuffle nodes of the variable we create a merge node
             # (or a dot if first or if we want only core nodes)
-            nb_var_shuffle_nodes = len(var_shuffle_nodes)
             for i, node in enumerate(var_shuffle_nodes):
-                name_node = _PREFIX_MERGE_SHUFFLED + var_layer if i == nb_var_shuffle_nodes-1 else None
-                if first and not only_core_shuffle:
-                    first = False
-                    merge_node = nuke.nodes.Dot(name=_PREFIX_DOT + var_layer if name_node is None else name_node,
-                                                inputs=[node])
+                up_node = nuke.nodes.Unpremult(inputs=[node])
+                self._layout_manager.add_node_layout_relation(
+                    node,
+                    up_node,
+                    LayoutManager.POS_BOTTOM,
+                    low_height_col + 0.1
+                )
+                if i == 0:
+                    merge_node = up_node
                 else:
-                    merge_node = nuke.nodes.Merge(
-                        name=_PREFIX_MERGE_SHUFFLE + var_layer if name_node is None else name_node,
-                        operation="plus", A="rgb", inputs=[current_node, node])
-                self._layout_manager.add_nodes_to_backdrop(shuffle_backdrop_longname, [merge_node])
-                self._layout_manager.add_node_layout_relation(node, merge_node, LayoutManager.POS_BOTTOM,
-                                                              half_height_col)
-                current_node = merge_node
+                    dot = nuke.nodes.Dot(inputs=[up_node])
+                    if i == 1:
+                        merge_distance = high_height_col
+                    else:
+                        merge_distance = low_height_col
+                    self._layout_manager.add_node_layout_relation(
+                        up_node,
+                        dot,
+                        LayoutManager.POS_BOTTOM,
+                        high_height_col + (i-1)*merge_distance
+                    )
+                    merge_node = nuke.nodes.Merge2(
+                        operation="plus",
+                        A="rgb",
+                        inputs=[last_merge, dot]
+                    )
+                    self._layout_manager.add_node_layout_relation(
+                        last_merge,
+                        merge_node,
+                        LayoutManager.POS_BOTTOM,
+                        merge_distance
+                    )
+                last_merge = merge_node
 
             # Add the last created node the the output node
-            self._output_nodes[var_layer] = (self._var_by_name[var_layer], current_node, len(var_shuffle_nodes))
+            self._output_nodes[var_layer] = (self._var_by_name[var_layer], last_merge, len(var_shuffle_nodes))
+            
+        # Add shuffle and unpremult node at the end after the last merge
+        last_dot = nuke.nodes.Dot(inputs=[last_merge])
+        self._layout_manager.add_node_layout_relation(
+            last_merge,
+            last_dot,
+            LayoutManager.POS_BOTTOM,
+            _DISTANCE_READ_TO_SHUFFLE / 2.0
+        )
+        last_shuffle: nuke.Node = nuke.createNode("Shuffle2")
+        last_shuffle.setInput(1, last_dot)
+        last_shuffle.setInput(0, self.first_node)
+        last_shuffle["in1"].setValue("rgb")
+        last_shuffle["out1"].setValue("rgb")
+        last_shuffle["fromInput1"].setValue("A")
+        self._layout_manager.add_node_layout_relation(
+            last_dot,
+            last_shuffle,
+            LayoutManager.POS_RIGHT,
+            _DISTANCE_FIRST_SHUFFLE)
+        last_up = nuke.nodes.Premult(inputs=[last_shuffle])
+        self._layout_manager.add_node_layout_relation(
+            last_shuffle,
+            last_up,
+            LayoutManager.POS_BOTTOM,
+            low_height_col
+        )
 
     def __output_shuffle(self):
         """

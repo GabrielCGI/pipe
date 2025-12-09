@@ -314,7 +314,7 @@ class inheriteClassAttr():
     
     def pathReference(self, primName):
         pathUSD = None
-        for element in ["Props", "Characters", "Sets"]:
+        for element in ["Props", "Characters", "Sets", "sandbox"]:
             USD = "USD"
             if primName == "dishOmeletFull":
                 primName =  "dishOmelet"

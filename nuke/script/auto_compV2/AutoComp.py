@@ -86,7 +86,11 @@ class AutoComp(QWidget):
         self.__ui_height = 150
         self.__ui_min_width = 250
         self.__ui_min_height = 150
-        self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width, self.__ui_height) / 2
+        
+        if qVersion() >= "5.14.0":
+            self.__ui_pos = QGuiApplication.primaryScreen().availableGeometry().center() - QPoint(self.__ui_width, self.__ui_height) / 2
+        else:
+            self.__ui_pos = QDesktopWidget().availableGeometry().center() - QPoint(self.__ui_width, self.__ui_height) / 2
 
         self.__retrieve_prefs()
         self.__retrieve_default_unpack_mode()
@@ -441,7 +445,7 @@ class AutoComp(QWidget):
             # Determine if known layer or unknown
             if not start_var:
                 name = render_layer
-                item.setTextColor(QColor(170,170,255))
+                item.setForeground(QColor(170,170,255))
             else:
                 name = render_layer + "   ["+start_var.get_name()+"]"
 
@@ -464,7 +468,7 @@ class AutoComp(QWidget):
                 item.setText(var_str)
                 self.__ui_start_vars_list.addItem(item)
                 if not self.__selected_unpack_mode.is_layer_name_scanned(var_str):
-                    item.setTextColor(QColor(150,150,150))
+                    item.setForeground(QColor(150,150,150))
 
     def __refresh_read_node_ui(self):
         """
@@ -479,10 +483,10 @@ class AutoComp(QWidget):
             present_channels = ShuffleMode.get_present_channels(self.__selected_read_node)
             self.__ui_channel_list.setSelectionMode(QAbstractItemView.ExtendedSelection)
             for channel in lg_channels:
-                item = QListWidgetItem(channel)
+                item: QListWidgetItem = QListWidgetItem(channel)
                 item.setData(Qt.UserRole, channel)
                 if channel in present_channels:
-                    item.setTextColor(QColor(*_COLOR_GREY_DISABLE))
+                    item.setForeground(QColor(*_COLOR_GREY_DISABLE))
                 self.__ui_channel_list.addItem(item)
         else:
             self.__ui_lbl_selected_read_node.setText("")
@@ -531,10 +535,10 @@ class AutoComp(QWidget):
             self.__ui_read_nodes_table.setItem(row_index, 3, last_version_item)
 
             if current_version == last_version:
-                name_item.setTextColor(QColor(*_COLOR_GREY_DISABLE))
-                layer_item.setTextColor(QColor(*_COLOR_GREY_DISABLE))
-                current_version_item.setTextColor(QColor(*_COLOR_GREY_DISABLE))
-                last_version_item.setTextColor(QColor(*_COLOR_GREY_DISABLE))
+                name_item.setForeground(QColor(*_COLOR_GREY_DISABLE))
+                layer_item.setForeground(QColor(*_COLOR_GREY_DISABLE))
+                current_version_item.setForeground(QColor(*_COLOR_GREY_DISABLE))
+                last_version_item.setForeground(QColor(*_COLOR_GREY_DISABLE))
 
     def __browse_folder(self):
         """
