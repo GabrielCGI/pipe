@@ -7,32 +7,32 @@ class Gate(MultipleActionTool):
         actions = {
             "square": {
                 "text": "square",
-                "action": self.__square,
+                "action": lambda: self.create_imageplane("square.png"),
                 "row": 0
             },
             "hor": {
                 "text": "16:9",
-                "action": self.__hor,
+                "action": lambda: self.create_imageplane("hor.png"),
                 "row": 0
             },
             "ver": {
                 "text": "9:16",
-                "action": self.__ver,
+                "action": lambda: self.create_imageplane("ver.png"),
                 "row": 0
             },
             "fullB": {
                 "text": "fb",
-                "action": self.__fullB,
+                "action": lambda: self.create_imageplane("fullBleed.jpg"),
                 "row": 0
             },
             "__vca": {
                 "text": "VCA",
-                "action": self.__vca,
+                "action": lambda: self.create_imageplane("Guides_6000square2048_C.png"),
                 "row": 0
             },
             "del": {
                 "text": "Remove",
-                "action": self.__del,
+                "action": self.deleteImagePlane,
                 "row": 0
             }
         }
@@ -40,92 +40,36 @@ class Gate(MultipleActionTool):
                          actions=actions, stretch=1)
 
 
-
-    def __square(self):
-        # TODO Enter the code you want the tool to execute on action 1
-        # Usage
-        image_path = "R:/pipeline/pipe/maya/scripts/bug_out_bag/textures/square.png"
-        self.create_imageplane(image_path)
-    def __hor(self):
-        # Usage
-        image_path = "R:/pipeline/pipe/maya/scripts/bug_out_bag/textures/hor.png"
-        self.create_imageplane(image_path)
-    def __ver(self):
-        # Usage
-        image_path = "R:/pipeline/pipe/maya/scripts/bug_out_bag/textures/ver.png"
-        self.create_imageplane(image_path)
-    def __fullB(self):
-        # Usage
-        image_path = "R:/pipeline/pipe/maya/scripts/bug_out_bag/textures/fullBleed.jpg"
-        self.create_imageplane(image_path)
-    def __vca(self):
-        # Usage
-        image_path = "R:/pipeline/pipe/maya/scripts/bug_out_bag/textures/Guides_6000square2048_C.png"
-        self.create_imageplane(image_path)
-    def __del(self):
-        # List all image plane nodes
-        image_planes = pm.ls(type='imagePlane')
-
-        if not image_planes:
-            print("No image planes found.")
+    def deleteImagePlane(self):
+        import maya.cmds as cmds
+        panel = cmds.getPanel(withFocus=True)
+        try:
+            camera = cmds.modelEditor(panel, query=True, camera=True)
+        except:
             return
 
-        # Loop through each image plane and try to delete
-        for img_plane in image_planes:
-            try:
-                pm.delete(img_plane)
-                print(f"Deleted image plane: {img_plane}")
-            except Exception as e:
-                print(f"Failed to delete {img_plane}: {e}")
-
-        print("Image plane deletion process complete.")
+        camShape = cmds.listRelatives(camera, c=True, ad=True)
+        all_image_plane = cmds.listRelatives(camShape, c=True, ad=True)
+        if not all_image_plane:
+            return
+        
+        for shape in all_image_plane:
+            cmds.delete(shape)
 
 
-    def create_imageplane(self, image_path):
-
-                # Get the active viewport
-        viewport = pm.playblast(activeEditor=True)
-
-        # Get the camera that is active in the viewport
-        cameraVP = pm.modelEditor(viewport, query=True, camera=True)
-
-
-
-        if not cameraVP :
-            raise Exception("Please select a camera.")
-
-        if pm.objectType( cameraVP ) == "camera":
-            camera = cameraVP
-        else:
-            print("looking for the camera shape")
-            camera = cameraVP.getShape()
-
-
-
-
-
-        camera.filmFit.set(1)
-        # Check for existing image planes attached to the camera
-        image_planes = pm.listConnections(camera, type='imagePlane')
-
-        if image_planes:
-            # If an image plane exists, update the image path
-            image_plane = image_planes[0].getShape()
-            print(image_plane)
-            pm.select(image_plane)
-            image_plane.imageName.set(image_path)
-            image_plane.fit.set(2)
-            print(f"Updated image path for existing image plane on {camera}.")
-        else:
-            # If no image plane exists, create one and set attributes
-            image_plane = pm.imagePlane(camera=camera, fileName=image_path, lookThrough=camera)[0]
-            image_plane.depth.set(1)
-            image_plane.alphaGain.set(0.5)
-            image_plane.fit.set(2)
-            print(f"Image plane created for {camera} with image {image_path}. Depth set to 1 and alphaGain set to 0.5.")
-        current_mode = pm.evaluationManager(query=True, mode=True)[0]
-        if current_mode == 'parallel':
-            pm.evaluationManager(mode="off")
-            pm.refresh()
-            pm.evaluationManager(mode="parallel")
-        pm.refresh()
+    def create_imageplane(self, ratio):
+        import maya.cmds as cmds
+        image_path = "R:/pipeline/pipe/maya/scripts/bug_out_bag/textures/" + ratio
+        panel = cmds.getPanel(withFocus=True)
+        try:
+            camera = cmds.modelEditor(panel, query=True, camera=True)
+        except:
+            return
+        if not camera:
+            return
+        
+        self.deleteImagePlane()
+        imageplane = cmds.imagePlane(camera= camera, fileName= image_path)[0]
+        cmds.setAttr(imageplane + ".alphaGain", 0.5)
+        cmds.setAttr(imageplane + ".fit", 2)
+        cmds.setAttr(imageplane + ".depth", 1)

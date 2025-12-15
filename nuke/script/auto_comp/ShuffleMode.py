@@ -9,17 +9,12 @@ BACKDROP_MERGE = "MERGE"
 BACKDROP_LAYER_SHUFFLE = "SHUFFLE"
 
 _SHUFFLE_LAYER_KEY = "shuffle_layer"
-_PREFIX_SHUFFLE = "shuffle_"
-_PREFIX_MERGE_SHUFFLE = "merge_shuffle_"
-_PREFIX_MERGE_SHUFFLED = "shuffled_"
-_PREFIX_DOT = "dot_"
-_DISTANCE_CLOSE_HEIGHT = 0.25
+_DISTANCE_CLOSE_HEIGHT = 0.5
 _DISTANCE_FIRST_MERGE = 1.0
 _DISTANCE_COLUMN_SHUFFLE = 1.75
 _DISTANCE_READ_TO_SHUFFLE = 1.7
 _DISTANCE_FIRST_SHUFFLE = 1.0
 _HEIGHT_COLUMN_SHUFFLE = 2
-_DISTANCE_OUTPUT_SHUFFLE = 1.7
 _PERCENT_HEIGHT_SHUFFLE = 1/4.0
 _EXTRA_CHANNELS = ["emission", "emission_indirect"]
 
@@ -75,7 +70,7 @@ class ShuffleMode:
 
         return [node['in1'].value() for node in child_nodes]
 
-    def __init__(self, layout_manager, shuffle_data=None):
+    def __init__(self, layout_manager, shuffle_data=None, horizontal_padding=1.0, vertical_padding=1.0):
         """
         Constructor
         :param layout_manager
@@ -87,6 +82,8 @@ class ShuffleMode:
         self._var_by_name = {}
         self._shuffle_nodes = {}
         self._output_nodes = {}
+        self.horizontal_padding = horizontal_padding
+        self.vertical_padding = vertical_padding
 
     def set_var_set(self, var_set):
         """
@@ -104,34 +101,29 @@ class ShuffleMode:
         """
         return ShuffleMode.get_light_group_channels(node_var)
 
-    def run(self, only_core_shuffle = False):
+    def run(self):
         """
         Run the Shuffle by shuffling variables, merging them and creating correct output nodes
-        :param only_core_shuffle:
         :return:
         """
         if self._var_set is None:
             return
-        self.__shuffle_vars(only_core_shuffle)
-        self.__merge_shuffle(only_core_shuffle)
-        if not only_core_shuffle:
-            self.__output_shuffle()
+        self.__shuffle_vars()
+        self.__merge_shuffle()
 
-    def __shuffle_vars(self, only_core_shuffle):
+    def __shuffle_vars(self):
         """
         Launch shuffle on all the variables
-        :param only_core_shuffle
         :return:
         """
         for var in self._var_set.get_active_vars()[:]:
             self._var_by_name[var.get_layer()] = var
-            self._shuffle_light_group(var, only_core_shuffle)
+            self._shuffle_light_group(var)
 
-    def _shuffle_light_group(self, var, only_core_shuffle):
+    def _shuffle_light_group(self, var):
         """
         Shuffle a Variable if it is in layer to shuffle
         :param var
-        :param only_core_shuffle
         :return:
         """
         name_var = var.get_name()
@@ -143,25 +135,8 @@ class ShuffleMode:
             self._var_set.active_var(var, False)
             self._output_nodes[layer] = (var, node_var, 0)
             return False
-        # Backdrops name
-        backdrop_longname = ".".join([BACKDROP_LAYER, layer])
-        shuffle_backdrop_longname = ".".join([backdrop_longname, BACKDROP_LAYER_SHUFFLE])
 
-        # If we want intermediate nodes we create it otherwise set to None
-        if only_core_shuffle:
-            dot_node = None
-        else:
-            init_dot = nuke.nodes.Dot(name=_PREFIX_DOT + layer, inputs=[node_var])
-
-            self._layout_manager.add_nodes_to_backdrop(backdrop_longname, [init_dot])
-            self._layout_manager.add_backdrop_option(shuffle_backdrop_longname, "margin_bottom", 56)
-            self._layout_manager.add_backdrop_option(shuffle_backdrop_longname, "font_size", 30)
-            self._layout_manager.add_node_layout_relation(node_var, init_dot, LayoutManager.POS_RIGHT,
-                                                          _DISTANCE_READ_TO_SHUFFLE / 2.0)
-            dot_node = nuke.nodes.Dot(name=_PREFIX_DOT + layer, inputs=[init_dot])
-            self._layout_manager.add_nodes_to_backdrop(backdrop_longname, [dot_node])
-            self._layout_manager.add_node_layout_relation(init_dot, dot_node, LayoutManager.POS_TOP,
-                                                          _HEIGHT_COLUMN_SHUFFLE)
+        dot_node = None
 
         # Get the channels to shuffle
         channels = self._get_channels(node_var)
@@ -179,7 +154,7 @@ class ShuffleMode:
             if i == 0:
                 dist = _DISTANCE_FIRST_SHUFFLE
             else:
-                dist = _DISTANCE_COLUMN_SHUFFLE
+                dist = _DISTANCE_COLUMN_SHUFFLE * self.horizontal_padding
             dot_node = nuke.nodes.Dot(inputs=[prev_node])
             self._layout_manager.add_node_layout_relation(prev_node, dot_node, LayoutManager.POS_LEFT, dist)
             prev_node = dot_node
@@ -220,16 +195,15 @@ class ShuffleMode:
             dist)
         return shuffle_node
 
-    def __merge_shuffle(self, only_core_shuffle=False):
+    def __merge_shuffle(self):
         """
         Merge the shuffled nodes for each variable
-        :param only_core_shuffle
         :return:
         """
         if len(self._shuffle_nodes)== 0: return
 
         low_height_col = _DISTANCE_CLOSE_HEIGHT
-        high_height_col = _DISTANCE_FIRST_MERGE
+        high_height_col = _DISTANCE_FIRST_MERGE * self.vertical_padding
         for var_layer, var_shuffle_nodes in self._shuffle_nodes.items():
             last_merge = None
             # For each shuffle nodes of the variable we create a merge node
@@ -299,47 +273,18 @@ class ShuffleMode:
             low_height_col
         )
 
-    def __output_shuffle(self):
-        """
-        Compute the output of the shuffle
-        :return:
-        """
-        max_len = 0
-        # Get the max distance at which shuffles end
-        for var, output_node, len_shuffle in self._output_nodes.values():
-            if len_shuffle > max_len: max_len = len_shuffle
-
-        for layer_name, output_node_data in self._output_nodes.items():
-            var, output_node, len_shuffle = output_node_data
-            # Compute the correct distance to place the end node
-            diff_len = max_len - len_shuffle
-            if max_len == 0:
-                dist = _DISTANCE_OUTPUT_SHUFFLE
-            else:
-                if len_shuffle != 0:
-                    dist = diff_len * _DISTANCE_COLUMN_SHUFFLE + _DISTANCE_OUTPUT_SHUFFLE
-                else:
-                    dist = (max_len - 1) * _DISTANCE_COLUMN_SHUFFLE + _DISTANCE_READ_TO_SHUFFLE + _DISTANCE_OUTPUT_SHUFFLE
-            # Create a end dot to the correct distance from the output node
-            dot_node = nuke.nodes.Dot(name=_PREFIX_DOT + layer_name, inputs=[output_node])
-            self._layout_manager.add_nodes_to_backdrop(BACKDROP_MERGE, [dot_node])
-            self._layout_manager.add_node_layout_relation(output_node, dot_node,
-                                                          LayoutManager.POS_RIGHT, dist)
-            var.set_node(dot_node)
-            self._var_set.active_var(var)
-
 
 class ShuffleChannelMode(ShuffleMode):
     """
     Shuffle Mode to only shuffle specific channel
     """
-    def __init__(self, channels, layout_manager):
+    def __init__(self, channels, layout_manager, horizontal_padding=1.0, vertical_padding=1.0):
         """
         Constructor
         :param channels
         :param layout_manager
         """
-        ShuffleMode.__init__(self, layout_manager)
+        ShuffleMode.__init__(self, layout_manager, horizontal_padding=horizontal_padding, vertical_padding=vertical_padding)
         self.__channels = channels
 
     def _get_channels(self, node_var):

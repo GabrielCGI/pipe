@@ -1,6 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <shelfDocument>
-  <!-- gestion des differents outils présent dans la shelf illogic Shading-->
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
   <toolshelf name="illogicShading" label="Illogic Shading">
     <memberTool name="sceneBuilder"/>
     <memberTool name="kmx"/>
@@ -9,11 +13,8 @@
     <memberTool name="CreateAutoVariant"/>
     <memberTool name="material_finder"/>
     <memberTool name="update_tex"/>
+    <memberTool name="rat_manager"/>
   </toolshelf>
-  <!-- gestion des differents outils présent dans la shelf illogic Shading-->
-
-
-
 
   <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
     <script scriptType="python"><![CDATA[import importlib
@@ -68,7 +69,7 @@ import kma_mat_from_attr
 reload(kma_mat_from_attr)
 kma_mat_from_attr.execute(collectionMode=False)]]></script>
   </tool>
-  
+
   <tool name="kma_mat_char" label="kmx_char" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
     <script scriptType="python"><![CDATA[import sys
 import importlib
@@ -79,7 +80,7 @@ import kmxChar
 importlib.reload(kmxChar)
 kmxChar.execute()]]></script>
   </tool>
-  
+
   <tool name="CreateAutoVariant" label="CAV" icon="hicon:/SVGIcons.index?CROWDS_popsteeralign.svg">
     <script scriptType="python"><![CDATA[import CreateAutoVariant as cav
 from imp import reload
@@ -109,5 +110,4 @@ import mtlximage_path_updatev2
 reload(mtlximage_path_updatev2)
 mtlximage_path_updatev2.run()]]></script>
   </tool>
-
 </shelfDocument>

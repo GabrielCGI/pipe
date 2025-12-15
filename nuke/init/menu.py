@@ -162,9 +162,8 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
             import PrismCore
 
             pcore = PrismCore.PrismCore(app="Nuke")
-
-
     # <<<PrismEnd
+    auto_comp.pcore = pcore
 
     # ------ add the following lines to your menu.py file  ------ 
 

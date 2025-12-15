@@ -1,0 +1,24 @@
+{
+    "filters": {
+        "COMPOSITING": [
+            "compo",
+            "comp",
+            "nuke",
+            "beauty"
+        ],
+        "ANIM": [
+            "anim",
+            "anim_playblast",
+            "playblast"
+        ],
+        "RLO": [
+            "RoughtLayout",
+            "layout",
+            "Previz",
+            "RoughLayout_playblast"
+        ]
+    },
+    "source_path": "I:/swaBeast_2511",
+    "dest_path": "D:/cache_resolve/swaBeast_2511",
+    "production": "swaBeast"
+}

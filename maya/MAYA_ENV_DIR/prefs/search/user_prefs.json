@@ -3,7 +3,6 @@
     "history": [
         [
             "GraphEditor",
-            "CreatePolygonCube",
             "MultiCutTool",
             "ScaleConstraint",
             "NodeEditorWindow",
@@ -24,7 +23,8 @@
             "NamespaceEditor",
             "HypershadeWindow",
             "ParentConstraint",
-            "ReferenceEditor"
+            "ReferenceEditor",
+            "CreatePolygonCube"
         ],
         [
             "share"

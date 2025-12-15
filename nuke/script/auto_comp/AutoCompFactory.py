@@ -7,7 +7,7 @@ from .RuleSet import VariablesSet, StartVariable
 class AutoCompFactory:
 
     @staticmethod
-    def shuffle_channel_mode(read_node, channels):
+    def shuffle_channel_mode(read_node, channels, horizontal_padding=1.0, vertical_padding=1.0):
         """
         Create an Unpack Mode to shuffle channels of a layer
         :param read_node
@@ -20,7 +20,7 @@ class AutoCompFactory:
         
         layout_manager = LayoutManager()
         # Shuffle
-        shuffle_mode = ShuffleMode.ShuffleChannelMode(channels, layout_manager)
+        shuffle_mode = ShuffleMode.ShuffleChannelMode(channels, layout_manager, horizontal_padding=horizontal_padding, vertical_padding=vertical_padding)
         var_set = VariablesSet([])
         # name, layer, rule, aliases, order, options, group_operation
         read_name = read_node.name()
@@ -32,8 +32,6 @@ class AutoCompFactory:
         # Retrieve the bounding box of the current graph to place correctly incoming graph
         layout_manager.compute_current_bbox_graph()
         # Shuffle those layers if needed
-        shuffle_mode.run(True)
+        shuffle_mode.run()
         # Organize all the nodes
         layout_manager.build_layout_node_graph()
-        # Organize all the backdrops
-        # layout_manager.build_layout_backdrops()

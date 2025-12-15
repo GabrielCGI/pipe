@@ -5,7 +5,8 @@ import threading
 
 RANCH_EXPORTER_PATH = "R:/pipeline/pipe/prism/ranch_cache_scripts"
 import sys
-sys.path.append(RANCH_EXPORTER_PATH)
+if not RANCH_EXPORTER_PATH in sys.path:
+    sys.path.insert(0,RANCH_EXPORTER_PATH)
 
 LOP_FILECACHE = PrismInit.pcore.getPlugin('USD').api.usdExport
 import ranchExporter
@@ -46,12 +47,15 @@ def run(dev=False):
     
     if dev:
         print('Start parse and copy in dev mode')
-        ranchExporter.parseAndCopyToRanchDev(name, kwargs)
+        import importlib
+        importlib.reload(ranchExporter)
+        ranchExporter.parseAndCopyToRanch(name, kwargs)
     else:
         print('Start parse and copy in main mode')
         startCopy(name, kwargs)
     
     
 def startCopy(stage, scene_path):
+    # ranchExporter.parseAndCopyToRanch(stage, scene_path)
     thread = threading.Thread(target=ranchExporter.parseAndCopyToRanch, args=(stage, scene_path))
     thread.start()

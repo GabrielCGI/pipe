@@ -13,8 +13,8 @@
     <memberTool name="clean_light"/>
     <memberTool name="batchrender"/>
     <memberTool name="send_ranch_copy"/>
-    <memberTool name="shotBuilder"/>
     <memberTool name="tool_1"/>
+    <memberTool name="shotBuilder"/>
   </toolshelf>
 
   <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
@@ -111,7 +111,7 @@ batchrender.main()]]></script>
     <script scriptType="python"><![CDATA[import sendranchcopy
 import importlib
 
-sendranchcopy.run()
+sendranchcopy.run(True)
 ]]></script>
   </tool>
 

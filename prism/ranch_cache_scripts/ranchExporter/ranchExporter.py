@@ -26,7 +26,7 @@ DEBUG_SCENE = False
 stu.SHOW_TIME = False
 
 UDIM_PATTERN = '\.(\d+|<UDIM>)\.'
-ROOT_CACHE_RANCH = os.path.join("I:", os.sep, "ranch_cache2")
+ROOT_CACHE_RANCH = os.path.join("I:", os.sep, "ranch_cache")
 PROD_DISK = 'i'
 
 # This variable store globally deps found
@@ -143,6 +143,7 @@ def is_light_cache(kwargs) -> bool:
         return False
     
     if from_scenefile.eval():
+        return True
         return 'lighting' in scenefile.lower()
     else:
         dpt = department.menuLabels()[department.eval()].lower()
@@ -622,6 +623,7 @@ def parseAndCopyToRanch(usdpath, kwargs):
     
     start = time.monotonic_ns()
     LOG.info('Start parsing dependencies ...')
+    asset_path = r"I:\ralphLauren_2412\03_Production\Shots\FILM\010\Export\USD\v219\FILM-010_USD_v219.usda"
     abs_paths = getDependencies(asset_path)
     
     time_ns = time.monotonic_ns() - start

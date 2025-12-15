@@ -744,7 +744,7 @@
         ]
     },
     "environmentVariables": {
-        "PRISM_DEADLINE_HUSK_PATH": "C:/Program Files/Side Effects Software/Houdini %HOUDINI_ILL_VERSION%/bin/husk.exe",
+        "PRISM_DEADLINE_HUSK_PATH": "C:/Program Files/Side Effects Software/Houdini 21.0.559/bin/husk.exe",
         "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio",
         "SANITY_CHECK_CONFIG": "I://00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml",
         "PXR_AR_DEFAULT_SEARCH_PATH": "R:/;I:/",
@@ -825,7 +825,7 @@
         ]
     },
     "mediaExtension": {
-        "setOcioConfig": true,
+        "setOcioConfig": false,
         "ocioConfigType": "Custom",
         "ocioCustomConfig": "R:\\pipeline\\networkInstall\\OpenColorIO-Configs\\PRISM\\illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio",
         "clearOcio": false,
@@ -856,21 +856,9 @@
             },
             {
                 "name": "Nuke",
-                "pool": "nuke_pool",
+                "pool": "none",
                 "secondaryPool": "none",
                 "group": "nuke_grp"
-            },
-            {
-                "name": "HoudiniFX",
-                "pool": "hou_fx_pool",
-                "secondaryPool": "none",
-                "group": "houdini_fx_grp"
-            },
-            {
-                "name": "HoudiniNoFx",
-                "pool": "hou_no_fx_pool",
-                "secondaryPool": "none",
-                "group": "houdini_grp"
             }
         ],
         "pools": [
