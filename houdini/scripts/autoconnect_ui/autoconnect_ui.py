@@ -4,6 +4,7 @@ import sys
 import glob
 import hou
 from pathlib import Path
+from functools import partial
 
 from . import houdinilog as hlog
 from . import auto
@@ -43,6 +44,7 @@ class MapState(Enum):
             MapState.ALREADY_UPDATED: "<font color='green'>"
                                      + "(Already Updated) </font>",
         }[self]
+    
     
 class MapWidget(QtWidgets.QWidget):
     
@@ -173,6 +175,7 @@ class MapWidget(QtWidgets.QWidget):
         
         if self.versioning:
             return self.versions
+    
         
 class ShaderWidget(QtWidgets.QTreeWidget):
     """
@@ -197,7 +200,7 @@ class ShaderWidget(QtWidgets.QTreeWidget):
         self.versioning = versioning
         self.color = color
         
-        self.mapWidgets: MapWidget = []
+        self.mapWidgets: list[MapWidget] = []
         self.currentState = MapState.NEW
         
         self.initializeShaderWidget()
@@ -418,7 +421,11 @@ class ShaderWidget(QtWidgets.QTreeWidget):
         if itemWidget.isEnabled() and itemWidget.checkbox:
             itemWidget.checkbox.setChecked(
                 not itemWidget.checkbox.isChecked())
-    
+            
+    def setCheckAll(self, on: bool):
+        for map in self.mapWidgets:
+            map.checkbox.setChecked(on)
+
     def showEvent(self, event):
         super().showEvent(event)
         self.adjustSize()
@@ -449,7 +456,7 @@ class AutoConnectUI(QtWidgets.QMainWindow):
         self.selectedShaders = None
         self.shaders = []
         self.subnets = []
-        self.shaderWidgets: ShaderWidget = []
+        self.shaderWidgets: list[ShaderWidget] = []
         
         self.initializeCentralWidget()
         self.onRefresh()
@@ -620,6 +627,18 @@ class AutoConnectUI(QtWidgets.QMainWindow):
                     f"{color[2]*255})")
             
             hbox.addWidget(labelName)
+            
+            select_button = QtWidgets.QPushButton("Select All")
+            select_button.clicked.connect(
+                partial(self.shaderWidgets[i].setCheckAll, True)
+            )
+            hbox.addWidget(select_button)
+            
+            deselect_button = QtWidgets.QPushButton("Deselect All")
+            deselect_button.clicked.connect(
+                partial(self.shaderWidgets[i].setCheckAll, False)
+            )
+            hbox.addWidget(deselect_button)
             
             widget = QtWidgets.QWidget()
             widget.setLayout(hbox)
@@ -903,7 +922,7 @@ class AutoConnectUI(QtWidgets.QMainWindow):
         #     for i, _ in enumerate(self.selectedShaders):
         #         self.shaders[i].name = self.selectedShaders[i]
                 
-        self.shaderWidgets: ShaderWidget = []
+        self.shaderWidgets: list[ShaderWidget] = []
         
         self.initializeShaderWidgets()
         self.setupShaderWidgets()
@@ -917,7 +936,7 @@ class AutoConnectUI(QtWidgets.QMainWindow):
         self.clearVBOX()
         
         self.shaders = auto.get_shaders_from_dir(self.dir_path)
-        self.shaderWidgets: ShaderWidget = []
+        self.shaderWidgets: list[ShaderWidget] = []
         
         self.initializeShaderWidgets()
         self.setupShaderWidgets()

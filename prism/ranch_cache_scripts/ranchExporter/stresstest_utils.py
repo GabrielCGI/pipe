@@ -25,6 +25,26 @@ def timeElapsed(func):
         return result
     return inner
 
+def shortTimeElapsed(func):
+    """
+        Same as the last function, but for the specific case in which most times are 0.0
+    """
+    def inner(*args, **kwargs):
+        
+        if not SHOW_TIME:
+            return func(*args, **kwargs)
+        
+        start = time.process_time_ns()
+        result = func(*args, **kwargs)
+        time_ns = time.process_time_ns() - start
+        time_sec = time_ns / 1000000000
+        
+        if time_ns > 0 :
+            print(f"Function: {func.__name__}")
+            print(f"as taken: {time_sec} s | {time_ns} ns")
+        return result
+    return inner
+
 def fullTimeElapsed(func):
     def inner(*args, **kwargs):
         global FULL_TIME_NS_ELAPSED

@@ -23,7 +23,7 @@ from pxr import Ar, Usd, Sdf, UsdUtils
 
 DEBUG_SCENE = False
 # Turn True if you want to see performance of decorate function
-stu.SHOW_TIME = False
+stu.SHOW_TIME = True
 
 UDIM_PATTERN = '\.(\d+|<UDIM>)\.'
 ROOT_CACHE_RANCH = os.path.join("I:", os.sep, "ranch_cache")
@@ -149,7 +149,7 @@ def is_light_cache(kwargs) -> bool:
         dpt = department.menuLabels()[department.eval()].lower()
         return ('lighting' in dpt or 'lgt' in dpt)
 
-
+@stu.shortTimeElapsed
 def filter_not_USD(assetPathProcessed):
     if not 'usd' in assetPathProcessed:
         global DEPS
@@ -167,47 +167,51 @@ def apply_filter(layer, dependencyInfo):
 
 
 # LOUIS MET L'ANCIENNE VERSION DE getDependencies ICI POUR LE MOMENT
-# def getDependencies(asset_path: Sdf.AssetPath) -> list[str]:
-#     """Get every dependencies of an USD files as str path.
-
-#     Args:
-#         asset_path (Sdf.AssetPath): Asset path to parse.
-
-#     Returns:
-#         list[str]: List of every dependencies as absolute path.
-#     """
-#     layer = Sdf.Layer.FindOrOpen(asset_path.path)
-#     if not layer:
-#         LOG.error(f"Failed to open layer: {asset_path.path}")
-#         return []
-#     layer.Reload(force=True)
-
-#     global DEPS
-#     DEPS = []
-
-#     UsdUtils.ModifyAssetPaths(layer, filter_not_USD)
-    
-#     dependencies = UsdUtils.ComputeAllDependencies(layer.identifier, apply_filter)
-#     layers, assets, unresolved_paths = dependencies
-    
-#     layers_path = []
-#     for layer in layers:
-#         layer_path = str(layer.resolvedPath)
-#         if layer_path != '':
-#             layers_path.append(layer_path)
-            
-#     abs_deps = resolveExternalDependencies(asset_path.path)      
-    
-#     paths = layers_path + assets + unresolved_paths + abs_deps
-#     paths = list(set(paths))
-#     LOG.info(f'Found {len(paths)} dependencies')
-       
-#     DEPS = []     
-#     return paths
-
-
-@stu.timeElapsed     
+@stu.timeElapsed
 def getDependencies(asset_path: Sdf.AssetPath) -> list[str]:
+    """Get every dependencies of an USD files as str path.
+
+    Args:
+        asset_path (Sdf.AssetPath): Asset path to parse.
+
+    Returns:
+        list[str]: List of every dependencies as absolute path.
+    """
+    asset_path = Sdf.AssetPath(asset_path)
+    layer = Sdf.Layer.FindOrOpen(asset_path.path)
+    if not layer:
+        LOG.error(f"Failed to open layer: {asset_path.path}")
+        return []
+    layer.Reload(force=True)
+
+    global DEPS
+    DEPS = []
+
+    UsdUtils.ModifyAssetPaths(layer, filter_not_USD)
+    
+    dependencies = UsdUtils.ComputeAllDependencies(layer.identifier, apply_filter)
+    #dependencies = UsdUtils.ComputeAllDependencies(layer.identifier)
+    
+    layers, assets, unresolved_paths = dependencies
+    
+    layers_path = []
+    for layer in layers:
+        layer_path = str(layer.resolvedPath)
+        if layer_path != '':
+            layers_path.append(layer_path)
+            
+    abs_deps = resolveExternalDependencies(asset_path.path)      
+    
+    paths = layers_path + assets + unresolved_paths + abs_deps
+    paths = list(set(paths))
+    LOG.info(f'Found {len(paths)} dependencies')
+       
+    DEPS = []  
+    return paths
+
+
+# @stu.timeElapsed     
+def getDependenciesOld(asset_path: Sdf.AssetPath) -> list[str]:
     """Get every dependencies of an USD files as str path.
 
     Args:
@@ -320,7 +324,7 @@ def getPathFamily(path: str):
     return to_copy
 
 
-@stu.timeElapsed  
+# @stu.timeElapsed  
 def getPathToCopy(abs_paths: list[str]):
     """Get a set of absolute filepath to copy from dependency list.
 
@@ -402,15 +406,24 @@ def getAssetPathFromUSD(usd_file: str) -> Sdf.AssetPath:
     
     return Sdf.AssetPath(usd_file)
 
+# Old func that has them lowercase KEPT IN CASE IT WAS IMPORTANT
+# def getDriveList():
+#     try:
+#         drives_str = os.environ['PXR_AR_DEFAULT_SEARCH_PATH']
+#         # expect a str with this format "C:/;D:/" each drive separated by a ;
+#         return [i[0].lower() for i in drives_str.split(';') if i]
+#     except:
+#         # default value to change later if ressource and prod2 change
+#         return ['i', 'r'] 
 
 def getDriveList():
     try:
         drives_str = os.environ['PXR_AR_DEFAULT_SEARCH_PATH']
         # expect a str with this format "C:/;D:/" each drive separated by a ;
-        return [i[0].lower() for i in drives_str.split(';') if i]
+        return [i[0] for i in drives_str.split(';') if i]
     except:
         # default value to change later if ressource and prod2 change
-        return ['i', 'r'] 
+        return ['I', 'R'] 
 
 def getGroupedPath(abs_paths): 
     paths: list[Path] = []
@@ -465,7 +478,7 @@ def copyToCacheranch(copy_list: list[str]):
             LOG.warning(f"Failed to copy {src}")
             LOG.warning(e)
 
-@stu.timeElapsed
+# @stu.timeElapsed
 def copyToCacheranchV2(copy_list: list[str]):
     """Copy every files found to cache ranch.
 
@@ -593,39 +606,79 @@ def parseAndCopyToRanch(usdpath, kwargs):
 
     LOG.info("Started a copy OLD PIPE. Please wait...")
     
-    lop_node = kwargs['state'].node
     
-    LOG.info('Check if the node is a light cache...')    
-    if is_light_cache(kwargs):
-        LOG.info('Node is a light filecache')
-        usdPath = lop_node.parm('importPath').eval()
-        if usdpath.endswith('.json'):
-            LOG.warning('Could not find USD path')
+
+    # TODO : Uncomment
+
+    # lop_node = kwargs['state'].node
+
+    # LOG.info('Check if the node is a light cache...')    
+    # if is_light_cache(kwargs):
+    #     LOG.info('Node is a light filecache')
+    #     usdPath = lop_node.parm('importPath').eval()
+    #     if usdpath.endswith('.json'):
+    #         LOG.warning('Could not find USD path')
             
-            print('INFO: Ranch export ended.')
-            return
-        asset_path = getAssetPathFromUSD(usdPath)
-    elif lop_node.type().name() == 'prism::LOP_Render::1.0':
-        LOG.info("Skipped because the node is a LOP RENDER")
-        print('INFO: Ranch export ended.')
-        return # TO_UNCOMMENT
-        writeToNode = lop_node.parm('writeToDisk')
-        if writeToNode and writeToNode.eval():
-            LOG.info("Getting dependencies from USD file...")
-            asset_path = getAssetPathFromUSD(usdpath)
-        else:
-            LOG.info("Getting dependencies from USD stage...")
-            asset_path = getAssetPathFromStage(stage)
-    else:
-        LOG.info('Render node is not LOP render or LOP File Cache')
-        print('INFO: Ranch export ended.')
-        return
+    #         print('INFO: Ranch export ended.')
+    #         return
+    #     asset_path = getAssetPathFromUSD(usdPath)
+    # elif lop_node.type().name() == 'prism::LOP_Render::1.0':
+    #     LOG.info("Skipped because the node is a LOP RENDER")
+    #     print('INFO: Ranch export ended.')
+    #     return # TO_UNCOMMENT
+    #     writeToNode = lop_node.parm('writeToDisk')
+    #     if writeToNode and writeToNode.eval():
+    #         LOG.info("Getting dependencies from USD file...")
+    #         asset_path = getAssetPathFromUSD(usdpath)
+    #     else:
+    #         LOG.info("Getting dependencies from USD stage...")
+    #         asset_path = getAssetPathFromStage(stage)
+    # else:
+    #     LOG.info('Render node is not LOP render or LOP File Cache')
+    #     print('INFO: Ranch export ended.')
+    #     return
     
     start = time.monotonic_ns()
     LOG.info('Start parsing dependencies ...')
-    asset_path = r"I:\ralphLauren_2412\03_Production\Shots\FILM\010\Export\USD\v219\FILM-010_USD_v219.usda"
-    abs_paths = getDependencies(asset_path)
+    # asset_path = r"I:\intermarche\03_Production\Shots\SQ010\SH0010\Export\USD\v162\SQ010-SH0010_USD_v162.usda"
+    # asset_path = r"I:\intermarche\03_Production\Shots\SQ010\SH0010\Export\USD\v115\SQ010-SH0010_USD_v115.usda"
+    asset_path = r"I:\intermarche\03_Production\Shots\SQ010\SH0010\Export\USD\v082\SQ010-SH0010_USD_v082.usda"
+
+    #asset_path = r"I:\Illogic_Training\03_Production\Shots\FILM\010\Export\USD\v152\FILM-010_USD_v152.usda"
+
+    # asset_path = r"I:\harveyNichols_2025\03_Production\Shots\FILM\wideTowers\Export\USD\v048\FILM-wideTowers_USD_v048.usda"
+
+    # Start profiling 
+    import cProfile
+    import pstats
+    PROFILER = cProfile.Profile()
+
+    # PROFILER.enable()
+
+    # print("Get dep old")
+    # abs_paths_old = getDependenciesOld(asset_path) # Old "slower" function
     
+    # PROFILER.disable()
+    # stats = pstats.Stats(PROFILER)
+    # stats.strip_dirs().sort_stats("cumtime").dump_stats(r'R:\pipeline\pipe\houdini\scripts\sendranchcopy\profiling\stats.prof')
+    # print("Profiling done.")
+    # PROFILER.clear()
+
+    PROFILER.enable()
+    print("Get dep new")
+    abs_paths = getDependencies(asset_path) # New "faster" function
+    PROFILER.disable()
+    stats = pstats.Stats(PROFILER)
+    stats.strip_dirs().sort_stats("cumtime").dump_stats(r'R:\pipeline\pipe\houdini\scripts\sendranchcopy\profiling\stats2.prof')
+    print("Profiling done.")
+    PROFILER.clear()
+    # abs_paths = getDependenciesOld(asset_path)
+
+
+    # PROFILER.clear()    
+    # comparePaths(abs_paths , abs_paths_old)
+
+
     time_ns = time.monotonic_ns() - start
     time_sec = time_ns / 1000000000
     LOG.info(f"Parsing completed in: {time_sec} s | {time_ns} ns\n")
@@ -645,7 +698,7 @@ def parseAndCopyToRanch(usdpath, kwargs):
     
     start = time.monotonic_ns()
     LOG.info('Start copy ...')
-    copyToCacheranchV2(to_copy)
+    # copyToCacheranchV2(to_copy)
     
     time_ns = time.monotonic_ns() - start
     time_sec = time_ns / 1000000000
@@ -656,3 +709,31 @@ def parseAndCopyToRanch(usdpath, kwargs):
     full_time = time.monotonic() - start_full
     print(f'INFO: Ranch export ended in {full_time} s.')
     
+
+def comparePaths(paths1, paths2):
+    print("comparing")
+     
+    print(f"FILES : {len(paths1)} vs {len(paths2)}")
+        # return 
+
+    notFound1 = 0
+    notFound2 = 0
+
+    absPaths1 = [os.path.normpath(path) for path in paths1] 
+    absPaths1 = list(set(absPaths1))
+    absPaths2 = {os.path.normpath(path) for path in paths2}   
+    absPaths2 = list(set(absPaths2))
+    for path1 in absPaths1:
+        if path1 not in absPaths2 : 
+            notFound2+=1
+            # print(f"{path1} not found in second paths list")
+
+    for path2 in absPaths2:
+        if path2 not in absPaths1 :
+            notFound1+=1 
+            # print(f"{path2} not found in fist path list !")
+
+    
+
+    print(f"Nb files in first not in second {notFound1}")
+    print(f"Nb files in second not in first {notFound2}")

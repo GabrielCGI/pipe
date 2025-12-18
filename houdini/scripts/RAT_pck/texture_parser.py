@@ -65,6 +65,7 @@ class WorkerThread(QtCore.QThread):
     """
 
     inc_signal = QtCore.Signal()
+    finished_signal = QtCore.Signal(int)
 
     def __init__(self, task_queue, output_path, id):
         super(WorkerThread, self).__init__()
@@ -129,6 +130,7 @@ class WorkerThread(QtCore.QThread):
             reason = "stopped"
 
         print("Thread #{} finished ({})".format(self.id, reason))
+        self.finished_signal.emit(self.id)
         return
 
 #endregion
@@ -194,6 +196,10 @@ class TextureParser():
     def find_textures_from_node(self, node):
 
         stage = node.stage()  # OR node.editableStage(), depending on use
+
+        if not stage : 
+            
+            return
 
         for prim in stage.Traverse():
             if prim.IsA(UsdShade.Shader):
@@ -312,24 +318,34 @@ class TextureParser():
         
         num_threads = min(threads, task_queue.qsize())
 
-        workers = []
+        self.workers = []
+        self.finished_workers = 0
+        self.total_workers = num_threads
+        
         for i in range(num_threads):
-            proc = WorkerThread(task_queue, output_path=path , id = i)
+            proc = WorkerThread(task_queue, output_path=path, id=i)
+            # Connect signals to UI updates
+            if self.ui:
+                proc.inc_signal.connect(self.ui.update_progress)
+                proc.finished_signal.connect(self.on_worker_finished)
             proc.start()
-            workers.append(proc)
+            self.workers.append(proc)
 
-        task_queue.join()
+        # Don't block here - let signals handle completion
+        print("Rat conversion : All workers started")
 
-        for w in workers:
-            w.stop()
 
-            if self.ui : 
-                self.ui.conversion_progress_val += 1
-                self.ui.conversion_progress.setValue(self.ui.conversion_progress_val)
+    def on_worker_finished(self, worker_id):
+        """Called when a worker thread finishes"""
+        self.finished_workers += 1
+        print(f"Worker {worker_id} finished. {self.finished_workers}/{self.total_workers} complete.")
+        
+        if self.finished_workers >= self.total_workers:
+            print("Rat conversion : All workers finished")
+            # Refresh the UI after all conversions complete
+            if self.ui:
+                self.ui.on_conversion_complete()
 
-            w.wait()
-
-        print("Rat conversion : All workers finished")
     
     #---------------------------- Utils ------------------------------
 

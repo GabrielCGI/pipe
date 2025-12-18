@@ -77,7 +77,8 @@ def general_parse(file: str, shaders: list[sh.Shader]):
 
         found = False
         for shader in shaders:
-            if shader.name == shader_name:
+            if (shader.name == shader_name
+                and not isinstance(shader, sh.VersionShader)):
                 shader.parse(file)
                 found = True
 

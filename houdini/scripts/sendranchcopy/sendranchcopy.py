@@ -2,14 +2,17 @@ import os
 import hou
 import PrismInit
 import threading
+import importlib
+
 
 RANCH_EXPORTER_PATH = "R:/pipeline/pipe/prism/ranch_cache_scripts"
 import sys
 if not RANCH_EXPORTER_PATH in sys.path:
     sys.path.insert(0,RANCH_EXPORTER_PATH)
 
-LOP_FILECACHE = PrismInit.pcore.getPlugin('USD').api.usdExport
+#LOP_FILECACHE = PrismInit.pcore.getPlugin('USD').api.usdExport
 import ranchExporter
+importlib.reload(ranchExporter)
 
 def run(dev=False):
     
@@ -24,7 +27,9 @@ def run(dev=False):
     selected_node = selected_nodes[0]
     
     try:
-        state = LOP_FILECACHE.getStateFromNode({'node': selected_node}).ui
+        state = None
+        # TODO : uncomment
+        #state = LOP_FILECACHE.getStateFromNode({'node': selected_node}).ui
     except Exception as e:
         hou.ui.displayMessage(
             text=(

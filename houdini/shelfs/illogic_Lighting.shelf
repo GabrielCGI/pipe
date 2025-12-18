@@ -110,6 +110,7 @@ batchrender.main()]]></script>
   <tool name="send_ranch_copy" label="Send Ranch Copy" icon="hicon:/SVGIcons.index?BUTTONS_network_distribute_vertical.svg">
     <script scriptType="python"><![CDATA[import sendranchcopy
 import importlib
+importlib.reload(sendranchcopy)
 
 sendranchcopy.run(True)
 ]]></script>

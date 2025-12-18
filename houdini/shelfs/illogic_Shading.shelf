@@ -110,4 +110,20 @@ import mtlximage_path_updatev2
 reload(mtlximage_path_updatev2)
 mtlximage_path_updatev2.run()]]></script>
   </tool>
+
+  <tool name="rat_manager" label=".rat manager" icon="hicon:/SVGIcons.index?DESKTOP_rat.svg">
+    <script scriptType="python"><![CDATA[import RAT_pck
+from imp import reload
+import sys
+
+MODULE_PATH = r"R:\devAndrew\houdini\RAT_pck"
+if not MODULE_PATH in sys.path :
+    sys.path.insert(0,MODULE_PATH)
+
+import RAT_pck
+reload(RAT_pck)
+
+RAT_pck.run()
+]]></script>
+  </tool>
 </shelfDocument>

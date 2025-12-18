@@ -1,3 +1,5 @@
+import socket
+
 from . import gui
 from . import texture_parser
 
@@ -8,6 +10,9 @@ reload(texture_parser)
 
 def run():
     gui.run()
+    if socket.gethostname() == "SPRINTER-04" : 
+        from . import debug
+        debug.debug()
 
 def test():
     #mat_find = USD_Material_Finder.MaterialFinder()

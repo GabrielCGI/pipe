@@ -606,7 +606,7 @@ class MainInterface(Qt.QMainWindow):
                 try:
                     source_parm: hou.Parm = node.parm('filepath')
                     source_path = source_parm.eval()
-                    usd_paths.append(source_path)
+                    usd_paths.append(os.path.normpath(source_path))
                 except Exception as e:
                     logger.warning(
                         'Could not find file path in'
@@ -617,14 +617,14 @@ class MainInterface(Qt.QMainWindow):
                 prism_metadata = stage.GetPrimAtPath('/prism_metadata')
                 source_attribute = prism_metadata.GetAttribute('prism_sources')
                 source_path = source_attribute.Get()[0]
-                usd_paths.append(source_path)
+                usd_paths.append(os.path.normpath(source_path))
             except Exception as e:
                 self.log(
                     "Warning : Could not found usd"
                     f" export from node {node.name()}"
                 )
                 logger.warning(e)
-        return usd_paths        
+        return list(set(usd_paths))        
 
     #---trouve le dernier publish de la scene maya en question---
     def find_lastest_layout_usda(self, filepath: str) -> list[str]:
@@ -635,6 +635,7 @@ class MainInterface(Qt.QMainWindow):
         elif self.openType == "houdini":
             logger.debug("---------Fetching current Maya scene path---------")
             scene_path = filepath
+            exports_path.append(scene_path)
             if not scene_path:
                 if os.path.exists(str(filepath)):
                     scene_path = filepath

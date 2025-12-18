@@ -147,7 +147,6 @@ def is_light_cache(kwargs) -> bool:
         return False
     
     if from_scenefile.eval():
-        return True
         return 'lighting' in scenefile.lower()
     else:
         dpt = department.menuLabels()[department.eval()].lower()

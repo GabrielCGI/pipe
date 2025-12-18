@@ -435,7 +435,8 @@ class AutoComp(Qt.QWidget):
                     "filepath": version_path,
                     "state": state,
                     "rendered_frames": rendered_frames,
-                    "total_frames": shots_frames
+                    "total_frames": shots_frames,
+                    "frame_range": frame_range
                 }
 
         for camera_node in camera_nodes:
@@ -473,12 +474,12 @@ class AutoComp(Qt.QWidget):
 
 
     def __get_state_from_version(self, version_directory, frame_range, threshold=0.15):
-        if frame_range is None:
+        if frame_range is None or frame_range[0] is None or frame_range[1] is None:
             return (self.ReadStates.EMPTY, 0, 0)
         pattern = os.path.join(version_directory, "*", "*.exr")
         all_frames = glob.glob(pattern)
         nb_shot_frames = frame_range[1] - frame_range[0] + 1
-        if len(all_frames) == nb_shot_frames:
+        if len(all_frames) >= nb_shot_frames:
             return (self.ReadStates.COMPLETE, len(all_frames), nb_shot_frames)
         frame_progression = len(all_frames) / nb_shot_frames
         if frame_progression > threshold:
@@ -596,10 +597,15 @@ class AutoComp(Qt.QWidget):
     def __update_read(self, read_node: nuke.Node, version):
         version_datas = self.__read_node_versions[read_node.name()][version]
         version_path = version_datas["filepath"]
+        frame_range = version_datas["frame_range"]
         read_node.knob("file").setValue(version_path)
         if read_node.Class() == "Read":
             version_state = version_datas["state"]
             read_node.knob("on_error").setValue("black")
+            read_node.knob("first").setValue(frame_range[0])
+            read_node.knob("origfirst").setValue(frame_range[0])
+            read_node.knob("last").setValue(frame_range[1])
+            read_node.knob("origlast").setValue(frame_range[1])
             if not version_state == self.ReadStates.COMPLETE:
                 rendered_frames = version_datas["rendered_frames"]
                 shots_frames = version_datas["total_frames"]

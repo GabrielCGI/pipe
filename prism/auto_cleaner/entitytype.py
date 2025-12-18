@@ -1,0 +1,7 @@
+from enum import Enum
+
+
+class EntityType(Enum):
+    _PRODUCT = "AUTO_CLEANER_PRODUCT_TO_KEEP"
+    _2D_RENDER = "AUTO_CLEANER_2DRENDER_TO_KEEP"
+    _3D_RENDER = "AUTO_CLEANER_3DRENDER_TO_KEEP"

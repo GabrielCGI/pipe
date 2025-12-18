@@ -20,11 +20,11 @@
             "RepeatLast",
             "CreatePolygonType",
             "MatchTransform",
-            "NamespaceEditor",
             "HypershadeWindow",
             "ParentConstraint",
             "ReferenceEditor",
-            "CreatePolygonCube"
+            "CreatePolygonCube",
+            "NamespaceEditor"
         ],
         [
             "share"

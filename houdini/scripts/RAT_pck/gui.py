@@ -10,6 +10,8 @@ import os
 from pathlib import Path
 import subprocess
 
+
+
 def import_qtpy():
     """
     Try to import qtpy from any prism install found in C:/ILLOGIC_APP/Prism.
@@ -76,7 +78,6 @@ class TextureWidget(Qt.QWidget):
     def __init__(self, text, parent=None):
         super().__init__(parent)
         self.is_update = False
-
         self.mainLayout = Qt.QHBoxLayout()
         self.setLayout(self.mainLayout)
         
@@ -158,19 +159,13 @@ class MainInterface(Qt.QMainWindow):
 
         self.setWindowTitle(".rat file converter")
 
-        width = 800
-        height = 900
+        width = 1450
+        height = 700
         self.resize(width, height)
 
         central = Qt.QWidget()
         self.setCentralWidget(central)
         self.layout = Qt.QVBoxLayout(central) 
-            
-        # Refresh button
-        parse_button = Qt.QPushButton("Refresh textures")
-        parse_button.clicked.connect(self.parse)
-        self.layout.addWidget(parse_button)
-        
 
         #############################################################
 
@@ -181,6 +176,7 @@ class MainInterface(Qt.QMainWindow):
         self.layout.addLayout(texture_layout)
         
         self.texture_list = TextureList(self)
+        self.texture_list.setSelectionMode(Qt.QAbstractItemView.ExtendedSelection) # make multiple selections possible
         texture_layout.addWidget(self.texture_list, 33)
         
         self.QTabTextures = Qt.QTabWidget()
@@ -201,6 +197,16 @@ class MainInterface(Qt.QMainWindow):
         # Fill the table and the number of textures
         self.parse()
         self.layout.addWidget(self.num_tex_label)
+
+        # Refresh button
+        parse_button = Qt.QPushButton("Refresh textures")
+        parse_button.clicked.connect(self.parse)
+        self.layout.addWidget(parse_button)
+
+        # Convert selection button
+        self.convert_selection_btn = Qt.QPushButton("Convert selected")
+        self.convert_selection_btn.clicked.connect(self.convert_selection)
+        self.layout.addWidget(self.convert_selection_btn)
     
         # Convert to .rat button
         self.convert_button = Qt.QPushButton("Convert to .rat")
@@ -263,10 +269,13 @@ class MainInterface(Qt.QMainWindow):
                 name = self.rat_parser.get_texture_name(tex_path)
 
                 name_item = Qt.QTableWidgetItem(name) # name
+                name_item.setFlags(name_item.flags() & ~Qtc.Qt.ItemIsEditable)
                 table.setItem(row, 0, name_item)
 
                 path_item = Qt.QTableWidgetItem(tex_path)
+                path_item.setFlags(path_item.flags() & ~Qtc.Qt.ItemIsEditable)
                 table.setItem(row, 1, path_item)
+                
 
                 # to_convert column: check if this path is in item.to_convert
                 to_conv_list = item.to_convert
@@ -274,13 +283,30 @@ class MainInterface(Qt.QMainWindow):
                 conv_item = Qt.QTableWidgetItem(to_conv_text)
                 conv_item.setTextAlignment(Qtc.Qt.AlignmentFlag.AlignCenter)
 
+                conv_item.setFlags(conv_item.flags() & ~Qtc.Qt.ItemIsEditable)
+
                 table.setItem(row, 2, conv_item)
 
 
             #table.setEditTriggers(Qt.QAbstractItemView.NoEditTriggers)
+            # table.setSelectionBehavior(Qt.QAbstractItemView.SelectRows)
+            # table.horizontalHeader().setSectionResizeMode(Qt.QHeaderView.Stretch)
+            # table.verticalHeader().setVisible(False)
+            #table.setEditTriggers(Qt.QAbstractItemView.NoEditTriggers)
+
+            # Allow rows to be selected
             table.setSelectionBehavior(Qt.QAbstractItemView.SelectRows)
-            table.horizontalHeader().setSectionResizeMode(Qt.QHeaderView.Stretch)
+            
+            header = table.horizontalHeader()
+            header.setSectionResizeMode(Qt.QHeaderView.Interactive)
+            header.setMinimumSectionSize(10)
+
+            header.setStretchLastSection(True)
+            table.setColumnWidth(0, 200) 
+            table.setColumnWidth(1, 700)
+            table.setColumnWidth(2, 50)
             table.verticalHeader().setVisible(False)
+
 
             self.QTabTextures.addTab(table, item.name)
 
@@ -296,20 +322,58 @@ class MainInterface(Qt.QMainWindow):
         else : 
             files_to_convert = self.rat_parser.get_all_files_to_convert()
 
+        if not files_to_convert : 
+            return
+
         # Setup progress bar
+        if not self.conversion_progress : 
+            self.conversion_progress = Qt.QProgressBar(self)
+            self.layout.addWidget(self.conversion_progress)
+
+            self.setStyleSheet("QProgressBar::chunk {background-color: green ; }")
+
         self.conversion_progress_val = 0
         self.conversion_progress.setValue(0)
         max_val = len(files_to_convert)
         self.conversion_progress.setMaximum(max_val)
 
-        if not self.conversion_progress : 
-            self.conversion_progress = Qt.QProgressBar(self)
-            self.layout.addWidget(self.conversion_progress)
+        # disable the button while converting
+        self.convert_button.setEnabled(False)
 
         # Call conversion function
         self.rat_parser.convert_to_rat(files_to_convert=files_to_convert)
+    
+    def convert_selection(self , id=None):
+        for item in self.texture_list.selectedItems(): 
 
-        # refresh the texture list
+            widget = self.texture_list.itemWidget(item)
+
+            files_to_convert = []
+
+            if widget and hasattr(widget, "label"):
+                # print(widget.label.text())
+
+                current_index = self.texture_list.indexFromItem(item)
+                # print(current_index.row())
+                #print(self.QTabTextures.tabText(current_index.row()))
+                table = self.QTabTextures.widget(current_index.row())
+                for row in range(table.rowCount()) :
+                    print(table.itemAt(row,1))
+                
+
+
+    def update_progress(self):
+        self.conversion_progress_val += 1
+        self.conversion_progress.setValue(self.conversion_progress_val)
+        # Qt.QApplication.processEvents()
+
+    def on_conversion_complete(self):
+        """
+        Called when all worker threads have finished
+        """
+        # Re-enable convert button
+        self.convert_button.setEnabled(True)
+        # Refresh the texture list
         self.parse()
 
     def open_in_explorer(self , current_index) :

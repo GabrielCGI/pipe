@@ -1,6 +1,8 @@
 from . import ranchExporter
+from . import prism_lop_utils
 
 import importlib
+
 
 def parseAndCopyToRanch(usdpath, kwargs):
     importlib.reload(ranchExporter)
@@ -9,10 +11,10 @@ def parseAndCopyToRanch(usdpath, kwargs):
     ranchExporter.parseAndCopyToRanch(usdpath, kwargs)
 
 def is_light_cache(kwargs):
-    return ranchExporter.is_light_cache(kwargs)
+    return prism_lop_utils.is_light_cache(kwargs)
 
 def getUsdPath(kwargs):
-    return ranchExporter.getUsdPath(kwargs)
+    return prism_lop_utils.getUsdPath(kwargs)
 
 def parseAndCopyToRanchDev(usdpath, kwargs):
     from . import ranchExporter_dev
