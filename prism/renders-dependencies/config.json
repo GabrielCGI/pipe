@@ -1,0 +1,9 @@
+{
+    "layers": [
+        "_layer_lay_camera",
+        "_layer_lay_master",
+        "_layer_anm_master",
+        "_layer_cfx_master",
+        "_layer_lgt_master"
+    ]
+}

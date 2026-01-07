@@ -4,6 +4,8 @@ import sys
 import json
 import logging
 import logging.config
+import datetime
+import traceback
 
 def sanitize_filename(name: str, replacement: str = "_") -> str:
     """
@@ -39,12 +41,10 @@ def setup_log(
             print('No config', file=sys.stderr)
             return False
         
-        
         sanitized_name = sanitize_filename(logName)
         if with_time:
-            import datetime
             timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-            log_name = f"log_{sanitized_name}_{timestamp}.log"
+            log_name = f"log_{timestamp}_{sanitized_name}.log"
         else:
             log_name = f"log_{sanitized_name}.log"
 
@@ -56,6 +56,14 @@ def setup_log(
         
         logging.config.dictConfig(log_config)
         return True
-
-    except:
+    except Exception as e:
+        try:
+            sanitized_name = sanitize_filename(logName)
+            timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+            error_log_name = os.path.join(logDirectory, f"ERROR_LOG_{timestamp}_{sanitized_name}.log")
+            with open(error_log_name, "w+") as error_file:
+                error_file.write(str(e)+"\n")
+                error_file.write(str(traceback.format_exc()))
+        except:
+            pass
         return False

@@ -42,6 +42,7 @@ def shortTimeElapsed(func):
         if time_ns > 0 :
             print(f"Function: {func.__name__}")
             print(f"as taken: {time_sec} s | {time_ns} ns")
+            print(f"File : {args}")
         return result
     return inner
 

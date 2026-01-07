@@ -9,8 +9,7 @@ import glob
 import os
 from pathlib import Path
 import subprocess
-
-
+from enum import Enum
 
 def import_qtpy():
     """
@@ -59,90 +58,16 @@ except:
 
 #endregion
 
+class TreeHeaders(Enum):
+    NAME = 0
+    STATUS = 1
+    PATH = 2 
+
 #region Interface
 
 OPEN = ["<b style=\"color: green;\">(" , "<b style=\"color: red;\">(" ]
 CLOSE = ")</b>"
 STATUS_TEXT = ["All files converted" , "Missing .rat files"]
-
-
-class TextureWidget(Qt.QWidget):
-    
-    """
-    (Merci Maxime)
-
-    Class to handle each individual element
-
-    """
-    
-    def __init__(self, text, parent=None):
-        super().__init__(parent)
-        self.is_update = False
-        self.mainLayout = Qt.QHBoxLayout()
-        self.setLayout(self.mainLayout)
-        
-        self.label = Qt.QLabel(text)
-        self.mainLayout.addWidget(self.label)
-        self.mainLayout.addStretch()
-        
-        self.status_label = Qt.QLabel()
-        self.mainLayout.addWidget(self.status_label)
-
-
-    def sizeHint(self) -> Qtc.QSize:
-        size = super().sizeHint()
-        size += Qtc.QSize(0, 2)
-        return size 
-
-
-    def setUpdated(self, on: bool, extra_text = ""):
-        self.is_update = on
-        if self.is_update:
-            self.status_label.setText(OPEN[0] + STATUS_TEXT[0] + extra_text + CLOSE) # Does not need conversion
-        else:
-            self.status_label.setText(OPEN[1] + STATUS_TEXT[1] + extra_text + CLOSE) # Needs conversion
-
-
-
-class TextureList(Qt.QListWidget):
-    
-    """
-    (Merci Maxime)
-
-    Class to handle the list of our textures
-    """
-    
-    def __init__(self, ui, parent=None):
-        super().__init__(parent)
-        self.main_ui = ui
-        
-        
-    def buildMenu(self, menu: Qt.QMenu) -> Qt.QMenu:
-        selected_indexes = self.selectedIndexes()
-        if not selected_indexes:
-            return
-        current_index = selected_indexes[0].row()
-        
-        openexplorerAction = menu.addAction("Open in Explorer")
-        openexplorerAction.triggered.connect(
-            lambda: self.main_ui.open_in_explorer(current_index)
-        )
-
-        # FIXME : Not entirely working yet, saves to the wrong directory
-        # convertSpecificTexAction = menu.addAction("Convert only this texture")
-        # convertSpecificTexAction.triggered.connect(
-        #     lambda : self.main_ui.convert(current_index)
-        # )
-        
-        return menu
-
-    def contextMenuEvent(self, event: Qtg.QContextMenuEvent):
-        contextmenu = Qt.QMenu(self)
-        contextmenu = self.buildMenu(contextmenu)
-        if hasattr(contextmenu, 'exec'):
-            contextmenu.exec(event.globalPos())
-        elif hasattr(contextmenu, 'exec_'):
-            contextmenu.exec_(event.globalPos())
 
 class MainInterface(Qt.QMainWindow):
     def __init__(self,
@@ -157,7 +82,7 @@ class MainInterface(Qt.QMainWindow):
 
         super(MainInterface, self).__init__(parent)
 
-        self.setWindowTitle(".rat file converter")
+        self.setWindowTitle(".rat Manager")
 
         width = 1450
         height = 700
@@ -165,61 +90,97 @@ class MainInterface(Qt.QMainWindow):
 
         central = Qt.QWidget()
         self.setCentralWidget(central)
-        self.layout = Qt.QVBoxLayout(central) 
+        self.layout = Qt.QHBoxLayout(central) 
 
-        #############################################################
 
-        # Taken from Maxime's thing, should pretty easily make it work
-        # Replace my tables with the layer list but figure out how dat work first
 
-        texture_layout = Qt.QHBoxLayout()
-        self.layout.addLayout(texture_layout)
-        
-        self.texture_list = TextureList(self)
-        self.texture_list.setSelectionMode(Qt.QAbstractItemView.ExtendedSelection) # make multiple selections possible
-        texture_layout.addWidget(self.texture_list, 33)
-        
-        self.QTabTextures = Qt.QTabWidget()
-        # set stylesheet to prevent prism pipeline overriding it
-        self.QTabTextures.setStyleSheet("QTabWidget::tab-bar {alignment: left;}")
-        self.QTabTextures.tabBar().hide()
-        
+        # #############################################################
+
+        # Little splitter to seperate each section from one another
+        self.splitter = Qt.QSplitter(central)
+        self.splitter.setOrientation(Qtc.Qt.Horizontal)
+        self.splitter.setObjectName("splitter")
+
+        ######################### Left side layout ##################
+
+        self.left_grp = Qt.QGroupBox('Texture list', self.splitter)
+        self.left_layout = Qt.QVBoxLayout(self.left_grp)
+
+        # Texture list
+        self.texture_list: Qt.QTreeWidget = Qt.QTreeWidget()
+            # TODO maybe add colorspace and node sections like Arnold
+        self.texture_list.setColumnCount(3)
+        self.texture_list.setHeaderLabels(['Name', 'Status', 'Path'])
+        self.texture_list.setSelectionMode(Qt.QAbstractItemView.ExtendedSelection)
+
+        self.texture_list.setSortingEnabled(True)
+
+        self.setStyleSheet("QTreeWidget::item { padding : 5px 0}")
+
+        self.left_layout.addWidget(self.texture_list)
+        self.layout.addWidget(self.left_grp)
+
         self.texture_list.itemSelectionChanged.connect(
             self.onSelectedLayerChanged
         )
-        
-        texture_layout.addWidget(self.QTabTextures, 67)
 
-        #############################################################
+        ######################## Right side layout ##################
 
-        # Number of textures found
-        self.num_tex_label = Qt.QLabel()
-        # Fill the table and the number of textures
-        self.parse()
-        self.layout.addWidget(self.num_tex_label)
+        self.right_frame = Qt.QFrame(self.splitter)
+        # self.right_frame.setMaximumWidth(qtutils.dpiScale(500))
+        self.right_layout = Qt.QVBoxLayout(self.right_frame)
 
-        # Refresh button
-        parse_button = Qt.QPushButton("Refresh textures")
-        parse_button.clicked.connect(self.parse)
-        self.layout.addWidget(parse_button)
+        #  : Maybe remove tx is not bad ! 
+        # Actions : Init 
 
-        # Convert selection button
-        self.convert_selection_btn = Qt.QPushButton("Convert selected")
-        self.convert_selection_btn.clicked.connect(self.convert_selection)
-        self.layout.addWidget(self.convert_selection_btn)
-    
-        # Convert to .rat button
-        self.convert_button = Qt.QPushButton("Convert to .rat")
-        self.convert_button.clicked.connect(self.convert)
-        self.layout.addWidget(self.convert_button)
+        self.actions_group = Qt.QGroupBox('Actions')
+        sizePolicy = Qt.QSizePolicy(Qt.QSizePolicy.Preferred, Qt.QSizePolicy.Maximum)
+        self.actions_group.setSizePolicy(sizePolicy)
+        self.actions_layout = Qt.QVBoxLayout(self.actions_group)
 
-        # progress bar init
-        self.conversion_progress = None
+        # TODO : Make sure the progress bar adapts its size to the other fella
+        self.conversion_progress = None # init progress bar
         self.conversion_progress_val = 0
 
+        # Actions : Convert HLayout
+        self.convert_btn_layout = Qt.QHBoxLayout()
 
+        # Actions : Convert selection button
+        self.convert_selection_btn = Qt.QPushButton("Convert selected")
+        self.convert_selection_btn.clicked.connect(self.convert_selection)
+        self.convert_selection_btn.setEnabled(False)
+
+        # Actions : Convert missing button
+        self.convert_button = Qt.QPushButton("Convert all missing")
+        self.convert_button.clicked.connect(self.convert)
+
+
+        # Actions : Refresh button
+        self.refresh_button = Qt.QPushButton("Refresh textures")
+
+        self.refresh_button.clicked.connect(
+            lambda: self.parse(True)
+        )
+
+        self.convert_btn_layout.addWidget(self.convert_selection_btn)
+        self.convert_btn_layout.addWidget(self.convert_button)
+
+        self.actions_layout.addLayout(self.convert_btn_layout)
+        self.actions_layout.addWidget(self.refresh_button)
+
+
+        # self.right_layout.addWidget(self.options_group)
+
+        self.right_layout.addWidget(self.actions_group)
+        self.layout.addWidget(self.right_frame)
+        # self.layout.addWidget(self.actions_group)
         
-    def parse(self):
+        ############################# Init ##########################
+
+
+        self.parse(True)
+
+    def parse(self , reset = True):
 
         """
         Using the functions from Texture parser, gets all our textures found and adds them to the table (name , path , has .rat)
@@ -229,86 +190,77 @@ class MainInterface(Qt.QMainWindow):
         
         num_tex = len(self.rat_parser.get_all_texture_paths())
 
-        self.num_tex_label.setText(f"Number of textures found : {num_tex}")
+        # self.num_tex_label.setText(f"Number of textures found : {num_tex}")
 
         # Clear the list
         self.texture_list.clear()
 
-        self.QTabTextures.clear()
+        # self.QTabTextures.clear()
 
+        id = 0
         for item in self.rat_parser.textures : 
-            layer_text = item.name
-            layer_widget = TextureWidget(layer_text)
-            layer_item = Qt.QListWidgetItem()
+            texture_name = item.name
+
+
+            # test = Qt.QTreeWidgetItem(None , ["Hiiii"])
+            # self.texture_list.insertTopLevelItems(0 , [test])
 
             item_tex = item.get_num_tex()
             need_convert = item.get_num_toconv()
-
+            
             if need_convert > 0: 
-                text = " " + str(need_convert) + "/" + str(item_tex)
-                layer_widget.setUpdated(False, text)
+                text = "Missing " + str(need_convert) + "/" + str(item_tex)
+                if need_convert == item_tex : 
+                    status_label = Qt.QLabel(f"<b style=\"color: red;\"> {text} </b>")
+                else : 
+                    status_label = Qt.QLabel(f"<b style=\"color: orange;\"> {text} </b>")
+
+
             else : 
-                layer_widget.setUpdated(True)  
+                text = 'All good'
+                status_label = Qt.QLabel(f"<b style=\"color: green;\"> {text} </b>")
 
-            self.texture_list.addItem(layer_item)
-            self.texture_list.setItemWidget(layer_item, layer_widget)
-            layer_item.setSizeHint(layer_widget.sizeHint())
+            texture_item = Qt.QTreeWidgetItem(None , [texture_name, ''])
+            self.texture_list.insertTopLevelItems(id , [texture_item])
+            self.texture_list.setItemWidget(texture_item , TreeHeaders.STATUS.value , status_label)
 
-
-
-            table = Qt.QTableWidget()
-            table.setColumnCount(3)
-            table.setHorizontalHeaderLabels(["Name" , "Path" , "Has .rat"])
 
             tex_paths = item.texture_paths
-
-            table.setRowCount(len(tex_paths))
 
             for row, tex_path in enumerate(tex_paths) : 
 
                 name = self.rat_parser.get_texture_name(tex_path)
 
-                name_item = Qt.QTableWidgetItem(name) # name
-                name_item.setFlags(name_item.flags() & ~Qtc.Qt.ItemIsEditable)
-                table.setItem(row, 0, name_item)
-
-                path_item = Qt.QTableWidgetItem(tex_path)
-                path_item.setFlags(path_item.flags() & ~Qtc.Qt.ItemIsEditable)
-                table.setItem(row, 1, path_item)
-                
-
                 # to_convert column: check if this path is in item.to_convert
                 to_conv_list = item.to_convert
-                to_conv_text = "" if tex_path in to_conv_list else "X"
-                conv_item = Qt.QTableWidgetItem(to_conv_text)
-                conv_item.setTextAlignment(Qtc.Qt.AlignmentFlag.AlignCenter)
+                if tex_path in to_conv_list : 
+                    to_conv_text = "Missing .rat"
+                    label = Qt.QLabel(f"<b style=\"color: red;\"> {to_conv_text} </b>")
+                else : 
+                    to_conv_text = "Has .rat"
+                    label = Qt.QLabel(f"<b style=\"color: green;\"> {to_conv_text} </b>")                    
 
-                conv_item.setFlags(conv_item.flags() & ~Qtc.Qt.ItemIsEditable)
+                test_child = Qt.QTreeWidgetItem(None , [name , '', tex_path])
 
-                table.setItem(row, 2, conv_item)
-
-
-            #table.setEditTriggers(Qt.QAbstractItemView.NoEditTriggers)
-            # table.setSelectionBehavior(Qt.QAbstractItemView.SelectRows)
-            # table.horizontalHeader().setSectionResizeMode(Qt.QHeaderView.Stretch)
-            # table.verticalHeader().setVisible(False)
-            #table.setEditTriggers(Qt.QAbstractItemView.NoEditTriggers)
-
-            # Allow rows to be selected
-            table.setSelectionBehavior(Qt.QAbstractItemView.SelectRows)
-            
-            header = table.horizontalHeader()
-            header.setSectionResizeMode(Qt.QHeaderView.Interactive)
-            header.setMinimumSectionSize(10)
-
-            header.setStretchLastSection(True)
-            table.setColumnWidth(0, 200) 
-            table.setColumnWidth(1, 700)
-            table.setColumnWidth(2, 50)
-            table.verticalHeader().setVisible(False)
+                texture_item.addChild(test_child)
+                # Add after the add child to actually apply the change
+                self.texture_list.setItemWidget(test_child , 1 , label)
 
 
-            self.QTabTextures.addTab(table, item.name)
+            id += 1
+
+        # Deactivate the Convert button if no missing textures
+        if not self.rat_parser.get_all_files_to_convert() : 
+            self.convert_button.setEnabled(False)
+        else : 
+            self.convert_button.setEnabled(True)
+
+        # Delete progress bar
+        if reset and self.conversion_progress : 
+            self.layout.removeWidget(self.conversion_progress)
+            self.conversion_progress.deleteLater()
+            self.conversion_progress = None
+
 
 
     def convert(self, id=None):
@@ -328,7 +280,7 @@ class MainInterface(Qt.QMainWindow):
         # Setup progress bar
         if not self.conversion_progress : 
             self.conversion_progress = Qt.QProgressBar(self)
-            self.layout.addWidget(self.conversion_progress)
+            self.actions_layout.addWidget(self.conversion_progress)
 
             self.setStyleSheet("QProgressBar::chunk {background-color: green ; }")
 
@@ -344,21 +296,39 @@ class MainInterface(Qt.QMainWindow):
         self.rat_parser.convert_to_rat(files_to_convert=files_to_convert)
     
     def convert_selection(self , id=None):
+
+        files_to_convert = []
         for item in self.texture_list.selectedItems(): 
+    
+            item_name = item.data(TreeHeaders.NAME.value,0) 
+            item_path = item.data(TreeHeaders.PATH.value,0)
+            print(f"Item : {item}")
 
-            widget = self.texture_list.itemWidget(item)
+            if "UDIM" in item_name : # Handle case where the whole UDIM is selected  
+                for i in range(item.childCount()) : 
+                    child = item.child(i)
+                    child_path = child.data(TreeHeaders.PATH.value,0)
+                    if child_path : 
+                        files_to_convert.append(child_path)
+            elif item_path : 
+                files_to_convert.append(item_path)
 
-            files_to_convert = []
 
-            if widget and hasattr(widget, "label"):
-                # print(widget.label.text())
+        # Setup progress bar
+        if not self.conversion_progress : 
+            self.conversion_progress = Qt.QProgressBar(self)
+            self.actions_layout.addWidget(self.conversion_progress)
 
-                current_index = self.texture_list.indexFromItem(item)
-                # print(current_index.row())
-                #print(self.QTabTextures.tabText(current_index.row()))
-                table = self.QTabTextures.widget(current_index.row())
-                for row in range(table.rowCount()) :
-                    print(table.itemAt(row,1))
+            self.setStyleSheet("QProgressBar::chunk {background-color: green ; }")
+
+        self.conversion_progress_val = 0
+        self.conversion_progress.setValue(0)
+        max_val = len(files_to_convert)
+        self.conversion_progress.setMaximum(max_val)
+
+        files_to_convert = list(set(files_to_convert))
+        print(files_to_convert)
+        self.rat_parser.convert_to_rat(files_to_convert=files_to_convert)
                 
 
 
@@ -374,7 +344,7 @@ class MainInterface(Qt.QMainWindow):
         # Re-enable convert button
         self.convert_button.setEnabled(True)
         # Refresh the texture list
-        self.parse()
+        self.parse(False)
 
     def open_in_explorer(self , current_index) :
         """
@@ -402,10 +372,9 @@ class MainInterface(Qt.QMainWindow):
 
         selectedItem = self.texture_list.selectedItems()
         if selectedItem:
-            current_index = self.texture_list.indexFromItem(selectedItem[0])
-            self.QTabTextures.setCurrentIndex(
-                current_index.row()
-            )
+            self.convert_selection_btn.setEnabled(True)
+        else :  
+            self.convert_selection_btn.setEnabled(False)
     
 
 #endregion

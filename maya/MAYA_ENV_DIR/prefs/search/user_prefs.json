@@ -2,7 +2,6 @@
     "context": "ttf",
     "history": [
         [
-            "GraphEditor",
             "MultiCutTool",
             "ScaleConstraint",
             "NodeEditorWindow",
@@ -14,17 +13,19 @@
             "ToggleVertexNormalDisplay",
             "ToggleFaceNormalDisplay",
             "CharacterAnimationEditor",
-            "HotkeyPreferencesWindow",
             "OpenNodeAttrRef",
             "CreateImagePlane",
             "RepeatLast",
             "CreatePolygonType",
-            "MatchTransform",
             "HypershadeWindow",
-            "ParentConstraint",
             "ReferenceEditor",
             "CreatePolygonCube",
-            "NamespaceEditor"
+            "NamespaceEditor",
+            "HotkeyPreferencesWindow",
+            "GraphEditor",
+            "mayaUsdOpenUsdLayerEditor",
+            "MatchTransform",
+            "ParentConstraint"
         ],
         [
             "share"

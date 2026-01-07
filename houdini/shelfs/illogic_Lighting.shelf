@@ -13,8 +13,8 @@
     <memberTool name="clean_light"/>
     <memberTool name="batchrender"/>
     <memberTool name="send_ranch_copy"/>
-    <memberTool name="tool_1"/>
     <memberTool name="shotBuilder"/>
+    <memberTool name="reduceTextureViewport"/>
   </toolshelf>
 
   <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
@@ -116,7 +116,7 @@ sendranchcopy.run(True)
 ]]></script>
   </tool>
 
-  <tool name="shotBuilder" label="Shot Builder" icon="hicon:/SVGIcons.index?BUTTONS_visible.svg">
+  <tool name="shotBuilder" label="Shot Builder" icon="hicon:/SVGIcons.index?LOP_lightfilterlibrary.svg">
     <script scriptType="python"><![CDATA[from imp import reload
 import PrismInit
 
@@ -135,11 +135,125 @@ for Dshot in data_shots:
 shotBuilder.ShotBuilder(hou.selectedItems(), shots)]]></script>
   </tool>
 
-  <tool name="tool_1" label="COP baker" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[import baked_hdri_cop
-import importlib
-importlib.reload(baked_hdri_cop)
+  <tool name="reduceTextureViewport0" label="Reduce Texture Viewport" icon="hicon:/SVGIcons.index?BUTTONS_visible.svg">
+    <script scriptType="python"><![CDATA[from hutil.Qt import QtWidgets
+import hou
 
-baked_hdri_cop.run()]]></script>
+
+
+def run():
+    pane = hou.ui.curDesktop().paneTabOfType(hou.paneTabType.SceneViewer)
+    if not pane:
+        raise RuntimeError("Pas de SceneViewer ouvert")
+
+    viewport = pane.curViewport()
+    settings = viewport.settings()
+
+    if kwargs["ctrlclick"]:
+        value = [hou.viewportTextureDepth.HDR16 , 1.0, 4096]
+    else:
+        value = [hou.viewportTextureDepth.Fixed8, 0.1, 1024]
+
+
+
+    #------------------------  |  Texture  |  ---------------------
+    # -- Texture 2D --
+    settings.setTextureBitDepthLimit2D(value[0])
+    settings.setTextureScale2D(value[1])
+
+    # -- Texture Cache (volumes) --
+    settings.setTextureCacheSize(value[2])
+
+    # -- Texture 3D (volumes) --
+    settings.setTexture2DSettingsFor3D(True)
+
+
+    displayMessage()
+    hou.hscript("glcache -c")
+
+
+def displayMessage():
+    dialog = hou.qt.createDialog()
+    dialog.setWindowTitle("Info")
+
+    # Layout vertical
+    layout = QtWidgets.QVBoxLayout(dialog)
+
+    # Texte
+    label = QtWidgets.QLabel("wait clear texture cache...")
+    layout.addWidget(label)
+
+    # Bouton OK
+    ok_btn = QtWidgets.QPushButton("OK")
+    layout.addWidget(ok_btn)
+
+    # Connexion du clic : ferme la fenÃªtre
+    ok_btn.clicked.connect(dialog.close)
+
+    # Affiche la fenÃªtre
+    dialog.show()
+
+run()]]></script>
+  </tool>
+
+  <tool name="reduceTextureViewport" label="Reduce Texture Viewport" icon="hicon:/SVGIcons.index?BUTTONS_visible.svg">
+    <script scriptType="python"><![CDATA[from hutil.Qt import QtWidgets
+import hou
+
+
+
+def run():
+    pane = hou.ui.curDesktop().paneTabOfType(hou.paneTabType.SceneViewer)
+    if not pane:
+        raise RuntimeError("Pas de SceneViewer ouvert")
+
+    viewport = pane.curViewport()
+    settings = viewport.settings()
+
+    if kwargs["ctrlclick"]:
+        value = [hou.viewportTextureDepth.HDR16 , 1.0, 4096]
+    else:
+        value = [hou.viewportTextureDepth.Fixed8, 0.1, 1024]
+
+
+
+    #------------------------  |  Texture  |  ---------------------
+    # -- Texture 2D --
+    settings.setTextureBitDepthLimit2D(value[0])
+    settings.setTextureScale2D(value[1])
+
+    # -- Texture Cache (volumes) --
+    settings.setTextureCacheSize(value[2])
+
+    # -- Texture 3D (volumes) --
+    settings.setTexture2DSettingsFor3D(True)
+
+
+    displayMessage()
+    hou.hscript("glcache -c")
+
+
+def displayMessage():
+    dialog = hou.qt.createDialog()
+    dialog.setWindowTitle("Info")
+
+    # Layout vertical
+    layout = QtWidgets.QVBoxLayout(dialog)
+
+    # Texte
+    label = QtWidgets.QLabel("wait clear texture cache...")
+    layout.addWidget(label)
+
+    # Bouton OK
+    ok_btn = QtWidgets.QPushButton("OK")
+    layout.addWidget(ok_btn)
+
+    # Connexion du clic : ferme la fenÃªtre
+    ok_btn.clicked.connect(dialog.close)
+
+    # Affiche la fenÃªtre
+    dialog.show()
+
+run()]]></script>
   </tool>
 </shelfDocument>

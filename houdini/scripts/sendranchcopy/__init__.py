@@ -12,7 +12,6 @@ def run(dev=False):
 
     # print("Profiling...")
     # PROFILER.enable()
-    print("Hello?")
     sendranchcopy.run(dev)
 
     # PROFILER.disable()

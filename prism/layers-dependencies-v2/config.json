@@ -1,0 +1,7 @@
+{
+    "_layer_lgt_master": ["_layer_lay_master", "_layer_lay_camera"],
+    "_layer_anm_master": ["_layer_lay_master", "_layer_lay_camera"],
+    "_layer_cfx_master": ["_layer_anm_master", "_layer_lay_camera"],
+    "_layer_fx_master": ["_layer_anm_master", "_layer_lay_camera"],
+    "_layer_lay_master": ["_layer_lay_camera"]
+}

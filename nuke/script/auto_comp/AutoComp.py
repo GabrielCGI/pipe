@@ -597,9 +597,9 @@ class AutoComp(Qt.QWidget):
     def __update_read(self, read_node: nuke.Node, version):
         version_datas = self.__read_node_versions[read_node.name()][version]
         version_path = version_datas["filepath"]
-        frame_range = version_datas["frame_range"]
         read_node.knob("file").setValue(version_path)
         if read_node.Class() == "Read":
+            frame_range = version_datas["frame_range"]
             version_state = version_datas["state"]
             read_node.knob("on_error").setValue("black")
             read_node.knob("first").setValue(frame_range[0])

@@ -744,12 +744,12 @@
         ]
     },
     "environmentVariables": {
-        "PRISM_DEADLINE_HUSK_PATH": "C:/Program Files/Side Effects Software/Houdini 21.0.559/bin/husk.exe",
+        "HOUDINI_BUFFEREDSAVE": "1",
         "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio",
-        "SANITY_CHECK_CONFIG": "I://00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml",
-        "PXR_AR_DEFAULT_SEARCH_PATH": "R:/;I:/",
+        "PRISM_DEADLINE_HUSK_PATH": "C:/Program Files/Side Effects Software/Houdini 21.0.559/bin/husk.exe",
         "PRISM_HUSK_DEADLINE_GROUP": "husk_grp",
-        "HOUDINI_BUFFEREDSAVE": "1"
+        "PXR_AR_DEFAULT_SEARCH_PATH": "R:/;I:/",
+        "SANITY_CHECK_CONFIG": "I://00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml"
     },
     "export_paths": {},
     "render_paths": {},
@@ -902,7 +902,14 @@
         "useProjectLibrary": true,
         "usePolyHaven": true,
         "useGpuOpen": false,
-        "customLibraries": [],
+        "customLibraries": [
+            {
+                "name": "LightBank",
+                "path": "R:\\lightBank",
+                "filefilter": "*",
+                "libType": "files"
+            }
+        ],
         "useLibraryImport": true
     },
     "usd": {

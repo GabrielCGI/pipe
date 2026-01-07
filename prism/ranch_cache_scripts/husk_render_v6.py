@@ -16,6 +16,8 @@ LOCAL_DRIVE_R       = "R:/"
 LOCAL_RANCH_CACHE_I = "I:/ranch_cache2/I/"
 
 UNC_RANCH_CACHE_I   = "\\\\RANCH-SERVER\\ranch_cache2\\I\\"
+# UNC_RANCH_CACHE_I   = "\\\\Z:\\ranch_cache2\\I\\" # Test path to see if the system properly clones the ranch_copy directory. Maybe not the correct path tbh
+
 UNC_RANCH_CACHE_R   = "\\\\RANCH-SERVER\\ranch_cache2\\r\\"   
 
 RANCH_OUT_EXR_DIR     = "C:/RANCH_OUT_EXR/"

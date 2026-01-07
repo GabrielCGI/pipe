@@ -329,9 +329,18 @@ if settings.get("width") and settings.get("height"):
     width = settings.get("width")
     height = settings.get("height")
     args += ["--res", str(width), str(height)]
-args += ["--autotile"]
-args += ["--autotile-res", "2000", "2000"]
-args += ["--tile-count", "2", "2"]
+
+# check si crypto est present dans le nom du fichier pour ne pas activer le tiling (crypto disfonctionnels)
+
+job_file_name = os.path.basename(__file__)
+is_crypto_job = "crypto" in job_file_name.lower()
+
+# auto tile active seuelement si ce n est pas un job contenant CRYPTO
+if not is_crypto_job:
+    args += ["--autotile"]
+    args += ["--autotile-res", "2000", "2000"]
+    args += ["--tile-count", "2", "2"]
+
 if useTiles:
     args += ["--autotile"]
     args += ["--tile-count", str(tilesX), str(tilesY)]

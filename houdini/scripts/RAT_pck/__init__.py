@@ -11,9 +11,6 @@ reload(texture_parser)
 def run():
     gui.run()
     if socket.gethostname() == "SPRINTER-04" : 
-        from . import debug
-        debug.debug()
-
-def test():
-    #mat_find = USD_Material_Finder.MaterialFinder()
-    tex_find = texture_parser.TextureParser()
+        # from . import debug
+        # debug.debug()
+        pass
