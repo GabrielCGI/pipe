@@ -46,6 +46,31 @@ LAYER_BADGE_STYLE = FILTER_BTN_STYLE.format(color=LAYER_FILTER_COLOR)
 
 CORE = None
 
+# Gestion robuste des popups de dépendances
+class DependencyPopupManager:
+    popups = []
+
+    @classmethod
+    def register(cls, popup):
+        cls.popups.append(popup)
+        popup.destroyed.connect(lambda obj=None: cls.unregister(popup))
+
+    @classmethod
+    def unregister(cls, popup):
+        try:
+            cls.popups.remove(popup)
+        except ValueError:
+            pass
+
+    @classmethod
+    def close_all(cls):
+        for popup in list(cls.popups):
+            try:
+                popup.close()
+            except Exception:
+                pass
+        cls.popups.clear()
+
 
 class FlowLayout(QtWidgets.QLayout):
     """A simple flow layout that wraps widgets onto multiple rows (no horizontal scrollbar)."""
@@ -214,22 +239,39 @@ def go_to_source_scene(layer_name: str, path: Optional[str]) -> None:
 def fmt_time(ts: float) -> str:
     """Format epoch timestamp to human-friendly string matching core.py."""
     try:
-        return datetime.fromtimestamp(float(ts)).strftime("%Y-%m-%d %H:%M:%S")
+        # Format: jour/mois/année - heure
+        return datetime.fromtimestamp(float(ts)).strftime("%d/%m/%Y - %H:%M:%S")
     except Exception:
         return str(ts)
 
 
-def _show_dependencies_popup(parent, layer_name: str, dependencies: Iterable[Tuple[str, str]]):
+def _show_dependencies_popup(parent, layer_name: str, dependencies: Iterable[Tuple[str, str]], layer_path: Optional[str] = None):
     """Popup listing dependency names and their statuses."""
     dlg = QtWidgets.QDialog(parent)
     dlg.setWindowTitle(f"Dépendances — {shorten_layer_name(layer_name)}")
-    dlg.setModal(True)
+    dlg.setWindowModality(QtCore.Qt.NonModal)
     dlg.setMinimumWidth(360)
     layout = QtWidgets.QVBoxLayout(dlg)
     layout.setContentsMargins(12, 12, 12, 12)
     layout.setSpacing(8)
+    # Enregistre la popup auprès du manager et assure la destruction à la fermeture
+    DependencyPopupManager.register(dlg)
+    dlg.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
-    header = QtWidgets.QLabel(f"<b>{layer_name}</b>")
+    # Chercher la date de modification du fichier du layer principal (via layer_path si fourni)
+    mtime = None
+    if layer_path:
+        try:
+            if os.path.exists(layer_path):
+                mtime = os.path.getmtime(layer_path)
+        except Exception:
+            pass
+    # Afficher le titre avec la date de modification si disponible
+    if mtime is not None:
+        mtime_str = fmt_time(mtime)
+        header = QtWidgets.QLabel(f"<b>{layer_name}</b> <span style='color:#9ea6ad; font-size:10pt;'>({mtime_str})</span>")
+    else:
+        header = QtWidgets.QLabel(f"<b>{layer_name}</b>")
     header.setStyleSheet("color: #ffffff;")
     layout.addWidget(header)
 
@@ -273,7 +315,29 @@ def _show_dependencies_popup(parent, layer_name: str, dependencies: Iterable[Tup
             # show status and optional mtime
             status_text = dep_status or ""
             if dep_mtime:
-                status_text = f"{status_text} — {dep_mtime}"
+                # Si dep_mtime est déjà une date au format 'YYYY-MM-DD HH:MM:SS', on la parse et on la reformate
+                date_str = None
+                try:
+                    # Si timestamp numérique
+                    date_str = fmt_time(float(dep_mtime))
+                except Exception:
+                    # Si string type 'YYYY-MM-DD HH:MM:SS'
+                    try:
+                        dt = datetime.strptime(str(dep_mtime), "%Y-%m-%d %H:%M:%S")
+                        date_str = dt.strftime("%d/%m/%Y - %H:%M:%S")
+                    except Exception:
+                        date_str = str(dep_mtime)
+                # Remplacer 'outdated' par 'newer' dans l'affichage
+                display_status = dep_status
+                if dep_status == "outdated":
+                    display_status = "newer"
+                status_text = f"{date_str} - {display_status}"
+            else:
+                # Remplacer 'outdated' par 'newer' dans l'affichage
+                display_status = dep_status
+                if dep_status == "outdated":
+                    display_status = "newer"
+                status_text = display_status or ""
             status_lbl = QtWidgets.QLabel(status_text)
             status_lbl.setStyleSheet("color: #cccccc;")
             hl.addWidget(status_lbl)
@@ -296,7 +360,7 @@ def _show_dependencies_popup(parent, layer_name: str, dependencies: Iterable[Tup
     """)
     layout.addWidget(btn_close, alignment=QtCore.Qt.AlignRight)
 
-    dlg.exec_()
+    dlg.show()
 
 
 def make_layer_row(layer_name: str, status: Optional[str] = None, path: Optional[str] = None,
@@ -332,7 +396,7 @@ def make_layer_row(layer_name: str, status: Optional[str] = None, path: Optional
 
     def _on_clicked():
         parent = QtWidgets.QApplication.activeWindow()
-        _show_dependencies_popup(parent, layer_name, dependencies or [])
+        _show_dependencies_popup(parent, layer_name, dependencies or [], path)
 
     btn.clicked.connect(_on_clicked)
 
@@ -457,6 +521,12 @@ def open_tree_ui(tree: Dict[str, Dict[str, Dict]], title: str, core):
     w = QtWidgets.QWidget()
     w.setWindowTitle(title)
     layout = QtWidgets.QHBoxLayout(w)
+
+    # Fermer toutes les popups de dépendances quand la fenêtre principale se ferme
+    def close_all_dependency_popups_on_main_close(event):
+        DependencyPopupManager.close_all()
+        event.accept()
+    w.closeEvent = close_all_dependency_popups_on_main_close
     left_panel = QtWidgets.QWidget()
     left_panel.setFixedWidth(280)
     left_layout = QtWidgets.QVBoxLayout(left_panel)

@@ -16,9 +16,15 @@
             "layout",
             "Previz",
             "RoughLayout_playblast"
+        ],
+        "UPSCALE": [
+            "upscale"
+        ],
+        "UPSCALE_MASK": [
+            "upscale_mask"
         ]
     },
     "source_path": "I:/swaBeast_2511",
     "dest_path": "D:/cache_resolve/swaBeast_2511",
-    "production": "swaBeast"
+    "production": "SWA BEAST"
 }

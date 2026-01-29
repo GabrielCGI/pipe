@@ -12,7 +12,7 @@
     <memberTool name="kma_mat_char"/>
     <memberTool name="CreateAutoVariant"/>
     <memberTool name="material_finder"/>
-    <memberTool name="update_tex"/>
+    <!-- <memberTool name="update_tex"/> -->
     <memberTool name="rat_manager"/>
   </toolshelf>
 
@@ -115,8 +115,13 @@ mtlximage_path_updatev2.run()]]></script>
     <script scriptType="python"><![CDATA[import RAT_pck
 from imp import reload
 import sys
+import socket
 
 MODULE_PATH = r"R:\devAndrew\houdini\RAT_pck"
+
+if socket.gethostname() == "SPRINTER-04":
+    MODULE_PATH = r"R:\devAndrew\houdini\V1"
+
 if not MODULE_PATH in sys.path :
     sys.path.insert(0,MODULE_PATH)
 

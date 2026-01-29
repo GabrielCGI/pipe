@@ -75,7 +75,7 @@ if ((not nuke.env["studio"]) or nuke.env["indie"]) and not nuke.env.get("gui"):
 nuke_version = str(nuke.NUKE_VERSION_MAJOR)+"."+str(nuke.NUKE_VERSION_MINOR)
 
 # >>>Variable Serveur Licence Start
-print("Serveur de licence:", os.environ.get('foundry_LICENSE'))   
+print("Serveur de licence:", os.environ.get("foundry_LICENSE"))   
 # <<<Variable Serveur Licence End
 
 print("Nuke Init as version 13+ ...\n")
@@ -84,20 +84,19 @@ print("Nuke Init as version 13+ ...\n")
 # ### -------------------------------------------------------------------------------------------
 
 nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/NukeSurvivalToolkit/")
-nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos')
-nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/ToolSets')
-# 'R:/pipeline/networkInstall/Nuke/nuke15+_configs/nuke15+_configs seulement pour que les ToolSets puissent etre loades correctement, lorsque l on pointe sur toolSets cela ne fonctionne pas
-nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs')
-nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts')
-nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/icons')
-nuke.pluginAddPath('R:/pipeline/pipe/nuke/cameraMetadata')
-#nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins')
-nuke.pluginAddPath('R:/pipeline/pipe/nuke/script')
+nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos")
+nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/ToolSets")
+# "R:/pipeline/networkInstall/Nuke/nuke15+_configs/nuke15+_configs seulement pour que les ToolSets puissent etre loades correctement, lorsque l on pointe sur toolSets cela ne fonctionne pas
+nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs")
+nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts")
+nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/icons")
+nuke.pluginAddPath("R:/pipeline/pipe/nuke/cameraMetadata")
+#nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins")
+nuke.pluginAddPath("R:/pipeline/pipe/nuke/script")
 nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/Deep2VP_v40")
 nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/pixelfudger3")
-nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts/nukeToPack/", 'nukeToPack/icons')
-nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/aeRefractor')
-nuke.pluginAddPath('R:/devmaxime/dev/nuke/nuke_path/plugins')
+nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts/nukeToPack/", "nukeToPack/icons")
+nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/aeRefractor")
 nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/stamps")
 
 # ### load magic defocus only if nuke 13 ou 16
@@ -123,7 +122,7 @@ if(nuke_version=="13.1"):
     
     os.environ["OPTICAL_FLARES_PRESET_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OpticalFlares_Nuke_13.1_Node-Locked_1.0.9\Textures-And-Presets"
 
-    if nuke.env['gui']:
+    if nuke.env["gui"]:
         print("Nuke 13.1 GUI version")
         nuke.pluginAddPath(r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OpticalFlares_Nuke_13.1_Node-Locked_1.0.9\plugin\Windows")
         os.environ["OPTICAL_FLARES_LICENSE_PATH"] = r"C:\Program Files\Nuke13.1v5"
@@ -139,7 +138,7 @@ elif (nuke_version=="15.1"):
     os.environ["OPTICAL_FLARES_PRESET_PATH"] = r"R:\pipeline\networkInstall\Nuke\nuke15+_configs\OpticalFlares\OpticalFlares_Nuke_15.1_Node-Locked_1.0.94\Textures-And-Presets"
     
 
-    if nuke.env['gui']:
+    if nuke.env["gui"]:
         print("Nuke 15.1 GUI version")
         
         print("\nSetting up Optical Flares for Nuke 15.1\n")
@@ -160,7 +159,7 @@ else:
 
     ### End Optical flare >>
 
-    nuke.pluginAddPath('R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins')
+    nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins")
     
 
 
@@ -185,9 +184,9 @@ nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/nuke
 
 ##  write nodes
 
-nuke.knobDefault('Write.exr.compression', '8')
-nuke.knobDefault('Write.exr.dw_compression_level', '85')
-nuke.knobDefault('Write.exr.interleave', '2')
+nuke.knobDefault("Write.exr.compression", "8")
+nuke.knobDefault("Write.exr.dw_compression_level", "85")
+nuke.knobDefault("Write.exr.interleave", "2")
 
 ##  write nodes
 
@@ -199,3 +198,9 @@ print("End Nuke Init as version 13+")
 ##  Shuffle Nodes default
 nuke.knobDefault("Shuffle.label", "[value in]")
 nuke.knobDefault("Shuffle2.label", "[value in1]")
+
+
+## edit 2026.01.19 (YYYY.MM.DD)
+## Add ILCG Suite Scripts and Gizmos
+nuke.pluginAddPath("R:/devmaxime/dev/nuke/nuke_scripts")
+nuke.pluginAddPath("R:/devmaxime/dev/nuke/nuke_gizmos")

@@ -68,6 +68,8 @@ class TreeHeaders(Enum):
 OPEN = ["<b style=\"color: green;\">(" , "<b style=\"color: red;\">(" ]
 CLOSE = ")</b>"
 STATUS_TEXT = ["All files converted" , "Missing .rat files"]
+TILE_ADDRESS_TOKENS = ["<UDIM>" , "$F"]
+
 
 class MainInterface(Qt.QMainWindow):
     def __init__(self,
@@ -170,14 +172,41 @@ class MainInterface(Qt.QMainWindow):
 
 
         # self.right_layout.addWidget(self.options_group)
-
         self.right_layout.addWidget(self.actions_group)
-        self.layout.addWidget(self.right_frame)
         # self.layout.addWidget(self.actions_group)
+
+        # Scene options
+
+        self.scene_options_group = Qt.QGroupBox('Scene Options')
+        sizePolicy = Qt.QSizePolicy(Qt.QSizePolicy.Preferred, Qt.QSizePolicy.Maximum)
+        self.scene_options_group.setSizePolicy(sizePolicy)
+        self.scene_options_layout = Qt.QFormLayout(
+            self.scene_options_group)
+
+        self.scene_include_layout = Qt.QVBoxLayout()
+        self.scene_include_actions_layout = Qt.QHBoxLayout()
+
+        self.scene_include = Qt.QListWidget()
+        # self.scene_include.addItems(lib.scene_default_texture_scan)
+        self.scene_include_add = Qt.QPushButton('Add')
+        self.scene_include_rm = Qt.QPushButton('Remove')
+        self.scene_include_actions_layout.addWidget(self.scene_include_add)
+        self.scene_include_actions_layout.addWidget(self.scene_include_rm)
+        self.scene_include_layout.addWidget(self.scene_include)
+        self.scene_include_layout.addLayout(self.scene_include_actions_layout)
+
+        self.scene_options_layout.addRow(
+            'Scan attributes', self.scene_include_layout)
         
+        # Scene include add 
+
+        # Scene include remove
+        
+        self.right_layout.addWidget(self.scene_options_group)
+
         ############################# Init ##########################
 
-
+        self.layout.addWidget(self.right_frame)
         self.parse(True)
 
     def parse(self , reset = True):
@@ -201,7 +230,6 @@ class MainInterface(Qt.QMainWindow):
         for item in self.rat_parser.textures : 
             texture_name = item.name
 
-
             # test = Qt.QTreeWidgetItem(None , ["Hiiii"])
             # self.texture_list.insertTopLevelItems(0 , [test])
 
@@ -217,7 +245,7 @@ class MainInterface(Qt.QMainWindow):
 
 
             else : 
-                text = 'All good'
+                text = 'All converted'
                 status_label = Qt.QLabel(f"<b style=\"color: green;\"> {text} </b>")
 
             texture_item = Qt.QTreeWidgetItem(None , [texture_name, ''])
@@ -304,7 +332,8 @@ class MainInterface(Qt.QMainWindow):
             item_path = item.data(TreeHeaders.PATH.value,0)
             print(f"Item : {item}")
 
-            if "UDIM" in item_name : # Handle case where the whole UDIM is selected  
+            # FIXME : Make this work with a global list of these
+            if "<UDIM>" in item_name or "$F" in item_name: # Handle case where the whole UDIM is selected  
                 for i in range(item.childCount()) : 
                     child = item.child(i)
                     child_path = child.data(TreeHeaders.PATH.value,0)
@@ -326,8 +355,6 @@ class MainInterface(Qt.QMainWindow):
         max_val = len(files_to_convert)
         self.conversion_progress.setMaximum(max_val)
 
-        files_to_convert = list(set(files_to_convert))
-        print(files_to_convert)
         self.rat_parser.convert_to_rat(files_to_convert=files_to_convert)
                 
 

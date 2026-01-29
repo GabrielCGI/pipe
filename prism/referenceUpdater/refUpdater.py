@@ -2,6 +2,7 @@ import qtpy.QtCore as qtc
 from importlib import reload
 from pathlib import Path
 import subprocess
+import socket
 import sys
 
 
@@ -85,6 +86,9 @@ class instanceWorker():
             return False
         
         print("start worker...")
+
+        
+        
         if standalone:
             self.worker = SubprocessWorker(arguments, self.debug)
             self.worker.finished.connect(self.Core.handleResult)
@@ -101,6 +105,7 @@ class instanceWorker():
                 sys.argv.append(str(self.dataRef))
             else:
                 sys.argv[2] = str(self.dataRef)
+
             
             from . import mayaCode_updateImportRef as update
             reload(update)

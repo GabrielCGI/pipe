@@ -119,7 +119,22 @@ class UISelectExport(qt.QDialog):
         exec_button_layout = qt.QHBoxLayout()
         container_ligne.addLayout(exec_button_layout)
 
+        self.allVarGood = qt.QComboBox()
+        all_variant_name = cmds.attributeQuery(self.name_variant, node=self.name_ctrl, listEnum=True)
+        if all_variant_name is not None:
+            self.allVarGood.addItems(all_variant_name[0].split(":"))
+        exec_button_layout.addWidget(self.allVarGood)
+
+        button_setName = qt.QPushButton("set this Name")
+        button_setName.clicked.connect(self.setName)
+        exec_button_layout.addWidget(button_setName)
+        show_result = qt.QPushButton("show result")
+        show_result.clicked.connect(self.seeResult)
+        exec_button_layout.addWidget(show_result)
+
+
         exec_button_layout.addStretch()
+
 
         button_exec = qt.QPushButton("Execute script")
         button_exec.clicked.connect(self.executeScript)
@@ -149,6 +164,15 @@ class UISelectExport(qt.QDialog):
 
 
     #------------------------- UI -------------------------
+    def setName(self):
+        item = self.list_QWidget_items.currentItem()
+        new_name = self.allVarGood.currentText()
+        
+        if not item:
+            return
+        
+        item.editNameVariant(new_name)
+
     def createDataSet(self, data) -> None:
         if not data:
             self.list_QWidget_items.clear()
@@ -195,7 +219,12 @@ class UISelectExport(qt.QDialog):
             self.exec_auto.setDisabled(True)
 
     def seeResult(self):
-        print(self.QtData_Widget)
+        for i, source in enumerate(self.QtData_Widget):
+            print("----------------", i)
+            print("long name", source.long_name)
+            print("nameVariant", source.nameVariant)
+            print("list_geo_save", source.list_geo_save)
+            print("list_rig_save", source.list_rig_save)
 
     def detectionAutomatic(self):
         if not self.list_QWidget_items.isEnabled():
@@ -336,11 +365,7 @@ class QvariantLineUI(qt.QListWidgetItem):
                 goodName.append(i.split("|")[-1])
         
             self.all_string_geo.setText(str(goodName))
-
-
-            self.QNameVariant.setText(goodName[0])
-            self.nameVariant = goodName[0]
-            self.long_name = data[0]
+            self.long_name = self.nameVariant
     
     def saveDataRig(self, data=None):
         if not data:
@@ -353,4 +378,9 @@ class QvariantLineUI(qt.QListWidgetItem):
                 goodName.append(i.split("|")[-1])
             
             self.all_string_rig.setText(str(goodName))
+        
+    def editNameVariant(self, new_name:str):
+        self.nameVariant = new_name
+        self.long_name = new_name
+        self.QNameVariant.setText(new_name)
     

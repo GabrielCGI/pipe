@@ -13,6 +13,12 @@
         ],
         "LAYOUT": [
             "layout"
+        ],
+        "sequence_Blast": [
+            "Blast_sh0100",
+            "Blast_sh0120",
+            "Blast_sh0130",
+            "Blast_sh0200"
         ]
     },
     "source_path": "I:/VCA_Perlee_2510",

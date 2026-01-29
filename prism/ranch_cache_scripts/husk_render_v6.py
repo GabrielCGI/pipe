@@ -15,10 +15,8 @@ LOCAL_DRIVE_R       = "R:/"
 
 LOCAL_RANCH_CACHE_I = "I:/ranch_cache2/I/"
 
-UNC_RANCH_CACHE_I   = "\\\\RANCH-SERVER\\ranch_cache2\\I\\"
-# UNC_RANCH_CACHE_I   = "\\\\Z:\\ranch_cache2\\I\\" # Test path to see if the system properly clones the ranch_copy directory. Maybe not the correct path tbh
-
-UNC_RANCH_CACHE_R   = "\\\\RANCH-SERVER\\ranch_cache2\\r\\"   
+UNC_RANCH_CACHE_I   = "C:\\tmp\\ranch_cache\\I\\"
+UNC_RANCH_CACHE_R   = "C:\\tmp\\ranch_cache\\R\\"   
 
 RANCH_OUT_EXR_DIR     = "C:/RANCH_OUT_EXR/"
 RANCH_OUT_EXR_LOG_DIR = "C:/RANCH_OUT_EXR_log/"
@@ -322,7 +320,7 @@ args = [
 #  MODIF exr mode set to 0 to debug draft assembly tile
     "--exrmode", multiPartExr ,
 #      autocrop desactive pour debug VCA 251128
-#    "--autocrop", "C,A,holdout_shadows",
+   "--autocrop", "C,A,holdout_shadows",
 ]
 
 if settings.get("camera"):

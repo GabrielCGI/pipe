@@ -21,9 +21,14 @@ def set_luxcore_render_settings():
     # Enable halt conditions and set samples
     scene.luxcore.halt.enable = True
     scene.luxcore.halt.use_samples = True
-    scene.luxcore.halt.samples = 1500
-    scene.luxcore.halt.use_noise_thresh = True
+    scene.luxcore.halt.samples = 1024
+    scene.luxcore.halt.use_noise_thresh = False
     scene.luxcore.halt.noise_thresh = 15
+    scene.luxcore.config.device = 'OCL'
+
+    #AOV Caustic
+    bpy.context.view_layer.luxcore.aovs.caustic = True
+
 
     # Enable denoiser
     scene.luxcore.denoiser.enabled = False
@@ -54,23 +59,39 @@ def clean_scene():
             bpy.data.objects.remove(obj, do_unlink=True)
 
 
-def set_caustic_light():
-    for light in bpy.data.lights:
-        if fnmatch.fnmatch(light.name, "lights/shadow*"):
-            print(f"Configuring caustic light: {light.name}")
+def set_caustic_light(pattern="shadow*"):
+    for obj in bpy.context.scene.objects:
+        if obj.type != 'LIGHT':
+            continue
 
-            # Blender light type
-            light.type = 'AREA'
-            light.size = 5.0
-            light.gain = 1
-            light.exposure = 6
+        light = obj.data  # datablock
+        print("OBJ:", obj.name, "| DATA:", light.name, "| TYPE:", light.type)
 
-            # LuxCore-specific setting
+        if not (fnmatch.fnmatch(obj.name, pattern) or fnmatch.fnmatch(light.name, pattern)):
+            continue
+
+        print(f"Configuring caustic light: {obj.name} (data: {light.name})")
+
+        # 1) force AREA
+        light.type = 'AREA'
+
+        # 2) maintenant size existe
+        if hasattr(light, "size"):
+            light.size = 15.0
+        else:
+            # normalement jamais, mais on garde safe
+            print("Light has no 'size' attribute even after setting AREA")
+
+        # LuxCore
+        if hasattr(light, "luxcore") and hasattr(light.luxcore, "is_laser"):
             light.luxcore.is_laser = True
+        else:
+            print("LuxCore not available on this light (skip is_laser)")
 
-            return  # only the first matching light
+        return
 
-    print("No light found matching pattern: lights/shadow*")
+    print(f"No light found matching pattern: {pattern}")
+
 
 def set_mats():
     for mat in bpy.data.materials:
@@ -85,5 +106,6 @@ def set_mats():
 def run():
     set_luxcore_render_settings()
     set_mats()
+    set_caustic_light()
     clean_scene()
 

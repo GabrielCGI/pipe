@@ -45,7 +45,7 @@ def main(file_path_usd):
                 print(prim_Path, '\nis deformed keep geo\n')
                 continue
             
-            # supprimer tout les attribute qui constitue le mesh pour tout les mesh qui non pas de time samplings uniquement eux
+            # supprimer tout les attribute qui constitue le mesh pour tout les mesh qui non pas de time samplings uniquement eux (donc les objet non skinner)
             if "faceVertexCounts" in primSpec.properties:
                 del primSpec.properties["faceVertexCounts"]
             if "faceVertexIndices" in primSpec.properties:
@@ -59,7 +59,7 @@ def main(file_path_usd):
             all_geomSubnet_to_delet.append(prim_Path)
             
     
-    # cette etape est la pour supprimer les primitives qui sont des geomSubnet pour enlver tout les bindmaterial qui sont efectuer par face et non pas a l'enssemble de l'objet
+    # cette etape est la pour supprimer les primitives qui sont des geomSubnet pour enlver tout les bindmaterial qui sont effectuer par face et non pas a l'enssemble de l'objet
     if all_geomSubnet_to_delet:
         edit = Sdf.BatchNamespaceEdit()
         for p in all_geomSubnet_to_delet:

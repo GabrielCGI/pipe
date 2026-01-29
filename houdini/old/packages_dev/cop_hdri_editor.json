@@ -1,0 +1,5 @@
+{
+    "env": [
+        {"PYTHONPATH":"C:/ILLOGIC_APP/R/pipeline/networkInstall/houdini/COP_hdri_editor/scripts;"}
+    ]
+}

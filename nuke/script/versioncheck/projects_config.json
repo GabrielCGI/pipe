@@ -1,0 +1,12 @@
+{
+    "productions": [
+        {
+            "project_name": "rivers_feature",
+            "allowed_version": [
+                "13.1v5",
+                "15.1v5"
+            ],
+            "bypass_resolution_mismatch": true
+        }
+    ]
+}

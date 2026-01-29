@@ -124,11 +124,11 @@ def get_status_tree(root_path: Path):
             prereq_statuses = []
             for layer in layers:
                 layer_dir = export_root / layer
-                # look for latest usdc under layer v* (ignore mp4)
                 layer_latest = None
-                # iterate v* dirs under the layer dir
+                vdirs = []
                 if layer_dir.exists():
-                    for vdir in [p for p in layer_dir.iterdir() if p.is_dir() and p.name.startswith("v")]:
+                    vdirs = [p for p in layer_dir.iterdir() if p.is_dir() and p.name.startswith("v")]
+                    for vdir in vdirs:
                         cur = get_latest_file(vdir, patterns=("*.usdc","*.usda"), ignore_contains="mp4")
                         if cur is None:
                             continue
@@ -139,15 +139,39 @@ def get_status_tree(root_path: Path):
                     prereq_statuses.append({"name": layer, "status": "missing", "path": str(layer_dir), "mtime": None, "mtime_str": None})
                 else:
                     if latest_render is None:
-                        # no render file to compare against -> treat render as missing; layer presence alone doesn't give status
                         prereq_statuses.append({"name": layer, "status": "up-to-date", "path": layer_latest[1], "mtime": layer_latest[0], "mtime_str": fmt_time(layer_latest[0])})
                     else:
                         layer_mtime = layer_latest[0]
                         render_mtime = latest_render[0]
-                        if layer_mtime > render_mtime:
-                            st = "outdated"
+                        st = "up-to-date"
+                        # Cas spécial pour _layer_lgt_master
+                        if layer == "_layer_lgt_master" and layer_mtime > render_mtime:
+                            # Chercher la version n-1
+                            def extract_version_num(vdir):
+                                try:
+                                    return int(vdir.name.lstrip("v"))
+                                except Exception:
+                                    return None
+                            vnums = sorted([(extract_version_num(v), v) for v in vdirs if extract_version_num(v) is not None], reverse=True)
+                            if len(vnums) >= 2:
+                                n1_vnum, n1_vdir = vnums[1]  # version n-1
+                                n1_latest = get_latest_file(n1_vdir, patterns=("*.usdc","*.usda"), ignore_contains="mp4")
+                                if n1_latest:
+                                    n1_mtime = n1_latest[0]
+                                    # Si la date de n-1 est très proche du render (moins de 5 min)
+                                    if abs(n1_mtime - render_mtime) <= 5*60:
+                                        st = "up-to-date"
+                                    else:
+                                        st = "outdated"
+                                else:
+                                    st = "outdated"
+                            else:
+                                st = "outdated"
                         else:
-                            st = "up-to-date"
+                            if layer_mtime > render_mtime:
+                                st = "outdated"
+                            else:
+                                st = "up-to-date"
                         prereq_statuses.append({"name": layer, "status": st, "path": layer_latest[1], "mtime": layer_latest[0], "mtime_str": fmt_time(layer_latest[0])})
 
             if latest_render is None:

@@ -1,0 +1,25 @@
+{
+    "project_path": "I:\\swaWicked_2506",
+    "asset_path": "Props\\camRig",
+    "department": "Rigging",
+    "task": "Rigging",
+    "asset": "camRig",
+    "version": "v002",
+    "type": "asset",
+    "locations": {
+        "global": "I:\\swaWicked_2506\\03_Production\\Assets\\Props\\camRig\\Scenefiles\\Rigging\\Rigging\\camRig_Rigging_v005.ma"
+    },
+    "comment": "fix film gate ratio",
+    "project_name": "swaWicked_2506",
+    "fps": 25.0,
+    "date": "03.09.25 14:46:56",
+    "dependencies": [],
+    "externalFiles": [
+        "R:\\pipeline\\pipe\\maya\\camRig_emile\\imagePlanes\\cinemaScope.png",
+        "I:\\swaWicked_2506\\03_Production\\Assets\\Props\\camRig\\Scenefiles\\Rigging\\Rigging\\camRig_Rigging_v005.ma"
+    ],
+    "sourceScene": "I:\\swaWicked_2506\\03_Production\\Assets\\Props\\camRig\\Scenefiles\\Rigging\\Rigging\\camRig_Rigging_v005.ma",
+    "product": "Rigging",
+    "username": "Mathieu Arc\u00e9",
+    "user": "mar"
+}

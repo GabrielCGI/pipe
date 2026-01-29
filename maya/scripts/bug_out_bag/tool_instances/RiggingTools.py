@@ -37,10 +37,12 @@ class RiggingTools(MultipleActionTool):
             actions=actions, stretch=1, tooltip=tooltip)
 
     def startUISplitVariant(self):
+
         import split_variants_rig as svr
+        reload(svr)
         scene_path = self.core.getCurrentFileName()
         if not 'Rigging\\Rigging' in scene_path:
             return
         
         spliter_variant = svr.main(self.core, scene_path)
-        spliter_variant.passPrePublish()
+        spliter_variant.passPrePublish(True)

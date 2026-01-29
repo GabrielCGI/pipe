@@ -231,8 +231,9 @@ class TextureParser():
                         texture_item = TextureItem(name, attr_str, [])
                         #texture_item = self.create_item(name , attr_str , [])
 
-                    if texture_item : 
+                    if texture_item and (texture_item not in self.textures) : 
                         self.textures.append(texture_item)
+
 
     #--------------------- Converter Methods ----------------------
 

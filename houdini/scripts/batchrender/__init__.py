@@ -8,5 +8,3 @@ def main():
     importlib.reload(batchrender)
     importlib.reload(farmsubmitter)
     batchrender.main()
-    
-

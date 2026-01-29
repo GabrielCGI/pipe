@@ -49,14 +49,14 @@ if nuke.NUKE_VERSION_MAJOR==12:
     collectMenu.addCommand('Collect Files', 'collectFiles.collectFiles()')
     collectMenu.addCommand('Help', 'collectFiles.myBlog()')
 
-    bloomMenu = nuke.menu("Nodes").addMenu("bloom","bloom.png")
-    bloomMenu.addCommand("Delete unused render", "NukeScanner().run()")
-    bloomMenu.addCommand("Delete unused render (OLD)", "NukeScannerOld.NukeScanner().run()")
-    bloomMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
-    bloomMenu.addCommand("Truly Delete unused render (OLD)", "nuke_delete_old.run()")
-    bloomMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
-    bloomMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
-    bloomMenu.addCommand("Localization policy on", "set_localization_policy_on()")
+    illogicMenu = nuke.menu("Nodes").addMenu("bloom","bloom.png")
+    illogicMenu.addCommand("Delete unused render", "NukeScanner().run()")
+    illogicMenu.addCommand("Delete unused render (OLD)", "NukeScannerOld.NukeScanner().run()")
+    illogicMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
+    illogicMenu.addCommand("Truly Delete unused render (OLD)", "nuke_delete_old.run()")
+    illogicMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
+    illogicMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
+    illogicMenu.addCommand("Localization policy on", "set_localization_policy_on()")
 
     toolbar = nuke.toolbar("Nodes")
     toolbar.addMenu("VideoCopilot", icon="VideoCopilot.png")
@@ -137,6 +137,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     import importCamFromMetadata
     import cleanexternalreads
     import VCA_cryptoExtractor
+    import ilcg_scripts
 
     import stamps
     # >>>PrismStart
@@ -165,37 +166,56 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     # <<<PrismEnd
     auto_comp.pcore = pcore
 
-    # ------ add the following lines to your menu.py file  ------ 
+    # ------ Panels Registration ------
 
-    toolbar = nuke.toolbar("Nodes")
+    # auto comp panel
+    panels.registerWidgetAsPanel("auto_comp.main(False)", 'AutoComp', 'illogic_studios.autocomp')
+
+    # ------ Custom Menu ------ 
+
+    # Optical Flare Menu
+    toolbar: nuke.ToolBar = nuke.toolbar("Nodes")
     toolbar.addMenu("VideoCopilot", icon="VideoCopilot.png")
     toolbar.addCommand( "VideoCopilot/OpticalFlares", "nuke.createNode('OpticalFlares')", icon="OpticalFlares.png")
 
+    # Illogic Frog (TODO Faire du menage)
+    illogicMenu: nuke.Menu = nuke.menu("Nodes").addMenu("bloom", icon="bloom.png")
+    illogicMenu.addCommand("VCA Cryptomatte Extractor", "VCA_cryptoExtractor.create_cryptomatte_nodes()")
+    illogicMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
 
-    panels.registerWidgetAsPanel("auto_comp.main(False)", 'AutoComp', 'illogic_studios.autocomp')
-    bloomMenu = nuke.menu("Nodes").addMenu("bloom", icon="bloom.png")
-    bloomMenu.addCommand("Delete unused render", "NukeScanner().run()")
-    bloomMenu.addCommand("Delete unused render (new)", "NukeScannerV2.NukeScanner().run()")
-    bloomMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
-    bloomMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
-    bloomMenu.addCommand("VCA Cryptomatte Extractor", "VCA_cryptoExtractor.create_cryptomatte_nodes()")
-    bloomMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
-    bloomMenu.addCommand("Clean external reads", "cleanexternalreads.main(debug_mode=True)")
-    s=bloomMenu.addMenu("Tools")
-    s.addCommand("Magnific upscale" , "nuke.nodePaste(\"R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/nukeToMagnific/nuke_magnific/Magnific.nk\")")
-    s.addCommand("Anim Buddy", "nuke.createNode(\"AnimVuddy\")") # >>> Add Anim Buddy tool
-    s.addCommand("Card Buddy", "nuke.createNode(\"CardBuddy\")") # >>> Add Card Buddy tool
-    s.addCommand("DepthBuddy", "nuke.createNode(\"DepthBuddy\")") # >>> Add Depth Buddy tool
-    s.addCommand("Flare Market", "nuke.createNode(\"FlareMarket\")") # >>> Add Flare Market tool
-    s.addCommand("Mask Buddy", "nuke.createNode(\"MaskBuddy\")") # >>> Add Mask Buddy tool
-    s.addCommand("Projection Buddy", "nuke.createNode(\"ProjectionBuddy\")") # >>> Add Projection Buddy tool
-    s.addCommand("Reflection Buddy", "nuke.createNode(\"ReflectionBuddy\")") # >>> Add Reflecrion Buddy tool
-    s.addCommand("aeRefractor", "nuke.createNode(\"aeRefracTHOR\")",  icon="aeRefracTHOR.png")
-    s.addCommand("Import Cam from Metadata", "importCamFromMetadata.main()")
-    n=bloomMenu.addMenu("Nodes")
-    n.addCommand('expoglow', 'nuke.createNode("expoglow")')
-    n.addCommand('exponential glow', "nuke.createNode(\"exponentialGlow\")")
+    # Scripts menus
+    ilcgMenu: nuke.Menu = illogicMenu.addMenu("ILGC Suite")
+    ilcgMenu.addCommand('ILGC_PosProject', 'nuke.createNode("ILGC_PosProject")')
+    ilgcSubTracker: nuke.Menu = ilcgMenu.addMenu("ILGC_OFTracker")
+    ilgcSubTracker.addCommand('ILGC_OFTracker', 'nuke.nodePaste(\"R:/devmaxime/dev/nuke/nuke_gizmos/ILGC_OFTracker.nk\")')
+    ilgcSubTracker.addCommand("Retrack Every Nodes", "ilcg_scripts.retrack_every_nodes()")
+    ilgcSubTracker.addCommand("Retrack Selected Nodes", "ilcg_scripts.retrack_selected_nodes()")
 
+    # Tools menus
+    toolsMenu: nuke.Menu = illogicMenu.addMenu("Tools")
+    toolsMenu.addCommand("Magnific upscale" , "nuke.nodePaste(\"R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/nukeToMagnific/nuke_magnific/Magnific.nk\")")
+    toolsMenu.addCommand("Anim Buddy", "nuke.createNode(\"AnimVuddy\")") # >>> Add Anim Buddy tool
+    toolsMenu.addCommand("Card Buddy", "nuke.createNode(\"CardBuddy\")") # >>> Add Card Buddy tool
+    toolsMenu.addCommand("DepthBuddy", "nuke.createNode(\"DepthBuddy\")") # >>> Add Depth Buddy tool
+    toolsMenu.addCommand("Flare Market", "nuke.createNode(\"FlareMarket\")") # >>> Add Flare Market tool
+    toolsMenu.addCommand("Mask Buddy", "nuke.createNode(\"MaskBuddy\")") # >>> Add Mask Buddy tool
+    toolsMenu.addCommand("Projection Buddy", "nuke.createNode(\"ProjectionBuddy\")") # >>> Add Projection Buddy tool
+    toolsMenu.addCommand("Reflection Buddy", "nuke.createNode(\"ReflectionBuddy\")") # >>> Add Reflecrion Buddy tool
+    toolsMenu.addCommand("aeRefractor", "nuke.createNode(\"aeRefracTHOR\")",  icon="aeRefracTHOR.png")
+    toolsMenu.addCommand("Import Cam from Metadata", "importCamFromMetadata.main()")
+
+    # Gizmos menus
+    nodesMenu: nuke.Menu = illogicMenu.addMenu("Nodes")
+    nodesMenu.addCommand('expoglow', 'nuke.createNode("expoglow")')
+    nodesMenu.addCommand('exponential glow', "nuke.createNode(\"exponentialGlow\")")
+
+    cleanMenu: nuke.Menu = illogicMenu.addMenu("Cleanup")
+    cleanMenu.addCommand("Delete unused render", "NukeScanner().run()")
+    cleanMenu.addCommand("Delete unused render (new)", "NukeScannerV2.NukeScanner().run()")
+    cleanMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
+    cleanMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
+    cleanMenu.addCommand("Clean external reads", "cleanexternalreads.main(debug_mode=True)")
+    
     ### edit folder path here ###
     DVPath = "R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/Deep2VP_v40/asGroup/"
 
@@ -215,6 +235,14 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
             else:
                 DVP.addCommand( "{0}/{1}".format(key,item), "nuke.nodePaste(\"{0}{1}/{2}.nk\")".format(DVPath,key,item), icon="{0}.png".format(item) )
     ### end here ###
+    
+    ### Add callback to prevent loading script with wrong nuke version
+    import versioncheck
+    try:
+        versioncheck.load_versioncheck_callback()
+        print("Load version check callback")
+    except Exception as e:
+        print(f"Failed to load version check callback:\n{e}")
 
     # === Select all Write nodes (Nuke 13+) ===
     def select_all_writes():

@@ -15,8 +15,8 @@ LOCAL_DRIVE_R       = "R:/"
 
 LOCAL_RANCH_CACHE_I = "I:/ranch_cache2/I/"
 
-UNC_RANCH_CACHE_I   = "\\\\RANCH-SERVER\\ranch_cache2\\I\\"
-UNC_RANCH_CACHE_R   = "\\\\RANCH-SERVER\\ranch_cache2\\r\\"   
+UNC_RANCH_CACHE_I   = "\\\\RANCH-SERVER\\ranch_cache\\I\\"
+UNC_RANCH_CACHE_R   = "\\\\RANCH-SERVER\\ranch_cache\\R\\"  
 
 RANCH_OUT_EXR_DIR     = "C:/RANCH_OUT_EXR/"
 RANCH_OUT_EXR_LOG_DIR = "C:/RANCH_OUT_EXR_log/"
@@ -333,7 +333,8 @@ if settings.get("width") and settings.get("height"):
 # check si crypto est present dans le nom du fichier pour ne pas activer le tiling (crypto disfonctionnels)
 
 job_file_name = os.path.basename(__file__)
-is_crypto_job = "crypto" in job_file_name.lower()
+#is_crypto_job = "crypto" in job_file_name.lower() pour detecter les cryptos 
+is_crypto_job = "cryptoDescatives" in job_file_name.lower()  #nom  cryptoDescativés pour desactiver temporairement la detecttion
 
 # auto tile active seuelement si ce n est pas un job contenant CRYPTO
 if not is_crypto_job:

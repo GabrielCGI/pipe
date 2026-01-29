@@ -1,0 +1,23 @@
+{
+    "project_path": "I:\\swaBeast_2511",
+    "asset_path": "Props\\camRig",
+    "department": "Rigging",
+    "task": "Rigging",
+    "asset": "camRig",
+    "version": "v006",
+    "type": "asset",
+    "locations": {
+        "global": "I:\\swaBeast_2511\\03_Production\\Assets\\Props\\camRig\\Scenefiles\\Rigging\\Rigging\\camRig_Rigging_v006.ma"
+    },
+    "comment": "fix film gate ratio",
+    "project_name": "swaWicked_2506",
+    "fps": 25.0,
+    "date": "09.12.25 15:15:48",
+    "dependencies": [],
+    "externalFiles": [
+        "I:\\swaBeast_2511\\03_Production\\Assets\\Props\\camRig\\Scenefiles\\Rigging\\Rigging\\camRig_Rigging_v006.ma"
+    ],
+    "username": "Fr\u00e9d\u00e9ric Dewit",
+    "user": "fde",
+    "filename": "camRig_Rigging_v006.ma"
+}

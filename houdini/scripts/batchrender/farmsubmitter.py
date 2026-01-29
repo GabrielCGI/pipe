@@ -82,7 +82,7 @@ class Farm_Submitter(loprender_module.Farm_Submitter):
             saveScene=saveScene,
             incrementScene=incrementScene,
             sanityChecks=sanityChecks,
-            versionWarning=False,
+            versionWarning=False
         )
         
         if result:

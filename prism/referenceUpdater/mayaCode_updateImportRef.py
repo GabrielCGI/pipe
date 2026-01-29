@@ -1,5 +1,5 @@
 import maya.cmds as cmds
-import maya.standalone
+# import maya.standalone
 import ctypes
 import msvcrt
 import sys
@@ -26,7 +26,7 @@ def error(msg):
 
 def debugger():
     sys.path.append("R:/pipeline/networkInstall/python_shares/python311_debug_pkgs/Lib/site-packages")
-    from debug import debug
+    import debug
     debug.debug()
     debug.debugpy.breakpoint()
 
@@ -88,12 +88,10 @@ def findSplitVariant(product_path, new_product_default, path_file_in_scene):
             new_product = folder
             find = False
             if not path_file_in_scene:
-                print("dd")
                 break
-            print("blabla", folder, path_file_in_scene)
+
             for split_folder in path_file_in_scene.split("/"):
                 if folder == split_folder:
-                    print("trouver")
                     find = True
                     break
             if find:
@@ -288,7 +286,9 @@ def CoreStandalone():
     infoP('\n\n\n\nSTART ------------------------------ILLOGIC REFERENCE UPDTE/IMPORT------------------------------------')
     if dataEnv["standalone"]:
         infoP("//ILLOGIC    Open scene...")
-        cmds.file(scene, open=True, force=True, loadReferenceDepth="none")
+        cmds.file(scene, open=True, force=True) # si sa crash à l'ouverture de maya en standalone mayapy.exe il faudras remetre ceci dans la fonction cmds.file :' , loadReferenceDepth="none"  '
+        
+
 
     infoP("\n//ILLOGIC------------    find Reference in the scene...")
     refInScene = findRefInScene()
@@ -339,12 +339,20 @@ def CoreStandalone():
 if __name__ == "__main__":
     if dataEnv["standalone"]:
         import maya.cmds as cmds
+        import maya.standalone
         maya.standalone.initialize(name='python')
-        import pymel.core as pm
+        try:
+            import pymel.core as pm
+        except ImportError:
+            sys.path.append(r"R:/pipeline/networkInstall/python_shares/python311_pymel_pkgs/Lib/site-packages/pymel")
+            import pymel.core as pm
+    
 
     CoreStandalone()
 
+
     if dataEnv["standalone"]:
+        import maya.standalone
         maya.standalone.uninitialize()
 
 

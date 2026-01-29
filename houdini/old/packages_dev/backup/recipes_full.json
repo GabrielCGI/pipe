@@ -1,0 +1,10 @@
+{
+    "env": [
+        {"HOUDINI_CUSTOM_RECIPE_DIR":"I:/pipeline/pipe/houdini/recipes"}, 
+        {"HOUDINI_CUSTOM_RECIPE_LIBRARY":"ill_recipes_share"}, 
+        {"HOUDINI_OTLSCAN_PATH":"I:/pipeline/pipe/houdini/recipes"}
+    ],
+
+}
+
+

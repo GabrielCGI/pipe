@@ -10,7 +10,6 @@ QWidget#w_execution {
     border: 1px solid BLACK;
     border-radius: 10px;
     background-color: SECONDARY_COLOR;
-    /* font-size: 13pt; */
 }
 
 QTreeWidget {
@@ -84,6 +83,16 @@ QWidget#w_description {
     border-radius: 10px;
     background-color: SECONDARY_COLOR;
     /* font-size: 13pt; */
+}
+
+QWidget#w_shotitem, QWidget#w_shotitem > * {
+    /* border: 1px solid BLACK; */
+    border-radius: 10px;
+    background-color: transparent;
+    /* font-size: 13pt; */
+}
+QWidget#w_shotitem > QPushButton {
+    border: 1px solid BLACK;
 }
 
 /* QLabel {

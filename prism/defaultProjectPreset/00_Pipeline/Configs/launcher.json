@@ -441,19 +441,19 @@
             "uid": "eb272e42-c918-11f0-8ad0-581122d38c57"
         },
         {
-            "label": "Account Licence",
+            "label": "Software Access",
             "category": "URL",
-            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\00_Pipeline\\Configs\\LauncherIcons\\Account Licence.png",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Software Access 2.png",
             "versions": [
                 {
                     "label": "Version 1",
-                    "mode": "URL",
-                    "cmd": "https://www.notion.so/illogic/Accounts-Softs-Illogics-1f6ba86df68e479f8714932f893e5e70",
+                    "mode": "Shell Command",
+                    "cmd": "R:\\access\\Software_Access.pdf",
                     "preferred": true,
                     "environment": {}
                 }
             ],
-            "uid": "2a495ae7-d1ea-11f0-bd4e-74d02b2741ff"
+            "uid": "9b7897d1-ec7e-11f0-9448-74d02b2741ff"
         }
     ],
     "prismVersions": [

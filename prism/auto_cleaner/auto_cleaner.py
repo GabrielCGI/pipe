@@ -32,17 +32,13 @@ VERSION_PATTERN_RE = re.compile(r"v\d{3,9}")
 
 
 def getLogger(log_name="unnamed"):
-    is_log_setup = loggingsetup.setup_log(
+    loggingsetup.setup_log(
         logName=log_name,
         logConfigPath=LOG_CONFIG,
         logDirectory=LOG_DIRECTORY,
         with_time=True
     )
-    if is_log_setup:
-        print("Log is setup")
-    else:
-        print("Log failed to setup")
-    return logging.getLogger(__name__)
+    return logging.getLogger(__package__)
 
 
 def getAllFiles(directory: str):
@@ -176,7 +172,14 @@ def deleteAllIndex(to_clear: list, indexes: list):
     return to_clear
 
 
-def getSafesVersions(versions: list) -> list:
+def isSafeVersionFile(file: str) -> bool:
+    current_time = time.time()
+    last_m = os.path.getmtime(file)
+    elapsed_day = (current_time - last_m) / 86400
+    return elapsed_day > _MIN_ELAPSED_DAY
+
+
+def getSafeVersionsDirectories(versions: list) -> list:
     to_skip = []
     # check date
     for i, version_path in enumerate(versions):
@@ -184,8 +187,8 @@ def getSafesVersions(versions: list) -> list:
         all_files = getAllFiles(version_path)
         # check date
         last_m = getLastModificationTime(all_files)
-        elapsed_time = (current_time - last_m) / 86400
-        if elapsed_time < _MIN_ELAPSED_DAY:
+        elapsed_day = (current_time - last_m) / 86400
+        if elapsed_day < _MIN_ELAPSED_DAY:
             to_skip.append(i)
             continue
     # clear versions
@@ -248,7 +251,7 @@ def getDirectoriesToClean(
             if (version_pattern_compiled.fullmatch(version_basename)):
                 versions.append(version_path)
         logger.info(f"Number of version before safety check: {len(versions)}")
-        versions = getSafesVersions(versions)
+        versions = getSafeVersionsDirectories(versions)
         logger.info(f"Number of version after safety check: {len(versions)}")
         versions.sort()
         layer_data = {}
@@ -285,16 +288,18 @@ def getScenefilesToClean(
     for task_directory in task_directories:
         scenefiles = os.listdir(task_directory)
         sf_versions = {}
-        for sf in scenefiles:
-            sf_basename = os.path.basename(sf)
-            if os.path.normpath(sf) in exclude_list_normpath:
+        for sf_basename in scenefiles:
+            sf_fullpath = os.path.join(task_directory, sf_basename)
+            if not isSafeVersionFile(sf_fullpath):
+                continue
+            if os.path.normpath(sf_fullpath) in exclude_list_normpath:
                 continue
             version_match = version_pattern_compiled.search(sf_basename)
             if not version_match:
                 continue
             version_span = version_match.span()
             version = sf_basename[version_span[0]:version_span[1]]
-            sf_versions.setdefault(version, []).append(sf)
+            sf_versions.setdefault(version, []).append(sf_fullpath)
         task_datas = {}
         sorted_versions = sorted(sf_versions.keys())[:-count_to_keep]
         task_datas['versions'] =  [x for v in sorted_versions for x in sf_versions[v]]

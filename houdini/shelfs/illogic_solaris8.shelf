@@ -14,8 +14,9 @@
     <memberToolshelf name="illogicLighting"/>
     <memberToolshelf name="illogicShading"/>
     <memberToolshelf name="illogicSolaris"/>
-    <memberToolshelf name="prism"/>
     <memberToolshelf name="illogicFxCfx"/>
+    <memberToolshelf name="prism"/>
+    <memberToolshelf name="develop"/>
   </shelfSet>
 
   <toolshelf name="illogicSolaris" label="Illogic Solaris">
@@ -26,6 +27,7 @@
     <memberTool name="autoconnect_ui"/>
     <memberTool name="Lib_Importer"/>
     <memberTool name="update_assets_USD"/>
+    <memberTool name="update_assets_USD_NEW"/>
     <memberTool name="usd_update_check"/>
     <memberTool name="restart_houdini"/>
     <memberTool name="set_node_parameters"/>
@@ -162,22 +164,6 @@ blast.run()]]></script>
 primselector.run()]]></script>
   </tool>
 
-  <tool name="automanifest" label="Auto Manifest" icon="hicon:/SVGIcons.index?MISC_sketchbook.svg">
-    <script scriptType="python"><![CDATA[from imp import reload
-
-import automanifest.auto_manifest_dev_v1 as auto_manifest
-reload(auto_manifest)
-auto_manifest.run()]]></script>
-  </tool>
-
-  <tool name="automanifestv2" label="Auto Manifest V2" icon="hicon:/SVGIcons.index?MISC_sketchbook.svg">
-    <script scriptType="python"><![CDATA[from imp import reload
-
-import automanifest.auto_manifest_dev_v2 as auto_manifest
-reload(auto_manifest)
-auto_manifest.run()]]></script>
-  </tool>
-
   <tool name="usd_update_checker" label="USD Update Checker" icon="hicon:/SVGIcons.index?NETVIEW_reload_needsupdate.svg">
     <script scriptType="python"><![CDATA[import sys
 import importlib
@@ -300,5 +286,23 @@ def create_out_and_merge_from_selection():
 # Run it
 create_out_and_merge_from_selection()
 ]]></script>
+  </tool>
+
+  <tool name="update_assets_USD_NEW" label="Update Assets USD (New)" icon="hicon:/SVGIcons.index?NETVIEW_lop_info.svg">
+    <script scriptType="python"><![CDATA[import sys
+
+MODULE_PATH = "r:/pipeline/pipe/prism"
+    
+if not MODULE_PATH in sys.path:
+    sys.path.insert(0, MODULE_PATH)
+
+import USDToolBox_pck
+import PrismInit
+
+USDToolBox_pck.updateAssetsUSD_new.reload_modules()
+USDToolBox_pck.updateAssetsUSD_new.startUpdateAssetsUSD(
+    'houdini',
+    prism_core=PrismInit.pcore
+)]]></script>
   </tool>
 </shelfDocument>

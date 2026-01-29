@@ -1,0 +1,24 @@
+{
+    "project_path": "I:\\swaWicked_2506",
+    "asset_path": "Props\\camRig",
+    "department": "Rigging",
+    "task": "Rigging",
+    "asset": "camRig",
+    "version": "v004",
+    "type": "asset",
+    "locations": {
+        "global": "I:\\swaWicked_2506\\03_Production\\Assets\\Props\\camRig\\Scenefiles\\Rigging\\Rigging\\camRig_Rigging_v004.ma"
+    },
+    "comment": "film back set to match resolution",
+    "project_name": "swaWicked_2506",
+    "fps": 25.0,
+    "date": "11.08.25 16:27:16",
+    "dependencies": [],
+    "externalFiles": [
+        "R:\\pipeline\\pipe\\maya\\camRig_emile\\imagePlanes\\cinemaScope.png",
+        "I:\\swaWicked_2506\\03_Production\\Assets\\Props\\camRig\\Scenefiles\\Rigging\\Rigging\\camRig_Rigging_v002.ma"
+    ],
+    "description": "",
+    "username": "Mathieu Arc\u00e9",
+    "user": "mar"
+}

@@ -21,14 +21,15 @@ class splitVariantsRig():
         self.core = core
         self.data = {}
 
-    def passPrePublish(self):
+    def passPrePublish(self, force=False):
         if cmds.about(batch=True):
             return
         
         have_variant = True
         self.findNameCtrlVariant()
-        if not self.name_variant or not self.name_ctrl:
-            return 
+        if not force:
+            if not self.name_variant or not self.name_ctrl:
+                return 
         
         data = self.getDataInScene("IllogicVariantRIG")
         if data is None:
@@ -45,48 +46,49 @@ class splitVariantsRig():
             #self.saveDataInScene("IllogicPathRIG", data_path)
 
     #--------------------------------- methode pass PostExport ---------------------------------
-    def passPostExport(self):
-        data = self.getDataInScene("IllogicPathRIG")
-        if not data:
-            return
+    # !!!!!!!!!!!!!!!!!!WARNING WARNING!!!!!!!!!!!!!!!!!! j'ai commennter la methode car je crois qu'elle est pas utiliser dans la pipe elle ne sert a rien je crois
+    # def passPostExport(self):
+    #     data = self.getDataInScene("IllogicPathRIG")
+    #     if not data:
+    #         return
         
-        # reccuper le dernirer export de rigging pour re ecrire le products
-        data_last_version = self.core.products.getLatestVersionFromProduct("Rigging", self.entity)
-        product = data_last_version["product"]
-        version = data_last_version["version"]
-        asset = data_last_version["asset"]
-        path = data_last_version["path"]
+    #     # reccuper le dernirer export de rigging pour re ecrire le products
+    #     data_last_version = self.core.products.getLatestVersionFromProduct("Rigging", self.entity)
+    #     product = data_last_version["product"]
+    #     version = data_last_version["version"]
+    #     asset = data_last_version["asset"]
+    #     path = data_last_version["path"]
 
-        path_packages = str(Path(os.path.abspath(__file__)).parent)
-        new_scene_name = f"{asset}_{product}_{version}.ma"
-        path_scene = f"{path}/{new_scene_name}"
+    #     path_packages = str(Path(os.path.abspath(__file__)).parent)
+    #     new_scene_name = f"{asset}_{product}_{version}.ma"
+    #     path_scene = f"{path}/{new_scene_name}"
 
 
-        with open(f"{path_packages}/template_scene_rigging.ma", "r") as f:
-            file_texte =f.read()
+    #     with open(f"{path_packages}/template_scene_rigging.ma", "r") as f:
+    #         file_texte =f.read()
         
-        # convertie les donner en mel script
-        all_import_Reference = ""
-        for i, reference in enumerate(data):
-            if i == 0:
-                all_import_Reference += f'file -rdi 1 -ns ":" -rfn "{reference}" -op "v=0;"\n'
-                all_import_Reference += f'		 -typ "mayaAscii" "{data[reference]}";\n'
-            else:
-                all_import_Reference += f'file -rdi 1 -ns ":" -dr 1 -rfn "{reference}" -op "v=0;"\n'
-                all_import_Reference += f'		  -typ "mayaAscii" "{data[reference]}";\n'
+    #     # convertie les donner en mel script
+    #     all_import_Reference = ""
+    #     for i, reference in enumerate(data):
+    #         if i == 0:
+    #             all_import_Reference += f'file -rdi 1 -ns ":" -rfn "{reference}" -op "v=0;"\n'
+    #             all_import_Reference += f'		 -typ "mayaAscii" "{data[reference]}";\n'
+    #         else:
+    #             all_import_Reference += f'file -rdi 1 -ns ":" -dr 1 -rfn "{reference}" -op "v=0;"\n'
+    #             all_import_Reference += f'		  -typ "mayaAscii" "{data[reference]}";\n'
         
-        for reference in data:
-            all_import_Reference += f'file -r -ns ":" -dr 1 -rfn "{reference}" -op "v=0;" -typ "mayaAscii"\n'
-            all_import_Reference += f'		 "{data[reference]}";\n'
+    #     for reference in data:
+    #         all_import_Reference += f'file -r -ns ":" -dr 1 -rfn "{reference}" -op "v=0;" -typ "mayaAscii"\n'
+    #         all_import_Reference += f'		 "{data[reference]}";\n'
 
 
-        #edite le template pour correcpondre a l'assets
-        file_texte = file_texte.replace("__nameScene__.ma", new_scene_name)
-        file_texte = file_texte.replace("__insert__information__all_data__here__", all_import_Reference)
+    #     #edite le template pour correcpondre a l'assets
+    #     file_texte = file_texte.replace("__nameScene__.ma", new_scene_name)
+    #     file_texte = file_texte.replace("__insert__information__all_data__here__", all_import_Reference)
 
-        #save le fichier aux bon endroits dans la pipe
-        with open(path_scene, "w") as f:
-            f.write(file_texte)
+    #     #save le fichier aux bon endroits dans la pipe
+    #     with open(path_scene, "w") as f:
+    #         f.write(file_texte)
 
 
 
@@ -133,6 +135,7 @@ class splitVariantsRig():
             return None
 
         convert_data = json.loads(data[0].encode().decode('unicode_escape'))
+        print(convert_data)
         if not convert_data:
             return None
         return convert_data
@@ -145,6 +148,11 @@ class splitVariantsRig():
         all_last_version_product = []
         data_path = {}
 
+        # import socket
+        # if socket.gethostname() == "FALCON-01":
+        #     from . import debug
+        #     debug.debug()
+        #     debug.debugpy.breakpoint()
         #trouver la plus grande version possible de creer pour faire en sorte que tout les variants on la meme last_version possible
         #pour eviter aux moment de changer les variant qu'il y ai pas de soucis de mélange entre les ancienne version des variant  
         for export in self.data:
@@ -172,6 +180,10 @@ class splitVariantsRig():
                     nmb_variant = i
                     break
 
+            if nmb_variant is None:
+                cmds.warning(f"variant name not found: {str(nmb_variant)}, {str(all_variant_value)}")
+                continue
+            
             cmds.setAttr(f"{self.name_ctrl}.{self.name_variant}", nmb_variant)
 
 
@@ -221,7 +233,7 @@ class splitVariantsRig():
         outliner_widget = wrapInstance(int(ptr), QWidget)
         cmds.refresh()
 
-
+        self.data.clear()
         # interface pour choirisir si oui ou non on veux exporter telle modé avec telle variant
         self.windowRig = UI.UISelectExport(self.core, self.name_asset, data, outliner_widget, self.name_variant, self.name_ctrl, main_window)
         self.windowRig.exec()

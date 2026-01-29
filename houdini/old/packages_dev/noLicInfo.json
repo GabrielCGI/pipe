@@ -1,0 +1,7 @@
+{
+    "enable" : true,
+    "load_package_once": true,
+    "env":[
+        {"HOUDINI_LMINFO_VERBOSE": 0}
+        ]
+}
