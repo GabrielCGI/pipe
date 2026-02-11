@@ -13,7 +13,7 @@ import datetime
 from pathlib import Path
 
 PYTHON = r'R:\pipeline\networkInstall\python\Python310\python.exe'
-LOG_DIR = r'R:\devmaxime\discordbot\logs'
+LOG_DIR = r'R:\logs\deadline_discord_publish_logs'
 LOG = None
 
 def setupLog(usdfile: str):

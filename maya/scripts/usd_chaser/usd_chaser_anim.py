@@ -83,8 +83,15 @@ def startInheriteClass(core):
     last_usd_container = core.products.getLatestVersionFromProduct("USD", entity=entity)
     if not last_usd_container:
         return None
-
-    file_usd = f'{str(last_usd_container["sequence"])}-{str(last_usd_container["shot"])}_{str(last_usd_container["product"])}_{str(last_usd_container["version"])}.usda'
+    
+    
+    force_asset = False
+    if last_usd_container["type"] == "asset":
+        force_asset = True
+        file_usd = f'{str(last_usd_container["asset"])}_{str(last_usd_container["product"])}_{str(last_usd_container["version"])}.usda'
+    else:
+        file_usd = f'{str(last_usd_container["sequence"])}-{str(last_usd_container["shot"])}_{str(last_usd_container["product"])}_{str(last_usd_container["version"])}.usda'
+    
     file_path_usd = f'{str(last_usd_container["path"])}/{file_usd}'
     if not os.path.exists(file_path_usd):
         return
@@ -93,7 +100,7 @@ def startInheriteClass(core):
     sys.path.append("R:\pipeline\pipe\houdini\scripts")
     import inheriteClassVariant as icv
     reload(icv)
-    inClass = icv.inheriteClassAttr(file_path_usd, "Maya")
+    inClass = icv.inheriteClassAttr(file_path_usd, "Maya", forceAsset = force_asset)
 
     #afficher un message suivant le type d'erreur que va nous retourner l'inherite class
     core.popup(inClass.message, severity=inClass.error_type)

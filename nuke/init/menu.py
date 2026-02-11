@@ -187,7 +187,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     ilcgMenu: nuke.Menu = illogicMenu.addMenu("ILGC Suite")
     ilcgMenu.addCommand('ILGC_PosProject', 'nuke.createNode("ILGC_PosProject")')
     ilgcSubTracker: nuke.Menu = ilcgMenu.addMenu("ILGC_OFTracker")
-    ilgcSubTracker.addCommand('ILGC_OFTracker', 'nuke.nodePaste(\"R:/devmaxime/dev/nuke/nuke_gizmos/ILGC_OFTracker.nk\")')
+    ilgcSubTracker.addCommand('ILGC_OFTracker', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/ILGC_OFTracker.nk\")')
     ilgcSubTracker.addCommand("Retrack Every Nodes", "ilcg_scripts.retrack_every_nodes()")
     ilgcSubTracker.addCommand("Retrack Selected Nodes", "ilcg_scripts.retrack_selected_nodes()")
 

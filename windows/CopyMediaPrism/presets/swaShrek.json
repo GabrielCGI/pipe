@@ -16,9 +16,12 @@
             "layout",
             "Previz",
             "RoughLayout_playblast"
+        ],
+        "MASK": [
+            "ALPHA_MASK"
         ]
     },
     "source_path": "I:/swaShrek_2511",
     "dest_path": "D:/cache_resolve/swaShrek_2511",
-    "production": "swaShreck"
+    "production": "swaShrek"
 }

@@ -258,6 +258,10 @@ class UISelectExport(qt.QDialog):
     
     def executeScript(self):
         self.converteData()
+        if self.checkData():
+            qt.QMessageBox.warning(self, "WARING", "variant is not defined:\n Variant No Def")
+            return
+
         self.saveData = True
         self.close()
 
@@ -279,6 +283,13 @@ class UISelectExport(qt.QDialog):
         cmds.fileInfo("IllogicVariantRIG", json.dumps(self.data_to_Export))
         cmds.file(save=True)
 
+    def checkData(self):
+        for name_export in self.data_to_Export:
+            if name_export == "Variant No Def":
+                return True
+        
+        return False
+
     def closeEvent(self, event):
         if not self.saveData:
             self.data_to_Export = None
@@ -287,6 +298,8 @@ class UISelectExport(qt.QDialog):
                 self.resulte = False
         
         return super().closeEvent(event)
+
+
 
 
 

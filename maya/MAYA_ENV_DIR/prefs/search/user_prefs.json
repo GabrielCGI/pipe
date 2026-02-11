@@ -16,18 +16,19 @@
             "CreateImagePlane",
             "RepeatLast",
             "CreatePolygonType",
-            "HypershadeWindow",
-            "NamespaceEditor",
             "CreatePolygonCube",
             "CreatePolygonCylinder",
-            "HotkeyPreferencesWindow",
             "CreateCameraOnly",
+            "mayaUsdOpenUsdLayerEditor",
+            "NodeEditorWindow",
+            "GraphEditor",
+            "NamespaceEditor",
             "MatchTransform",
             "ParentConstraint",
-            "mayaUsdOpenUsdLayerEditor",
-            "GraphEditor",
-            "NodeEditorWindow",
-            "ReferenceEditor"
+            "ReferenceEditor",
+            "PluginManager",
+            "HypershadeWindow",
+            "HotkeyPreferencesWindow"
         ],
         [
             "share"

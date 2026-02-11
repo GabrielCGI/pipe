@@ -36,7 +36,7 @@ __license__ = "MIT License 2024"
 __version__ = "1.1"
 __status__ = "Production"
 
-# editer par frédéric dewit  pourquoi ?: pouvoir l'executer plusieur avec une selection multiple 
+# editer par frédéric dewit  pourquoi ?: pouvoir l'executer plusieur fois avec une selection multiple 
 
 import hou
 import voptoolutils

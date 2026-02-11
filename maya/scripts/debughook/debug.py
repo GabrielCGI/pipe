@@ -5,10 +5,18 @@ import logging
 
 DEBUG_MODE = True
 try:
-    sys.path.append(r'R:\devmaxime\virtualvens\sanitycheck\Lib\site-packages')
+    python_share_dir = os.getenv("ILL_PYTHON_SHARE_PATH", "")
+    DEBUGPY_PATH = os.path.join(
+        python_share_dir,
+        "python311_debug_pkgs/Lib/site-packages"
+    )
+    if not DEBUGPY_PATH in sys.path:
+        sys.path.insert(0, DEBUGPY_PATH)
     import debugpy
-except:
+except ImportError as e:
+    print(e)
     DEBUG_MODE = False
+
 
 logger = logging.getLogger(__name__)
 _HAS_LOGGER = False

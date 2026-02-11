@@ -1,0 +1,19 @@
+{
+    "filters": {
+        "COMPOSITING": [],
+        "ANIM": [
+            "anim",
+            "anim_playblast",
+            "playblast"
+        ],
+        "RLO": [
+            "RoughtLayout",
+            "layout",
+            "Previz",
+            "RoughLayout_playblast"
+        ]
+    },
+    "source_path": "I:/mikes_2511",
+    "dest_path": "C:/cache_anim/mikes_2511",
+    "production": "mikes_animation"
+}

@@ -12,7 +12,6 @@
     <memberTool name="kma_mat_char"/>
     <memberTool name="CreateAutoVariant"/>
     <memberTool name="material_finder"/>
-    <!-- <memberTool name="update_tex"/> -->
     <memberTool name="rat_manager"/>
   </toolshelf>
 
@@ -112,23 +111,22 @@ mtlximage_path_updatev2.run()]]></script>
   </tool>
 
   <tool name="rat_manager" label=".rat manager" icon="hicon:/SVGIcons.index?DESKTOP_rat.svg">
-    <script scriptType="python"><![CDATA[import RAT_pck
-from imp import reload
+    <script scriptType="python"><![CDATA[from importlib import reload
 import sys
 import socket
 
-MODULE_PATH = r"R:\devAndrew\houdini\RAT_pck"
+MODULE_PATH = r"R:\pipeline\pipe\houdini\scripts"
 
-if socket.gethostname() == "SPRINTER-04":
-    MODULE_PATH = r"R:\devAndrew\houdini\V1"
+#if not MODULE_PATH in sys.path :
+sys.path.insert(0,MODULE_PATH)
+    
+import ratmanager
+print(ratmanager)
+reload(ratmanager)
 
-if not MODULE_PATH in sys.path :
-    sys.path.insert(0,MODULE_PATH)
+print(MODULE_PATH)
 
-import RAT_pck
-reload(RAT_pck)
-
-RAT_pck.run()
+ratmanager.run()
 ]]></script>
   </tool>
 </shelfDocument>

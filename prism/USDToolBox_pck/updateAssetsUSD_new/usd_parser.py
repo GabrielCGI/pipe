@@ -20,7 +20,9 @@ except: # pragma: no cover
 logger = logging.getLogger(__name__)
 
 SHOW_LOGS = False
-
+VERSION_PATTERN = r'v\d{2,9}'
+VERSION_PATTERN_COMPILED = re.compile(VERSION_PATTERN)
+USD_EXTS = ('.usd', '.usda', '.usdc')
 
 class USDParser():
     
@@ -131,8 +133,7 @@ class USDParser():
         
         # parse alternate versions paths
         glob_pattern = (
-            re
-            .sub(r'v\d{2,9}', 'v*', resolved_path.as_posix())
+            VERSION_PATTERN_COMPILED.sub('v*', resolved_path.as_posix())
             .replace(extension, '.usd*')
         )
         glob_versions = glob.glob(glob_pattern)
@@ -152,9 +153,8 @@ class USDParser():
             return assetPathProcessed
         
         # parse versions digits
-        version_pattern = r'.*?v(\d{2,9}).*?'
-        latest_match = re.search(version_pattern, versions[-1])
-        current_match = re.search(version_pattern, assetPathProcessed)
+        latest_match = VERSION_PATTERN_COMPILED.search(versions[-1])
+        current_match = VERSION_PATTERN_COMPILED.search(assetPathProcessed)
         if not current_match or not latest_match:
             self._log(
                 f"❌ Skipped (invalid or unresolvable): {assetPathProcessed}"
@@ -164,9 +164,9 @@ class USDParser():
             return assetPathProcessed
         
         # check if the current asset is the latest
-        latest_version = int(latest_match.group(1))
-        current_version = int(current_match.group(1))
-        if latest_version == current_version:
+        current_version = int(current_match.group(0)[1:])
+        int_latest_version = int(latest_match.group(0)[1:])
+        if int_latest_version == current_version:
             logger.debug(' - Already updated')
             self._log(f"🟰 Skipping up-to-date: {assetPathProcessed}")
             self._add_item_list_abs(item)
@@ -176,13 +176,13 @@ class USDParser():
         logger.debug(' - Can be updated')
         self._isupdate = False
         if not Path(assetPathProcessed).is_absolute():
-            updatedPath = re.sub(
-                r'v\d{2,9}', f'v{latest_match.group(1)}',
+            updatedPath = VERSION_PATTERN_COMPILED.sub(
+                f'v{int_latest_version}',
                 assetPathProcessed
             )
         else:
-            updatedPath = re.sub(
-                r'v\d{2,9}', f'v{latest_match.group(1)}',
+            updatedPath = VERSION_PATTERN_COMPILED.sub(
+                f'v{int_latest_version}',
                 relative_path.as_posix()
             )
         latest_extension = os.path.splitext(versions[-1])[1]
@@ -190,11 +190,121 @@ class USDParser():
         
         item.updated_path = updatedPath
         item.from_version = current_version
-        item.to_version = latest_version
+        item.to_version = int_latest_version
+        self._add_item_list_once(item)
+        return assetPathProcessed
+    
+    
+    def _parse_filter_scandir(self, assetPathProcessed):
+        logger.debug(f'Parse {assetPathProcessed}')
+        
+        if self.update_check_only and not self._isupdate:
+            return assetPathProcessed
+        
+        # resolve path from context or layer if needed
+        resolved_path = self._resolve_path(assetPathProcessed, self.dirname)
+        if len(resolved_path.parts) < 2: # pragma: no cover
+            logger.debug(' - path is too short')
+            return assetPathProcessed
+        
+        # create item
+        relative_path = Path(*resolved_path.parts[1:])
+        item = at.AssetItem(
+            assetPathProcessed,
+            relative_path.as_posix(),
+            None,
+            None
+        )
+        item.layer_path = Path(self.previousLayer.realPath).as_posix()
+        item.can_be_updated = self._enable_update
+        
+        # check extension for USD files
+        extension = resolved_path.suffix
+        if not extension in ['.usdc', '.usda', ".usd"]: # modif fred ajout de ".usd"
+            logger.debug(' - not an USD file')
+            self._add_item_list_abs(item)
+            return assetPathProcessed
+        
+        asset_dirname_px = resolved_path.parent.as_posix()
+        version_dir_match = VERSION_PATTERN_COMPILED.search(asset_dirname_px)
+        if not version_dir_match:
+            logger.debug(" - cannot find version directory")
+            return assetPathProcessed
+        # parse alternate versions paths
+        version_name_match = VERSION_PATTERN_COMPILED.search(resolved_path.name)
+        if version_name_match:
+            name_start_idx = version_name_match.span()[0]
+            name_start = resolved_path.name[:name_start_idx]
+        else:
+            name_start = resolved_path.name
+        version_directory = asset_dirname_px[:version_dir_match.span()[0]]
+        latest_version = None
+        for version in os.scandir(version_directory):
+            if not version.is_dir():
+                continue
+            if latest_version is None or version.name > latest_version[0]:
+                for f in os.scandir(version.path):
+                    if f.name.endswith(USD_EXTS) and f.name.startswith(name_start):
+                        latest_version = (version.name, f.path)
+                        break
+                # for filepath in Path(version.path).glob(glob_pattern):
+        
+        if latest_version is None:
+            self._log(
+                f"❌ Did not found others versions: {assetPathProcessed}"
+            )
+            logger.debug(' - did not found others versions')
+            self._add_item_list_abs(item)
+            return assetPathProcessed
+        
+        # parse versions digits
+        current_match = VERSION_PATTERN_COMPILED.search(assetPathProcessed)
+        if not current_match:
+            self._log(
+                f"❌ Skipped (invalid or unresolvable): {assetPathProcessed}"
+            )
+            logger.debug(' - skipped (invalid or unresolvable)')
+            self._add_item_list_abs(item)
+            return assetPathProcessed
+        
+        # check if the current asset is the latest
+        current_version = int(current_match.group(0)[1:])
+        int_latest_version = int(latest_version[0][1:])
+        if int_latest_version == current_version:
+            logger.debug(' - Already updated')
+            self._log(f"🟰 Skipping up-to-date: {assetPathProcessed}")
+            self._add_item_list_abs(item)
+            return assetPathProcessed
+            
+        # update item to show latest and current version
+        logger.debug(' - Can be updated')
+        self._isupdate = False
+        if not Path(assetPathProcessed).is_absolute():
+            updatedPath = VERSION_PATTERN_COMPILED.sub(
+                latest_version[0],
+                assetPathProcessed
+            )
+        else:
+            updatedPath = VERSION_PATTERN_COMPILED.sub(
+                latest_version[0],
+                relative_path.as_posix()
+            )
+        latest_extension = os.path.splitext(latest_version[1])[1]
+        updatedPath = os.path.splitext(updatedPath)[0] + latest_extension
+        
+        item.updated_path = updatedPath
+        item.from_version = current_version
+        item.to_version = int_latest_version
         self._add_item_list_once(item)
         return assetPathProcessed
 
 
+    def _parse_dependencies(self, layer):
+        self.previousLayer = layer
+        self._isupdate = True
+        UsdUtils.ModifyAssetPaths(layer, self._parse_filter_scandir)
+
+  
     def _apply_parse_filter(self, layer, depInfos):
         if layer.identifier == self.previousLayer.identifier:
             return depInfos
@@ -203,21 +313,15 @@ class USDParser():
             return depInfos
         self.dirname = Path(path).parent
         self.previousLayer = layer
-        UsdUtils.ModifyAssetPaths(layer, self._parse_filter)
+        UsdUtils.ModifyAssetPaths(layer, self._parse_filter_scandir)
         self.dirname = ''
         return depInfos
-
-
-    def _parse_dependencies(self, layer):
-        self.previousLayer = layer
-        self._isupdate = True
-        UsdUtils.ModifyAssetPaths(layer, self._parse_filter)
         
 
     def _recursive_parse_dependencies(self, layer):
         self._enable_update = False
         self.previousLayer = layer
-        UsdUtils.ModifyAssetPaths(layer, self._parse_filter)
+        UsdUtils.ModifyAssetPaths(layer, self._parse_filter_scandir)
         UsdUtils.ComputeAllDependencies(
             layer.identifier,
             self._apply_parse_filter
@@ -250,15 +354,16 @@ class USDParser():
 
         Args:
             usd_path (str): USD layer path.
-        """        
+        """
         resolved_path = self._resolve_path(usd_path, os.path.dirname(usd_path))
         extension = resolved_path.suffix
         if not extension in ['.usdc', '.usda', ".usd"]:
             return
         glob_pattern = (
-            re
-            .sub(r'v\d{2,9}', 'v*', resolved_path.as_posix())
-            .replace(extension, '.usd*')
+            VERSION_PATTERN_COMPILED.sub(
+                'v*',
+                resolved_path.as_posix()
+            ).replace(extension, '.usd*')
         )
         glob_versions = glob.glob(glob_pattern)
         versions = []
@@ -268,7 +373,10 @@ class USDParser():
         versions.sort()
         if not len(versions):
             return
-        return versions[-1]
+        latest_version = VERSION_PATTERN_COMPILED.search(versions[-1])
+        if not latest_version:
+            return
+        return latest_version.group(0)
 
 
     # -------------------------------Update USD-------------------------------
@@ -334,7 +442,6 @@ class USDParser():
 
 
     def create_new_version(self, layer: Sdf.Layer, core):
-        # TODO Handle versioninfo.json
         project_path = Path(core.projectPath)
         project_offset = len(project_path.parts)
         usd_api = core.getPlugin("USD").api

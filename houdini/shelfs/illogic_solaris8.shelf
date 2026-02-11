@@ -17,6 +17,8 @@
     <memberToolshelf name="illogicFxCfx"/>
     <memberToolshelf name="prism"/>
     <memberToolshelf name="develop"/>
+    <memberToolshelf name="gsops_shelf"/>
+    <memberToolshelf name="lfrimat"/>
   </shelfSet>
 
   <toolshelf name="illogicSolaris" label="Illogic Solaris">
@@ -133,9 +135,9 @@ restart.restart_houdini()]]></script>
   </tool>
 
   <tool name="autoconnect_ui" label="Auto Connect" icon="R:/pipeline/pipe/houdini/shelfs/icons/autoconnect.png">
-    <script scriptType="python"><![CDATA[import autoconnect_ui
+    <script scriptType="python"><![CDATA[import autoconnect
 
-autoconnect_ui.main()]]></script>
+autoconnect.main()]]></script>
   </tool>
 
   <tool name="set_node_parameters" label="Set Nodes Parameters" icon="hicon:/SVGIcons.index?VOP_complement.svg">

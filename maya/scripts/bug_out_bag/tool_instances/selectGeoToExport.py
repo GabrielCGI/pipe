@@ -26,32 +26,19 @@ class GeoExport(MultipleActionTool):
 
     def select_all_geo(self, parent):
         """cette fonction a pour but de seletctionner rapidement tous les dossier, qui s'appellent geo(en ignorant le namespace) et qui sont une reference"""
-        geo_objects = []
-        real_geoObject=[]
-        dag_nodes = cmds.ls(dag=True)
-        for node in dag_nodes:
-            if 'geo' in node: geo_objects +=[node]
+        hierarchy_nodes =cmds.listRelatives(parent, allDescendents=True, s=False, f=True)
+        if hierarchy_nodes is None:
+            return
+        
+        nodes_find = set()
+        for node in hierarchy_nodes:
+            if ":rig|" in node:
+                continue
+            elif node.endswith(":geo"):
+                nodes_find.add(node)
 
-        for geo_object in geo_objects:
-            parts=geo_object.split(":")
-            for part in parts:
-                if part == "geo":
-                    real_geoObject.append(geo_object)
-        print(real_geoObject)
-
-        hierarchy_nodes =cmds.listRelatives(parent, allDescendents=True, )
-        if hierarchy_nodes:
-            hierarchy_nodes.append(parent)
-            print(hierarchy_nodes)
-            print(real_geoObject)
-            filtered_nodes = [node for node in real_geoObject if node in hierarchy_nodes]
-            # Sélectionner les objets filtrés
-            if filtered_nodes:
-                cmds.select(filtered_nodes, add=1)
-                print(f"Les objets suivants ont été sélectionnés: {filtered_nodes}")
-            else:
-                print("Aucun objet contenant 'geo' dans le nom n'a été trouvé.")
-        else : print(f"{parent} n'a pas d'enfants")
+        if nodes_find:
+            cmds.select(nodes_find, add=True)
 
     def on_button_click(self,*args):
         cmds.select(clear=1)

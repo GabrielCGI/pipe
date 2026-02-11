@@ -33,7 +33,7 @@ class ChangeHuskRenderCommand:
         self.core.plugins.monkeyPatch(plugin.getHuskRenderScript, self.getHuskRenderScript, self, force=True)
 
     def getHuskRenderScript(self):
-        script_path = r"R:/pipeline/pipe/prism/ranch_cache_scripts/husk_render_v3.py"
+        script_path = "R:/pipeline/pipe/prism/husk_render_scripts/illogic_husk_render.py"
         with open(script_path, "r", encoding="utf-8") as f:
             script = f.read()
         return script

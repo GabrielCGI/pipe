@@ -34,6 +34,11 @@ class AnimLayoutTools(MultipleActionTool):
                 "action": self.startControler,
                 "row": 0
             },
+            "openMatchCam": {
+                "text": "Match Cameras",
+                "action": self.match_cameras,
+                "row": 0
+            }
         }
         tooltip = "open Reference Updater"
         super().__init__(
@@ -66,3 +71,7 @@ class AnimLayoutTools(MultipleActionTool):
 
         except Exception as e:
             print(e)
+    
+    def match_cameras(self):
+        import match_cameras
+        match_cameras.match_cameras()

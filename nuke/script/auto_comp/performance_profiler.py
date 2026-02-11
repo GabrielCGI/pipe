@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 _PROFILER = cProfile.Profile()
-_PROFILER_STATS_DIR = "R:/devmaxime/dev/nuke/nuke_scripts/auto_comp/dump_stats"
+_PROFILER_STATS_DIR = "R:/pipeline/pipe/nuke/script/auto_comp/dump_stats"
 
 def profile_function(func):
     def inner(*args, **kwargs):

@@ -25,10 +25,12 @@ def error(msg):
     print("ILLOGIC ERROR : " + str(msg), file=sys.stderr)
 
 def debugger():
-    sys.path.append("R:/pipeline/networkInstall/python_shares/python311_debug_pkgs/Lib/site-packages")
-    import debug
-    debug.debug()
-    debug.debugpy.breakpoint()
+    import socket
+    if socket.gethostname() == "FALCON-01":
+        sys.path.insert(0, "R:/pipeline/networkInstall/python_shares/python311_debug_pkgs/Lib/site-packages/debug")
+        import debug
+        debug.debug()
+        debug.debugpy.breakpoint()
 
 def catch_error(dataEnv):
     if not dataEnv or type(dataEnv) != dict:
@@ -51,15 +53,20 @@ def findLastScene(Projet, nameSpace, Type, path_file_in_scene = None):
 
     extention = None
     product = departement
-    if departement == "Rigging":
+    type_element = "Assets"
+    if departement == "Rigging" and "toAnim" not in path_file_in_scene:
         new_rigging = findSplitVariant(rf"{Projet}03_Production/Assets/{Type}/{nameSpace}/Export", "Rigging", path_file_in_scene)
         if new_rigging is not None:
             product = new_rigging
         extention = "ma"
+    elif departement == "Rigging" and "toAnim" in path_file_in_scene:
+        type_element = "Shots"
+        product = "toAnim"
+        extention = "ma"
     elif departement == "toRig":
         extention = "usdc"
     
-    dosAsset = rf"{Projet}03_Production/Assets/{Type}/{nameSpace}/Export/{product}"
+    dosAsset = rf"{Projet}03_Production/{type_element}/{Type}/{nameSpace}/Export/{product}"
     last_file = None
     fileRef = None
 
@@ -67,12 +74,19 @@ def findLastScene(Projet, nameSpace, Type, path_file_in_scene = None):
         return None
 
     last_Version, _ = findLastVersion(dosAsset)
-    
-    last_file = f"{nameSpace}_{product}_{last_Version}.{extention}"
-    fileRef = rf"{Projet}03_Production/Assets/{Type}/{nameSpace}/Export/{product}/{last_Version}/{last_file}"
+    data_product = nameSpace
+    if "toAnim" in path_file_in_scene:
+        data_product = f"{Type}-{nameSpace}"
+
+    last_file = f"{data_product}_{product}_{last_Version}.{extention}"
+    fileRef = rf"{Projet}03_Production/{type_element}/{Type}/{nameSpace}/Export/{product}/{last_Version}/{last_file}"
     if not os.path.exists(fileRef):
-        error("ERROR path not foud.........................\n" + fileRef)
-        fileRef = None
+        last_file = f"{data_product}_{product}_{last_Version}.mb"
+        fileRef = rf"{Projet}03_Production/{type_element}/{Type}/{nameSpace}/Export/{product}/{last_Version}/{last_file}"
+        if not os.path.exists(fileRef):
+            error("ERROR path not foud.........................\n" + fileRef)
+            fileRef = None
+        
     
     return fileRef
 
@@ -216,10 +230,13 @@ def hierarchie():
                                 box = parent
                             else:
                                 parent = f"assets|{cat.lower()}"
-                                box = cmds.createNode("transform", n=node.split(":")[-1], ss=True, p=parent)
+                                box = node.split(":")[-1]
+                                if not cmds.objExists(box) and box != "cameras" and box != "assets" and box != "shooting":
+                                    box = cmds.createNode("transform", n=node.split(":")[-1], ss=True, p=parent)
 
-                            infoP(f'hierarchie of {node} in {parent}')
-                            cmds.parent(node, box)
+                            if box != "cameras" and box != "cameras" and box != "assets" and box != "shooting":
+                                infoP(f'hierarchie of {node} in {box}')
+                                cmds.parent(node, box)
                         
                         elif departement == "toRig":
                             infoP(f'hierarchie of rig in {node}')
@@ -286,7 +303,7 @@ def CoreStandalone():
     infoP('\n\n\n\nSTART ------------------------------ILLOGIC REFERENCE UPDTE/IMPORT------------------------------------')
     if dataEnv["standalone"]:
         infoP("//ILLOGIC    Open scene...")
-        cmds.file(scene, open=True, force=True) # si sa crash à l'ouverture de maya en standalone mayapy.exe il faudras remetre ceci dans la fonction cmds.file :' , loadReferenceDepth="none"  '
+        cmds.file(scene, open=True, force=True, loadReferenceDepth="none") # si sa crash à l'ouverture de maya en standalone mayapy.exe il faudras remetre ceci dans la fonction cmds.file :' , loadReferenceDepth="none"  '
         
 
 
@@ -301,7 +318,6 @@ def CoreStandalone():
             MSG +=  "\n" + str(len(refInScene[cat][i])) + "x " + i
     MSG += "\n\n"
     infoP(MSG)
-    
 
     if dataEnv["Update"]:
         infoP("\n//ILLOGIC------------    Update all reference...")

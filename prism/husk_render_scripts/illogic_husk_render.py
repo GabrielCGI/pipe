@@ -228,6 +228,7 @@ args = [
     renderSettings,
 #   "--windows-console",
 #    "wait",
+    "--autocrop", "C,A,holdout_shadows"
 ]
 
 if settings.get("legacyExrMode"):

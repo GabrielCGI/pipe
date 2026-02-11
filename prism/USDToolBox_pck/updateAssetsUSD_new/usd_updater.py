@@ -617,6 +617,48 @@ class MainInterface(Qt.QMainWindow):
             )
     
     
+    def ask_latest(self, pathfile: str):
+        versions = self.check_latest_container(pathfile)
+        if versions is None:
+            return pathfile
+        current_version, last_version = versions
+        if last_version != current_version:
+            last_path = usd_parser.VERSION_PATTERN_COMPILED.sub(last_version, pathfile)
+            ask_latest = Qt.QMessageBox(parent=self)
+            ask_latest.setText(
+                "A newer USD container is available :\n - "
+                f"{current_version} => {last_version}\n"
+            )
+            ask_latest.setInformativeText(
+                "Would you like to update your layer from the latest version ?",
+            )
+            ask_latest.setStandardButtons(
+                Qt.QMessageBox.StandardButton.Apply
+                | Qt.QMessageBox.StandardButton.Cancel
+            )
+            ask_latest.setDefaultButton(
+                Qt.QMessageBox.StandardButton.Cancel
+            )
+            ask_latest.setWindowTitle("USD Container Warning")
+            ask_latest.setWindowModality(Qtc.Qt.WindowModality.WindowModal)
+            should_update = ask_latest.exec_()
+            if should_update == Qt.QMessageBox.StandardButton.Apply:
+                return last_path
+        return pathfile
+    
+    
+    def check_latest_container(self, pathfile: str):
+        expanded_path = os.path.expandvars(pathfile)
+        last_version = self._usd_parser.get_last_version(expanded_path)
+        if last_version is None:
+            return
+        layer_type = self.getLayerType(expanded_path)
+        if layer_type != AssetListWidget.LayerType.CONTAINER:
+            return
+        current_version = usd_parser.VERSION_PATTERN_COMPILED.search(pathfile).group(0)
+        return current_version, last_version
+    
+    
     def find_USD_file_to_update(self):
         self.clearInterfaceData()
         current_mode = self.targetMode.currentIndex()
@@ -680,12 +722,20 @@ class MainInterface(Qt.QMainWindow):
                 layer_directory = f'_layer_{departement}_master'
             parts = list(layer_path_p.parts)
             parts[production_index+5] = layer_directory
-            layer_pattern = Path(*parts[:production_index+6]) / '*' / '*.usd*'
-            layers_list = glob.glob(layer_pattern.as_posix())
-            if not layers_list:
-                return
-            layers_list.sort()
-            return Path(layers_list[-1]).as_posix()
+            layer_pattern = Path(*parts[:production_index+6])
+            latest = None
+            for layers_version in os.scandir(layer_pattern.as_posix()):
+                if not layers_version.is_dir():
+                    continue
+                for f in os.scandir(layers_version.path):
+                    name = f.name
+                    if not name.endswith(usd_parser.USD_EXTS):
+                        continue
+                    if latest is None or name > latest[0]:
+                        latest = (name, f.path)
+            if latest is None:
+                return None
+            return Path(latest[1]).as_posix()
 
 
     def load_exports_names(self):
@@ -704,7 +754,7 @@ class MainInterface(Qt.QMainWindow):
     
     
     def get_path_from_houdini_node(self): # pragma: no cover
-        nodes = hou.selectedNodes()
+        nodes: list[hou.LopNode] = hou.selectedNodes()
         if not nodes:
             self.log("No node selected, could not parse usd export path")
             return []
@@ -714,24 +764,29 @@ class MainInterface(Qt.QMainWindow):
             if node.type().name() == 'prism::LOP_Import::1.0':
                 try:
                     source_parm: hou.Parm = node.parm('filepath')
-                    source_path = source_parm.eval()
-                    usd_paths.append(source_path)
+                    source_path = source_parm.unexpandedString()
+                    pathfile = self.ask_latest(source_path)
+                    source_parm.set(pathfile)
+                    usd_paths.append(source_parm.eval())
                 except Exception as e:
                     logger.warning(
                         'Could not find file path in'
                         f' parm of node {node.name()}'
                     )
-            stage: Usd.Stage = node.stage()
-            try:
-                prism_metadata = stage.GetPrimAtPath('/prism_metadata')
-                source_attribute = prism_metadata.GetAttribute('prism_sources')
-                source_path = source_attribute.Get()[0]
-                usd_paths.append(source_path)
-            except Exception as e:
-                self.log(
-                    f"Could not found usd export from node {node.name()}",
-                    severity=logging.WARNING
-                )
+            else:
+                if not hasattr(node, "stage"):
+                    continue
+                stage: Usd.Stage = node.stage()
+                try:
+                    prism_metadata = stage.GetPrimAtPath('/prism_metadata')
+                    source_attribute = prism_metadata.GetAttribute('prism_sources')
+                    source_path = source_attribute.Get()[0]
+                    usd_paths.append(source_path)
+                except Exception as e:
+                    self.log(
+                        f"Could not found usd export from node {node.name()}",
+                        severity=logging.WARNING
+                    )
         return usd_paths        
 
 
@@ -746,9 +801,16 @@ class MainInterface(Qt.QMainWindow):
                 try:
                     source_parm: hou.Parm = node.parm('filepath')
                     source_path = source_parm.eval()
+                    raw_path = source_parm.unexpandedString()
                     last_version = self._usd_parser.get_last_version(source_path)
-                    if last_version is not None:
-                        source_parm.set(last_version)
+                    if last_version is None:
+                        continue
+                    last_path = usd_parser.VERSION_PATTERN_COMPILED.sub(
+                        last_version,
+                        raw_path
+                    )
+                    if os.path.exists(os.path.expandvars(last_path)):
+                        source_parm.set(last_path)
                 except Exception as e:
                     logger.warning(
                         'Could not find file path in'

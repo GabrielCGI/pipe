@@ -44,8 +44,8 @@ def set_luxcore_render_settings():
     scene.luxcore.viewport.halt_time = 30
 
     # Set resolution
-    scene.render.resolution_x = 2048
-    scene.render.resolution_y = 2048
+    #scene.render.resolution_x = 2048
+    #scene.render.resolution_y = 2048
     scene.render.image_settings.file_format = 'OPEN_EXR'
     scene.render.image_settings.color_depth = '16'
 
@@ -76,6 +76,7 @@ def set_caustic_light(pattern="shadow*"):
 
         # 1) force AREA
         light.type = 'AREA'
+        light.luxcore.exposure = 4
 
         # 2) maintenant size existe
         if hasattr(light, "size"):

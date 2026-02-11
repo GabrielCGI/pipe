@@ -12,11 +12,11 @@ LIST_MACHINE_DEBUG = ["FALCON-01"]
 
 
 class inheriteClassAttr():
-    def __init__(self, filePathImport, soft, clearFile=False):
+    def __init__(self, filePathImport, soft, clearFile=False, forceAsset = False):
         if not os.path.exists(filePathImport):
             print("no file found")
             return 
-        
+        self.forceAsset = forceAsset
         self.result = True
         self.soft = soft
         if self.soft == "Houdini":
@@ -280,12 +280,16 @@ class inheriteClassAttr():
         infoLay = None
         layerPath = []
         layerMaster = None
+        find_to_rm = "Assets"
+        if self.forceAsset:
+            find_to_rm = "Shots"
+
         for layer in used_layers:
-            if layerName_main in layer.identifier and not "Assets" in layer.identifier:
+            if layerName_main in layer.identifier and not find_to_rm in layer.identifier:
                 infoLay = layer.identifier.split("/")[-1]
                 layerFilePath.append(layer.identifier)
                 layerPath.append(layer.realPath)
-            elif layerName_master in layer.identifier and not "Assets" in layer.identifier:
+            elif layerName_master in layer.identifier and not find_to_rm in layer.identifier:
                 layerMaster = layer
         
             """if layerMaster and layerPath and infoLay:

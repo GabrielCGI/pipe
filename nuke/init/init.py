@@ -202,5 +202,4 @@ nuke.knobDefault("Shuffle2.label", "[value in1]")
 
 ## edit 2026.01.19 (YYYY.MM.DD)
 ## Add ILCG Suite Scripts and Gizmos
-nuke.pluginAddPath("R:/devmaxime/dev/nuke/nuke_scripts")
-nuke.pluginAddPath("R:/devmaxime/dev/nuke/nuke_gizmos")
+nuke.pluginAddPath("R:/pipeline/pipe/nuke/gizmos")

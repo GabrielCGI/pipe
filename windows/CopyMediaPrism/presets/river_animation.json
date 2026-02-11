@@ -1,0 +1,19 @@
+{
+    "filters": {
+        "COMPOSITING": [],
+        "ANIM": [
+            "anim",
+            "anim_playblast",
+            "playblast"
+        ],
+        "RLO": [
+            "RoughtLayout",
+            "layout",
+            "Previz",
+            "RoughLayout_playblast"
+        ]
+    },
+    "source_path": "I:/rivers_feature",
+    "dest_path": "I:/rivers_feature/04_Resources/Anim/RiversKpro",
+    "production": "river_animation"
+}

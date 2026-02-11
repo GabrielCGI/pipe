@@ -144,14 +144,15 @@ def findUSDPath(deadlinePlugin):
     dir = Path(job.JobOutputDirectories[0]) / "_usd"
     exr = job.JobOutputFileNames[0]
 
-    for ext in USD_EXT : 
-        usd_path = Path(dir / (exr.split('.')[0] + ext))
-        if usd_path.is_file():
-            log_info(f"USD found at : {usd_path}")
-            return usd_path
+    for file in os.scandir(dir):
+        filename = file.name
+        for ext in USD_EXT :
+            if filename.endswith(ext):
+                log_info(f"USD found at : {filename}")
+                return Path(file)
 
-    log_error(f"USD file not found : {usd_path}")
-    raise Exception("USD File not found")
+    log_error(f"USD file not found in folder : {dir}")
+    raise Exception(f"USD File not found at {dir}")
 
 def getAssetPathFromUSD(usd_file: str) -> Sdf.AssetPath:
     """Get Sdf.AssetPath from given USD file. 
