@@ -9,6 +9,7 @@ def reload_all_modules():
     from . import qt
     from . import ressource
     from . import shader
+
     importlib.reload(auto)
     importlib.reload(houdinilog)
     importlib.reload(map)
@@ -20,6 +21,7 @@ def reload_all_modules():
 def main(enable_debug=False, reload_all=False):
     if enable_debug:
         from . import debug
+
         importlib.reload(debug)
         # Also need to enable it in debug module
         debug.debug()

@@ -144,7 +144,7 @@ class CustomExport():
 
         path_scene = self.state.core.getCurrentFileName()
         self.entity = self.state.core.getScenefileData(path_scene)
-        asset_name = self.entity["asset"]
+        asset_name = "|" + self.entity["asset"]
         if not cmds.objExists(asset_name):
             self.PrintMSG(f"the '|{asset_name}' group does not exist")
         

@@ -1,5 +1,6 @@
-from hutil.PySide import QtWidgets
+from hutil.PySide import QtWidgets, QtGui, QtCore
 import hou
+import webbrowser
 
 
 class LPEDesigner(QtWidgets.QWidget):
@@ -93,6 +94,18 @@ class LPEDesigner(QtWidgets.QWidget):
         
         main_layout.addLayout(node_layout)
 
+        # ---------------- Documentation Link ----------------
+        doc_layout = QtWidgets.QHBoxLayout()
+        doc_layout.addStretch()
+        
+        self.btn_doc = QtWidgets.QPushButton("📖 How to add a Render Var (LPE)")
+        self.btn_doc.setStyleSheet("color: #4a9eff; text-decoration: underline;")
+        self.btn_doc.setCursor(QtGui.QCursor(QtCore.Qt.PointingHandCursor))  # CORRECTION ICI
+        doc_layout.addWidget(self.btn_doc)
+        
+        doc_layout.addStretch()
+        main_layout.addLayout(doc_layout)
+
         # Stretch pour pousser tout en haut
         main_layout.addStretch()
 
@@ -107,9 +120,6 @@ class LPEDesigner(QtWidgets.QWidget):
     # =========================
     # SIGNALS
     # =========================
-
-    def onCreateInterface(self):
-        super().onCreateInterface()
 
     def connect_signals(self):
 
@@ -144,6 +154,9 @@ class LPEDesigner(QtWidgets.QWidget):
         # Copy & Use Selected
         self.btn_copy.clicked.connect(self.copy_to_clipboard)
         self.btn_use_selected.clicked.connect(self.use_selected_node)
+        
+        # Documentation
+        self.btn_doc.clicked.connect(self.open_documentation)
 
     # =========================
     # PRESETS
@@ -168,11 +181,9 @@ class LPEDesigner(QtWidgets.QWidget):
         self.after_combo.setCurrentIndex(0)  # None
 
     def preset_transmission(self):
-        """Preset: C<T>+'or'.+L"""
         self.clear_events()
         self.cb_transmit.setChecked(True)
         self.rep_combo.setCurrentIndex(1)  # One or More (+)
-        self.tag_input.setText("or")
         self.after_combo.setCurrentIndex(2)  # Require after tag (.+)
         self.end_light.setChecked(True)
 
@@ -277,6 +288,13 @@ class LPEDesigner(QtWidgets.QWidget):
                 
         except Exception:
             pass  # Silencieux pour ne pas spammer les erreurs
+
+    def open_documentation(self):
+        """Ouvre la documentation sur comment ajouter une Render Var"""
+        # URL vers la doc SideFX officielle
+        url = "https://www.notion.so/illogic/Karma-LPE-3069d24ae7e380bb8ae0f502ab1b5a98?source=copy_link"
+        webbrowser.open(url)
+        hou.ui.setStatusMessage("Opening documentation in browser...", severity=hou.severityType.Message)
 
 
 def createInterface():

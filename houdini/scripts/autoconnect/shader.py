@@ -4,7 +4,6 @@ from . import map as mp
 
 
 class Shader:
-
     def __init__(self, name: str):
         self.name = name.lower()
         self.unversionned_map: list[mp.Map] = []
@@ -12,10 +11,8 @@ class Shader:
         self.selected_maps: list[mp.Map] = []
         self.allVersionsMaps: dict = {}
 
-
     def isEmpty(self) -> bool:
         return not (len(self.allVersionsMaps) or len(self.unversionned_map))
-
 
     def existMaps(self, mat: mp.Map, versionned=False):
         if not versionned:
@@ -29,7 +26,6 @@ class Shader:
                     return map_name
             return None
 
-
     def _parse_map(self, map_path: str) -> bool:
         map = mp.Map(map_path)
         if map.parse():
@@ -42,12 +38,11 @@ class Shader:
             return True
         return False
 
-
     def _parse_version_map(self, map_path: str) -> bool:
         new_map = mp.VersionMap(map_path)
         if new_map.parse():
             mat: str = self.existMaps(new_map, versionned=True)
-            # If the map already exists 
+            # If the map already exists
             # with a different version
             if mat is not None:
                 is_new_version = True
@@ -64,7 +59,6 @@ class Shader:
             return True
         return False
 
-
     def parse(self, map_path: str) -> bool:
         map_directory = os.path.dirname(map_path)
         version_match = mp.VERSION_PATTERN_COMPILE.search(map_directory)
@@ -72,7 +66,6 @@ class Shader:
             return self._parse_map(map_path)
         else:
             return self._parse_version_map(map_path)
-
 
     def setLatestMap(self):
         self.latest_maps.clear()

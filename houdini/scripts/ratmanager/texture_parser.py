@@ -182,7 +182,6 @@ class TextureFile(TextureItemInterface):
         return 1
     
     def get_num_toconv(self):
-        print(f"file to convert : {self.to_convert}")
         return self.to_convert
     
     def get_textures_paths(self):
@@ -216,7 +215,6 @@ class TextureFrames(TextureItemInterface) :
         return len(self.children)
     
     def get_num_toconv(self):
-        print(f"udim to convert : {self.to_convert}")
         return self.to_convert
     
     def get_textures_paths(self):
@@ -238,7 +236,6 @@ class TextureFrames(TextureItemInterface) :
     def compute_convert(self):
         nb_convert = 0
         for item in self.children :
-            print(f"Item : {item}")
             nb_convert += item.to_convert   
         self.to_convert = nb_convert
 
@@ -271,11 +268,15 @@ class TextureParser():
 
         self.accepted_nodes : list[str] = ["materiallibrary"]
 
-        self.find_textures_from_scene()
-        self.find_convert_files()
-
         for item in self.texture_items :
             item.update_item()
+
+    def clear(self):
+
+        self.texture_items.clear()
+        self.texture_paths.clear()
+        self.files_to_convert.clear()
+
 
     def find_textures_from_scene(self):
         """Find all nodes in a scene, and then all textures in those nodes.
@@ -284,7 +285,7 @@ class TextureParser():
             Exception: If not in solaris, stage does not exist causing an error
         """
 
-        print("Finding textures in scene")
+        self.clear()
 
         main_stage = hou.node("/stage")
         if not main_stage : 
@@ -293,32 +294,26 @@ class TextureParser():
         for node in main_stage.children() : 
             node_type = node.type().name()
             if node_type in self.accepted_nodes : 
-                print(f"Node : {node}")
+                print(f"node_ytpe : {node_type} , accepted nodes : {self.accepted_nodes}")
                 self.find_textures_from_node(node)
         
-        print("Done finding textures")
-
     def find_textures_from_node(self, node):
 
 
         stage = node.stage()  # OR node.editableStage(), depending on use
         node_name = node.name()
 
-        print(f"Finding texture in {node_name}")
-
         if not stage : 
             return
 
         for prim in stage.Traverse():
             if not prim.IsA(UsdShade.Shader):
-                print("Prim is not a shader")
                 continue
 
             shader = UsdShade.Shader(prim)
             attr = shader.GetInput("file") 
 
             if not attr:
-                print(f"Texture file not found in {node_name}")
                 continue
             
             attr_str = str(attr.Get())[1:-1] # paths are contained in @dir1/dir2/test.jpg@ , this removes the @ @
@@ -332,6 +327,7 @@ class TextureParser():
                     item.update_item()
                     break
 
+            texture_item = None
             # Remove the tile tokens if it has any (eg. UDIM)
             for token in TILE_ADDRESS_TOKENS : 
                 if token in attr_str :
@@ -343,6 +339,7 @@ class TextureParser():
                     for path in files_from_token:
                         textures_from_token.append(self.create_texture_item(path))
 
+                    
                     if not exists :
                         texture_item = TextureFrames(name=name, texture_path='', nodes=[node_name], children=textures_from_token)
                     #texture_item = self.create_item(name , files_from_token , [])
@@ -356,19 +353,15 @@ class TextureParser():
                     texture_item = TextureFile(name=name, texture_path=attr_str, nodes=[node_name])
                 #texture_item = self.create_item(name , attr_str , [])
 
-            if texture_item and (texture_item not in self.texture_items) : 
+            if texture_item and (not texture_item in self.texture_items) : 
                 self.texture_items.append(texture_item)
-
-            
-
 
     def create_texture_item(self, filepath, nodes=[]):
         name = self.get_texture_name(filepath)
         return TextureFile(name=name , texture_path=filepath, nodes=nodes)
 
-
     #--------------------- Converter Methods ----------------------
-    # FIXME
+
     def find_convert_files(self):
         """
             Using texture paths, look for all their corresponding .rat files in the folder
@@ -380,9 +373,7 @@ class TextureParser():
         checked_dirs = []
 
         for item in self.texture_items :
-            
-            print(f"Item texture path : {item.texture_path}")
-            
+                        
             files_to_convert = item.get_textures_paths()
 
             for texture_path in files_to_convert : 
@@ -427,14 +418,12 @@ class TextureParser():
             textures_list = self.get_all_files_to_convert()
 
         if len(textures_list) <= 0 : 
-            print("Rat conversion : we're done baby")
             if self.ui : 
                 self.ui.conversion_progress.setMaximum(1)
                 self.ui.conversion_progress.setValue(1)
             return
 
         if not textures_list:
-            print("hell naw")
             return None
 
         if not threads : 

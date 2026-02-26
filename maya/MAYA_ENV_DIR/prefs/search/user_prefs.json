@@ -18,17 +18,18 @@
             "CreatePolygonType",
             "CreatePolygonCube",
             "CreatePolygonCylinder",
-            "CreateCameraOnly",
-            "mayaUsdOpenUsdLayerEditor",
             "NodeEditorWindow",
-            "GraphEditor",
             "NamespaceEditor",
             "MatchTransform",
-            "ParentConstraint",
-            "ReferenceEditor",
             "PluginManager",
             "HypershadeWindow",
-            "HotkeyPreferencesWindow"
+            "GraphEditor",
+            "CreateCameraOnly",
+            "ExtractFace",
+            "HotkeyPreferencesWindow",
+            "ParentConstraint",
+            "ReferenceEditor",
+            "mayaUsdOpenUsdLayerEditor"
         ],
         [
             "share"

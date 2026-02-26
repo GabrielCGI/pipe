@@ -1,0 +1,1 @@
+Could not setup log from R:\pipeline/pipe/prism\USDToolBox_pck\updateAssetsUSD_new\config/logconfig.json

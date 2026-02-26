@@ -19,6 +19,8 @@
     <memberToolshelf name="develop"/>
     <memberToolshelf name="gsops_shelf"/>
     <memberToolshelf name="lfrimat"/>
+    <memberToolshelf name="shelf_1"/>
+    <memberToolshelf name="shelf_1"/>
   </shelfSet>
 
   <toolshelf name="illogicSolaris" label="Illogic Solaris">

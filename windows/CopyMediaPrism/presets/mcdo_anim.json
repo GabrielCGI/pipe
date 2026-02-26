@@ -1,0 +1,19 @@
+{
+    "filters": {
+        "COMPOSITING": [],
+        "ANIM": [
+            "anim",
+            "anim_playblast",
+            "playblast"
+        ],
+        "RLO": [
+            "RoughtLayout",
+            "layout",
+            "Previz",
+            "RoughLayout_playblast"
+        ]
+    },
+    "source_path": "I:/McDonald_2511",
+    "dest_path": "I:/McDonald_2511/04_Resources/Anim/Kpro",
+    "production": "mcdo_animation"
+}

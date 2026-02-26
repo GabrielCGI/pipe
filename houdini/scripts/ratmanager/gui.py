@@ -106,9 +106,10 @@ class MainInterface(Qt.QMainWindow):
         self.right_layout = Qt.QVBoxLayout(self.right_frame)
 
         self.setup_actions()
-        # self.setup_scene_options()
+        self.setup_scene_options()
 
         # Init 
+        self.rat_parser = texture_parser.TextureParser(ui = self)     
         self.layout.addWidget(self.right_frame)
         self.parse(True)
 
@@ -187,6 +188,8 @@ class MainInterface(Qt.QMainWindow):
         self.scene_include_actions_layout = Qt.QHBoxLayout()
 
         self.scene_include = Qt.QListWidget()
+        self.scene_include.setSelectionMode(Qt.QAbstractItemView.ExtendedSelection)
+
         self.scene_include_add = Qt.QPushButton('Add')
         self.scene_include_rm = Qt.QPushButton('Remove')
         self.scene_include_actions_layout.addWidget(self.scene_include_add)
@@ -197,12 +200,16 @@ class MainInterface(Qt.QMainWindow):
         self.scene_options_layout.addRow(
             'Scan nodes', self.scene_include_layout)
         
+        # self.scene_include.addItem("test_label")
+        # self.scene_include.addItem("test_label") 
+        # self.scene_include.addItem("test_label") 
+        # self.scene_include.addItem("test_label") 
+        
         # Scene include add 
-        self.scene_include_add.connect(self.add_nodes)
+        self.scene_include_add.clicked.connect(self.add_nodes)
     
         # Scene include remove
-        self.scene_include_add.connect(self.remove_nodes)
-        
+        self.scene_include_rm.clicked.connect(self.remove_nodes)
         self.right_layout.addWidget(self.scene_options_group)
 
     def parse(self , reset = True):
@@ -211,17 +218,14 @@ class MainInterface(Qt.QMainWindow):
         Using the functions from Texture parser, gets all our textures found and adds them to the table (name , path , has .rat)
         """
 
-        self.rat_parser = texture_parser.TextureParser(ui = self)     
-        
-        num_tex = len(self.rat_parser.get_all_texture_paths())
+        self.rat_parser.find_textures_from_scene()
+        self.rat_parser.find_convert_files()
 
-        # self.num_tex_label.setText(f"Number of textures found : {num_tex}")
+        num_tex = len(self.rat_parser.get_all_texture_paths())
+        self.update_scene_options()
 
         # Clear the list
         self.texture_list.clear()
-
-        # self.QTabTextures.clear()
-
         id = 0
         for item in self.rat_parser.texture_items : 
             texture_name = item.name
@@ -232,8 +236,6 @@ class MainInterface(Qt.QMainWindow):
             item_tex = item.get_num_tex()
             need_convert = item.get_num_toconv()
             
-            print(f"Need convert : {need_convert}")
-
             if need_convert > 0: 
                 text = "Missing " + str(need_convert) + "/" + str(item_tex)
                 if need_convert == item_tex : 
@@ -267,7 +269,6 @@ class MainInterface(Qt.QMainWindow):
 
                 # to_convert column: check if this path is in item.to_convert
                 to_conv_list = self.rat_parser.files_to_convert
-                print(f"To convert list  : {to_conv_list}")
                 if tex_path in to_conv_list : 
                     to_conv_text = "Missing .rat"
                     label = Qt.QLabel(f"<b style=\"color: red;\"> {to_conv_text} </b>")
@@ -283,6 +284,7 @@ class MainInterface(Qt.QMainWindow):
 
 
             id += 1
+        
 
         # Deactivate the Convert button if no missing textures
         if not self.rat_parser.get_all_files_to_convert() : 
@@ -295,6 +297,7 @@ class MainInterface(Qt.QMainWindow):
             self.layout.removeWidget(self.conversion_progress)
             self.conversion_progress.deleteLater()
             self.conversion_progress = None
+
 
     def convert(self, id=None):
 
@@ -335,10 +338,10 @@ class MainInterface(Qt.QMainWindow):
     
             item_name = item.data(TreeHeaders.NAME.value,0) 
             item_path = item.data(TreeHeaders.PATH.value,0)
-            print(f"Item : {item}")
 
-            # FIXME : Make this work with a global list of these
-            if "<UDIM>" in item_name or "$F" in item_name: # Handle case where the whole UDIM is selected  
+            # Handle case where the whole UDIM is selected 
+            # TODO : handle this with TextureFrames class maybe ?
+            if "<UDIM>" in item_name or "$F" in item_name: 
                 for i in range(item.childCount()) : 
                     child = item.child(i)
                     child_path = child.data(TreeHeaders.PATH.value,0)
@@ -409,7 +412,6 @@ class MainInterface(Qt.QMainWindow):
             self.convert_selection_btn.setEnabled(False)
     
     def openMenu(self, pos):
-        print("word")
         self.menu = Qt.QMenu(self)
         current_item = self.texture_list.itemAt(pos)
 
@@ -420,16 +422,38 @@ class MainInterface(Qt.QMainWindow):
     
         self.menu.exec(self.texture_list.mapToGlobal(pos))
 
+    def update_scene_options(self):
+        self.scene_include.clear()
+    
+        for node_name in self.rat_parser.accepted_nodes:
+            if not self.scene_include.findItems(node_name,Qtc.Qt.MatchExactly):
+                self.scene_include.addItem(node_name)
+
     def add_nodes(self):
-        # 1. open dialogue to allow user to type, and accept 
-        # 2. add to list
-        # 3. disolay it on the ui 
-        pass
+
+        text, ok =  Qt.QInputDialog.getText(self, "Add node",
+                                            "Add nodes (seperated by space )", Qt.QLineEdit.Normal,
+                                            "")
+        if not (ok and text) :
+            return 
+        
+        nodes = text.split(' ')
+        for node in nodes :
+
+            if self.scene_include.findItems(node,Qtc.Qt.MatchExactly):
+                continue
+        
+            self.rat_parser.accepted_nodes.append(node)
+
+        self.update_scene_options()
+         
 
     def remove_nodes(self):
-        # 1. See if any text is selected 
-        # 2. If selected, and button pressed, remove that bih 
-        pass
+        for node_item in self.scene_include.selectedItems(): 
+            node_name = node_item.text()
+            self.rat_parser.accepted_nodes.remove(str(node_name))
+
+        self.update_scene_options()
 
 #endregion
 

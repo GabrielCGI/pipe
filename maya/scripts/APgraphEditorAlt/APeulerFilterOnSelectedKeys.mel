@@ -1,0 +1,39 @@
+//
+global proc APeulerFilterOnSelectedKeys()
+{
+
+  float $keys[] = `keyframe -query -sl`;
+  float $sortedKeys[] = `sort $keys`;
+if(`size $sortedKeys`)
+{
+  filterCurve -s $sortedKeys[0] -e $sortedKeys[`size $sortedKeys`-1]; 
+  //string $curv[] = `keyframe  -query -n`;
+  //string $cmd = "";
+
+  /*
+  for ($cu in $curv)
+  {
+      float $ff[] = `keyframe -query -sl $cu`;
+    $cmd += ("selectKey -add -k -t "+"\""+$ff[0]+":"+$ff[`size $ff`-1]+"\""+" "+$cu+";\n") ;
+      
+  }
+  */
+  /*
+  bufferCurve -animation "keys" -overwrite true;
+  filterCurve;
+  copyKey ;
+  bufferCurve -animation "keys" -swap;
+
+
+  for ($cu in $curv)
+  {
+      float $ff[] = `keyframe -query -sl $cu`;
+      setKeyframe -i -t ($ff[0]-1) $cu;
+      setKeyframe -i -t ($ff[(`size $ff`-1)]+1) $cu;
+      
+  }
+  //eval $cmd;
+  pasteKey -option replace -copies 1 -connect 0 -timeOffset 0 -floatOffset 0 -valueOffset 0;
+  */
+}
+}

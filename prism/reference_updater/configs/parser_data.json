@@ -1,0 +1,26 @@
+{
+    "Assets":{
+        "hide_PahtAssets":[
+            "Shooting", "sandbox", "test", "PrevizSets", "Environments", "Environment", "@asset_path@", "LineUps"
+        ],
+        "hide_assets":[
+            
+        ],
+        "hide_products":[
+            "toSubstance", "toGroom", "extraPublish", "_layer*"
+        ]
+    },
+    "Shots":{
+
+    },
+    "procedure":{
+        "no_hiearchie":{
+            "Shots":[],
+            "Assets":[],
+            "cat":["cameras"]
+        },
+        "extention_valide":[
+            ".ma", ".mb", ".usd", ".usda", ".usdc"
+        ]
+    }
+}

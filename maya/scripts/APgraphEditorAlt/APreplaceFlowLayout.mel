@@ -1,0 +1,1357 @@
+//
+
+global string $APgraphAltIconPath;
+global string $APgraphEditorAltPath;
+
+
+global proc APreplaceGEiconBar()
+{
+	
+  
+	if(!`optionVar -ex APdoPreserveIn`)
+	{optionVar -iv APdoPreserveIn 1;}
+	if(!`optionVar -ex APdoPreserveOut`)
+	{optionVar -iv APdoPreserveOut 1;}
+	if(!`optionVar -ex APonlySelection`)
+	{optionVar -iv APonlySelection 1;}
+	if(!`optionVar -ex APkeepAutoTangentAlive`)
+	{optionVar -iv APkeepAutoTangentAlive 0;}
+	if(!`optionVar -ex APskipTangentsSmooth`)
+	{optionVar -iv APskipTangentsSmooth 1;}
+	
+        global string $APgraphEditorAltPath;
+        global string $APgraphAltIconPath;
+	global string $APflow;
+	if ($APflow == "")
+	{
+	  if (`flowLayout -ex $APflow`==0)
+	  {
+	    
+	    string $altParent = `control -q -p graphEditor1OutlineEdForm`;
+	    if (!`optionVar -ex "aTan_softness"`)
+	    {optionVar -fv "aTan_softness" 0.0;}
+
+	    string $Parent = `control -q -p $altParent`;
+	    string $chil2[] = `formLayout -q -ca $Parent`;
+	    string $chil[] = `frameLayout -q -ca $chil2[0]`;
+	    string $chil3[] = `formLayout -q -ca $chil[0]`;
+	    flowLayout -e -vis 0 $chil3[0];
+	    $APflow =  `flowLayout -p $chil[0]`;
+	    string $content[] = `flowLayout -q -ca $chil3[0]`;
+	    formLayout -e 
+	    -af $APflow "top" 0
+	    -af $APflow "left" 0
+	    -af $APflow "right" 0
+	    -af $APflow "bottom" 0
+	    $chil[0];
+	    global string $APgraphCurve;
+	    global string $APoutlinerPanel;
+	    for ($button in $content)
+	    {
+	    //print(`objectTypeUI $button`+"\n");		
+		 if ($button != "keyframeStats")
+		 {
+			    if ($button != "interpSeparator")
+			    {			
+			      if ($button != "frameAllButton" && $button != "frameRangeButton" && $button != "centerCurrentTimeButton")
+			      {control -e -p $APflow $button;}
+			    }
+			    
+			    if ($button == "interpSeparator")
+			    {
+				//button  -p $APflow -l "Auto Tangents" -bgc 0.89 0.43 0.47 -c "trdprty_tungsethTangent" -ann "Auto tangents" -w 90 -h 24;
+				button  -p $APflow -l "Auto Tangents" -bgc 0.89 0.43 0.47 -c "APautoSmoothKeys" -ann "Auto tangents" -w 90 -h 24;
+				string $ppm = `popupMenu -b 3`;
+				//string $ppm2 = `popupMenu -b 2`;
+				  popupMenu -e -pmc ("APbuidMenuSmooth("+"\""+$ppm+"\""+")") $ppm;
+				  //popupMenu -e -pmc ("APbuidMenuLiveATOption("+"\""+$ppm2+"\""+")") $ppm2;
+				    //string $col = `radioMenuItemCollection -p $ppm`;
+				    //menuItem -p $ppm -l "- Smoothness -" -en 0;
+				button -p $APflow -w 24 -bgc 0.5 0.69 0.87 -ann "Isolate Selected Curve(s)" -c ("global int $APisolateCurveActive; if(!$APisolateCurveActive){APisolateSelectedCurves("+"\""+$APoutlinerPanel+"\""+","+"\""+$APgraphCurve+"\""+",1);}") -l "[ i ]";
+                button -p $APflow -w 24 -ann "copyPasteWithAnOffset" -l "CP" -c "APcopyPasteKeyWithTempOffset(1)";
+			    }
+		    }
+		    else
+		    {
+
+			    //APbuildAltKeyStats();
+			    control -e -p $APflow $button;
+			    button -p $APflow -w 24 -ann "Align Selected Keys values on the Highest Key value of the Selection" -c "APgraphKeystoUpperBoundSwitcher()" -l "¯";
+			    button -p $APflow -w 24 -ann "Align Selected Keys values on the Lowest Key value of the Selection" -c "APgraphKeystoLowerBoundSwitcher()" -l "_";
+			    //button -p $APflow -w 24 -ann "Align Selected Keys values on the Average value of all Selected Keys" -c APsetKeyValToAverageBound -l "�";
+			    button -p $APflow -w 24 -ann "Reset Selected Keys to their Default Values" -c APresetKeyToDefault -l "0";
+			    button -p $APflow -w 24 -ann "Click = Globaly align selected Keys values on the First value of all Selected Keys\nShift+Click = Relative align selected Keys values on the First value of all Selected Keys" -c APgraphKeystoFirstSwitcher -l "x--";
+			    button -p $APflow -w 24 -ann "Click = Globaly align selected Keys values on the Last value of all Selected Keys\nShift+Click = Relative align selected Keys values on the Last value of all Selected Keys" -c APgraphKeystoLastSwitcher -l "--x";
+			    button -p $APflow -w 24 -ann "Click = Relative scale Down Keys values from the first value of all Selected Keys\nShift+Click = Relative scale Up Keys values from the first value of all Selected Keys" -c "APperCurveSetRelativeKeyScaleFromFirst(0)" -l ("x "+"\\");
+			      string $ppmScaleFlow1 = `popupMenu`;
+			      popupMenu -e -pmc ("APscaleKeyFromFlowPPM("+"\""+$ppmScaleFlow1+"\""+")") $ppmScaleFlow1;
+			    button -p $APflow -w 24 -ann "Click = Relative scale Down Keys values from the last value of all Selected Keys\nShift+Click = Relative scale Up Keys values from the last value of all Selected Keys" -c "APperCurveSetRelativeKeyScaleFromFirst(1)" -l "/ x";
+			      string $ppmScaleFlow2 = `popupMenu`;
+			       popupMenu -e -pmc ("APscaleKeyFromFlowPPM("+"\""+$ppmScaleFlow2+"\""+")") $ppmScaleFlow2;
+				
+			    //button -p $APflow -w 30 -ann "Click = Move All Selected keys to Current Time\nShift+Click = Relative Move All Selected Keys to Current Time" -c "scaleKey -scaleSpecifiedKeys 1 -newStartTime `currentTime -q` -newStartFloat `currentTime -q` -newEndTime `currentTime -q` -newEndFloat `currentTime -q`; keyframe -a -o over -t `currentTime -q`;" -l " > | < ";
+			    button -p $APflow -w 35 -ann "Relative Move All Selected Keys to Current Time ( Keep timing )" -c "APrelativeMoveFullKeySelection()";
+			    iconTextButton -p $APflow -w 30 -ann "Reverse Animation of Selected Keys" -c "APreverseTiming" -bgc 0.365 0.365 0.365  -i "undo_s.png";
+			    iconTextButton -p $APflow -h 23 -w 30 -ann "click = Reverse Values from first Selected Keys\shift+Click = Reverse Values from Last Selected Keys" -bgc 0.365 0.365 0.365 -c "APreverseValues" -rot -1.5708 -i "undo_s.png";
+			    //button -p $APflow -w 24 -ann "Click = Relative scale Up Keys values from the first value of all Selected Keys" -c "APperCurveSetRelativeKeyScaleFromFirst(0.1)" -l ("+~");
+			    iconTextButton -p $APflow -w 24 -visibility 0 -ann "Help" -c "APlaunchGrapEditorHelp" -bgc 0.365 0.365 0.365 -i "help.png"; //-bgc 0.65 0.93 0.65 
+			
+		            iconTextButton -p $APflow -w 23 -h 23  -ann "Apply Euler Filter On Selected Keys" -ua 1 -st "iconAndTextCentered" -l "Œ" -bgc 0.365 0.365 0.365 -c "APeulerFilterOnSelectedKeys()" -i ($APgraphAltIconPath+"euler.png") -hi ($APgraphAltIconPath+"euler_HI.png");
+			    button -p $APflow -w 50 -ann "Noise Selected Keys" -c "APdoNoise(1,1,0.5)" -l "Noise"; //-bgc 0.65 0.93 0.65 
+			    button -p $APflow -w 24 -ann "copyPasteWithAnOffset" -l "CP" -c "APcopyPasteKeyWithTempOffset(1)";
+			    string $ppmm = `popupMenu -b 3`;
+				menuItem -p $ppmm -cb `optionVar -q APdoPreserveIn` -c ("optionVar -iv APonlySelection (1-`optionVar -q APdoPreserveIn`)") -l "Preserve IN";
+				menuItem -p $ppmm -cb `optionVar -q APdoPreserveOut` -c ("optionVar -iv APonlySelection (1-`optionVar -q APdoPreserveOut`)") -l "Preserve OUT";
+				menuItem -p $ppmm -cb `optionVar -q APonlySelection` -c ("optionVar -iv APonlySelection (1-`optionVar -q APonlySelection`)") -l "On Selection Only";
+			    //button -p $APflow -w 50 -ann "Smooth Selected Keys" -c APsmoothKeys -l "Smooth";
+			      
+			    
+			    //iconTextButton -p $APflow  -style "iconOnly" -i "modifyStraighten" -ann "Align Selected Keys values on a slope drawn between the first and last key of the selection" -w 24 -h 24 -c APrebuildSlope -l "/";	
+		    }
+	    }
+	  }
+	}
+}
+
+
+global proc APrelativeMoveFullKeySelection()
+{
+  float $d[] = `keyframe -q -tc`;
+  float $tc ;
+  //print `getModifiers`;
+  if(`getModifiers` == 0)
+  {
+     $tc = (`currentTime -q`-$d[0]);
+    
+  }
+  
+  if(`getModifiers` == 4)
+  {
+    float $times[] = `sort $d`;
+    $tc = (`currentTime -q`-$times[`size $times`-1]);
+    
+  }
+  catchQuiet(`keyframe -animation keys -o over -r -tc $tc`);
+}
+
+global proc APisolateSelectedCurves(string $editorName, string $curveEditor, int $mode)
+{
+	global string $APtmpCurrentSel[];
+	global string $APgraphCurve;
+	global string $SelectionfromEditor;
+	global string $APemptySelectionfromEditor;
+	global string $APpinedList[];
+	global int $APisolateCurveActive;
+	
+	if($mode)
+	{
+	  $APgraphCurve = "graphEditor1GraphEd";
+	  string $dff[] = `APlistSelectedCurves $APgraphCurve`;
+	  string $dff2[] = `selectionConnection -q -obj "keyframeList"`;
+	  selectionConnection -e -clear $SelectionfromEditor;
+	  string $attr[];
+	  string $tmp[];
+	  clear $attr;
+	  $APemptySelectionfromEditor = `selectionConnection`;
+	  selectionConnection -e -clear $APemptySelectionfromEditor;
+	  //string $pinlist[] = `outlinerEditor -q -pin $outLiner`;
+	  outlinerEditor -e -mainListConnection $APemptySelectionfromEditor $editorName;
+	  clear $APpinedList;
+	  for ($curve in $dff2)
+	  {
+		  string $t[] = `listConnections -s 0 -d 1 -p 1 $curve`;
+		  outlinerEditor -e -pin $t[0] $editorName;
+		  evalDeferred("selectionConnection -e -select "+$t[0]+" "+"\""+$SelectionfromEditor+"\"");
+		  $APpinedList[`size $APpinedList`] = $t[0];
+	  }
+	  string $parent = `outlinerEditor -q -p $editorName`;
+	  string $children[] = `formLayout -q -ca $parent`;
+	  $children = `columnLayout -q -ca $children[0]`;
+	  $children = `formLayout -q -ca $children[0]`;
+	  textField -e -ebg 1 -bgc 0.871 0.875 0.478 $children[1];
+	  $APisolateCurveActive = 1;
+	}
+	else
+	{
+	  
+	  APdefaultMayaIsolateCurve((1-$APisolateCurveActive));
+	  $APisolateCurveActive = (1-$APisolateCurveActive);
+	  //print $APisolateCurveActive;
+	}
+	//print "hello";
+	//APtogglePinSelected ($editorName);
+
+	//select -cl;
+	//for ($curve in $dff2)
+	//{
+	//	string $t[] = `listConnections -s 0 -d 1 -p 1 $curve`;
+		
+	//}
+	
+	//selectionConnection -e -clear $APemptySelectionfromEditor;
+	
+	
+	//animCurveEditor -e -af 1 $curveEditor;
+	//animCurveEditor -e -af 0 $curveEditor;
+	
+	//evalDeferred("selectionAsFilter("+"\""+$editorName+"\""+", "+"\""+$curveEditor+"\""+")");
+}
+
+global proc APdefaultMayaIsolateCurve(int $active)
+{
+	eval(("isolateAnimCurve "+$active+" graphEditor1FromOutliner graphEditor1GraphEd"));
+}
+
+global proc string[] APlistSelectedCurves (string $editorName)
+{
+	return `animCurveEditor -q -cs graphEditor1GraphEd`;
+}
+
+global proc APgraphEditorCustomToolBar(string $parent)
+{
+	
+  
+	if(!`optionVar -ex APdoPreserveIn`)
+	{optionVar -iv APdoPreserveIn 1;}
+	if(!`optionVar -ex APdoPreserveOut`)
+	{optionVar -iv APdoPreserveOut 1;}
+	if(!`optionVar -ex APonlySelection`)
+	{optionVar -iv APonlySelection 1;}
+	if(!`optionVar -ex APkeepAutoTangentAlive`)
+	{optionVar -iv APkeepAutoTangentAlive 0;}
+	if(!`optionVar -ex APskipTangentsSmooth`)
+	{optionVar -iv APskipTangentsSmooth 1;}
+	
+	int $isolateMode = 1; 
+	
+        global string $APgraphEditorAltPath;
+        global string $APgraphAltIconPath;
+	global string $APflow;
+	if ($APflow == "")
+	{
+	  if (`flowLayout -ex $APflow`==0)
+	  {
+	    //string $altParent = `control -q -p graphEditor1OutlineEdForm`;
+	    if (!`optionVar -ex "aTan_softness"`)
+	    {optionVar -fv "aTan_softness" 0.0;}
+	    /*
+	    //string $Parent = `control -q -p $altParent`;
+	    //string $chil2[] = `formLayout -q -ca $Parent`;
+	    //string $chil[] = `frameLayout -q -ca $chil2[0]`;
+	    string $chil3[] = `formLayout -q -ca $parent`;
+	    //print $chil3;
+	    catchQuiet(`flowLayout -e -vis 0 $chil3[0]`);
+	    $APflow =  `flowLayout -p $parent`;
+	    string $content[];
+
+	    if(`flowLayout -ex $chil3[0]`)
+	    { $content = `flowLayout -q -ca $chil3[0]`;}
+	    else
+	    { $content = {"keyframeStats","interpSeparator"}; }
+	    formLayout -e 
+	    -af $APflow "top" 0
+	    -af $APflow "left" 0
+	    -af $APflow "right" 0
+	    -af $APflow "bottom" 0
+	    $parent;
+	    */
+	    
+	    string $altParent = `control -q -p graphEditor1OutlineEdForm`;
+	    if (!`optionVar -ex "aTan_softness"`)
+	    {optionVar -fv "aTan_softness" 0.0;}
+	    
+	    string $Parent = `control -q -p $altParent`;
+	    string $chil2[] = `formLayout -q -ca $Parent`;
+	    string $chil[] = `frameLayout -q -ca $chil2[0]`;
+	    string $chil3[] = `formLayout -q -ca $chil[0]`;
+	    flowLayout -e -vis 1 $chil3[0];
+	    string $content[] = `flowLayout -q -ca $chil3[0]`;
+	    print $content;
+	    $APflow =  `flowLayout -p "graphEditorKeyframeStatsLayout"`;
+	    
+	    formLayout -e 
+	    -af $APflow "top" 0
+	    -ac $APflow "left" 0 "keyframeStats"
+	    -af $APflow "right" 0
+	    -af $APflow "bottom" 0
+	    "graphEditorKeyframeStatsLayout";
+	    
+	    global string $APgraphCurve;
+	    global string $APoutlinerPanel;
+	    
+
+			    //APbuildAltKeyStats();
+			    //if(`size $content`>2)
+			    //{control -e -p $APflow $button;}
+			    
+			    iconTextButton -p $APflow -w 23 -h 23 -bgc 0.365 0.365 0.365 -l "͞¯" -ann "Align Selected Keys values on the Highest Key value of the Selection" -i ($APgraphAltIconPath+"alignToHigher.png") -c "APgraphKeystoUpperBoundSwitcher()" ;
+			    iconTextButton -p $APflow -w 23 -h 23 -bgc 0.365 0.365 0.365 -ann "Align Selected Keys values on the Lowest Key value of the Selection" -i ($APgraphAltIconPath+"alignToLower.png") -c APgraphKeystoLowerBoundSwitcher -l "_";
+			    //button -p $APflow -w 23 -h 23 -ann "Align Selected Keys values on the Average value of all Selected Keys" -c APsetKeyValToAverageBound -l "�";
+			    button -p $APflow -w 23 -h 23 -ann "Reset Selected Keys to their Default Values" -c APresetKeyToDefault -l "0";
+			    iconTextButton -p $APflow -w 23 -h 23 -bgc 0.365 0.365 0.365 -ann "Click = Globaly align selected Keys values on the First value of all Selected Keys\nShift+Click = Relative align selected Keys values on the First value of all Selected Keys" -i ($APgraphAltIconPath+"alignLeft.png")  -c APgraphKeystoFirstSwitcher -l "x--";
+			    iconTextButton -p $APflow -w 23 -h 23 -bgc 0.365 0.365 0.365 -ann "Click = Globaly align selected Keys values on the Last value of all Selected Keys\nShift+Click = Relative align selected Keys values on the Last value of all Selected Keys" -i ($APgraphAltIconPath+"alignRight.png")  -c APgraphKeystoLastSwitcher -l "--x";
+			    button -p $APflow -w 23 -h 23 -ann "Click = Relative scale Down Keys values from the first value of all Selected Keys\nShift+Click = Relative scale Up Keys values from the first value of all Selected Keys" -c "APperCurveSetRelativeKeyScaleFromFirst(0)" -l ("x "+"\\");
+			      string $ppmScaleFlow1 = `popupMenu`;
+			      popupMenu -e -pmc ("APscaleKeyFromFlowPPM("+"\""+$ppmScaleFlow1+"\""+")") $ppmScaleFlow1;
+			    button -p $APflow -w 24 -ann "Click = Relative scale Down Keys values from the last value of all Selected Keys\nShift+Click = Relative scale Up Keys values from the last value of all Selected Keys" -c "APperCurveSetRelativeKeyScaleFromFirst(1)" -l "/ x";
+			      string $ppmScaleFlow2 = `popupMenu`;
+			       popupMenu -e -pmc ("APscaleKeyFromFlowPPM("+"\""+$ppmScaleFlow2+"\""+")") $ppmScaleFlow2;
+				
+			    //button -p $APflow -w 30 -ann "Click = Move All Selected keys to Current Time\nShift+Click = Relative Move All Selected Keys to Current Time" -c "scaleKey -scaleSpecifiedKeys 1 -newStartTime `currentTime -q` -newStartFloat `currentTime -q` -newEndTime `currentTime -q` -newEndFloat `currentTime -q`; keyframe -a -o over -t `currentTime -q`;" -l " > | < ";
+			    iconTextButton -p $APflow -ann "Relative Move All Selected Keys to Current Time ( Keep timing )" -w 23 -h 23 -bgc 0.365 0.365 0.365 -c "float $d[] = `keyframe -q -tc`; keyframe -animation keys -o over -r -tc (`currentTime -q`-$d[0])" -l "-> | <- " -i ($APgraphAltIconPath+"moveTo.png");
+			    iconTextButton -p $APflow -w 30 -ann "Reverse Time of Selected Keys" -c "APreverseTiming" -bgc 0.365 0.365 0.365  -i "undo_s.png";
+			    iconTextButton -p $APflow -h 23 -w 30 -ann "Click = Reverse Values from first Selected Keys\nCtrl+Alt = Reverse Values from Last Selected Keys" -bgc 0.365 0.365 0.365 -c "APreverseValues" -rot -1.5708 -i "undo_s.png";
+			    //button -p $APflow -w 24 -ann "Click = Relative scale Up Keys values from the first value of all Selected Keys" -c "APperCurveSetRelativeKeyScaleFromFirst(0.1)" -l ("+~");
+			    if(`size $content`>2)
+			    {iconTextButton -p $APflow -w 24 -manage 0 -ann "Help" -c "APlaunchGrapEditorHelp" -bgc 0.365 0.365 0.365 -i "help.png";} //-bgc 0.65 0.93 0.65 
+			    print ("//"+$APgraphAltIconPath+"//"+"\n");
+			    iconTextButton -p $APflow -w 23 -h 23 -ann "Apply Euler Filter On Selected Keys" -ua 1 -l "Œ" -st "iconOnly" -bgc 0.365 0.365 0.365 -c "APeulerFilterOnSelectedKeys()" -i ($APgraphAltIconPath+"euler.png");
+			    iconTextButton -p $APflow -w 50 -ann "Noise Selected Keys" -c "APdoNoise(1,1, 0.5)" -w 23 -h 23 -bgc 0.365 0.365 0.365 -i ($APgraphAltIconPath+"noise.png") -l "Noise"; //-bgc 0.65 0.93 0.65 
+			    string $ppmm = `popupMenu -b 3`;
+				menuItem -p $ppmm -cb `optionVar -q APdoPreserveIn` -c ("optionVar -iv APonlySelection (1-`optionVar -q APdoPreserveIn`)") -l "Preserve IN";
+				menuItem -p $ppmm -cb `optionVar -q APdoPreserveOut` -c ("optionVar -iv APonlySelection (1-`optionVar -q APdoPreserveOut`)") -l "Preserve OUT";
+				menuItem -p $ppmm -cb `optionVar -q APonlySelection` -c ("optionVar -iv APonlySelection (1-`optionVar -q APonlySelection`)") -l "On Selection Only";
+			    //button -p $APflow -w 50 -ann "Smooth Selected Keys" -c APsmoothKeys -l "Smooth";
+			      
+			    //button  -p $APflow -l "Auto Tangents" -bgc 0.89 0.43 0.47 -c "trdprty_tungsethTangent" -ann "Auto tangents" -w 90 -h 24;
+				button  -p $APflow -l "Auto Tangents" -bgc 0.89 0.43 0.47 -c "APautoSmoothKeys" -ann "Auto tangents" -w 90 -h 24;
+				string $ppm = `popupMenu -b 3`;
+				//string $ppm2 = `popupMenu -b 2`;
+				  popupMenu -e -pmc ("APbuidMenuSmooth("+"\""+$ppm+"\""+")") $ppm;
+				  //popupMenu -e -pmc ("APbuidMenuLiveATOption("+"\""+$ppm2+"\""+")") $ppm2;
+				    //string $col = `radioMenuItemCollection -p $ppm`;
+				    //menuItem -p $ppm -l "- Smoothness -" -en 0;
+				if(`size $content`<=2)
+				{ $isolateMode = 0; }
+				    
+				button -p $APflow -w 24 -bgc 0.5 0.69 0.87 -ann "Isolate Selected Curve(s)" -c ("APisolateSelectedCurves("+"\""+$APoutlinerPanel+"\""+","+"\""+$APgraphCurve+"\""+","+$isolateMode+")") -l "[ i ]";
+			    //iconTextButton -p $APflow  -style "iconOnly" -i "modifyStraighten" -ann "Align Selected Keys values on a slope drawn between the first and last key of the selection" -w 24 -h 24 -c APrebuildSlope -l "/";	
+		    
+	    }
+	  
+	}
+formLayout -e -w 610 "graphEditorKeyframeStatsLayout";
+}
+
+global proc APscaleKeyFromFlowPPM(string $ppm)
+{
+  popupMenu -e -dai $ppm;
+  menuItem -p $ppm -l "Set Scale Ratio" -c "APdefineScaleRatioGraphAlt";
+  menuItem -p $ppm -l "Preserve Curves Tangent Type" -cb `optionVar -q APskipTangentsSmooth` -c ("optionVar -iv APskipTangentsSmooth #1");
+}
+
+global proc APdefineScaleRatioGraphAlt()
+{
+  string $text;
+  string $ratio = `optionVar -q APscaleRatioGraphAlt`;
+  string $result = `promptDialog
+      -title "Scale ratio"
+      -message "Enter New Ratio"
+      -button "OK" -tx $ratio -button "Cancel"
+      -defaultButton "OK" -cancelButton "Cancel"
+      -dismissString "Cancel"`;
+
+  if ($result == "OK") 
+  {
+    if(`promptDialog -query -text` != "")
+    {
+	optionVar -fv APscaleRatioGraphAlt (float(`promptDialog -query -text`));
+    }
+  }
+}
+
+global proc APreverseTiming()
+{
+  
+  float $d[] = `keyframe -q -tc`;
+  if(`size $d`)
+  {
+  float $f[] = sort($d);
+  float $timePivot =  ($f[0]+(($f[`size $f`-1]-$f[0])/2.0));
+  scaleKey -iub false -ts -1 -tp $timePivot -fs 1 -fp $timePivot -vs 1 -animation keys;
+  }
+  else
+    error "No Key selected";
+}
+
+global proc APreverseValues()
+{
+    float $scale = `optionVar -q APscaleRatioGraphAlt`;
+    optionVar -fv APscaleRatioGraphAlt 2.0;
+    if(`getModifiers` == 0 )
+    {
+      APperCurveSetRelativeKeyScaleFromFirst(0);
+    }
+    
+    if(`getModifiers` == 12 )
+    {
+      APperCurveSetRelativeKeyScaleFromFirst(1);
+    }
+    optionVar -fv APscaleRatioGraphAlt $scale;
+    //print `getModifiers`;
+}
+
+
+global proc APreverseValues2()
+{
+float $d[] = `keyframe -q -tc`;
+float $v[] = `keyframe -q -vc`;
+  if(`size $d`)
+  {
+  float $f[] = sort($d);
+  float $e[] = sort($v);
+  float $valuePivot =  ($v[0]+(($v[`size $v`-1]-$v[0])/2.0));
+  //scaleKey -iub false -ts -1 -tp $timePivot -fs 1 -fp $timePivot -vs 1 -animation keys;
+    if(`getModifiers` == 0 )
+    {
+      scaleKey -scaleSpecifiedKeys 1 -timeScale 0 -timePivot $f[0] -floatScale 0 -floatPivot $f[0] -valueScale -1 -valuePivot $v[0] -animation keys;
+    }
+    if(`getModifiers` == 4 )
+    {
+      scaleKey -scaleSpecifiedKeys 1 -timeScale 0 -timePivot $f[0] -floatScale 0 -floatPivot $f[0] -valueScale -1 -valuePivot $v[`size $v`-1] -animation keys;
+    }
+  }
+  else
+    error "No Key selected";
+
+}
+
+
+
+
+global proc APmoveAllKeyToCurrentTime()
+{
+ //scaleKey -scaleSpecifiedKeys 1 -newStartTime `currentTime -q` -newStartFloat `currentTime -q` -newEndTime (`currentTime -q`+`rand 0 0.05`) ` -newEndFloat (`currentTime -q`+`rand 0 0.05`); 
+ keyframe -a -o over -t (`currentTime -q`+`rand 0 0.05`); 
+}
+
+global proc APlaunchGrapEditorHelp()
+{
+   global string $APgraphEditorAltPath;
+    if(!`optionVar -ex "APoccCheckLanguage"`)
+    {optionVar -sv "APoccCheckLanguage" "#";}
+    
+    if(`optionVar -q "APoccCheckLanguage"` == "#")
+    {
+      //print ($APyouMovePath+"DOC_FR/doc.html\n");
+      APshowHelp(($APgraphEditorAltPath+"DOC/index_fr.html"),1);
+    }
+    if(`optionVar -q "APoccCheckLanguage"` == "&")
+    {
+       //print ($APyouMovePath+"DOC_EN/doc.html\n");
+       APshowHelp(($APgraphEditorAltPath+"DOC/index_en.html"),1);
+    } 
+}
+
+global proc APalignSelKeysOnCurrentFrame()
+{
+  
+ string $selectedCurves[] = `keyframe -q -n -sl`;
+for ($c in $selectedCurves)
+{
+    float $time = `currentTime -q`;
+    
+float $vals[];
+$vals = `keyframe -t $time -q  -vc -query $c`;  
+if(`size $vals`)   
+{keyframe -e -iub true  -a -o move -tc `currentTime -q` $c;}
+
+}
+
+}
+
+global proc APsmoothKeys ()
+{
+  oaSmoothKeys; 
+  aTan_smoothKeys2(0.25,1);
+}
+
+
+global proc APnoiseKey(float $amp, float $step, int $preserveIn, int $preserveOut, int $onlySelection)
+{
+  python("import time");
+  string $selectedCurves[] = `keyframe -q -n -sl`; 
+
+  if (`size $selectedCurves`)
+  {
+      for ($curv in $selectedCurves)
+      {
+	    float $valdT[] = `keyframe -q -tc -sl $curv`;
+	    float $valdV[] = `keyframe -q -vc -sl $curv`;
+	    int $i = 0;
+	    float $stamp = float(python("str(time.time())"));
+	    seed(int($stamp));
+	    for($f in $valdT)
+	    {
+		
+		float $valRand = `rand ($valdV[$i]-$amp) ($valdV[$i]+$amp)`;
+		string $cmd = ("keyframe -t "+$valdT[$i]+" -valueChange "+$valRand) ;
+		
+		  // print ($cmd+" "+$curv);
+		//print ($cmd+$curv);
+		eval($cmd+" "+$curv);
+		$i++;
+	    }
+	      //keyTangent -itt flat -ott flat;
+	      //scaleKey -iub false -ts 1 -iub 1 -t ($valdT[0]+":"+($valdT[`size $valdT`-1]+1)) -tp 176 -fs 1 -fp 176 -vs 0.9 -vp -1.352171619 Scarlet:FULL:neck_02_rotateZ
+      }
+    //keyTangent -itt flat -ott $outTan[0];
+  } 
+}
+
+global proc APnoiseKey2(float $amp, float $step, int $preserveIn, int $preserveOut, int $onlySelection)
+{
+	global string $gPlayBackSlider;
+	float $range[] = `keyframe -q -tc -sl`;
+	//float $values[] = `keyframe -q -vc -sl`;
+	string $sel[] = `ls -sl`;
+	int $u;
+	//float $step = 1;
+	float $val[];
+	clear $val;
+    string $curves[] = `selectionConnection -q -obj "keyframeList"`;
+    string $attrs[];
+    //APverbosePrint(stringArrayToString($curves, " ")); 
+  
+    for ($curve in $curves)
+    {
+    	string $t[] = `listConnections -s 0 -d 1 -p 1 $curve`;
+    	$attrs[`size $attrs`] = $t[0];
+    }	
+	
+	for ($attr in $attrs)
+	 {
+            $sel[0] = `plugNode $attr`;
+			int $i=(0+$preserveIn);
+			for ($u=($range[0]+$preserveIn); $u<=($range[`size $range`-1]-$preserveOut); $u+=$step)
+			{
+                if ($onlySelection)
+                {                
+                    //print ("U="+$u+"\n");
+                                  
+                    if ($u == $range[$i])
+                    {				
+                       // print ("rang="+$range[$i]+"\n") ;        				
+        				$val[`size $val`] = `getAttr -t $u $attr`;
+        				$i+=1;
+     				}
+     				
+				}
+				else
+				{
+				    $val[`size $val`] = `getAttr -t $u $attr`;
+				}
+				
+			}
+			float $shorterList[] = APfloatArrayRemoveDuplicates($val,0);
+			float $sum=0;
+            for ($va in $shorterList)
+            {
+                $sum+=$va;
+            }
+	    int $size = `size $shorterList`;
+	    if ($size == 0)
+	    {$size = 1;}
+            float $aver = ($sum/$size);
+            $amp = `abs $aver`;
+	    if ($amp == 0)
+	    {$amp = 10;}
+            //print ($amp+"\n");   
+			int $y=(0+$preserveIn);
+			$i=0;
+			for ($u=($range[0]+$preserveIn); $u<=($range[`size $range`-1]-$preserveOut); $u+=$step)
+			{
+                if ($onlySelection)
+                {                
+                    if ($u == $range[$y])
+                    {				
+        				setKeyframe -s 0 -t $u -at `plugAttr($attr)` -v `rand ($val[$i]-$amp) ($val[$i]+$amp)` $attr;
+        				$y+=1;
+        				$i+=1;
+    				}
+				}
+				else
+				{
+				    setKeyframe -s 0 -t $u -at `plugAttr($attr)` -v `rand ($val[$i]-$amp) ($val[$i]+$amp)` $attr;
+				    $i+=1;
+				}
+				//				
+			}
+	}
+}
+
+global proc APdoNoise(int $resample, float $step, float $power)
+{
+  if($resample == 1)
+  {
+    string $curves[] = `keyframe -q -sl -n`;
+    float $keyss[] = sort(`keyframe -q -sl -tc`);
+    for($curv in $curves)
+    {
+      //float $keyss[] = sort(`keyframe -q -sl -tc $curv`);
+      int $size = `size $keyss`;
+      catchQuiet(`filterCurve -f resample  -kernel lirp -startTime ($keyss[0]-1) -endTime ($keyss[$size-1]+1) -period $step  $curv`);
+      APnoiseKey($power, 1, `optionVar -q APdoPreserveIn`, `optionVar -q APdoPreserveOut`, `optionVar -q APonlySelection` );
+    }
+  }
+  
+}
+
+//global proc APbuidMenuLiveATOption ( string $ppm )
+//{
+  //popupMenu -e -dai $ppm;
+  //menuItem -p $ppm -c ("optionVar -iv APkeepAutoTangentAlive (1-`optionVar -q APkeepAutoTangentAlive`)") -cb `optionVar -q "APkeepAutoTangentAlive"` -l "Keep Alive";  
+//}
+
+
+global proc APbuidMenuSmooth( string $ppm )
+{
+  
+  popupMenu -e -dai $ppm;
+  menuItem -p $ppm -c ("optionVar -iv APkeepAutoTangentAlive (1-`optionVar -q APkeepAutoTangentAlive`)") -cb `optionVar -q "APkeepAutoTangentAlive"` -l "Live Tangents";
+  menuItem -p $ppm -d 1;
+  float $i = 0;
+  for ($i=0; $i<=100; $i+=25)
+  {	
+    if (($i/100) == `optionVar -q "aTan_softness"`)
+    {
+      string $mm = `menuItem -p $ppm -l ("- "+$i+" -") -bld 1 -sm 1`;
+      //setParent -m $ppm;
+      menuItem -e -pmc ("optionVar -fv aTan_softness "+($i/100)+"; aTan_smoothKeys22("+($i/100)+",1)") $mm;
+      
+    }
+    else
+    {
+      string $mm = `menuItem -p $ppm -l ("  "+$i +"  ")-sm 1`;
+      //setParent -m $ppm;
+      menuItem -e -pmc ("optionVar -fv aTan_softness "+($i/100)+"; aTan_smoothKeys22("+($i/100)+",1)") $mm;
+      
+    }
+  }
+}
+
+global proc APrebuildSlope()
+{
+	float $times[]  = `keyframe -q`;
+	string $selList[] = `selectionConnection -q -obj "keyframeList"`;
+	if (`size $times`)
+	{
+    	int $index=0;
+    	selectKey -clear ;
+    	cutKey -cl -time ($times[1]+":"+$times[`size $times`-2]) $selList;
+    	string $evalCmd = "setKeyframe -s 0 -i";
+    	string $evalCmd2 = "selectKey -add -k";
+    	for ($t in $times)
+    	{
+    	    $evalCmd+= (" -t "+$t);
+            $evalCmd2+= (" -t "+$t);	
+    	}
+    	eval ($evalCmd+ " "+ $selList[0]);
+    	eval ($evalCmd2+ " "+ $selList[0]);
+    	keyTangent -itt linear -ott linear $selList;
+	}
+}
+
+global proc APsetKeyValToUpperBound()
+{
+    float $val[] = `keyframe -q -vc -sl`;
+    if (`size $val`)
+    {
+        $val = `sort $val`;
+        keyframe -animation keys -absolute -valueChange $val[`size $val`-1];
+        catchQuiet(APautoSmoothKeysSwitch());
+    }
+}
+
+global proc APgraphKeystoUpperBoundSwitcher()
+{
+ if(`getModifiers`==1)
+ {
+   APsetKeyValToUpperBound;
+ }
+ else
+ {
+   APperCurveSetKeyValToUpperBound;
+ }
+}
+
+global proc APgraphKeystoFirstSwitcher()
+{
+ if(`getModifiers`==1)
+ {
+   //APsetKeyValToFirst;
+   APperCurveSetRelativeKeyValToFirst;
+ }
+ else
+ {
+   APperCurveSetKeyValToFirst;
+ }
+}
+
+global proc APgraphKeystoLastSwitcher()
+{
+ if(`getModifiers`==1)
+ {
+   //APsetKeyValToLast;
+   APperCurveSetRelativeKeyValToLast;
+ }
+ else
+ {
+   APperCurveSetKeyValToLast;
+ }
+}
+
+global proc APgraphKeystoLowerBoundSwitcher()
+{
+ if(`getModifiers`==1)
+ {
+   APsetKeyValToLowerBound;
+ }
+ else
+ {
+   APperCurveSetKeyValToLowerBound;
+ }
+}
+
+global proc APperCurveSetKeyValToUpperBound()
+{
+	string $selectedCurves[] = `keyframe -q -n -sl`;
+	float $valdd[];
+	float $vald[];
+	clear $valdd;
+	clear $vald;
+	string $cmd = "";
+	string $outTan[];
+	if (`size $selectedCurves`)
+	{
+	  for ($curv in $selectedCurves)
+	  {
+	      $valdd = `keyframe -q -vc -sl $curv`;
+	      int $index[] = `keyframe -q -sl -iv $curv`;
+	      int $lastID = $index[`size $index`-1];
+	      $outTan = `keyTangent -index $lastID -q -ott $curv`;
+	      if (!`size $valdd`)
+	      {
+		$valdd = `keyframe -q -vc $curv`;
+		$index = `keyframe -q -sl -iv $curv`;
+	      }
+	      
+	      $vald = `sort $valdd`;
+	      int $lstVal = (`size $vald`-1);
+	      string $cmd = ("keyframe -e -absolute -valueChange "+$vald[$lstVal]);
+	      int $in;
+	      for ($in in $index)
+	      {$cmd+= (" -index "+$in+" ");}
+	      eval($cmd+$curv);
+	      keyTangent -itt flat -ott flat;
+	      
+	  }
+	  keyTangent -itt flat -ott $outTan[0];
+	}
+}
+
+global proc APperCurveSetRelativeKeyValToFirst()
+{
+	string $selectedCurves[] = `keyframe -q -n -sl`;
+	float $valdd[];
+	float $vald[];
+	clear $valdd;
+	clear $vald;
+	string $cmd = "";
+	string $outTan[]; string $curv;
+	if (`size $selectedCurves`)
+	{
+	  for ($curv in $selectedCurves)
+	  {
+	      $valdd = `keyframe -q -vc -sl $curv`;
+	      float $aver;
+	      int $i = 1;
+	      for ($i = 1; $i<`size $valdd`; $i++)
+	      {
+	          $aver+= $valdd[$i];
+	      }
+	      float $average = ($aver/(`size $valdd`-1));
+	      int $index[] = `keyframe -q -sl -iv $curv`;
+	      int $firstID = $index[0];
+	      $outTan = `keyTangent -index $firstID -q -ott $curv`;
+
+	      
+	      string $cmd = ("keyframe -e -relative -valueChange "+($valdd[0]-$valdd[1]));
+	      int $in;
+	      //for ($in in $index)
+	      //{$cmd+= (" -index "+$in+" ");}
+	      $i = 1;
+	      for ($i = 1; $i<`size $valdd`; $i++)
+	      {
+	          $cmd+= (" -index "+$index[$i]+" ");
+	      }
+	      //print ($cmd+$curv);
+	      eval($cmd+$curv);
+	      //keyTangent -itt flat -ott flat;
+	      
+	  }
+	  //keyTangent -itt flat -ott $outTan[0];
+	} 
+}
+
+global proc APperCurveSetRelativeKeyScaleFromFirst(int $mode)
+{
+   float $way = `optionVar -q APscaleRatioGraphAlt`;
+    if (`getModifiers` == 1 || `getModifiers` == 5)
+    {
+      $way *= -1;
+    }
+    
+    
+ string $selectedCurves[] = `keyframe -q -n -sl`;
+	float $valdT[];
+	float $valdV[];
+	float $vald[];
+	clear $valdV;
+	clear $valdT;
+	clear $vald;
+	string $cmd = "";
+	string $outTan[]; string $curv;
+	//print $way;
+	float $value = (1-$way);
+	if (`size $selectedCurves`)
+	{
+	  for ($curv in $selectedCurves)
+	  {
+	      $valdT = `keyframe -q -tc -sl $curv`;
+	      $valdV = `keyframe -q -vc -sl $curv`;
+	      if(`getModifiers` == 4 || `getModifiers` == 5)
+	      {
+		float $avrVal;
+		for ($v in $valdV)
+		{
+		  $avrVal+=$v;
+		}
+		$valdV[0] = ($avrVal/(`size $valdV`*1.0));
+		//print ("\naverage = "+$valdV[0]);
+	      }
+	      else
+	      {
+	         if($mode)
+	         {$valdV[0] = $valdV[`size $valdV`-1];}
+	      }
+	     // print $value;
+	      string $cmd = ("scaleKey -ts 1 -iub 1 -t "+"\""+$valdT[0]+":"+($valdT[`size $valdT`-1])+"\""+" -tp "+$valdT[0]+" -fs 1 -fp "+$valdV[0]+" -vs "+$value+" -vp "+$valdV[0]) ;
+	      
+           // print ($cmd+" "+$curv);
+	      //print ($cmd+$curv);
+	      eval($cmd+" "+$curv);
+	      //keyTangent -itt flat -ott flat;
+	      //scaleKey -iub false -ts 1 -iub 1 -t ($valdT[0]+":"+($valdT[`size $valdT`-1]+1)) -tp 176 -fs 1 -fp 176 -vs 0.9 -vp -1.352171619 Scarlet:FULL:neck_02_rotateZ
+	  }
+	  //keyTangent -itt flat -ott $outTan[0];
+	} 
+	catchQuiet(APautoSmoothKeysSwitch());
+}
+
+
+global proc APperCurveSetRelativeKeyValToLast()
+{
+	string $selectedCurves[] = `keyframe -q -n -sl`;
+	float $valdd[];
+	float $vald[];
+	clear $valdd;
+	clear $vald;
+	string $cmd = "";
+	string $outTan[]; string $curv;
+	if (`size $selectedCurves`)
+	{
+	  for ($curv in $selectedCurves)
+	  {
+	      $valdd = `keyframe -q -vc -sl $curv`;
+	      float $aver;
+	      int $i = 0;
+	      for ($i = 0; $i<(`size $valdd`-1); $i++)
+	      {
+	          $aver+= $valdd[$i];
+	      }
+	      float $average = ($aver/(`size $valdd`-1));
+	      int $index[] = `keyframe -q -sl -iv $curv`;
+	      int $lastID = $index[`size $index`-1];
+	      $outTan = `keyTangent -index $lastID -q -ott $curv`;
+
+	      
+	      string $cmd = ("keyframe -e -relative -valueChange "+($valdd[(`size $valdd`-1)] - $valdd[(`size $valdd`-2)]));
+	      int $in;
+	      //for ($in in $index)
+	      //{$cmd+= (" -index "+$in+" ");}
+	      $i = 0;
+	      for ($i = 0; $i<(`size $valdd`-1); $i++)
+	      {
+	          $cmd+= (" -index "+$index[$i]+" ");
+	      }
+	      //print ($cmd+$curv);
+	      eval($cmd+$curv);
+	      //keyTangent -itt flat -ott flat;
+	      
+	  }
+	  //keyTangent -itt flat -ott $outTan[0];
+	} 
+}
+
+global proc APperCurveSetKeyValToLowerBound()
+{
+	string $selectedCurves[] = `keyframe -q -n -sl`;
+	float $valdd[];
+	float $vald[];
+	clear $valdd;
+	clear $vald;
+	string $cmd = "";
+	string $outTan[];
+	if (`size $selectedCurves`)
+	{
+	  for ($curv in $selectedCurves)
+	  {
+	      $valdd = `keyframe -q -vc -sl $curv`;
+	      int $index[] = `keyframe -q -sl -iv $curv`;
+	      int $lastID = $index[`size $index`-1];
+	      $outTan = `keyTangent -index $lastID -q -ott $curv`;
+	      if (!`size $valdd`)
+	      {
+		$valdd = `keyframe -q -vc $curv`;
+		$index = `keyframe -q -sl -iv $curv`;
+	      }
+	      $vald = `sort $valdd`;
+	      string $cmd = ("keyframe -e -absolute -valueChange "+$vald[0]);
+	      int $in;
+	      for ($in in $index)
+	      {$cmd+= (" -index "+$in+" ");}
+	      eval($cmd+$curv);
+	      keyTangent -itt flat -ott flat;
+	  }
+	  if(!`optionVar -q APskipTangentsSmooth`)
+	  {keyTangent -itt flat -ott $outTan[0];}
+	  
+	}
+}
+
+global proc APperCurveSetKeyValToFirst()
+{
+	string $selectedCurves[] = `keyframe -q -n -sl`;
+	float $valdd[];
+	float $vald[];
+	clear $valdd;
+	clear $vald;
+	string $cmd = "";
+	string $outTan[];
+	if (`size $selectedCurves`)
+	{
+	  for ($curv in $selectedCurves)
+	  {
+	      $valdd = `keyframe -q -vc -sl $curv`;
+	      int $index[] = `keyframe -q -sl -iv $curv`;
+	      int $lastID = $index[`size $index`-1];
+	      $outTan = `keyTangent -index $lastID -q -ott $curv`;
+	      if (!`size $valdd`)
+	      {
+		$valdd = `keyframe -q -vc $curv`;
+		$index = `keyframe -q -sl -iv $curv`;
+	      }
+	      //$vald = `sort $valdd`;
+	      string $cmd = ("keyframe -e -absolute -valueChange "+$valdd[0]);
+	      int $in;
+	      for ($in in $index)
+	      {$cmd+= (" -index "+$in+" ");}
+	      eval($cmd+$curv);
+	      keyTangent -itt flat -ott flat;
+	  }
+	  if(!`optionVar -q APskipTangentsSmooth`)
+	  {keyTangent -itt flat -ott $outTan[0];}
+	}
+}
+
+global proc APperCurveSetKeyValToLast()
+{
+	string $selectedCurves[] = `keyframe -q -n -sl`;
+	float $valdd[];
+	float $vald[];
+	clear $valdd;
+	clear $vald;
+	string $cmd = "";
+	string $outTan[];
+	if (`size $selectedCurves`)
+	{
+	  for ($curv in $selectedCurves)
+	  {
+	      $valdd = `keyframe -q -vc -sl $curv`;
+	      int $index[] = `keyframe -q -sl -iv $curv`;
+	      int $lastID = $index[`size $index`-1];
+	      $outTan = `keyTangent -index $lastID -q -ott $curv`;
+	      if (!`size $valdd`)
+	      {
+		$valdd = `keyframe -q -vc $curv`;
+		$index = `keyframe -q -sl -iv $curv`;
+	      }
+	      //$vald = `sort $valdd`;
+	      string $cmd = ("keyframe -e -absolute -valueChange "+$valdd[`size $valdd`-1]);
+	      int $in;
+	      for ($in in $index)
+	      {$cmd+= (" -index "+$in+" ");}
+	      eval($cmd+$curv);
+	      keyTangent -itt flat -ott flat;
+	      
+	  }
+	  if(!`optionVar -q APskipTangentsSmooth`)
+	  {keyTangent -itt flat -ott $outTan[0];}
+	}
+}
+
+global proc APsetKeyValToZero()
+{
+    string $tangType[] = `keyTangent -q -ott`;
+    keyframe -animation keys -absolute -valueChange 0;
+    if ($tangType[size (`keyTangent -q -ott`)-1]=="step")
+    {keyTangent -ott step;}
+    else
+    {aTan_smoothKeys2(0.0,1);}
+}
+
+global proc APresetKeyToDefault()
+{
+        if (`getModifiers` == 1)
+	{
+	  
+	  APsetKeyValToZero();
+	}
+	else
+	{
+	  string $selectedCurves[] = `keyframe -q -n -sl`;
+	  float $valdd[];
+	  float $vald[];
+	  clear $valdd;
+	  clear $vald;
+	  string $cmd = "";
+	  string $outTan[];
+	  if (`size $selectedCurves`)
+	  {
+	    for ($curv in $selectedCurves)
+	    {
+		$valdd = `keyframe -q -vc -sl $curv`;
+		int $index[] = `keyframe -q -sl -iv $curv`;
+		int $lastID = $index[`size $index`-1];
+		$outTan = `keyTangent -index $lastID -q -ott $curv`;
+		if (!`size $valdd`)
+		{
+		  $valdd = `keyframe -q -vc $curv`;
+		  $index = `keyframe -q -sl -iv $curv`;
+		}
+		string $attrs[] = `listConnections -s 0 -d 1 -p 1 $curv`;
+		float $val;
+		
+		if (`gmatch $attrs[0] "*translateX"` || `gmatch $attrs[0] "*translateY"` || `gmatch $attrs[0] "*translateZ"`)
+			    $val=0;
+		    else if (`gmatch $attrs[0] "*rotateX"` || `gmatch $attrs[0] "*rotateY"` || `gmatch $attrs[0] "*rotateZ"`)
+			    $val=0;
+		    else if (`gmatch $attrs[0] "*scaleX"` || `gmatch $attrs[0] "*scaleY"` || `gmatch $attrs[0] "*scaleZ"`)
+			    $val=1;
+		else
+		    { 
+		      if(catchQuiet(`addAttr -q -dv $attrs[0]`))
+		      {
+			$val = `addAttr -q -dv $attrs[0]`; 
+		      }
+		    }
+		
+	      
+		string $cmd = ("keyframe -e -absolute -valueChange "+$val);
+		int $in;
+		for ($in in $index)
+		{$cmd+= (" -index "+$in+" ");}
+		eval($cmd+$curv);
+		
+		keyTangent -itt flat -ott flat;
+	    }
+	    if(!`optionVar -q APskipTangentsSmooth`)
+	    {keyTangent -itt flat -ott $outTan[0];}
+	  }
+	}
+}
+
+global proc APsetKeyValToLowerBound()
+{
+    float $val[] = `keyframe -q -vc -sl`;
+    if (`size $val`)
+    {
+        $val = `sort $val`;
+        keyframe -animation keys -absolute -valueChange $val[0];
+        catchQuiet(APautoSmoothKeysSwitch());
+    }
+}
+
+global proc APsetKeyValToFirst()
+{
+    float $val[] = `keyframe -q -vc -sl`;
+    if (`size $val`)
+    {
+        string $tangType[] = `keyTangent -q -ott`;
+	keyframe -animation keys -absolute -valueChange $val[0];
+        if ($tangType[size (`keyTangent -q -ott`)-1]=="step")
+	{keyTangent -ott step;}
+	else
+	{aTan_smoothKeys2(0.0,1);}
+    }
+}
+
+global proc APsetKeyValToLast()
+{
+    float $val[] = `keyframe -q -vc -sl`;
+    if (`size $val`)
+    {
+        string $tangType[] = `keyTangent -q -ott`;
+	keyframe -animation keys -absolute -valueChange $val[`size $val`-1];
+        if ($tangType[size (`keyTangent -q -ott`)-1]=="step")
+	{keyTangent -ott step;}
+	else
+	{aTan_smoothKeys2(0.0,1);}
+    }
+}
+
+global proc APsetKeyValToAverageBound()
+{
+    float $val[] = `keyframe -q -vc -sl`;
+    if (`size $val`)
+    {
+        float $sum = 0;
+	float $shorterList[] = APfloatArrayRemoveDuplicates($val,0);
+        for ($va in $shorterList)
+        {
+            $sum+=$va;
+        }
+        keyframe -animation keys -absolute -valueChange ($sum/(`size $shorterList`));
+        aTan_smoothKeys2(0.0,1);
+    }
+}
+
+global proc APbuildAltKeyStats()
+{
+	string $form = `formLayout -w 210`;
+	global string $APtimeFloatFieldGE;
+	$APtimeFloatFieldGE = `floatField -p $form -pre 4`;
+	string $buttonTime = `iconTextButton -c ("floatField -e -v 0 "+"\""+$APtimeFloatFieldGE+"\"")  -style "textOnly" -p $form -w 15 -h 24 -l "T"`;
+	string $buttonTimeAdd = `iconTextButton -style "textOnly" -c ("APsetTimeFloatFieldCmd(`floatField -q -v "+"\""+$APtimeFloatFieldGE+"\""+"`)") -p $form -w 20 -h 24 -l "+="`;
+	    popupMenu -b 3 -p $buttonTimeAdd;
+	        menuItem -c ("global string $APsetGlobalMoveModeGE; $APsetGlobalMoveModeGE = "+"\""+"-"+"\""+";iconTextButton -e -l "+"\""+"-="+"\""+ " "+"\""+$buttonTimeAdd+"\"") -l "-";
+	        menuItem -c ("global string $APsetGlobalMoveModeGE; $APsetGlobalMoveModeGE = "+"\""+":"+"\""+";iconTextButton -e -l "+"\""+":="+"\""+ " "+"\""+$buttonTimeAdd+"\"") -l ":";
+	        menuItem -c ("global string $APsetGlobalMoveModeGE; $APsetGlobalMoveModeGE = "+"\""+"x"+"\""+";iconTextButton -e -l "+"\""+"x="+"\""+ " "+"\""+$buttonTimeAdd+"\"") -l "x";
+	        menuItem -c ("global string $APsetGlobalMoveModeGE; $APsetGlobalMoveModeGE = "+"\""+"+"+"\""+";iconTextButton -e -l "+"\""+"+="+"\""+ " "+"\""+$buttonTimeAdd+"\"") -l "+";
+	global string $APvalueFloatFieldGE;
+	$APvalueFloatFieldGE = `floatField -p $form -pre 4`;
+	string $buttonValue = `iconTextButton -c ("floatField -e -v 0 "+"\""+$APvalueFloatFieldGE+"\"") -dcc ("floatField -e -v 0 "+"\""+$APvalueFloatFieldGE+"\""+";APsetKeyValToZero") -style "textOnly" -p $form -w 15 -h 24 -l "V"`;
+	string $buttonValueAdd = `iconTextButton -style "textOnly" -c ("APsetValueFloatFieldCmd(`floatField -q -v "+"\""+$APvalueFloatFieldGE+"\""+"`)") -p $form -w 20 -h 24 -l "+="`;
+		popupMenu -b 3 -p $buttonValueAdd;
+	        menuItem -c ("global string $APsetGlobalMoveModeGE; $APsetGlobalMoveModeGE = "+"\""+"-"+"\""+"; iconTextButton -e -l "+"\""+"-="+"\""+ " "+"\""+$buttonValueAdd+"\"") -l "-";
+	        menuItem -c ("global string $APsetGlobalMoveModeGE; $APsetGlobalMoveModeGE = "+"\""+":"+"\""+";iconTextButton -e -l "+"\""+":="+"\""+ " "+"\""+$buttonValueAdd+"\"") -l ":";
+	        menuItem -c ("global string $APsetGlobalMoveModeGE; $APsetGlobalMoveModeGE = "+"\""+"x"+"\""+";iconTextButton -e -l "+"\""+"x="+"\""+ " "+"\""+$buttonValueAdd+"\"") -l "x";
+	        menuItem -c ("global string $APsetGlobalMoveModeGE; $APsetGlobalMoveModeGE = "+"\""+"+"+"\""+";iconTextButton -e -l "+"\""+"+="+"\""+ " "+"\""+$buttonValueAdd+"\"") -l "+";
+	floatField -e -ec ("APsetValueFloatFieldAbsCmd(`floatField -q -v "+"\""+$APvalueFloatFieldGE+"\""+"`)") $APvalueFloatFieldGE;
+	floatField -e -ec ("APsetTimeFloatFieldAbsCmd(`floatField -q -v "+"\""+$APtimeFloatFieldGE+"\""+"`)") $APtimeFloatFieldGE;
+	//-cc ("APsetTimeFloatFieldCmd(`floatField -q -v "+"\""+$APtimeFloatFieldGE+"\""+"`)")
+	formLayout -e
+	-af $buttonTime "top" 0
+	-af $buttonTime "bottom" 0
+	-af $buttonTime "left" 0
+	-an $buttonTime "right"
+	
+	-af $buttonTimeAdd "top" 0
+	-af $buttonTimeAdd "bottom" 0
+	-ac $buttonTimeAdd "left" 0 $buttonTime
+	-an $buttonTimeAdd "right"
+	
+	-af $APtimeFloatFieldGE "top" 0
+	-af $APtimeFloatFieldGE "bottom" 0
+	-ac $APtimeFloatFieldGE "left" 0 $buttonTimeAdd
+	-an $APtimeFloatFieldGE "right" 
+	
+	-af $buttonValue "top" 0
+	-af $buttonValue "bottom" 0
+	-ac $buttonValue "left" 10 $APtimeFloatFieldGE
+	-an $buttonValue "right"
+	
+	-af $buttonValueAdd "top" 0
+	-af $buttonValueAdd "bottom" 0
+	-ac $buttonValueAdd "left" 0 $buttonValue
+	-an $buttonValueAdd "right"
+	
+	-af $APvalueFloatFieldGE "top" 0
+	-af $APvalueFloatFieldGE "bottom" 0
+	-an $APvalueFloatFieldGE "right"
+	-ac $APvalueFloatFieldGE "left" 0 $buttonValueAdd
+	$form;
+}
+
+
+
+global proc APsetTimeFloatFieldCmd(float $val)
+{
+    if (`getModifiers` == 1)
+    {
+        $val*=-1;
+    }
+    keyframe -animation keys -r -o over -tc $val;
+}
+
+global proc APsetTimeFloatFieldAbsCmd(float $val)
+{
+    global string $APsetGlobalMoveModeGE;
+    float $tmpVal[] = `keyframe -q -tc`;
+    for ($time in $tmpVal)
+    {
+	if ($APsetGlobalMoveModeGE == "x")
+	{    
+	  if (catchQuiet(`keyframe -animation keys -a -o over -tc $val`))
+	  {keyframe -animation keys -r -o over -tc ($time*$val);}
+	}
+
+	if ($APsetGlobalMoveModeGE == ":")
+	{    
+	  if (catchQuiet(`keyframe -animation keys -a -o over -tc $val`))
+	  {keyframe -animation keys -r -o over -tc ($time/$val);}
+	}
+
+	if ($APsetGlobalMoveModeGE == "+")
+	{    
+	  if (catchQuiet(`keyframe -animation keys -a -o over -tc $val`))
+	  {keyframe -animation keys -r -o over -tc ($time+$val);}
+	}
+
+	if ($APsetGlobalMoveModeGE == "-")
+	{    
+	  if (catchQuiet(`keyframe -animation keys -a -o over -tc $val`))
+	  {keyframe -animation keys -r -o over -tc ($time-$val);}
+	}
+    }
+}
+
+global proc APsetValueFloatFieldCmd(float $val)
+{
+    //if (`getModifiers` == 1)
+    //{
+       // $val*=-1;
+    //}
+    //keyframe -animation keys -r -vc $val;
+    global string $APsetGlobalMoveModeGE;
+    float $tmpVal[] = `keyframe -q -vc`;
+    float $tmpTime[] = `keyframe -q -tc`;
+    int $i=0;
+  //  for ($time in $tmpVal)
+   // {
+	if ($APsetGlobalMoveModeGE == "x")
+	{    
+	  if (catchQuiet(`keyframe -animation keys -a -o over -vc $val`))
+	  {keyframe -animation keys -r -o over -vc ($val*=$val);}
+	}
+
+	if ($APsetGlobalMoveModeGE == ":")
+	{    
+	  if (catchQuiet(`keyframe -animation keys -a -o over -vc $val`))
+	  {keyframe -animation keys -r -o over -vc ($val/=$val);}
+	}
+
+	if ($APsetGlobalMoveModeGE == "+")
+	{    
+	  if (catchQuiet(`keyframe -animation keys -a -o over -vc $val`))
+	  {keyframe -animation keys -r -o over -vc ($val+=$val);}
+	}
+
+	if ($APsetGlobalMoveModeGE == "-")
+	{    
+	  if (catchQuiet(`keyframe -animation keys -a -o over -vc $val`))
+	  {keyframe -animation keys -r -o over -vc ($val-=$val);}
+	}
+   // $i++;
+   // }
+}
+
+
+global proc APsetValueFloatFieldAbsCmd(float $val)
+{
+    global string $APsetGlobalMoveModeGE;
+    float $tmpVal[] = `keyframe -q -vc`;
+    float $tmpTime[] = `keyframe -q -tc`;
+    int $i=0;
+    for ($time in $tmpVal)
+    {
+	if ($APsetGlobalMoveModeGE == "x")
+	{    
+	  if (catchQuiet(`keyframe -animation keys -a -o over -tc $val`))
+	  {keyframe -time $tmpTime[$i] -r -o over -vc ($time*$val);}
+	}
+
+	if ($APsetGlobalMoveModeGE == ":")
+	{    
+	  if (catchQuiet(`keyframe -animation keys -a -o over -tc $val`))
+	  {keyframe -time $tmpTime[$i] -r -o over -vc ($time/$val);}
+	}
+
+	if ($APsetGlobalMoveModeGE == "+")
+	{    
+	  if (catchQuiet(`keyframe -animation keys -a -o over -tc $val`))
+	  {keyframe -time $tmpTime[$i] -r -o over -vc ($time+$val);}
+	}
+
+	if ($APsetGlobalMoveModeGE == "-")
+	{    
+	  if (catchQuiet(`keyframe -animation keys -a -o over -tc $val`))
+	  {keyframe -time $tmpTime[$i] -r -o over -vc ($time-$val);}
+	}
+    $i++;
+    }
+    //string $selList[] = `selectionConnection -q -obj "keyframeList"`;
+    //if (`size $selList`)
+    //{
+    //  keyframe -animation keys -absolute -valueChange $val;
+    //  //keyTangent -itt flat -ott flat $selList;
+    //}
+}
+
+global proc APupdateGEfloatFields()
+{
+global string $APvalueFloatFieldGE;
+global string $APtimeFloatFieldGE;
+floatField -e -ebg 0 -bgc 0.164706 0.164706 0.164706 $APtimeFloatFieldGE;
+floatField -e -ebg 0 -bgc 0.164706 0.164706 0.164706 $APvalueFloatFieldGE;
+if (size(`keyframe -q -sl`))
+{
+    float $vals[] = `keyframe -q -vc -sl`;
+    float $times[] = `keyframe -q -tc -sl`;
+    floatField -e -v $vals[`size $vals`-1] $APvalueFloatFieldGE;
+    floatField -e -v $times[`size $times`-1] $APtimeFloatFieldGE;
+    if(`size $vals`>1)
+    {
+        for ($val in $vals)
+        {
+            if ($vals[0] != $val)
+                {floatField -e -ebg 1 -bgc 0.729 0.588 0.745  $APvalueFloatFieldGE;
+                break;}
+        }
+    
+    
+    
+        for ($time in $times)
+        {
+            if ($times[0] != $time)
+                {floatField -e -ebg 1 -bgc 0.729 0.588 0.745  $APtimeFloatFieldGE;
+                break;}
+        }
+    }
+}
+}
+
+global proc APcopyPasteKeyWithTempOffset(float $offset)
+{
+  copyKey ;
+  string $from[] = `keyframe -q -sl -n` ;
+  string $selConn = `editor -q -selectionConnection graphEditor1OutlineEd`;
+  string $curves[] = findAnimCurves($selConn);
+  string $curv[] = stringArrayRemoveExact($from,$curves);
+  string $cn[] = `listConnections   -p 1 $curv[0]`;
+
+  pasteKey -option replace -copies 1 -connect 1 -timeOffset $offset -floatOffset 0 -valueOffset 0 -attribute (plugAttr($cn[0])) (plugNode($cn[0]));
+}
+
+//scriptJob -e "SelectionChanged" APupdateGEfloatFields;

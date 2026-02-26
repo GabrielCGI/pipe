@@ -1,0 +1,4069 @@
+#! C:/Program Files/Nuke15.1v5/nuke-15.1.5.dll -nx
+version 15.1 v5
+Gizmo {
+ inputs 2
+ knobChanged "\nnode=nuke.thisNode()\nknob=nuke.thisKnob()\n\nif knob.name() == \"filter_autosize\" and knob.value() == 1:\n    node\['autosize_parameters'].setVisible(True)\n\nelif knob.name() == \"filter_autosize\" and knob.value() == 0:\n    node\['autosize_parameters'].setVisible(False)\nelif knob.name() == \"near_percentage\" and knob.value() > 100 :\n    node\['near_percentage'].setValue(100)\nelif knob.name() == \"near_percentage\" and knob.value() < 0 :\n    node\['near_percentage'].setValue(0)\nelif knob.name() == \"far_percentage\" and knob.value() > 100 :\n    node\['far_percentage'].setValue(100)\nelif knob.name() == \"far_percentage\" and knob.value() < 0 :\n    node\['far_percentage'].setValue(0)\nelif knob.name() == \"KWH_radius_map_remap\" and knob.value() > 1 :\n    node\['KWH_radius_map_remap'].setValue(1)\nelif knob.name() == \"KWH_radius_map_remap\" and knob.value() < -1 :\n    node\['KWH_radius_map_remap'].setValue(-1)\nelif knob.name() == \"brush_mask_projection_remap\" and knob.value() > 1 :\n    node\['brush_mask_projection_remap'].setValue(1)\nelif knob.name() == \"brush_mask_projection_remap\" and knob.value() < -1 :\n    node\['brush_mask_projection_remap'].setValue(-1)\nelif knob.name() == \"KWH_radius_map_noise_gain\" and knob.value() > 1 :\n    node\['KWH_radius_map_noise_gain'].setValue(1)\nelif knob.name() == \"KWH_radius_map_noise_gain\" and knob.value() < 0 :\n    node\['KWH_radius_map_noise_gain'].setValue(0)\nelif knob.name() == \"KWH_radius_map_hair_preserve\" and knob.value() > 1 :\n    node\['KWH_radius_map_hair_preserve'].setValue(1)\nelif knob.name() == \"KWH_radius_map_hair_preserve\" and knob.value() < 0 :\n    node\['KWH_radius_map_hair_preserve'].setValue(0)\nelif knob.name() == \"EC_edgepush_size_out\" and knob.value() < 0 :\n    node\['EC_edgepush_size_out'].setValue(0)\nelif knob.name() == \"EC_edgepush_size_in\" and knob.value() < 0 :\n    node\['EC_edgepush_size_in'].setValue(0)\nelif knob.name() == \"EC_mix\" and knob.value() < 0 :\n    node\['EC_mix'].setValue(0)\nelif knob.name() == \"EC_mix\" and knob.value() > 1 :\n    node\['EC_mix'].setValue(1)\nelif knob.name() == \"EC_amount\" and knob.value() < 1 :\n    node\['EC_amount'].setValue(1)\nelif knob.name() == \"EC_amount\" and knob.value() > 6 :\n    node\['EC_amount'].setValue(6)\nelif knob.name() == \"bbd_gain\" and knob.value() < 0 :\n    node\['bbd_gain'].setValue(0)\nelif knob.name() == \"bbd_mix\" and knob.value() > 1 :\n    node\['bbd_mix'].setValue(1)\nelif knob.name() == \"bbd_mix\" and knob.value() < 0 :\n    node\['bbd_mix'].setValue(0)\nelif knob.name() == \"debug_median_size\" and knob.value() > 10 :\n    node\['debug_median_size'].setValue(10)\nelif knob.name() == \"debug_median_size\" and knob.value() < 0 :\n    node\['debug_median_size'].setValue(0)\n\nelif knob.name() == 'brushes_mode' and knob.value() == \"Interactive\":\n    node\['brush_size'].setVisible(True)\n    node\['brush_offset'].setVisible(True)\n    node\['brush_map1'].setVisible(False)\n    node\['brush_map2'].setVisible(False)\nelif knob.name() == 'brushes_mode' and knob.value() == \"Baked\":\n    node\['brush_map1'].setVisible(True)\n    node\['brush_map2'].setVisible(True)\n    node\['brush_size'].setVisible(False)\n    node\['brush_offset'].setVisible(False)\n\n\nelif knob.name() == \"brush_map1\" and knob.value() > 1 :\n    node\['brush_map1'].setValue(1)\nelif knob.name() == \"brush_map1\" and knob.value() < 0 :\n    node\['brush_map1'].setValue(0)\nelif knob.name() == \"brush_map2\" and knob.value() > 1 :\n    node\['brush_map2'].setValue(1)\nelif knob.name() == \"brush_map2\" and knob.value() < 0 :\n    node\['brush_map2'].setValue(0)\n\nelse:\n    pass\n"
+ tile_color 0x540054ff
+ note_font "Verdana Bold"
+ addUserKnob {20 FUR_TAB l FUR}
+ addUserKnob {26 title_presets l "" +STARTLINE T "Presets :"}
+ addUserKnob {1 create_preset_name l "Create Preset : Name =>"}
+ create_preset_name Standard
+ addUserKnob {22 create_preset_go l Go! -STARTLINE T "import nuke\nimport json\n\ndef save_node_knobs_to_json(node, json_path):\n    knob_data = \{\}\n\n    for knob_name in node.knobs():\n        knob = node\[knob_name]\n        try:\n            # Tente de lire la valeur du knob\n            value = knob.value()\n            # Pour les knobs multivaleurs (ex: Position 2D), convertis en liste\n            if isinstance(value, (tuple, list)):\n                value = list(value)\n            knob_data\[knob_name] = value\n        except:\n            # Si le knob ne supporte pas .value() ou pose un problème, on l'ignore\n            continue\n\n    with open(json_path, 'w') as f:\n        json.dump(knob_data, f, indent=4)\n\n# Exemple d'utilisation :\nnode = nuke.thisNode()\npath = \"I:/rivers_feature/04_Resources/nuke/Tools/RIV_StylisedChar/presets/\"\npreset_name = node\['create_preset_name'].getValue()\next = \".json\"\nsave_node_knobs_to_json(node, path+preset_name+ext)"}
+ addUserKnob {2 load_preset_path l "Load Preset : Path =>"}
+ load_preset_path I:/rivers_feature/04_Resources/nuke/Tools/RIV_StylisedChar/presets/
+ addUserKnob {22 load_preset_go l Go! -STARTLINE T "import nuke\nimport json\n\ndef load_knobs_from_json(json_path, node):\n    with open(json_path, 'r') as f:\n        knob_data = json.load(f)\n\n    for knob_name, value in knob_data.items():\n        # 🔽 On ignore \"z_result\"\n        exclude_knobs = \[\"z_result\", \"xpos\", \"ypos\", \"name\"]\n        if knob_name in exclude_knobs:\n            continue\n\n\n        # 🔽 On ignore les champs qui ne sont pas des knobs du node\n        if knob_name not in node.knobs():\n            continue\n\n        knob = node\[knob_name]\n        try:\n            # 🔽 Si c’est une liste, on passe chaque valeur (ex: 2D/3D)\n            if isinstance(value, list):\n                knob.setValue(value)\n            else:\n                knob.setValue(value)\n        except Exception as e:\n            print(f\"❌ Impossible de définir la valeur pour le knob '\{knob_name\}': \{e\}\")\n\n# Exemple d’utilisation :\nnode = nuke.thisNode()\npath = node\['load_preset_path'].getValue()\nload_knobs_from_json(path , node)\n"}
+ addUserKnob {26 ""}
+ addUserKnob {26 title_display l "" +STARTLINE T "Display :"}
+ addUserKnob {68 result l "" -STARTLINE M {"Final Result" "Kuwahara Radius Map" "Brushes Projection Map" "" ""}}
+ addUserKnob {26 title_active l "" +STARTLINE T "Active :"}
+ addUserKnob {6 active_kwh l KWH -STARTLINE}
+ active_kwh true
+ addUserKnob {6 active_brushes l Brushes -STARTLINE}
+ active_brushes true
+ addUserKnob {26 ""}
+ addUserKnob {26 title_autosize l "" +STARTLINE T "AutoSize :"}
+ addUserKnob {6 filter_autosize l "Filter AutoSize" -STARTLINE}
+ addUserKnob {20 autosize_parameters l Parameters +HIDDEN n 1}
+ addUserKnob {41 znear l "Near Value (cm)" T PxF_DeepDefocus.znear}
+ addUserKnob {41 nearPick l near -STARTLINE T PxF_DeepDefocus.nearPick}
+ addUserKnob {41 zfar l "Far Value (cm)" T PxF_DeepDefocus.zfar}
+ addUserKnob {41 farPick l far -STARTLINE T PxF_DeepDefocus.farPick}
+ addUserKnob {7 near_percentage l "Filter % (near)" R 0 100}
+ near_percentage 100
+ addUserKnob {7 far_percentage l "Filter % (far)" R 0 100}
+ far_percentage 10
+ addUserKnob {20 endGroup n -1}
+ addUserKnob {26 ""}
+ addUserKnob {26 title_KWH l "" +STARTLINE T "Kuwahara :"}
+ addUserKnob {7 KWH_radius_map_remap l "Radius Map Remap" R -1 1}
+ KWH_radius_map_remap -0.3
+ addUserKnob {7 KWH_radius_map_noise_size l "Radius Map Noise Size" R 1 100}
+ KWH_radius_map_noise_size 10
+ addUserKnob {7 KWH_radius_map_noise_gain l "Radius Map Noise Gain"}
+ KWH_radius_map_noise_gain 0.5
+ addUserKnob {7 KWH_size l "KWH Size" R 0 30}
+ KWH_size 15
+ addUserKnob {26 title_kwh_body l "" +STARTLINE T "KWH Body :"}
+ addUserKnob {7 kwh_tail l "KWH Tail"}
+ kwh_tail 0.5
+ addUserKnob {7 kwh_nose l "KWH Nose"}
+ kwh_nose 0.5
+ addUserKnob {7 kwh_eyebrows l "KWH Eyebrows"}
+ kwh_eyebrows 0.5
+ addUserKnob {7 kwh_ears l "KWH Ears"}
+ kwh_ears 0.5
+ addUserKnob {7 kwh_feet l "KWH Feet"}
+ kwh_feet 0.5
+ addUserKnob {7 kwh_mouth l "KWH Mouth"}
+ kwh_mouth 0.5
+ addUserKnob {7 kwh_claws l "KWH Claws"}
+ addUserKnob {26 ""}
+ addUserKnob {26 title_brushes l "" +STARTLINE T "Brushes :"}
+ addUserKnob {68 brushes_mode l "Mode : " M {Interactive Baked}}
+ addUserKnob {7 brush_size l "Brush Size" R 0 300}
+ brush_size 30
+ addUserKnob {7 brush_offset l "Brush Offset" R 0 100}
+ addUserKnob {7 brush_map1 l "Map 1 Gain" +HIDDEN}
+ addUserKnob {7 brush_map2 l "Map 2 Gain" +HIDDEN}
+ brush_map2 1
+ addUserKnob {7 brush_median l "Brush Median" R 0 10}
+ addUserKnob {7 brush_mask_projection_remap l "Mask Projection Remap" R -1 1}
+ brush_mask_projection_remap 0.5
+ addUserKnob {7 brush_distort l "Distort Force" R 0 10}
+ brush_distort 3
+ addUserKnob {26 ""}
+ addUserKnob {26 title_mask l "" +STARTLINE T "Mask :"}
+ addUserKnob {6 mask_invert l invert -STARTLINE}
+ addUserKnob {6 mask_premult l premult -STARTLINE}
+ addUserKnob {20 DEBUG_TAB l DEBUG}
+ addUserKnob {7 debug_median_size l "Median on Pref (stabilize Pref) : Size " R 0 10}
+ debug_median_size 1
+ addUserKnob {20 INFO_TAB l INFO}
+ addUserKnob {26 infos l "" +STARTLINE T "info : tool built @ Illogic Studios for RIV.\n\nreleases: \nv0.1 : first release\nv0.2 : clean parameters\nv0.3 : optim + KWH Claws added\n"}
+}
+ BackdropNode {
+  inputs 0
+  name BackdropNode1
+  tile_color 0x454131ff
+  label Display
+  note_font_size 42
+  xpos -212
+  ypos 3056
+  bdwidth 511
+  bdheight 437
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode2
+  tile_color 0x232023ff
+  label KWH
+  note_font "Verdana Bold"
+  note_font_size 41
+  xpos -1061
+  ypos 674
+  bdwidth 2281
+  bdheight 846
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode3
+  tile_color 0x2b2f34ff
+  label BRUSHES
+  note_font_size 42
+  xpos -1385
+  ypos 1532
+  bdwidth 1688
+  bdheight 1068
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode4
+  tile_color 0x40602eff
+  label "keep cryptos passes out"
+  note_font_size 42
+  xpos -929
+  ypos 2825
+  bookmark false
+  bdwidth 554
+  bdheight 530
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode5
+  tile_color 0x222229ff
+  label DEBUG
+  note_font "Verdana Bold"
+  note_font_size 52
+  xpos 100
+  ypos 186
+  bdwidth 342
+  bdheight 470
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode7
+  tile_color 0x323c45ff
+  label Masking
+  note_font_size 42
+  xpos -213
+  ypos 2665
+  bdwidth 516
+  bdheight 365
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode8
+  tile_color 0x222229ff
+  label UTILITY
+  note_font "Verdana Bold"
+  note_font_size 52
+  xpos -786
+  ypos 174
+  bdwidth 771
+  bdheight 485
+ }
+ Input {
+  inputs 0
+  name beauty
+  xpos 0
+  ypos -193
+ }
+set N650d0400 [stack 0]
+ Dot {
+  name Dot55
+  xpos 34
+  ypos 290
+ }
+set N650d0800 [stack 0]
+ Dot {
+  name Dot1
+  xpos -266
+  ypos 290
+ }
+set N650d0c00 [stack 0]
+ Dot {
+  name Dot59
+  xpos -545
+  ypos 290
+ }
+set N650d1000 [stack 0]
+ Dot {
+  name Dot8
+  xpos -683
+  ypos 290
+ }
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0.1668189168 0.1691026688 0.176410675 0 716 320 717 321}
+  matteList *fur*
+  unpremultiply true
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte1
+  xpos -717
+  ypos 410
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 alpha
+  fromInput2 {{0} B}
+  mappings "4 rgba.alpha 0 0 rgba.alpha 0 3 rgba.alpha 0 0 rgba.red 0 0 rgba.alpha 0 0 rgba.green 0 1 rgba.alpha 0 0 rgba.blue 0 2"
+  name Shuffle1
+  label "\[value in1]"
+  xpos -717
+  ypos 434
+ }
+ Dot {
+  name Dot9
+  label OUT_FUR_MASK
+  note_font "Verdana Bold"
+  xpos -683
+  ypos 549
+ }
+set N64752400 [stack 0]
+ PostageStamp {
+  name FUR_MASK1
+  note_font "Verdana Bold"
+  xpos -439
+  ypos 2196
+  hide_input true
+ }
+push $N650d1000
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 depth
+  fromInput2 {{0} B}
+  in2 alpha
+  mappings "4 depth.Z 0 0 rgba.red 0 0 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.green 0 1 rgba.alpha 1 0 rgba.alpha 0 3"
+  name Shuffle18
+  label "\[value in1]"
+  xpos -579
+  ypos 405
+ }
+ Expression {
+  temp_name0 near
+  temp_expr0 parent.near_far.near
+  temp_name1 far
+  temp_expr1 parent.near_far.far
+  temp_name2 nearforce
+  temp_expr2 parent.near_far.near_force*0.01
+  temp_name3 farforce
+  temp_expr3 parent.near_far.far_force*0.01
+  expr0 "clamp(1 - ((r - near) / (far - near)) * (nearforce - farforce), farforce, nearforce)"
+  name Expression1
+  xpos -579
+  ypos 441
+ }
+ Premult {
+  name Premult5
+  xpos -579
+  ypos 465
+ }
+ Unpremult {
+  name Unpremult3
+  xpos -579
+  ypos 489
+ }
+ Dot {
+  name Dot57
+  label OUT_AUTOSIZE_MASK
+  note_font "Verdana Bold"
+  xpos -545
+  ypos 553
+ }
+set N64753c00 [stack 0]
+ PostageStamp {
+  name AUTOSIZE_MASK1
+  note_font "Verdana Bold"
+  xpos -440
+  ypos 2144
+  hide_input true
+ }
+push $N650d0800
+ Dot {
+  name Dot23
+  xpos 35
+  ypos 757
+ }
+set N63ad8400 [stack 0]
+ Dot {
+  name Dot39
+  xpos -51
+  ypos 757
+ }
+set N63ad8800 [stack 0]
+ Dot {
+  name Dot4
+  xpos -170
+  ypos 757
+ }
+set N63ad8c00 [stack 0]
+ Dot {
+  name Dot5
+  xpos -364
+  ypos 757
+ }
+set N63ad9000 [stack 0]
+ Dot {
+  name Dot24
+  xpos -469
+  ypos 757
+ }
+set N63ad9400 [stack 0]
+ Dot {
+  name Dot80
+  xpos -617
+  ypos 757
+ }
+set N63ad9800 [stack 0]
+ Dot {
+  name Dot81
+  xpos -786
+  ypos 757
+ }
+set N63ad9c00 [stack 0]
+ Dot {
+  name Dot2
+  xpos -883
+  ypos 757
+ }
+ Dot {
+  name Dot6
+  xpos -883
+  ypos 1427
+ }
+push $N64753c00
+ PostageStamp {
+  name AUTOSIZE_MASK
+  note_font "Verdana Bold"
+  xpos 209
+  ypos 1241
+  hide_input true
+ }
+push $N63ad8400
+ Dot {
+  name Dot38
+  xpos 366
+  ypos 757
+ }
+ Dot {
+  name Dot13
+  xpos 366
+  ypos 849
+ }
+set N66a67000 [stack 0]
+ Dot {
+  name Dot42
+  xpos 496
+  ypos 849
+ }
+set N66a67400 [stack 0]
+ Dot {
+  name Dot43
+  xpos 623
+  ypos 849
+ }
+set N66a67800 [stack 0]
+ Dot {
+  name Dot44
+  xpos 755
+  ypos 849
+ }
+set N66a67c00 [stack 0]
+ Dot {
+  name Dot3
+  xpos 868
+  ypos 849
+ }
+set N7aa92400 [stack 0]
+ Dot {
+  name Dot32
+  xpos 984
+  ypos 849
+ }
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {1.244004369 1.156195998 0.1290391535 1 561 477 562 478}
+  matteList *mouth_grp*
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte3
+  xpos 950
+  ypos 945
+ }
+ Grade {
+  channels rgba
+  multiply {{parent.kwh_mouth}}
+  name Grade7
+  xpos 950
+  ypos 978
+ }
+push $N66a67800
+add_layer {masks_face masks_face.red masks_face.green masks_face.blue}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 masks_face
+  fromInput2 {{0} B}
+  mappings "4 masks_face.green 0 1 rgba.green 0 1 masks_face.green 0 1 rgba.red 0 0 masks_face.green 0 1 rgba.alpha 0 3 masks_face.green 0 1 rgba.blue 0 2"
+  name Shuffle10
+  label "\[value in1]"
+  xpos 589
+  ypos 939
+ }
+ Grade {
+  channels rgba
+  multiply {{parent.kwh_nose}}
+  name Grade1
+  xpos 589
+  ypos 978
+ }
+push $N66a67400
+add_layer {masks_tail masks_tail.red masks_tail.green masks_tail.blue}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 masks_tail
+  fromInput2 {{0} B}
+  mappings "4 masks_tail.red 0 0 rgba.red 0 0 masks_tail.green 0 1 rgba.green 0 1 masks_tail.blue 0 2 rgba.blue 0 2 masks_tail.blue 0 2 rgba.alpha 0 3"
+  name Shuffle5
+  label "\[value in1]"
+  xpos 462
+  ypos 939
+ }
+ Grade {
+  channels rgba
+  multiply {{parent.kwh_tail}}
+  name Grade4
+  xpos 462
+  ypos 978
+ }
+push 0
+push $N66a67000
+add_layer {masks_ears masks_ears.red masks_ears.green masks_ears.blue}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 masks_ears
+  fromInput2 {{0} B}
+  mappings "4 masks_ears.blue 0 2 rgba.blue 0 2 masks_ears.blue 0 2 rgba.alpha 0 3 masks_ears.blue 0 2 rgba.green 0 1 masks_ears.blue 0 2 rgba.red 0 0"
+  name Shuffle15
+  label "\[value in1]"
+  xpos 332
+  ypos 939
+ }
+ Grade {
+  channels rgba
+  multiply {{parent.kwh_ears}}
+  name Grade5
+  xpos 332
+  ypos 978
+ }
+push $N7aa92400
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0 0 0 0 0 0 0 0}
+  matteList *claws*
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte2
+  xpos 834
+  ypos 897
+ }
+ Dot {
+  name Dot37
+  xpos 868
+  ypos 971
+ }
+push $N66a67c00
+add_layer {masks_feet masks_feet.red masks_feet.green masks_feet.blue}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 masks_feet
+  fromInput2 {{0} B}
+  mappings "4 masks_feet.blue 0 2 rgba.red 0 0 masks_feet.blue 0 2 rgba.green 0 1 masks_feet.blue 0 2 rgba.blue 0 2 masks_feet.blue 0 2 rgba.alpha 0 3"
+  name Shuffle17
+  label "\[value in1]"
+  xpos 721
+  ypos 900
+ }
+ Grade {
+  channels rgba
+  multiply {{parent.kwh_feet}}
+  name Grade6
+  xpos 721
+  ypos 939
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value {{parent.kwh_claws}}
+  name Multiply1
+  xpos 721
+  ypos 968
+ }
+set N7aa93800 [stack 0]
+ Merge2 {
+  inputs 5+1
+  name Merge1
+  xpos 523
+  ypos 1048
+ }
+set N5f7eb000 [stack 0]
+ Dot {
+  name Dot21
+  xpos 557
+  ypos 1082
+ }
+push $N66a67000
+ Dot {
+  name Dot34
+  xpos 236
+  ypos 849
+ }
+ Group {
+  name PxF_Bandpass
+  help "Extract detail from an image by subtracting the original image from a blur of itself.\nUseful to enhance an image for easier tracking."
+  tile_color 0x733520ff
+  xpos 202
+  ypos 945
+  addUserKnob {20 PxF_Bandpass}
+  addUserKnob {41 colorspace_out l Colorspace t "Pixel values will be converted from linear to this colorspace before processing." T Colorspace1.colorspace_out}
+  addUserKnob {41 blur_1 l blurAmount1 t "Frequencies below this size will be filtered out." T Blur1.size}
+  addUserKnob {41 blur_2 l blurAmount2 t "Frequencies above this size will be filtered out." T Blur2.size}
+  addUserKnob {7 brightness l Gain t "Overall gain applied after bandpass filter." R 0 20}
+  brightness 10.85
+  addUserKnob {41 saturation t "Overall saturation after bandpass and gain." T Saturation1.saturation}
+  addUserKnob {7 offset l offsetDarks t "Constant added after bandpass."}
+  offset 0.172
+  addUserKnob {6 pre_bc l "pre black clamp" t "Clamp blacks before bandpass." +STARTLINE}
+  pre_bc true
+  addUserKnob {6 pre_wc l "pre white clamp" t "Clamp whites before bandpass." -STARTLINE}
+  addUserKnob {6 bc l "post black clamp" t "Clamp blacks after bandpass." +STARTLINE}
+  bc true
+  addUserKnob {6 wc l "post white clamp" t "Clamp whites after bandpass." -STARTLINE}
+  wc true
+  addUserKnob {7 mix t "Dissolve between the original (0) and the full effect (1)."}
+  mix 1
+  addUserKnob {26 ""}
+  addUserKnob {26 Credits l "" t "PxF_Bandpass 2.5.1 - &copy; 2012-2024 - Xavier Bourque - pixelfudger.com \n\nPixelfudger gizmos are free to use for personal and commercial use as long as you leave the credit text intact in the gizmo's knobs and in the source files. " +STARTLINE T "<font size=2>PxF_Bandpass 2.5.1 - &copy; 2012-2024 - </font><a href=\"http://www.xavierbourque.com\"><font color=\"#bbbbbb\" size=2>Xavier Bourque</a></font> - <a href=\"http://www.pixelfudger.com\"><font color=\"#bbbbbb\" size=2>pixelfudger.com</a></font> - <a href=\"https://www.youtube.com/watch?v=m7jNBrvYq3o\"><font color=\"#bbbbbb\" size=2>Video Tutorial</a></font>"}
+ }
+  Input {
+   inputs 0
+   name mask
+   xpos 434
+   ypos 141
+   number 1
+  }
+  Input {
+   inputs 0
+   name img
+   xpos 171
+   ypos -273
+  }
+set N5f718000 [stack 0]
+  Clamp {
+   minimum_enable {{parent.pre_bc}}
+   maximum_enable {{parent.pre_wc}}
+   name Clamp1
+   xpos 171
+   ypos -219
+  }
+set N5f718400 [stack 0]
+  Dot {
+   name Dot1
+   xpos 405
+   ypos 31
+  }
+set N5f718800 [stack 0]
+push $N5f718800
+push $N5f718400
+  Colorspace {
+   colorspace_out Cineon
+   name Colorspace1
+   xpos 171
+   ypos -163
+  }
+set N5f718c00 [stack 0]
+  Blur {
+   name Blur1
+   xpos 132
+   ypos -126
+  }
+push $N5f718c00
+  Blur {
+   size 5.4
+   name Blur2
+   xpos 227
+   ypos -127
+  }
+  Merge2 {
+   inputs 2
+   operation minus
+   name Merge1
+   xpos 180
+   ypos -71
+  }
+  Grade {
+   white {{brightness}}
+   add {{offset}}
+   black_clamp {{bc}}
+   white_clamp {{wc}}
+   name Grade1
+   xpos 180
+   ypos 4
+  }
+  Saturation {
+   saturation 0
+   name Saturation1
+   xpos 180
+   ypos 47
+  }
+  ShuffleCopy {
+   inputs 2
+   name ShuffleCopy1
+   xpos 180
+   ypos 163
+  }
+  Keymix {
+   inputs 3
+   invertMask true
+   bbox B
+   name Keymix1
+   xpos 180
+   ypos 229
+   disable {{"\[exists parent.input1] ? 0 : 1" x1 0}}
+  }
+push $N5f718000
+  Dot {
+   name Dot3
+   note_font_size 22
+   xpos 37
+   ypos -179
+  }
+  Dot {
+   name Dot2
+   note_font_size 22
+   xpos 37
+   ypos 228
+  }
+  Dissolve {
+   inputs 2
+   which {{parent.mix}}
+   name Dissolve1
+   xpos 180
+   ypos 294
+  }
+  Output {
+   name Output1
+   xpos 180
+   ypos 361
+  }
+ end_group
+ Grade {
+  black 0.5
+  name Grade2
+  xpos 202
+  ypos 978
+ }
+ Multiply {
+  inputs 1+1
+  value 0
+  invert_mask true
+  name Multiply2
+  xpos 202
+  ypos 1073
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
+  name Shuffle9
+  label "\[value in1]"
+  xpos 202
+  ypos 1109
+ }
+ Blur {
+  size 2
+  name Blur1
+  xpos 202
+  ypos 1176
+ }
+push $N63ad9c00
+add_layer {clumpid_A clumpid_A.x clumpid_A.y clumpid_A.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 clumpid_A
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.alpha 0 3 clumpid_A.x 0 0 rgba.red 0 0 clumpid_A.y 0 1 rgba.green 0 1 clumpid_A.z 0 2 rgba.blue 0 2"
+  name Shuffle13
+  label "\[value in1]"
+  xpos -820
+  ypos 793
+ }
+ Saturation {
+  saturation 0
+  mode Average
+  name Saturation2
+  xpos -820
+  ypos 834
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
+  name Shuffle14
+  label "\[value in1]"
+  xpos -820
+  ypos 864
+ }
+ Dot {
+  name Dot83
+  xpos -786
+  ypos 931
+ }
+push $N63ad9800
+add_layer {clumpid_B clumpid_B.x clumpid_B.y clumpid_B.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 clumpid_B
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.alpha 0 3 clumpid_B.x 0 0 rgba.red 0 0 clumpid_B.y 0 1 rgba.green 0 1 clumpid_B.z 0 2 rgba.blue 0 2"
+  name Shuffle7
+  label "\[value in1]"
+  xpos -651
+  ypos 793
+ }
+ Saturation {
+  saturation 0
+  mode Average
+  name Saturation1
+  xpos -651
+  ypos 834
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
+  name Shuffle12
+  label "\[value in1]"
+  xpos -651
+  ypos 864
+ }
+ Merge2 {
+  inputs 2
+  name Merge11
+  xpos -651
+  ypos 928
+ }
+ Grade {
+  channels rgba
+  multiply 3.4
+  name Grade3
+  xpos -651
+  ypos 1113
+ }
+push $N64752400
+ PostageStamp {
+  name FUR_MASK
+  note_font "Verdana Bold"
+  xpos -311
+  ypos 1069
+  hide_input true
+ }
+push $N63ad8800
+ Cryptomatte {
+  pickerAdd {0.9287120104 0.998231411 0.1002085209 0.9106793404 947 974 948 975}
+  matteList eyebrows
+  lastSelectedCryptoLayerName CryptoPrimvar_part
+  name Cryptomatte4
+  xpos -85
+  ypos 1009
+ }
+push $N63ad8c00
+add_layer {Pref Pref.red Pref.green Pref.blue Pref.x Pref.y Pref.z Pref.alpha}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 {Pref.red Pref.green Pref.blue -Pref.x -Pref.y -Pref.z -Pref.alpha}
+  out1 rgb
+  fromInput2 {{0} B}
+  mappings "3 Pref.red 0 0 rgba.red 0 0 Pref.green 0 1 rgba.green 0 1 Pref.blue 0 2 rgba.blue 0 2"
+  name Shuffle16
+  label "\[value in1]"
+  xpos -204
+  ypos 786
+ }
+ set C5f751c00 [stack 0]
+ Median {
+  size {{parent.Median_MASTER.size}}
+  ignore_top_line false
+  name Median3
+  xpos -204
+  ypos 837
+ }
+ Group {
+  name P_Noise_Advanced
+  knobChanged "\nn = nuke.thisNode()\ntype = n\['noisetype'].value()\nblock = n\['Trunc'].getValue()\nVis = \[]\nHide = \[]\nif type in ('fBm', 'turbulent'):\n    Vis.extend(\['octaves', 'lacunarity', 'gain', 'gamma'])\n    Hide.extend(\['rays', 'range', 'invert', 'ringsSeed', 'raysSeed', 'gammaNormalize'])   \nelif type == 'p_rings':\n    Vis.extend(\['ringsSeed', 'gammaNormalize'])\n    Hide.extend(\['rays', 'range', 'invert', 'octaves', 'lacunarity', 'gain', 'gamma', 'raysSeed'])\nelif type == 'p_rays':\n    Vis.extend(\['rays', 'raysSeed', 'gammaNormalize'])\n    Hide.extend(\['range', 'invert', 'octaves', 'lacunarity', 'gain', 'gamma', 'ringsSeed'])\nelif type in ('Euclidian', 'Voronoi', 'Manhattan', 'ChebyShev'):\n    Vis.extend(\['range', 'gammaNormalize'])\n    Hide.extend(\['rays', 'invert', 'octaves', 'lacunarity', 'gain', 'gamma', 'ringsSeed', 'raysSeed'])\nelif type == 'Worley':\n    Vis.extend(\['invert', 'gammaNormalize'])\n    Hide.extend(\['rays', 'range', 'octaves', 'lacunarity', 'gain', 'gamma', 'ringsSeed', 'raysSeed'])\nfor r in Vis: n\[r].setVisible(True)\nfor x in Hide: n\[x].setVisible(False)\n\nif block == True:\n    n\['truncSize'].setVisible(True)\nelse:\n    n\['truncSize'].setVisible(False)\n"
+  label "(\[value in])"
+  xpos -204
+  ypos 883
+  addUserKnob {20 User}
+  addUserKnob {41 in l "position data" T Shuffle_Input_Channels.in}
+  addUserKnob {6 unpremultiply +STARTLINE}
+  addUserKnob {6 useAlpha l "ignore outside alpha" -STARTLINE}
+  addUserKnob {6 useGPU l "use GPU if available" -STARTLINE}
+  useGPU true
+  addUserKnob {26 ""}
+  addUserKnob {4 noisetype M {fBm turbulent p_rings p_rays Euclidian Voronoi Manhattan Chebyslev Worley "" "" ""}}
+  addUserKnob {6 Trunc l "blocky (trunc)" -STARTLINE}
+  addUserKnob {41 Position2d T SampleXY.Position2d}
+  addUserKnob {41 rgbSample l center T Sample.rgbSample}
+  addUserKnob {6 useCenter -STARTLINE}
+  useCenter true
+  addUserKnob {26 ""}
+  addUserKnob {18 size R 1 100}
+  size {{parent.KWH_radius_map_noise_size}}
+  addUserKnob {6 size_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {18 seed}
+  seed {0 0 0}
+  addUserKnob {6 seed_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {18 truncSize l "blocky size" +HIDDEN R 0 2}
+  truncSize 0.5
+  addUserKnob {6 truncSize_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {26 ""}
+  addUserKnob {7 rays +HIDDEN}
+  rays 30
+  addUserKnob {7 raysSeed l "rays seed" +HIDDEN R 0 10}
+  addUserKnob {7 ringsSeed l "rings seed" +HIDDEN R 0 10}
+  addUserKnob {7 range +HIDDEN R 0 6}
+  range 1
+  addUserKnob {6 invert +HIDDEN +STARTLINE}
+  addUserKnob {3 octaves}
+  octaves 10
+  addUserKnob {7 lacunarity R 1 10}
+  lacunarity 2
+  addUserKnob {7 gain R 0.1 1}
+  gain 0.5
+  addUserKnob {7 gamma}
+  gamma 0.5
+  addUserKnob {7 gammaNormalize l gamma +HIDDEN R 0 2}
+  gammaNormalize 1
+  addUserKnob {26 ""}
+  addUserKnob {26 INFO l "" +STARTLINE T "v1.02 (c) Riley Gray and Owen Bulka 2020\nBased on \"Cell Noise v1.1\" by Matthew Shaw     "}
+  addUserKnob {26 c44_version_author l "" +STARTLINE T "<span style=\"color:#666\"><br/><b>C44Kernel v1.0</b> - <a href=\"http://www.adrianpueyo.com\" style=\"color:#666;text-decoration: none;\">adrianpueyo.com</a>, 2018</span>"}
+  addUserKnob {20 Transform}
+  addUserKnob {41 rot_order l "rotation order" T Axis1.rot_order}
+  addUserKnob {41 translate T Axis1.translate}
+  addUserKnob {41 rotate T Axis1.rotate}
+  addUserKnob {41 scaling l scale T Axis1.scaling}
+  addUserKnob {41 uniform_scale l "uniform scale" T Axis1.uniform_scale}
+  addUserKnob {41 skew T Axis1.skew}
+  addUserKnob {41 pivot +INVISIBLE T Axis1.pivot}
+ }
+  Input {
+   inputs 0
+   name img
+   xpos 0
+   ypos -116
+  }
+  AddChannels {
+   channels alpha
+   color 1
+   name AddChannels1
+   xpos 0
+   ypos -64
+  }
+  Shuffle {
+   alpha blue
+   out rgb
+   name Shuffle_Input_Channels
+   xpos 0
+   ypos -18
+  }
+  Unpremult {
+   name Unpremult1
+   xpos 0
+   ypos 16
+   disable {{!parent.unpremultiply i}}
+  }
+  Dot {
+   name Dot2
+   xpos 34
+   ypos 66
+  }
+set N5a223400 [stack 0]
+  Dot {
+   name Dot4
+   xpos -130
+   ypos 66
+  }
+set N5a223800 [stack 0]
+  Dot {
+   name Dot3
+   xpos -292
+   ypos 66
+  }
+  Expression {
+   channel0 alpha
+   expr0 "a == 0 ? 1 :0"
+   channel1 none
+   channel2 none
+   channel3 {none none none -rgba.alpha}
+   name Expression1
+   xpos -326
+   ypos 751
+  }
+  Axis2 {
+   inputs 0
+   name Axis1
+   xpos 265
+   ypos 200
+  }
+push $N5a223400
+  Add {
+   channels rgb
+   value {{parent.Sample.rgbSample/-1} {parent.Sample.rgbSample/-1} {parent.Sample.rgbSample/-1} 0}
+   name center
+   xpos 0
+   ypos 141
+   disable {{1-parent.useCenter}}
+  }
+  Group {
+   inputs 2
+   name C44Kernel
+   help "C44Kernel v1.0 by Adrian Pueyo\n\nMultiply the rgb or rgba colors by an arbitrary 4x4 Matrix. Useful for transforming a Position pass.\n\nYou can plug in an Axis or Camera node into the axis input, to also apply its transformations.\n\nadrianpueyo.com, 2017"
+   tile_color 0xe88543ff
+   xpos 0
+   ypos 221
+   lock_connections true
+   addUserKnob {20 C44Kernel}
+   addUserKnob {41 channels T MergeIn.Achannels}
+   addUserKnob {41 matrix T Axis1.matrix}
+   addUserKnob {6 invert -STARTLINE}
+   addUserKnob {6 alpha_masking l "alpha masking" t "Apply only where rgba.alpha>0" +STARTLINE}
+   addUserKnob {20 advanced l Advanced n 1}
+   advanced 0
+   addUserKnob {6 transpose +STARTLINE}
+   addUserKnob {6 w_divide +STARTLINE}
+   addUserKnob {6 rgba_mode l "apply on Vector4" t "Usually you'll want to apply the matrix on the RGB only, which uses a white alpha. Enable this to use the full Vector4 (RGBA)." +STARTLINE}
+   addUserKnob {20 endGroup n -1}
+   addUserKnob {26 ""}
+   addUserKnob {41 mix T MergeOut.mix}
+   addUserKnob {26 version_author l "" t "C44Kernel v1.0\n23 June, 2018" +STARTLINE T "<span style=\"color:#666\"><br/><b>C44Kernel v1.0</b> - <a href=\"http://www.adrianpueyo.com\" style=\"color:#666;text-decoration: none;\">adrianpueyo.com</a>, 2018</span>"}
+   addUserKnob {20 GPU_Settings l "GPU Settings"}
+  }
+   Input {
+    inputs 0
+    name Inputaxis
+    xpos 133
+    ypos -181
+    number 1
+   }
+   Axis2 {
+    useMatrix true
+    name Axis1
+    xpos 143
+    ypos -133
+   }
+   Input {
+    inputs 0
+    name Inputimg
+    xpos -110
+    ypos -192
+   }
+set N5a181400 [stack 0]
+   Dot {
+    name Dot1
+    xpos -76
+    ypos -161
+   }
+set N5a181800 [stack 0]
+   Expression {
+    expr3 a>0
+    name ExpressionA
+    xpos -220
+    ypos -164
+   }
+   Switch {
+    which {{!parent.alpha_masking}}
+    name SwitchMasking
+    xpos -220
+    ypos -112
+   }
+push $N5a181800
+push $N5a181400
+   Remove {
+    name RemoveAll
+    xpos 34
+    ypos -196
+   }
+   Merge2 {
+    inputs 2
+    operation copy
+    Bchannels none
+    name MergeIn
+    xpos 34
+    ypos -164
+   }
+   Shuffle {
+    alpha white
+    name ShuffleWhiteA
+    xpos 34
+    ypos -140
+    disable {{parent.rgba_mode}}
+   }
+   BlinkScript {
+    recompileCount 147
+    ProgramGroup 1
+    KernelDescription "2 \"C44MatrixKernel\" iterate pixelWise 10f1841ce0aee43165aca4445fb9ce0126826eedd71da6339f12b8f8de8e52eb 2 \"src\" Read Point \"dst\" Write Point 4 \"m\" Float 16 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA== \"invert\" Int 1 AAAAAA== \"transpose\" Int 1 AAAAAA== \"w_divide\" Int 1 AAAAAA== 4 \"m\" 16 1 \"invert\" 1 1 \"transpose\" 1 1 \"w_divide\" 1 1 0"
+    kernelSource "kernel C44MatrixKernel : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessPoint, eEdgeClamped> src;\n  Image<eWrite> dst;\n\n  param:\n    float4x4 m;\n    int invert;\n    int transpose;\n    int w_divide;\n\n  void process(int2 pos) \{\n    SampleType(src) p = src();\n    float4 result = 1.0f;\n    float4x4 mi = m;\n    mi = invert?mi.invert():mi;\n    mi = transpose?mi.transpose():mi;\n    for(int c = 0; c<dst.kComps; c++)\{\n      result\[c] = mi\[c]\[0]*p.x + mi\[c]\[1]*p.y + mi\[c]\[2]*p.z + mi\[c]\[3]*p.w;\n    \}\n    dst() = w_divide?result/result.w:result;\n  \}\n\};\n"
+    rebuild ""
+    C44MatrixKernel_m {
+        {{Axis1.world_matrix} {Axis1.world_matrix} {Axis1.world_matrix} {Axis1.world_matrix}}
+        {{Axis1.world_matrix} {Axis1.world_matrix} {Axis1.world_matrix} {Axis1.world_matrix}}
+        {{Axis1.world_matrix} {Axis1.world_matrix} {Axis1.world_matrix} {Axis1.world_matrix}}
+        {{Axis1.world_matrix} {Axis1.world_matrix} {Axis1.world_matrix} {Axis1.world_matrix}}
+      }
+    C44MatrixKernel_invert {{parent.invert}}
+    C44MatrixKernel_transpose {{parent.transpose}}
+    C44MatrixKernel_w_divide {{parent.w_divide}}
+    rebuild_finalise ""
+    name C44MatrixKernel
+    xpos 34
+    ypos -116
+   }
+push $N5a181800
+   Merge2 {
+    inputs 2+1
+    operation copy
+    Bchannels {{{parent.MergeIn.Achannels}}}
+    output {{{parent.MergeIn.Achannels}}}
+    name MergeOut
+    xpos -110
+    ypos -112
+   }
+   Output {
+    name Output1
+    xpos -110
+    ypos -88
+   }
+  end_group
+  Add {
+   channels rgb
+   value {{parent.seed} {parent.seed} {parent.seed} {parent.seed}}
+   name Seed
+   xpos 0
+   ypos 279
+  }
+  Multiply {
+   channels rgb
+   value {{10/parent.size} {10/parent.size} {10/parent.size} {10/parent.size}}
+   name size
+   xpos 0
+   ypos 327
+  }
+  Expression {
+   expr0 trunc(r*truncScale.r)/truncScale.r/.95
+   expr1 trunc(g*truncScale.g)/truncScale.g/.95
+   expr2 trunc(b*truncScale.b)/truncScale.b/.95
+   name Trunc
+   xpos 0
+   ypos 391
+   disable {{1-parent.Trunc}}
+   addUserKnob {20 User}
+   addUserKnob {18 truncScale R 0.1 10}
+   truncScale {{1/parent.truncSize} {1/parent.truncSize} {1/parent.truncSize}}
+   addUserKnob {6 truncScale_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  }
+  Dot {
+   name Dot1
+   xpos 34
+   ypos 469
+  }
+set N67fdc400 [stack 0]
+  BlinkScript {
+   recompileCount 5
+   ProgramGroup 1
+   KernelDescription "2 \"Worley\" iterate pixelWise 438e1f780c47470c5df359606fb43213aedb3c954840151838b0bafe69a5cec8 2 \"position_pass\" Read Point \"dst\" Write Point 1 \"Invert\" Bool 1 AA== 1 \"invert\" 1 1 0"
+   kernelSource "// https://aftbit.com/cell-noise-2/\n\n// C++11\nconst uint rand_multiplier = 48271;\nconst uint rand_increment  = 0;\nconst uint rand_modulus    = 2147483647;\n\nstatic int lcgRandom(int seed)\n\{\n  return abs((seed * rand_multiplier + rand_increment) % rand_modulus);\n\}\n\n// FNV Hash\nconst uint OFFSET_BASIS = 2166136261;\nconst uint FNV_PRIME = 16777619;\n\nstatic uint hash(uint i, uint j, uint k)\n\{\n  return ((((((OFFSET_BASIS ^ i) * FNV_PRIME) ^ j) * FNV_PRIME) ^ k) * FNV_PRIME);\n\}\n\n// Poisson Distribution\nconst uint one   =  393325350;\nconst uint two   = 1022645910;\nconst uint three = 1861739990;\nconst uint four  = 2700834071;\nconst uint five  = 3372109335;\nconst uint six   = 3819626178;\nconst uint seven = 4075350088;\nconst uint eight = 4203212043;\n\nstatic uint probLookup(uint value)\n\{\n  if (value < one) return 1;\n  if (value < two) return 2;\n  if (value < three) return 3;\n  if (value < four) return 4;\n  if (value < five) return 5;\n  if (value < six) return 6;\n  if (value < seven) return 7;\n  if (value < eight) return 8;\n  return 9;\n\}\n\n// Distance Functions\nstatic float EuclidianDistanceFunc(float3 p1, float3 p2)\n\{\n  return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y) + (p1.z - p2.z) * (p1.z - p2.z);\n\}\n\nstatic float ManhattanDistanceFunc(float3 p1, float3 p2)\n\{\n  return fabs(p1.x - p2.x) + fabs(p1.y - p2.y) + fabs(p1.z - p2.z);\n\}\n\nstatic float ChebyshevDistanceFunc(float3 p1, float3 p2)\n\{\n  float3 diff = p1 - p2;\n  return max(max(fabs(diff.x), fabs(diff.y)), fabs(diff.z));\n\}\n\n\n// Blink Kernel\nkernel Worley : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessPoint> position_pass;\n  Image<eWrite> dst;\n\n  param:\n    bool invert;\n\n  void define()\n  \{\n    defineParam(invert, \"Invert\", false);\n  \}\n\n  void process()\n  \{\n\n    //Declare some values for later use\n    int lastRandom, numberFeaturePoints;\n    float distance = 6666.0f;\n    float3 randomDiff, featurePoint;\n    int cubeX, cubeY, cubeZ;\n\n    float4 position = position_pass();\n    float3 input = float3(position.x, position.y, position.z);\n\n    // Determine which cube the evaluation point is in\n    int evalCubeX = floor(input.x);\n    int evalCubeY = floor(input.y);\n    int evalCubeZ = floor(input.z);\n\n    for (int i = -1; i < 2; ++i)\n    \{\n      for (int j = -1; j < 2; ++j)\n      \{\n        for (int k = -1; k < 2; ++k)\n        \{\n            cubeX = evalCubeX + i;\n            cubeY = evalCubeY + j;\n            cubeZ = evalCubeZ + k;\n\n            // Generate a reproducible random number generator for the cube\n            lastRandom = lcgRandom(hash(cubeX, cubeY, cubeZ));\n            // Determine how many feature points are in the cube\n            numberFeaturePoints = probLookup(lastRandom);\n            // Check each feature point\n            for (uint l = 0; l < numberFeaturePoints; ++l)\n            \{\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.x = float(lastRandom) / rand_modulus;\n\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.y = float(lastRandom) / rand_modulus;\n\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.z = float(lastRandom) / rand_modulus;\n\n              featurePoint = float3(randomDiff.x + float(cubeX), randomDiff.y + float(cubeY), randomDiff.z + float(cubeZ));\n\n              distance = min(distance, dot(input - featurePoint, input - featurePoint));\n            \}\n        \}\n      \}\n    \}\n\n    distance = sqrt(distance);\n    if (invert)\n      distance = 1.0f - distance;\n    dst() = distance;\n\n  \}\n\n\};"
+   useGPUIfAvailable {{parent.useGPU}}
+   rebuild ""
+   Worley_Invert {{parent.invert}}
+   rebuild_finalise ""
+   name WorleyNoise
+   xpos 990
+   ypos 579
+  }
+  Gamma {
+   channels rgba
+   value {{parent.gammaNormalize}}
+   name Gamma2
+   xpos 990
+   ypos 615
+  }
+push $N67fdc400
+  BlinkScript {
+   recompileCount 4
+   ProgramGroup 1
+   KernelDescription "2 \"ChebyshevNoise\" iterate pixelWise 517a1358a56b1248ee4a1cc426f04457776dbd1836be53c12b3ff4f236c7ecd9 2 \"position_pass\" Read Point \"dst\" Write Point 1 \"Range\" Float 1 AABAQA== 1 \"range\" 1 1 2 \"fRange\" Float 1 1 AAAAAA== \"iRange\" Int 1 1 AAAAAA=="
+   kernelSource "// https://aftbit.com/cell-noise-2/\n\n# define MAX_DISTANCE_ARRAY 12\n\n// C++11\nconst uint rand_multiplier = 48271;\nconst uint rand_increment  = 0;\nconst uint rand_modulus    = 2147483647;\n\nstatic int lcgRandom(int seed)\n\{\n  return abs((seed * rand_multiplier + rand_increment) % rand_modulus);\n\}\n\n// FNV Hash\nconst uint OFFSET_BASIS = 2166136261;\nconst uint FNV_PRIME = 16777619;\n\nstatic uint hash(uint i, uint j, uint k)\n\{\n  return ((((((OFFSET_BASIS ^ i) * FNV_PRIME) ^ j) * FNV_PRIME) ^ k) * FNV_PRIME);\n\}\n\n// Poisson Distribution\nconst uint one   =  393325350;\nconst uint two   = 1022645910;\nconst uint three = 1861739990;\nconst uint four  = 2700834071;\nconst uint five  = 3372109335;\nconst uint six   = 3819626178;\nconst uint seven = 4075350088;\nconst uint eight = 4203212043;\n\nstatic uint probLookup(uint value)\n\{\n  if (value < one) return 1;\n  if (value < two) return 2;\n  if (value < three) return 3;\n  if (value < four) return 4;\n  if (value < five) return 5;\n  if (value < six) return 6;\n  if (value < seven) return 7;\n  if (value < eight) return 8;\n  return 9;\n\}\n\n// Distance Function\nstatic float ChebyshevDistanceFunc(float3 p1, float3 p2)\n\{\n  float3 diff = p1 - p2;\n  return max(max(fabs(diff.x), fabs(diff.y)), fabs(diff.z));\n\}\n\n// Insertion Array\nstatic void insert(float arr\[], float value)\n\{\n  float temp;\n  for (int i = MAX_DISTANCE_ARRAY - 1; i >= 0; i--)\n  \{\n    if (value > arr\[i])\n      break;\n    temp = arr\[i];\n    arr\[i] = value;\n    if (i + 1 < MAX_DISTANCE_ARRAY)\n    \{\n      arr\[i + 1] = temp;\n    \}\n  \}\n\}\n\n\n// Blink Kernel\nkernel ChebyshevNoise : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessPoint> position_pass;\n  Image<eWrite> dst;\n\n  param:\n    float range;\n\n  local:\n    float fRange;\n    int iRange;\n\n  void define()\n  \{\n    defineParam(range, \"Range\", 3.0f);\n  \}\n\n  void init()\n  \{\n    fRange = clamp(range, 0.0f, float(MAX_DISTANCE_ARRAY - 2));\n    iRange = int(fRange);\n  \}\n\n  void process()\n  \{\n\n    //Declare some values for later use\n    int lastRandom, numberFeaturePoints;\n    float3 randomDiff, featurePoint;\n    int cubeX, cubeY, cubeZ;\n\n    float distanceArray\[MAX_DISTANCE_ARRAY];\n\n    // Initialize values in distance array to large values\n    for (int i = 0; i < MAX_DISTANCE_ARRAY; i++)\n        distanceArray\[i] = 6666;\n\n    float4 position = position_pass();\n    float3 input = float3(position.x, position.y, position.z);\n\n    // Determine which cube the evaluation point is in\n    int evalCubeX = floor(input.x);\n    int evalCubeY = floor(input.y);\n    int evalCubeZ = floor(input.z);\n\n    for (int i = -1; i < 2; ++i)\n    \{\n      for (int j = -1; j < 2; ++j)\n      \{\n        for (int k = -1; k < 2; ++k)\n        \{\n            cubeX = evalCubeX + i;\n            cubeY = evalCubeY + j;\n            cubeZ = evalCubeZ + k;\n\n            // Generate a reproducible random number generator for the cube\n            lastRandom = lcgRandom(hash(cubeX, cubeY, cubeZ));\n            // Determine how many feature points are in the cube\n            numberFeaturePoints = probLookup(lastRandom);\n            // Check each feature point\n            for (uint l = 0; l < numberFeaturePoints; ++l)\n            \{\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.x = float(lastRandom) / rand_modulus;\n\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.y = float(lastRandom) / rand_modulus;\n\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.z = float(lastRandom) / rand_modulus;\n\n              featurePoint = float3(randomDiff.x + float(cubeX), randomDiff.y + float(cubeY), randomDiff.z + float(cubeZ));\n\n              insert(distanceArray, ChebyshevDistanceFunc(input, featurePoint));\n            \}\n        \}\n      \}\n    \}\n\n    float color = (distanceArray\[ iRange + 2 ] - distanceArray\[ iRange + 1 ]) * fmod(fRange, 1.0f) + distanceArray\[ iRange + 1] - distanceArray\[0];\n    dst() = color;\n\n  \}\n\n\};"
+   useGPUIfAvailable {{parent.useGPU}}
+   rebuild ""
+   ChebyshevNoise_Range 1
+   format {{{WorleyNoise.format}}}
+   rebuild_finalise ""
+   name ChebyShevNoise
+   xpos 880
+   ypos 578
+  }
+  Gamma {
+   channels rgba
+   value {{parent.gammaNormalize}}
+   name Gamma3
+   xpos 880
+   ypos 614
+  }
+push $N67fdc400
+  BlinkScript {
+   recompileCount 15
+   ProgramGroup 1
+   KernelDescription "2 \"ManhattanNoise\" iterate pixelWise 8f4d3375bd506ca9e28dc8e57d643af6a2e1e4628d082801994f4dfea81563d1 2 \"position_pass\" Read Point \"dst\" Write Point 1 \"Range\" Float 1 AABAQA== 1 \"range\" 1 1 2 \"fRange\" Float 1 1 AAAAAA== \"iRange\" Int 1 1 AAAAAA=="
+   kernelSource "// https://aftbit.com/cell-noise-2/\n\n# define MAX_DISTANCE_ARRAY 12\n\n// C++11\nconst uint rand_multiplier = 48271;\nconst uint rand_increment  = 0;\nconst uint rand_modulus    = 2147483647;\n\nstatic int lcgRandom(int seed)\n\{\n  return abs((seed * rand_multiplier + rand_increment) % rand_modulus);\n\}\n\n// FNV Hash\nconst uint OFFSET_BASIS = 2166136261;\nconst uint FNV_PRIME = 16777619;\n\nstatic uint hash(uint i, uint j, uint k)\n\{\n  return ((((((OFFSET_BASIS ^ i) * FNV_PRIME) ^ j) * FNV_PRIME) ^ k) * FNV_PRIME);\n\}\n\n// Poisson Distribution\nconst uint one   =  393325350;\nconst uint two   = 1022645910;\nconst uint three = 1861739990;\nconst uint four  = 2700834071;\nconst uint five  = 3372109335;\nconst uint six   = 3819626178;\nconst uint seven = 4075350088;\nconst uint eight = 4203212043;\n\nstatic uint probLookup(uint value)\n\{\n  if (value < one) return 1;\n  if (value < two) return 2;\n  if (value < three) return 3;\n  if (value < four) return 4;\n  if (value < five) return 5;\n  if (value < six) return 6;\n  if (value < seven) return 7;\n  if (value < eight) return 8;\n  return 9;\n\}\n\n// Distance Function\nstatic float ManhattanDistanceFunc(float3 p1, float3 p2)\n\{\n  return fabs(p1.x - p2.x) + fabs(p1.y - p2.y) + fabs(p1.z - p2.z);\n\}\n\n// Insertion Array\nstatic void insert(float arr\[], float value)\n\{\n  float temp;\n  for (int i = MAX_DISTANCE_ARRAY - 1; i >= 0; i--)\n  \{\n    if (value > arr\[i])\n      break;\n    temp = arr\[i];\n    arr\[i] = value;\n    if (i + 1 < MAX_DISTANCE_ARRAY)\n    \{\n      arr\[i + 1] = temp;\n    \}\n  \}\n\}\n\n// Blink Kernel\nkernel ManhattanNoise : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessPoint> position_pass;\n  Image<eWrite> dst;\n\n  param:\n    float range;\n\n  local:\n    float fRange;\n    int iRange;\n\n  void define()\n  \{\n    defineParam(range, \"Range\", 3.0f);\n  \}\n\n  void init()\n  \{\n    fRange = clamp(range, 0.0f, float(MAX_DISTANCE_ARRAY - 2));\n    iRange = int(fRange);\n  \}\n\n  void process()\n  \{\n\n    //Declare some values for later use\n    int lastRandom, numberFeaturePoints;\n    float3 randomDiff, featurePoint;\n    int cubeX, cubeY, cubeZ;\n\n    float distanceArray\[MAX_DISTANCE_ARRAY];\n\n    // Initialize values in distance array to large values\n    for (int i = 0; i < MAX_DISTANCE_ARRAY; i++)\n        distanceArray\[i] = 6666;\n\n    float4 position = position_pass();\n    float3 input = float3(position.x, position.y, position.z);\n\n    // Determine which cube the evaluation point is in\n    int evalCubeX = floor(input.x);\n    int evalCubeY = floor(input.y);\n    int evalCubeZ = floor(input.z);\n\n    for (int i = -1; i < 2; ++i)\n    \{\n      for (int j = -1; j < 2; ++j)\n      \{\n        for (int k = -1; k < 2; ++k)\n        \{\n            cubeX = evalCubeX + i;\n            cubeY = evalCubeY + j;\n            cubeZ = evalCubeZ + k;\n\n            // Generate a reproducible random number generator for the cube\n            lastRandom = lcgRandom(hash(cubeX, cubeY, cubeZ));\n            // Determine how many feature points are in the cube\n            numberFeaturePoints = probLookup(lastRandom);\n            // Check each feature point\n            for (uint l = 0; l < numberFeaturePoints; ++l)\n            \{\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.x = float(lastRandom) / rand_modulus;\n\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.y = float(lastRandom) / rand_modulus;\n\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.z = float(lastRandom) / rand_modulus;\n\n              featurePoint = float3(randomDiff.x + float(cubeX), randomDiff.y + float(cubeY), randomDiff.z + float(cubeZ));\n\n              insert(distanceArray, ManhattanDistanceFunc(input, featurePoint));\n            \}\n        \}\n      \}\n    \}\n\n    float color = (distanceArray\[ iRange + 2 ] - distanceArray\[ iRange + 1 ]) * fmod(fRange, 1.0f) + distanceArray\[ iRange + 1] - distanceArray\[0];\n    dst() = color;\n\n  \}\n\n\};"
+   useGPUIfAvailable {{parent.useGPU}}
+   rebuild ""
+   ManhattanNoise_Range 1
+   format {{{WorleyNoise.format}}}
+   rebuild_finalise ""
+   name ManhattanNoise
+   xpos 770
+   ypos 577
+  }
+  Gamma {
+   channels rgba
+   value {{parent.gammaNormalize}}
+   name Gamma4
+   xpos 770
+   ypos 613
+  }
+push $N67fdc400
+  BlinkScript {
+   recompileCount 15
+   ProgramGroup 1
+   KernelDescription "2 \"VoronoiNoise\" iterate pixelWise 67095f19952c7fb522e989b2d6691d9d342affbd2c266bc258f83435f13f21f7 2 \"position_pass\" Read Point \"dst\" Write Point 1 \"Range\" Float 1 AABAQA== 1 \"range\" 1 1 2 \"fRange\" Float 1 1 AAAAAA== \"iRange\" Int 1 1 AAAAAA=="
+   kernelSource "// https://aftbit.com/cell-noise-2/\n\n# define MAX_DISTANCE_ARRAY 12\n\n// C++11\nconst uint rand_multiplier = 48271;\nconst uint rand_increment  = 0;\nconst uint rand_modulus    = 2147483647;\n\nstatic int lcgRandom(int seed)\n\{\n  return abs((seed * rand_multiplier + rand_increment) % rand_modulus);\n\}\n\n// FNV Hash\nconst uint OFFSET_BASIS = 2166136261;\nconst uint FNV_PRIME = 16777619;\n\nstatic uint hash(uint i, uint j, uint k)\n\{\n  return ((((((OFFSET_BASIS ^ i) * FNV_PRIME) ^ j) * FNV_PRIME) ^ k) * FNV_PRIME);\n\}\n\n// Poisson Distribution\nconst uint one   =  393325350;\nconst uint two   = 1022645910;\nconst uint three = 1861739990;\nconst uint four  = 2700834071;\nconst uint five  = 3372109335;\nconst uint six   = 3819626178;\nconst uint seven = 4075350088;\nconst uint eight = 4203212043;\n\nstatic uint probLookup(uint value)\n\{\n  if (value < one) return 1;\n  if (value < two) return 2;\n  if (value < three) return 3;\n  if (value < four) return 4;\n  if (value < five) return 5;\n  if (value < six) return 6;\n  if (value < seven) return 7;\n  if (value < eight) return 8;\n  return 9;\n\}\n\n// Insertion Array\nstatic void insert(float arr\[], int idArr\[], float value, int id)\n\{\n  float temp;\n  int tempID;\n  for (int i = MAX_DISTANCE_ARRAY - 1; i >= 0; i--)\n  \{\n    if (value > arr\[i])\n      break;\n    temp = arr\[i];\n    tempID = idArr\[i];\n    arr\[i] = value;\n    idArr\[i] = id;\n    if (i + 1 < MAX_DISTANCE_ARRAY)\n    \{\n      arr\[i + 1] = temp;\n      idArr\[i + 1] = tempID;\n    \}\n  \}\n\}\n\n\n// Blink Kernel\nkernel VoronoiNoise : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessPoint> position_pass;\n  Image<eWrite> dst;\n\n  param:\n    float range;\n    \n  local:\n    float fRange;\n    int iRange;\n\n  void define()\n  \{\n    defineParam(range, \"Range\", 3.0f);\n  \}\n\n  void init()\n  \{\n    fRange = clamp(range, 0.0f, float(MAX_DISTANCE_ARRAY - 2));\n    iRange = int(fRange);\n  \}\n\n  void process()\n  \{\n\n    //Declare some values for later use\n    int lastRandom, id, numberFeaturePoints;\n    float3 randomDiff, featurePoint;\n    int cubeX, cubeY, cubeZ;\n\n    float distanceArray\[MAX_DISTANCE_ARRAY];\n    int idArray\[MAX_DISTANCE_ARRAY];\n\n    // Initialize values in distance array to large values\n    for (int i = 0; i < MAX_DISTANCE_ARRAY; i++)\n        distanceArray\[i] = 6666;\n\n    float4 position = position_pass();\n    float3 input = float3(position.x, position.y, position.z);\n\n    // Determine which cube the evaluation point is in\n    int evalCubeX = floor(input.x);\n    int evalCubeY = floor(input.y);\n    int evalCubeZ = floor(input.z);\n\n    for (int i = -1; i < 2; ++i)\n    \{\n      for (int j = -1; j < 2; ++j)\n      \{\n        for (int k = -1; k < 2; ++k)\n        \{\n            cubeX = evalCubeX + i;\n            cubeY = evalCubeY + j;\n            cubeZ = evalCubeZ + k;\n\n            // Generate a reproducible random number generator for the cube\n            lastRandom = lcgRandom(hash(cubeX, cubeY, cubeZ));\n            id = lastRandom;\n            // Determine how many feature points are in the cube\n            numberFeaturePoints = probLookup(lastRandom);\n            // Check each feature point\n            for (uint l = 0; l < numberFeaturePoints; ++l)\n            \{\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.x = float(lastRandom) / rand_modulus;\n\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.y = float(lastRandom) / rand_modulus;\n\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.z = float(lastRandom) / rand_modulus;\n\n              featurePoint = float3(randomDiff.x + float(cubeX), randomDiff.y + float(cubeY), randomDiff.z + float(cubeZ));\n\n              insert(distanceArray, idArray, length(input - featurePoint), id+l);\n            \}\n        \}\n      \}\n    \}\n\n    float3 col = float3(float(idArray\[iRange]) / rand_modulus, 0.0f, 0.0f);\n    lastRandom = lcgRandom(idArray\[iRange]);\n    col.y = float(lastRandom) / rand_modulus;\n    lastRandom = lcgRandom(lastRandom);\n    col.z = float(lastRandom) / rand_modulus;\n\n    for(int component = 0; component < 3; component++)\n      dst(component) = col\[component];\n    dst(3) = 1.0f;\n  \}\n\n\};"
+   useGPUIfAvailable {{parent.useGPU}}
+   rebuild ""
+   VoronoiNoise_Range 1
+   format {{{WorleyNoise.format}}}
+   rebuild_finalise ""
+   name VoronoiNoise
+   xpos 658
+   ypos 579
+  }
+  Gamma {
+   channels rgba
+   value {{parent.gammaNormalize}}
+   name Gamma5
+   xpos 658
+   ypos 615
+  }
+push $N67fdc400
+  BlinkScript {
+   recompileCount 3
+   ProgramGroup 1
+   KernelDescription "2 \"EuclidianNoise\" iterate pixelWise b78f7b94022701a0fe7a0b3d8a219cf673ea1032aea12739f59fb3562a78ed42 2 \"position_pass\" Read Point \"dst\" Write Point 1 \"Range\" Float 1 AABAQA== 1 \"range\" 1 1 2 \"fRange\" Float 1 1 AAAAAA== \"iRange\" Int 1 1 AAAAAA=="
+   kernelSource "// https://aftbit.com/cell-noise-2/\n\n# define MAX_DISTANCE_ARRAY 12\n\n// C++11\nconst uint rand_multiplier = 48271;\nconst uint rand_increment  = 0;\nconst uint rand_modulus    = 2147483647;\n\nstatic int lcgRandom(int seed)\n\{\n  return abs((seed * rand_multiplier + rand_increment) % rand_modulus);\n\}\n\n// FNV Hash\nconst uint OFFSET_BASIS = 2166136261;\nconst uint FNV_PRIME = 16777619;\n\nstatic uint hash(uint i, uint j, uint k)\n\{\n  return ((((((OFFSET_BASIS ^ i) * FNV_PRIME) ^ j) * FNV_PRIME) ^ k) * FNV_PRIME);\n\}\n\n// Poisson Distribution\nconst uint one   =  393325350;\nconst uint two   = 1022645910;\nconst uint three = 1861739990;\nconst uint four  = 2700834071;\nconst uint five  = 3372109335;\nconst uint six   = 3819626178;\nconst uint seven = 4075350088;\nconst uint eight = 4203212043;\n\nstatic uint probLookup(uint value)\n\{\n  if (value < one) return 1;\n  if (value < two) return 2;\n  if (value < three) return 3;\n  if (value < four) return 4;\n  if (value < five) return 5;\n  if (value < six) return 6;\n  if (value < seven) return 7;\n  if (value < eight) return 8;\n  return 9;\n\}\n\n// Distance Functions\nstatic float EuclidianDistanceFunc(float3 p1, float3 p2)\n\{\n  return (p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y) + (p1.z - p2.z) * (p1.z - p2.z);\n\}\n\n\n// Insertion Array\nstatic void insert(float arr\[], float value)\n\{\n  float temp;\n  for (int i = MAX_DISTANCE_ARRAY - 1; i >= 0; i--)\n  \{\n    if (value > arr\[i])\n      break;\n    temp = arr\[i];\n    arr\[i] = value;\n    if (i + 1 < MAX_DISTANCE_ARRAY)\n    \{\n      arr\[i + 1] = temp;\n    \}\n  \}\n\}\n\n\n// Blink Kernel\nkernel EuclidianNoise : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessPoint> position_pass;\n  Image<eWrite> dst;\n\n  param:\n    float range;\n\n  local:\n    float fRange;\n    int iRange;\n\n  void define()\n  \{\n    defineParam(range, \"Range\", 3.0f);\n  \}\n\n  void init()\n  \{\n    fRange = clamp(range, 0.0f, float(MAX_DISTANCE_ARRAY - 2));\n    iRange = int(fRange);\n  \}\n\n  void process()\n  \{\n\n    //Declare some values for later use\n    int lastRandom, numberFeaturePoints;\n    float3 randomDiff, featurePoint;\n    int cubeX, cubeY, cubeZ;\n\n    float distanceArray\[MAX_DISTANCE_ARRAY];\n\n    // Initialize values in distance array to large values\n    for (int i = 0; i < MAX_DISTANCE_ARRAY; i++)\n        distanceArray\[i] = 6666;\n\n    float4 position = position_pass();\n    float3 input = float3(position.x, position.y, position.z);\n\n    // Determine which cube the evaluation point is in\n    int evalCubeX = floor(input.x);\n    int evalCubeY = floor(input.y);\n    int evalCubeZ = floor(input.z);\n\n    for (int i = -1; i < 2; ++i)\n    \{\n      for (int j = -1; j < 2; ++j)\n      \{\n        for (int k = -1; k < 2; ++k)\n        \{\n            cubeX = evalCubeX + i;\n            cubeY = evalCubeY + j;\n            cubeZ = evalCubeZ + k;\n\n            // Generate a reproducible random number generator for the cube\n            lastRandom = lcgRandom(hash(cubeX, cubeY, cubeZ));\n            // Determine how many feature points are in the cube\n            numberFeaturePoints = probLookup(lastRandom);\n            // Check each feature point\n            for (uint l = 0; l < numberFeaturePoints; ++l)\n            \{\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.x = float(lastRandom) / rand_modulus;\n\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.y = float(lastRandom) / rand_modulus;\n\n              lastRandom = lcgRandom(lastRandom);\n              randomDiff.z = float(lastRandom) / rand_modulus;\n\n              featurePoint = float3(randomDiff.x + float(cubeX), randomDiff.y + float(cubeY), randomDiff.z + float(cubeZ));\n\n              insert(distanceArray, EuclidianDistanceFunc(input, featurePoint));\n            \}\n        \}\n      \}\n    \}\n\n\n    float color = (distanceArray\[ iRange + 2 ] - distanceArray\[ iRange + 1 ]) * fmod(fRange, 1.0f) + distanceArray\[ iRange + 1] - distanceArray\[0];\n    dst() = color;\n\n  \}\n\n\};"
+   useGPUIfAvailable {{parent.useGPU}}
+   rebuild ""
+   EuclidianNoise_Range 1
+   format {{{WorleyNoise.format}}}
+   rebuild_finalise ""
+   name EuclidianNoise
+   xpos 550
+   ypos 579
+  }
+  Gamma {
+   channels rgba
+   value {{parent.gammaNormalize}}
+   name Gamma6
+   xpos 550
+   ypos 615
+  }
+push $N67fdc400
+  Expression {
+   channel0 rgba
+   expr0 "sin( atan(r, g) *rays+rays_seed)"
+   channel1 none
+   channel2 none
+   name rays
+   xpos 400
+   ypos 582
+   addUserKnob {20 User}
+   addUserKnob {7 rays}
+   rays {{parent.rays}}
+   addUserKnob {7 rays_seed l "rays seed"}
+   rays_seed {{parent.raysSeed}}
+  }
+  Gamma {
+   channels rgba
+   value {{parent.gammaNormalize}}
+   name Gamma7
+   xpos 400
+   ypos 606
+  }
+push $N67fdc400
+  Expression {
+   channel0 rgba
+   expr0 "sin(sqrt( r*r + g*g + b*b)+rings_seed)"
+   channel1 none
+   channel2 none
+   name rings
+   xpos 259
+   ypos 581
+   addUserKnob {20 User}
+   addUserKnob {7 rings_seed l "rings seed"}
+   rings_seed {{parent.ringsSeed}}
+  }
+  Gamma {
+   channels rgba
+   value {{parent.gammaNormalize}}
+   name Gamma8
+   xpos 259
+   ypos 605
+  }
+push $N67fdc400
+  Expression {
+   channel0 rgba
+   expr0 "pow(turbulence (r, g, b, octaves, lacunarity, gain), 1/gamma)"
+   channel1 none
+   channel2 none
+   channel3 {none none none -rgba.alpha}
+   name Turb
+   xpos 128
+   ypos 579
+   addUserKnob {20 User}
+   addUserKnob {3 octaves}
+   octaves {{parent.octaves}}
+   addUserKnob {7 lacunarity R 1 10}
+   lacunarity {{parent.lacunarity}}
+   addUserKnob {7 gain R 0.1 1}
+   gain {{parent.gain}}
+   addUserKnob {7 gamma}
+   gamma {{parent.gamma}}
+  }
+push $N67fdc400
+  Expression {
+   channel0 rgba
+   expr0 "pow((fBm (r, g, b, octaves, lacunarity, gain) +1)/2, 1/gamma)"
+   channel1 none
+   channel2 none
+   channel3 {none none none -rgba.alpha}
+   name FBM
+   xpos 0
+   ypos 577
+   addUserKnob {20 User}
+   addUserKnob {3 octaves}
+   octaves {{parent.octaves}}
+   addUserKnob {7 lacunarity R 1 10}
+   lacunarity {{parent.lacunarity}}
+   addUserKnob {7 gain R 0.1 1}
+   gain {{parent.gain}}
+   addUserKnob {7 gamma}
+   gamma {{parent.gamma}}
+  }
+  Switch {
+   inputs 9
+   which {{noisetype}}
+   name Type
+   xpos 0
+   ypos 692
+  }
+  Multiply {
+   inputs 1+1
+   channels rgba
+   value 0
+   name Multiply1
+   xpos 0
+   ypos 751
+   disable {{1-parent.useAlpha}}
+  }
+  Output {
+   name Output1
+   xpos 0
+   ypos 885
+  }
+push $N5a223800
+  NoOp {
+   name SampleXY
+   knobChanged "\nn = nuke.thisNode()\nrgbNode = nuke.toNode('Sample')\nposition = n.knob('Position2d').getValue()\npositionX = position\[0]\npositionY = position\[-1]\nrSample = n.sample(\"r\",positionX,positionY)\ngSample = n.sample(\"g\",positionX,positionY)\nbSample = n.sample(\"b\",positionX,positionY)\nrgbNode.knob('rgbSample').setValue(\[rSample, gSample, bSample])\n"
+   xpos -164
+   ypos 95
+   addUserKnob {20 User}
+   addUserKnob {12 Position2d}
+   Position2d {914 591}
+  }
+  NoOp {
+   inputs 0
+   name Sample
+   xpos -162
+   ypos 140
+   addUserKnob {20 User}
+   addUserKnob {18 rgbSample}
+   rgbSample {0 0 0}
+   addUserKnob {6 rgbSample_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  }
+ end_group
+ Dot {
+  name Dot10
+  xpos -170
+  ypos 955
+ }
+push $N63ad9000
+ Dot {
+  name Dot7
+  xpos -364
+  ypos 889
+ }
+push $N63ad9400
+add_layer {perimeter perimeter.perimeter}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 perimeter
+  fromInput2 {{0} B}
+  mappings "4 perimeter.perimeter 0 0 rgba.red 0 0 perimeter.perimeter 0 0 rgba.green 0 1 perimeter.perimeter 0 0 rgba.blue 0 2 perimeter.perimeter 0 0 rgba.alpha 0 3"
+  name Shuffle25
+  label "\[value in1]"
+  xpos -503
+  ypos 793
+ }
+ set C5c604000 [stack 0]
+ Grade {
+  inputs 1+1
+  channels rgba
+  blackpoint {{KWH_radius_map_remap}}
+  name Grade_remap
+  xpos -503
+  ypos 886
+ }
+ Multiply {
+  inputs 1+1
+  channels alpha
+  value {{1-KWH_radius_map_noise_gain}}
+  name Multiply_Noise
+  xpos -503
+  ypos 946
+ }
+ Multiply {
+  inputs 1+1
+  channels alpha
+  value {{parent.kwh_eyebrows}}
+  name Multiply_brows
+  xpos -503
+  ypos 1003
+ }
+ Multiply {
+  inputs 1+1
+  channels alpha
+  value 0
+  invert_mask true
+  name Multiply_FM
+  xpos -503
+  ypos 1063
+ }
+ Multiply {
+  inputs 1+1
+  channels alpha
+  value 0.3
+  name Multiply4
+  xpos -503
+  ypos 1107
+ }
+ Dot {
+  name Dot31
+  xpos -469
+  ypos 1143
+ }
+push $N63ad8400
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name Copy4
+  xpos 1
+  ypos 1134
+ }
+ ChannelMerge {
+  inputs 2
+  name ChannelMerge1
+  xpos 1
+  ypos 1170
+ }
+set Na688a000 [stack 0]
+ Multiply {
+  inputs 1+1
+  channels alpha
+  value 0
+  maskChannelMask rgba.red
+  invert_mask true
+  name Multiply_AS
+  xpos 1
+  ypos 1235
+  disable {{!filter_autosize}}
+ }
+ Dot {
+  name Dot60
+  xpos 35
+  ypos 1334
+ }
+set Na688a800 [stack 0]
+ Dot {
+  name Dot63
+  xpos -40
+  ypos 1334
+ }
+ Dot {
+  name Dot62
+  xpos -40
+  ypos 1389
+ }
+push $Na688a800
+ Group {
+  name KUWAHARA20
+  tile_color 0x6e49a7ff
+  xpos 1
+  ypos 1358
+  addUserKnob {20 User}
+  addUserKnob {7 Size t "Radius of brush stroke" R 0 20}
+  Size {{parent.KWH_size}}
+  addUserKnob {7 Sharpness t "From (0) soft to (1) sharp brush stroke. "}
+  Sharpness 1
+  addUserKnob {7 Eccentricity t "Elongates brush strokes following the direction of image details. Ranges from isotropic (0) to anisotropic (1)."}
+  Eccentricity 0.6
+  addUserKnob {7 Blur l "Blur Structure Tensor" t "Gaussian smoothing of structure tensor to eliminate high frequency details." R 2 10}
+  Blur 2
+  addUserKnob {26 ""}
+  addUserKnob {26 MapRadius l "Map Brush Size" T " "}
+  addUserKnob {6 map l "Enable brush size mask (alpha)" t "A depth map can be shuffled into the alpha to control brush radius so that out of focus objects appear more abstract and stylized. \n\nThe size parameter acts as a multiplier for the mask." +STARTLINE}
+  map true
+  addUserKnob {6 normalize l "Normalize alpha mask" t "Mask is normalized into a 0 to 1 range and  clamped after the color corrections to avoid values above 1. " +STARTLINE}
+  addUserKnob {26 label_1 l "Adjust alpha" T ""}
+  addUserKnob {41 black l "Lift (Blackpoint)" T Grade1.black}
+  addUserKnob {41 white l "Gain (Whitepoint)" T Grade1.white}
+  addUserKnob {41 gamma T Grade1.gamma}
+  addUserKnob {6 disable_1 l "disable color corrections" t "disables lift, gamma, gain." +STARTLINE}
+  disable_1 true
+  addUserKnob {20 Info}
+  addUserKnob {26 Credit l "" +STARTLINE T "Adapted from the Blender GLSL script. An implementation of the Anisotropic Kuwahara\n filter described in the paper: Kyprianidis, Jan Eric, Henry Kang, and Jurgen Dollner. \n\"Image and video abstraction by anisotropic Kuwahara filtering.\" 2009.\n\nBlink C++ implementation by Derek Flood\nhttps://sharktacos.github.io "}
+ }
+  Input {
+   inputs 0
+   name Image
+   xpos 89
+   ypos 48
+  }
+set Na688b400 [stack 0]
+  Dot {
+   name Dot7
+   xpos 0
+   ypos 51
+  }
+set Na688b800 [stack 0]
+  Dot {
+   name Dot8
+   xpos -132
+   ypos 51
+  }
+set Na688bc00 [stack 0]
+  Dot {
+   name Dot6
+   xpos -224
+   ypos 51
+  }
+push $Na688bc00
+  Dilate {
+   channels alpha
+   size {{width*-1}}
+   name min
+   xpos -166
+   ypos 106
+   disable {{1-normalize}}
+  }
+set Nbfaf0400 [stack 0]
+  Merge2 {
+   inputs 2
+   operation minus
+   Achannels alpha
+   Bchannels alpha
+   output alpha
+   name Merge1
+   xpos -258
+   ypos 175
+   disable {{1-normalize}}
+  }
+push $Na688b800
+  Dilate {
+   channels alpha
+   size {{width}}
+   name max
+   xpos -34
+   ypos 105
+   disable {{1-normalize}}
+  }
+push $Nbfaf0400
+  Merge2 {
+   inputs 2
+   operation minus
+   Achannels alpha
+   Bchannels alpha
+   output alpha
+   name Merge2
+   xpos -84
+   ypos 170
+   disable {{1-normalize}}
+  }
+  Merge2 {
+   inputs 2
+   operation divide
+   Achannels alpha
+   Bchannels alpha
+   output alpha
+   name Merge3
+   xpos -169
+   ypos 238
+   disable {{1-normalize}}
+  }
+  Grade {
+   channels alpha
+   name Grade1
+   xpos -169
+   ypos 287
+   disable {{disable_1}}
+  }
+  Clamp {
+   channels alpha
+   name Clamp1
+   xpos -169
+   ypos 330
+  }
+set Nbfaf1c00 [stack 0]
+  Dot {
+   name Dot2
+   xpos 8
+   ypos 337
+  }
+push $Na688b400
+  BlinkScript {
+   kernelSourceFile /Users/Derek/Documents/GitHub/VFX-software-prefs/Nuke/Kuwahara/df_kuwahara_tensor.cpp
+   recompileCount 1
+   ProgramGroup 1
+   KernelDescription "2 \"df_StructureTensor\" iterate pixelWise c7d617919d38a981e9f6151e47894f57b5fb50f8141c50358a503095f70a2622 2 \"src\" Read Random \"dst\" Write Point 0 0 0"
+   kernelSource "kernel df_StructureTensor : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src; \n    Image<eWrite> dst; \n\n/*  \n *  Blink C++ implementation by Derek Flood, 2024\n *\n *  Adapted from the Blender GLSL script (Copyright: 2023 Blender Authors)\n *  https://projects.blender.org/blender/blender/src/source/blender/compositor/realtime_compositor/shaders/\n *     compositor_kuwahara_anisotropic_compute_structure_tensor.glsl\n *   ---------------------------------------------- \n *  \n *  Computes the structure tensor of the image using a Dirac delta window function as described in\n *  section \"3.2 Local Structure Estimation\" of the paper: Kyprianidis, Jan Eric. \n * \"Image and video abstraction by multi-scale anisotropic Kuwahara filtering.\" 2011.\n *  \n *  The structure tensor should then be smoothed using a Gaussian function to eliminate high frequency details.\n */\n\n    void process(int2 pos) \{\n        SampleType(src) input = src(pos.x, pos.y);\n\n  \t\t// The weight kernels of the filter optimized for rotational symmetry \n  \t\t// described in section \"3.2.1 Gradient Calculation\".\n\t\tconst float corner_weight = 0.182f;\n        const float center_weight = 1.0f - 2.0f * corner_weight;\n\n        float4 x_partial_derivative = src(pos.x - 1, pos.y + 1) * -corner_weight +                      \n                                        src(pos.x - 1, pos.y    ) * -center_weight +\n                                        src(pos.x - 1, pos.y - 1) * -corner_weight +\n                                        src(pos.x + 1, pos.y + 1) * corner_weight +\n                                        src(pos.x + 1, pos.y    ) * center_weight +\n                                        src(pos.x + 1, pos.y - 1) * corner_weight;\n\n    \tfloat4 y_partial_derivative = src(pos.x - 1, pos.y + 1) * corner_weight +\n                                        src(pos.x    , pos.y + 1) * center_weight +\n                                        src(pos.x + 1, pos.y + 1) * corner_weight +\n                                        src(pos.x - 1, pos.y - 1) * -corner_weight +\n                                        src(pos.x    , pos.y - 1) * -center_weight +\n                                        src(pos.x + 1, pos.y - 1) * -corner_weight;\n\n        float dxdx = dot(x_partial_derivative, x_partial_derivative);\n        float dxdy = dot(x_partial_derivative, y_partial_derivative);\n        float dydy = dot(y_partial_derivative, y_partial_derivative);\n        \n  \t\tdst(0) = dxdx;\n  \t\tdst(1) = dxdy;\n  \t\tdst(2) = dydy;\n\t\}\n\};\n"
+   rebuild ""
+   rebuild_finalise ""
+   name BlinkScript1
+   xpos 176
+   ypos 158
+  }
+  Blur {
+   size {{Blur}}
+   name Blur1
+   xpos 176
+   ypos 213
+  }
+set Nbf530800 [stack 0]
+push $Na688b400
+  BlinkScript {
+   inputs 3
+   kernelSourceFile /Users/Derek/Documents/GitHub/VFX-software-prefs/Nuke/Kuwahara/df_kuwaharaAnisotropic_map.cpp
+   recompileCount 28
+   KernelDescription "2 \"df_KuwaharaAnisotropic\" iterate pixelWise 58c7ca7a9c050c67aed7643fb5cf53a523eb3d6804fbacbb0f9ad4a200add6df 4 \"src\" Read Random \"structure_tensor\" Read Random \"radius_map\" Read Random \"dst\" Write Point 3 \"Size\" Float 1 AAAgQQ== \"Sharpness\" Float 1 AACAPw== \"Eccentricity\" Float 1 AAAAPw== 3 \"size\" 1 1 \"sharpness\" 1 1 \"eccentricity\" 1 1 0"
+   kernelSource "kernel df_KuwaharaAnisotropic : ImageComputationKernel<ePixelWise>\n\{\n\n/*  \n *  Blink C++ implementation by Derek Flood, 2024\n *\n *  Adapted from the Blender GLSL script (Copyright: 2023 Blender Authors)\n *  https://projects.blender.org/blender/blender/src/source/blender/compositor/realtime_compositor/shaders/\n *  compositor_kuwahara_anisotropic.glsl\n *   ---------------------------------------------- \n *\n *  An implementation of the Anisotropic Kuwahara filter described in the paper:\n *   Kyprianidis, Jan Eric, Henry Kang, and Jurgen Dollner. \"Image and video abstraction by\n *   anisotropic Kuwahara filtering.\" 2009.\n *\n *  But with the polynomial weighting functions described in the paper:\n *   Kyprianidis, Jan Eric, et al. \"Anisotropic Kuwahara Filtering with Polynomial Weighting\n *   Functions.\" 2010.\n *\n *  And the sector weight function described in the paper:\n *  Kyprianidis, Jan Eric. \"Image and video abstraction by multi-scale anisotropic Kuwahara\n *  filtering.\" 2011.\n */ \n \n    Image<eRead, eAccessRandom, eEdgeClamped> src; \n    Image<eRead, eAccessRandom, eEdgeClamped> structure_tensor;\n    Image<eRead, eAccessRandom> radius_map;  // for mapped radius\n    Image<eWrite> dst; \n    \n    param:\n        float size; \n        float sharpness;\n        float eccentricity;\n\n    void define() \{\n        defineParam(size, \"Size\", 10.0f); \n        defineParam(sharpness, \"Sharpness\", 1.0f); \n        defineParam(eccentricity, \"Eccentricity\", 0.5f); \n    \}\n    \n    inline float square(float x) \{\n  \t\treturn x * x;\n\t\}\n\t\n\n\n    void process(int2 pos) \{\n          \t\t\n  \t\t// The structure tensor is encoded in a float4 using a column major storage order, as can be seen\n\t\t// in the compositor_kuwahara_anisotropic_compute_structure_tensor.glsl shader. \n\t\tfloat4 encoded_structure_tensor = structure_tensor (pos.x, pos.y);\n\t\t\n\t\tfloat dxdx = encoded_structure_tensor.x;\n\t\tfloat dxdy = encoded_structure_tensor.y;\n\t\tfloat dydy = encoded_structure_tensor.z;\n  \t\t\n\n\t\t// Compute the first and second eigenvalues of the structure tensor using the equations in\n\t\t// section \"3.1 Orientation and Anisotropy Estimation\" of the paper. \n\t\tfloat eigenvalue_first_term = (dxdx + dydy) / 2.f;\n  \t\tfloat eigenvalue_square_root_term = sqrt(square(dxdx - dydy) + 4.0f * square(dxdy)) / 2.0f;\n\t\tfloat first_eigenvalue = eigenvalue_first_term + eigenvalue_square_root_term;\n\t\tfloat second_eigenvalue = eigenvalue_first_term - eigenvalue_square_root_term;\n\n\t\t// Compute the normalized eigenvector of the structure tensor oriented in direction of the\n\t\t// minimum rate of change using the equations in section \"3.1 Orientation and Anisotropy\n\t\t// Estimation\" of the paper. \n\t\tfloat2 eigenvector = float2(first_eigenvalue - dxdx, -1.0f * dxdy);\n\t\tfloat eigenvector_length = length(eigenvector);\n\t\tfloat2 unit_eigenvector = eigenvector_length != 0.0f ? eigenvector / eigenvector_length : float2(1.0f);\n\n\t\t// Compute the amount of anisotropy using equations in section \"3.1 Orientation and Anisotropy\n\t\t// Estimation\" of the paper. The anisotropy ranges from 0 to 1, where 0 corresponds to isotropic\n\t\t// and 1 corresponds to entirely anisotropic regions. \n\t\tfloat eigenvalue_sum = first_eigenvalue + second_eigenvalue;\n\t\tfloat eigenvalue_difference = first_eigenvalue - second_eigenvalue;\n\t\tfloat anisotropy = eigenvalue_sum > 0.0f ? eigenvalue_difference / eigenvalue_sum : 0.0f;\n\t\n\n//\t\tfloat radius = max(0.0f, size);\t\n  //  \t\tfloat alpha = radius_map(pos.x, pos.y).w; // Sample the alpha\n  \t//\tfloat maxValue = max(alpha, 0.0f); // Find the maximum value\n  \t\t// Normalize by dividing by the maximum value\n  \t//\tfloat radius = alpha / maxValue * size;\n\n//\t\tfloat radius = clamp(radius_map(pos.x, pos.y).w, 0.0f, 1.0f) * size;\n\t\tfloat alpha = radius_map(pos.x, pos.y).w;\n\t\tfloat radius = alpha * size;\n//\t\tfloat radius = radius_map(pos.x, pos.y).w * size;\n\t\t\t\n\t\tif (radius == 0.0f) \{\n\t\t\t\tdst() = src (pos.x, pos.y);\n\t\t  return;\n\t\t\}\n\n\n\t\t// Compute the width and height of an ellipse that is more width-elongated for high anisotropy\n\t\t// and more circular for low anisotropy, controlled using the eccentricity factor. Since the\n\t\t// anisotropy is in the \[0, 1] range, the width factor tends to 1 as the eccentricity tends to\n\t\t// infinity and tends to infinity when the eccentricity tends to zero. This is based on the\n\t\t// equations in section \"3.2. Anisotropic Kuwahara Filtering\" of the paper. \n\t\tfloat eccentricity_clamp = min(eccentricity, 0.95f);\n\t\tfloat eccentric_adj = (1.0f - eccentricity_clamp) * 10.f;\n\t\tfloat ellipse_width_factor = (eccentric_adj + anisotropy) / eccentric_adj;\n\n\t\tfloat ellipse_width = ellipse_width_factor * radius;\n\t\tfloat ellipse_height = radius / ellipse_width_factor;\n\n\t\t// Compute the cosine and sine of the angle that the eigenvector makes with the x axis. Since the\n\t\t// eigenvector is normalized, its x and y components are the cosine and sine of the angle it\n\t\t// makes with the x axis. \n\t\tfloat cosine = unit_eigenvector.x;\n\t\tfloat sine = unit_eigenvector.y;\n\n\t\t// Compute an inverse transformation matrix that represents an ellipse of the given width and\n\t\t// height and makes and an angle with the x axis of the given cosine and sine. This is an inverse\n\t\t// matrix, so it transforms the ellipse into a disk of unit radius. \n\t\tfloat2 inverse_ellipse_matrix_1 (cosine / ellipse_width,     sine / ellipse_width);\n        float2 inverse_ellipse_matrix_2 (-sine / ellipse_height,     cosine / ellipse_height); \n\n\t\t// Compute the bounding box of a zero centered ellipse whose major axis is aligned with the\n\t\t// eigenvector and has the given width and height. This is based on the equations described in:\n\t\t//\n\t\t//   https://iquilezles.org/articles/ellipses/\n\t\t//\n\t\t// Notice that we only compute the upper bound, the lower bound is just negative that since the\n\t\t// ellipse is zero centered. Also notice that we take the ceiling of the bounding box, just to\n\t\t// ensure the filter window is at least 1x1. \n\t\tfloat2 ellipse_major_axis = ellipse_width * unit_eigenvector;\n\t\tfloat2 ellipse_minor_axis = float2(ellipse_height * unit_eigenvector.y * -1.f,\n                                    ellipse_height * unit_eigenvector.x * 1.f);\n\n\t\tint2 ellipse_bounds = int2(\n    \t\tceil(sqrt( square(ellipse_major_axis.x) + square(ellipse_minor_axis.x) )),\n    \t\tceil(sqrt( square(ellipse_major_axis.y) + square(ellipse_minor_axis.y) ))\n\t\t);\n\n\n\t\t// Compute the overlap polynomial parameters for 8-sector ellipse based on the equations in\n\t\t// section \"3 Alternative Weighting Functions\" of the polynomial weights paper. More on this\n\t\t// later in the code. \n\t\tconst int number_of_sectors = 8;\n\t\tfloat sector_center_overlap_parameter = 2.f / radius;\n\t\tfloat sector_envelope_angle = ((3.f / 2.f) * PI) / number_of_sectors;                          \n        float cross_sector_overlap_parameter = (sector_center_overlap_parameter + \n        \t\t\t\t\t\t\t\tcos(sector_envelope_angle)) /\n                                        square( sin(sector_envelope_angle) );\n\n\n\t\t// We need to compute the weighted mean of color and squared color of each of the 8 sectors of\n \t\t// the ellipse, so we declare arrays for accumulating those and initialize them in the next code\n \t\t// section.\n\t\tfloat4 weighted_mean_of_squared_color_of_sectors\[8];\n\t\tfloat4 weighted_mean_of_color_of_sectors\[8];\n\t\tfloat sum_of_weights_of_sectors\[8];\n\n\t\t// The center pixel (0, 0) is exempt from the main loop below for reasons that are explained in\n \t\t// the first if statement in the loop, so we need to accumulate its color, squared color, and\n \t\t// weight separately first. Luckily, the zero coordinates of the center pixel zeros out most of\n \t\t// the complex computations below, and it can easily be shown that the weight for the center\n \t\t// pixel in all sectors is simply (1 / number_of_sectors).\n\t\tfloat4 center_color = src (pos.x, pos.y); \t\t\n\t\tfloat4 center_color_squared = center_color * center_color;\n\t\tfloat center_weight_b = 1.f / number_of_sectors;\n\t\tfloat4 weighted_center_color = center_color * center_weight_b;\n\t\tfloat4 weighted_center_color_squared = center_color_squared * center_weight_b;\n\n\t\tfor (int i = 0; i < number_of_sectors; i++) \{\n\t\t\t\tweighted_mean_of_squared_color_of_sectors\[i] = weighted_center_color_squared;\n\t\t\t\tweighted_mean_of_color_of_sectors\[i] = weighted_center_color;\n\t\t\t\tsum_of_weights_of_sectors\[i] = center_weight_b;\n\t\t\}\n\n\t\t// Loop over the window of pixels inside the bounding box of the ellipse. However, we utilize the\n \t\t// fact that ellipses are mirror symmetric along the horizontal axis, so we reduce the window to\n \t\t// only the upper two quadrants, and compute each two mirrored pixels at the same time using the\n \t\t// same weight as an optimization.\n\t\tfor (int j = 0; j <= ellipse_bounds.y; j++) \{\n\t\t\tfor (int i = -ellipse_bounds.x; i <= ellipse_bounds.x; i++) \{\n\t\t\t\t\n    \t\t\t// Since we compute each two mirrored pixels at the same time, we need to also exempt the\n     \t\t\t// pixels whose x coordinates are negative and their y coordinates are zero, that's because\n     \t\t\t// those are mirrored versions of the pixels whose x coordinates are positive and their y\n     \t\t\t// coordinates are zero, and we don't want to compute and accumulate them twice. Moreover, we\n     \t\t\t// also need to exempt the center pixel with zero coordinates for the same reason, however,\n     \t\t\t// since the mirror of the center pixel is itself, it need to be accumulated separately,\n     \t\t\t// hence why we did that in the code section just before this loop.\n      \t\t\tif (j == 0 && i <= 0) \{ \n      \t\t\t\tcontinue;\n      \t\t\t\}\n\n    \t\t\t// Map the pixels of the ellipse into a unit disk, exempting any points that are not part of\n     \t\t\t// the ellipse or disk.\n     \t\t\tfloat2 disk_point(\n     \t\t\t\t\t(inverse_ellipse_matrix_1.x * i + inverse_ellipse_matrix_1.y * j), \n     \t\t\t\t\t(inverse_ellipse_matrix_2.x * i + inverse_ellipse_matrix_2.y * j)\n     \t\t\t\t\t);\n\n      \t\t\tfloat disk_point_length_squared = dot(disk_point, disk_point);\n      \t\t\tif (disk_point_length_squared > 1.0f) \{\n        \t\t\tcontinue;\n      \t\t\t\}\n\n    \t\t\t// While each pixel belongs to a single sector in the ellipse, we expand the definition of\n     \t\t\t// a sector a bit to also overlap with other sectors as illustrated in Figure 8 of the\n     \t\t\t// polynomial weights paper. So each pixel may contribute to multiple sectors, and thus we\n     \t\t\t// compute its weight in each of the 8 sectors.\n      \t\t\tfloat sector_weights\[8];\n\n    \t\t\t// We evaluate the weighting polynomial at each of the 8 sectors by rotating the disk point\n     \t\t\t// by 45 degrees and evaluating the weighting polynomial at each incremental rotation. To\n     \t\t\t// avoid potentially expensive rotations, we utilize the fact that rotations by 90 degrees\n     \t\t\t// are simply swapping of the coordinates and negating the x component. We also note that\n     \t\t\t// since the y term of the weighting polynomial is squared, it is not affected by the sign\n     \t\t\t// and can be computed once for the x and once for the y coordinates. So we compute every\n     \t\t\t// other even-indexed 4 weights by successive 90 degree rotations as discussed.\n\n      \t\t\tfloat2 polynomial = sector_center_overlap_parameter -\n                        cross_sector_overlap_parameter * disk_point * disk_point;\n      \t\t\tsector_weights\[0] = square(max(0.f, disk_point.y + polynomial.x));\n      \t\t\tsector_weights\[2] = square(max(0.f, -disk_point.x + polynomial.y));\n      \t\t\tsector_weights\[4] = square(max(0.f, -disk_point.y + polynomial.x));\n      \t\t\tsector_weights\[6] = square(max(0.f, disk_point.x + polynomial.y));\n\n    \t\t\t// Then we rotate the disk point by 45 degrees, which is a simple expression involving a\n     \t\t\t// constant as can be demonstrated by applying a 45 degree rotation matrix.\n\t\t\t\tfloat M_SQRT1_2 =  1.0f / sqrt(2.0f);  // M_SQRT1_2 = 0.70710678118654752440f  \t\t\t\n      \t\t\tfloat2 rotated_disk_point = M_SQRT1_2 *\n                                float2(disk_point.x - disk_point.y, disk_point.x + disk_point.y);\n\n\n    \t\t\t// Finally, we compute every other odd-index 4 weights starting from the 45 degrees rotated disk point.\n      \t\t\tfloat2 rotated_polynomial = sector_center_overlap_parameter -\n                                cross_sector_overlap_parameter * rotated_disk_point * rotated_disk_point;\n      \t\t\tsector_weights\[1] = square(max(0.f, rotated_disk_point.y + rotated_polynomial.x));\n      \t\t\tsector_weights\[3] = square(max(0.f, -rotated_disk_point.x + rotated_polynomial.y));\n      \t\t\tsector_weights\[5] = square(max(0.f, -rotated_disk_point.y + rotated_polynomial.x));\n      \t\t\tsector_weights\[7] = square(max(0.f, rotated_disk_point.x + rotated_polynomial.y));\n\n\n    \t\t\t// We compute a radial Gaussian weighting component such that pixels further away from the\n     \t\t\t// sector center gets attenuated, and we also divide by the sum of sector weights to\n     \t\t\t// normalize them, since the radial weight will eventually be multiplied to the sector weight below.\n      \t\t\tfloat sector_weights_sum = sector_weights\[0] + sector_weights\[1] + sector_weights\[2] +\n                                 sector_weights\[3] + sector_weights\[4] + sector_weights\[5] +\n                                 sector_weights\[6] + sector_weights\[7];\n      \t\t\tfloat radial_gaussian_weight = exp(-PI * disk_point_length_squared) / sector_weights_sum;\n\n\n    \t\t\t// Load the color of the pixel and its mirrored pixel and compute their square.\n      \t\t\tfloat4 upper_color = src (pos.x + i, pos.y + j); \n      \t\t\tfloat4 lower_color = src (pos.x - i, pos.y - j); \n      \t\t\tfloat4 upper_color_squared = upper_color * upper_color;\n      \t\t\tfloat4 lower_color_squared = lower_color * lower_color;\n\n\n      \t\t\tfor (int k = 0; k < number_of_sectors; k++) \{\n        \t\t\tfloat weight = sector_weights\[k] * radial_gaussian_weight;\n\n      \t\t\t\t// Accumulate the pixel to each of the sectors multiplied by the sector weight.\n        \t\t\tint upper_index = k;\n        \t\t\tsum_of_weights_of_sectors\[upper_index] += weight;\n        \t\t\tweighted_mean_of_color_of_sectors\[upper_index] += upper_color * weight;\n        \t\t\tweighted_mean_of_squared_color_of_sectors\[upper_index] += upper_color_squared * weight;\n\n      \t\t\t\t// Accumulate the mirrored pixel to each of the sectors multiplied by the sector weight.\n        \t\t\tint lower_index = (k + number_of_sectors / 2) % number_of_sectors;\n        \t\t\tsum_of_weights_of_sectors\[lower_index] += weight;\n        \t\t\tweighted_mean_of_color_of_sectors\[lower_index] += lower_color * weight;\n        \t\t\tweighted_mean_of_squared_color_of_sectors\[lower_index] += lower_color_squared * weight;\n        \t\t\}\n    \t\t\}\n\t\t\}\n\n\t\t// Compute the weighted sum of mean of sectors, such that sectors with lower standard deviation\n \t\t// gets more significant weight than sectors with higher standard deviation.\n  \t\tfloat sum_of_weights = 0.f;\n  \t\tfloat4 weighted_sum = float4(0.f);\n  \t\tfor (int i = 0; i < number_of_sectors; i++) \{\n    \t\tweighted_mean_of_color_of_sectors\[i] /= sum_of_weights_of_sectors\[i];\n    \t\tweighted_mean_of_squared_color_of_sectors\[i] /= sum_of_weights_of_sectors\[i];\n\n    \t\tfloat4 color_mean = weighted_mean_of_color_of_sectors\[i];\n    \t\tfloat4 squared_color_mean = weighted_mean_of_squared_color_of_sectors\[i];\n    \t\tfloat4 color_variance = fabs(squared_color_mean - color_mean * color_mean);\n\n    \t\tfloat standard_deviation = dot(sqrt(\n    \t\t\tfloat3(color_variance.x, color_variance.y, color_variance.z)), float3(1.0f));\n\n\n  \t\t\t// Compute the sector weight based on the weight function introduced in section \"3.3.1\n   \t\t\t// Single-scale Filtering\" of the multi-scale paper. Use a threshold of 0.02 to avoid zero\n   \t\t\t// division and avoid artifacts in homogeneous regions as demonstrated in the paper.\n   \t\t\tfloat normalized_sharpness = sharpness * 10.0f;\n    \t\tfloat weight = 1.0 / pow( max(0.02, standard_deviation), normalized_sharpness);\n\n    \t\tsum_of_weights += weight;\n    \t\tweighted_sum += color_mean * weight;\n  \t\t\}\n\n  \t\tweighted_sum /= sum_of_weights;\n  \t\t//dst() = weighted_sum;\n  \t\tdst(0) = weighted_sum.x;\n  \t\tdst(1) = weighted_sum.y;\n  \t\tdst(2) = weighted_sum.z;\n  \t\tdst(3) = alpha;\n\t\}\n\};\n"
+   rebuild ""
+   df_KuwaharaAnisotropic_Size {{Size}}
+   df_KuwaharaAnisotropic_Sharpness {{Sharpness}}
+   df_KuwaharaAnisotropic_Eccentricity {{Eccentricity}}
+   rebuild_finalise ""
+   name BlinkScript2
+   xpos 77
+   ypos 328
+  }
+  Dot {
+   name Dot3
+   xpos 111
+   ypos 452
+  }
+push $Nbf530800
+push $Na688b400
+  Dot {
+   name Dot1
+   xpos 314
+   ypos 51
+  }
+  BlinkScript {
+   inputs 2
+   kernelSourceFile /Users/Derek/Documents/GitHub/VFX-software-prefs/Nuke/Kuwahara/df_kuwaharaAnisotropic.cpp
+   recompileCount 2
+   KernelDescription "2 \"df_KuwaharaAnisotropic\" iterate pixelWise c9fac050899a11aa7d8bba6a69ec55a542ea0dedf53b14982a6fe228f427cae2 3 \"src\" Read Random \"structure_tensor\" Read Random \"dst\" Write Point 3 \"Size\" Float 1 AAAgQQ== \"Sharpness\" Float 1 AACAPw== \"Eccentricity\" Float 1 AAAAPw== 3 \"size\" 1 1 \"sharpness\" 1 1 \"eccentricity\" 1 1 0"
+   kernelSource "kernel df_KuwaharaAnisotropic : ImageComputationKernel<ePixelWise>\n\{\n\n/*  \n *  Blink C++ implementation by Derek Flood, 2024\n *\n *  Adapted from the Blender GLSL script (Copyright: 2023 Blender Authors)\n *  https://projects.blender.org/blender/blender/src/source/blender/compositor/realtime_compositor/shaders/\n *  compositor_kuwahara_anisotropic.glsl\n *   ---------------------------------------------- \n *\n *  An implementation of the Anisotropic Kuwahara filter described in the paper:\n *   Kyprianidis, Jan Eric, Henry Kang, and Jurgen Dollner. \"Image and video abstraction by\n *   anisotropic Kuwahara filtering.\" 2009.\n *\n *  But with the polynomial weighting functions described in the paper:\n *   Kyprianidis, Jan Eric, et al. \"Anisotropic Kuwahara Filtering with Polynomial Weighting\n *   Functions.\" 2010.\n *\n *  And the sector weight function described in the paper:\n *  Kyprianidis, Jan Eric. \"Image and video abstraction by multi-scale anisotropic Kuwahara\n *  filtering.\" 2011.\n */ \n \n    Image<eRead, eAccessRandom, eEdgeClamped> src; \n    Image<eRead, eAccessRandom, eEdgeClamped> structure_tensor;\n    Image<eWrite> dst; \n    \n    param:\n        float size; \n        float sharpness;\n        float eccentricity;\n\n    void define() \{\n        defineParam(size, \"Size\", 10.0f); \n        defineParam(sharpness, \"Sharpness\", 1.0f); \n        defineParam(eccentricity, \"Eccentricity\", 0.5f); \n    \}\n    \n    inline float square(float x) \{\n  \t\treturn x * x;\n\t\}\n\t\n\n\n    void process(int2 pos) \{\n          \t\t\n  \t\t// The structure tensor is encoded in a float4 using a column major storage order, as can be seen\n\t\t// in the compositor_kuwahara_anisotropic_compute_structure_tensor.glsl shader. \n\t\tfloat4 encoded_structure_tensor = structure_tensor (pos.x, pos.y);\n\t\t\n\t\tfloat dxdx = encoded_structure_tensor.x;\n\t\tfloat dxdy = encoded_structure_tensor.y;\n\t\tfloat dydy = encoded_structure_tensor.z;\n  \t\t\n\n\t\t// Compute the first and second eigenvalues of the structure tensor using the equations in\n\t\t// section \"3.1 Orientation and Anisotropy Estimation\" of the paper. \n\t\tfloat eigenvalue_first_term = (dxdx + dydy) / 2.f;\n  \t\tfloat eigenvalue_square_root_term = sqrt(square(dxdx - dydy) + 4.0f * square(dxdy)) / 2.0f;\n\t\tfloat first_eigenvalue = eigenvalue_first_term + eigenvalue_square_root_term;\n\t\tfloat second_eigenvalue = eigenvalue_first_term - eigenvalue_square_root_term;\n\n\t\t// Compute the normalized eigenvector of the structure tensor oriented in direction of the\n\t\t// minimum rate of change using the equations in section \"3.1 Orientation and Anisotropy\n\t\t// Estimation\" of the paper. \n\t\tfloat2 eigenvector = float2(first_eigenvalue - dxdx, -1.0f * dxdy);\n\t\tfloat eigenvector_length = length(eigenvector);\n\t\tfloat2 unit_eigenvector = eigenvector_length != 0.0f ? eigenvector / eigenvector_length : float2(1.0f);\n\n\t\t// Compute the amount of anisotropy using equations in section \"3.1 Orientation and Anisotropy\n\t\t// Estimation\" of the paper. The anisotropy ranges from 0 to 1, where 0 corresponds to isotropic\n\t\t// and 1 corresponds to entirely anisotropic regions. \n\t\tfloat eigenvalue_sum = first_eigenvalue + second_eigenvalue;\n\t\tfloat eigenvalue_difference = first_eigenvalue - second_eigenvalue;\n\t\tfloat anisotropy = eigenvalue_sum > 0.0f ? eigenvalue_difference / eigenvalue_sum : 0.0f;\n\t\n\t\tfloat radius = max(0.0f, size);\t\t\t\t\n\t\tif (radius == 0.0f) \{\n\t\t\t\tdst() = src (pos.x, pos.y);\n\t\t  return;\n\t\t\}\n\n\n\t\t// Compute the width and height of an ellipse that is more width-elongated for high anisotropy\n\t\t// and more circular for low anisotropy, controlled using the eccentricity factor. Since the\n\t\t// anisotropy is in the \[0, 1] range, the width factor tends to 1 as the eccentricity tends to\n\t\t// infinity and tends to infinity when the eccentricity tends to zero. This is based on the\n\t\t// equations in section \"3.2. Anisotropic Kuwahara Filtering\" of the paper. \n\t\tfloat eccentricity_clamp = min(eccentricity, 0.95f);\n\t\tfloat eccentric_adj = (1.0f - eccentricity_clamp) * 10.f;\n\t\tfloat ellipse_width_factor = (eccentric_adj + anisotropy) / eccentric_adj;\n\n\t\tfloat ellipse_width = ellipse_width_factor * radius;\n\t\tfloat ellipse_height = radius / ellipse_width_factor;\n\n\t\t// Compute the cosine and sine of the angle that the eigenvector makes with the x axis. Since the\n\t\t// eigenvector is normalized, its x and y components are the cosine and sine of the angle it\n\t\t// makes with the x axis. \n\t\tfloat cosine = unit_eigenvector.x;\n\t\tfloat sine = unit_eigenvector.y;\n\n\t\t// Compute an inverse transformation matrix that represents an ellipse of the given width and\n\t\t// height and makes and an angle with the x axis of the given cosine and sine. This is an inverse\n\t\t// matrix, so it transforms the ellipse into a disk of unit radius. \n\t\tfloat2 inverse_ellipse_matrix_1 (cosine / ellipse_width,     sine / ellipse_width);\n        float2 inverse_ellipse_matrix_2 (-sine / ellipse_height,     cosine / ellipse_height); \n\n\t\t// Compute the bounding box of a zero centered ellipse whose major axis is aligned with the\n\t\t// eigenvector and has the given width and height. This is based on the equations described in:\n\t\t//\n\t\t//   https://iquilezles.org/articles/ellipses/\n\t\t//\n\t\t// Notice that we only compute the upper bound, the lower bound is just negative that since the\n\t\t// ellipse is zero centered. Also notice that we take the ceiling of the bounding box, just to\n\t\t// ensure the filter window is at least 1x1. \n\t\tfloat2 ellipse_major_axis = ellipse_width * unit_eigenvector;\n\t\tfloat2 ellipse_minor_axis = float2(ellipse_height * unit_eigenvector.y * -1.f,\n                                    ellipse_height * unit_eigenvector.x * 1.f);\n\n\t\tint2 ellipse_bounds = int2(\n    \t\tceil(sqrt( square(ellipse_major_axis.x) + square(ellipse_minor_axis.x) )),\n    \t\tceil(sqrt( square(ellipse_major_axis.y) + square(ellipse_minor_axis.y) ))\n\t\t);\n\n\n\t\t// Compute the overlap polynomial parameters for 8-sector ellipse based on the equations in\n\t\t// section \"3 Alternative Weighting Functions\" of the polynomial weights paper. More on this\n\t\t// later in the code. \n\t\tconst int number_of_sectors = 8;\n\t\tfloat sector_center_overlap_parameter = 2.f / radius;\n\t\tfloat sector_envelope_angle = ((3.f / 2.f) * PI) / number_of_sectors;                          \n        float cross_sector_overlap_parameter = (sector_center_overlap_parameter + \n        \t\t\t\t\t\t\t\tcos(sector_envelope_angle)) /\n                                        square( sin(sector_envelope_angle) );\n\n\n\t\t// We need to compute the weighted mean of color and squared color of each of the 8 sectors of\n \t\t// the ellipse, so we declare arrays for accumulating those and initialize them in the next code\n \t\t// section.\n\t\tfloat4 weighted_mean_of_squared_color_of_sectors\[8];\n\t\tfloat4 weighted_mean_of_color_of_sectors\[8];\n\t\tfloat sum_of_weights_of_sectors\[8];\n\n\t\t// The center pixel (0, 0) is exempt from the main loop below for reasons that are explained in\n \t\t// the first if statement in the loop, so we need to accumulate its color, squared color, and\n \t\t// weight separately first. Luckily, the zero coordinates of the center pixel zeros out most of\n \t\t// the complex computations below, and it can easily be shown that the weight for the center\n \t\t// pixel in all sectors is simply (1 / number_of_sectors).\n\t\tfloat4 center_color = src (pos.x, pos.y); \t\t\n\t\tfloat4 center_color_squared = center_color * center_color;\n\t\tfloat center_weight_b = 1.f / number_of_sectors;\n\t\tfloat4 weighted_center_color = center_color * center_weight_b;\n\t\tfloat4 weighted_center_color_squared = center_color_squared * center_weight_b;\n\n\t\tfor (int i = 0; i < number_of_sectors; i++) \{\n\t\t\t\tweighted_mean_of_squared_color_of_sectors\[i] = weighted_center_color_squared;\n\t\t\t\tweighted_mean_of_color_of_sectors\[i] = weighted_center_color;\n\t\t\t\tsum_of_weights_of_sectors\[i] = center_weight_b;\n\t\t\}\n\n\t\t// Loop over the window of pixels inside the bounding box of the ellipse. However, we utilize the\n \t\t// fact that ellipses are mirror symmetric along the horizontal axis, so we reduce the window to\n \t\t// only the upper two quadrants, and compute each two mirrored pixels at the same time using the\n \t\t// same weight as an optimization.\n\t\tfor (int j = 0; j <= ellipse_bounds.y; j++) \{\n\t\t\tfor (int i = -ellipse_bounds.x; i <= ellipse_bounds.x; i++) \{\n\t\t\t\t\n    \t\t\t// Since we compute each two mirrored pixels at the same time, we need to also exempt the\n     \t\t\t// pixels whose x coordinates are negative and their y coordinates are zero, that's because\n     \t\t\t// those are mirrored versions of the pixels whose x coordinates are positive and their y\n     \t\t\t// coordinates are zero, and we don't want to compute and accumulate them twice. Moreover, we\n     \t\t\t// also need to exempt the center pixel with zero coordinates for the same reason, however,\n     \t\t\t// since the mirror of the center pixel is itself, it need to be accumulated separately,\n     \t\t\t// hence why we did that in the code section just before this loop.\n      \t\t\tif (j == 0 && i <= 0) \{ \n      \t\t\t\tcontinue;\n      \t\t\t\}\n\n    \t\t\t// Map the pixels of the ellipse into a unit disk, exempting any points that are not part of\n     \t\t\t// the ellipse or disk.\n     \t\t\tfloat2 disk_point(\n     \t\t\t\t\t(inverse_ellipse_matrix_1.x * i + inverse_ellipse_matrix_1.y * j), \n     \t\t\t\t\t(inverse_ellipse_matrix_2.x * i + inverse_ellipse_matrix_2.y * j)\n     \t\t\t\t\t);\n\n      \t\t\tfloat disk_point_length_squared = dot(disk_point, disk_point);\n      \t\t\tif (disk_point_length_squared > 1.0f) \{\n        \t\t\tcontinue;\n      \t\t\t\}\n\n    \t\t\t// While each pixel belongs to a single sector in the ellipse, we expand the definition of\n     \t\t\t// a sector a bit to also overlap with other sectors as illustrated in Figure 8 of the\n     \t\t\t// polynomial weights paper. So each pixel may contribute to multiple sectors, and thus we\n     \t\t\t// compute its weight in each of the 8 sectors.\n      \t\t\tfloat sector_weights\[8];\n\n    \t\t\t// We evaluate the weighting polynomial at each of the 8 sectors by rotating the disk point\n     \t\t\t// by 45 degrees and evaluating the weighting polynomial at each incremental rotation. To\n     \t\t\t// avoid potentially expensive rotations, we utilize the fact that rotations by 90 degrees\n     \t\t\t// are simply swapping of the coordinates and negating the x component. We also note that\n     \t\t\t// since the y term of the weighting polynomial is squared, it is not affected by the sign\n     \t\t\t// and can be computed once for the x and once for the y coordinates. So we compute every\n     \t\t\t// other even-indexed 4 weights by successive 90 degree rotations as discussed.\n\n      \t\t\tfloat2 polynomial = sector_center_overlap_parameter -\n                        cross_sector_overlap_parameter * disk_point * disk_point;\n      \t\t\tsector_weights\[0] = square(max(0.f, disk_point.y + polynomial.x));\n      \t\t\tsector_weights\[2] = square(max(0.f, -disk_point.x + polynomial.y));\n      \t\t\tsector_weights\[4] = square(max(0.f, -disk_point.y + polynomial.x));\n      \t\t\tsector_weights\[6] = square(max(0.f, disk_point.x + polynomial.y));\n\n    \t\t\t// Then we rotate the disk point by 45 degrees, which is a simple expression involving a\n     \t\t\t// constant as can be demonstrated by applying a 45 degree rotation matrix.\n\t\t\t\tfloat M_SQRT1_2 =  1.0f / sqrt(2.0f);  // M_SQRT1_2 = 0.70710678118654752440f  \t\t\t\n      \t\t\tfloat2 rotated_disk_point = M_SQRT1_2 *\n                                float2(disk_point.x - disk_point.y, disk_point.x + disk_point.y);\n\n\n    \t\t\t// Finally, we compute every other odd-index 4 weights starting from the 45 degrees rotated disk point.\n      \t\t\tfloat2 rotated_polynomial = sector_center_overlap_parameter -\n                                cross_sector_overlap_parameter * rotated_disk_point * rotated_disk_point;\n      \t\t\tsector_weights\[1] = square(max(0.f, rotated_disk_point.y + rotated_polynomial.x));\n      \t\t\tsector_weights\[3] = square(max(0.f, -rotated_disk_point.x + rotated_polynomial.y));\n      \t\t\tsector_weights\[5] = square(max(0.f, -rotated_disk_point.y + rotated_polynomial.x));\n      \t\t\tsector_weights\[7] = square(max(0.f, rotated_disk_point.x + rotated_polynomial.y));\n\n\n    \t\t\t// We compute a radial Gaussian weighting component such that pixels further away from the\n     \t\t\t// sector center gets attenuated, and we also divide by the sum of sector weights to\n     \t\t\t// normalize them, since the radial weight will eventually be multiplied to the sector weight below.\n      \t\t\tfloat sector_weights_sum = sector_weights\[0] + sector_weights\[1] + sector_weights\[2] +\n                                 sector_weights\[3] + sector_weights\[4] + sector_weights\[5] +\n                                 sector_weights\[6] + sector_weights\[7];\n      \t\t\tfloat radial_gaussian_weight = exp(-PI * disk_point_length_squared) / sector_weights_sum;\n\n\n    \t\t\t// Load the color of the pixel and its mirrored pixel and compute their square.\n      \t\t\tfloat4 upper_color = src (pos.x + i, pos.y + j); \n      \t\t\tfloat4 lower_color = src (pos.x - i, pos.y - j); \n      \t\t\tfloat4 upper_color_squared = upper_color * upper_color;\n      \t\t\tfloat4 lower_color_squared = lower_color * lower_color;\n\n\n      \t\t\tfor (int k = 0; k < number_of_sectors; k++) \{\n        \t\t\tfloat weight = sector_weights\[k] * radial_gaussian_weight;\n\n      \t\t\t\t// Accumulate the pixel to each of the sectors multiplied by the sector weight.\n        \t\t\tint upper_index = k;\n        \t\t\tsum_of_weights_of_sectors\[upper_index] += weight;\n        \t\t\tweighted_mean_of_color_of_sectors\[upper_index] += upper_color * weight;\n        \t\t\tweighted_mean_of_squared_color_of_sectors\[upper_index] += upper_color_squared * weight;\n\n      \t\t\t\t// Accumulate the mirrored pixel to each of the sectors multiplied by the sector weight.\n        \t\t\tint lower_index = (k + number_of_sectors / 2) % number_of_sectors;\n        \t\t\tsum_of_weights_of_sectors\[lower_index] += weight;\n        \t\t\tweighted_mean_of_color_of_sectors\[lower_index] += lower_color * weight;\n        \t\t\tweighted_mean_of_squared_color_of_sectors\[lower_index] += lower_color_squared * weight;\n        \t\t\}\n    \t\t\}\n\t\t\}\n\n\t\t// Compute the weighted sum of mean of sectors, such that sectors with lower standard deviation\n \t\t// gets more significant weight than sectors with higher standard deviation.\n  \t\tfloat sum_of_weights = 0.f;\n  \t\tfloat4 weighted_sum = float4(0.f);\n  \t\tfor (int i = 0; i < number_of_sectors; i++) \{\n    \t\tweighted_mean_of_color_of_sectors\[i] /= sum_of_weights_of_sectors\[i];\n    \t\tweighted_mean_of_squared_color_of_sectors\[i] /= sum_of_weights_of_sectors\[i];\n\n    \t\tfloat4 color_mean = weighted_mean_of_color_of_sectors\[i];\n    \t\tfloat4 squared_color_mean = weighted_mean_of_squared_color_of_sectors\[i];\n    \t\tfloat4 color_variance = fabs(squared_color_mean - color_mean * color_mean);\n\n    \t\tfloat standard_deviation = dot(sqrt(\n    \t\t\tfloat3(color_variance.x, color_variance.y, color_variance.z)), float3(1.0f));\n\n\n  \t\t\t// Compute the sector weight based on the weight function introduced in section \"3.3.1\n   \t\t\t// Single-scale Filtering\" of the multi-scale paper. Use a threshold of 0.02 to avoid zero\n   \t\t\t// division and avoid artifacts in homogeneous regions as demonstrated in the paper.\n   \t\t\tfloat normalized_sharpness = sharpness * 10.0f;\n    \t\tfloat weight = 1.0 / pow( max(0.02, standard_deviation), normalized_sharpness);\n\n    \t\tsum_of_weights += weight;\n    \t\tweighted_sum += color_mean * weight;\n  \t\t\}\n\n  \t\tweighted_sum /= sum_of_weights;\n  \t\tdst(0) = weighted_sum.x;\n  \t\tdst(1) = weighted_sum.y;\n  \t\tdst(2) = weighted_sum.z;\n  \t\tdst(3) = center_color.w;\n\t\}\n\};\n"
+   rebuild ""
+   df_KuwaharaAnisotropic_Size {{Size}}
+   df_KuwaharaAnisotropic_Sharpness {{Sharpness}}
+   df_KuwaharaAnisotropic_Eccentricity {{Eccentricity}}
+   rebuild_finalise ""
+   name BlinkScript3
+   xpos 280
+   ypos 341
+  }
+  Clamp {
+   channels alpha
+   name Clamp2
+   xpos 280
+   ypos 405
+  }
+  Dot {
+   name Dot4
+   xpos 314
+   ypos 452
+  }
+  Switch {
+   inputs 2
+   which {{map}}
+   name Switch1
+   xpos 178
+   ypos 449
+  }
+set Nbf577e00 [stack 0]
+  Output {
+   name Output1
+   xpos 178
+   ypos 557
+  }
+push $Nbfaf1c00
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push $Nbf577e00
+  Viewer {
+   inputs 10
+   frame_range 1001-1001
+   fps 25
+   input_number 9
+   colour_sample_bbox {0.271874994 0.396874994 0.2734375 0.3984375}
+   name Viewer1
+   xpos -83
+   ypos 740
+  }
+ end_group
+ Switch {
+  inputs 2
+  which {{!active_kwh}}
+  name Switch1
+  xpos 1
+  ypos 1386
+ }
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name Copy1
+  xpos 1
+  ypos 1418
+ }
+ Dot {
+  name Dot15
+  label KWH_OUT
+  note_font "Verdana Bold"
+  note_font_size 21
+  xpos 35
+  ypos 1481
+ }
+ Dot {
+  name Dot17
+  xpos 34
+  ypos 1908
+ }
+set Nbf4c7800 [stack 0]
+ Dot {
+  name Dot11
+  xpos -293
+  ypos 1908
+ }
+set Nbf4c7c00 [stack 0]
+add_layer {curveu curveu.curveu}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 curveu
+  fromInput2 {{0} B}
+  mappings "4 curveu.curveu 0 0 rgba.red 0 0 curveu.curveu 0 0 rgba.green 0 1 curveu.curveu 0 0 rgba.blue 0 2 curveu.curveu 0 0 rgba.alpha 0 3"
+  name Shuffle27
+  label "\[value in1]"
+  xpos -327
+  ypos 1926
+ }
+ Group {
+  name LumaKeyer
+  onCreate "n = nuke.thisNode()\nn.knob('blackpoint').setRange(0, 1)\nn.knob('whitepoint').setRange(0, 1)"
+  tile_color 0x421010ff
+  note_font "Bitstream Vera Sans Bold"
+  xpos -327
+  ypos 1962
+  addUserKnob {20 User l lumaKeyer}
+  addUserKnob {4 output M {Alpha RGBA}}
+  output RGBA
+  addUserKnob {41 blackpoint T picker.blackpoint}
+  addUserKnob {41 whitepoint T picker.whitepoint}
+  addUserKnob {6 invert +STARTLINE}
+  addUserKnob {4 smoothing l Smoothing: M {None Smooth Smooth0 Smooth1 ""}}
+  addUserKnob {26 ""}
+  addUserKnob {26 "" l mask T ""}
+  addUserKnob {41 maskChannelInput l "" -STARTLINE T Merge1.maskChannelInput}
+  addUserKnob {41 inject -STARTLINE T Merge1.inject}
+  addUserKnob {41 invert_mask l invert -STARTLINE T Merge1.invert_mask}
+  addUserKnob {41 fringe -STARTLINE T Merge1.fringe}
+  addUserKnob {41 mix T Merge1.mix}
+  addUserKnob {20 info}
+  addUserKnob {22 btn l DerekVFX.ca T "import os\nimport sys\n\ntry:\n    import subprocess\n    def _run(cmd, shell, wait):\n        opener = subprocess.Popen(cmd, shell=shell)\n        if wait:\n            opener.wait()\n        return opener.pid\nexcept ImportError:\n    import popen2\n    def _run(cmd, shell, wait):\n        opener = popen2.Popen3(cmd)\n        if wait:\n            opener.wait()\n        return opener.pid\n\ndef _open(url, wait=0):\n    if sys.platform == \"darwin\":\n        cmd = \[\"open\", url]\n    elif hasattr(os, \"startfile\"):\n        return os.startfile(url)\n    elif os.environ.has_key(\"KDE_FULL_SESSION\") or os.environ.has_key(\"KDE_MULTIHEAD\") or \\\n        os.environ.has_key(\"GNOME_DESKTOP_SESSION_ID\") or os.environ.has_key(\"GNOME_KEYRING_SOCKET\"):\n        cmd = \[\"xdg-open\", url]\n    else:\n        raise OSError, \"Desktop not supported.\"\n\n    return _run(cmd, 0, wait)\n\n_open('http://www.derekvfx.ca/')" +STARTLINE}
+  addUserKnob {26 versionUpdate l "" -STARTLINE T "<font color = gray> adjusted by Tony Lyons </font color = gray>"}
+ }
+  Input {
+   inputs 0
+   name Input1
+   xpos 57
+   ypos -347
+  }
+set Nbb66e400 [stack 0]
+  Colorspace {
+   colorspace_out HSL
+   name Colorspace1
+   xpos -181
+   ypos -181
+  }
+set Nbb66e800 [stack 0]
+  Shuffle {
+   red blue
+   green blue
+   alpha blue
+   name Shuffle1
+   tile_color 0x3d3f8e00
+   xpos -336
+   ypos -181
+  }
+  Grade {
+   blackpoint 0.8
+   name picker
+   xpos -336
+   ypos -139
+  }
+  Input {
+   inputs 0
+   name Inputmask
+   xpos 231
+   ypos 446
+   number 1
+  }
+push $Nbb66e400
+  Dot {
+   name Dot5
+   note_font_size 41
+   xpos 91
+   ypos 284
+  }
+set Nbb66f800 [stack 0]
+push $Nbb66e800
+  Expression {
+   expr3 smoothstep(parent.picker.blackpoint,parent.picker.whitepoint,b)
+   name Expression1
+   xpos -181
+   ypos -138
+  }
+  Dot {
+   name Dot1
+   note_font_size 41
+   xpos -147
+   ypos -58
+  }
+set Nbe14a000 [stack 0]
+  ColorLookup {
+   channels {{{parent.ColorLookup_smooth.channels}}}
+   lut {master {curve L 0 C k 1 s0}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth1
+   xpos -69
+   ypos 33
+  }
+push $Nbe14a000
+  ColorLookup {
+   channels {{{parent.ColorLookup_smooth.channels}}}
+   lut {master {curve L 0 s0 1}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth0
+   xpos -181
+   ypos 32
+  }
+push $Nbe14a000
+  ColorLookup {
+   lut {master {curve L 0 s0 C k 1 s0}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth
+   xpos -293
+   ypos 32
+  }
+push $Nbe14a000
+  Dot {
+   name Dot2
+   note_font_size 41
+   xpos -345
+   ypos -52
+  }
+  Dot {
+   name Dot3
+   note_font_size 41
+   xpos -345
+   ypos 131
+  }
+  Switch {
+   inputs 4
+   which {{parent.smoothing}}
+   name Switch1
+   label "\[value which]"
+   xpos -181
+   ypos 121
+  }
+  Expression {
+   expr3 1-a
+   name Expression2
+   xpos -181
+   ypos 191
+   disable {{"parent.invert == 0"}}
+  }
+  Merge2 {
+   inputs 2
+   operation copy
+   Achannels {rgba.red rgba.green rgba.blue -rgba.alpha}
+   Bchannels {rgba.red rgba.green rgba.blue -rgba.alpha}
+   output {rgba.red rgba.green rgba.blue -rgba.alpha}
+   name Merge2
+   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
+   xpos -181
+   ypos 280
+  }
+  Shuffle {
+   red alpha
+   green alpha
+   blue alpha
+   name Shuffle2
+   tile_color 0xffffffff
+   xpos -181
+   ypos 328
+   disable {{!parent.output}}
+  }
+  Dot {
+   name Dot4
+   note_font_size 41
+   xpos -147
+   ypos 450
+  }
+push $Nbb66f800
+  Shuffle {
+   alpha black
+   name Shuffle3
+   label "\[value in]"
+   xpos 57
+   ypos 331
+  }
+  Shuffle {
+   red black
+   green black
+   blue black
+   alpha black
+   name Shuffle4
+   label "\[value in]"
+   xpos 57
+   ypos 369
+   disable {{!parent.output}}
+  }
+  Merge2 {
+   inputs 2+1
+   operation copy
+   also_merge rgba
+   name Merge1
+   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
+   xpos 57
+   ypos 446
+  }
+  Output {
+   name Output1
+   xpos 57
+   ypos 602
+  }
+ end_group
+ Dot {
+  name Dot12
+  xpos -293
+  ypos 2100
+ }
+push $Nbf4c7c00
+ Dot {
+  name Dot26
+  xpos -390
+  ypos 1908
+ }
+clone $C5c604000 {
+  xpos -424
+  ypos 1926
+  selected false
+ }
+ Group {
+  name LumaKeyer4
+  onCreate "n = nuke.thisNode()\nn.knob('blackpoint').setRange(0, 1)\nn.knob('whitepoint').setRange(0, 1)"
+  tile_color 0x421010ff
+  note_font "Bitstream Vera Sans Bold"
+  xpos -424
+  ypos 1962
+  addUserKnob {20 User l lumaKeyer}
+  addUserKnob {4 output M {Alpha RGBA}}
+  output RGBA
+  addUserKnob {41 blackpoint T picker.blackpoint}
+  addUserKnob {41 whitepoint T picker.whitepoint}
+  addUserKnob {6 invert +STARTLINE}
+  addUserKnob {4 smoothing l Smoothing: M {None Smooth Smooth0 Smooth1 ""}}
+  addUserKnob {26 ""}
+  addUserKnob {26 "" l mask T ""}
+  addUserKnob {41 maskChannelInput l "" -STARTLINE T Merge1.maskChannelInput}
+  addUserKnob {41 inject -STARTLINE T Merge1.inject}
+  addUserKnob {41 invert_mask l invert -STARTLINE T Merge1.invert_mask}
+  addUserKnob {41 fringe -STARTLINE T Merge1.fringe}
+  addUserKnob {41 mix T Merge1.mix}
+  addUserKnob {20 info}
+  addUserKnob {22 btn l DerekVFX.ca T "import os\nimport sys\n\ntry:\n    import subprocess\n    def _run(cmd, shell, wait):\n        opener = subprocess.Popen(cmd, shell=shell)\n        if wait:\n            opener.wait()\n        return opener.pid\nexcept ImportError:\n    import popen2\n    def _run(cmd, shell, wait):\n        opener = popen2.Popen3(cmd)\n        if wait:\n            opener.wait()\n        return opener.pid\n\ndef _open(url, wait=0):\n    if sys.platform == \"darwin\":\n        cmd = \[\"open\", url]\n    elif hasattr(os, \"startfile\"):\n        return os.startfile(url)\n    elif os.environ.has_key(\"KDE_FULL_SESSION\") or os.environ.has_key(\"KDE_MULTIHEAD\") or \\\n        os.environ.has_key(\"GNOME_DESKTOP_SESSION_ID\") or os.environ.has_key(\"GNOME_KEYRING_SOCKET\"):\n        cmd = \[\"xdg-open\", url]\n    else:\n        raise OSError, \"Desktop not supported.\"\n\n    return _run(cmd, 0, wait)\n\n_open('http://www.derekvfx.ca/')" +STARTLINE}
+  addUserKnob {26 versionUpdate l "" -STARTLINE T "<font color = gray> adjusted by Tony Lyons </font color = gray>"}
+ }
+  Input {
+   inputs 0
+   name Input1
+   xpos 57
+   ypos -347
+  }
+set Nbf5f8400 [stack 0]
+  Colorspace {
+   colorspace_out HSL
+   name Colorspace1
+   xpos -181
+   ypos -181
+  }
+set Nbf5f8800 [stack 0]
+  Shuffle {
+   red blue
+   green blue
+   alpha blue
+   name Shuffle1
+   tile_color 0x3d3f8e00
+   xpos -336
+   ypos -181
+  }
+  Grade {
+   blackpoint {{brush_mask_projection_remap}}
+   name picker
+   xpos -336
+   ypos -139
+  }
+  Input {
+   inputs 0
+   name Inputmask
+   xpos 231
+   ypos 446
+   number 1
+  }
+push $Nbf5f8400
+  Dot {
+   name Dot5
+   note_font_size 41
+   xpos 91
+   ypos 284
+  }
+set Nbf5f9800 [stack 0]
+push $Nbf5f8800
+  Expression {
+   expr3 smoothstep(parent.picker.blackpoint,parent.picker.whitepoint,b)
+   name Expression1
+   xpos -181
+   ypos -138
+  }
+  Dot {
+   name Dot1
+   note_font_size 41
+   xpos -147
+   ypos -58
+  }
+set N180ec000 [stack 0]
+  ColorLookup {
+   channels {{{parent.ColorLookup_smooth.channels}}}
+   lut {master {curve L 0 C k 1 s0}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth1
+   xpos -69
+   ypos 33
+  }
+push $N180ec000
+  ColorLookup {
+   channels {{{parent.ColorLookup_smooth.channels}}}
+   lut {master {curve L 0 s0 1}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth0
+   xpos -181
+   ypos 32
+  }
+push $N180ec000
+  ColorLookup {
+   lut {master {curve L 0 s0 C k 1 s0}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth
+   xpos -293
+   ypos 32
+  }
+push $N180ec000
+  Dot {
+   name Dot2
+   note_font_size 41
+   xpos -345
+   ypos -52
+  }
+  Dot {
+   name Dot3
+   note_font_size 41
+   xpos -345
+   ypos 131
+  }
+  Switch {
+   inputs 4
+   which {{parent.smoothing}}
+   name Switch1
+   label "\[value which]"
+   xpos -181
+   ypos 121
+  }
+  Expression {
+   expr3 1-a
+   name Expression2
+   xpos -181
+   ypos 191
+   disable {{"parent.invert == 0"}}
+  }
+  Merge2 {
+   inputs 2
+   operation copy
+   Achannels {rgba.red rgba.green rgba.blue -rgba.alpha}
+   Bchannels {rgba.red rgba.green rgba.blue -rgba.alpha}
+   output {rgba.red rgba.green rgba.blue -rgba.alpha}
+   name Merge2
+   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
+   xpos -181
+   ypos 280
+  }
+  Shuffle {
+   red alpha
+   green alpha
+   blue alpha
+   name Shuffle2
+   tile_color 0xffffffff
+   xpos -181
+   ypos 328
+   disable {{!parent.output}}
+  }
+  Dot {
+   name Dot4
+   note_font_size 41
+   xpos -147
+   ypos 450
+  }
+push $Nbf5f9800
+  Shuffle {
+   alpha black
+   name Shuffle3
+   label "\[value in]"
+   xpos 57
+   ypos 331
+  }
+  Shuffle {
+   red black
+   green black
+   blue black
+   alpha black
+   name Shuffle4
+   label "\[value in]"
+   xpos 57
+   ypos 369
+   disable {{!parent.output}}
+  }
+  Merge2 {
+   inputs 2+1
+   operation copy
+   also_merge rgba
+   name Merge1
+   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
+   xpos 57
+   ypos 446
+  }
+  Output {
+   name Output1
+   xpos 57
+   ypos 602
+  }
+ end_group
+ Blur {
+  size 5
+  name Blur4
+  xpos -424
+  ypos 2008
+ }
+ Dot {
+  name Dot16
+  xpos -390
+  ypos 2052
+ }
+push $N650d0400
+ PostageStamp {
+  name beauty2
+  note_font "Verdana Bold"
+  xpos -590
+  ypos 1604
+  hide_input true
+ }
+set N181fc000 [stack 0]
+ Dot {
+  name Dot35
+  xpos -719
+  ypos 1607
+ }
+set N181fc400 [stack 0]
+ Dot {
+  name Dot75
+  xpos -845
+  ypos 1607
+ }
+set N181fc800 [stack 0]
+ Dot {
+  name Dot76
+  xpos -989
+  ypos 1607
+ }
+add_layer {furTex furTex.x furTex.y furTex.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 furTex
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.alpha 0 3 furTex.x 0 0 rgba.red 0 0 furTex.y 0 1 rgba.green 0 1 furTex.z 0 2 rgba.blue 0 2"
+  name Shuffle11
+  label "\[value in1]"
+  xpos -1023
+  ypos 1663
+ }
+ Dot {
+  name Dot77
+  xpos -989
+  ypos 1773
+ }
+push $N181fc800
+add_layer {furTex2 furTex2.x furTex2.y furTex2.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 furTex2
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.alpha 0 3 furTex2.x 0 0 rgba.red 0 0 furTex2.y 0 1 rgba.green 0 1 furTex2.z 0 2 rgba.blue 0 2"
+  name Shuffle8
+  label "\[value in1]"
+  xpos -879
+  ypos 1663
+ }
+ Blend {
+  inputs 2
+  channels rgba
+  weight0 {{brush_map1}}
+  weight1 {{brush_map2}}
+  name Blend1
+  xpos -879
+  ypos 1770
+ }
+ Dot {
+  name Dot74
+  xpos -845
+  ypos 1914
+ }
+push $N181fc400
+add_layer {N N.x N.y N.z N.red N.green N.blue N.alpha N.X N.Y N.Z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 N
+  out1 rgb
+  fromInput2 {{0} B}
+  mappings "3 N.x 0 0 rgba.red 0 0 N.y 0 1 rgba.green 0 1 N.z 0 2 rgba.blue 0 2"
+  name Shuffle23
+  label "\[value in1]"
+  xpos -753
+  ypos 1664
+ }
+ Dot {
+  name Dot36
+  xpos -719
+  ypos 1819
+ }
+push $N181fc000
+clone $C5f751c00 {
+  xpos -590
+  ypos 1664
+  selected false
+ }
+ Median {
+  size {{parent.Median_MASTER.size}}
+  ignore_top_line false
+  name Median2
+  xpos -590
+  ypos 1729
+ }
+ Read {
+  inputs 0
+  file_type exr
+  file I:/intermarche/04_Resources/Ben/BrushstrokesTextures/brushStroke01.exr
+  format "2048 2048 0 0 2048 2048 1 square_2K"
+  origset true
+  name Read2
+  knobChanged "try:\n\tpcore.getPlugin(\"Nuke\").updateNodeUI(\"read\", nuke.toNode(nuke.thisNode().fullName().rsplit(\".\", 1)\[0]))\nexcept:\n\tpass"
+  xpos -447
+  ypos 1586
+  addUserKnob {20 tab_prism l Prism}
+  addUserKnob {26 fileName l File T I:/intermarche/04_Resources/Ben/BrushstrokesTextures/brushStroke01.exr}
+  addUserKnob {22 browse l Browse... T pcore.appPlugin.readNode_onBrowseClicked(nuke.thisNode()) +STARTLINE}
+  addUserKnob {22 openExplorer l "Open In Explorer..." -STARTLINE T pcore.appPlugin.readNode_onOpenInClicked(nuke.thisNode())}
+ }
+add_layer {dir dir.red dir.green dir.x dir.y dir.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 dir
+  fromInput2 {{0} B}
+  mappings "4 dir.red 0 0 rgba.red 0 0 dir.green 0 1 rgba.green 0 1 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuffle3
+  label "\[value in1]"
+  xpos -447
+  ypos 1682
+ }
+ Blur {
+  size 10
+  name Blur2
+  xpos -447
+  ypos 1718
+ }
+ Clamp {
+  channels rgba
+  minimum -1
+  name Clamp1
+  xpos -447
+  ypos 1816
+ }
+set Nbb094000 [stack 0]
+push $Nbb094000
+push $Nbb094000
+ Group {
+  inputs 5
+  name TRIPLANAR
+  xpos -590
+  ypos 1816
+  addUserKnob {20 User}
+  addUserKnob {41 size_2 l sizeX T Expression6.size}
+  addUserKnob {41 size_1 l sizeY T Expression7.size}
+  addUserKnob {41 size l sizeZ T Expression8.size}
+  addUserKnob {13 offset}
+  offset {{parent.brush_offset} {offset.x} {offset.x}}
+  addUserKnob {7 rotX l "rotate X" R 0 360}
+  addUserKnob {7 rotY l "rotate Y" R 0 360}
+  addUserKnob {7 rotZ l "rotate Z" R 0 360}
+  addUserKnob {26 ""}
+  addUserKnob {41 blackpoint T Grade62.blackpoint}
+  addUserKnob {41 whitepoint T Grade62.whitepoint}
+  addUserKnob {41 gamma T Grade62.gamma}
+  addUserKnob {26 ""}
+  addUserKnob {26 Credits l "" +STARTLINE T "© v001 Perceval Schopp 2021\n"}
+ }
+  Input {
+   inputs 0
+   name Normal
+   xpos -330
+   ypos -59
+   number 4
+  }
+  Expression {
+   expr0 abs(r)
+   expr1 abs(g)
+   expr2 abs(b)
+   name Expression1
+   xpos -330
+   ypos -18
+  }
+  Dot {
+   name Dot2
+   xpos -296
+   ypos 29
+  }
+set Nbb094c00 [stack 0]
+  Dot {
+   name Dot3
+   xpos -518
+   ypos 29
+  }
+set Nbb095000 [stack 0]
+  Dot {
+   name Dot4
+   xpos -867
+   ypos 29
+  }
+  Dot {
+   name Dot75
+   xpos -867
+   ypos 310
+  }
+  Input {
+   inputs 0
+   name Position
+   xpos -475
+   ypos -62
+   number 3
+  }
+  Add {
+   value {{parent.offset} {parent.offset} {parent.offset} {parent.offset}}
+   name Add1
+   xpos -475
+   ypos 58
+  }
+  Dot {
+   name Dot79
+   xpos -441
+   ypos 109
+  }
+set Nbbc00400 [stack 0]
+  Dot {
+   name Dot74
+   xpos -783
+   ypos 109
+  }
+  Group {
+   name Pworld_transform
+   xpos -817
+   ypos 134
+   addUserKnob {20 User}
+   addUserKnob {41 in l Position T Shuffle1.in}
+   addUserKnob {26 ""}
+   addUserKnob {41 translate T Axis1.translate}
+   addUserKnob {41 rotate T Axis1.rotate}
+   addUserKnob {41 scaling l scale T Axis1.scaling}
+   addUserKnob {41 uniform_scale l "uniform scale" T Axis1.uniform_scale}
+  }
+   Input {
+    inputs 0
+    name pworld
+    label input
+    xpos 0
+   }
+   Shuffle {
+    alpha black
+    name Shuffle1
+    label "select pworld\n"
+    xpos 0
+    ypos 50
+   }
+   Expression {
+    expr0 r-parent.Axis1.world_matrix.3
+    expr1 g-parent.Axis1.world_matrix.7
+    expr2 b-parent.Axis1.world_matrix.11
+    name Expression1
+    xpos 0
+    ypos 151
+   }
+   ColorMatrix {
+    matrix {
+        {{parent.Axis1.world_matrix.0} {parent.Axis1.world_matrix.1} {parent.Axis1.world_matrix.2}}
+        {{parent.Axis1.world_matrix.4} {parent.Axis1.world_matrix.5} {parent.Axis1.world_matrix.6}}
+        {{parent.Axis1.world_matrix.8} {parent.Axis1.world_matrix.9} {parent.Axis1.world_matrix.10}}
+      }
+    invert true
+    name ColorMatrix1
+    xpos 0
+    ypos 195
+   }
+   Output {
+    name Output1
+    xpos 0
+    ypos 300
+   }
+   Viewer {
+    frame_range 1-100
+    name Viewer1
+    xpos 0
+    ypos 326
+   }
+   Axis2 {
+    inputs 0
+    rotate {{parent.parent.rotX} 0 0}
+    name Axis1
+    xpos -150
+    ypos 171
+   }
+  end_group
+  Shuffle {
+   in rgb
+   red green
+   green blue
+   blue red2
+   alpha red2
+   name Shuffle17
+   label YZ
+   xpos -817
+   ypos 188
+  }
+  Expression {
+   expr0 r>=0?(r%size)/size:(1-(-r%size)/size)
+   expr1 g>=0?(g%size)/size:(1-(-g%size)/size)
+   expr3 abs(a)
+   name Expression6
+   xpos -817
+   ypos 265
+   addUserKnob {20 User}
+   addUserKnob {7 size R 0 300}
+   size {{parent.parent.brush_size}}
+  }
+  Input {
+   inputs 0
+   name imgX
+   xpos -720
+   ypos 257
+  }
+  Dot {
+   name Dot7
+   xpos -686
+   ypos 330
+  }
+  BlinkScript {
+   inputs 2
+   recompileCount 29
+   ProgramGroup 1
+   KernelDescription "2 \"stmap\" iterate pixelWise 7a68aa278e15934f6eed8ab5e98f4a100b5f2ecefdbe100e4f0bb62a47208981 3 \"src\" Read Random \"STMap\" Read Point \"dst\" Write Point 0 0 3 \"srcconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA== \"UV\" Float 2 1 AAAAAAAAAAA= \"resolution\" Int 2 1 AAAAAAAAAAA="
+   kernelSource "\nkernel stmap : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeConstant> src; // the input image\n  Image<eRead, eAccessPoint, eEdgeClamped> STMap;\n  Image<eWrite> dst; // the output image\n\n  param:\n    // This parameter is made available to the user.\n    \n    \n\n  local:\n    // This local variable is not exposed to the user.\n    float2 UV;\n    int2 resolution;\n\n  // In define(), parameters can be given labels and default values.\n  void define() \{\n    \n  \}\n\n  // The init() function is run before any calls to process().\n  // Local variables can be initialized here.\n  void init() \{\n    \n    resolution.x = src.bounds.width();\n    resolution.y = src.bounds.height();\n\n  \}\n\n  void process(int2 pos) \{\n    \n    UV.x = STMap().x*resolution.x;\n    UV.y = STMap().y*resolution.y;\n\n    // Write the result to the output image\n    dst() = bilinear(src, UV.x, UV.y);\n\n  \}\n\};\n"
+   rebuild ""
+   specifiedFormat true
+   rebuild_finalise ""
+   name BlinkScript2
+   xpos -817
+   ypos 321
+  }
+  Copy {
+   inputs 2
+   from0 rgba.red
+   to0 rgba.alpha
+   name Copy6
+   xpos -817
+   ypos 454
+  }
+  Grade {
+   channels alpha
+   blackpoint 0.17
+   whitepoint 0.57
+   gamma 0.405
+   name Grade62
+   xpos -817
+   ypos 530
+  }
+  set C66b86400 [stack 0]
+  Premult {
+   name Premult4
+   xpos -824
+   ypos 564
+  }
+push 0
+push $Nbb095000
+  Dot {
+   name Dot76
+   xpos -518
+   ypos 312
+  }
+push $Nbbc00400
+  Group {
+   name Pworld_transform1
+   xpos -475
+   ypos 132
+   addUserKnob {20 User}
+   addUserKnob {41 in l Position T Shuffle1.in}
+   addUserKnob {26 ""}
+   addUserKnob {41 translate T Axis1.translate}
+   addUserKnob {41 rotate T Axis1.rotate}
+   addUserKnob {41 scaling l scale T Axis1.scaling}
+   addUserKnob {41 uniform_scale l "uniform scale" T Axis1.uniform_scale}
+  }
+   Input {
+    inputs 0
+    name pworld
+    label input
+    xpos 0
+   }
+   Shuffle {
+    alpha black
+    name Shuffle1
+    label "select pworld\n"
+    xpos 0
+    ypos 50
+   }
+   Expression {
+    expr0 r-parent.Axis1.world_matrix.3
+    expr1 g-parent.Axis1.world_matrix.7
+    expr2 b-parent.Axis1.world_matrix.11
+    name Expression1
+    xpos 0
+    ypos 151
+   }
+   ColorMatrix {
+    matrix {
+        {{parent.Axis1.world_matrix.0} {parent.Axis1.world_matrix.1} {parent.Axis1.world_matrix.2}}
+        {{parent.Axis1.world_matrix.4} {parent.Axis1.world_matrix.5} {parent.Axis1.world_matrix.6}}
+        {{parent.Axis1.world_matrix.8} {parent.Axis1.world_matrix.9} {parent.Axis1.world_matrix.10}}
+      }
+    invert true
+    name ColorMatrix1
+    xpos 0
+    ypos 195
+   }
+   Output {
+    name Output1
+    xpos 0
+    ypos 300
+   }
+   Viewer {
+    frame_range 1-100
+    name Viewer1
+    xpos 0
+    ypos 326
+   }
+   Axis2 {
+    inputs 0
+    rotate {0 {parent.parent.rotY} 0}
+    name Axis1
+    xpos -150
+    ypos 171
+   }
+  end_group
+  Shuffle {
+   in rgb
+   green blue
+   blue green2
+   alpha green2
+   name Shuffle18
+   label XZ
+   xpos -475
+   ypos 189
+  }
+  Expression {
+   expr0 r>=0?(r%size)/size:(1-(-r%size)/size)
+   expr1 g>=0?(g%size)/size:(1-(-g%size)/size)
+   expr2 0
+   expr3 abs(a)
+   name Expression7
+   xpos -475
+   ypos 256
+   addUserKnob {20 User}
+   addUserKnob {7 size R 0 300}
+   size {{parent.Expression6.size}}
+  }
+  Input {
+   inputs 0
+   name imgY
+   xpos -381
+   ypos 261
+   number 2
+  }
+  Dot {
+   name Dot6
+   xpos -347
+   ypos 340
+  }
+  BlinkScript {
+   inputs 2
+   recompileCount 27
+   ProgramGroup 1
+   KernelDescription "2 \"stmap\" iterate pixelWise e2eb2abe0852e641515c9b135b45d5fe999c0cb063e785d3342ce194addf80f5 3 \"src\" Read Random \"STMap\" Read Point \"dst\" Write Point 0 0 3 \"srcconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA== \"UV\" Float 2 1 AAAAAAAAAAA= \"resolution\" Int 2 1 AAAAAAAAAAA="
+   kernelSource "\nkernel stmap : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeConstant> src; // the input image\n  Image<eRead, eAccessPoint, eEdgeClamped> STMap;\n  Image<eWrite> dst; // the output image\n\n  param:\n    // This parameter is made available to the user.\n    \n    \n\n  local:\n    // This local variable is not exposed to the user.\n    float2 UV;\n    int2 resolution;\n\n  // In define(), parameters can be given labels and default values.\n  void define() \{\n    \n  \}\n\n  // The init() function is run before any calls to process().\n  // Local variables can be initialized here.\n  void init() \{\n    \n    resolution.x = src.bounds.width();\n    resolution.y = src.bounds.height();\n\n  \}\n\n  void process(int2 pos) \{\n    \n    UV.x = STMap().x*resolution.x-.5f;\n    UV.y = STMap().y*resolution.y-.5f;\n\n    // Write the result to the output image\n    dst() = bilinear(src, UV.x, UV.y);\n\n  \}\n\};\n"
+   rebuild ""
+   specifiedFormat true
+   rebuild_finalise ""
+   name BlinkScript1
+   xpos -475
+   ypos 331
+  }
+  Copy {
+   inputs 2
+   from0 rgba.green
+   to0 rgba.alpha
+   name Copy7
+   xpos -475
+   ypos 415
+  }
+clone $C66b86400 {
+   xpos -465
+   ypos 520
+   selected false
+  }
+  Premult {
+   name Premult5
+   xpos -465
+   ypos 556
+  }
+push $Nbb094c00
+  Dot {
+   name Dot78
+   xpos -292
+   ypos 286
+  }
+push $Nbbc00400
+  Dot {
+   name Dot77
+   xpos -174
+   ypos 109
+  }
+  Group {
+   name Pworld_transform2
+   xpos -208
+   ypos 133
+   addUserKnob {20 User}
+   addUserKnob {41 in l Position T Shuffle1.in}
+   addUserKnob {26 ""}
+   addUserKnob {41 translate T Axis1.translate}
+   addUserKnob {41 rotate T Axis1.rotate}
+   addUserKnob {41 scaling l scale T Axis1.scaling}
+   addUserKnob {41 uniform_scale l "uniform scale" T Axis1.uniform_scale}
+  }
+   Input {
+    inputs 0
+    name pworld
+    label input
+    xpos 0
+   }
+   Shuffle {
+    alpha black
+    name Shuffle1
+    label "select pworld\n"
+    xpos 0
+    ypos 50
+   }
+   Expression {
+    expr0 r-parent.Axis1.world_matrix.3
+    expr1 g-parent.Axis1.world_matrix.7
+    expr2 b-parent.Axis1.world_matrix.11
+    name Expression1
+    xpos 0
+    ypos 151
+   }
+   ColorMatrix {
+    matrix {
+        {{parent.Axis1.world_matrix.0} {parent.Axis1.world_matrix.1} {parent.Axis1.world_matrix.2}}
+        {{parent.Axis1.world_matrix.4} {parent.Axis1.world_matrix.5} {parent.Axis1.world_matrix.6}}
+        {{parent.Axis1.world_matrix.8} {parent.Axis1.world_matrix.9} {parent.Axis1.world_matrix.10}}
+      }
+    invert true
+    name ColorMatrix1
+    xpos 0
+    ypos 195
+   }
+   Output {
+    name Output1
+    xpos 0
+    ypos 300
+   }
+   Viewer {
+    frame_range 1-100
+    name Viewer1
+    xpos 0
+    ypos 326
+   }
+   Axis2 {
+    inputs 0
+    rotate {0 0 {parent.parent.rotZ}}
+    name Axis1
+    xpos -150
+    ypos 171
+   }
+  end_group
+  Shuffle {
+   in rgb
+   blue blue2
+   alpha blue2
+   name Shuffle19
+   label XY
+   xpos -208
+   ypos 193
+  }
+  Expression {
+   expr0 r>=0?(r%size)/size:(1-(-r%size)/size)
+   expr1 g>=0?(g%size)/size:(1-(-g%size)/size)
+   expr2 0
+   expr3 abs(a)
+   name Expression8
+   xpos -208
+   ypos 253
+   addUserKnob {20 User}
+   addUserKnob {7 size R 0 300}
+   size {{parent.Expression7.size}}
+  }
+  Input {
+   inputs 0
+   name imgZ
+   xpos -73
+   ypos 267
+   number 1
+  }
+  Dot {
+   name Dot5
+   xpos -39
+   ypos 333
+  }
+  BlinkScript {
+   inputs 2
+   recompileCount 28
+   ProgramGroup 1
+   KernelDescription "2 \"stmap\" iterate pixelWise e2eb2abe0852e641515c9b135b45d5fe999c0cb063e785d3342ce194addf80f5 3 \"src\" Read Random \"STMap\" Read Point \"dst\" Write Point 0 0 3 \"srcconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA== \"UV\" Float 2 1 AAAAAAAAAAA= \"resolution\" Int 2 1 AAAAAAAAAAA="
+   kernelSource "\nkernel stmap : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeConstant> src; // the input image\n  Image<eRead, eAccessPoint, eEdgeClamped> STMap;\n  Image<eWrite> dst; // the output image\n\n  param:\n    // This parameter is made available to the user.\n    \n    \n\n  local:\n    // This local variable is not exposed to the user.\n    float2 UV;\n    int2 resolution;\n\n  // In define(), parameters can be given labels and default values.\n  void define() \{\n    \n  \}\n\n  // The init() function is run before any calls to process().\n  // Local variables can be initialized here.\n  void init() \{\n    \n    resolution.x = src.bounds.width();\n    resolution.y = src.bounds.height();\n\n  \}\n\n  void process(int2 pos) \{\n    \n    UV.x = STMap().x*resolution.x-.5f;\n    UV.y = STMap().y*resolution.y-.5f;\n\n    // Write the result to the output image\n    dst() = bilinear(src, UV.x, UV.y);\n\n  \}\n\};\n"
+   rebuild ""
+   specifiedFormat true
+   rebuild_finalise ""
+   name BlinkScript3
+   xpos -208
+   ypos 324
+  }
+  Copy {
+   inputs 2
+   from0 rgba.blue
+   to0 rgba.alpha
+   name Copy8
+   xpos -208
+   ypos 413
+  }
+clone $C66b86400 {
+   xpos -208
+   ypos 494
+   selected false
+  }
+  Merge2 {
+   inputs 3+1
+   name Merge8
+   xpos -465
+   ypos 612
+  }
+set Na671f400 [stack 0]
+  Output {
+   name Output1
+   xpos -465
+   ypos 695
+  }
+push $Na671f400
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+  Viewer {
+   inputs 10
+   frame_range 1001-1100
+   fps 25
+   input_number 9
+   name Viewer1
+   xpos -365
+   ypos 195
+  }
+ end_group
+ Switch {
+  inputs 2
+  which {{brushes_mode}}
+  name Switch2
+  xpos -590
+  ypos 1911
+ }
+ Median {
+  size {{brush_median}}
+  ignore_top_line false
+  name Median1
+  xpos -590
+  ypos 1950
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  invert_mask true
+  name Multiply5
+  xpos -590
+  ypos 2049
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  name Multiply7
+  xpos -590
+  ypos 2097
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  maskChannelMask rgba.red
+  invert_mask true
+  name Multiply_AS1
+  xpos -590
+  ypos 2144
+  disable {{!filter_autosize}}
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  invert_mask true
+  name Multiply_FM1
+  xpos -590
+  ypos 2196
+ }
+ Multiply {
+  channels rgba
+  value 0
+  name Multiply19
+  xpos -590
+  ypos 2247
+  disable {{active_brushes}}
+ }
+ Dot {
+  name Dot30
+  label "\nBRUSHES_OUT"
+  note_font "Verdana Bold"
+  note_font_size 21
+  xpos -556
+  ypos 2357
+ }
+set Nbb065c00 [stack 0]
+ PostageStamp {
+  name BRUSHES_MAP
+  note_font "Verdana Bold"
+  xpos -149
+  ypos 3374
+  hide_input true
+ }
+push $Na688a000
+ PostageStamp {
+  name KWH_RM
+  note_font "Verdana Bold"
+  xpos -149
+  ypos 3268
+  hide_input true
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 alpha
+  fromInput2 {{0} B}
+  mappings "4 rgba.alpha 0 0 rgba.alpha 0 3 rgba.alpha 0 0 rgba.red 0 0 rgba.alpha 0 0 rgba.green 0 1 rgba.alpha 0 0 rgba.blue 0 2"
+  name Shuffle2
+  label "\[value in1]"
+  xpos -149
+  ypos 3292
+ }
+push $N650d0400
+ PostageStamp {
+  name beauty1
+  note_font "Verdana Bold"
+  xpos -160
+  ypos 2922
+  hide_input true
+ }
+set Nb7958c00 [stack 0]
+ Dot {
+  name Dot14
+  xpos -521
+  ypos 2925
+ }
+set Nb7959000 [stack 0]
+ Dot {
+  name Dot25
+  xpos -651
+  ypos 2925
+ }
+set Nb7959400 [stack 0]
+ Dot {
+  name Dot27
+  xpos -795
+  ypos 2925
+ }
+add_layer {CryptoPrimvar_part CryptoPrimvar_part.red CryptoPrimvar_part.green CryptoPrimvar_part.blue}
+add_layer {CryptoPrimvar_part00 CryptoPrimvar_part00.red CryptoPrimvar_part00.green CryptoPrimvar_part00.blue CryptoPrimvar_part00.alpha}
+add_layer {CryptoPrimvar_part01 CryptoPrimvar_part01.red CryptoPrimvar_part01.green CryptoPrimvar_part01.blue CryptoPrimvar_part01.alpha}
+add_layer {CryptoPrimvar_part02 CryptoPrimvar_part02.red CryptoPrimvar_part02.green CryptoPrimvar_part02.blue CryptoPrimvar_part02.alpha}
+ Remove {
+  operation keep
+  channels CryptoPrimvar_part
+  channels2 CryptoPrimvar_part00
+  channels3 CryptoPrimvar_part01
+  channels4 CryptoPrimvar_part02
+  name Remove3
+  xpos -829
+  ypos 3047
+ }
+ Dot {
+  name Dot28
+  xpos -795
+  ypos 3228
+ }
+push $Nb7959400
+add_layer {CryptoPrimitives CryptoPrimitives.red CryptoPrimitives.green CryptoPrimitives.blue}
+add_layer {CryptoPrimitives00 CryptoPrimitives00.red CryptoPrimitives00.green CryptoPrimitives00.blue CryptoPrimitives00.alpha}
+add_layer {CryptoPrimitives01 CryptoPrimitives01.red CryptoPrimitives01.green CryptoPrimitives01.blue CryptoPrimitives01.alpha}
+add_layer {CryptoPrimitives02 CryptoPrimitives02.red CryptoPrimitives02.green CryptoPrimitives02.blue CryptoPrimitives02.alpha}
+ Remove {
+  operation keep
+  channels CryptoPrimitives
+  channels2 CryptoPrimitives00
+  channels3 CryptoPrimitives01
+  channels4 CryptoPrimitives02
+  name Remove2
+  xpos -685
+  ypos 3047
+ }
+ Dot {
+  name Dot29
+  xpos -651
+  ypos 3155
+ }
+push $Nb7959000
+add_layer {CryptoMaterials CryptoMaterials.red CryptoMaterials.green CryptoMaterials.blue}
+add_layer {CryptoMaterials00 CryptoMaterials00.red CryptoMaterials00.green CryptoMaterials00.blue CryptoMaterials00.alpha}
+add_layer {CryptoMaterials01 CryptoMaterials01.red CryptoMaterials01.green CryptoMaterials01.blue CryptoMaterials01.alpha}
+add_layer {CryptoMaterials02 CryptoMaterials02.red CryptoMaterials02.green CryptoMaterials02.blue CryptoMaterials02.alpha}
+ Remove {
+  operation keep
+  channels CryptoMaterials
+  channels2 CryptoMaterials00
+  channels3 CryptoMaterials01
+  channels4 CryptoMaterials02
+  name Remove1
+  xpos -555
+  ypos 3047
+ }
+ Copy {
+  inputs 2
+  from0 -rgba.alpha
+  to0 -rgba.alpha
+  channels all
+  metainput All
+  rangeinput All
+  name Copy2
+  xpos -555
+  ypos 3140
+ }
+ Copy {
+  inputs 2
+  from0 -rgba.alpha
+  to0 -rgba.alpha
+  channels all
+  metainput All
+  rangeinput All
+  name Copy3
+  xpos -555
+  ypos 3213
+ }
+ Input {
+  inputs 0
+  name mask
+  xpos 147
+  ypos 2846
+  number 1
+ }
+ Shuffle {
+  name FixEmpty
+  xpos 147
+  ypos 2878
+ }
+ Dot {
+  name Dot22
+  xpos 181
+  ypos 2925
+ }
+set Nbb2c6000 [stack 0]
+ Dot {
+  name Dot66
+  xpos 181
+  ypos 2972
+ }
+push $Nbb2c6000
+push $Nb7958c00
+push $Nbb065c00
+push $Nbf4c7800
+add_layer {disto01 disto01.x disto01.y disto01.z disto01.u disto01.v}
+ Shuffle2 {
+  inputs 2
+  fromInput1 {{1} B A}
+  out1 disto01
+  fromInput2 {{0} B A}
+  mappings "5 rgba.red 0 0 disto01.x 0 0 rgba.green 0 1 disto01.y 0 1 rgba.blue 0 2 disto01.z 0 2 black -1 -1 disto01.u 0 3 black -1 -1 disto01.v 0 4"
+  name Shuffle26
+  label "\[value in1]"
+  xpos 0
+  ypos 2348
+ }
+ Dot {
+  name Dot18
+  xpos 34
+  ypos 2438
+ }
+set Nbb2c6c00 [stack 0]
+ Dot {
+  name Dot19
+  xpos -50
+  ypos 2438
+ }
+ Dot {
+  name Dot20
+  xpos -50
+  ypos 2501
+ }
+push $Nbb2c6c00
+ IDistort {
+  uv disto01
+  uv_scale {{parent.brush_distort}}
+  invert_mask true
+  name IDistort1
+  xpos 0
+  ypos 2456
+ }
+ Shuffle2 {
+  inputs 2
+  fromInput1 {{0} B A}
+  in1 disto01
+  out1 disto01
+  fromInput2 {{0} B A}
+  mappings "5 disto01.x 0 0 disto01.x 0 0 disto01.y 0 1 disto01.y 0 1 disto01.z 0 2 disto01.z 0 2 black -1 -1 disto01.u 0 3 black -1 -1 disto01.v 0 4"
+  name Shuffle6
+  label "\[value in1]"
+  xpos 0
+  ypos 2492
+ }
+ IDistort {
+  uv disto01
+  uv_scale {{-parent.IDistort1.uv_scale}}
+  invert_mask true
+  name IDistort2
+  xpos 0
+  ypos 2528
+ }
+ Dissolve {
+  inputs 2+1
+  which 1
+  invert_mask {{!mask_invert}}
+  name Dissolve1
+  xpos 0
+  ypos 2916
+  disable {{"\[expr \{\[exists parent.input1] ? 0 : 1\}]"}}
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value {{!mask_premult}}
+  invert_mask {{!mask_invert}}
+  name Multiply21
+  xpos 0
+  ypos 2969
+  disable {{"\[expr \{\[exists parent.input1] ? 0 : 1\}]"}}
+ }
+ Copy {
+  inputs 2
+  from0 -rgba.alpha
+  to0 -rgba.alpha
+  channels all
+  metainput All
+  rangeinput All
+  name Copy5
+  xpos 0
+  ypos 3213
+ }
+ Switch {
+  inputs 3
+  which {{result}}
+  name Switch_RESULT
+  xpos 0
+  ypos 3374
+ }
+ Dot {
+  name Dot58
+  label OUT
+  note_font "Verdana Bold"
+  note_font_size 61
+  xpos 34
+  ypos 3434
+ }
+ Output {
+  name Output1
+  xpos 0
+  ypos 3524
+ }
+push $N650d0800
+ Dot {
+  name Dot33
+  xpos 269
+  ypos 290
+ }
+ Median {
+  size {{debug_median_size}}
+  ignore_top_line false
+  name Median_MASTER
+  xpos 235
+  ypos 434
+ }
+push $N650d0c00
+ Group {
+  name DeepFromDepth
+  tile_color 0x66ff
+  xpos -300
+  ypos 403
+  addUserKnob {20 User}
+  addUserKnob {41 in l z T Shuffle21.in}
+  addUserKnob {41 in2 l alpha T Shuffle21.in2}
+  addUserKnob {41 premult l premultiplied T DeepFromImage2.premult}
+  addUserKnob {1 FS_PROPERTY +HIDDEN}
+ }
+  Input {
+   inputs 0
+   name Input1
+   xpos -896
+   ypos 390
+  }
+  Shuffle {
+   in depth
+   in2 alpha
+   red blue
+   green blue
+   alpha alpha2
+   name Shuffle21
+   xpos -896
+   ypos 439
+  }
+  Shuffle {
+   red blue
+   green blue
+   out deep
+   name Shuffle28
+   xpos -896
+   ypos 499
+  }
+  DeepFromImage {
+   premult true
+   name DeepFromImage2
+   xpos -896
+   ypos 583
+  }
+  DeepExpression {
+   chans1 deep
+   rgba.alpha a
+   deep.front r==0?inf:r
+   deep.back g==0?inf:g
+   name DeepExpression1
+   xpos -896
+   ypos 643
+  }
+  Output {
+   name Output1
+   xpos -896
+   ypos 718
+  }
+ end_group
+ Group {
+  name PxF_DeepDefocus
+  help "Defocus a deep image by cutting it into multiple depth slices and defocusing each slice separately.\n\nThis enables background objects to be revealed properly when foreground objects become transparent from the defocus.\n\nRequires a Deep image on input.\n\nOutputs a non-Deep RGBA image."
+  onCreate "m = nuke.thisNode\nfl = nuke.toNode('Flare1')\n\nfl\['position'].setEnabled(False)"
+  knobChanged "m = nuke.thisNode()\nkc = nuke.thisKnob()\n\n#Check if running in Non Commercial\nncCheck = False\nif nuke.env\['nc'] or nuke.env\['indie']:\n  ncCheck = True\n\n\n#Autofocus picker\nif kc.name() in \['autofocus']:\n  mp = nuke.toNode('Shuffle1')\n  px = m\['autofocus'].value(0)\n  py = m\['autofocus'].value(1)\n  dp = mp.sample(\"red\", px, py)\n  m\['focalDistance'].setValue(dp)\n\n\n#Auto deep slices\n\nif kc.name() in \['auto_deep_slices']:                                                         #If Auto Slices changed...\n  autoSlices = m\['auto_deep_slices'].value()                                                  #... et the value of Auto Slices\n  toggleKnobs = \['deepSlices', 'znear', 'zfar', 'nearPick', 'farPick', 'inclNear', 'inclFar'] #... list of knobs\n  if ncCheck:\n    for kb in toggleKnobs:\n      m\[kb].setEnabled(False)\n  else: # not in NC mode\n    for kb in toggleKnobs:\n      if autoSlices:\n        m\[kb].setEnabled(False)\n      else:\n        m\[kb].setEnabled(True)\n        \n            \n#DeepSlices near picker \nif kc.name() in \['nearPick']:\n  mp = nuke.toNode('Shuffle1')\n  px = m\['nearPick'].value(0)\n  py = m\['nearPick'].value(1)\n  dp = mp.sample(\"red\", px, py)\n  m\['znear'].setValue(dp)\n\n#DeepSlices far picker\nif kc.name() in \['farPick']:\n  mp = nuke.toNode('Shuffle1')\n  px = m\['farPick'].value(0)\n  py = m\['farPick'].value(1)\n  dp = mp.sample(\"red\", px, py)\n  m\['zfar'].setValue(dp)\n\n\n\n#Convert resolution to integer for expression to pick up   \nif kc.name() in \['resolution']:\n  rz = int(m\['resolution'].getValue())\n  m\['truescale'].setValue(rz)\n  \n  \n#Disable layer knobs if autoLayerSpacing is on\nif kc.name() in \['auto_layer_spacing']:\n  autoLayerSpacing = m\['auto_layer_spacing'].value()\n  if autoLayerSpacing:\n    m\['depth_layers'].setEnabled(False)\n    m\['layer_curve'].setEnabled(False)\n  else:\n    m\['depth_layers'].setEnabled(True)\n    m\['layer_curve'].setEnabled(True)\n\n\n#Prevent user from having less than 1 layer and more than 256 (Foundry limit)\nif kc.name() in \['depth_layers']:\n  depthLayers = m\['depth_layers'].value()\n  if depthLayers < 1:\n    m\['depth_layers'].setValue(1)\n  if depthLayers > 256:\n    m\['depth_layers'].setValue(256)\n\n\n\n\n\n#Switch unit multiplier\nif kc.name() in \['units']:\n  no = nuke.toNode('NoOp1')\n  conv = \[10.0,1.0,0.1,0.01,0.00001,1/2.54,1/30.48,1/91.44,1.0]\n  unit = m\['units'].getValue()\n  no\['unitMult'].setValue(conv\[int(unit)])\n\n\n\n#Turn on/off lensSim knobs when enableSim is toggled    \nif kc.name() in \['enableSim']:\n  kl = \['units', 'filmBack', 'focalLength','fStop', 'pickCamera', 'inclFStop']  \n  if m\['enableSim'].value() == 1:\n    m\['size'].setEnabled(False)\n    for x in kl:\n      m\[x].setEnabled(True)       \n  else:\n    m\['size'].setEnabled(True)\n    for x in kl:\n      m\[x].setEnabled(False)\n\n\n    \n    \n#Loop through all ZDefocus nodes and switch filter modes\nif kc.name() in \['filter']:\n  ft = m\['filter'].value()\n  for zd in nuke.allNodes():\n    if zd.Class() == 'ZDefocus2':  \n      if ft == 'gaussian':\n        zd\['filter_type'].setValue('disc')\n        zd\['shape'].setValue(0)\n      elif ft == 'defocus':\n        zd\['filter_type'].setValue('disc')\n        zd\['shape'].setValue(1)\n      elif ft == 'bokeh':\n        zd\['filter_type'].setValue('image')\n        \n\n\n\n  \n\n \n#Prevent users from having less than 2 slices\nif kc.name() == 'deepSlices':\n  if m\['deepSlices'].value() < 2:\n    m\['deepSlices'].setValue(2)\n    \n    \n#Prevent users from going out of bounds with single slice\nif kc.name() == 'singleSliceIdx':\n  singleVal = m\['singleSliceIdx'].value()\n  if m\['auto_deep_slices'].value() == 1:\n    deepSlices = 2\n  else:\n    deepSlices = m\['deepSlices'].value()\n  if singleVal < 1:\n    m\['singleSliceIdx'].setValue(1)\n  if singleVal > deepSlices:\n    m\['singleSliceIdx'].setValue(deepSlices)\n\n#Turn off the warning message once the user touches anything in the deepSlices    \n#if kc.name() in \['deepSlices', 'znear', 'zfar','nearPick', 'farPick']:\n#   m\['warn'].setVisible(False)\n   \n#Get merge node operation knob index when user picks mergeOperation\nif kc.name() == 'mergeOperation':\n  mergeOps = \{'conjoint-over':4, 'disjoint-over':7, 'min':18, 'max':17, 'over':22, 'plus':24, 'screen':25\}\n  m\['mergeOpIndex'].setValue(mergeOps\[m\['mergeOperation'].value()])\n  \nif kc.name() == 'doubleMergeOperation':\n  mergeOps = \{'conjoint-over':4, 'disjoint-over':7, 'min':18, 'max':17, 'over':22, 'plus':24, 'screen':25\}\n  m\['doubleMergeOpIndex'].setValue(mergeOps\[m\['doubleMergeOperation'].value()])\n\n    \n#MAIN LOOP\n#Check which knob was touched\n\n\n\nif ncCheck == False:\n  if kc.name() in \['auto_deep_slices', 'deepSlices', 'inclNear', 'inclFar','doubleSlices']:\n    i = nuke.toNode('DeepReformat1')\n    o = nuke.toNode('Switch5')\n    noOp = nuke.toNode('NoOp1')\n    swSingle = nuke.toNode('switchSingle')\n    near = noOp\['znear'].value()\n    far = noOp\['zfar'].value()  \n    slices = int(noOp\['deepSlices'].value())\n    doubleSlices = m\['doubleSlices'].value()\n    mergeOp = m\['mergeOperation'].value()\n  \n    def hex2float(h,i):\n      return float(int(h\[i*2:(i*2)+2],16))/255\n        \n    palette = \['1a5fb4','e01b24','33d17a','9141ac','f6d32d','986a44','deddda','ff7800',] \n    p = 0\n    lenp = len(palette)\n  \n    \n    \n    #Delete old nodes\n    for n in nuke.allNodes():\n        if \"static\" not in n\['label'].getValue():\n            nuke.delete(n)\n            \n    #Disconnect all inputs on switchSingle node        \n    for ipt in range(0, swSingle.maxInputs()):\n\t     swSingle.setInput(ipt, None)\n    \n    #Create new nodes\n    \n    for x in range(1,slices+1,1):\n  \n      #If doubleSlices is turned on, do the loop twice\n      for offset in range(0,doubleSlices+1,1):\n        \n        #Create crops with DeepExpressions\n        dc = nuke.nodes.DeepExpression()\n        dc\['selected'].setValue(False)\n        dc.addKnob(nuke.Double_Knob('znear','znear'))\n        dc.addKnob(nuke.Double_Knob('zfar','zfar'))\n        if offset == 0:\n          dc\['zfar'].setExpression(\"NoOp1.zfar-(((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)*\"+str(x-1)+\")\")\n          dc\['label'].setValue(\"\[value zfar] to \[value znear]\")\n        if offset == 1:\n          dc\['zfar'].setExpression(\"NoOp1.zfar-(((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)*\"+str(x-1)+\")+((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices/2)\")\n          dc\['label'].setValue(\"\[value zfar] to \[value znear]\\noffset slice\")\n        dc\['znear'].setExpression(\"zfar - ((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)\")      \n        dc\['temp_name0'].setValue(\"dpcheck\")\n        incnear = noOp\['inclNear'].getValue()\n        incfar = noOp\['inclFar'].getValue()\n        if x == 1 and incfar:\n          dc\['temp_expr0'].setValue(\"deep.front >= znear\")\n        elif x == slices and incnear:\n          dc\['temp_expr0'].setValue(\"deep.front < zfar\")\n        else:\n          dc\['temp_expr0'].setValue(\"deep.front >= znear && deep.front < zfar\")\n        for y in \['rgba.red','rgba.green','rgba.blue','rgba.alpha','deep.front','deep.back']:\n          dc\[y].setValue(\"dpcheck ? \"+y+\":0\")\n        dc.setInput(0,i)\n    \n        #Create DeeptoImage\n        dt = nuke.nodes.DeepToImage()\n        dt\['selected'].setValue(False)\n        dt.setInput(0,dc)\n        if offset == 1:\n          dt\['label'].setValue('offset slice')\n          \n        #Premult deep layer\n        pm = nuke.nodes.Premult()\n        pm.setInput(0, dt)\n        pm\['channels'].setValue('deep')\n        pm\['disable'].setExpression('parent.inpaint ? 0 : 1')\n        \n        up = nuke.nodes.Unpremult()\n        up.setInput(0, pm)\n        up\['channels'].setValue('deep')\n        up\['disable'].setExpression('parent.inpaint ? 0 : 1')\n        \n        ip = nuke.nodes.Inpaint2()\n        ip.setInput(0, up)\n        ip\['channels'].setValue('deep')\n        ip\['fillRegion'].setValue(\"Source Inverted Alpha\")\n        ip\['disable'].setExpression('parent.inpaint ? 0 : 1')\n    \n        #Create ZDefocus    \n        zd = nuke.nodes.ZDefocus2()\n        zd\['selected'].setValue(False)\n        zd.setInput(0,ip)\n        zd.setInput(1,nuke.toNode('Reformat32'))\n        zd\['useGPUIfAvailable'].setExpression('parent.useGPU')\n        zd\['z_channel'].setValue('deep.front')\n        zd\['math'].setValue('depth')\n        zd\['center'].setExpression('parent.focalDistance')\n        zd\['size'].setExpression('parent.enableSim ? NoOp1.defoAtInfinity * \[value parent.truescale] : parent.size * \[value parent.truescale]')\n        zd\['legacy_resize_mode'].setValue(0)\n        zd\['blur_dof'].setValue(False)\n        zd\['max_size'].setExpression('parent.maxSize * \[value parent.truescale]')\n        zd\['autoLayerSpacing'].setExpression('parent.auto_layer_spacing')\n        zd\['layers'].setExpression('parent.auto_layer_spacing ? 50 : parent.depth_layers')\n        zd\['layerCurve'].setExpression('parent.auto_layer_spacing ? 1 : parent.layer_curve')\n        zd\['aspect'].setExpression('parent.aspect')\n        zd\['disable'].setExpression('NoOp1.disableDefocus')\n        zd\['use_input_channels'].setExpression('parent.filterChannel')\n        if offset == 1:\n          zd\['label'].setValue('offset slice')\n        filter = m\['filter'].getValue()\n        if filter == 0:\n          zd\['filter_type'].setValue('disc')\n          zd\['shape'].setValue(0)\n        elif filter == 1:\n          zd\['filter_type'].setValue('disc')\n          zd\['shape'].setValue(1)\n        elif filter == 2:\n          zd\['filter_type'].setValue('image')\n  \n  \n        #Create copy/premult for missing alpha for ZDefocus layers / focal plane\n        cp = nuke.nodes.Copy()\n        cp.setInput(0,zd)\n        cp.setInput(1,ip)\n        cp\['from0'].setValue(\"rgba.alpha\")\n        cp\['to0'].setValue(\"rgba.alpha\")\n        cp\['disable'].setExpression(\"parent.view_type == 2 || parent.view_type == 3 ? 0 : 1\")\n        \n        pm2 = nuke.nodes.Premult()\n        pm2.setInput(0,cp)\n        pm2\['disable'].setExpression(\"parent.view_type == 2 || parent.view_type == 3 ? 0 : 1\")\n        \n        #Create random slice colors\n        cc = nuke.nodes.ColorCorrect()\n        cc\['selected'].setValue(False)\n        cc.setInput(0,pm2)\n        cc\['saturation'].setValue(0)\n        cc\['gain'].setSingleValue(False)\n        cc\['disable'].setExpression(\"parent.view_type == 1 ? 0 : 1\")  #Enable CC if 'Deep Slices' is selected\n        for c in range(0,3,1):\n          cc\['gain'].setValue(hex2float(palette\[p%lenp],c),c)\n\n\n        swSingle.setInput(x,cc)\n  \n        if offset == 0:\n          p = p+1\n  \n        \n        \n        if x == 1.0:\n          if offset == 0:\n            prevMg = cc\n          if offset == 1:\n            prevMgOffset = cc\n          \n          \n        #Create Merges\n        if x > 1:\n          mg = nuke.nodes.Merge2()\n          mg\['selected'].setValue(False)\n          mg\['operation'].setExpression('parent.mergeOpIndex')\n          mg.setInput(1,cc)\n          if offset == 0:\n            mg.setInput(0,prevMg)\n            prevMg = mg\n          if offset == 1:\n            mg.setInput(0,prevMgOffset)\n            prevMgOffset = mg\n      \n  \n  \n        \n      #Connect last merge to output      \n      if x == slices:\n        \n        if offset == 1:\n          mg2 = nuke.nodes.Merge2()\n          mg2\['selected'].setValue(False)\n          mg2\['operation'].setExpression('parent.doubleMergeOpIndex')\n          mg2.setInput(0,prevMg)\n          mg2.setInput(1,prevMgOffset)\n          o.setInput(0,mg2)\n        if offset == 0:\n          o.setInput(0,mg)\n        \n    \n      \n#Loop through all ZDefocus nodes and switch output mode\nif kc.name() in \['view_type', 'auto_deep_slices', 'deepSlices', 'inclNear', 'inclFar', 'doubleSlices']:\n  viewType = m\['view_type'].value()\n  for zd in nuke.allNodes():\n    if zd.Class() == 'ZDefocus2':\n      if viewType == 'ZDefocus layers':\n        zd\['output'].setValue('layer setup')\n      elif viewType == 'Focal plane':\n        zd\['output'].setValue('focal plane setup')\n      else:\n        zd\['output'].setValue('result')   \n  \n    \n    \n      \n    \n    \n\n    "
+  updateUI "tn = nuke.thisNode()\n\nncCheck = False\nif nuke.env\['nc'] or nuke.env\['indie']:\n  ncCheck = True\n  \ntoggleKnobs = \['auto_deep_slices', 'deepSlices', 'inclNear', 'inclFar','doubleSlices', 'doubleMergeOperation']\nautoSlices = tn\['auto_deep_slices'].value()\n\nif ncCheck:                                     #If in NC mode...\n  tn\['nc_warning'].setVisible(True)             # ... warn user\n  for kb in toggleKnobs:                        #... For every knob in list...\n    tn\[kb].setEnabled(False)                    #... disable them.\nelse:                                           #If NOT in NC mode...\n  tn\['nc_warning'].setVisible(False)            #... turn off warning\n  if autoSlices:                                #... If autoSlices is ON...\n    tn\['auto_deep_slices'].setEnabled(True)     #... enable Auto Slices\n  else:                                         #If autoSlices is OFF and NOT in NC mode...\n    for kb in toggleKnobs:                      #... for every knob in the list...\n      tn\[kb].setEnabled(True)                   #... turn them on.\n\n\n\n"
+  tile_color 0x733520ff
+  xpos -300
+  ypos 443
+  addUserKnob {20 PxF_DeepDefocus}
+  addUserKnob {26 warn l "" t "Make sure to adjust the number of Deep Slices and the znear and zfar parameters in the DeepSlices tab." +STARTLINE +HIDDEN T "<font color='red'>Please adjust DeepSlices!</font>"}
+  addUserKnob {4 filter t "Which kind of kernel to apply.\n\nGaussian: Gaussian blur, similar to \"Blur\" node. (Does not simulate \"real\" defocus).\n\nDefocus: Similar to Defocus node. Simulates a lens with a perfectly round aperture.\n\nBokeh: Similar to Convolve node. Use knobs in the Bokeh tab to customize the shape of the aperture (bokeh) or provide your own custom bokeh image with the 'bokeh' input. \n\nFor best results make sure to reformat your bokeh image to 255x255 pixels." M {gaussian defocus bokeh "" "" "" "" "" "" "" "" "" "" "" "" "" ""}}
+  filter bokeh
+  addUserKnob {6 useGPU l "use GPU if available" t "Enable GPU rendering on the built-in ZDefocus nodes." +STARTLINE}
+  useGPU true
+  addUserKnob {4 resolution t "Use lower resolutions for faster rendering." M {1:1 1:2 1:4 1:8 "" "" "" ""}}
+  addUserKnob {4 truescale l "" -STARTLINE +INVISIBLE M {1.0 0.5 0.25 0.125 ""}}
+  addUserKnob {12 autofocus t "Use the autofocus widget in the Viewer to pick the focus plane (i.e. which area is sharp/in focus).\n\n(Make sure your Viewer resolution is set to 1:1.)" +INVISIBLE}
+  autofocus {341 158}
+  addUserKnob {7 focalDistance l "focus plane" t "How far, in front of the camera, is the sharp/'in focus' area. (In real world units).\n\nUse the 'autofocus' widget to pick this value automatically in the Viewer." R 0 10000}
+  focalDistance inf
+  addUserKnob {7 size t "The 'amount' of defocus at infinity (in pixels).\n\nObjects close to camera might be more defocused than this.\n\nNot used if lens simulation is 'on'." R 1 300}
+  size 10
+  addUserKnob {7 maxSize l "max size" t "Maximum size of defocus, in pixels.\nUse this to prevent huge defocus values when objects are really close to camera." R 0 500}
+  maxSize 100
+  addUserKnob {7 aspect t "Aspect ratio of the bokeh. Use this to simulate 'oval' bokeh from an anamorphic lens." R 0 4}
+  aspect 1
+  addUserKnob {7 mix t "Dissolve between the original (0) and the full effect (1)."}
+  mix 1
+  addUserKnob {6 preserve_bbox l "preserve bounding box" t "Preserve the bounding box of the original image.\n\nIf this is off, the image will be cropped to it's width/height to make processing faster." +STARTLINE}
+  addUserKnob {26 ""}
+  addUserKnob {26 nc_warning l "" +STARTLINE +HIDDEN T "<font size=2 color=#f7931e>Nuke Non-Commercial / Indie detected. Some features disabled due to Python limits.</font>"}
+  addUserKnob {26 Credits l "" t "PxF_DeepDefocus 1.1.1 - &copy; 2022-2024 - Xavier Bourque - pixelfudger.com \n\nPixelfudger gizmos are free to use for personal and commercial use as long as you leave the credit text intact in the gizmo's knobs and in the source files. " +STARTLINE T "<font size=2>PxF_DeepDefocus 1.1.1 - &copy; 2022-2024 - </font><a href=\"http://www.xavierbourque.com\"><font color=\"#bbbbbb\" size=2>Xavier Bourque</a></font> - <a href=\"http://www.pixelfudger.com\"><font color=\"#bbbbbb\" size=2>pixelfudger.com</a></font> - <a href=\"https://www.youtube.com/watch?v=hmXCtXeaNCw\"><font color=\"#bbbbbb\" size=2>Video Tutorial</a></font>"}
+  addUserKnob {20 DeepSlices}
+  addUserKnob {4 view_type l "view type" t "Result: the result of the defocus operation.\n\nDeep slices: Visualize deep slices by assigning a random color to each slice.\n\nZDefocus layers: Visualize the layers of the internal ZDefocus nodes.\n\nFocal plane: Visualize the focal plane of the internal ZDefocus nodes.\n\nGreen = sharp area.\nRed = out of focus area in front of the focus plane.\nBlue = out of focus area behind the focus plane.\n" M {Result "Deep slices" "ZDefocus layers" "Focal plane"}}
+  addUserKnob {6 singleSlice t "Visualize deep slices one at a time for troubleshooting." +STARTLINE}
+  addUserKnob {3 singleSliceIdx l "" t "Select which deep slice to visualize. Slice 1 is the farthest and higher numbers are closer to camera." -STARTLINE}
+  singleSliceIdx 1
+  addUserKnob {6 disableDefocus l "disable defocus" t "Turn off defocus to increase interactivity." +STARTLINE}
+  addUserKnob {26 ""}
+  addUserKnob {6 auto_deep_slices l "automatic deep slices" t "Mimic the behaviour of the Bokeh node by creating 2 deep slices. One slice starts at camera up to the focal plane, the other starts at the focal plane to infinity." +STARTLINE}
+  addUserKnob {3 deepSlices l "deep slices" t "How many deep crops to apply to the image before going through separate ZDefocus nodes.\n\nFor example, 10 slices will generate 10 deep crops and 10 defocus nodes internally (14 if 'fix artefacts' is turned on)."}
+  deepSlices 5
+  addUserKnob {7 znear l "Near Value (cm)" t "Starting point of the slices (how close to camera is the starting point).\n\nUse the nearPick widget in the Viewer to pick znear automatically." R 0 100}
+  znear 88.6008606
+  addUserKnob {12 nearPick l near t "Move the nearPick widget in the Viewer to pick the depth of znear.\n\n(Make sure your Viewer resolution set to 1:1)"}
+  nearPick {640 664}
+  addUserKnob {7 zfar l "Far Value (cm)" t "Ending point of the slices (how far from camera is the end point).\n\nUse the farPick widget in the Viewer to pick zfar automatically." R 0 100}
+  zfar 300
+  addUserKnob {12 farPick l far t "Move the farPick widget in the Viewer to pick the depth of zfar.\n\n(Make sure your Viewer resolution is set to 1:1)"}
+  farPick {610 734}
+  addUserKnob {6 inclNear l "include zero to znear" t "Force the first slice to start at zero distance from the camera." +STARTLINE}
+  inclNear true
+  addUserKnob {6 inclFar l "include zfar to infinity" t "Force the last slice to go to infinity." +STARTLINE}
+  inclFar true
+  addUserKnob {26 ""}
+  addUserKnob {4 mergeOperation t "Which merge operation to use when combining all the defocused slices together.\n\n'disjoint-over' is the default.\n\nYou can try alternative merge operations to minimize artefacts at joints between slices." M {conjoint-over disjoint-over min max over plus screen "" "" "" "" "" "" "" "" ""}}
+  mergeOperation disjoint-over
+  addUserKnob {3 mergeOpIndex -STARTLINE +INVISIBLE}
+  mergeOpIndex 7
+  addUserKnob {4 doubleMergeOperation l doubleMerge t "Use 'max' to get rid of dark edges at junctions between slices.\n\nUse 'min' to get rid of bright edges at junctions between slices." M {min max "" "" "" "" "" "" "" ""}}
+  doubleMergeOperation max
+  addUserKnob {3 doubleMergeOpIndex l "" -STARTLINE +INVISIBLE}
+  doubleMergeOpIndex 17
+  addUserKnob {6 doubleSlices l "fix artefacts (double slices)" t "Fix artefacts by rendering 2 sets of slices, offset by half a slice, then merging both sets together with a min or a max.\n\nTurn this on if you see dark/bright edges at the edge of slices.\n\nThis doubles the number of slices (slow!) so you may want to reduce the number of total slices." -STARTLINE}
+  addUserKnob {26 ""}
+  addUserKnob {6 auto_layer_spacing l "automatic layer spacing" t "Use the default layer spacing (layers=50, layer curve=1) for the internal ZDefocus nodes." +STARTLINE}
+  auto_layer_spacing true
+  addUserKnob {6 inpaint l "inpaint depth channel" t "Enables internal Inpaint nodes to extend the depth layers beyond the edges of objects to avoid edge artefacts in the defocus." -STARTLINE}
+  inpaint true
+  addUserKnob {3 depth_layers l "depth layers" t "Adjusts the amount of layers used by the internal ZDefocus nodes.\n\nLower values are faster to render but less precise. \n\nHigher values are slower to render but more precise.\n\nTry increasing this value if you see areas 'jump' from one layer to the other when animating a rack focus or moving the camera in/out.\n\nMaximum 256 layers." +DISABLED}
+  depth_layers 50
+  addUserKnob {7 layer_curve l "layer curve" t "0 = Even distribution of the slices.\n1 = More slices are concentrated near the focus plane." +DISABLED}
+  layer_curve 1
+  addUserKnob {20 lensSim l "Lens Simulation"}
+  addUserKnob {6 enableSim l "Enable Lens Simulation" t "Compute the amount of defocus using real world lens information. " -STARTLINE}
+  addUserKnob {4 units l "world scale" t "Specifies which real-world units are used in the deep image.\n\nThe values in the deep.front buffer of your deep image should represent how far each sample is from the camera in real world units." +DISABLED M {mm cm dm m km inch feet yards "" "" "" "" "" "" "" "" "" "" ""}}
+  units m
+  addUserKnob {7 focalLength l "focal length" t "Focal length of the lens in mm." +DISABLED R 0 300}
+  focalLength 50
+  addUserKnob {7 fStop t "Aperture of the lens in fStop." +DISABLED R 0 22}
+  fStop 1.4
+  addUserKnob {7 filmBack l "filmback width" t "Width of camera sensor in mm." +DISABLED R 0 70}
+  filmBack 36
+  addUserKnob {22 pickCamera l "pick camera" t "Get the focal length and filmback width from the currently selected camera." +DISABLED T "import nuke\n\ndef pickCamera():\n  tn = nuke.thisNode()\n  with nuke.root():\n    nds = nuke.selectedNodes()\n\n  if nds == \[]:\n    nuke.message('No nodes selected. Please select a Camera node.')\n    return\n  \n  for nd in nds:\n    if 'Camera' in nd.Class():\n      tn\['focalLength'].setValue(nd\['focal'].value())\n      tn\['filmBack'].setValue(nd\['haperture'].value())\n      if tn\['inclFStop'].value() == True:\n        tn\['fStop'].setValue(nd\['fstop'].value())\n      return\n    else:\n      nuke.message('Could not find a Camera in the selection.')\n      return\n    \npickCamera()" +STARTLINE}
+  addUserKnob {6 inclFStop l "include fStop" t "Use the value of the FStop knob when using 'pick camera'." -STARTLINE +DISABLED}
+  addUserKnob {20 Bokeh}
+  addUserKnob {6 viewKernel l viewBokeh t "View the image being used as the kernel when the filter mode is set to 'Bokeh'. Use this to see what you're doing when adjusting the kernel shape.\n\nDon't forget to turn it off when you're done!" +STARTLINE}
+  addUserKnob {26 "" l "@b;Colors"}
+  addUserKnob {7 ringWidth t "Thickness of the 'donut' around the edge of the kernel."}
+  ringWidth 0.25
+  addUserKnob {41 ring_color l "ring color" t "Color of the 'donut' around the edge of the kernel." T Flare1.ring_color}
+  addUserKnob {41 inner_color l "inner color" t "Color of the center of the kernel." T Flare1.inner_color}
+  addUserKnob {41 outer_falloff l "outer falloff" t "Falloff on the outer edge of the 'donut'." T Flare1.outer_falloff}
+  addUserKnob {41 inner_falloff l "inner falloff" t "Falloff on the inner edge of the 'donut'." T Flare1.inner_falloff}
+  addUserKnob {26 _1 l "@b;Shape"}
+  addUserKnob {41 corners t "How many 'blades' are in the iris." T Flare1.corners}
+  addUserKnob {41 flattening l "edge flattening" t "0 = round aperture (no blades).\n1 = flat edges between corners." T Flare1.flattening}
+  addUserKnob {41 sharpness l "corner sharpness" T Flare1.sharpness}
+  addUserKnob {41 corners_angle l angle t "Rotate the aperture." T Flare1.corners_angle}
+  addUserKnob {26 Noise l "@b;Noise"}
+  addUserKnob {6 enableNoise l enable t "Add noise to the bokeh." +STARTLINE}
+  enableNoise true
+  addUserKnob {7 noiseSize l size t "Size of the noise." R 0 50}
+  noiseSize 35
+  addUserKnob {7 noiseGain l gain t "Gain of the noise."}
+  noiseGain 0.85
+  addUserKnob {7 noiseGamma l gamma t "Gamma of the noise."}
+  noiseGamma 0.85
+  addUserKnob {7 noiseMix l mix t "Adjusts how much noise is present in the bokeh."}
+  noiseMix 0.33
+  addUserKnob {26 ChromaAb l "@b;Chroma Aberration"}
+  addUserKnob {6 chromaAbEnable l enable t "Enable chroma aberration on the bokeh.\n\nMake sure to set filter channels to rgb colour." +STARTLINE}
+  chromaAbEnable true
+  addUserKnob {7 chromaAbScale l scale t "Amount of chroma aberration on the bokeh. 1.0 = no chroma aberration."}
+  chromaAbScale 1.02
+  addUserKnob {26 ""}
+  addUserKnob {4 filterChannel l "filter channel" t "When using Bokeh mode, which channels to use from the bokeh image.\n\nrgb luma: Use the RGB luminance of the bokeh input to defocus all channels.\n\nrgb colour: Use the RGB channels to defocus RGB and RGB luminance to defocus the alpha." M {"rgb luminance" "rgb colour" "" "" "" "" "" ""}}
+  filterChannel "rgb colour"
+ }
+  Input {
+   inputs 0
+   name mask
+   label static
+   xpos 5550
+   ypos 1119
+   number 2
+  }
+  Input {
+   inputs 0
+   name deep
+   label static
+   xpos 2930
+   ypos -1885
+  }
+set N78325c00 [stack 0]
+  DeepToImage2 {
+   name DeepToImage7
+   label static
+   xpos 2710
+   ypos -1703
+  }
+set Ned524000 [stack 0]
+  Dot {
+   name Dot1
+   label static
+   note_font_size 22
+   xpos 2744
+   ypos 499
+  }
+set Ned524400 [stack 0]
+  Input {
+   inputs 0
+   name bokeh
+   label static
+   xpos 4030
+   ypos -1435
+   number 1
+  }
+  Keyer {
+   operation "luminance key"
+   name Keyer4
+   label static
+   xpos 4030
+   ypos -1333
+  }
+  Reformat {
+   type "to box"
+   box_width 255
+   box_height 255
+   box_fixed true
+   name Reformat3
+   label static
+   xpos 4030
+   ypos -1250
+  }
+  Reformat {
+   inputs 0
+   type "to box"
+   box_width 501
+   box_height 501
+   box_fixed true
+   name Reformat4
+   label static
+   xpos 4315
+   ypos -1476
+  }
+set Ned525800 [stack 0]
+  Noise {
+   size {{parent.noiseSize i}}
+   gain {{parent.noiseGain i}}
+   gamma {{parent.noiseGamma i}}
+   center {1440 810}
+   name Noise1
+   label static
+   xpos 4386
+   ypos -1430
+  }
+push $Ned525800
+  Flare {
+   position {{"250 * 1"} {"250 * 1"}}
+   radius {0 {"249 - (parent.ringWidth*249)"} 249}
+   inner_color 0.75
+   outer_falloff 0.35
+   inner_falloff 10
+   vis_in 0
+   vis_out 1
+   vis_mask_size 0
+   corners 8
+   flattening 0.9
+   sharpness 0.99
+   name Flare1
+   label static
+   xpos 4242
+   ypos -1418
+  }
+  Merge2 {
+   inputs 2
+   operation multiply
+   mix {{parent.noiseMix i}}
+   name Merge1
+   label static
+   xpos 4323
+   ypos -1351
+   disable {{parent.enableNoise?0:1 i}}
+  }
+  Shuffle {
+   alpha red
+   name Shuffle2
+   label static
+   xpos 4323
+   ypos -1306
+  }
+  TransformMasked {
+   channels {rgba.red -rgba.green -rgba.blue none}
+   scale {{parent.chromaAbScale}}
+   center {250.5 250.5}
+   name Transform1
+   label static
+   xpos 4323
+   ypos -1268
+   disable {{"parent.chromaAbEnable ? 0 : 1"}}
+  }
+  TransformMasked {
+   channels {-rgba.red -rgba.green rgba.blue none}
+   scale {{"1 / parent.chromaAbScale"}}
+   center {250.5 250.5}
+   name Transform2
+   label static
+   xpos 4323
+   ypos -1205
+   disable {{"parent.chromaAbEnable ? 0 : 1"}}
+  }
+  Reformat {
+   type "to box"
+   box_width 255
+   box_height 255
+   box_fixed true
+   scale 0.5
+   name Reformat1
+   label static
+   xpos 4323
+   ypos -1151
+  }
+  Switch {
+   inputs 2
+   which {{"\[exists parent.input1]"}}
+   name Switch3
+   label static
+   xpos 4232
+   ypos -1082
+  }
+set N6a09f900 [stack 0]
+  Dot {
+   name Dot4
+   label static
+   note_font_size 22
+   xpos 4284
+   ypos 764
+  }
+push $N78325c00
+  DeepReformat {
+   type scale
+   scale {{"\[value parent.truescale]"}}
+   pbb {{parent.preserve_bbox}}
+   name DeepReformat1
+   label static
+   xpos 2930
+   ypos -1822
+  }
+set N5f568c00 [stack 0]
+  DeepExpression {
+   temp_name0 dpcheck
+   temp_expr0 "deep.front < zfar"
+   chans1 deep
+   rgba.red "dpcheck ? rgba.red:0"
+   rgba.green "dpcheck ? rgba.green:0"
+   rgba.blue "dpcheck ? rgba.blue:0"
+   rgba.alpha "dpcheck ? rgba.alpha:0"
+   deep.front "dpcheck ? deep.front:0"
+   deep.back "dpcheck ? deep.back:0"
+   name DeepExpression5
+   label "\[value zfar] to \[value znear]"
+   addUserKnob {20 User}
+   addUserKnob {7 znear}
+   znear {{"zfar - ((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)"}}
+   addUserKnob {7 zfar}
+   zfar {{NoOp1.zfar-(((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)*4)}}
+  }
+  DeepToImage {
+   name DeepToImage5
+  }
+  Premult {
+   channels deep
+   name Premult9
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+  Unpremult {
+   channels deep
+   name Unpremult5
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+  Inpaint2 {
+   channels deep
+   fillRegion "Source Inverted Alpha"
+   name Inpaint5
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+set N5f7a2000 [stack 0]
+push $N6a09f900
+  Reformat {
+   type scale
+   scale {{parent.aspect} 1}
+   resize distort
+   name Reformat32
+   label static
+   xpos 4340
+   ypos -675
+  }
+set N5f7a2800 [stack 0]
+push $N5f7a2000
+  ZDefocus2 {
+   inputs 2
+   useGPUIfAvailable {{parent.useGPU}}
+   z_channel deep.front
+   math depth
+   center {{parent.focalDistance}}
+   blur_dof false
+   size {{"parent.enableSim ? NoOp1.defoAtInfinity * \[value parent.truescale] : parent.size * \[value parent.truescale]"}}
+   max_size {{"parent.maxSize * \[value parent.truescale]"}}
+   autoLayerSpacing {{parent.auto_layer_spacing}}
+   layers {{"parent.auto_layer_spacing ? 50 : parent.depth_layers"}}
+   layerCurve {{"parent.auto_layer_spacing ? 1 : parent.layer_curve"}}
+   filter_type image
+   legacy_resize_mode false
+   use_input_channels {{parent.filterChannel}}
+   aspect {{parent.aspect}}
+   name ZDefocus5
+   disable {{NoOp1.disableDefocus}}
+  }
+  Copy {
+   inputs 2
+   from0 rgba.alpha
+   to0 rgba.alpha
+   name Copy5
+   disable {{"parent.view_type == 2 || parent.view_type == 3 ? 0 : 1"}}
+  }
+  Premult {
+   name Premult10
+   disable {{"parent.view_type == 2 || parent.view_type == 3 ? 0 : 1"}}
+  }
+  ColorCorrect {
+   saturation 0
+   gain {0.9647058824 0.8274509804 0.1764705882 1}
+   name ColorCorrect5
+   disable {{"parent.view_type == 1 ? 0 : 1"}}
+  }
+set N5f7a3c00 [stack 0]
+push $N5f568c00
+  DeepExpression {
+   temp_name0 dpcheck
+   temp_expr0 "deep.front >= znear && deep.front < zfar"
+   chans1 deep
+   rgba.red "dpcheck ? rgba.red:0"
+   rgba.green "dpcheck ? rgba.green:0"
+   rgba.blue "dpcheck ? rgba.blue:0"
+   rgba.alpha "dpcheck ? rgba.alpha:0"
+   deep.front "dpcheck ? deep.front:0"
+   deep.back "dpcheck ? deep.back:0"
+   name DeepExpression4
+   label "\[value zfar] to \[value znear]"
+   addUserKnob {20 User}
+   addUserKnob {7 znear}
+   znear {{"zfar - ((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)"}}
+   addUserKnob {7 zfar}
+   zfar {{NoOp1.zfar-(((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)*3)}}
+  }
+  DeepToImage {
+   name DeepToImage4
+  }
+  Premult {
+   channels deep
+   name Premult7
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+  Unpremult {
+   channels deep
+   name Unpremult4
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+  Inpaint2 {
+   channels deep
+   fillRegion "Source Inverted Alpha"
+   name Inpaint4
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+set N5f5eb000 [stack 0]
+push $N5f7a2800
+push $N5f5eb000
+  ZDefocus2 {
+   inputs 2
+   useGPUIfAvailable {{parent.useGPU}}
+   z_channel deep.front
+   math depth
+   center {{parent.focalDistance}}
+   blur_dof false
+   size {{"parent.enableSim ? NoOp1.defoAtInfinity * \[value parent.truescale] : parent.size * \[value parent.truescale]"}}
+   max_size {{"parent.maxSize * \[value parent.truescale]"}}
+   autoLayerSpacing {{parent.auto_layer_spacing}}
+   layers {{"parent.auto_layer_spacing ? 50 : parent.depth_layers"}}
+   layerCurve {{"parent.auto_layer_spacing ? 1 : parent.layer_curve"}}
+   filter_type image
+   legacy_resize_mode false
+   use_input_channels {{parent.filterChannel}}
+   aspect {{parent.aspect}}
+   name ZDefocus4
+   disable {{NoOp1.disableDefocus}}
+  }
+  Copy {
+   inputs 2
+   from0 rgba.alpha
+   to0 rgba.alpha
+   name Copy4
+   disable {{"parent.view_type == 2 || parent.view_type == 3 ? 0 : 1"}}
+  }
+  Premult {
+   name Premult8
+   disable {{"parent.view_type == 2 || parent.view_type == 3 ? 0 : 1"}}
+  }
+  ColorCorrect {
+   saturation 0
+   gain {0.568627451 0.2549019608 0.6745098039 1}
+   name ColorCorrect4
+   disable {{"parent.view_type == 1 ? 0 : 1"}}
+  }
+set Nb75fe400 [stack 0]
+push $N5f568c00
+  DeepExpression {
+   temp_name0 dpcheck
+   temp_expr0 "deep.front >= znear && deep.front < zfar"
+   chans1 deep
+   rgba.red "dpcheck ? rgba.red:0"
+   rgba.green "dpcheck ? rgba.green:0"
+   rgba.blue "dpcheck ? rgba.blue:0"
+   rgba.alpha "dpcheck ? rgba.alpha:0"
+   deep.front "dpcheck ? deep.front:0"
+   deep.back "dpcheck ? deep.back:0"
+   name DeepExpression3
+   label "\[value zfar] to \[value znear]"
+   addUserKnob {20 User}
+   addUserKnob {7 znear}
+   znear {{"zfar - ((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)"}}
+   addUserKnob {7 zfar}
+   zfar {{NoOp1.zfar-(((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)*2)}}
+  }
+  DeepToImage {
+   name DeepToImage3
+  }
+  Premult {
+   channels deep
+   name Premult5
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+  Unpremult {
+   channels deep
+   name Unpremult3
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+  Inpaint2 {
+   channels deep
+   fillRegion "Source Inverted Alpha"
+   name Inpaint3
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+set Nb75ff800 [stack 0]
+push $N5f7a2800
+push $Nb75ff800
+  ZDefocus2 {
+   inputs 2
+   useGPUIfAvailable {{parent.useGPU}}
+   z_channel deep.front
+   math depth
+   center {{parent.focalDistance}}
+   blur_dof false
+   size {{"parent.enableSim ? NoOp1.defoAtInfinity * \[value parent.truescale] : parent.size * \[value parent.truescale]"}}
+   max_size {{"parent.maxSize * \[value parent.truescale]"}}
+   autoLayerSpacing {{parent.auto_layer_spacing}}
+   layers {{"parent.auto_layer_spacing ? 50 : parent.depth_layers"}}
+   layerCurve {{"parent.auto_layer_spacing ? 1 : parent.layer_curve"}}
+   filter_type image
+   legacy_resize_mode false
+   use_input_channels {{parent.filterChannel}}
+   aspect {{parent.aspect}}
+   name ZDefocus3
+   disable {{NoOp1.disableDefocus}}
+  }
+  Copy {
+   inputs 2
+   from0 rgba.alpha
+   to0 rgba.alpha
+   name Copy3
+   disable {{"parent.view_type == 2 || parent.view_type == 3 ? 0 : 1"}}
+  }
+  Premult {
+   name Premult6
+   disable {{"parent.view_type == 2 || parent.view_type == 3 ? 0 : 1"}}
+  }
+  ColorCorrect {
+   saturation 0
+   gain {0.2 0.8196078431 0.4784313725 1}
+   name ColorCorrect3
+   disable {{"parent.view_type == 1 ? 0 : 1"}}
+  }
+set Nba96ac00 [stack 0]
+push $N5f568c00
+  DeepExpression {
+   temp_name0 dpcheck
+   temp_expr0 "deep.front >= znear && deep.front < zfar"
+   chans1 deep
+   rgba.red "dpcheck ? rgba.red:0"
+   rgba.green "dpcheck ? rgba.green:0"
+   rgba.blue "dpcheck ? rgba.blue:0"
+   rgba.alpha "dpcheck ? rgba.alpha:0"
+   deep.front "dpcheck ? deep.front:0"
+   deep.back "dpcheck ? deep.back:0"
+   name DeepExpression2
+   label "\[value zfar] to \[value znear]"
+   addUserKnob {20 User}
+   addUserKnob {7 znear}
+   znear {{"zfar - ((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)"}}
+   addUserKnob {7 zfar}
+   zfar {{NoOp1.zfar-(((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)*1)}}
+  }
+  DeepToImage {
+   name DeepToImage2
+  }
+  Premult {
+   channels deep
+   name Premult3
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+  Unpremult {
+   channels deep
+   name Unpremult2
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+  Inpaint2 {
+   channels deep
+   fillRegion "Source Inverted Alpha"
+   name Inpaint2
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+set Nbf976000 [stack 0]
+push $N5f7a2800
+push $Nbf976000
+  ZDefocus2 {
+   inputs 2
+   useGPUIfAvailable {{parent.useGPU}}
+   z_channel deep.front
+   math depth
+   center {{parent.focalDistance}}
+   blur_dof false
+   size {{"parent.enableSim ? NoOp1.defoAtInfinity * \[value parent.truescale] : parent.size * \[value parent.truescale]"}}
+   max_size {{"parent.maxSize * \[value parent.truescale]"}}
+   autoLayerSpacing {{parent.auto_layer_spacing}}
+   layers {{"parent.auto_layer_spacing ? 50 : parent.depth_layers"}}
+   layerCurve {{"parent.auto_layer_spacing ? 1 : parent.layer_curve"}}
+   filter_type image
+   legacy_resize_mode false
+   use_input_channels {{parent.filterChannel}}
+   aspect {{parent.aspect}}
+   name ZDefocus2
+   disable {{NoOp1.disableDefocus}}
+  }
+  Copy {
+   inputs 2
+   from0 rgba.alpha
+   to0 rgba.alpha
+   name Copy2
+   disable {{"parent.view_type == 2 || parent.view_type == 3 ? 0 : 1"}}
+  }
+  Premult {
+   name Premult4
+   disable {{"parent.view_type == 2 || parent.view_type == 3 ? 0 : 1"}}
+  }
+  ColorCorrect {
+   saturation 0
+   gain {0.8784313725 0.1058823529 0.1411764706 1}
+   name ColorCorrect2
+   disable {{"parent.view_type == 1 ? 0 : 1"}}
+  }
+set Nbf977400 [stack 0]
+push $N5f568c00
+  DeepExpression {
+   temp_name0 dpcheck
+   temp_expr0 "deep.front >= znear"
+   chans1 deep
+   rgba.red "dpcheck ? rgba.red:0"
+   rgba.green "dpcheck ? rgba.green:0"
+   rgba.blue "dpcheck ? rgba.blue:0"
+   rgba.alpha "dpcheck ? rgba.alpha:0"
+   deep.front "dpcheck ? deep.front:0"
+   deep.back "dpcheck ? deep.back:0"
+   name DeepExpression1
+   label "\[value zfar] to \[value znear]"
+   addUserKnob {20 User}
+   addUserKnob {7 znear}
+   znear {{"zfar - ((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)"}}
+   addUserKnob {7 zfar}
+   zfar {{NoOp1.zfar-(((NoOp1.zfar-NoOp1.znear)/NoOp1.deepSlices)*0)}}
+  }
+  DeepToImage {
+   name DeepToImage1
+  }
+  Premult {
+   channels deep
+   name Premult1
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+  Unpremult {
+   channels deep
+   name Unpremult1
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+  Inpaint2 {
+   channels deep
+   fillRegion "Source Inverted Alpha"
+   name Inpaint1
+   disable {{"parent.inpaint ? 0 : 1"}}
+  }
+set Nbde50800 [stack 0]
+push $N5f7a2800
+push $Nbde50800
+  ZDefocus2 {
+   inputs 2
+   useGPUIfAvailable {{parent.useGPU}}
+   z_channel deep.front
+   math depth
+   center {{parent.focalDistance}}
+   blur_dof false
+   size {{"parent.enableSim ? NoOp1.defoAtInfinity * \[value parent.truescale] : parent.size * \[value parent.truescale]"}}
+   max_size {{"parent.maxSize * \[value parent.truescale]"}}
+   autoLayerSpacing {{parent.auto_layer_spacing}}
+   layers {{"parent.auto_layer_spacing ? 50 : parent.depth_layers"}}
+   layerCurve {{"parent.auto_layer_spacing ? 1 : parent.layer_curve"}}
+   filter_type image
+   legacy_resize_mode false
+   use_input_channels {{parent.filterChannel}}
+   aspect {{parent.aspect}}
+   name ZDefocus1
+   disable {{NoOp1.disableDefocus}}
+  }
+  Copy {
+   inputs 2
+   from0 rgba.alpha
+   to0 rgba.alpha
+   name Copy1
+   disable {{"parent.view_type == 2 || parent.view_type == 3 ? 0 : 1"}}
+  }
+  Premult {
+   name Premult2
+   disable {{"parent.view_type == 2 || parent.view_type == 3 ? 0 : 1"}}
+  }
+  ColorCorrect {
+   saturation 0
+   gain {0.1019607843 0.3725490196 0.7058823529 1}
+   name ColorCorrect1
+   disable {{"parent.view_type == 1 ? 0 : 1"}}
+  }
+set Nbde51c00 [stack 0]
+push 0
+  Switch {
+   inputs 6
+   which {{parent.singleSliceIdx}}
+   name switchSingle
+   label static
+   xpos 4728
+   ypos 289
+  }
+push $N5f7a3c00
+push $Nb75fe400
+push $Nba96ac00
+push $Nbf977400
+push $Nbde51c00
+  Merge2 {
+   inputs 2
+   operation {{parent.mergeOpIndex}}
+   name Merge2
+  }
+  Merge2 {
+   inputs 2
+   operation {{parent.mergeOpIndex}}
+   name Merge3
+  }
+  Merge2 {
+   inputs 2
+   operation {{parent.mergeOpIndex}}
+   name Merge4
+  }
+  Merge2 {
+   inputs 2
+   operation {{parent.mergeOpIndex}}
+   name Merge5
+  }
+  Switch {
+   inputs 2
+   which {{parent.singleSlice}}
+   name Switch5
+   label "static\nsingleSlices"
+   xpos 5330
+   ypos 624
+  }
+  Reformat {
+   type scale
+   scale {{"1 / \[value parent.truescale]"}}
+   pbb {{parent.preserve_bbox}}
+   name Reformat2
+   label static
+   xpos 5330
+   ypos 865
+  }
+  Switch {
+   inputs 2
+   which {{parent.viewKernel}}
+   name Switch2
+   label "static\nviewKernel"
+   xpos 5330
+   ypos 949
+  }
+  Keymix {
+   inputs 3
+   invertMask true
+   bbox B
+   name Keymix1
+   label static
+   xpos 5330
+   ypos 1172
+   disable {{"\[exists parent.input2] ? 0 : 1" x1 0}}
+  }
+push $Ned524400
+  Dissolve {
+   inputs 2
+   which {{parent.mix}}
+   name Dissolve1
+   label static
+   xpos 5330
+   ypos 1319
+  }
+  Output {
+   name Output1
+   label static
+   xpos 5330
+   ypos 1446
+  }
+push $N5f568c00
+  DeepToImage2 {
+   name DeepToImage12
+   label static
+   xpos 2820
+   ypos -1665
+  }
+  Dot {
+   name Dot2
+   label static
+   note_font_size 22
+   xpos 2854
+   ypos 434
+  }
+push $Ned524000
+  Shuffle {
+   in deep
+   green black
+   blue black
+   alpha black
+   name Shuffle1
+   label "static\nfor autofocus picker"
+   xpos 2533
+   ypos -1595
+  }
+  NoOp {
+   name NoOp1
+   label static
+   xpos 2533
+   ypos -1518
+   addUserKnob {20 User}
+   addUserKnob {7 unitMult}
+   unitMult 0.01
+   addUserKnob {7 focalDistanceCM}
+   focalDistanceCM {{"parent.focalDistance / unitMult"}}
+   addUserKnob {7 reallyFar}
+   reallyFar 10000000
+   addUserKnob {7 defoAtInfinity}
+   defoAtInfinity {{"((fabs((parent.focalLength/parent.fStop)*(((reallyFar-(focalDistanceCM*10))/reallyFar)*(parent.focalLength/((focalDistanceCM*10)-parent.focalLength))))) * (width/parent.filmBack) / 2)"}}
+   addUserKnob {6 autoSlices +STARTLINE}
+   autoSlices {{parent.auto_deep_slices}}
+   addUserKnob {3 deepSlices}
+   deepSlices {{"autoSlices ? 2 : parent.deepSlices"}}
+   addUserKnob {7 znear}
+   znear {{"autoSlices ? 0 : parent.znear"}}
+   addUserKnob {7 zfar}
+   zfar {{"autoSlices ? focalDistance * 2 : parent.zfar"}}
+   addUserKnob {6 inclNear +STARTLINE}
+   inclNear {{"autoSlices ? 1 : parent.inclNear"}}
+   addUserKnob {6 inclFar +STARTLINE}
+   inclFar {{"autoSlices ? 1 : parent.inclFar"}}
+   addUserKnob {6 disableDefocus +STARTLINE}
+   disableDefocus {{"parent.view_type == 1 ? 1 : parent.disableDefocus"}}
+  }
+ end_group
+ NoOp {
+  inputs 0
+  name near_far
+  xpos -447
+  ypos 440
+  addUserKnob {20 User}
+  addUserKnob {7 near R 0 2000}
+  near {{parent.PxF_DeepDefocus.znear}}
+  addUserKnob {7 far R 0 5000}
+  far {{parent.PxF_DeepDefocus.zfar}}
+  addUserKnob {7 near_force l near% R 0 100}
+  near_force {{near_percentage}}
+  addUserKnob {7 far_force l far% R 0 100}
+  far_force {{far_percentage}}
+ }
+push $N7aa93800
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push $N5f7eb000
+ Viewer {
+  inputs 10
+  frame 1029
+  frame_range 1001-1025
+  fps 25
+  input_number 9
+  colour_sample_bbox {-0.01354166679 0.4520833194 -0.01250000019 0.453125}
+  samplepoints {{-0.30078125 -0.1064453125}
+    }
+  viewerProcess "ACES 1.0 - SDR Video (sRGB - Display)"
+  input_process false
+  monitorOutNDISenderName "Nuke - susan_sandboxRendu_v008 - Viewer1"
+  monitorOutOutputTransform "ACES 1.0 - SDR Video (sRGB - Display)"
+  name Viewer1
+  xpos 3195
+  ypos 5759
+ }
+end_group

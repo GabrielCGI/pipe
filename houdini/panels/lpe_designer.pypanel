@@ -9,11 +9,11 @@
     <script><![CDATA[import lpe_designer
 import importlib
 
-importlib.reload(lpe_designer)
 
-
-def createInterface(reload=True):
-    return lpe_designer.createInterface()]]></script>
+def createInterface():
+    importlib.reload(lpe_designer)
+    return lpe_designer.createInterface()
+]]></script>
     <includeInPaneTabMenu menu_position="0" create_separator="false"/>
     <includeInToolbarMenu menu_position="208" create_separator="false"/>
     <help><![CDATA[]]></help>

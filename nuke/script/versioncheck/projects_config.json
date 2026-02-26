@@ -6,7 +6,10 @@
                 "13.1v5",
                 "15.1v5"
             ],
-            "bypass_resolution_mismatch": true
+            "bypass_mismatch": true,
+            "mismatch_list": [
+                "Resolution mismatch"
+            ]
         }
     ]
 }

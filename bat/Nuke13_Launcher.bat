@@ -23,6 +23,7 @@ REM === LANCEMENT ===
 "C:/Program Files/Nuke13.1v5/Nuke13.1.exe"
 REM DEBUG
 REM START "Nuke 13.1 Console" /WAIT cmd /K "C:/Program Files/Nuke13.1v5/Nuke13.1.exe" %* ^& EXIT
+PAUSE
 
 REM === FIN ===
 IF ERRORLEVEL 1 (

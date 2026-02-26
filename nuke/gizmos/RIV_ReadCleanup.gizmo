@@ -1,0 +1,722 @@
+#! C:/Program Files/Nuke15.1v5/nuke-15.1.5.dll -nx
+version 15.1 v5
+Gizmo {
+ tile_color 0x540054ff
+ note_font "Verdana Bold"
+ addUserKnob {20 CLEAN l CLEANUP}
+ addUserKnob {7 alpha_threshold l "Alpha Threshold" R 0 0.1}
+ alpha_threshold 0.005
+ addUserKnob {14 overscan_size l "Overscan (px)" R 0 100}
+ overscan_size {0 0}
+ addUserKnob {20 INFO_TAB l INFO}
+ addUserKnob {26 info_text l "" +STARTLINE T "info : tool built @ Illogic Studios for The Rivers.\n\n_____________________\n\nreleases: \nv0.1 : first release\nv0.2 : fixed Chara_Checker analyse"}
+}
+ BackdropNode {
+  inputs 0
+  name BackdropNode1
+  tile_color 0x585858ff
+  label ALBEDO
+  note_font_size 42
+  xpos -188
+  ypos 251
+  bdwidth 890
+  bdheight 454
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode2
+  tile_color 0x585858ff
+  label "FORMAT SECURITYs"
+  note_font_size 42
+  xpos -184
+  ypos -405
+  bdwidth 887
+  bdheight 636
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode3
+  tile_color 0x585858ff
+  label SHADERs
+  note_font_size 42
+  xpos -182
+  ypos -1064
+  bdwidth 887
+  bdheight 636
+ }
+ Input {
+  inputs 0
+  name Input1
+  xpos 540
+  ypos -1183
+ }
+set N5e8cf000 [stack 0]
+ Group {
+  name BBoxToFormat
+  onCreate "n = nuke.thisNode()\ninputFormat = n.knob(\"inputFormat\")\ninputBBox = n.knob(\"inputBBox\")\ncrop = nuke.toNode(\"Crop6\")\ncropb = crop.knob('box')\noutputBBox = n.knob('outputBBox')\noutputBBoxCenter = n.knob(\"outputBBoxCenter\")\n\ninputFormat.setFlag(0x0000000000008000)\ninputBBox.setFlag(0x0000000000008000)\ncropb.setFlag(0x0000000000008000)\noutputBBox.setFlag(0x0000000000008000)\noutputBBoxCenter.setFlag(0x0000000000008000)\n\nn = nuke.thisNode()\nn.knob(\"overscan\").setRange(0,400)\nn.knob(\"overscanPercent\").setRange(1,4)"
+  knobChanged "n = nuke.thisNode()\nk = nuke.thisKnob()\nif k.name() == \"overscanType\":\n    if n.knob(\"overscanType\").getValue() == 1:\n        n.knob(\"overscanPercent\").setVisible(True)\n        n.knob(\"overscan\").setVisible(False)\n    else:\n        n.knob(\"overscanPercent\").setVisible(False)\n        n.knob(\"overscan\").setVisible(True)"
+  tile_color 0xa57aaaff
+  note_font "Verdana Bold"
+  note_font_color 0xffffffff
+  xpos 540
+  ypos -1154
+  addUserKnob {20 CropBBox}
+  addUserKnob {4 type l Type +INVISIBLE M {"To Format" "To BBox"}}
+  addUserKnob {41 intersect T Crop6.intersect}
+  addUserKnob {6 blackOutside l "Black Outside" -STARTLINE}
+  addUserKnob {4 overscanType l "Overscan Type:" M {Pixels Percentage}}
+  addUserKnob {14 overscan l Overscan R 0 400}
+  overscan {{parent.overscan_size.w} {parent.overscan_size.h}}
+  addUserKnob {14 overscanPercent l "Overscan Percent" +HIDDEN R 1 4}
+  overscanPercent 1
+  addUserKnob {20 inputBbox l "BBox Data" n 1}
+  addUserKnob {15 inputFormat l "Input Format"}
+  inputFormat {0 0 {input.width} {input.height}}
+  addUserKnob {15 inputBBox l "Input BBox"}
+  inputBBox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+  addUserKnob {12 outputBBoxCenter l OutputBBoxCenter}
+  outputBBoxCenter {{OutputBBox1.outputBBoxCenter.w} {OutputBBox1.outputBBoxCenter.h}}
+  addUserKnob {15 outputBBox l "Output BBox"}
+  outputBBox {{OutputBBox1.OutputBBox} {OutputBBox1.OutputBBox} {OutputBBox1.OutputBBox} {OutputBBox1.OutputBBox}}
+  addUserKnob {20 endGroup n -1}
+  addUserKnob {20 info_1 l Info}
+  addUserKnob {26 creator l Creator: T "<b><big>Tony Lyons"}
+  addUserKnob {26 desc l Description: t "crop to inputformat\n\ndisplays values of input bbox" T CropBBox}
+  addUserKnob {26 ver l Version: T v02}
+ }
+  Input {
+   inputs 0
+   name Input
+   xpos 261
+   ypos 394
+  }
+  Dot {
+   name Dot2
+   note_font_size 41
+   xpos 295
+   ypos 462
+  }
+set N5e8cf800 [stack 0]
+  Dot {
+   name Dot1
+   note_font_size 41
+   xpos -160
+   ypos 462
+  }
+set N5e8cfc00 [stack 0]
+push $N5e8cf800
+  Crop {
+   box {{curve} {curve} {input.width} {input.height}}
+   crop {{parent.blackOutside}}
+   name Crop6
+   xpos 261
+   ypos 510
+   addUserKnob {20 User}
+   addUserKnob {22 cropToBbox l "Crop to Bounding Box" -STARTLINE T codeBBox()}
+  }
+set N6fe02000 [stack 0]
+  Remove {
+   operation keep
+   channels none
+   name Remove1
+   xpos 120
+   ypos 504
+  }
+set N6fe02400 [stack 0]
+  Transform {
+   scale {{parent.overscanPercent} {parent.overscanPercent}}
+   center {{input.bbox.r/2} {input.bbox.t/2}}
+   shutteroffset centred
+   name Transform1
+   xpos 120
+   ypos 555
+  }
+push $N6fe02400
+  AdjBBox {
+   numpixels {{parent.overscan} {parent.overscan}}
+   name AdjBBox1
+   xpos -5
+   ypos 510
+  }
+  Switch {
+   inputs 2
+   which {{overscanType}}
+   name Switch2
+   label "\[value which]"
+   xpos -5
+   ypos 549
+  }
+  Merge2 {
+   inputs 2
+   bbox intersection
+   Achannels {-rgba.red -rgba.green -rgba.blue rgba.alpha}
+   Bchannels {-rgba.red -rgba.green -rgba.blue rgba.alpha}
+   output {-rgba.red -rgba.green -rgba.blue rgba.alpha}
+   name Merge1
+   xpos -5
+   ypos 647
+   disable {{!parent.Crop6.intersect}}
+  }
+push $N5e8cfc00
+  CopyBBox {
+   inputs 2
+   name CopyBBox1
+   xpos -194
+   ypos 653
+  }
+  BlackOutside {
+   name BlackOutside1
+   xpos -194
+   ypos 692
+   disable {{!parent.blackOutside}}
+  }
+  Dot {
+   name Dot4
+   note_font_size 41
+   xpos -160
+   ypos 769
+  }
+push $N6fe02000
+  Switch {
+   inputs 2
+   which {{"overscanType == 0 ? overscan.w != 0 || overscan.h != 0 : overscanPercent.w != 1 || overscanPercent.h != 1 ? 1 : 0"}}
+   name Switch1
+   label "\[value which]"
+   xpos 261
+   ypos 759
+  }
+set N38e7f200 [stack 0]
+  Output {
+   name Output1
+   xpos 261
+   ypos 921
+  }
+push $N38e7f200
+  NoOp {
+   name OutputBBox1
+   xpos 378
+   ypos 821
+   addUserKnob {20 User}
+   addUserKnob {15 OutputBBox l "Output BBox"}
+   OutputBBox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+   addUserKnob {14 outputBBoxCenter l "Output BBox Center" R 0 100}
+   outputBBoxCenter {{OutputBBox.x+(OutputBBox.r-OutputBBox.x)/2} {OutputBBox.y+(OutputBBox.t-OutputBBox.y)/2}}
+  }
+ end_group
+set N38e54b00 [stack 0]
+ Expression {
+  temp_name0 security
+  temp_expr0 alpha_threshold
+  expr3 "alpha < security ? 0 : alpha"
+  name Expression_AlphaSecurity
+  note_font "Verdana Bold"
+  xpos 540
+  ypos -1125
+ }
+ Dot {
+  name Dot23
+  xpos 574
+  ypos -907
+ }
+set N6fe42c00 [stack 0]
+ Dot {
+  name Dot24
+  xpos 438
+  ypos -907
+ }
+set N6fe43000 [stack 0]
+ Dot {
+  name Dot25
+  xpos 304
+  ypos -907
+ }
+set N6fe43400 [stack 0]
+ Dot {
+  name Dot26
+  xpos 159
+  ypos -907
+ }
+add_layer {glossytransmission glossytransmission.red glossytransmission.green glossytransmission.blue glossytransmission.alpha}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 {glossytransmission.red glossytransmission.green glossytransmission.blue -glossytransmission.alpha}
+  fromInput2 {{0} B}
+  mappings "4 glossytransmission.red 0 0 rgba.red 0 0 glossytransmission.green 0 1 rgba.green 0 1 glossytransmission.blue 0 2 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuffle10
+  label "\[value in1]"
+  xpos 125
+  ypos -871
+ }
+ Dot {
+  name Dot27
+  label GlossyTransmission
+  xpos 159
+  ypos -806
+ }
+ Dot {
+  name Dot28
+  xpos 159
+  ypos -600
+ }
+push $N6fe43400
+add_layer {combineddiffuse combineddiffuse.red combineddiffuse.green combineddiffuse.blue}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 combineddiffuse
+  fromInput2 {{0} B}
+  mappings "4 combineddiffuse.red 0 0 rgba.red 0 0 combineddiffuse.green 0 1 rgba.green 0 1 combineddiffuse.blue 0 2 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuffle11
+  label "\[value in1]"
+  xpos 270
+  ypos -871
+ }
+ Dot {
+  name Dot29
+  label Diffuse
+  xpos 304
+  ypos -808
+ }
+ Dot {
+  name Dot30
+  xpos 304
+  ypos -653
+ }
+push $N6fe43000
+add_layer {combinedglossyreflection combinedglossyreflection.red combinedglossyreflection.green combinedglossyreflection.blue}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 combinedglossyreflection
+  fromInput2 {{0} B}
+  mappings "4 combinedglossyreflection.red 0 0 rgba.red 0 0 combinedglossyreflection.green 0 1 rgba.green 0 1 combinedglossyreflection.blue 0 2 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuffle12
+  label "\[value in1]"
+  xpos 404
+  ypos -871
+ }
+ Dot {
+  name Dot31
+  label GlossyRefflection
+  xpos 438
+  ypos -807
+ }
+ Dot {
+  name Dot32
+  xpos 438
+  ypos -697
+ }
+push $N6fe42c00
+add_layer {GlossyReflection GlossyReflection.red GlossyReflection.green GlossyReflection.blue}
+ Shuffle2 {
+  inputs 2
+  fromInput1 {{1} B A}
+  out1 GlossyReflection
+  fromInput2 {{0} B A}
+  mappings "3 rgba.red 0 0 GlossyReflection.red 0 0 rgba.green 0 1 GlossyReflection.green 0 1 rgba.blue 0 2 GlossyReflection.blue 0 2"
+  name Shuffle13
+  label "-> \[value out1]"
+  xpos 540
+  ypos -706
+ }
+add_layer {Diffuse Diffuse.red Diffuse.green Diffuse.blue}
+ Shuffle2 {
+  inputs 2
+  fromInput1 {{1} B A}
+  out1 Diffuse
+  fromInput2 {{0} B A}
+  mappings "3 rgba.red 0 0 Diffuse.red 0 0 rgba.green 0 1 Diffuse.green 0 1 rgba.blue 0 2 Diffuse.blue 0 2"
+  name Shuffle14
+  label "-> \[value out1]"
+  xpos 540
+  ypos -662
+ }
+add_layer {GlossyTransmit GlossyTransmit.red GlossyTransmit.green GlossyTransmit.blue GlossyTransmit.alpha}
+ Shuffle2 {
+  inputs 2
+  fromInput1 {{1} B A}
+  out1 GlossyTransmit
+  fromInput2 {{0} B A}
+  mappings "4 rgba.red 0 0 GlossyTransmit.red 0 0 rgba.green 0 1 GlossyTransmit.green 0 1 rgba.blue 0 2 GlossyTransmit.blue 0 2 black -1 -1 GlossyTransmit.alpha 0 3"
+  name Shuffle15
+  label "-> \[value out1]"
+  xpos 540
+  ypos -609
+ }
+ Remove {
+  channels combineddiffuse
+  channels2 combinedglossyreflection
+  channels3 glossytransmission
+  name Remove7
+  xpos 540
+  ypos -564
+ }
+add_layer {CryptoPrimvar_part CryptoPrimvar_part.red CryptoPrimvar_part.green CryptoPrimvar_part.blue}
+add_layer {CryptoPrimvar_part00 CryptoPrimvar_part00.red CryptoPrimvar_part00.green CryptoPrimvar_part00.blue CryptoPrimvar_part00.alpha}
+add_layer {CryptoPrimvar_part01 CryptoPrimvar_part01.red CryptoPrimvar_part01.green CryptoPrimvar_part01.blue CryptoPrimvar_part01.alpha}
+add_layer {CryptoPrimvar_part02 CryptoPrimvar_part02.red CryptoPrimvar_part02.green CryptoPrimvar_part02.blue CryptoPrimvar_part02.alpha}
+ Remove {
+  channels CryptoPrimvar_part
+  channels2 CryptoPrimvar_part00
+  channels3 CryptoPrimvar_part01
+  channels4 CryptoPrimvar_part02
+  name Remove8
+  xpos 540
+  ypos -324
+  disable {{"!\[expr \{\n    !(\n        \[value parent.CHARA_CHECKER.check_chip] ||\n        \[value parent.CHARA_CHECKER.check_twiggy] ||\n        \[value parent.CHARA_CHECKER.check_susan] ||\n        \[value parent.CHARA_CHECKER.check_bucky]\n    )\n\}]"}}
+ }
+set N6fe87000 [stack 0]
+ Dot {
+  name Dot1
+  xpos 354
+  ypos -315
+ }
+set N6fe87400 [stack 0]
+ Dot {
+  name Dot3
+  xpos 132
+  ypos -315
+ }
+set N6fe87800 [stack 0]
+ Dot {
+  name Dot4
+  xpos -66
+  ypos -315
+ }
+ Remove {
+  operation keep
+  channels CryptoPrimvar_part
+  channels2 CryptoPrimvar_part00
+  channels3 CryptoPrimvar_part01
+  channels4 CryptoPrimvar_part02
+  name Remove9
+  xpos -100
+  ypos -263
+ }
+ Reformat {
+  format "2048 858 0 0 2048 858 1 FORMAT_DELIVERY_1"
+  filter impulse
+  pbb true
+  name Reformat5
+  label "\[value type]"
+  xpos -100
+  ypos -227
+  disable true
+ }
+ Dot {
+  name Dot5
+  xpos -66
+  ypos 163
+ }
+push $N6fe87800
+add_layer {CryptoPrimitives CryptoPrimitives.red CryptoPrimitives.green CryptoPrimitives.blue}
+add_layer {CryptoPrimitives00 CryptoPrimitives00.red CryptoPrimitives00.green CryptoPrimitives00.blue CryptoPrimitives00.alpha}
+add_layer {CryptoPrimitives01 CryptoPrimitives01.red CryptoPrimitives01.green CryptoPrimitives01.blue CryptoPrimitives01.alpha}
+add_layer {CryptoPrimitives02 CryptoPrimitives02.red CryptoPrimitives02.green CryptoPrimitives02.blue CryptoPrimitives02.alpha}
+ Remove {
+  operation keep
+  channels CryptoPrimitives
+  channels2 CryptoPrimitives00
+  channels3 CryptoPrimitives01
+  channels4 CryptoPrimitives02
+  name Remove10
+  xpos 98
+  ypos -263
+ }
+ Reformat {
+  format "2048 858 0 0 2048 858 1 FORMAT_DELIVERY_1"
+  filter impulse
+  pbb true
+  name Reformat6
+  label "\[value type]"
+  xpos 98
+  ypos -227
+  disable true
+ }
+ Dot {
+  name Dot6
+  xpos 132
+  ypos 115
+ }
+push $N6fe87400
+add_layer {CryptoMaterials CryptoMaterials.red CryptoMaterials.green CryptoMaterials.blue}
+add_layer {CryptoMaterials00 CryptoMaterials00.red CryptoMaterials00.green CryptoMaterials00.blue CryptoMaterials00.alpha}
+add_layer {CryptoMaterials01 CryptoMaterials01.red CryptoMaterials01.green CryptoMaterials01.blue CryptoMaterials01.alpha}
+ Remove {
+  operation keep
+  channels CryptoMaterials
+  channels2 CryptoMaterials00
+  channels3 CryptoMaterials01
+  channels4 CryptoPrimitives02
+  name Remove11
+  xpos 320
+  ypos -264
+ }
+ Reformat {
+  format "2048 858 0 0 2048 858 1 FORMAT_DELIVERY_1"
+  filter impulse
+  pbb true
+  name Reformat7
+  label "\[value type]"
+  xpos 320
+  ypos -228
+  disable true
+ }
+ Dot {
+  name Dot7
+  xpos 354
+  ypos 67
+ }
+push $N6fe87000
+add_layer {depth_extra depth_extra.z depth_extra.depth}
+ Premult {
+  channels {-depth_extra.z depth_extra.depth}
+  name Premult1
+  xpos 540
+  ypos -288
+ }
+ Unpremult {
+  channels {-depth_extra.z depth_extra.depth}
+  name Unpremult3
+  xpos 540
+  ypos -252
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 depth_extra
+  out1 depth
+  fromInput2 {{0} B}
+  mappings "1 depth_extra.z 0 0 depth.Z 0 0"
+  name Shuffle4
+  label "\[value in1]"
+  xpos 540
+  ypos -212
+ }
+add_layer {uv_extra uv_extra.red uv_extra.green uv_extra.blue}
+ Premult {
+  channels uv_extra
+  name Premult2
+  xpos 540
+  ypos -176
+ }
+ Unpremult {
+  channels uv_extra
+  name Unpremult4
+  xpos 540
+  ypos -140
+ }
+add_layer {UV UV.u UV.v UV.red UV.green UV.blue UV.X UV.Y UV.Z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 uv_extra
+  out1 {UV.u UV.v UV.red UV.green UV.blue UV.X UV.Y UV.Z}
+  fromInput2 {{0} B}
+  mappings "8 uv_extra.red 0 0 UV.u 0 0 uv_extra.green 0 1 UV.v 0 1 black -1 -1 UV.red 0 2 black -1 -1 UV.green 0 3 black -1 -1 UV.blue 0 4 black -1 -1 UV.X 0 5 black -1 -1 UV.Y 0 6 black -1 -1 UV.Z 0 7"
+  name Shuffle5
+  label "\[value in1]"
+  xpos 540
+  ypos -104
+ }
+add_layer {diffuse_albedo diffuse_albedo.red diffuse_albedo.green diffuse_albedo.blue diffuse_albedo.alpha}
+ Remove {
+  channels depth_extra
+  channels2 combinedglossyreflection
+  channels3 diffuse_albedo
+  name Remove12
+  xpos 540
+  ypos -68
+ }
+ Remove {
+  channels uv_extra
+  name Remove13
+  xpos 540
+  ypos -32
+ }
+ Reformat {
+  format "2048 858 0 0 2048 858 1 FORMAT_DELIVERY_1"
+  pbb true
+  name Reformat8
+  label "\[value type]"
+  xpos 540
+  ypos 4
+  disable true
+ }
+ Copy {
+  inputs 2
+  from0 -rgba.alpha
+  to0 -rgba.alpha
+  channels all
+  name Copy1
+  xpos 540
+  ypos 52
+ }
+ Copy {
+  inputs 2
+  from0 -rgba.alpha
+  to0 -rgba.alpha
+  channels all
+  name Copy2
+  xpos 540
+  ypos 100
+ }
+ Copy {
+  inputs 2
+  from0 -rgba.alpha
+  to0 -rgba.alpha
+  channels all
+  name Copy6
+  xpos 540
+  ypos 148
+ }
+ Dot {
+  name Dot8
+  xpos 574
+  ypos 313
+ }
+set N6ff2a400 [stack 0]
+ Dot {
+  name Dot2
+  xpos 215
+  ypos 313
+ }
+ Dot {
+  name Dot191
+  xpos 215
+  ypos 378
+ }
+set N6ff2ac00 [stack 0]
+ Dot {
+  name Dot21
+  xpos 351
+  ypos 378
+ }
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0 0 0 0 734 811 735 812}
+  matteList "*body*\n*fur*"
+  unpremultiply true
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte11
+  xpos 317
+  ypos 423
+ }
+ Dot {
+  name Dot193
+  xpos 351
+  ypos 468
+ }
+push $N6ff2ac00
+add_layer {albedotransmitteddiffuse albedotransmitteddiffuse.red albedotransmitteddiffuse.green albedotransmitteddiffuse.blue}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 albedotransmitteddiffuse
+  out1 rgb
+  fromInput2 {{0} B}
+  mappings "3 albedotransmitteddiffuse.red 0 0 rgba.red 0 0 albedotransmitteddiffuse.green 0 1 rgba.green 0 1 albedotransmitteddiffuse.blue 0 2 rgba.blue 0 2"
+  name Shuffle35
+  label "\[value in1]"
+  xpos 181
+  ypos 415
+ }
+ Multiply {
+  inputs 1+1
+  value 0
+  name Multiply2
+  xpos 181
+  ypos 459
+ }
+push $N6ff2ac00
+ Dot {
+  name Dot20
+  xpos 83
+  ypos 378
+ }
+add_layer {customAlbedo customAlbedo.red customAlbedo.green customAlbedo.blue}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 customAlbedo
+  out1 rgb
+  fromInput2 {{0} B}
+  mappings "3 customAlbedo.red 0 0 rgba.red 0 0 customAlbedo.green 0 1 rgba.green 0 1 customAlbedo.blue 0 2 rgba.blue 0 2"
+  name Shuffle36
+  label "\[value in1]"
+  xpos 49
+  ypos 414
+ }
+ Dot {
+  name Dot192
+  xpos 83
+  ypos 510
+ }
+ Merge2 {
+  inputs 2
+  name Merge40
+  xpos 181
+  ypos 507
+ }
+ Dot {
+  name Dot19
+  xpos 215
+  ypos 592
+ }
+push $N6ff2a400
+add_layer {albedo albedo.red albedo.green albedo.blue}
+ Shuffle2 {
+  inputs 2
+  fromInput1 {{1} B A}
+  in1 rgb
+  out1 albedo
+  fromInput2 {{0} B A}
+  mappings "3 rgba.red 0 0 albedo.red 0 0 rgba.green 0 1 albedo.green 0 1 rgba.blue 0 2 albedo.blue 0 2"
+  name Shuffle3
+  xpos 540
+  ypos 589
+ }
+ Remove {
+  channels customAlbedo
+  channels2 albedotransmitteddiffuse
+  name Remove1
+  xpos 540
+  ypos 613
+ }
+ Crop {
+  box {{parent.Crop1.box.x} {parent.Crop1.box.y} {parent.Crop1.box.r} {parent.Crop1.box.t}}
+  reformat true
+  crop false
+  name Crop2
+  xpos 540
+  ypos 770
+ }
+ Output {
+  name Output1
+  xpos 540
+  ypos 815
+ }
+push $N38e54b00
+ Dot {
+  name Dot22
+  xpos 762
+  ypos -1151
+ }
+ Crop {
+  box {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+  reformat true
+  crop false
+  name Crop1
+  xpos 728
+  ypos 770
+ }
+push $N5e8cf000
+ NoOp {
+  name CHARA_CHECKER
+  xpos 396
+  ypos -1183
+  addUserKnob {20 User}
+  addUserKnob {6 check_chip +STARTLINE}
+  check_chip {{"\[python (False\\ if\\ not\\ nuke.thisNode().input(0)\\ else\\n\\ any((\\\"crypto\\\"\\ in\\ k.lower()\\ and\\ \\\"manifest\\\"\\ in\\ k.lower()\\ and\\ isinstance(v,\\ str)\\ and\\ \\\"chip\\\"\\ in\\ v.lower()\\ and\\ \\\"characters\\\"\\ in\\ v.lower())\\n\\ \\ \\ \\ \\ for\\ k,\\ v\\ in\\ nuke.thisNode().input(0).metadata().items()))\\n]"}}
+  addUserKnob {6 check_twiggy +STARTLINE}
+  check_twiggy {{"\[python (False\\ if\\ not\\ nuke.thisNode().input(0)\\ else\\n\\ any((\\\"crypto\\\"\\ in\\ k.lower()\\ and\\ \\\"manifest\\\"\\ in\\ k.lower()\\ and\\ isinstance(v,\\ str)\\ and\\ \\\"twiggy\\\"\\ in\\ v.lower()\\ and\\ \\\"characters\\\"\\ in\\ v.lower())\\n\\ \\ \\ \\ \\ for\\ k,\\ v\\ in\\ nuke.thisNode().input(0).metadata().items()))\\n]"}}
+  addUserKnob {6 check_susan +STARTLINE}
+  check_susan {{"\[python (False\\ if\\ not\\ nuke.thisNode().input(0)\\ else\\n\\ any((\\\"crypto\\\"\\ in\\ k.lower()\\ and\\ \\\"manifest\\\"\\ in\\ k.lower()\\ and\\ isinstance(v,\\ str)\\ and\\ \\\"susan\\\"\\ in\\ v.lower()\\ and\\ \\\"characters\\\"\\ in\\ v.lower())\\n\\ \\ \\ \\ \\ for\\ k,\\ v\\ in\\ nuke.thisNode().input(0).metadata().items()))\\n]"}}
+  addUserKnob {6 check_bucky +STARTLINE}
+  check_bucky {{"\[python (False\\ if\\ not\\ nuke.thisNode().input(0)\\ else\\n\\ any((\\\"crypto\\\"\\ in\\ k.lower()\\ and\\ \\\"manifest\\\"\\ in\\ k.lower()\\ and\\ isinstance(v,\\ str)\\ and\\ \\\"bucky\\\"\\ in\\ v.lower()\\ and\\ \\\"characters\\\"\\ in\\ v.lower())\\n\\ \\ \\ \\ \\ for\\ k,\\ v\\ in\\ nuke.thisNode().input(0).metadata().items()))\\n]"}}
+ }
+end_group

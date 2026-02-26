@@ -191,6 +191,17 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     ilgcSubTracker.addCommand("Retrack Every Nodes", "ilcg_scripts.retrack_every_nodes()")
     ilgcSubTracker.addCommand("Retrack Selected Nodes", "ilcg_scripts.retrack_selected_nodes()")
 
+    # Rivers menus
+    riversMenu: nuke.Menu = illogicMenu.addMenu("Rivers Tools")
+    riversMenu.addCommand('RIV_BringBackDetails', 'nuke.createNode("RIV_BringBackDetails")')
+    riversMenu.addCommand('RIV_EdgeCrushChar', 'nuke.createNode("RIV_EdgeCrushChar")')
+    riversMenu.addCommand('RIV_Kuwahara', 'nuke.createNode("RIV_Kuwahara")')
+    riversMenu.addCommand('RIV_ReadCleanup', 'nuke.createNode("RIV_ReadCleanup")')
+    riversMenu.addCommand('RIV_StylisedChar', 'nuke.createNode("RIV_StylisedChar")')
+    riversMenu.addCommand('RIV_ZDefocus', 'nuke.createNode("RIV_ZDefocus")')
+    riversMenu.addCommand('RIV_BrushScatter', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_BrushScatter.nk\")')
+    riversMenu.addCommand('RIV_ZDefocus_CHILD', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_ZDefocus_CHILD.nk\")')
+
     # Tools menus
     toolsMenu: nuke.Menu = illogicMenu.addMenu("Tools")
     toolsMenu.addCommand("Magnific upscale" , "nuke.nodePaste(\"R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/nukeToMagnific/nuke_magnific/Magnific.nk\")")
@@ -264,6 +275,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
         custom_config_path = "R:/pipeline/networkInstall/OpenColorIO-Configs/cg-config-v1.0.0_aces-v1.3_ocio-v2.0.ocio"
         os.environ["OCIO"] = custom_config_path
         print("FORCE OCIO IN INIT.PY TO: %s"%(custom_config_path))
+
         # Set the OCIO config to 'custom' mode
         nuke.root()['OCIO_config'].setValue('custom')
         # Set the path to the custom config

@@ -10,9 +10,8 @@
         {"HOUDINI_USE_HFS_OCL": 0},
         {"HOUDINI_OTLSCAN_PATH":"R:/pipeline/pipe/houdini/hda;"},
         {"HOUDINI_VIEWERSTATE_PATH": "R:/pipeline/pipe/houdini/viewer_states"},
+		{"HOUDINI_PYTHON_PANEL_PATH":"R:/pipeline/pipe/houdini/panels;"},
         {"PYTHONPATH":"R:/pipeline/pipe/houdini/scripts;"},
-		{"HOUDINI_PYTHON_PANEL_PATH":"R:/pipeline/pipe/houdini/panels;"}
+	    {"KARMA_XPU_OPTIX_SPARSE_TEXTURES": 1}
     ]
 }
-
-

@@ -40,7 +40,7 @@ class AnimLayoutTools(MultipleActionTool):
                 "row": 0
             }
         }
-        tooltip = "open Reference Updater"
+        tooltip = "tools for animator"
         super().__init__(
             name="Anim Layout Tools",
             pref_name="anim_layout_tools",
@@ -52,8 +52,8 @@ class AnimLayoutTools(MultipleActionTool):
 
     def startUI(self):
         try:
-            import referenceUpdater as refUp
-            reload(refUp)
+            import reference_updater
+            reload(reference_updater)
         except:
             traceback.print_exc()
             print("impossible de load refUpdater")
@@ -66,7 +66,7 @@ class AnimLayoutTools(MultipleActionTool):
 
             main_window_ptr = OpenMayaUI.MQtUtil.mainWindow()
             instance = wrapInstance(int(main_window_ptr), QWidget)
-            self.win = refUp.mainUI(self, "Maya", self.core.getCurrentFileName(), self.core.projectPath, False, False, instance)
+            self.win = reference_updater.mainUI(False, self.core, instance)
             self.win.show()
 
         except Exception as e:

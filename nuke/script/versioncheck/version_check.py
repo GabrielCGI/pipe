@@ -1,16 +1,16 @@
 from pathlib import Path
 import json
-import nuke
+import nuke # type: ignore
 import sys
 import os
 
 
 try:
     from PySide6 import QtWidgets
-except:
+except ImportError:
     try:
         from PySide2 import QtWidgets # type: ignore
-    except:
+    except ImportError:
         sys.exit(1)
 
 
@@ -32,10 +32,11 @@ def checkVersion(project_config=PROJECT_CONFIG):
         if prod_name != script_prod_name:
             continue
         allowed_version = p_data['allowed_version']
-        resolution_mismatch = p_data.get('bypass_resolution_mismatch', False)
+        resolution_mismatch = p_data.get('bypass_mismatch', False)
         if resolution_mismatch:
-            close_res_mismatch()
-        if not nuke.NUKE_VERSION_STRING in allowed_version:
+            mismatch_list = p_data.get("mismatch_list", [])
+            close_mismatch(mismatch_list)
+        if nuke.NUKE_VERSION_STRING not in allowed_version:
             close_unwanted_popups()
             nuke.scriptClose()
             msg = (
@@ -47,19 +48,21 @@ def checkVersion(project_config=PROJECT_CONFIG):
             print(msg)
 
 
-def close_res_mismatch():
+def close_mismatch(mismatch_list):
     app = QtWidgets.QApplication.instance()
-
+    if app is None:
+        return
     for widget in app.topLevelWidgets():
         if isinstance(widget, QtWidgets.QMessageBox):
             title = widget.windowTitle()
-            if title in ["Resolution mismatch", 'Framerange mismatch']:
+            if title in mismatch_list:
                 widget.done(0)
 
 
 def close_unwanted_popups():
     app = QtWidgets.QApplication.instance()
-
+    if app is None:
+        return
     for widget in app.topLevelWidgets():
         if isinstance(widget, QtWidgets.QMessageBox):
             title = widget.windowTitle()

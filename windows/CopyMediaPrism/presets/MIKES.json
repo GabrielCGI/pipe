@@ -1,0 +1,24 @@
+{
+    "filters": {
+        "ANIM": [
+            "anim",
+            "anim_playblast",
+            "playblast"
+        ],
+        "LAYOUT": [
+            "RoughtLayout",
+            "layout",
+            "Previz",
+            "RoughLayout_playblast"
+        ],
+        "COMPO": [
+            "beauty",
+            "compo",
+            "comp",
+            "slapComp"
+        ]
+    },
+    "source_path": "I:/mikes_2511",
+    "dest_path": "D:/cache_resolve/mikes_2511",
+    "production": "MIKES"
+}

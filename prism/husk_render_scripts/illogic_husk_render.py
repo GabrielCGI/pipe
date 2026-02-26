@@ -172,6 +172,8 @@ tilesY = settings.get("tilesY", 1)
 enableTiles = bool(int(settings.get("enable_tile", "0")))
 tiles_1 = settings.get("tiles_1", "1")
 tiles_2 = settings.get("tiles_2", "1")
+enableAutoCrop = settings.get("enable_autocrop", True)
+autocrop_aovs = settings.get("autocrop_aovs", "C,A,holdout_shadows")
 # END >>
 if useTiles:
     tileFrame = int(settings.get("startFrame", 1))
@@ -228,7 +230,6 @@ args = [
     renderSettings,
 #   "--windows-console",
 #    "wait",
-    "--autocrop", "C,A,holdout_shadows"
 ]
 
 if settings.get("legacyExrMode"):
@@ -251,6 +252,10 @@ if useTiles:
 elif enableTiles:
     args += ["--autotile"]
     args += ["--tile-count", tiles_1, tiles_2]
+# END >>
+# ILLOGIC_CUSTOM << - Enable autocrop
+if enableAutoCrop:
+    args += "--autocrop", autocrop_aovs
 # END >>
 
 print("command args: %s" % (args))

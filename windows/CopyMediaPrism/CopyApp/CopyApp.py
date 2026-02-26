@@ -10,8 +10,7 @@ from tkinter.scrolledtext import ScrolledText
 import file_utils
 
 # Path for the configuration file
-JSON_DIRECTORY = os.path.join(os.path.expanduser("~"), "Documents", "CopyApp")
-JSON_DIRECTORY = "R:/pipeline/pipe/windows/CopyMediaPrism/configs"
+JSON_DIRECTORY = os.path.join(file_utils.APP_DIRECTORY, "configs")
 config_file_path = "copy_config.json"
 
 # Color configuration
@@ -58,6 +57,7 @@ class CopyApp:
         self.source_path = tk.StringVar()
         self.dest_path = tk.StringVar()
         self.enable_md5 = tk.BooleanVar(value=False)
+        self.merge_department = tk.BooleanVar(value=False)
                 
         # Load or create department identifiers JSON
         self.config = load_config()  # Load saved configuration
@@ -140,6 +140,7 @@ class CopyApp:
         
         settings_frame = tk.Frame(left_frame, bg=BG_COLOR)
         settings_frame.pack(pady=5, fill='x', expand=True)
+        
         self.enable_md5_cb = tk.Checkbutton(
             settings_frame,
             text="Enable MD5 comparison (slower)",
@@ -152,8 +153,22 @@ class CopyApp:
             bg=BG_COLOR,
             fg=TEXT_FG
         )
-        self.enable_md5_cb.pack(pady=5, fill='x', side='left')
+        self.enable_md5_cb.grid(column=0, row=0, sticky=tk.W)
 
+        self.merge_department_cb = tk.Checkbutton(
+            settings_frame,
+            text="Merge Department (will remove department from name)",
+            variable=self.merge_department,
+            onvalue=1,
+            offvalue=0,
+            selectcolor=BG_COLOR,
+            activebackground=BG_COLOR,
+            activeforeground=TEXT_FG,
+            bg=BG_COLOR,
+            fg=TEXT_FG
+        )
+        self.merge_department_cb.grid(column=0, row=1, sticky=tk.W)
+        
         # Control buttons
         self.preview_button = tk.Button(left_frame, text="Preview", command=self.start_preview_mode_thread, bg=BUTTON_COLOR, fg=TEXT_FG)
         self.preview_button.pack(pady=5, fill='x')
@@ -323,6 +338,7 @@ class CopyApp:
                         json.dump(self.department_identifiers, f, indent=4)
                 else:
                     with filedialog.asksaveasfile(initialdir=file_utils.JSON_DIRECTORY, defaultextension=".json") as f:
+                        self.preset_path.set(f.name)
                         json.dump(self.department_identifiers, f, indent=4)
             except:
                 self.log("Save cancelled")
@@ -330,7 +346,7 @@ class CopyApp:
 
             # Log success
             self.log("JSON file saved.")
-
+            self.load_preset(self.preset_path.get())
             self.refresh()
         except json.JSONDecodeError as e:
             self.log(f"Error updating JSON file: {e}")
@@ -369,11 +385,11 @@ class CopyApp:
             self.log(f"Found Shots directory: {shots_directory}")
             self.log("Please wait...")
             # Call find_files using the loaded department identifiers and exclusions
-            found_files = file_utils.find_files(shots_directory, department_identifiers, exclusions, log_func=self.log)
+            found_files = file_utils.find_files(shots_directory, department_identifiers, exclusions, log_func=self.log, no_department=bool(self.merge_department.get()))
 
             # Log the found files
             for base_name, info in found_files.items():
-                self.log(f"File: {base_name}, Version: {info['version']}, Departement: {info['departement']}, Identifier: {info['identifier']}")
+                self.log(f"File: {base_name}, Version: {info['version']}, Departement: {info.get('departement', 'Not specified')}, Identifier: {info['identifier']}")
         else:
             self.log("Error: 'Shots' directory not found in '03_Production'.")
         self.preview_button["state"] = "normal"
@@ -404,7 +420,7 @@ class CopyApp:
             department_identifiers = self.department_identifiers.get(FILTER_KEY, {})
 
             # Call find_files to find the source files with exclusions
-            found_files = file_utils.find_files(shots_directory, department_identifiers, exclusions, log_func=self.log)
+            found_files = file_utils.find_files(shots_directory, department_identifiers, exclusions, log_func=self.log, no_department=bool(self.merge_department.get()))
             # Call copy_files to copy from source to destination, and rename the files
             file_utils.copy_files(found_files, dest_directory, log_func=self.log,
                        enable_md5=bool(self.enable_md5.get()),

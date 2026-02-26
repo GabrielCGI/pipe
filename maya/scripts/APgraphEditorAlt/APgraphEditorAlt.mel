@@ -1,0 +1,1329 @@
+global proc string APsourcePathFromMasterProc(string $masterProc)
+{
+    
+    string $path = `whatIs $masterProc`;
+    string $paths[] = stringToStringArray($path, " ");
+    string $root = dirname($paths[4]);
+    //source ($root+"/APutils.mel");
+    //APrecursiveSourcing($root, "*.mel");
+    string $strippedPath = ($root+"/");
+    return $strippedPath;
+}
+
+
+global int $jobNumContainer;
+//print ("avant: "+$jobNumContainer+"\n");
+//if ($jobNumContainer == 0 )
+//{$jobNumContainer = `scriptJob -pro -e "SelectionChanged" "ifContainer"`;}
+//print ("apres: "+$jobNumContainer+"\n");
+
+global proc string APstripPathLength(string $path , int $stripBackValue)
+{
+    string $tmpPath[] = stringToStringArray($path, "/");
+    string $tmpPath2 = "";
+    int $size = (`size $tmpPath`-$stripBackValue);
+    int $i = 0;
+    for ($chunk in $tmpPath)
+    {
+	if( $size > $i)
+	{
+	    $tmpPath2 += ("/"+$chunk);
+	    
+	}
+	else
+	    break;
+
+	$i+=1;
+    }
+    
+    return $tmpPath2;
+}
+
+global proc APrecursiveSourcingSkip(string $scriptPath, string $ext, string $toSkip)
+{
+	string $files[] = `getFileList -fld ( $scriptPath +"/")`;
+	//waitCursor -state on;
+
+	if ( size($files) )
+		{
+			string	$file;
+			string	$tokens[];
+			
+			for ($file in $files)
+			{
+
+				$file = ($scriptPath + $file);
+				
+				if ( `gmatch $file $ext` && !`gmatch $file ("*"+$toSkip)`)
+				{
+					//print ("\nje source " + $file);
+					int $result = catchQuiet(`evalDeferred("source \""+$file+"\"")`);
+				}
+	
+				//	Parse sub-directory
+				if ( `filetest -d $file` )
+					APrecursiveSourcing( ($file +"/"), $ext );
+			}
+		}
+		//waitCursor -state off;
+}
+
+
+global proc string APgraphEditorAlt(string $parent)
+{
+	
+
+	;
+	if (!`itemFilterAttr -q -exists userAnimItemFilter`)
+	{
+			//itemFilterAttr -hc 1 -k 1 -bs "APuserAnimFilter" userAnimItemFilter; // marche dans maya2014 mais fait planter maya2015
+			itemFilterAttr -bs "APuserAnimFilter" userAnimItemFilter; // marche dans maya2015
+	}
+
+	if (!`optionVar -ex "APshowPinGE"`)
+	{
+	  optionVar -iv "APshowPinGE" 0;
+	}
+	
+	if (!`optionVar -ex "APscaleRatioGraphAlt"`)
+	{
+	  optionVar -fv APscaleRatioGraphAlt 0.1;
+	}
+	namespace -set ":";
+	//string $framelayout = `menuBarLayout`;
+	//string $pl = `paneLayout -p $framelayout -ps 1 30 100 -api 2 -configuration "vertical2"`;
+	global string $APgraphEditGridLayout;
+	string $fl = `formLayout -p $parent`;
+	string $col = `columnLayout -p $fl -h 30 -adj 1`;
+	string $r = `formLayout -h 25 -p $col`;
+	string $pinButt = `iconTextButton -ann "Toggle Pin Selected Attributes\nRMB = Access to Pin Menu" -st "iconOnly" -i "pin" -w 30 -h 25 -p $r`;
+	string $tx = `textField -h 25 -ann ("Enter an Attribute Name to find. no need to be the full name. Eg: Typing "+"\""+"ans"+"\""+" = filter all attributes containing "+"\""+"ans"+"\""+", like trANSlate.\nRMB = Show Filter History Menu") -p $r`;
+	string $row = `flowLayout -p $r -vis 0 -h 30`;
+	global string $APoutlinerPanel;
+	//string $APgraphEditGridLayout = `button -w 25 -h 25  -l " X "`;
+	$APgraphEditGridLayout = `gridLayout -p $r -w 120 -cr 1 -aec 0 -numberOfColumns 6 -cellWidthHeight 20 25`;
+	string $bt2 = `button -p $APgraphEditGridLayout -h 25 -ann "clear & Reset All Filters" -label "X"`;
+	separator -w 5 -hr 0;
+	//iconTextCheckBox -p $APgraphEditGridLayout -h 25 -style "textOnly" -label "All";
+	string $translateFilterButton = `button -p $APgraphEditGridLayout -h 25 -ann "Show Only Translate Attributes" -label "T"`;
+	string $rotateFilterButton = `button -p $APgraphEditGridLayout -h 25 -ann "Show Only Rotate Attributes" -label "R"`;
+	string $scaleFilterButton = `button -p $APgraphEditGridLayout -h 25 -ann "Show Only Scale Attributes" -label "S"`;
+	string $userFilterButton = `button -p $APgraphEditGridLayout -h 25 -ann "Show Only Custom Attributes" -label "C"`;
+	//string $bt2 = `button -p $r -w 20 -h 25  -l " X "`;
+	
+
+	formLayout -e 
+	-attachForm     $tx     "bottom" 0
+	-attachControl $tx  "left"   0 $pinButt
+	-attachForm  $tx     "top" 0 
+	-attachControl     $tx     "right" 0 $APgraphEditGridLayout
+
+	-attachForm     $pinButt     "bottom" 0
+	-attachForm $pinButt  "left"   0
+	-attachForm  $pinButt    "top" 0 
+	-attachNone     $pinButt     "right"
+
+	-attachForm     $row     "bottom" 0
+	-attachForm $row  "left"   0
+	-attachForm  $row     "top" 0 
+	-attachControl     $row     "right" 0 $APgraphEditGridLayout
+
+	-attachForm     $APgraphEditGridLayout     "top" 0
+	-attachNone $APgraphEditGridLayout  "left"
+	-attachForm     $APgraphEditGridLayout    "bottom" 0
+	-attachForm    $APgraphEditGridLayout    "right" 0
+	//-attachControl    $APgraphEditGridLayout    "right" 0 $bt2	
+
+	//-attachForm     $bt2     "top" 0
+	//-attachNone $bt2  "left"
+	//-attachForm     $bt2    "bottom" 0
+	//-attachForm    $bt2    "right" 0
+	$r;
+	//string $APoutlinerPanel = `outlinerPanel -mbv 0 -p $fl `;
+	//string $out = `outlinerPanel -query -outlinerEditor $APoutlinerPanel`;
+	//outlinerPanel -e -pmp ("buildCustomGraphEditorPanel("+"\""+$out+"\""+")") $APoutlinerPanel;
+	//int $pin = `optionVar -q "APshowPinGE"`;
+	$APoutlinerPanel = `outlinerEditor -p $fl -ln 1 -dm "List" -showPinIcons 0 -showSelected 1 -ignoreDagHierarchy 1 -showNamespace 1 -showUpstreamCurves 0 -showShapes 1 -showAttributes 1 -showConnected 1 -showAnimCurvesOnly 1 -showDagOnly 0 -autoExpand 1 -saw 1 -expandObjects 0 -expandConnections 0 -showNumericAttrsOnly 0 -autoSelectNewObjects 0 -doNotSelectNewObjects 0 -transmitFilters 1 -showSetMembers 0 -showCompounds 0 -showLeafs 0 -scc 1 -sco 1 -cif 1 -mainListConnection "graphEditorList" -highlightConnection "keyframeList"`;
+	iconTextButton -e -c ("APtogglePinSelected("+"\""+$APoutlinerPanel+"\""+")") $pinButt;
+	  string $pinMenu = `popupMenu -p $pinButt -b 3`;
+	      menuItem -c ("APpinAll("+"\""+$APoutlinerPanel+"\""+",0)") -l "unPin All";
+	      //menuItem -l "Invert Pin All";
+	      menuItem -c ("APpinAll("+"\""+$APoutlinerPanel+"\""+",1)") -l "Pin All";
+	      //menuItem -l "Show Only Pinned";
+	      setParent..;
+	global string $SelectionfromEditor;
+	//global string $APemptySelectionfromEditor;
+	//$SelectionfromEditor  = `selectionConnection`;
+	$SelectionfromEditor  =  "graphEditor1FromOutliner";
+	//editor -edit -selectionConnection $fromEditor1 $APoutlinerPanel;
+	editor -edit -selectionConnection $SelectionfromEditor  $APoutlinerPanel;
+	//print ($APoutlinerPanel+"\n");
+	//animCurveEditor -e -mainListConnection $fromEditor1 graphEditor1GraphEd;
+	animCurveEditor -e -mainListConnection $SelectionfromEditor  graphEditor1GraphEd;
+	//animCurveEditor -e -m ("buildCustomGraphEditorPanel("+"\""+$curvEdit+"\""+")") $curvEdit;
+	//print ("pushTransform("+"\""+$tx+"\""+","+"\""+$scaleFilterButton+"\""+","+"\""+$APgraphEditGridLayout+"\""+"), GEfilterQueue ("+"\""+$APgraphEditGridLayout+"\""+","+"\""+$APoutlinerPanel+"\""+","+"\""+$tx+"\""+")");
+	button -e -c ("pushTransform("+"\""+$tx+"\""+","+"\""+$translateFilterButton+"\""+","+"\""+$APgraphEditGridLayout+"\""+"); GEfilterQueue ("+"\""+$APgraphEditGridLayout+"\""+","+"\""+$APoutlinerPanel+"\""+","+"\""+$tx+"\""+")") $translateFilterButton;
+	button -e -c ("pushTransform("+"\""+$tx+"\""+","+"\""+$rotateFilterButton+"\""+","+"\""+$APgraphEditGridLayout+"\""+"); GEfilterQueue ("+"\""+$APgraphEditGridLayout+"\""+","+"\""+$APoutlinerPanel+"\""+","+"\""+$tx+"\""+")") $rotateFilterButton;
+	button -e -c ("pushTransform("+"\""+$tx+"\""+","+"\""+$scaleFilterButton+"\""+","+"\""+$APgraphEditGridLayout+"\""+"); GEfilterQueue ("+"\""+$APgraphEditGridLayout+"\""+","+"\""+$APoutlinerPanel+"\""+","+"\""+$tx+"\""+")") $scaleFilterButton;
+	button -e -c ("pushTransform("+"\""+$tx+"\""+","+"\""+$userFilterButton+"\""+","+"\""+$APgraphEditGridLayout+"\""+"); GEfilterQueue ("+"\""+$APgraphEditGridLayout+"\""+","+"\""+$APoutlinerPanel+"\""+","+"\""+$tx+"\""+")") $userFilterButton;
+	//registerEditor ($APoutlinerPanel, "graphEditorList");
+	textField -e -ec ("outlinerEditor -e -attrFilter 0 -showConnected true "+"\""+$APoutlinerPanel+"\""+"; matchFilter(`textField -q -tx "+"\""+$tx+"\""+"`); GEfilterQueue ("+"\""+$APgraphEditGridLayout+"\""+","+"\""+$APoutlinerPanel+"\""+","+"\""+$tx+"\""+"); textField -e -ebg 1 -bgc 0.871 0.875 0.478 "+"\""+$tx+"\"") $tx;
+	//	string $hispop = `popupMenu -p $tx -b 3`;
+	//	popupMenu -e -pmc ("updateFilterHistoryMenu("+"\""+$hispop+"\""+")") $hispop;
+	//	
+	button -e -c ("global int $APisolateCurveActive; $APisolateCurveActive = 0; APresetTransformButtons ("+"\""+$APgraphEditGridLayout+"\""+"); textField -e -vis 1 "+"\""+$tx+"\""+"; flowLayout -e -vis 0 "+"\""+$row+"\""+";global string $recompAttr; $recompAttr = "+"\""+""+"\""+"; global string $userAttrFilter[]; clear $userAttrFilter; textField -e -tx "+"\""+""+"\" "+ $tx+"; GEfilterQueue ("+"\""+$APgraphEditGridLayout+"\""+","+"\""+$APoutlinerPanel+"\""+","+"\""+$tx+"\""+")"+"; APresetAllpin ("+"\""+$APoutlinerPanel+"\""+"); APreselectAll("+"\""+$tx+"\""+","+"\""+$APoutlinerPanel+"\""+"); textField -e -ebg 1 -bgc 0.165 0.165 0.165 " +"\""+$tx+"\""+"; outlinerEditor -e -attrFilter 0 -mainListConnection "+"\""+"graphEditorList"+"\""+" "+"\""+$APoutlinerPanel+"\"") $bt2;
+	//outlinerEditor -e -sec ("fitCurentTime("+"\""+$curvEdit+"\""+")") $APoutlinerPanel;
+	string $pe = `outlinerEditor -q -pnl $APoutlinerPanel`;
+	//print ($tx+"\n");
+	//outlinerPanel -e -pmp ("buildCustomGraphEditorPanel("+"\""+$APoutlinerPanel+"\""+")") $pe;
+//	OutlinerEdMenuCommand outlinerEditor1;
+	//print ("curve Editor: "+$curvEdit+"\n");
+	//print ("outliner Editor: "+$APoutlinerPanel+"\n");
+	//if (!`optionVar -ex "APgraphQuickFilterMode"` && !`optionVar -ex "APgraphTightFilterMode"`)
+	//{
+	//  optionVar -iv "APgraphQuickFilterMode" 1;
+	//  optionVar -iv "APgraphTightFilterMode" 0;
+	//}
+		//string $hispop2 = `popupMenu -ctl 1 -p $tx -b 3`;
+			//menuItem -rb `optionVar -q "APgraphQuickFilterMode"` -c "switchFilterType(1)" -l "Quick Filter";
+			//menuItem -rb `optionVar -q "APgraphTightFilterMode"` -c "switchFilterType(0)" -l "Tight Filter";
+			//setParent..;
+	string $hispop = `popupMenu -p $tx -b 3`;
+	popupMenu -e -pmc ("updateFilterHistoryMenu("+"\""+$hispop+"\""+","+"\""+$tx+"\""+")") $hispop;
+	//outlinerEditor -e -sec ("synchroSelect3("+"\""+$tx+"\""+","+"\""+$row+"\""+","+"\""+"graphEditor1GraphEd"+"\""+")") $APoutlinerPanel;
+	//animView -startTime (`playbackOptions -query -minTime` - 1) -endTime (`playbackOptions -query -maxTime` + 1) $curvEdit;
+	formLayout -edit
+	-attachForm     $APoutlinerPanel     "bottom" 0
+	-attachForm     $APoutlinerPanel     "left"   0
+	-attachControl  $APoutlinerPanel     "top" 0 $col
+	-attachForm     $APoutlinerPanel     "right"  0
+	
+	-attachForm     $col     "top" 0
+	-attachForm     $col     "left"   0
+	-attachNone     $col     "bottom"
+	-attachForm     $col     "right"  0
+	$fl;
+
+	//APprefilterGraphEditor($tx,$APoutlinerPanel);
+	scriptJob -uid $tx "APrebuidDefautSelectionConnection";
+	//scriptJob -p $tx -e "SelectionChanged" APupdateGEfloatFields;
+	if (!`selectionConnection -q -ex graphEditor1FromOutliner`)
+	{
+	  selectionConnection graphEditor1FromOutliner;
+	  outlinerEditor -e -mainListConnection "graphEditorList" -selectionConnection graphEditor1FromOutliner graphEditor1OutlineEd;
+	  //animCurveEditor -e -mainListConnection "graphEditor1FromOutliner"  graphEditor1GraphEd;
+	}
+	outlinerEditor -e -hir 1 -sco 0 -scc 1 -expandConnections 1 $APoutlinerPanel;
+	//selectionConnection -e -as APupdateGEfloatFields -rs APupdateGEfloatFields "keyframeList";
+	return $fl;
+
+
+	//showWindow;
+}
+
+global proc APprefilterGraphEditor(string $tx, string $APoutlinerPanel)
+{
+	if (!`itemFilterAttr -q -exists userAnimItemFilter`)
+	{
+			itemFilterAttr -hc 1 -k 1 -bs "APuserAnimFilter" userAnimItemFilter;
+	}
+	global string $userAttrFilter[];
+	clear $userAttrFilter;
+	translateFilter(1, $tx);
+	rotateFilter(1, $tx);
+	scaleFilter(1, $tx);
+	userAttrFilter(1, $tx);
+	$userAttrFilter = stringArrayRemoveDuplicates( $userAttrFilter );
+	//print $userAttrFilter;
+	outlinerEditor -e -attrFilter userAnimItemFilter -showConnected 1 $APoutlinerPanel;
+}
+
+global proc APpinAll (string $outLiner, int $mode)
+{
+  string $selectedChannels[] = `selectionConnection -q -obj "graphEditorList"`;
+  string $animated[] = `listConnections -s 1 -d 0 -c 1 -p 0 -type "animCurve" $selectedChannels`;
+  for ($chan in  $animated)
+  {
+    if ($mode)
+    {outlinerEditor -e -pin $chan $outLiner;}
+    else
+    {outlinerEditor -e -unp $chan $outLiner;}
+  }
+}
+
+global proc APresetAllpin (string $outLiner)
+{
+  global string $APpinedList[];
+  for ($chan in  $APpinedList)
+  {
+    if (attributeExists(`plugAttr $chan`, `plugNode $chan`))
+    {outlinerEditor -e -unp $chan $outLiner;}
+  }
+}
+
+global proc APtogglePinSelected (string $outLiner)
+{
+  global string $SelectionfromEditor;
+  string $selectedChannels[] = `selectionConnection -q -obj $SelectionfromEditor`;
+  string $pinned[] = `outlinerEditor -q -pin $outLiner`;
+  for ($chan in $selectedChannels)
+  {
+    //$chan = plugAttr($chan);
+    if (stringArrayContains($chan , $pinned))
+    {outlinerEditor -e -unp $chan $outLiner;}
+    else
+    {outlinerEditor -e -pin $chan $outLiner;}
+   }
+
+}
+
+global proc APtogglePinInvert (string $outLiner)
+{
+
+}
+
+
+global proc APtoggleShowPin(string $outLiner)
+{
+  outlinerEditor -e -spi (1-`outlinerEditor -q -spi $outLiner`) $outLiner;
+  if (`optionVar -ex "APshowPinGE"`)
+  {
+    optionVar -iv "APshowPinGE" `outlinerEditor -q -spi $outLiner`;
+  }
+}
+
+global proc string APbuildHyperPinRegExp()
+{
+  global string $SelectionfromEditor;
+  string $conAttr[] = `listConnections -s 0 -d 1 -connections 1 $SelectionfromEditor`;
+  int $r=0;
+  string $finalstring ="";
+  for ($df in $conAttr)
+  {
+    $finalstring += (plugAttr($conAttr[$r]));
+    $r+=2;
+    if ($r>(`size $conAttr`/2))
+    {break;}
+    $finalstring += "+";
+  }
+  return $finalstring;
+}
+
+
+global proc APisolateSelected2(string $editorName, string $curveEditor)
+{
+	global string $APgraphCurve;
+	global string $SelectionfromEditor;
+	$APgraphCurve = "graphEditor1GraphEd";
+	string $dff[] = `APlistSelectedCurves $APgraphCurve`;
+	string $dff2[] = `selectionConnection -q -obj "keyframeList"`;
+	selectionConnection -e -clear $SelectionfromEditor;
+	string $attr[];
+	string $tmp[];
+	clear $attr;
+	for ($curv in $dff2)
+	{
+	 $tmp = `listConnections -s 0 -d 1 -c 0 -p 1 $curv`;
+	 $attr[`size $attr`] = plugNode($tmp[0]);
+	}
+	//select $attr;
+	for ($curve in $dff2)
+	{
+		string $t[] = `listConnections -s 0 -d 1 -p 1 $curve`;
+		selectionConnection -e -select $t[0] $SelectionfromEditor;
+	}
+	animCurveEditor -e -af 1 $curveEditor;
+	animCurveEditor -e -af 0 $curveEditor;
+	
+	//evalDeferred("selectionAsFilter("+"\""+$editorName+"\""+", "+"\""+$curveEditor+"\""+")");
+}
+
+
+
+global proc APisolateSelectedMaya(string $editorName, string $curveEditor)
+{
+  global int $APisolateCurveActive;
+  global string $APgraphCurve;
+  //print ("isolateAnimCurve true "+$editorName+" "+$APgraphCurve);
+  	string $parent = `outlinerEditor -q -p $editorName`;
+	string $children[] = `formLayout -q -ca $parent`;
+	$children = `columnLayout -q -ca $children[0]`;
+	$children = `formLayout -q -ca $children[0]`;
+	textField -e -ebg 1 -bgc 0.871 0.875 0.478 $children[1];
+
+  isolateAnimCurve (1-$APisolateCurveActive) graphEditor1FromOutliner $APgraphCurve; 
+  $APisolateCurveActive = (1-$APisolateCurveActive);
+
+}
+global proc switchFilterType(int $mode)
+{
+  if (`optionVar -ex "APgraphQuickFilterMode"` && `optionVar -ex "APgraphTightFilterMode"`)
+  {
+    optionVar -iv "APgraphQuickFilterMode" $mode;
+    //print ("set quickFilter to "+ `optionVar -q "APgraphQuickFilterMode"`+"\n");
+    optionVar -iv "APgraphTightFilterMode" (1-$mode);
+    //print ("set tightFilter to "+ `optionVar -q "APgraphTightFilterMode"`+"\n");
+  }
+}
+
+global proc APreplaceOutliner()
+{
+   APreplaceOutlinerSwitch(1);
+}
+
+global proc APreplaceOutlinerSwitch(int $mode)
+{
+    global string $APgraphEditorAltPath;
+    string $path = `whatIs "APreplaceOutliner"`;
+    string $paths[] = stringToStringArray($path, " ");
+    string $root = dirname($paths[`size $paths`-1]);
+    $APgraphEditorAltPath = ($root+"/");
+
+    string $AProotPath = (APstripPathLength($APgraphEditorAltPath , 1)+"/");
+    //APverbosePrint($APgraphEditorAltPath);
+    catchQuiet(APrecursiveSourcingSkip($APgraphEditorAltPath, "*.mel", "APgraphEditorAlt.mel"));
+    
+    string $tmps[] = stringToStringArray(`playblast -ae`,"|");
+    string $panel = $tmps[`size $tmps`-1];
+    if ($panel == "")
+    {
+      $panel = `getPanel -wf`;
+    }
+    if ($mode == 1 )
+    {GraphEditor;}
+    if ($mode == 2 )
+    {scriptedPanel -e -rp $panel graphEditor1;}
+    if (`iconTextCheckBox -exists "graphEditor1OutlineEdloadToggleButton"`)
+    {iconTextCheckBox -e -enable 0 "graphEditor1OutlineEdloadToggleButton";}
+    string $altParent = `control -q -p graphEditor1OutlineEdForm`;
+    control -e -m 0 graphEditor1OutlineEdForm;
+    global string $alternateED;
+    $alternateED = `APgraphEditorAlt ($altParent)`;
+    paneLayout -e -ps 1 25 100 -sp $alternateED 1 $altParent;
+
+
+    string $Parent = `control -q -p $altParent`;
+    string $chil2[] = `formLayout -q -ca $Parent`;
+    string $chil[] = `frameLayout -q -ca $chil2[0]`;
+    APgraphEditorCustomToolBar($chil[0]);
+    
+    //APreplaceGEiconBar;
+    //evalDeferred("APreselectAll");
+
+}
+
+global proc APrebuidDefautSelectionConnection()
+{
+    //print "\nhello toto";
+    if (!`control -q -ex graphEditor1OutlineEdForm`)
+    {
+      if (!`selectionConnection -q -ex graphEditor1FromOutliner`)
+      {
+	selectionConnection graphEditor1FromOutliner;
+	outlinerEditor -e -mainListConnection "graphEditorList" -selectionConnection graphEditor1FromOutliner graphEditor1OutlineEd;
+	animCurveEditor -e -mainListConnection "graphEditor1FromOutliner"  graphEditor1GraphEd;
+      }
+      if (`animCurveEditor -q -mainListConnection "graphEditor1GraphEd"` != "graphEditor1FromOutliner")
+      {animCurveEditor -e -mainListConnection "graphEditor1FromOutliner"  graphEditor1GraphEd;}
+    }
+    else
+    {
+      global string $SelectionfromEditor;
+      animCurveEditor -e -mainListConnection $SelectionfromEditor  graphEditor1GraphEd;
+    }
+    global string $APflow;
+    $APflow = "";
+}
+
+global proc ifContainer()
+{
+  string $sel[] = `ls -sl`;
+  global string $APoutlinerPanel;
+  string $cont2="";
+  $cont2 = `container -q -fc $sel`;
+  if ($APoutlinerPanel != "")
+  {
+    if ($cont2!="")
+    {outlinerEditor -e -hir 0 -sco 0 -scc 0 -expandConnections 1 $APoutlinerPanel;}
+    else
+    {outlinerEditor -e -hir 1 -sco 1 -scc 1 -expandConnections 0 $APoutlinerPanel;}
+  }
+}
+
+global proc ifContainer2()
+{
+  string $sel[] = `ls -sl`;
+  global string $APoutlinerPanel;
+  outlinerEditor -e -hir 1 -sco 1 -expandConnections 0 $APoutlinerPanel;
+  for ($obj in $sel)
+  {
+    if (`objectType $obj` == "container")
+    {outlinerEditor -e -hir 0 -sco 0 -expandConnections 1 $APoutlinerPanel;
+      break;}
+  }
+}
+
+
+global proc removeOutliner()
+{
+    string $altParent = `control -q -p graphEditor1OutlineEdForm`;
+    control -e -m 1 graphEditor1OutlineEdForm;
+    global string $alternateED;
+    if (`objExists $alternateED`)
+    {deleteUI $alternateED; }
+    paneLayout -e -sp graphEditor1OutlineEdForm 1 $altParent;
+}
+
+global proc updateFilterHistoryMenu(string $popupname, string $tx)
+{
+	string $optionVarContent[];
+	global string $APoutlinerPanel;
+	int $i = 0;
+	if (`optionVar -ex "graphEditorFilterHistory"`)
+	{
+		popupMenu -e -dai $popupname;
+		int $size = tokenizeList(`optionVar -q "graphEditorFilterHistory"`, $optionVarContent);
+		//optionVar -sv "graphEditorFilterHistory" "";
+		if ($size)
+		{
+			for ($item in $optionVarContent)
+			{
+				menuItem -l $item -p $popupname -c ("outlinerEditor -e -attrFilter 0 -showConnected true "+"\""+$APoutlinerPanel+"\""+"; matchFilter("+"\""+$item+"\""+"); outlinerEditor -e -attrFilter userAnimItemFilter -showConnected 0 "+"\""+$APoutlinerPanel+"\""+";textField -e -ebg 1 -bgc 0.871 0.875 0.478 "+"\""+$tx+"\""+"; textField -e -tx "+"\""+$item+"\""+" "+$tx);
+				$i++;
+				//optionVar -sv "graphEditorFilterHistory" (`optionVar -q "graphEditorFilterHistory"` + " " + $item );
+				if($i>6)
+				  break;
+			}
+			menuItem -p $popupname -d 1;
+			//menuItem -l "Clear History" -c ("optionVar -sv "+"\""+"graphEditorFilterHistory"+"\""+"\""+""+"\"");
+			menuItem -p $popupname -l "Clear History" -c ("optionVar -sv "+"\""+"graphEditorFilterHistory"+"\""+"\""+""+"\"");
+		}
+		
+		//else
+		//{
+		//	menuItem -l "-----";
+		//}
+	}
+}
+
+
+
+
+
+global proc APselectionAsFilter(string $editorName, string $curveEditor)
+{
+	global string $userAttrFilter[];
+	global string $APgraphCurve;
+	$APgraphCurve = "graphEditor1GraphEd";
+	outlinerEditor -e -attrFilter 0 $editorName;
+	clear $userAttrFilter;
+	//$curveEditor = "ultimGraph";
+	string $dff[] = `APlistSelectedCurves $APgraphCurve`;
+	string $attrsg[];
+	clear $attrsg;
+	for ($curve in $dff)
+	{
+	 string $t[] = `listConnections -p 1 $curve`;
+	 $attrsg[`size $attrsg`] = $t[0];
+	}
+	string $tempd[];
+	clear $tempd;
+	for ($d in $attrsg)
+	{
+	 $tempd[`size $tempd`] = `plugAttr $d`;
+	}
+	string $shorterList[] = stringArrayRemoveDuplicates($tempd);
+	$userAttrFilter = $shorterList;
+	outlinerEditor -e -attrFilter userAnimItemFilter $editorName;
+	//print $editorName;
+	string $parent = `outlinerEditor -q -p $editorName`;
+	string $children[] = `formLayout -q -ca $parent`;
+	$children = `columnLayout -q -ca $children[0]`;
+	$children = `formLayout -q -ca $children[0]`;
+	textField -e -ebg 1 -bgc 0.871 0.875 0.478 $children[1];
+}
+
+global proc GEfilterQueue (string $buttonParent, string $APoutlinerPanel, string $text)
+{
+	global string $recompAttr;
+	if (!`itemFilterAttr -q -exists userAnimItemFilter`)
+	{
+			//itemFilterAttr -hc 1 -k 1 -bs "APuserAnimFilter" userAnimItemFilter;
+			itemFilterAttr -bs "APuserAnimFilter" userAnimItemFilter;
+	}
+	string $childArray[] =  `gridLayout -q -ca $buttonParent`;
+	global string $userAttrFilter[];
+	//if ((`iconTextCheckBox -q -v $childArray[2]`+`iconTextCheckBox -q -v $childArray[3]`+`iconTextCheckBox -q -v $childArray[4]`+`iconTextCheckBox -q -v $childArray[5]`) == 1)
+	//{clear $userAttrFilter;}
+
+	translateFilter(`button -q -ebg $childArray[2]`, $text );
+	rotateFilter(`button -q -ebg $childArray[3]`, $text);
+	scaleFilter(`button -q -ebg $childArray[4]`, $text);
+	userAttrFilter(`button -q -ebg $childArray[5]`, $text);
+	$userAttrFilter = stringArrayRemoveDuplicates( $userAttrFilter );
+	//print $userAttrFilter;
+	if ((`button -q -ebg $childArray[2]`+`button -q -ebg $childArray[3]`+`button -q -ebg $childArray[4]`+`button -q -ebg $childArray[5]`) == 0)
+	{
+		if (`textField -q -tx $text` != "" || $recompAttr != "")
+		{
+		  if (`textField -q -tx $text` != "")
+		  {matchFilter(`textField -q -tx $text`);}
+		  else
+		  {matchFilter($recompAttr);}
+		  outlinerEditor -e -attrFilter 0 -showConnected 1 $APoutlinerPanel;
+		  outlinerEditor -e -attrFilter userAnimItemFilter -showConnected 1 $APoutlinerPanel;
+		}
+		else
+		{outlinerEditor -e -attrFilter 0 -showConnected 0 $APoutlinerPanel;
+		  outlinerEditor -e -attrFilter 0 -showConnected 1 $APoutlinerPanel;}
+		
+	}
+	else
+	{
+	  outlinerEditor -e -attrFilter 0 -showConnected 1 $APoutlinerPanel;
+	  outlinerEditor -e -attrFilter userAnimItemFilter -showConnected 1 $APoutlinerPanel;
+	  
+	}
+	global string $SelectionfromEditor;
+	string $dff3[] = `selectionConnection -q -obj "graphEditorList"`;
+	//print $dff3;
+	
+	
+
+	//global string $APgraphCurve;
+	//$APgraphCurve = "graphEditor1GraphEd";
+	//string $dff3[] = `selectionConnection -q -obj "animationList"`;
+	//selectionConnection -e -clear "graphEditor1FromOutliner";
+	//global string $SelectionfromEditor;
+	//selectionConnection -e -clear $SelectionfromEditor;
+	//for ($curve in $dff3)
+	//{
+	//	selectionConnection -e -select $curve $SelectionfromEditor;
+	//}
+}
+
+global proc APrefreshFilterByMenu ()
+{
+	string $buffer[];
+	global string $APgraphCurve;
+	$APgraphCurve = "graphEditor1GraphEd";
+	string $shorterList[] = `listSubNameFilter($APgraphCurve)`;
+	$numTokens = `tokenize $shorterList[0] "_" $buffer`;
+	for ($tok in $buffer)
+	{
+		menuItem -l $tok;
+	}
+}
+
+global proc APlinkFilterToObject()
+{
+
+
+}
+
+global proc string[] listSubNameFilter (string $curveEditor)
+{
+	global string $userAttrFilter[];
+	global string $APgraphCurve;
+	$APgraphCurve = "graphEditor1GraphEd";
+	clear $userAttrFilter;
+	//$curveEditor = "ultimGraph";
+	string $dff[] = `APlistSelectedCurves $APgraphCurve`;
+	string $attrsg[];
+	clear $attrsg;
+	for ($curve in $dff)
+	{
+	 string $t[] = `listConnections -p 1 $curve`;
+	 $attrsg[`size $attrsg`] = $t[0];
+	}
+	string $tempd[];
+	clear $tempd;
+	for ($d in $attrsg)
+	{
+	 $tempd[`size $tempd`] = `plugAttr $d`;
+	}
+	
+	string $shorterList[] = stringArrayRemoveDuplicates($tempd);
+	return $shorterList;
+}
+
+global proc int isBigList(string $list[])
+{
+	string $buffer[];
+	$numTokens = `tokenize $list[0] "_" $buffer`;
+	return $numTokens;
+}
+
+global proc APreselectAll(string $tx, string $APoutlinerPanel)
+{
+	global string $APgraphCurve;
+	$APgraphCurve = "graphEditor1GraphEd";
+	string $dff3[] = `selectionConnection -q -obj "animationList"`;
+	//selectionConnection -e -clear "graphEditor1FromOutliner";
+	global string $SelectionfromEditor;
+	selectionConnection -e -clear $SelectionfromEditor;
+	//APprefilterGraphEditor($tx, $APoutlinerPanel);
+	for ($curve in $dff3)
+	{
+		selectionConnection -e -select $curve $SelectionfromEditor;
+	}
+
+}
+
+global proc APselectSameName (string $editorName, string $curveEditor)
+{
+	//$curveEditor = "ultimGraph";
+	global string $APgraphCurve;
+	$APgraphCurve = "graphEditor1GraphEd";
+	//editor -edit -selectionConnection $fromEditor1 $APoutlinerPanel;
+	string $sc = `editor -q -selectionConnection $editorName`;
+	string $dff[] = `APlistSelectedCurves $APgraphCurve`;
+	selectionConnection -e -clear $sc;
+	for ($curve in $dff)
+	{
+		string $t[] = `listConnections -s 0 -d 1 -p 1 $curve`;
+		$tempdd = `plugAttr $t[0]`;
+		string $conAttr[] = `listConnections -s 1 -d 0 -connections 1 animationList`;
+		for ($attr in $conAttr)
+		{
+			//selectionConnection -e -d $attr $sc;
+			if (`gmatch $attr ("*."+$tempdd)`)
+			{
+			  selectionConnection -e -select $attr $sc;
+			}
+		}
+	}
+}
+
+global proc selectFromAutoPin (string $editorName)
+{
+	//$curveEditor = "ultimGraph";
+	global string $APgraphCurve;
+	global string $userAttrFilter[];
+	$APgraphCurve = "graphEditor1GraphEd";
+
+	string $sel[] = `ls -sl`;
+	if (`attributeExists "APuserFilter" $sel[0]`)
+	{
+	  string $filter[] = `listConnections ($sel[0]+".APuserFilter")`;
+	  string $conAttr[];
+	  clear $conAttr;
+	  if(`size $filter`)
+	  {
+	    $conAttr = stringToStringArray(`getAttr  ($filter[0]+".regexp")`, "+");
+	  }
+	  //editor -edit -selectionConnection $fromEditor1 $APoutlinerPanel;
+	  string $tempd[];
+	  clear $tempd;
+	  for ($attr in $conAttr)
+	  {
+	    $tempd[`size $tempd`] = $attr;
+	  }
+	  $userAttrFilter = stringArrayRemoveDuplicates($tempd);
+	  outlinerEditor -e -as 0 -attrFilter userAnimItemFilter $editorName;
+	}
+
+}
+
+global proc APaddDynamicFilter( string $regexp )
+{
+    string $list[] = `ls -sl`;
+    for ($obj in $list)
+    {
+        if (!`attributeExists "APuserFilter" $obj`)
+        {
+	  addAttr -ln "APuserFilter"  -at long $obj;
+	  string $node = `createNode network -ss -n "GraphEdUserFilter"`;
+	  addAttr -ln "regexp"  -dt "string" $node;
+	  connectAttr -f ($obj+".APuserFilter") ($node+".affectedBy[0]");
+        }
+        string $con[] = `listConnections ($obj+".APuserFilter")`;
+        setAttr -e -type "string" ($con[0]+".regexp") $regexp;
+    }
+   // select $list;
+}
+
+
+global proc int APuserAnimFilter ( string $nodeName, string $attrName)
+{
+	
+	int $good = 0;
+	global string $userAttrFilter[];
+	for ($attr in $userAttrFilter)
+	{
+		if ($attrName == $attr)
+			$good = 1;
+	}
+	
+	return $good;
+
+}
+
+//global string storeKeySelelection()
+//{
+//string $historyList[] = `repeatLast -q -commandList`;
+//eval( $historyList[15])
+//}
+global proc fitCurentTime(string $graphEditorName)
+{
+ 	//animCurveEditor -edit -lookAt currentTime $graphEditorName;
+}
+
+global proc buildCustomGraphEditorPanel(string $APoutlinerPanel)
+{
+		//popupMenu -p $APoutlinerPanel -button 3;
+			menuItem -c "curveShow" -l "curveShowed";	
+			setParent -m ..;
+}
+
+global proc synchroSelect3 (string $text, string $row, string $curveEditor)
+{
+  string $dff[] = `APlistSelectedCurves $curveEditor`;
+//print $dff;
+global string $APoutlinerPanel;
+  if (`size $dff`==1) 
+  { 
+    string $attrs[] = `listConnections -s 0 -d 1 -p 1 ($dff[0]+".output")`;
+    
+    string $tmp = `plugAttr $attrs[0]`;
+    //print $tmp;
+    string $node = `plugNode $attrs[0]`;
+    string $buffer[];
+    string $attr = `attributeQuery -node $node -nn $tmp`;
+    //print $attr;
+    $numTokens = `tokenize $tmp "_" $buffer`;
+    int $columnIndex=1;
+    if ($numTokens > 1)
+    {
+      //print $numTokens;
+      //flowLayout -e -nc `size $buffer` $row;
+      string $children[] = `flowLayout -q -ca $row`;
+      textField -e -vis 0 $text;
+      //print $children;
+      for ($tmp in $children)	
+      {
+	deleteUI $tmp;
+	//print "je passe";
+      }
+      
+      for ($attrPart in $buffer)	
+      {
+	  
+	  //string $low = tolower($attrPart);
+	  //print $attrPart;
+	  string $button = `button -p $row -l $attrPart`;
+	  button -e -c ("pushColor("+"\""+$text+"\""+","+"\""+$button+"\""+","+"\""+$row+"\""+")")  $button;
+	  //flowLayout -e  -columnWidth $columnIndex (`size $attrPart`*9) $row;
+	  $columnIndex++;
+      }
+      flowLayout -e -vis 1 $row;
+    }
+    else
+    {
+      flowLayout -e -vis 0 $row;
+      textField -e  -vis 1 $text;
+    }
+    //outlinerEditor -e -as 0 $APoutlinerPanel;
+  }
+
+}
+
+global proc pullColor(string $tx, string $button, string $row)
+{
+	    button -e -ebg 0 -bgc 0.392 0.392 0.392 $button;
+	    //iconTextCheckBox -e -ebg 1 -v 1 -bgc 0.871 0.875 0.478 $child;
+}
+
+global proc APresetTransformButtons (string $row)
+{
+      string $children[] = `gridLayout -q -ca $row`;
+      for ($child in $children)
+      {
+	  //print (($path+$child) +" "+$button+"\n");
+	  if (`objectTypeUI $child` == "button")
+	  {
+	    button -e -ebg 0 -bgc 0.392 0.392 0.392 $child;
+	  }
+      }
+}
+
+global proc pushTransform (string $tx, string $button, string $row)
+{
+
+    global string $APoutlinerPanel;
+    global string $APgraphEditGridLayout;
+    global string $recompAttr;
+    string $children[] = `gridLayout -q -ca $row`;
+    string $child;
+    string $path;
+    string $buffer[];
+    int $numTokens = `tokenize $button "|" $buffer`;
+       int $i =0;
+       string $d;
+      // print $buffer;
+ 
+    for ($d in $buffer)
+    {
+        if ($i==($numTokens-1))
+        {break;}        
+        $path+= ($d+"|");
+        $i++;
+
+    }
+
+    int $multiSel = 0;
+
+    if (`getModifiers` != 1 && `getModifiers` != 4)
+    {
+      for ($child in $children)
+      {
+	if (`objectTypeUI $child` == "button")
+	{$multiSel += `button -q -ebg $child`;}
+      }
+      //print ("multiSel= "+$multiSel+"\n");
+      for ($child in $children)
+      {
+	  //print (($path+$child) +" "+$button+"\n");
+	  if (`objectTypeUI $child` == "button")
+	  {
+	    if (($path+$child) == $button)
+	    {
+
+	      if ($multiSel == 1 || $multiSel == 0)
+	      {
+		if (!`button -q -ebg $button`)
+		{
+		  button -e -ebg 1 -bgc 0.871 0.875 0.478 $button;
+		  textField -e -ebg 1 -bgc 0.871 0.875 0.478 $tx;
+		}
+		else
+		{
+		  button -e -ebg 0 -bgc 0.392 0.392 0.392 $button;
+		  textField -e -ebg 1 -bgc 0.165 0.165 0.165 $tx;
+		}
+	      }
+	      else
+	      {
+		button -e -ebg 1 -bgc 0.871 0.875 0.478 $button;
+		textField -e -ebg 1 -bgc 0.871 0.875 0.478 $tx;
+	      }
+  
+
+	    }
+	    else
+	    {
+	      button -e -ebg 0 -bgc 0.392 0.392 0.392 $child;
+	    }
+	  }
+      }
+    }
+    else
+    {
+      if (`objectTypeUI $button` == "button")
+      {
+	if (`button -q -ebg $button` == 1)
+	{
+	  button -e -ebg 0 -bgc 0.392 0.392 0.392 $button;
+	  textField -e -ebg 1 -bgc 0.165 0.165 0.165 $tx;
+	}
+	else 
+	{
+	  button -e -ebg 1 -bgc 0.871 0.875 0.478 $button;
+	  textField -e -ebg 1 -bgc 0.871 0.875 0.478 $tx;
+	}
+      }
+      //APbuildRegExpFromButton($children);
+    }
+   //outlinerEditor -e -attrFilter 0 -showConnected true -showAnimCurvesOnly true $APoutlinerPanel;
+    //print `button -q -l $button`;
+    //matchFilter(`button -q -l $button`);
+    //GEfilterQueue ($APgraphEditGridLayout,$APoutlinerPanel,$tx);
+   // print $recompAttr;
+
+}
+
+
+global proc pushColor(string $tx, string $button, string $row)
+{
+
+    global string $APoutlinerPanel;
+    global string $APgraphEditGridLayout;
+    global string $recompAttr;
+    string $children[] = `flowLayout -q -ca $row`;
+    string $child;
+    string $path;
+    string $buffer[];
+    int $numTokens = `tokenize $button "|" $buffer`;
+       int $i =0;
+       string $d;
+      // print $buffer;
+ 
+    for ($d in $buffer)
+    {
+        if ($i==($numTokens-1))
+        {break;}        
+        $path+= ($d+"|");
+        $i++;
+
+    }
+    if (`getModifiers` != 1 && `getModifiers` != 4)
+    {
+      for ($child in $children)
+      {
+	  //print (($path+$child) +" "+$button+"\n");      
+	  if (($path+$child) != $button)
+	  {
+	    button -e -ebg 0 -bgc 0.392 0.392 0.392 $child;
+	  }
+	  else
+	  {
+	    if (`button -q -ebg $button` == 0)
+	    {
+	      button -e -ebg 1 -bgc 0.871 0.875 0.478 $button;
+	    }
+	    else
+	    {button -e -ebg 0 -bgc 0.392 0.392 0.392 $button;}
+	    int $index = APgetStringIndex(`button -q -l $button`, $children);
+	    //print $index;
+	    if ($index == 0)
+	    {$recompAttr = (`button -q -l $button`+"*");}
+	    if ($index == (`size $children`-1))
+	    {$recompAttr = ("*"+`button -q -l $button`);}
+	    if ($index != 0 && $index != (`size $children`-1))
+	    {$recompAttr = `button -q -l $button`;}
+	  }
+      }
+    }
+    else
+    {
+      if (`button -q -ebg $button` == 1)
+      {
+	button -e -ebg 0 -bgc 0.392 0.392 0.392 $button;
+      }
+      else 
+      {button -e -ebg 1 -bgc 0.871 0.875 0.478 $button;}
+      APbuildRegExpFromButton($children);
+    }
+   outlinerEditor -e -attrFilter 0 -showConnected true -showAnimCurvesOnly true $APoutlinerPanel;
+    //print `button -q -l $button`;
+    matchFilter(`button -q -l $button`);
+    GEfilterQueue ($APgraphEditGridLayout,$APoutlinerPanel,$tx);
+    textField -e -ebg 1 -bgc 0.871 0.875 0.478 $tx;
+    //print $recompAttr;
+
+}
+
+global proc APbuildRegExpFromButton (string $array[])
+{
+  global string $recompAttr;
+  $recompAttr = "";
+  int $index = 0;
+  int $index2 = 0;
+  for ($child in $array)
+  {
+      if (`button -q -ebg $child` == 1)
+      {
+	if ($index==$index2)
+	{
+	  $recompAttr += `button -q -l $child`+"_";
+	  $index2++;
+	}
+	else
+	{
+	  $recompAttr += ("*"+`button -q -l $child`+"*");
+	  $index2 = $index;
+	}
+      }
+      $index++;
+  }
+}
+
+global proc int APgetStringIndex(string $stringToFind, string $array[])
+{
+  int $index = 0;
+  for ($child in $array)
+  {
+    if (`button -q -l $child`== $stringToFind)
+    {break;}
+    $index++;
+  }
+  return $index;
+}
+
+
+global proc synchroSelect (string $APoutlinerPanel, string $curveEditor)
+{
+  if (size(`ls -sl`)>1) 
+  { 
+    if (`optionVar -ex autoSyncSelGE`)
+    {
+      if (`optionVar -q autoSyncSelGE`==1)
+      {
+	evalDeferred ("selectSameName ("+"\""+$APoutlinerPanel+"\""+","+"\""+$curveEditor+"\""+")");
+	//selectSameName ($APoutlinerPanel,$curveEditor);
+      }
+    }
+  }
+
+  if (size(`ls -sl`)==1)
+  {
+    if (`optionVar -ex autoSyncSelGE`)
+    {
+      if (`optionVar -q autoSyncSelGE`==1)
+      {
+	selectFromAutoPin($APoutlinerPanel);
+      }
+    }
+  }
+  else
+  {	
+	outlinerEditor -e -attrFilter 0 $APoutlinerPanel;
+	global string $userAttrFilter[];
+	clear $userAttrFilter;
+  }
+}
+
+
+
+global proc matchFilter(string $regex)
+{
+	global string $userAttrFilter[];
+	int $smart = `optionVar -q "APgraphQuickFilterMode"`;
+	//print ("smart ="+$smart+"\n");
+	clear $userAttrFilter;
+	string $history;
+	//clear $history;
+	string $seltmp[] = `ls -sl`;
+	//python("import gmatch as gm");
+	//string $selString = stringArrayToString(`listAttr -u -k`, " ");
+	if (`size  $seltmp`)
+	{
+	  string $sel[] = `listAttr -u -k $seltmp`;
+	  $sel = stringArrayRemoveDuplicates($sel);
+	  //string $userAttrFilterTmp[] = python("gm.gmatch('"+$regex+"','"+$selString+"')");
+	  //string $userAttrFilter[];
+	  //$userAttrFilter = stringArrayRemoveDuplicates($userAttrFilterTmp);
+	  if (`size $sel`)
+	  {
+		  //string $sel[] = `listAttr -u -k $seltmp`;
+		  for ($attr in $sel)
+		  {
+			  
+			  //print ($attr+"\n"+$regex+"\n");
+			  if (`gmatch $attr ("*"+$regex+"*")`)
+			  {
+				  //string $buffer[];
+				 // $numTokens = `tokenize $regex "+" $buffer`;
+				 // for ($attrs in $buffer)
+				 // {
+				//	  if (`gmatch $attr ("*"+$attrs+"*")`)
+				//	  {$userAttrFilter[`size $userAttrFilter`] = $attr;}
+				  //}
+				  $userAttrFilter[`size $userAttrFilter`] = $attr;
+			  }
+			  else
+			  {
+				  //print ($attr+"\n");
+				  if (`isValidObjectName($regex)`)
+				  {
+				    python("import re");
+				    python("m = re.search('"+$regex+"', '"+$attr+"', re.IGNORECASE)");
+				    int $result = python("bool(m)");
+				    //print ("je passe en Smart\n");
+				    if ($result)
+				    {$userAttrFilter[`size $userAttrFilter`] = $attr;}
+				  }
+				  else
+				  {
+				    if (`gmatch $attr $regex`)
+				    {$userAttrFilter[`size $userAttrFilter`] = $attr;}
+				  }
+			  }
+		  }
+	  }
+	  string $optionVarContent[];
+	  if (`optionVar -ex "graphEditorFilterHistory"`)
+	  {
+	    $history = `optionVar -q "graphEditorFilterHistory"`;
+	    tokenizeList($history, $optionVarContent);
+	  }
+	  int $i = 0;
+	  if (`size $optionVarContent`== 0)
+	  {optionVar -sv "graphEditorFilterHistory" ( $regex+ " " + $history );}
+	  else
+	  {
+	    for ($r in $optionVarContent)
+	    {
+		    if (`gmatch $history ("*"+$regex+"*")`)
+		    { break;}
+		    else
+		    {optionVar -sv "graphEditorFilterHistory" ( $regex+ " " + $history );}
+		    if($i>6)
+		    {break;}
+		    
+	    }
+	  }
+	}
+}
+
+global proc translateFilter(int $clear,string $text)
+{
+	global string $userAttrFilter[];
+	//if ($clear == 0)
+	//{
+	//	clear $userAttrFilter;
+	//}
+	string $regex = `textField -q -tx $text`;
+	string $sel[] = `ls -sl`;
+	if (`size $sel`)
+	{
+		string $sel[] = `listAttr -se -u -k -v`;
+		for ($attr in $sel)
+		{
+			if (`gmatch $attr ("translate*"+$regex+"*")`)
+			{
+				//$userAttrFilter[`size $userAttrFilter`] = $attr;
+				if ($clear==1)
+				{$userAttrFilter[`size $userAttrFilter`] = $attr;}
+				else
+				{$userAttrFilter = stringArrayRemove({$attr}, $userAttrFilter);}
+			}
+		}
+	}
+	//print $userAttrFilter;
+}
+
+global proc rotateFilter(int $clear,string $text)
+{
+	global string $userAttrFilter[];
+	string $sel[] = `ls -sl`;
+	string $regex = `textField -q -tx $text`;
+	if (`size $sel`)
+	{
+		string $sel[] = `listAttr -se -u -k -v`;
+		for ($attr in $sel)
+		{
+			if (`gmatch $attr ("rotate*"+$regex+"*")`)
+			{
+				//$userAttrFilter[`size $userAttrFilter`] = $attr;
+				if ($clear==1)
+				{$userAttrFilter[`size $userAttrFilter`] = $attr;}
+				else
+				{$userAttrFilter = stringArrayRemove({$attr}, $userAttrFilter);}
+			}
+		}
+	}
+	//print $userAttrFilter;
+}
+
+global proc scaleFilter(int $clear, string $text)
+{
+	global string $userAttrFilter[];
+	string $regex = `textField -q -tx $text`;
+	string $sel[] = `ls -sl`;
+	if (`size $sel`)
+	{
+		string $sel[] = `listAttr -se -u -k -v`;
+		for ($attr in $sel)
+		{
+			if (`gmatch $attr ("scale*"+$regex+"*")`)
+			{
+				if ($clear==1)
+				{$userAttrFilter[`size $userAttrFilter`] = $attr;}
+				else
+				{$userAttrFilter = stringArrayRemove({$attr}, $userAttrFilter);}
+			}
+		}
+	}
+	//print $userAttrFilter;
+}
+
+global proc userAttrFilter(int $clear, string $text)
+{
+	global string $userAttrFilter[];
+	string $sel[] = `ls -sl`;
+	string $regex = `textField -q -tx $text`;
+	if (`size $sel`)
+	{
+		string $sel[] = `listAttr -se -k -u -v -ud`;
+		//string $sel[] = `listAttr -cb -u -v -ud`;
+		for ($attr in $sel)
+		{
+				if ($regex != "")
+				{
+				  if (`gmatch $attr ("*"+$regex+"*")`)
+				  {
+				    if ($clear==1)
+				    {$userAttrFilter[`size $userAttrFilter`] = $attr;}
+				    else
+				    {$userAttrFilter = stringArrayRemove({$attr}, $userAttrFilter);}
+				  }
+				}
+				else
+				{
+				  if ($clear==1)
+				  {$userAttrFilter[`size $userAttrFilter`] = $attr;}
+				  else
+				  {$userAttrFilter = stringArrayRemove({$attr}, $userAttrFilter);}
+				}
+		}
+	}
+	//print $userAttrFilter;
+}
+
+global proc APrecursiveSourcing(string $scriptPath, string $ext)
+{
+	string $files[] = `getFileList -fld ( $scriptPath +"/") -fs $ext`;
+	//waitCursor -state on;
+	//print $files;
+        //print ("\n\n");
+        int $fileId2;
+        string $exampleFileName = ( `internalVar -userTmpDir` + "log.txt" );
+	$fileId2=`fopen $exampleFileName "a"`;
+	if ( size($files) )
+	{
+		string	$file;
+		string	$tokens[];
+		
+		for ($file in $files)
+		{
+
+			$file = ($scriptPath +"/"+ $file);
+			//print ($file+"\n");
+			if ( !`filetest -d $file` )
+			{
+			  //if ( `gmatch $file $ext` )
+			  //{
+				  
+				  //int $result = catchQuiet(`eval("source \""+$file+"\"")`);
+				  
+				 
+				  //
+				  //
+				  print ("Sourcing ---> "+basename( $file, ".mel" )+"\n");
+				  fprint $fileId2 ("Sourcing ---> "+basename( $file, ".mel" )+"\n");
+				  int $result = catchQuiet(evalDeferred("source \""+$file+"\""));
+			          
+				  if ($result ==  1 )
+				  {
+					  print ("Failed ---> "+basename( $file, ".mel" )+"\n");
+					  fprint $fileId2 ("Failed ---> "+basename( $file, ".mel" )+"\n");
+				  }
+				  
+			  //}
+			 }
+			else
+			{ APrecursiveSourcing( $file , $ext ); }
+		}
+	}
+	fclose $fileId2;
+	//waitCursor -state off;
+}
+
+global string $APgraphAltIconPath;
+global string $APgraphEditorAltPath;
+$APgraphEditorAltPath = APsourcePathFromMasterProc("APsourcePathFromMasterProc");
+$APgraphAltIconPath = ($APgraphEditorAltPath+"Icons/");
+evalDeferred(("source "+"\""+$APgraphEditorAltPath+"APreplaceFlowLayout.mel"+"\""));
+evalDeferred(("source "+"\""+$APgraphEditorAltPath+"APeulerFilterOnSelectedKeys.mel"+"\""));
+evalDeferred("APreplaceOutlinerSwitch(1)");

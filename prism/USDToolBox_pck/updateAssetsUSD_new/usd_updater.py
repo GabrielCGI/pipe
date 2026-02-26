@@ -1187,7 +1187,7 @@ class MainInterface(Qt.QMainWindow):
             
         current_layer: Sdf.Layer = tab.layer
         layer_identifier = current_layer.identifier
-        assets_to_update = self._assetsToUpdate[layer_identifier]
+        assets_to_update = self._assetsToUpdate.get(layer_identifier, [])
         
         if not tab.can_be_updated:
             self.log(

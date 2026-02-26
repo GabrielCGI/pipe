@@ -118,13 +118,16 @@ def submit_deadline_job(deadlinePlugin, usd_path):
 
     parent_job = deadlinePlugin.GetJob()
 
+    # Give it a higher prio than the original job, capped at deadline's max prio (100)
+    copy_prio = min(parent_job.JobPriority + 30 , 100)
+
     jobInfo = {
         "Name": f"{parent_job.JobName}_ranch_copy", # Add ranch copy to current job name
         "Plugin": "Python",             
         "Group": RANCH_ONLY,                        # Defined above, the group with only ranch workers (debugranch for now)
-        # "Pool": "urgent",                           # Urgent for ranch scripts to quickly get onto this
-        "SecondaryPool": "none",
-        "Priority": "50",
+        "Pool": parent_job.JobPool,                   
+        "SecondaryPool": "none", 
+        "Priority": copy_prio,
         "Frames": "1",
         "ChunkSize": "1",
         "MachineLimit": "0",

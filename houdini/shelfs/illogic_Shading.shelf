@@ -124,8 +124,6 @@ import ratmanager
 print(ratmanager)
 reload(ratmanager)
 
-print(MODULE_PATH)
-
 ratmanager.run()
 ]]></script>
   </tool>

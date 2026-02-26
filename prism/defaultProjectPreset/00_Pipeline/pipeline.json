@@ -749,7 +749,8 @@
         "PRISM_DEADLINE_HUSK_PATH": "C:/Program Files/Side Effects Software/Houdini 21.0.559/bin/husk.exe",
         "PRISM_HUSK_DEADLINE_GROUP": "husk_grp",
         "PXR_AR_DEFAULT_SEARCH_PATH": "R:/;I:/",
-        "SANITY_CHECK_CONFIG": "I://00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml"
+        "SANITY_CHECK_CONFIG": "I://00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml",
+        "KARMA_XPU_OPTIX_SPARSE_TEXTURES": "1"
     },
     "export_paths": {},
     "render_paths": {},
@@ -947,6 +948,10 @@
                 "name": "Anim"
             },
             {
+                "abbreviation": "set",
+                "name": "SetDress"
+            },
+            {
                 "abbreviation": "lay",
                 "name": "Layout"
             },
@@ -977,10 +982,6 @@
             {
                 "abbreviation": "cpt",
                 "name": "Concept"
-            },
-            {
-                "abbreviation": "set",
-                "name": "SetDress"
             },
             {
                 "abbreviation": "prd",

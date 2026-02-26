@@ -199,7 +199,11 @@ print("End Nuke Init as version 13+")
 nuke.knobDefault("Shuffle.label", "[value in]")
 nuke.knobDefault("Shuffle2.label", "[value in1]")
 
-
 ## edit 2026.01.19 (YYYY.MM.DD)
 ## Add ILCG Suite Scripts and Gizmos
 nuke.pluginAddPath("R:/pipeline/pipe/nuke/gizmos")
+
+## edit 2026.02.24 (YY.MM.DD)
+##  set blur and multiply nodes default configs
+nuke.knobDefault("Multiply.channels", "rgba")
+nuke.knobDefault("Blur.channels", "rgba")

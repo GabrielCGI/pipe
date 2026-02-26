@@ -1,0 +1,1793 @@
+#! C:/Program Files/Nuke15.1v5/nuke-15.1.5.dll -nx
+version 15.1 v5
+Gizmo {
+ inputs 2
+ knobChanged "\n\nnode = nuke.thisNode()\nparent_knob = nuke.thisKnob()\n\nif parent_knob.name() == \"ec_noise\" and parent_knob.value() < 1:\n    node\[\"ec_noise\"].setValue(1)\nelif parent_knob.name() == \"ec_noise\" and parent_knob.value() > 6:\n    node\[\"ec_noise\"].setValue(6)\n\nelif parent_knob.name() == \"ec_noise_variations\" and parent_knob.value() < 0:\n    node\[\"ec_noise_variations\"].setValue(0)\nelif parent_knob.name() == \"ec_noise_variations\" and parent_knob.value() > 6:\n    node\[\"ec_noise_variations\"].setValue(6)\n"
+ tile_color 0x530054ff
+ label "\[value charSelect]"
+ note_font "Verdana Bold"
+ addUserKnob {20 EC_TAB l EC}
+ addUserKnob {26 title_display l "" +STARTLINE T "Display : "}
+ addUserKnob {68 display l "" -STARTLINE M {Result "Noise Map" "" "" ""}}
+ addUserKnob {26 ""}
+ addUserKnob {26 title_char l "" +STARTLINE T "Select Char :"}
+ addUserKnob {68 charSelect l "" -STARTLINE M {CHIP TWIGGY BUCKY SUSAN "" ""}}
+ addUserKnob {26 ""}
+ addUserKnob {26 title_edgecrush l "" +STARTLINE T "Edgecrush :"}
+ addUserKnob {3 ec_noise l "Noise Selection"}
+ ec_noise 3
+ addUserKnob {26 warning_noise01 l "" -STARTLINE T (1-6)}
+ addUserKnob {3 ec_noise_variations l " | Noise Variations" -STARTLINE}
+ ec_noise_variations 6
+ addUserKnob {26 warning_noise02 l "" -STARTLINE T (0-6)}
+ addUserKnob {7 ec_edgepush_out l "EdgePush \[OUT]" R 0 20}
+ ec_edgepush_out 1
+ addUserKnob {7 ec_edgepush_in l "EdgePush \[IN]" R 0 10}
+ ec_edgepush_in 6
+ addUserKnob {26 ""}
+ addUserKnob {26 title_mask l "" +STARTLINE T "Mask :"}
+ addUserKnob {6 mask_invert l invert -STARTLINE}
+ addUserKnob {20 INFO_TAB l INFO}
+ addUserKnob {26 infos l "" +STARTLINE T "info : tool built @ Illogic Studios for RIV.\n\nreleases: \nv0.1 : first release\n"}
+}
+ Input {
+  inputs 0
+  name beauty
+  xpos 0
+  ypos 1
+ }
+set Nd2747c00 [stack 0]
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0 0 0 0 0 0 0 0}
+  matteList *chip*
+  unpremultiply true
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte1
+  label CHIP
+  xpos 270
+  ypos -5
+ }
+ Multiply {
+  value {{"\[python 1\\ if\\ nuke.thisGroup()\\\['charSelect'\\].value()\\ ==\\ \\\"CHIP\\\"\\ else\\ 0]"}}
+  name Multiply1
+  xpos 270
+  ypos 31
+ }
+ Dot {
+  name Dot3
+  xpos 304
+  ypos 178
+ }
+push $Nd2747c00
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0 0 0 0 0 0 0 0}
+  matteList *twiggy*
+  unpremultiply true
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte2
+  label TWIGGY
+  xpos 365
+  ypos -5
+ }
+ Multiply {
+  value {{"\[python 1\\ if\\ nuke.thisGroup()\\\['charSelect'\\].value()\\ ==\\ \\\"TWIGGY\\\"\\ else\\ 0\\n]"}}
+  name Multiply2
+  xpos 365
+  ypos 31
+ }
+ Dot {
+  name Dot2
+  xpos 399
+  ypos 130
+ }
+push $Nd2747c00
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0 0 0 0 0 0 0 0}
+  matteList *bucky*
+  unpremultiply true
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte3
+  label BUCKY
+  xpos 460
+  ypos -5
+ }
+ Multiply {
+  value {{"\[python 1\\ if\\ nuke.thisGroup()\\\['charSelect'\\].value()\\ ==\\ \\\"BUCKY\\\"\\ else\\ 0]"}}
+  name Multiply3
+  xpos 460
+  ypos 31
+ }
+ Dot {
+  name Dot1
+  xpos 494
+  ypos 82
+ }
+push $Nd2747c00
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0 0 0 0 0 0 0 0}
+  matteList *susan*
+  unpremultiply true
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte4
+  label SUSAN
+  xpos 555
+  ypos -5
+ }
+ Multiply {
+  value {{"\[python 1\\ if\\ nuke.thisGroup()\\\['charSelect'\\].value()\\ ==\\ \\\"SUSAN\\\"\\ else\\ 0]"}}
+  name Multiply4
+  xpos 555
+  ypos 31
+ }
+ ChannelMerge {
+  inputs 2
+  name ChannelMerge1
+  xpos 555
+  ypos 67
+ }
+ ChannelMerge {
+  inputs 2
+  name ChannelMerge2
+  xpos 555
+  ypos 115
+ }
+ ChannelMerge {
+  inputs 2
+  name ChannelMerge3
+  xpos 555
+  ypos 163
+ }
+set N1dc6b800 [stack 0]
+ Dot {
+  name Dot4
+  xpos 589
+  ypos 211
+ }
+push $Nd2747c00
+ Unpremult {
+  name Unpremult49
+  xpos 0
+  ypos 178
+ }
+ Multiply {
+  inputs 1+1
+  value 0
+  invert_mask true
+  name Multiply30
+  xpos 0
+  ypos 202
+ }
+ Premult {
+  name Premult12
+  xpos 0
+  ypos 238
+ }
+ Dot {
+  name Dot184
+  xpos 34
+  ypos 417
+ }
+set N8f1e1000 [stack 0]
+ Dot {
+  name Dot185
+  xpos -1012
+  ypos 417
+ }
+ Dot {
+  name Dot186
+  xpos -1012
+  ypos 511
+ }
+set N8f1e1800 [stack 0]
+ Dot {
+  name Dot187
+  xpos -1012
+  ypos 591
+ }
+set N8f1e1c00 [stack 0]
+ Dot {
+  name Dot188
+  xpos -1012
+  ypos 668
+ }
+set N6a732000 [stack 0]
+ Dot {
+  name Dot189
+  xpos -1228
+  ypos 668
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 alpha
+  fromInput2 {{0} B}
+  mappings "4 rgba.alpha 0 0 rgba.alpha 0 3 rgba.alpha 0 0 rgba.red 0 0 rgba.alpha 0 0 rgba.green 0 1 rgba.alpha 0 0 rgba.blue 0 2"
+  name Shuffle47
+  label "\[value in1]"
+  xpos -1262
+  ypos 731
+ }
+ Unpremult {
+  name Unpremult47
+  xpos -1262
+  ypos 767
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
+  name Shuffle48
+  label "\[value in1]"
+  xpos -1262
+  ypos 791
+ }
+ Dot {
+  name Dot217
+  xpos -1228
+  ypos 925
+ }
+set N6a733400 [stack 0]
+ Dot {
+  name Dot218
+  xpos -1228
+  ypos 1306
+ }
+push $N8f1e1000
+ Dot {
+  name Dot6
+  xpos 644
+  ypos 417
+ }
+set N6a733c00 [stack 0]
+ Dot {
+  name Dot220
+  xpos 1230
+  ypos 417
+ }
+set Nfa5e8000 [stack 0]
+add_layer {clumpid_B clumpid_B.x clumpid_B.y clumpid_B.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 clumpid_B
+  out1 rgb
+  fromInput2 {{0} B}
+  mappings "3 clumpid_B.x 0 0 rgba.red 0 0 clumpid_B.y 0 1 rgba.green 0 1 clumpid_B.z 0 2 rgba.blue 0 2"
+  name Shuffle7
+  label "\[value in1]"
+  xpos 1196
+  ypos 459
+ }
+ Dot {
+  name Dot221
+  xpos 1230
+  ypos 535
+ }
+set Nfa5e8800 [stack 0]
+ Dot {
+  name Dot222
+  xpos 1112
+  ypos 535
+ }
+set Nfa5e8c00 [stack 0]
+ Dot {
+  name Dot223
+  xpos 990
+  ypos 535
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.blue 0 2 rgba.red 0 0 rgba.blue 0 2 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.blue 0 2 rgba.alpha 0 3"
+  name Shuffle49
+  xpos 956
+  ypos 579
+ }
+ Multiply {
+  value {{"ec_noise_variations >= 6 ? 1:0"}}
+  name Multiply_6
+  xpos 956
+  ypos 603
+ }
+ Dot {
+  name Dot224
+  xpos 990
+  ypos 1048
+ }
+push $Nfa5e8c00
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.green 0 1 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.green 0 1 rgba.alpha 0 3"
+  name Shuffle50
+  xpos 1078
+  ypos 579
+ }
+ Multiply {
+  value {{"ec_noise_variations >= 5 ? 1:0"}}
+  name Multiply_7
+  xpos 1078
+  ypos 605
+ }
+ Dot {
+  name Dot225
+  xpos 1112
+  ypos 1024
+ }
+push $Nfa5e8800
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.red 0 0 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
+  name Shuffle51
+  xpos 1196
+  ypos 579
+ }
+ Multiply {
+  value {{"ec_noise_variations >= 4 ? 1:0"}}
+  name Multiply_8
+  xpos 1196
+  ypos 603
+ }
+ Dot {
+  name Dot226
+  xpos 1230
+  ypos 1000
+ }
+push $Nfa5e8000
+ Dot {
+  name Dot219
+  xpos 1597
+  ypos 417
+ }
+add_layer {clumpid_A clumpid_A.x clumpid_A.y clumpid_A.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 clumpid_A
+  out1 rgb
+  fromInput2 {{0} B}
+  mappings "3 clumpid_A.x 0 0 rgba.red 0 0 clumpid_A.y 0 1 rgba.green 0 1 clumpid_A.z 0 2 rgba.blue 0 2"
+  name Shuffle6
+  label "\[value in1]"
+  xpos 1563
+  ypos 461
+ }
+ Dot {
+  name Dot227
+  xpos 1597
+  ypos 535
+ }
+set N2b388000 [stack 0]
+ Dot {
+  name Dot228
+  xpos 1477
+  ypos 535
+ }
+set N2b388400 [stack 0]
+ Dot {
+  name Dot229
+  xpos 1357
+  ypos 535
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.blue 0 2 rgba.red 0 0 rgba.blue 0 2 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.blue 0 2 rgba.alpha 0 3"
+  name Shuffle52
+  xpos 1323
+  ypos 579
+ }
+ Multiply {
+  value {{"ec_noise_variations >= 3 ? 1:0"}}
+  name Multiply_9
+  xpos 1323
+  ypos 603
+ }
+ Dot {
+  name Dot230
+  xpos 1357
+  ypos 976
+ }
+push $N2b388400
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.green 0 1 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.green 0 1 rgba.alpha 0 3"
+  name Shuffle53
+  xpos 1443
+  ypos 579
+ }
+ Multiply {
+  value {{"ec_noise_variations >= 2 ? 1:0"}}
+  name Multiply_10
+  xpos 1443
+  ypos 602
+ }
+ Dot {
+  name Dot231
+  xpos 1477
+  ypos 952
+ }
+push $N2b388000
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.red 0 0 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
+  name Shuffle54
+  xpos 1563
+  ypos 579
+ }
+ Multiply {
+  value {{"ec_noise_variations >= 1 ? 1:0"}}
+  name Multiply_1
+  xpos 1563
+  ypos 603
+ }
+ Merge2 {
+  inputs 2
+  operation disjoint-over
+  name Merge63
+  xpos 1563
+  ypos 949
+ }
+ Merge2 {
+  inputs 2
+  operation disjoint-over
+  name Merge66
+  xpos 1563
+  ypos 973
+ }
+ Merge2 {
+  inputs 2
+  operation disjoint-over
+  name Merge67
+  xpos 1563
+  ypos 997
+ }
+ Merge2 {
+  inputs 2
+  operation disjoint-over
+  name Merge68
+  xpos 1563
+  ypos 1021
+ }
+ Merge2 {
+  inputs 2
+  operation disjoint-over
+  name Merge69
+  xpos 1563
+  ypos 1045
+ }
+ Sharpen {
+  size 15
+  name Sharpen2
+  xpos 1563
+  ypos 1069
+ }
+ Clamp {
+  name Clamp5
+  xpos 1563
+  ypos 1105
+ }
+push $N8f1e1c00
+add_layer {noiseFur1 noiseFur1.x noiseFur1.y noiseFur1.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 noiseFur1
+  fromInput2 {{0} B}
+  mappings "4 noiseFur1.x 0 0 rgba.red 0 0 noiseFur1.x 0 0 rgba.green 0 1 noiseFur1.x 0 0 rgba.blue 0 2 noiseFur1.x 0 0 rgba.alpha 0 3"
+  name Shuffle55
+  label "\[value in1]"
+  xpos -912
+  ypos 582
+  disable {{"ec_noise == 1 ? 0:1"}}
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 noiseFur1
+  fromInput2 {{0} B}
+  mappings "4 noiseFur1.y 0 1 rgba.red 0 0 noiseFur1.y 0 1 rgba.green 0 1 noiseFur1.y 0 1 rgba.blue 0 2 noiseFur1.y 0 1 rgba.alpha 0 3"
+  name Shuffle1
+  label "\[value in1]"
+  xpos -817
+  ypos 582
+  disable {{"ec_noise == 2 ? 0:1"}}
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 noiseFur1
+  fromInput2 {{0} B}
+  mappings "4 noiseFur1.z 0 2 rgba.red 0 0 noiseFur1.z 0 2 rgba.green 0 1 noiseFur1.z 0 2 rgba.blue 0 2 noiseFur1.z 0 2 rgba.alpha 0 3"
+  name Shuffle2
+  label "\[value in1]"
+  xpos -723
+  ypos 582
+  disable {{"ec_noise == 3 ? 0:1"}}
+ }
+add_layer {noiseFur2 noiseFur2.x noiseFur2.y noiseFur2.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 noiseFur2
+  fromInput2 {{0} B}
+  mappings "4 noiseFur2.x 0 0 rgba.red 0 0 noiseFur2.x 0 0 rgba.green 0 1 noiseFur2.x 0 0 rgba.blue 0 2 noiseFur2.x 0 0 rgba.alpha 0 3"
+  name Shuffle3
+  label "\[value in1]"
+  xpos -627
+  ypos 582
+  disable {{"ec_noise == 4 ? 0:1"}}
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 noiseFur2
+  fromInput2 {{0} B}
+  mappings "4 noiseFur2.y 0 1 rgba.red 0 0 noiseFur2.y 0 1 rgba.green 0 1 noiseFur2.y 0 1 rgba.blue 0 2 noiseFur2.y 0 1 rgba.alpha 0 3"
+  name Shuffle4
+  label "\[value in1]"
+  xpos -532
+  ypos 582
+  disable {{"ec_noise == 5 ? 0:1"}}
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 noiseFur2
+  fromInput2 {{0} B}
+  mappings "4 noiseFur2.z 0 2 rgba.red 0 0 noiseFur2.z 0 2 rgba.green 0 1 noiseFur2.z 0 2 rgba.blue 0 2 noiseFur2.z 0 2 rgba.alpha 0 3"
+  name Shuffle5
+  label "\[value in1]"
+  xpos -437
+  ypos 582
+  disable {{"ec_noise == 6 ? 0:1"}}
+ }
+ Dot {
+  name Dot5
+  xpos -298
+  ypos 591
+ }
+ Sharpen {
+  name Sharpen1
+  xpos -332
+  ypos 1061
+ }
+ Multiply {
+  inputs 1+1
+  value 0
+  name Multiply23
+  xpos -332
+  ypos 1105
+ }
+ Group {
+  name LumaKeyer3
+  onCreate "n = nuke.thisNode()\nn.knob('blackpoint').setRange(0, 1)\nn.knob('whitepoint').setRange(0, 1)"
+  tile_color 0x421010ff
+  note_font "Bitstream Vera Sans Bold"
+  xpos -332
+  ypos 1229
+  addUserKnob {20 User l lumaKeyer}
+  addUserKnob {4 output M {Alpha RGBA}}
+  output RGBA
+  addUserKnob {41 blackpoint T picker.blackpoint}
+  addUserKnob {41 whitepoint T picker.whitepoint}
+  addUserKnob {6 invert +STARTLINE}
+  addUserKnob {4 smoothing l Smoothing: M {None Smooth Smooth0 Smooth1 ""}}
+  addUserKnob {26 ""}
+  addUserKnob {26 "" l mask T ""}
+  addUserKnob {41 maskChannelInput l "" -STARTLINE T Merge1.maskChannelInput}
+  addUserKnob {41 inject -STARTLINE T Merge1.inject}
+  addUserKnob {41 invert_mask l invert -STARTLINE T Merge1.invert_mask}
+  addUserKnob {41 fringe -STARTLINE T Merge1.fringe}
+  addUserKnob {41 mix T Merge1.mix}
+  addUserKnob {20 info}
+  addUserKnob {22 btn l DerekVFX.ca T "import os\nimport sys\n\ntry:\n    import subprocess\n    def _run(cmd, shell, wait):\n        opener = subprocess.Popen(cmd, shell=shell)\n        if wait:\n            opener.wait()\n        return opener.pid\nexcept ImportError:\n    import popen2\n    def _run(cmd, shell, wait):\n        opener = popen2.Popen3(cmd)\n        if wait:\n            opener.wait()\n        return opener.pid\n\ndef _open(url, wait=0):\n    if sys.platform == \"darwin\":\n        cmd = \[\"open\", url]\n    elif hasattr(os, \"startfile\"):\n        return os.startfile(url)\n    elif os.environ.has_key(\"KDE_FULL_SESSION\") or os.environ.has_key(\"KDE_MULTIHEAD\") or \\\n        os.environ.has_key(\"GNOME_DESKTOP_SESSION_ID\") or os.environ.has_key(\"GNOME_KEYRING_SOCKET\"):\n        cmd = \[\"xdg-open\", url]\n    else:\n        raise OSError, \"Desktop not supported.\"\n\n    return _run(cmd, 0, wait)\n\n_open('http://www.derekvfx.ca/')" +STARTLINE}
+  addUserKnob {26 versionUpdate l "" -STARTLINE T "<font color = gray> adjusted by Tony Lyons </font color = gray>"}
+ }
+  Input {
+   inputs 0
+   name Input1
+   xpos 57
+   ypos -347
+  }
+set N8daa8c00 [stack 0]
+  Colorspace {
+   colorspace_out HSL
+   name Colorspace1
+   xpos -181
+   ypos -181
+  }
+set N8daa9000 [stack 0]
+  Shuffle {
+   red blue
+   green blue
+   alpha blue
+   name Shuffle1
+   tile_color 0x3d3f8e00
+   xpos -336
+   ypos -181
+  }
+  Grade {
+   blackpoint 0.25
+   whitepoint 0.4
+   name picker
+   xpos -336
+   ypos -139
+  }
+  Input {
+   inputs 0
+   name Inputmask
+   xpos 231
+   ypos 446
+   number 1
+  }
+push $N8daa8c00
+  Dot {
+   name Dot5
+   note_font_size 41
+   xpos 91
+   ypos 284
+  }
+set N9544e000 [stack 0]
+push $N8daa9000
+  Expression {
+   expr3 smoothstep(parent.picker.blackpoint,parent.picker.whitepoint,b)
+   name Expression1
+   xpos -181
+   ypos -138
+  }
+  Dot {
+   name Dot1
+   note_font_size 41
+   xpos -147
+   ypos -58
+  }
+set N9544e800 [stack 0]
+  ColorLookup {
+   channels {{{parent.ColorLookup_smooth.channels}}}
+   lut {master {curve L 0 C k 1 s0}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth1
+   xpos -69
+   ypos 33
+  }
+push $N9544e800
+  ColorLookup {
+   channels {{{parent.ColorLookup_smooth.channels}}}
+   lut {master {curve L 0 s0 1}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth0
+   xpos -181
+   ypos 32
+  }
+push $N9544e800
+  ColorLookup {
+   lut {master {curve L 0 s0 C k 1 s0}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth
+   xpos -293
+   ypos 32
+  }
+push $N9544e800
+  Dot {
+   name Dot2
+   note_font_size 41
+   xpos -345
+   ypos -52
+  }
+  Dot {
+   name Dot3
+   note_font_size 41
+   xpos -345
+   ypos 131
+  }
+  Switch {
+   inputs 4
+   which {{parent.smoothing}}
+   name Switch1
+   label "\[value which]"
+   xpos -181
+   ypos 121
+  }
+  Expression {
+   expr3 1-a
+   name Expression2
+   xpos -181
+   ypos 191
+   disable {{"parent.invert == 0"}}
+  }
+  Merge2 {
+   inputs 2
+   operation copy
+   Achannels {rgba.red rgba.green rgba.blue -rgba.alpha}
+   Bchannels {rgba.red rgba.green rgba.blue -rgba.alpha}
+   output {rgba.red rgba.green rgba.blue -rgba.alpha}
+   name Merge2
+   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
+   xpos -181
+   ypos 280
+  }
+  Shuffle {
+   red alpha
+   green alpha
+   blue alpha
+   name Shuffle2
+   tile_color 0xffffffff
+   xpos -181
+   ypos 328
+   disable {{!parent.output}}
+  }
+  Dot {
+   name Dot4
+   note_font_size 41
+   xpos -147
+   ypos 450
+  }
+push $N9544e000
+  Shuffle {
+   alpha black
+   name Shuffle3
+   label "\[value in]"
+   xpos 57
+   ypos 331
+  }
+  Shuffle {
+   red black
+   green black
+   blue black
+   alpha black
+   name Shuffle4
+   label "\[value in]"
+   xpos 57
+   ypos 369
+   disable {{!parent.output}}
+  }
+  Merge2 {
+   inputs 2+1
+   operation copy
+   also_merge rgba
+   name Merge1
+   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
+   xpos 57
+   ypos 446
+  }
+  Output {
+   name Output1
+   xpos 57
+   ypos 602
+  }
+ end_group
+push $Nd2747c00
+ PostageStamp {
+  name beauty1
+  xpos -119
+  ypos 896
+  hide_input true
+ }
+ Dilate {
+  size {{-parent.EdgeFromAlpha.ErodeOutside_size*.25}}
+  name Dilate1
+  xpos -119
+  ypos 921
+ }
+push $N8f1e1800
+ Dot {
+  name Dot233
+  xpos 34
+  ypos 511
+ }
+ Dot {
+  name Dot234
+  xpos 34
+  ypos 696
+ }
+set N8812ac00 [stack 0]
+ Dot {
+  name Dot235
+  xpos -85
+  ypos 696
+ }
+add_layer {masks_hands masks_hands.red masks_hands.green masks_hands.blue}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 masks_hands
+  fromInput2 {{0} B}
+  mappings "4 masks_hands.blue 0 2 rgba.blue 0 2 masks_hands.blue 0 2 rgba.green 0 1 masks_hands.blue 0 2 rgba.red 0 0 masks_hands.blue 0 2 rgba.alpha 0 3"
+  name Shuffle57
+  label "\[value in1]"
+  xpos -119
+  ypos 720
+ }
+ Dot {
+  name Dot236
+  xpos -85
+  ypos 759
+ }
+push $N8812ac00
+add_layer {masks_face masks_face.red masks_face.green masks_face.blue}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 masks_face
+  fromInput2 {{0} B}
+  mappings "4 masks_face.blue 0 2 rgba.blue 0 2 masks_face.blue 0 2 rgba.red 0 0 masks_face.blue 0 2 rgba.green 0 1 masks_face.blue 0 2 rgba.alpha 0 3"
+  name Shuffle58
+  label "\[value in1]"
+  xpos 0
+  ypos 720
+ }
+ Merge2 {
+  inputs 2
+  name Merge70
+  xpos 0
+  ypos 756
+ }
+ Dot {
+  name Dot9
+  xpos 34
+  ypos 793
+ }
+set N94766400 [stack 0]
+ Dot {
+  name Dot11
+  xpos -200
+  ypos 793
+ }
+ Group {
+  name EdgeFromAlpha
+  note_font Verdana
+  xpos -234
+  ypos 849
+  mapsize {0.15 0.15}
+  addUserKnob {20 "" l Settings}
+  addUserKnob {41 from0 l "control channel" T Copy2.from0}
+  addUserKnob {41 output T ChannelMerge4.output}
+  addUserKnob {41 blackpoint T Grade1.blackpoint}
+  addUserKnob {41 whitepoint T Grade1.whitepoint}
+  addUserKnob {26 "" l "edge size"}
+  addUserKnob {41 size l inside T ErodeInside.size}
+  addUserKnob {14 ErodeOutside_size l outside R 0 100}
+  ErodeOutside_size {{-parent.XDistort1.distort*16}}
+  addUserKnob {26 "" l "edge blur"}
+  addUserKnob {41 size_3 l inside T BlurInside.size}
+  addUserKnob {41 size_1 l outside T BlurOutside.size}
+ }
+  Input {
+   inputs 0
+   name Input1
+   xpos -448
+   ypos 2
+  }
+  AddChannels {
+   channels {rgba.red -rgba.green -rgba.blue rgba.alpha}
+   name AddChannels1
+   xpos -448
+   ypos 30
+  }
+set N94767000 [stack 0]
+push $N94767000
+  Copy {
+   inputs 2
+   from0 rgba.alpha
+   to0 rgba.red
+   name Copy2
+   xpos -193
+   ypos 30
+  }
+  Clamp {
+   channels {rgba.red -rgba.green -rgba.blue none}
+   name Clamp1
+   xpos -193
+   ypos 94
+  }
+  Grade {
+   channels {rgba.red -rgba.green -rgba.blue none}
+   black_clamp false
+   name Grade1
+   xpos -193
+   ypos 146
+  }
+set N94767c00 [stack 0]
+  Erode {
+   channels {none none none rgba.red}
+   size 0
+   name ErodeInside
+   xpos -126
+   ypos 198
+  }
+  Blur {
+   channels {rgba.red -rgba.green -rgba.blue none}
+   name BlurInside
+   xpos -126
+   ypos 250
+  }
+push $N94767c00
+  Erode {
+   channels {none none none rgba.red}
+   size {{-parent.ErodeOutside_size.w} {-parent.ErodeOutside_size.h}}
+   name ErodeOutside
+   xpos -264
+   ypos 199
+  }
+  Blur {
+   channels {rgba.red -rgba.green -rgba.blue none}
+   name BlurOutside
+   xpos -264
+   ypos 251
+  }
+  ChannelMerge {
+   inputs 2
+   A rgba.red
+   operation stencil
+   B rgba.red
+   name ChannelMerge4
+   xpos -191
+   ypos 308
+  }
+set N92ab5000 [stack 0]
+  Dot {
+   name Dot1
+   xpos -52
+   ypos 324
+  }
+  Dot {
+   name Dot2
+   xpos -52
+   ypos 465
+  }
+push $N94767000
+  Dot {
+   name Dot3
+   xpos -414
+   ypos 416
+  }
+push $N92ab5000
+  Copy {
+   inputs 2
+   from0 rgba.red
+   to0 rgba.red
+   name Copy1
+   xpos -191
+   ypos 407
+  }
+  Switch {
+   inputs 2
+   which {{"parent.output == 1" i}}
+   name Switch1
+   xpos -191
+   ypos 463
+  }
+  Output {
+   name Output1
+   xpos -191
+   ypos 526
+  }
+ end_group
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 alpha
+  fromInput2 {{0} B}
+  mappings "4 rgba.alpha 0 0 rgba.alpha 0 3 rgba.alpha 0 0 rgba.red 0 0 rgba.alpha 0 0 rgba.green 0 1 rgba.alpha 0 0 rgba.blue 0 2"
+  name Shuffle8
+  label "\[value in1]"
+  xpos -234
+  ypos 885
+ }
+ Multiply {
+  inputs 1+1
+  value 0
+  name Multiply7
+  xpos -234
+  ypos 921
+ }
+ Dot {
+  name Dot10
+  xpos -200
+  ypos 1002
+ }
+push $N94766400
+ ChannelMerge {
+  inputs 2
+  name ChannelMerge4
+  xpos 0
+  ypos 987
+ }
+ Dot {
+  name Dot237
+  xpos 34
+  ypos 1181
+ }
+push $N6a733400
+push $N6a732000
+ Group {
+  inputs 2
+  name XDistort1
+  help "Create distortion with great control and flexibility."
+  knobChanged "n = nuke.thisNode()\nif n.input(2):\n    n\[\"mask\"].setEnabled(True)\nelse:\n    n\[\"mask\"].setEnabled(False)\n    \n    \nif n\[\"distort_from\"].value() == \"Noise\":\n    n\[\"noise_size\"].setVisible(True)\n    n\[\"noise_z\"].setVisible(True)\nelse:\n    n\[\"noise_size\"].setVisible(False)\n    n\[\"noise_z\"].setVisible(False)\n\nif n\[\"enable_chroma\"].value() == 1:\n    n\[\"aberration\"].setVisible(True)\n    n\[\"blur_aberration\"].setVisible(True)\nelse:\n    n\[\"aberration\"].setVisible(False)\n    n\[\"blur_aberration\"].setVisible(False)\n    \nn\[\"mix\"].setValue(min(max(0,n\[\"mix\"].value()),1))\nn\[\"blur_map\"].setValue(max(0,n\[\"blur_map\"].value()))\nn\[\"max_blur\"].setValue(max(0,n\[\"max_blur\"].value()))\n"
+  tile_color 0x540054ff
+  note_font "Verdana Bold"
+  note_font_color 0xffffffff
+  xpos -1046
+  ypos 922
+  addUserKnob {20 X_Distort}
+  addUserKnob {6 aberration_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  aberration_panelDropped true
+  addUserKnob {41 "Local GPU: " T BlinkScript.gpuName}
+  addUserKnob {41 "Use GPU if Available" T BlinkScript.useGPUIfAvailable}
+  addUserKnob {26 ""}
+  addUserKnob {7 distort t "The amount of displacement going to be applied." R -100 100}
+  distort {{-parent.ec_edgepush_out}}
+  addUserKnob {7 blur t "The amount of smoothing going to be applied." R -100 100}
+  blur 2
+  addUserKnob {3 max_blur l max t "Limit the vector blur to this number of samples.\nVector Blur can be expensive, this limits the time it takes to render, but sometimes artifacts can appear.\n\nSetting this parameter to 0 will disable the limit." -STARTLINE}
+  max_blur 50
+  addUserKnob {7 direction t "The direction of the generated vector map:\n\n  <b>At 0:</b> Pixels will be attracted to the brighter areas.\n  <b>At 0.5:</b> Pixels will be attracted to the darker areas.\n  <b>At 0.25 or .75:</b> Pixels will spin around the bright ans dark areas.\n\nThis pattern repeats, so a value of 1 will produce the same result as a value of 0 and a value of 0.5 will produce the same result as a value of 1.5."}
+  direction 0.5
+  addUserKnob {4 filter t "<b>impulse</b> very fast but can sometimes show pixelation or moire patterns.\n<b>bilinear</b> slower but smoothes out  most artifacts or unwanted patterns." M {impulse bilinear}}
+  filter bilinear
+  addUserKnob {26 ""}
+  addUserKnob {4 distort_from l "distortion from" t "Choose where do you want to create the distortion map from:\n\n<b>· Auto</b> will look at the inputs of the node and decid which one to use.\n<b>· Source</b> will distort the image using the information on the original image.\n<b>· Dist Map</b> will distort the image using the information on the secondary input of this node.\n<b>· Noise</b> will generate an animated fractal that will be used to create the distortion map." M {Auto Source Map Noise "" ""}}
+  distort_from Map
+  addUserKnob {6 use_all_channels l "use all channels" t "By default the distortion map will be generated from the average of the rgb channel. If this setting is enabled the channels will be paired up.\nThe red from the source will be distorted with the red from the map, the green with the green and so on. This allows you to have different distortion maps per each channel." -STARTLINE}
+  addUserKnob {7 noise_size l size t "The relative frequency of the turbulence pattern. Big values will generate low frequency distortion." +HIDDEN R 1 1000}
+  noise_size 100
+  addUserKnob {7 noise_z l z t "Use this to animate the noise pattern.\nFor instance you could try with the expression \"frame/100\".\n\nRight click --> Add expression" -STARTLINE +HIDDEN}
+  noise_z 4.815162342
+  addUserKnob {7 blur_map l "blur map" t "Filter the map to make it smoother and get rid of the high frequency distortions. Increase this value to make a smoother distortion." R 0 100}
+  blur_map 500
+  addUserKnob {6 fast_blur_map l fast t "Uses a multipass blur that, altough not as accurate as a bruteforce blur, gets rid of the artifacts at a reduced cost. It is recommended to keep this on." -STARTLINE}
+  fast_blur_map true
+  addUserKnob {26 ""}
+  addUserKnob {6 enable_chroma l "chromatic aberration" t "Enable per-channel control on the distortion." +STARTLINE}
+  addUserKnob {19 aberration l distort t "This is a multiplier on the distortion for every channel. Use this to simulate light frequencies being separated." +HIDDEN R -2 2}
+  aberration {1.2 1 0.8 1}
+  addUserKnob {6 aberration_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {6 aberration_panelDropped_1 l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {19 blur_aberration l blur t "This is a multiplier on the blur for every channel. Use this to simulate light frequencies being separated." +HIDDEN}
+  blur_aberration {1 1 1 1}
+  addUserKnob {6 blur_aberration_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {6 blur_aberration_panelDropped_1 l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {26 ""}
+  addUserKnob {4 output_form l output t "Choose what type of data you would like to output.\n\n<b>Result</b> will output the distorted and filtered input.\n<b>STMap</b> will output a UV map to be used in conjunction with the STMap node.\n<b>IDistort</b> will output a displacement map to be used in conjunction with the IDistort node." M {Result STMap IDistort ""}}
+  addUserKnob {41 mask l "  mask" t "This will mask the distortion map before the effect. Use this to limit the influence of the distortion to certain areas." -STARTLINE T Mask.maskChannelMask}
+  addUserKnob {6 invert_mask l invert t "invert the effect of the mask" -STARTLINE}
+  addUserKnob {41 fringe t "Limits the effect on the edges of the mask." -STARTLINE T Mask.fringe}
+  addUserKnob {7 mix t "Blend between the original source and the applied effect."}
+  mix 1
+  addUserKnob {20 Settings l "GPU Settings"}
+  addUserKnob {20 about l About}
+  addUserKnob {26 about_1 l "" t "A bunny:\n(\\(\\ \n( - -)\n((') (')" +STARTLINE T "<br>\n<b>Xavier Martín © 2017</b>"}
+  addUserKnob {26 ""}
+  addUserKnob {26 website l "" +STARTLINE T "<a href=\"http://www.xaviermartinvfx.com\"><span style=\"color:#C8C8C8;\">www.xaviermartinvfx.com</span></a>"}
+  addUserKnob {26 space4_1 l "" +STARTLINE T <br>}
+  addUserKnob {22 version l <center>version</center> T "nuke.message('X_Distort Gizmo <i>v4.1</i><br><b>Xavier Martín © 2017</b>')" +STARTLINE}
+  addUserKnob {22 help_documentation l <center>?</center> -STARTLINE T "nuke.message('You can find more documentation<br>on <a href=\"http://www.nukepedia.com/gizmos/transform/x_distort\"><span style=\"color:#BCBCBC;\">Nukepedia</span></a> or my <a href=\"http://www.xaviermartinvfx.com/x_distort/\"><span style=\"color:#BCBCBC;\">website</span></a>.')"}
+ }
+  Input {
+   inputs 0
+   name InputSrc
+   xpos -140
+   ypos -460
+  }
+  Dot {
+   name Dot3
+   xpos -106
+   ypos -406
+  }
+set Nabfe6000 [stack 0]
+  Dot {
+   name Dot2
+   xpos 94
+   ypos -406
+  }
+set Nabfe6400 [stack 0]
+  Dot {
+   name Dot1
+   xpos 94
+   ypos -356
+  }
+set Nabfe6800 [stack 0]
+  Noise {
+   cliptype bbox
+   replace true
+   size {{parent.noise_size}}
+   zoffset {{parent.noise_z}}
+   gamma 1
+   center {1024 778}
+   name Noise1
+   xpos 60
+   ypos -310
+  }
+  Input {
+   inputs 0
+   name InputDist_Map
+   xpos 260
+   ypos -460
+   number 1
+  }
+  AdjBBox {
+   numpixels 1
+   name AdjBBox2
+   xpos 260
+   ypos -436
+  }
+set Nabfe7800 [stack 0]
+push $Nabfe6800
+push $Nabfe7800
+push $Nabfe6400
+  Switch {
+   inputs 2
+   which {{parent.input1.name+1}}
+   name Auto
+   xpos 160
+   ypos -360
+  }
+  Switch {
+   inputs 4
+   which {{distort_from}}
+   name Switch1
+   xpos 260
+   ypos -310
+  }
+  Remove {
+   operation keep
+   channels rgba
+   name Remove1
+   xpos 260
+   ypos -258
+  }
+  Saturation {
+   saturation 0
+   mode Average
+   name Saturation1
+   xpos 260
+   ypos -210
+   disable {{use_all_channels}}
+  }
+  Remove {
+   operation keep
+   channels {rgba.red -rgba.green -rgba.blue -rgba.alpha}
+   name Remove2
+   xpos 260
+   ypos -160
+   disable {{use_all_channels}}
+  }
+set N36d2a400 [stack 0]
+  Dot {
+   name Dot6
+   xpos 194
+   ypos -156
+  }
+  Dot {
+   name Dot7
+   xpos 194
+   ypos 144
+  }
+  Input {
+   inputs 0
+   name Inputmask
+   xpos 460
+   ypos -10
+   number 2
+  }
+  Dot {
+   name Dot9
+   xpos 494
+   ypos 94
+  }
+push $N36d2a400
+  Blur {
+   size {{blur_map}}
+   quality {{parent.fast_blur_map?15:blur_map+1}}
+   crop false
+   name Blur1
+   xpos 260
+   ypos -116
+   disable {{size<1}}
+  }
+  Blur {
+   size {{blur_map/15}}
+   crop false
+   name Blur2
+   xpos 260
+   ypos -66
+   disable {{(size<1)+(1-parent.fast_blur_map)}}
+  }
+  Blur {
+   size {{blur_map/225}}
+   crop false
+   name Blur3
+   xpos 260
+   ypos -16
+   disable {{(size<1)+(1-parent.fast_blur_map)}}
+  }
+  Shuffle {
+   green red
+   blue red
+   alpha red
+   name Shuffle1
+   xpos 260
+   ypos 40
+   disable {{use_all_channels}}
+  }
+  Multiply {
+   inputs 1+1
+   value 0
+   invert_mask {{1-parent.invert_mask}}
+   name Mask
+   xpos 260
+   ypos 84
+   disable {{parent.inputs!=3}}
+  }
+  CopyBBox {
+   inputs 2
+   name CopyBBox1
+   xpos 260
+   ypos 140
+  }
+  Dot {
+   name Dot8
+   xpos 294
+   ypos 194
+  }
+set N9f29b000 [stack 0]
+  BlinkScript {
+   ProgramGroup 1
+   KernelDescription "2 \"X_Distort\" iterate pixelWise c808228749d48a9f044958c8efc9a2b21aa668de9616076bf59cb1bcfcd28dcc 2 \"map\" Read Ranged2D \"dst\" Write Point 4 \"distortion\" Float 4 AAAAAAAAAAAAAAAAAAAAAA== \"direction\" Float 1 AAAAAA== \"stmap\" Int 1 AAAAAA== \"format\" Int 2 AAAAAAAAAAA= 4 \"distortion\" 4 1 \"direction\" 1 1 \"stmap\" 1 1 \"format\" 2 1 4 \"maprangeMin\" Int 2 1 AAAAAAAAAAA= \"maprangeMax\" Int 2 1 AAAAAAAAAAA= \"mapconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA== \"rotate\" Float 2 1 AAAAAAAAAAA="
+   kernelSource "kernel X_Distort : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRanged2D, eEdgeConstant> map; // the distortion map image\n  Image<eWrite> dst; // the output image\n\n  param:\n    float4 distortion;\n    float direction;\n    int stmap;\n    int2 format;\n\n  local:\n    float2 rotate;\n\n  void init() \{\n    // Initialise trigonometric functions.\n    rotate = float2(sin(direction*6.28318f),\n                    cos(direction*6.28318f));\n    map.setRange(-1,-1,1,1);\n  \}\n\n  void process(int2 pos) \{\n\n    // Sample gradient\n    float2 distort;\n    distort = float2(map(1,0,0)-map(-1,0,0),\n                    map(0,1,0)-map(0,-1,0));\n\n    // Rotate vector\n    distort = float2(distort.x*rotate.y+distort.y*rotate.x,\n                    -distort.x*rotate.x+distort.y*rotate.y);\n    distort *= distortion.x;\n\n    if(stmap==1)\n      distort = (distort+float2(pos.x,pos.y))/float2(format.x,format.y);\n\n    dst() = float4(distort.x,distort.y,0,0);\n  \}\n\};\n"
+   useGPUIfAvailable {{parent.BlinkScript.useGPUIfAvailable}}
+   rebuild ""
+   X_Distort_distortion {{parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2}}
+   X_Distort_direction {{parent.direction+.5}}
+   X_Distort_stmap {{2-output_form}}
+   X_Distort_format {{width} {height}}
+   rebuild_finalise ""
+   name BlinkScript1
+   xpos 260
+   ypos 234
+  }
+  Dot {
+   name Dot11
+   xpos 294
+   ypos 344
+  }
+push $N9f29b000
+push $Nabfe6000
+  AdjBBox {
+   numpixels 1
+   name AdjBBox1
+   xpos -140
+   ypos -360
+  }
+  Dot {
+   name Dot10
+   xpos -106
+   ypos 144
+  }
+  BlinkScript {
+   inputs 2
+   ProgramGroup 1
+   KernelDescription "1 \"X_Distort\" iterate componentWise b9627c0324b2a89d1b941c7c64b5afb3310f15cfcf6b1f077dd0574498415168 3 \"src\" Read Random \"map\" Read Ranged2D \"dst\" Write Point 5 \"distortion\" Float 4 AAAAAAAAAAAAAAAAAAAAAA== \"vector_blur\" Float 4 AAAAAAAAAAAAAAAAAAAAAA== \"direction\" Float 1 AAAAAA== \"filter\" Int 1 AAAAAA== \"max_steps\" Int 1 AAAAAA=="
+   kernelSource "kernel X_Distort : ImageComputationKernel<eComponentWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeClamped> src; // the input image\n  Image<eRead, eAccessRanged2D, eEdgeClamped> map; // the distortion map image\n  Image<eWrite> dst; // the output image\n\n  param:\n    float4 distortion;\n    float4 vector_blur;\n    float direction;\n    int filter;\n    int max_steps;\n\n  local:\n    float2 rotate;\n\n  void init() \{\n    // Initialise trigonometric functions.\n    rotate = float2(sin(direction*6.28318f),\n                    cos(direction*6.28318f));\n    map.setRange(-1,-1,1,1);\n  \}\n\n  void process(int3 pos) \{\n\n    // Sample gradient\n    float2 distort;\n    distort = float2(map(1,0)-map(-1,0),\n                    map(0,1)-map(0,-1));\n\n    // Rotate vector\n    distort = float2(distort.x*rotate.y+distort.y*rotate.x,\n                    -distort.x*rotate.x+distort.y*rotate.y);\n\n    // Sample source (no blur)\n    if(fabs(vector_blur\[pos.z])<0.01)\{\n      distort *= distortion\[pos.z];\n      distort += float2(pos.x,pos.y);\n      if(filter==0)\n        dst() = src(int(distort.x),int(distort.y));\n      else\n        dst() = bilinear(src,distort.x,distort.y);\n    \}\n\n    else \{\n\n    // If vector blur is enabled\n    // Create vector blur final coordiantes\n      float2 blur = distort;\n      blur *= distortion\[pos.z]+vector_blur\[pos.z];\n      blur += float2(pos.x,pos.y);\n      distort *= distortion\[pos.z];\n      distort += float2(pos.x,pos.y);\n\n    // Calculate length of the blur\n      int distance;\n      distance = ceil(length(distort-blur));\n      if(max_steps>0)\n        distance = min(distance,max_steps);\n\n\n    // Accumulate pixels through blur\n      if(filter==0)\{\n        float sum = src(int(distort.x),int(distort.y));\n        float step = 0.0f;\n        float2 dist_blur;\n        for(int i = 0; i < distance; i++)\{\n          step = float(i)/(distance);\n          dist_blur = distort*step+blur*(1.0-step);\n          sum += src(int(dist_blur.x),int(dist_blur.y));\n        \}\n        dst() = sum/(distance+1);\n      \}\n\n      else \{\n        float sum = bilinear(src,distort.x,distort.y);\n        float step = 0.0f;\n        float2 dist_blur;\n        for(int i = 0; i < distance; i++)\{\n          step = float(i)/(distance);\n          dist_blur = distort*step+blur*(1.0-step);\n          sum += bilinear(src,dist_blur.x,dist_blur.y);\n        \}\n        dst() = sum/(distance+1);\n      \}\n    \}\n  \}\n\};\n"
+   rebuild ""
+   X_Distort_distortion {{parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2}}
+   X_Distort_vector_blur {{parent.blur*(blur_map+1)*((blur_aberration-1)*enable_chroma+1)*2} {parent.blur*(blur_map+1)*((blur_aberration-1)*enable_chroma+1)*2} {parent.blur*(blur_map+1)*((blur_aberration-1)*enable_chroma+1)*2} {parent.blur*(blur_map+1)*((blur_aberration-1)*enable_chroma+1)*2}}
+   X_Distort_direction {{parent.direction+.5}}
+   X_Distort_filter {{filter}}
+   X_Distort_max_steps {{max_blur}}
+   rebuild_finalise ""
+   name BlinkScript
+   xpos -140
+   ypos 184
+  }
+push $Nabfe6000
+  Dot {
+   name Dot5
+   xpos -206
+   ypos -406
+  }
+  Dot {
+   name Dot4
+   xpos -206
+   ypos 294
+  }
+  Dissolve {
+   inputs 2
+   channels rgba
+   which {{parent.mix}}
+   name Dissolve1
+   xpos -140
+   ypos 291
+  }
+  Switch {
+   inputs 2
+   which {{output_form}}
+   name Switch3
+   xpos -140
+   ypos 340
+  }
+  Output {
+   name Output1
+   xpos -140
+   ypos 440
+  }
+push $N9f29b000
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+  Viewer {
+   inputs 10
+   frame_range 1001-1100
+   fps 25
+   input_number 9
+   monitorOutNDISenderName "Nuke - testShot-testComp_testCompo_v037 - Viewer1"
+   name Viewer1
+   xpos 370
+   ypos -460
+  }
+ end_group
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  name Multiply24
+  xpos -1046
+  ypos 1178
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  invert_mask true
+  name Multiply25
+  xpos -1046
+  ypos 1235
+ }
+ Group {
+  inputs 2
+  name XDistort2
+  help "Create distortion with great control and flexibility."
+  knobChanged "n = nuke.thisNode()\nif n.input(2):\n    n\[\"mask\"].setEnabled(True)\nelse:\n    n\[\"mask\"].setEnabled(False)\n    \n    \nif n\[\"distort_from\"].value() == \"Noise\":\n    n\[\"noise_size\"].setVisible(True)\n    n\[\"noise_z\"].setVisible(True)\nelse:\n    n\[\"noise_size\"].setVisible(False)\n    n\[\"noise_z\"].setVisible(False)\n\nif n\[\"enable_chroma\"].value() == 1:\n    n\[\"aberration\"].setVisible(True)\n    n\[\"blur_aberration\"].setVisible(True)\nelse:\n    n\[\"aberration\"].setVisible(False)\n    n\[\"blur_aberration\"].setVisible(False)\n    \nn\[\"mix\"].setValue(min(max(0,n\[\"mix\"].value()),1))\nn\[\"blur_map\"].setValue(max(0,n\[\"blur_map\"].value()))\nn\[\"max_blur\"].setValue(max(0,n\[\"max_blur\"].value()))\n"
+  tile_color 0x540054ff
+  note_font "Verdana Bold"
+  note_font_color 0xffffffff
+  xpos -1046
+  ypos 1303
+  addUserKnob {20 X_Distort}
+  addUserKnob {6 aberration_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  aberration_panelDropped true
+  addUserKnob {41 "Local GPU: " T BlinkScript.gpuName}
+  addUserKnob {41 "Use GPU if Available" T BlinkScript.useGPUIfAvailable}
+  addUserKnob {26 ""}
+  addUserKnob {7 distort t "The amount of displacement going to be applied." R -100 100}
+  distort {{-parent.XDistort1.distort*1.5}}
+  addUserKnob {7 blur t "The amount of smoothing going to be applied." R -100 100}
+  blur 1
+  addUserKnob {3 max_blur l max t "Limit the vector blur to this number of samples.\nVector Blur can be expensive, this limits the time it takes to render, but sometimes artifacts can appear.\n\nSetting this parameter to 0 will disable the limit." -STARTLINE}
+  max_blur 50
+  addUserKnob {7 direction t "The direction of the generated vector map:\n\n  <b>At 0:</b> Pixels will be attracted to the brighter areas.\n  <b>At 0.5:</b> Pixels will be attracted to the darker areas.\n  <b>At 0.25 or .75:</b> Pixels will spin around the bright ans dark areas.\n\nThis pattern repeats, so a value of 1 will produce the same result as a value of 0 and a value of 0.5 will produce the same result as a value of 1.5."}
+  direction 0.5
+  addUserKnob {4 filter t "<b>impulse</b> very fast but can sometimes show pixelation or moire patterns.\n<b>bilinear</b> slower but smoothes out  most artifacts or unwanted patterns." M {impulse bilinear}}
+  filter bilinear
+  addUserKnob {26 ""}
+  addUserKnob {4 distort_from l "distortion from" t "Choose where do you want to create the distortion map from:\n\n<b>· Auto</b> will look at the inputs of the node and decid which one to use.\n<b>· Source</b> will distort the image using the information on the original image.\n<b>· Dist Map</b> will distort the image using the information on the secondary input of this node.\n<b>· Noise</b> will generate an animated fractal that will be used to create the distortion map." M {Auto Source Map Noise "" ""}}
+  distort_from Map
+  addUserKnob {6 use_all_channels l "use all channels" t "By default the distortion map will be generated from the average of the rgb channel. If this setting is enabled the channels will be paired up.\nThe red from the source will be distorted with the red from the map, the green with the green and so on. This allows you to have different distortion maps per each channel." -STARTLINE}
+  use_all_channels true
+  addUserKnob {7 noise_size l size t "The relative frequency of the turbulence pattern. Big values will generate low frequency distortion." +HIDDEN R 1 1000}
+  noise_size 100
+  addUserKnob {7 noise_z l z t "Use this to animate the noise pattern.\nFor instance you could try with the expression \"frame/100\".\n\nRight click --> Add expression" -STARTLINE +HIDDEN}
+  noise_z 4.815162342
+  addUserKnob {7 blur_map l "blur map" t "Filter the map to make it smoother and get rid of the high frequency distortions. Increase this value to make a smoother distortion." R 0 100}
+  blur_map 500
+  addUserKnob {6 fast_blur_map l fast t "Uses a multipass blur that, altough not as accurate as a bruteforce blur, gets rid of the artifacts at a reduced cost. It is recommended to keep this on." -STARTLINE}
+  fast_blur_map true
+  addUserKnob {26 ""}
+  addUserKnob {6 enable_chroma l "chromatic aberration" t "Enable per-channel control on the distortion." +STARTLINE}
+  addUserKnob {19 aberration l distort t "This is a multiplier on the distortion for every channel. Use this to simulate light frequencies being separated." +HIDDEN R -2 2}
+  aberration {1.2 1 0.8 1}
+  addUserKnob {6 aberration_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {6 aberration_panelDropped_1 l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {19 blur_aberration l blur t "This is a multiplier on the blur for every channel. Use this to simulate light frequencies being separated." +HIDDEN}
+  blur_aberration {1 1 1 1}
+  addUserKnob {6 blur_aberration_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {6 blur_aberration_panelDropped_1 l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {26 ""}
+  addUserKnob {4 output_form l output t "Choose what type of data you would like to output.\n\n<b>Result</b> will output the distorted and filtered input.\n<b>STMap</b> will output a UV map to be used in conjunction with the STMap node.\n<b>IDistort</b> will output a displacement map to be used in conjunction with the IDistort node." M {Result STMap IDistort ""}}
+  addUserKnob {41 mask l "  mask" t "This will mask the distortion map before the effect. Use this to limit the influence of the distortion to certain areas." -STARTLINE T Mask.maskChannelMask}
+  addUserKnob {6 invert_mask l invert t "invert the effect of the mask" -STARTLINE}
+  invert_mask true
+  addUserKnob {41 fringe t "Limits the effect on the edges of the mask." -STARTLINE T Mask.fringe}
+  addUserKnob {7 mix t "Blend between the original source and the applied effect."}
+  mix 1
+  addUserKnob {20 Settings l "GPU Settings"}
+  addUserKnob {20 about l About}
+  addUserKnob {26 about_1 l "" t "A bunny:\n(\\(\\ \n( - -)\n((') (')" +STARTLINE T "<br>\n<b>Xavier Martín © 2017</b>"}
+  addUserKnob {26 ""}
+  addUserKnob {26 website l "" +STARTLINE T "<a href=\"http://www.xaviermartinvfx.com\"><span style=\"color:#C8C8C8;\">www.xaviermartinvfx.com</span></a>"}
+  addUserKnob {26 space4_1 l "" +STARTLINE T <br>}
+  addUserKnob {22 version l <center>version</center> T "nuke.message('X_Distort Gizmo <i>v4.1</i><br><b>Xavier Martín © 2017</b>')" +STARTLINE}
+  addUserKnob {22 help_documentation l <center>?</center> -STARTLINE T "nuke.message('You can find more documentation<br>on <a href=\"http://www.nukepedia.com/gizmos/transform/x_distort\"><span style=\"color:#BCBCBC;\">Nukepedia</span></a> or my <a href=\"http://www.xaviermartinvfx.com/x_distort/\"><span style=\"color:#BCBCBC;\">website</span></a>.')"}
+ }
+  Input {
+   inputs 0
+   name InputSrc
+   xpos -140
+   ypos -460
+  }
+  Dot {
+   name Dot3
+   xpos -106
+   ypos -406
+  }
+set Nfbefcc00 [stack 0]
+  Dot {
+   name Dot2
+   xpos 94
+   ypos -406
+  }
+set Nfbefd000 [stack 0]
+  Dot {
+   name Dot1
+   xpos 94
+   ypos -356
+  }
+set Nfbefd400 [stack 0]
+  Noise {
+   cliptype bbox
+   replace true
+   size {{parent.noise_size}}
+   zoffset {{parent.noise_z}}
+   gamma 1
+   center {1024 778}
+   name Noise1
+   xpos 60
+   ypos -310
+  }
+  Input {
+   inputs 0
+   name InputDist_Map
+   xpos 260
+   ypos -460
+   number 1
+  }
+  AdjBBox {
+   numpixels 1
+   name AdjBBox2
+   xpos 260
+   ypos -436
+  }
+set Nebed6400 [stack 0]
+push $Nfbefd400
+push $Nebed6400
+push $Nfbefd000
+  Switch {
+   inputs 2
+   which {{parent.input1.name+1}}
+   name Auto
+   xpos 160
+   ypos -360
+  }
+  Switch {
+   inputs 4
+   which {{distort_from}}
+   name Switch1
+   xpos 260
+   ypos -310
+  }
+  Remove {
+   operation keep
+   channels rgba
+   name Remove1
+   xpos 260
+   ypos -258
+  }
+  Saturation {
+   saturation 0
+   mode Average
+   name Saturation1
+   xpos 260
+   ypos -210
+   disable {{use_all_channels}}
+  }
+  Remove {
+   operation keep
+   channels {rgba.red -rgba.green -rgba.blue -rgba.alpha}
+   name Remove2
+   xpos 260
+   ypos -160
+   disable {{use_all_channels}}
+  }
+set Nebed7000 [stack 0]
+  Dot {
+   name Dot6
+   xpos 194
+   ypos -156
+  }
+  Dot {
+   name Dot7
+   xpos 194
+   ypos 144
+  }
+  Input {
+   inputs 0
+   name Inputmask
+   xpos 460
+   ypos -10
+   number 2
+  }
+  Dot {
+   name Dot9
+   xpos 494
+   ypos 94
+  }
+push $Nebed7000
+  Blur {
+   size {{blur_map}}
+   quality {{parent.fast_blur_map?15:blur_map+1}}
+   crop false
+   name Blur1
+   xpos 260
+   ypos -116
+   disable {{size<1}}
+  }
+  Blur {
+   size {{blur_map/15}}
+   crop false
+   name Blur2
+   xpos 260
+   ypos -66
+   disable {{(size<1)+(1-parent.fast_blur_map)}}
+  }
+  Blur {
+   size {{blur_map/225}}
+   crop false
+   name Blur3
+   xpos 260
+   ypos -16
+   disable {{(size<1)+(1-parent.fast_blur_map)}}
+  }
+  Shuffle {
+   green red
+   blue red
+   alpha red
+   name Shuffle1
+   xpos 260
+   ypos 40
+   disable {{use_all_channels}}
+  }
+  Multiply {
+   inputs 1+1
+   value 0
+   invert_mask {{1-parent.invert_mask}}
+   name Mask
+   xpos 260
+   ypos 84
+   disable {{parent.inputs!=3}}
+  }
+  CopyBBox {
+   inputs 2
+   name CopyBBox1
+   xpos 260
+   ypos 140
+  }
+  Dot {
+   name Dot8
+   xpos 294
+   ypos 194
+  }
+set N157c9c00 [stack 0]
+  BlinkScript {
+   ProgramGroup 1
+   KernelDescription "2 \"X_Distort\" iterate pixelWise c808228749d48a9f044958c8efc9a2b21aa668de9616076bf59cb1bcfcd28dcc 2 \"map\" Read Ranged2D \"dst\" Write Point 4 \"distortion\" Float 4 AAAAAAAAAAAAAAAAAAAAAA== \"direction\" Float 1 AAAAAA== \"stmap\" Int 1 AAAAAA== \"format\" Int 2 AAAAAAAAAAA= 4 \"distortion\" 4 1 \"direction\" 1 1 \"stmap\" 1 1 \"format\" 2 1 4 \"maprangeMin\" Int 2 1 AAAAAAAAAAA= \"maprangeMax\" Int 2 1 AAAAAAAAAAA= \"mapconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA== \"rotate\" Float 2 1 AAAAAAAAAAA="
+   kernelSource "kernel X_Distort : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRanged2D, eEdgeConstant> map; // the distortion map image\n  Image<eWrite> dst; // the output image\n\n  param:\n    float4 distortion;\n    float direction;\n    int stmap;\n    int2 format;\n\n  local:\n    float2 rotate;\n\n  void init() \{\n    // Initialise trigonometric functions.\n    rotate = float2(sin(direction*6.28318f),\n                    cos(direction*6.28318f));\n    map.setRange(-1,-1,1,1);\n  \}\n\n  void process(int2 pos) \{\n\n    // Sample gradient\n    float2 distort;\n    distort = float2(map(1,0,0)-map(-1,0,0),\n                    map(0,1,0)-map(0,-1,0));\n\n    // Rotate vector\n    distort = float2(distort.x*rotate.y+distort.y*rotate.x,\n                    -distort.x*rotate.x+distort.y*rotate.y);\n    distort *= distortion.x;\n\n    if(stmap==1)\n      distort = (distort+float2(pos.x,pos.y))/float2(format.x,format.y);\n\n    dst() = float4(distort.x,distort.y,0,0);\n  \}\n\};\n"
+   useGPUIfAvailable {{parent.BlinkScript.useGPUIfAvailable}}
+   rebuild ""
+   X_Distort_distortion {{parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2}}
+   X_Distort_direction {{parent.direction+.5}}
+   X_Distort_stmap {{2-output_form}}
+   X_Distort_format {{width} {height}}
+   rebuild_finalise ""
+   name BlinkScript1
+   xpos 260
+   ypos 234
+  }
+  Dot {
+   name Dot11
+   xpos 294
+   ypos 344
+  }
+push $N157c9c00
+push $Nfbefcc00
+  AdjBBox {
+   numpixels 1
+   name AdjBBox1
+   xpos -140
+   ypos -360
+  }
+  Dot {
+   name Dot10
+   xpos -106
+   ypos 144
+  }
+  BlinkScript {
+   inputs 2
+   ProgramGroup 1
+   KernelDescription "1 \"X_Distort\" iterate componentWise b9627c0324b2a89d1b941c7c64b5afb3310f15cfcf6b1f077dd0574498415168 3 \"src\" Read Random \"map\" Read Ranged2D \"dst\" Write Point 5 \"distortion\" Float 4 AAAAAAAAAAAAAAAAAAAAAA== \"vector_blur\" Float 4 AAAAAAAAAAAAAAAAAAAAAA== \"direction\" Float 1 AAAAAA== \"filter\" Int 1 AAAAAA== \"max_steps\" Int 1 AAAAAA=="
+   kernelSource "kernel X_Distort : ImageComputationKernel<eComponentWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeClamped> src; // the input image\n  Image<eRead, eAccessRanged2D, eEdgeClamped> map; // the distortion map image\n  Image<eWrite> dst; // the output image\n\n  param:\n    float4 distortion;\n    float4 vector_blur;\n    float direction;\n    int filter;\n    int max_steps;\n\n  local:\n    float2 rotate;\n\n  void init() \{\n    // Initialise trigonometric functions.\n    rotate = float2(sin(direction*6.28318f),\n                    cos(direction*6.28318f));\n    map.setRange(-1,-1,1,1);\n  \}\n\n  void process(int3 pos) \{\n\n    // Sample gradient\n    float2 distort;\n    distort = float2(map(1,0)-map(-1,0),\n                    map(0,1)-map(0,-1));\n\n    // Rotate vector\n    distort = float2(distort.x*rotate.y+distort.y*rotate.x,\n                    -distort.x*rotate.x+distort.y*rotate.y);\n\n    // Sample source (no blur)\n    if(fabs(vector_blur\[pos.z])<0.01)\{\n      distort *= distortion\[pos.z];\n      distort += float2(pos.x,pos.y);\n      if(filter==0)\n        dst() = src(int(distort.x),int(distort.y));\n      else\n        dst() = bilinear(src,distort.x,distort.y);\n    \}\n\n    else \{\n\n    // If vector blur is enabled\n    // Create vector blur final coordiantes\n      float2 blur = distort;\n      blur *= distortion\[pos.z]+vector_blur\[pos.z];\n      blur += float2(pos.x,pos.y);\n      distort *= distortion\[pos.z];\n      distort += float2(pos.x,pos.y);\n\n    // Calculate length of the blur\n      int distance;\n      distance = ceil(length(distort-blur));\n      if(max_steps>0)\n        distance = min(distance,max_steps);\n\n\n    // Accumulate pixels through blur\n      if(filter==0)\{\n        float sum = src(int(distort.x),int(distort.y));\n        float step = 0.0f;\n        float2 dist_blur;\n        for(int i = 0; i < distance; i++)\{\n          step = float(i)/(distance);\n          dist_blur = distort*step+blur*(1.0-step);\n          sum += src(int(dist_blur.x),int(dist_blur.y));\n        \}\n        dst() = sum/(distance+1);\n      \}\n\n      else \{\n        float sum = bilinear(src,distort.x,distort.y);\n        float step = 0.0f;\n        float2 dist_blur;\n        for(int i = 0; i < distance; i++)\{\n          step = float(i)/(distance);\n          dist_blur = distort*step+blur*(1.0-step);\n          sum += bilinear(src,dist_blur.x,dist_blur.y);\n        \}\n        dst() = sum/(distance+1);\n      \}\n    \}\n  \}\n\};\n"
+   rebuild ""
+   X_Distort_distortion {{parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2}}
+   X_Distort_vector_blur {{parent.blur*(blur_map+1)*((blur_aberration-1)*enable_chroma+1)*2} {parent.blur*(blur_map+1)*((blur_aberration-1)*enable_chroma+1)*2} {parent.blur*(blur_map+1)*((blur_aberration-1)*enable_chroma+1)*2} {parent.blur*(blur_map+1)*((blur_aberration-1)*enable_chroma+1)*2}}
+   X_Distort_direction {{parent.direction+.5}}
+   X_Distort_filter {{filter}}
+   X_Distort_max_steps {{max_blur}}
+   rebuild_finalise ""
+   name BlinkScript
+   xpos -140
+   ypos 184
+  }
+push $Nfbefcc00
+  Dot {
+   name Dot5
+   xpos -206
+   ypos -406
+  }
+  Dot {
+   name Dot4
+   xpos -206
+   ypos 294
+  }
+  Dissolve {
+   inputs 2
+   channels rgba
+   which {{parent.mix}}
+   name Dissolve1
+   xpos -140
+   ypos 291
+  }
+  Switch {
+   inputs 2
+   which {{output_form}}
+   name Switch3
+   xpos -140
+   ypos 340
+  }
+  Output {
+   name Output1
+   xpos -140
+   ypos 440
+  }
+push $N157c9c00
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+  Viewer {
+   inputs 10
+   frame_range 1001-1100
+   fps 25
+   input_number 9
+   monitorOutNDISenderName "Nuke - testShot-testComp_testCompo_v037 - Viewer1"
+   name Viewer1
+   xpos 370
+   ypos -460
+  }
+ end_group
+ Dot {
+  name Dot238
+  xpos -1012
+  ypos 1353
+ }
+set Na5fe2c00 [stack 0]
+ Dot {
+  name Dot8
+  xpos -1012
+  ypos 1964
+ }
+ Input {
+  inputs 0
+  name mask
+  xpos 162
+  ypos 1777
+  number 1
+ }
+ Shuffle {
+  name FixEmpty
+  xpos 162
+  ypos 1809
+ }
+ Dot {
+  name Dot22
+  xpos 196
+  ypos 1895
+ }
+push $N6a733c00
+ FilterErode {
+  size {{parent.ec_edgepush_in}}
+  name FilterErode1
+  xpos 610
+  ypos 1193
+ }
+ Blur {
+  size {{parent.FilterErode1.size/2}}
+  name Blur1
+  xpos 610
+  ypos 1242
+ }
+ Dot {
+  name Dot7
+  xpos 644
+  ypos 1485
+ }
+push $Na5fe2c00
+ Dot {
+  name Dot239
+  xpos 34
+  ypos 1353
+ }
+ Multiply {
+  inputs 1+1
+  value 0
+  name Multiply5
+  xpos 0
+  ypos 1476
+ }
+ Multiply {
+  inputs 1+1
+  value 0
+  invert_mask {{parent.mask_invert}}
+  name Multiply6
+  xpos 0
+  ypos 1886
+ }
+ Switch {
+  inputs 2
+  which {{display}}
+  name Switch1
+  xpos 0
+  ypos 1961
+ }
+ Output {
+  name Output1
+  xpos 0
+  ypos 2176
+ }
+push $N1dc6b800
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push $N6a732000
+ Viewer {
+  inputs 10
+  frame_range 1001-1025
+  fps 25
+  input_number 9
+  viewerProcess "ACES 1.0 - SDR Video (sRGB - Display)"
+  monitorOutNDISenderName "Nuke - TEST-gymChip_Compo_v010 - Viewer1"
+  name Viewer1
+  xpos 998
+  ypos 258
+ }
+end_group
