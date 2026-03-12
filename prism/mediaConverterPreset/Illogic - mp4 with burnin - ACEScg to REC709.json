@@ -1,0 +1,163 @@
+{
+    "name": "Illogic - mp4 with burnin - ACEScg to REC709.json",
+    "category": "",
+    "settings": {
+        "autoOutputStartFrame": true,
+        "outputStartFrame": 1001,
+        "outputFormat": ".mp4",
+        "outputFormatOptions": {
+            "useProjectFps": true,
+            "fps": 25.0,
+            "crf": 16
+        },
+        "outputPath": "./SEQ_mcdo-SH060_Compo_v006_converted.mp4",
+        "modifiers": [
+            {
+                "type": "crop",
+                "enabled": false,
+                "cropLeft": 0,
+                "cropTop": 0,
+                "cropRight": 0,
+                "cropBottom": 0,
+                "usePercent": false
+            },
+            {
+                "type": "overlay",
+                "enabled": true,
+                "overlayType": "Rectangle",
+                "width": 100,
+                "height": 10,
+                "text": "Example Text",
+                "font": "arial",
+                "alignx": "Left",
+                "aligny": "Top",
+                "size": 50,
+                "filepath": "",
+                "usePercentFont": false,
+                "usePercentWidth": true,
+                "usePercentHeight": true,
+                "usePercent": true,
+                "position": [
+                    0,
+                    90
+                ],
+                "color": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.5882353186607361
+                ]
+            },
+            {
+                "type": "overlay",
+                "enabled": true,
+                "overlayType": "Text",
+                "width": 1920,
+                "height": 200,
+                "text": "{frame} \nin ({start} out {end}) {width} x {height}",
+                "font": "arial",
+                "alignx": "Left",
+                "aligny": "Top",
+                "size": 50,
+                "filepath": "",
+                "usePercentFont": true,
+                "usePercentWidth": false,
+                "usePercentHeight": false,
+                "usePercent": true,
+                "position": [
+                    3,
+                    90
+                ],
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            {
+                "type": "overlay",
+                "enabled": true,
+                "overlayType": "Text",
+                "width": 1920,
+                "height": 200,
+                "text": "{project_name}\n{sequence} - {shot}\n{identifier} - {version}\n ",
+                "font": "arial",
+                "alignx": "Center",
+                "aligny": "Top",
+                "size": 50,
+                "filepath": "",
+                "usePercentFont": true,
+                "usePercentWidth": false,
+                "usePercentHeight": false,
+                "usePercent": true,
+                "position": [
+                    50,
+                    85
+                ],
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            {
+                "type": "overlay",
+                "enabled": true,
+                "overlayType": "Text",
+                "width": 1920,
+                "height": 200,
+                "text": "{username}\n{date}\n ",
+                "font": "arial",
+                "alignx": "Right",
+                "aligny": "Top",
+                "size": 50,
+                "filepath": "",
+                "usePercentFont": true,
+                "usePercentWidth": false,
+                "usePercentHeight": false,
+                "usePercent": true,
+                "position": [
+                    97,
+                    88
+                ],
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            {
+                "type": "colorconversion",
+                "enabled": true,
+                "inputSpace": "auto",
+                "outputSpace": {
+                    "display": "Rec.1886 Rec.709 - Display",
+                    "view": "ACES 1.0 - SDR Video"
+                }
+            },
+            {
+                "type": "scale",
+                "enabled": false,
+                "resolutionMode": "50% of source",
+                "customWidth": 1920,
+                "customHeight": 1080,
+                "lockRatio": true
+            },
+            {
+                "type": "slate",
+                "enabled": false,
+                "slatePreset": ""
+            },
+            {
+                "type": "combine",
+                "enabled": false,
+                "mediaPaths": ""
+            }
+        ],
+        "inputPath": "I:\\McDonald_2511\\03_Production\\Shots\\SEQ_mcdo\\SH060\\Renders\\2dRender\\Compo\\v006\\SEQ_mcdo-SH060_Compo_v006.####.exr",
+        "path": "I:\\McDonald_2511\\03_Production\\Shots\\SEQ_mcdo\\SH060\\Renders\\2dRender\\Compo\\v006\\SEQ_mcdo-SH060_Compo_v006.####.exr"
+    }
+}

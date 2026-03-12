@@ -14,6 +14,9 @@ if usdPlug:
     usdImport = usdPlug.api.usdImport
 
 
+SHOT_TO_NOT_BUILD = ["edit", "edits", "test"]
+
+
 
 class ShotBuilder():
     def __init__(self, selection, shots: list[str], UI=True):
@@ -23,6 +26,7 @@ class ShotBuilder():
         self.all_msg = ""
         self.spacer = 15
 
+        shots = self.deleteShotToNotBuild(shots)
         if not selection:
             self.sendError("Select what you want duplicate", "importMessage")
             return
@@ -138,3 +142,13 @@ class ShotBuilder():
         path = usdPlug.api.getLatestEntityUsdPath({"shot": shot, "type": "shot"})
         if path:
             node.parm("filepath").set(path)
+
+    def deleteShotToNotBuild(self, shots: list[str]):
+        to_keep = []
+        for shot in shots:
+            if shot.lower() not in SHOT_TO_NOT_BUILD:
+                to_keep.append(shot)
+            else:
+                print(f"skeep shot :{shot}")
+        
+        return to_keep.copy()

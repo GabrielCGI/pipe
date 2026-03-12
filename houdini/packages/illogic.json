@@ -1,17 +1,16 @@
 {
     "env": [
-        {"HOUDINI_USER_PREF_DIR": "R:/pipeline/pipe/houdini/pref/houdini20.5"},
-        {"HOUDINI_TOOLBAR_PATH":"R:/pipeline/pipe/houdini/shelfs;"},
         {"HOUDINI_NO_START_PAGE_SPLASH":1},
         {"HOUDINI_GL_USE_MATERIALX":0},
         {"HOUDINI_EXTERNAL_HELP_BROWSER": 0},
         {"HOUDINI_LMINFO_VERBOSE": 1},
         {"HOUDINI_OCL_DEVICETYPE": "GPU"},
         {"HOUDINI_USE_HFS_OCL": 0},
+	    {"KARMA_XPU_OPTIX_SPARSE_TEXTURES": 1},
+        {"HOUDINI_TOOLBAR_PATH":"R:/pipeline/pipe/houdini/shelfs;"},
         {"HOUDINI_OTLSCAN_PATH":"R:/pipeline/pipe/houdini/hda;"},
         {"HOUDINI_VIEWERSTATE_PATH": "R:/pipeline/pipe/houdini/viewer_states"},
 		{"HOUDINI_PYTHON_PANEL_PATH":"R:/pipeline/pipe/houdini/panels;"},
-        {"PYTHONPATH":"R:/pipeline/pipe/houdini/scripts;"},
-	    {"KARMA_XPU_OPTIX_SPARSE_TEXTURES": 1}
+        {"PYTHONPATH":"R:/pipeline/pipe/houdini/scripts;"}
     ]
 }

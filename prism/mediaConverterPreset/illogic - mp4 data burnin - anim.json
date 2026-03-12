@@ -1,0 +1,244 @@
+{
+    "name": "illogic - mp4 data burnin - anim",
+    "category": "",
+    "settings": {
+        "autoOutputStartFrame": true,
+        "outputStartFrame": 1001,
+        "outputFormat": ".mp4",
+        "outputFormatOptions": {
+            "useProjectFps": true,
+            "fps": 25.0,
+            "crf": 16
+        },
+        "outputPath": "./MOREOOMPH-SH060_Anim_v009_converted.mp4",
+        "modifiers": [
+            {
+                "type": "crop",
+                "enabled": false,
+                "cropLeft": 0,
+                "cropTop": 0,
+                "cropRight": 0,
+                "cropBottom": 0,
+                "usePercent": false
+            },
+            {
+                "type": "overlay",
+                "enabled": true,
+                "overlayType": "Rectangle",
+                "width": 100,
+                "height": 5,
+                "text": "Example Text",
+                "font": "arial",
+                "alignx": "Left",
+                "aligny": "Top",
+                "size": 50,
+                "filepath": "",
+                "usePercentFont": false,
+                "usePercentWidth": true,
+                "usePercentHeight": true,
+                "usePercent": true,
+                "position": [
+                    0,
+                    95
+                ],
+                "color": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.19607843458652496
+                ]
+            },
+            {
+                "type": "overlay",
+                "enabled": true,
+                "overlayType": "Rectangle",
+                "width": 100,
+                "height": 5,
+                "text": "Example Text",
+                "font": "arial",
+                "alignx": "Left",
+                "aligny": "Top",
+                "size": 50,
+                "filepath": "",
+                "usePercentFont": false,
+                "usePercentWidth": true,
+                "usePercentHeight": true,
+                "usePercent": true,
+                "position": [
+                    0,
+                    0
+                ],
+                "color": [
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.29411765933036804
+                ]
+            },
+            {
+                "type": "overlay",
+                "enabled": true,
+                "overlayType": "Text",
+                "width": 1920,
+                "height": 200,
+                "text": "{sequence} - {shot}",
+                "font": "arialbd",
+                "alignx": "Center",
+                "aligny": "Top",
+                "size": 50,
+                "filepath": "",
+                "usePercentFont": true,
+                "usePercentWidth": false,
+                "usePercentHeight": false,
+                "usePercent": true,
+                "position": [
+                    50,
+                    2
+                ],
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            {
+                "type": "overlay",
+                "enabled": true,
+                "overlayType": "Text",
+                "width": 1920,
+                "height": 200,
+                "text": "{date}",
+                "font": "arial",
+                "alignx": "Right",
+                "aligny": "Top",
+                "size": 50,
+                "filepath": "",
+                "usePercentFont": true,
+                "usePercentWidth": false,
+                "usePercentHeight": false,
+                "usePercent": true,
+                "position": [
+                    98,
+                    2
+                ],
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            {
+                "type": "overlay",
+                "enabled": true,
+                "overlayType": "Text",
+                "width": 1920,
+                "height": 200,
+                "text": "{frame}",
+                "font": "arial",
+                "alignx": "Right",
+                "aligny": "Top",
+                "size": 50,
+                "filepath": "",
+                "usePercentFont": true,
+                "usePercentWidth": false,
+                "usePercentHeight": false,
+                "usePercent": true,
+                "position": [
+                    98,
+                    97
+                ],
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            {
+                "type": "overlay",
+                "enabled": true,
+                "overlayType": "Text",
+                "width": 1920,
+                "height": 200,
+                "text": "{version}",
+                "font": "arial",
+                "alignx": "Center",
+                "aligny": "Top",
+                "size": 50,
+                "filepath": "",
+                "usePercentFont": true,
+                "usePercentWidth": false,
+                "usePercentHeight": false,
+                "usePercent": true,
+                "position": [
+                    50,
+                    97
+                ],
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            {
+                "type": "overlay",
+                "enabled": true,
+                "overlayType": "Text",
+                "width": 1920,
+                "height": 200,
+                "text": "{username} ",
+                "font": "arialbd",
+                "alignx": "Left",
+                "aligny": "Top",
+                "size": 50,
+                "filepath": "",
+                "usePercentFont": true,
+                "usePercentWidth": false,
+                "usePercentHeight": false,
+                "usePercent": true,
+                "position": [
+                    2,
+                    2
+                ],
+                "color": [
+                    1.0,
+                    1.0,
+                    1.0,
+                    1.0
+                ]
+            },
+            {
+                "type": "colorconversion",
+                "enabled": false,
+                "inputSpace": "auto",
+                "outputSpace": {
+                    "display": "sRGB - Display",
+                    "view": "ACES 1.0 - SDR Video"
+                }
+            },
+            {
+                "type": "scale",
+                "enabled": false,
+                "resolutionMode": "50% of source",
+                "customWidth": 1920,
+                "customHeight": 1080,
+                "lockRatio": true
+            },
+            {
+                "type": "slate",
+                "enabled": false,
+                "slatePreset": ""
+            },
+            {
+                "type": "combine",
+                "enabled": false,
+                "mediaPaths": ""
+            }
+        ],
+        "inputPath": "I:\\mikes_2511\\03_Production\\Shots\\MOREOOMPH\\SH060\\Playblasts\\Anim\\v009\\MOREOOMPH-SH060_Anim_v009.mp4",
+        "path": "I:\\mikes_2511\\03_Production\\Shots\\MOREOOMPH\\SH060\\Playblasts\\Anim\\v009\\MOREOOMPH-SH060_Anim_v009.mp4"
+    }
+}

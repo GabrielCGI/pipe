@@ -1,5 +1,6 @@
 from importlib import reload
-from pxr import Usd, Sdf
+from pxr import Usd, Sdf, Vt
+import socket
 import sys
 import os
 
@@ -19,11 +20,95 @@ def main(file_path_usd):
         return False
 
     print("//------------USD CHASER: Start Script------------")
-    print("USD CHASER: parse find USD")
+    print("---USD CHASER: parse find USD")
     #ouvrir et parcourir toute les prim pour récupéré leur path
     layer = Sdf.Layer.FindOrOpen(file_path_usd)
     layer.Traverse(layer.pseudoRoot.path, feachAllPrim)
 
+    print("\n\n---USD CHASER: delete Primitive Attribute")
+    deleteunUsedData(layer)
+
+    if "I:/mikes_2511/03_Production" in file_path_usd.replace("\\", "/"):
+        print("\n\n---USD CHASER: add Scale info")
+        addScaleInfo(layer)
+
+    layer.Save()
+    del layer
+    print("\n\n---USD CHASER: layer saved")
+
+
+# -------------------------------- ajouter les info du scale des ctrl dans le layer usd --------------------------------
+def addScaleInfo(layer: Sdf.Layer):
+    import maya.cmds as cmds
+    target_names = ["*:Main*", "*:ctrl_world*", "*:World_Ctr*"]
+    target_attrs = ["globalScale"]
+    name_attr_USD = "primvars:globalScale"
+    all_node_maya_with_scale = {}
+
+    for name in target_names:
+        matches = cmds.ls(name, long=True, typ=["transform"])
+        for node in matches:
+            for attr in target_attrs:
+                has_attr = cmds.attributeQuery(attr, node=node, exists=True)
+                if has_attr:
+                    print(node, 'found')
+                    path_node = converteWithoutNameSpace(node)
+                    data_frames = getKeyFrameValue(node, attr)
+                    all_node_maya_with_scale[path_node] = data_frames
+
+    if not all_node_maya_with_scale:
+        print("-value not found")
+        return False
+    
+    for prim_Path in ALL_PRIM_PATH:
+        primSpec = layer.GetPrimAtPath(prim_Path)
+        if not primSpec:
+            continue
+        if primSpec.kind != "component":
+            continue            
+        
+        for node_path in all_node_maya_with_scale:
+            if primSpec.path.pathString in node_path.replace("|", "/"):
+                writeDataInPrimitive(layer, primSpec, name_attr_USD, all_node_maya_with_scale[node_path])
+
+def converteWithoutNameSpace(node_name):
+    name = ""
+    for part in node_name.split("|")[1:]:
+        name += "|" + part.split(":")[-1]
+    
+    return name
+
+def getKeyFrameValue(node_name, attr):
+    import maya.cmds as cmds
+    
+    result = {}
+    curve = cmds.listConnections(node_name + "." + attr, type="animCurve")
+    if curve:
+        connections = cmds.listConnections(curve[0], plugs=True, destination=True)
+        if not connections:
+            return
+        start = int(cmds.playbackOptions(q=True, min=True))
+        end   = int(cmds.playbackOptions(q=True, max=True))
+        
+        for frame in range(start, end + 1):
+            value = cmds.keyframe(curve[0], query=True, eval=True, time=(frame, frame))
+            if value:
+                result[frame] = value[0]
+    else:
+        result[1001] = cmds.getAttr(node_name + "." + attr)
+    
+    return result
+
+def writeDataInPrimitive(layer: Sdf.Layer, primSpec: Sdf.PrimSpec, name_attr_USD: str, data_ctrl):
+    attr_spec = Sdf.AttributeSpec(primSpec, name_attr_USD, Sdf.ValueTypeNames.Double)
+    attr_spec.custom = True
+    for frame, value in data_ctrl.items():
+        layer.SetTimeSample(attr_spec.path, float(frame), float(value))
+
+
+
+# -------------------------------- delete tout les attribute qui ne sont pas utile dans le layer --------------------------------
+def deleteunUsedData(layer: Sdf.Layer):
     all_geomSubnet_to_delet = []
     for prim_Path in ALL_PRIM_PATH:
         primSpec = layer.GetPrimAtPath(prim_Path)
@@ -67,14 +152,10 @@ def main(file_path_usd):
             print(p, '\nGeomSubset deleted\n')
         
         layer.Apply(edit)
-    
-                
-    layer.Save()
-    del layer
-    print("USD CHASER: layer saved")
-    #startInheriteClass(stateManager)
-    print("//------------USD CHASER: finish Script------------")
 
+
+
+# ----------------------------------------- démmarrer le script pour le inherite class -----------------------------------------
 def startInheriteClass(core):
     print("USD CHASER: create and inherte class")
     # en premier lieux récuperer la dernière version du container USD

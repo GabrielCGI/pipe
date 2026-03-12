@@ -3,7 +3,7 @@
         {
             "label": "Miro",
             "category": "URL",
-            "icon": "I:\\VCA_Perlee_2510\\/00_Pipeline/Configs\\LauncherIcons\\Miro.png",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\00_Pipeline\\LauncherIcons\\Miro.png",
             "versions": [
                 {
                     "label": "Version 1",
@@ -413,7 +413,7 @@
         {
             "label": "Kitsu",
             "category": "URL",
-            "icon": "I:\\VCA_Perlee_2510\\/00_Pipeline/Configs\\LauncherIcons\\Kitsu.png",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\00_Pipeline\\LauncherIcons\\Kitsu.png",
             "versions": [
                 {
                     "label": "Version 1",
@@ -428,7 +428,7 @@
         {
             "label": "wiki",
             "category": "URL",
-            "icon": "I:\\mikes_2511\\/00_Pipeline/Configs\\LauncherIcons\\wiki.png",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\00_Pipeline\\LauncherIcons\\notion.png",
             "versions": [
                 {
                     "label": "Version 1",

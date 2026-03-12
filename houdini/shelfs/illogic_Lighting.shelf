@@ -12,9 +12,9 @@
     <memberTool name="domelight_create"/>
     <memberTool name="clean_light"/>
     <memberTool name="batchrender"/>
-    <!-- <memberTool name="send_ranch_copy"/>-->
     <memberTool name="shotBuilder"/>
     <memberTool name="reduceTextureViewport"/>
+    <memberTool name="CopRopImage"/>
   </toolshelf>
 
   <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
@@ -194,5 +194,14 @@ def displayMessage():
     dialog.show()
 
 run()]]></script>
+  </tool>
+
+  <tool name="CopRopImage" label="Cop Rop Image" icon="hicon:/SVGIcons.index?SCENEGRAPH_primtype_renderproduct.svg">
+    <helpText><![CDATA[select a node first]]></helpText>
+    <script scriptType="python"><![CDATA[from imp import reload
+
+import cop_createRopImage
+reload(cop_createRopImage)
+cop_createRopImage.run()]]></script>
   </tool>
 </shelfDocument>

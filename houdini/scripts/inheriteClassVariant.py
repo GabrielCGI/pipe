@@ -154,11 +154,14 @@ class inheriteClassAttr():
         imageable = UsdGeom.Imageable(prim)
         if imageable:
             name = prim.GetName().lower()
+            if name.startswith("xform"):
+                return
+            
             if not "/characters/" in str(prim.GetPath()):
                 over = self.NewLayer.OverridePrim(prim.GetPath())
                 overImage = UsdGeom.Imageable(over)
                 overImage.CreateVisibilityAttr().Set("inherited")
-
+            
                 """if "/characters/" in str(prim.GetPath()):
                     if name.startswith("proxy"):
                         over.CreateAttribute("purpose", Sdf.ValueTypeNames.Token, custom=True).Set("proxy")

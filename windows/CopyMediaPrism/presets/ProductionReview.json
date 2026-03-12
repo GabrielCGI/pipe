@@ -1,26 +1,19 @@
 {
     "filters": {
+        "COMPOSITING": [],
         "ANIM": [
             "anim",
             "anim_playblast",
             "playblast"
         ],
-        "LAYOUT": [
+        "RLO": [
             "RoughtLayout",
             "layout",
             "Previz",
             "RoughLayout_playblast"
-        ],
-        "COMPO": [
-            "beauty",
-            "compo",
-            "comp",
-            "slapComp",
-            "Compo_hard",
-            "Compo_harder"
         ]
     },
     "source_path": "I:/mikes_2511",
-    "dest_path": "D:/cache_resolve/mikes_2511",
-    "production": "MIKES"
+    "dest_path": "C:/Users/f.putzola/Documents/Test",
+    "production": "flo_productionReview"
 }

@@ -11,7 +11,7 @@ import os
 from pathlib import Path
 import argparse
 import sys
-import socket
+# import socket
 import re
 import glob
 import subprocess
@@ -30,6 +30,7 @@ UDIM_PATTERN = '\.(\d+|<UDIM>)\.'
 ROOT_CACHE_RANCH = '\\\\RANCH-SERVER\\ranch_cache'
 RANCH_CPY_LOG_DIR = "C:/RANCH_CPY_log/"
 
+MAX_CHUNCK_ROBOCOPY = 50
 
 if sys.version_info[0] == 3 :
     v = sys.version_info[1]
@@ -47,7 +48,7 @@ if sys.version_info[0] == 3 :
 else:
     raise RuntimeError(f"Unsupported Python version: {sys.version_info[0]}.x")
 
-from pxr import Ar, Usd, Sdf, UsdUtils
+from pxr import Ar, Sdf, UsdUtils
 
 # region Log functions
 
@@ -79,6 +80,11 @@ def log_error(msg):
 
 # region Deps + Copy
 
+def chunks(lst, n):
+    """Yield successive n-sized chunks from lst."""
+    for i in range(0, len(lst), n):
+        yield lst[i:i + n]
+        
 def getAssetPathFromUSD(usd_file: str) -> Sdf.AssetPath:
     """Get Sdf.AssetPath from given USD file. 
 
@@ -152,7 +158,7 @@ def getDriveList():
         drives_str = os.environ['PXR_AR_DEFAULT_SEARCH_PATH']
         # expect a str with this format "C:/;D:/" each drive separated by a ;
         return [i[0].lower() for i in drives_str.split(';') if i]
-    except:
+    except Exception:
         # default value to change later if ressource and prod2 change
         return ['i', 'r'] 
 
@@ -164,7 +170,7 @@ def getGroupedPath(abs_paths):
     grouped_path = {}
     for path in paths:
         norm_path = path.parent.as_posix()
-        if not norm_path in grouped_path:
+        if norm_path not in grouped_path:
             grouped_path[norm_path] = [path.name]
         else:
             grouped_path[norm_path].append(path.name)
@@ -217,8 +223,11 @@ def getPathToCopy(abs_paths: list[str]):
     """    
     
     to_copy = []
-    for path in abs_paths:
-        to_copy += getPathFamily(path)
+    log_info(f"Get path to copy: {len(abs_paths)} elements")
+    for i, path in enumerate(abs_paths):
+        if path not in to_copy:
+            to_copy += getPathFamily(path)
+        log_info(f"{i+1}/{len(abs_paths)}")
     
     list(set(to_copy))
     return to_copy
@@ -248,13 +257,13 @@ def parseRobocopyOutput(src, dst, output):
             log_warning(f" - Failed: {failed}")
             # COPY_FAILED += failed
     else:
-        log_info(f"! Could not parse precise result")
+        log_info("! Could not parse precise result")
         if output.returncode > 1:
             # COPY_FAILED += 1
             log_info(f" - Copy failed {src}")
         else:
             # COPY_SUCCESS += 1
-            log_info(f" - Copy created")
+            log_info(" - Copy created")
 
 def copyToCacheranchV2(copy_list: list[str]):
     """Copy every files found to cache ranch.
@@ -282,27 +291,30 @@ def copyToCacheranchV2(copy_list: list[str]):
             abs_paths.append(file_path)
             
     copy_list = getGroupedPath(abs_paths)
-
+    log_info(f"Final copy list size: {len(copy_list)}")
     for directory in copy_list:
         file_list = copy_list[directory]
-        
         splitdrive = os.path.splitdrive(directory)
         drive = splitdrive[0][0]
         relativepath = os.path.relpath(splitdrive[1], os.sep)
         destination_dir = os.path.join(ROOT_CACHE_RANCH, drive, relativepath)
         
-        command = ['robocopy', directory, destination_dir, *file_list]
-        try:
-            result = subprocess.run(
-                command,
-                creationflags=subprocess.CREATE_NO_WINDOW,
-                capture_output=True
-            )
-            # log_info(f"Copying : {result.stdout}")
-            parseRobocopyOutput(directory, destination_dir, result)
-        except Exception as e:
-            log_error(e)
-            raise Exception(e) 
+        chunks_gen = chunks(file_list, MAX_CHUNCK_ROBOCOPY)
+        for chunk in chunks_gen:
+            command = ['robocopy', directory, destination_dir, *chunk]
+            try:
+                log_info(" ".join(command))
+                result = subprocess.run(
+                    command,
+                    creationflags=subprocess.CREATE_NO_WINDOW,
+                    capture_output=True
+                )
+                # log_info(f"Copying : {result.stdout}")
+                parseRobocopyOutput(directory, destination_dir, result)
+            except Exception as e:
+                log_error(e)    
+                log_error(f"Failed to copy {directory} to {destination_dir}")
+                raise Exception(e) 
 
 
 # endregion
@@ -329,6 +341,7 @@ def main():
     log_info("Start copy")
     start = time.time()
     to_copy = getPathToCopy(paths)
+    log_info(f"Copy of {len(to_copy)} elements ...")
     copyToCacheranchV2(to_copy)
     end = time.time()
     log_info(f"Copy Done in : {end - start} seconds")
