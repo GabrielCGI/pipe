@@ -3,7 +3,12 @@ import sys
 
 from functools import partial
 
-import pymel.core as pm
+try:
+    import pymel.core as pm
+except ImportError:
+    sys.path.append(r"R:/pipeline/networkInstall/python_shares/python311_pymel_pkgs/Lib/site-packages/pymel")
+    import pymel.core as pm
+
 import maya.OpenMayaUI as omui
 import maya.OpenMaya as OpenMaya
 

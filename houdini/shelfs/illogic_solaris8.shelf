@@ -12,14 +12,10 @@
     <memberToolshelf name="simplefx"/>
     <memberToolshelf name="labs_toolset"/>
     <memberToolshelf name="illogicLighting"/>
-    <memberToolshelf name="illogicShading"/>
     <memberToolshelf name="illogicSolaris"/>
+    <memberToolshelf name="illogicShading"/>
     <memberToolshelf name="illogicFxCfx"/>
     <memberToolshelf name="prism"/>
-    <memberToolshelf name="develop"/>
-    <memberToolshelf name="gsops_shelf"/>
-    <memberToolshelf name="lfrimat"/>
-    <memberToolshelf name="shelf_debug"/>
     <memberToolshelf name="shelf_debug"/>
   </shelfSet>
 

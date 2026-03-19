@@ -30,7 +30,10 @@ def main(file_path_usd):
 
     if "I:/mikes_2511/03_Production" in file_path_usd.replace("\\", "/"):
         print("\n\n---USD CHASER: add Scale info")
-        addScaleInfo(layer)
+        addScaleInfo(layer, ["*:Main*", "*:ctrl_world*", "*:World_Ctr*"], ["globalScale"])
+        print("\n\n---USD CHASER: add Scale info")
+    elif "I:/McDonald_2511/03_Production" in file_path_usd.replace("\\", "/"):
+        addScaleInfo(layer, ["*:Rabbit_Root_Ctrl", "*:Bear_Root_Ctrl"], ["scaleY"])
 
     layer.Save()
     del layer
@@ -38,10 +41,8 @@ def main(file_path_usd):
 
 
 # -------------------------------- ajouter les info du scale des ctrl dans le layer usd --------------------------------
-def addScaleInfo(layer: Sdf.Layer):
+def addScaleInfo(layer: Sdf.Layer, target_names, target_attrs):
     import maya.cmds as cmds
-    target_names = ["*:Main*", "*:ctrl_world*", "*:World_Ctr*"]
-    target_attrs = ["globalScale"]
     name_attr_USD = "primvars:globalScale"
     all_node_maya_with_scale = {}
 
@@ -54,6 +55,7 @@ def addScaleInfo(layer: Sdf.Layer):
                     print(node, 'found')
                     path_node = converteWithoutNameSpace(node)
                     data_frames = getKeyFrameValue(node, attr)
+                    print("data maya", path_node, "\n", data_frames, "\n\n\n")
                     all_node_maya_with_scale[path_node] = data_frames
 
     if not all_node_maya_with_scale:
@@ -102,7 +104,9 @@ def getKeyFrameValue(node_name, attr):
 def writeDataInPrimitive(layer: Sdf.Layer, primSpec: Sdf.PrimSpec, name_attr_USD: str, data_ctrl):
     attr_spec = Sdf.AttributeSpec(primSpec, name_attr_USD, Sdf.ValueTypeNames.Double)
     attr_spec.custom = True
+    #print("time sampling")
     for frame, value in data_ctrl.items():
+        #print("frame:", frame, "value: ", value)
         layer.SetTimeSample(attr_spec.path, float(frame), float(value))
 
 

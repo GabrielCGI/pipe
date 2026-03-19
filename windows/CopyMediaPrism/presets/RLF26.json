@@ -6,16 +6,15 @@
             "nuke",
             "beauty"
         ],
-        "ANIM": [
-            "anim",
-            "anim_playblast",
-            "playblast"
-        ],
+        "ANIM": [],
         "LAYOUT": [
             "RoughtLayout",
             "layout",
             "Previz",
-            "RoughLayout_playblast"
+            "RoughLayout_playblast",
+            "anim",
+            "anim_playblast",
+            "playblast"
         ]
     },
     "source_path": "I:/ralphLauren_JO26",

@@ -745,12 +745,12 @@
     },
     "environmentVariables": {
         "HOUDINI_BUFFEREDSAVE": "1",
+        "KARMA_XPU_OPTIX_SPARSE_TEXTURES": "1",
         "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio",
         "PRISM_DEADLINE_HUSK_PATH": "C:/Program Files/Side Effects Software/Houdini 21.0.559/bin/husk.exe",
         "PRISM_HUSK_DEADLINE_GROUP": "husk_grp",
         "PXR_AR_DEFAULT_SEARCH_PATH": "R:/;I:/",
-        "SANITY_CHECK_CONFIG": "I://00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml",
-        "KARMA_XPU_OPTIX_SPARSE_TEXTURES": "1"
+        "SANITY_CHECK_CONFIG": "I://00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml"
     },
     "export_paths": {},
     "render_paths": {},
@@ -842,7 +842,91 @@
     },
     "prjManagement": {
         "showReviewTab": true,
-        "manager": "None"
+        "manager": "Kitsu",
+        "prism_status": [
+            {
+                "name": "Approved",
+                "abbreviation": "apr",
+                "icon": "",
+                "color": [
+                    50,
+                    200,
+                    50
+                ],
+                "tasks": false,
+                "products": true,
+                "media": true
+            },
+            {
+                "name": "To Review",
+                "abbreviation": "rev",
+                "icon": "wave",
+                "color": [
+                    200,
+                    200,
+                    100
+                ],
+                "tasks": false,
+                "products": true,
+                "media": true
+            },
+            {
+                "name": "Finished",
+                "abbreviation": "fin",
+                "icon": "",
+                "color": [
+                    50,
+                    200,
+                    50
+                ],
+                "tasks": true,
+                "products": false,
+                "media": false
+            },
+            {
+                "name": "In Progress",
+                "abbreviation": "ip",
+                "icon": "",
+                "color": [
+                    200,
+                    150,
+                    100
+                ],
+                "tasks": true,
+                "products": false,
+                "media": false
+            },
+            {
+                "name": "Waiting to Start",
+                "abbreviation": "wtg",
+                "icon": "",
+                "color": [
+                    200,
+                    200,
+                    200
+                ],
+                "tasks": true,
+                "products": false,
+                "media": false
+            }
+        ],
+        "kitsu_enableProductPublishes": true,
+        "kitsu_enableMediaPublishes": true,
+        "kitsu_syncDepartments": false,
+        "kitsu_url": "",
+        "kitsu_projectName": "",
+        "kitsu_versionPubStatus": "wfa",
+        "kitsu_showTaskStatus": true,
+        "kitsu_allowNonExistentTaskPublishes": true,
+        "kitsu_allowLocalTasks": false,
+        "kitsu_useShortTaskNames": false,
+        "kitsu_allowAssetCreation": false,
+        "kitsu_allowShotCreation": false,
+        "kitsu_allowTaskCreation": false,
+        "kitsu_includePathInComments": true,
+        "kitsu_useUsername": true,
+        "kitsu_syncPlaylists": true,
+        "kitsu_syncEntityConnections": false
     },
     "deadline": {
         "submitScenes": false,

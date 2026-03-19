@@ -80,7 +80,7 @@ Gizmo {
  addUserKnob {7 debug_median_size l "Median on Pref (stabilize Pref) : Size " R 0 10}
  debug_median_size 1
  addUserKnob {20 INFO_TAB l INFO}
- addUserKnob {26 infos l "" +STARTLINE T "info : tool built @ Illogic Studios for RIV.\n\nreleases: \nv0.1 : first release\nv0.2 : clean parameters\nv0.3 : optim + KWH Claws added\n"}
+ addUserKnob {26 infos l "" +STARTLINE T "info : tool built @ Illogic Studios for RIV.\n\nreleases: \nv0.1 : first release\nv0.2 : clean parameters\nv0.3 : optim + KWH Claws added\nv0.4 : distort no longer affecting other aovs"}
 }
  BackdropNode {
   inputs 0
@@ -169,25 +169,25 @@ Gizmo {
   xpos 0
   ypos -193
  }
-set N650d0400 [stack 0]
+set Nc5a47c00 [stack 0]
  Dot {
   name Dot55
   xpos 34
   ypos 290
  }
-set N650d0800 [stack 0]
+set N5bdb6000 [stack 0]
  Dot {
   name Dot1
   xpos -266
   ypos 290
  }
-set N650d0c00 [stack 0]
+set N5bdb6400 [stack 0]
  Dot {
   name Dot59
   xpos -545
   ypos 290
  }
-set N650d1000 [stack 0]
+set N5bdb6800 [stack 0]
  Dot {
   name Dot8
   xpos -683
@@ -220,7 +220,7 @@ set N650d1000 [stack 0]
   xpos -683
   ypos 549
  }
-set N64752400 [stack 0]
+set N5bdb7c00 [stack 0]
  PostageStamp {
   name FUR_MASK1
   note_font "Verdana Bold"
@@ -228,7 +228,7 @@ set N64752400 [stack 0]
   ypos 2196
   hide_input true
  }
-push $N650d1000
+push $N5bdb6800
  Shuffle2 {
   fromInput1 {{0} B}
   in1 depth
@@ -271,7 +271,7 @@ push $N650d1000
   xpos -545
   ypos 553
  }
-set N64753c00 [stack 0]
+set N5bddb400 [stack 0]
  PostageStamp {
   name AUTOSIZE_MASK1
   note_font "Verdana Bold"
@@ -279,49 +279,49 @@ set N64753c00 [stack 0]
   ypos 2144
   hide_input true
  }
-push $N650d0800
+push $N5bdb6000
  Dot {
   name Dot23
   xpos 35
   ypos 757
  }
-set N63ad8400 [stack 0]
+set N5bddbc00 [stack 0]
  Dot {
   name Dot39
   xpos -51
   ypos 757
  }
-set N63ad8800 [stack 0]
+set N5be0a000 [stack 0]
  Dot {
   name Dot4
   xpos -170
   ypos 757
  }
-set N63ad8c00 [stack 0]
+set N5be0a400 [stack 0]
  Dot {
   name Dot5
   xpos -364
   ypos 757
  }
-set N63ad9000 [stack 0]
+set N5be0a800 [stack 0]
  Dot {
   name Dot24
   xpos -469
   ypos 757
  }
-set N63ad9400 [stack 0]
+set N5be0ac00 [stack 0]
  Dot {
   name Dot80
   xpos -617
   ypos 757
  }
-set N63ad9800 [stack 0]
+set N5be0b000 [stack 0]
  Dot {
   name Dot81
   xpos -786
   ypos 757
  }
-set N63ad9c00 [stack 0]
+set N5be0b400 [stack 0]
  Dot {
   name Dot2
   xpos -883
@@ -332,7 +332,7 @@ set N63ad9c00 [stack 0]
   xpos -883
   ypos 1427
  }
-push $N64753c00
+push $N5bddb400
  PostageStamp {
   name AUTOSIZE_MASK
   note_font "Verdana Bold"
@@ -340,7 +340,7 @@ push $N64753c00
   ypos 1241
   hide_input true
  }
-push $N63ad8400
+push $N5bddbc00
  Dot {
   name Dot38
   xpos 366
@@ -351,31 +351,31 @@ push $N63ad8400
   xpos 366
   ypos 849
  }
-set N66a67000 [stack 0]
+set N5be20800 [stack 0]
  Dot {
   name Dot42
   xpos 496
   ypos 849
  }
-set N66a67400 [stack 0]
+set N5be20c00 [stack 0]
  Dot {
   name Dot43
   xpos 623
   ypos 849
  }
-set N66a67800 [stack 0]
+set N5be21000 [stack 0]
  Dot {
   name Dot44
   xpos 755
   ypos 849
  }
-set N66a67c00 [stack 0]
+set N5be21400 [stack 0]
  Dot {
   name Dot3
   xpos 868
   ypos 849
  }
-set N7aa92400 [stack 0]
+set N5be21800 [stack 0]
  Dot {
   name Dot32
   xpos 984
@@ -397,7 +397,7 @@ set N7aa92400 [stack 0]
   xpos 950
   ypos 978
  }
-push $N66a67800
+push $N5be21000
 add_layer {masks_face masks_face.red masks_face.green masks_face.blue}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -416,7 +416,7 @@ add_layer {masks_face masks_face.red masks_face.green masks_face.blue}
   xpos 589
   ypos 978
  }
-push $N66a67400
+push $N5be20c00
 add_layer {masks_tail masks_tail.red masks_tail.green masks_tail.blue}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -436,7 +436,7 @@ add_layer {masks_tail masks_tail.red masks_tail.green masks_tail.blue}
   ypos 978
  }
 push 0
-push $N66a67000
+push $N5be20800
 add_layer {masks_ears masks_ears.red masks_ears.green masks_ears.blue}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -455,7 +455,7 @@ add_layer {masks_ears masks_ears.red masks_ears.green masks_ears.blue}
   xpos 332
   ypos 978
  }
-push $N7aa92400
+push $N5be21800
  Cryptomatte {
   cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
   pickerAdd {0 0 0 0 0 0 0 0}
@@ -470,7 +470,7 @@ push $N7aa92400
   xpos 868
   ypos 971
  }
-push $N66a67c00
+push $N5be21400
 add_layer {masks_feet masks_feet.red masks_feet.green masks_feet.blue}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -497,20 +497,19 @@ add_layer {masks_feet masks_feet.red masks_feet.green masks_feet.blue}
   xpos 721
   ypos 968
  }
-set N7aa93800 [stack 0]
  Merge2 {
   inputs 5+1
   name Merge1
   xpos 523
   ypos 1048
  }
-set N5f7eb000 [stack 0]
+set N5be79c00 [stack 0]
  Dot {
   name Dot21
   xpos 557
   ypos 1082
  }
-push $N66a67000
+push $N5be20800
  Dot {
   name Dot34
   xpos 236
@@ -556,7 +555,7 @@ push $N66a67000
    xpos 171
    ypos -273
   }
-set N5f718000 [stack 0]
+set N5d092c00 [stack 0]
   Clamp {
    minimum_enable {{parent.pre_bc}}
    maximum_enable {{parent.pre_wc}}
@@ -564,28 +563,28 @@ set N5f718000 [stack 0]
    xpos 171
    ypos -219
   }
-set N5f718400 [stack 0]
+set N5d093000 [stack 0]
   Dot {
    name Dot1
    xpos 405
    ypos 31
   }
-set N5f718800 [stack 0]
-push $N5f718800
-push $N5f718400
+set N5d093400 [stack 0]
+push $N5d093400
+push $N5d093000
   Colorspace {
    colorspace_out Cineon
    name Colorspace1
    xpos 171
    ypos -163
   }
-set N5f718c00 [stack 0]
+set N5d093800 [stack 0]
   Blur {
    name Blur1
    xpos 132
    ypos -126
   }
-push $N5f718c00
+push $N5d093800
   Blur {
    size 5.4
    name Blur2
@@ -629,7 +628,7 @@ push $N5f718c00
    ypos 229
    disable {{"\[exists parent.input1] ? 0 : 1" x1 0}}
   }
-push $N5f718000
+push $N5d092c00
   Dot {
    name Dot3
    note_font_size 22
@@ -684,7 +683,7 @@ push $N5f718000
   xpos 202
   ypos 1176
  }
-push $N63ad9c00
+push $N5be0b400
 add_layer {clumpid_A clumpid_A.x clumpid_A.y clumpid_A.z}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -717,7 +716,7 @@ add_layer {clumpid_A clumpid_A.x clumpid_A.y clumpid_A.z}
   xpos -786
   ypos 931
  }
-push $N63ad9800
+push $N5be0b000
 add_layer {clumpid_B clumpid_B.x clumpid_B.y clumpid_B.z}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -758,7 +757,7 @@ add_layer {clumpid_B clumpid_B.x clumpid_B.y clumpid_B.z}
   xpos -651
   ypos 1113
  }
-push $N64752400
+push $N5bdb7c00
  PostageStamp {
   name FUR_MASK
   note_font "Verdana Bold"
@@ -766,7 +765,7 @@ push $N64752400
   ypos 1069
   hide_input true
  }
-push $N63ad8800
+push $N5be0a000
  Cryptomatte {
   pickerAdd {0.9287120104 0.998231411 0.1002085209 0.9106793404 947 974 948 975}
   matteList eyebrows
@@ -775,7 +774,7 @@ push $N63ad8800
   xpos -85
   ypos 1009
  }
-push $N63ad8c00
+push $N5be0a400
 add_layer {Pref Pref.red Pref.green Pref.blue Pref.x Pref.y Pref.z Pref.alpha}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -788,7 +787,7 @@ add_layer {Pref Pref.red Pref.green Pref.blue Pref.x Pref.y Pref.z Pref.alpha}
   xpos -204
   ypos 786
  }
- set C5f751c00 [stack 0]
+ set C5d16c800 [stack 0]
  Median {
   size {{parent.Median_MASTER.size}}
   ignore_top_line false
@@ -886,13 +885,13 @@ add_layer {Pref Pref.red Pref.green Pref.blue Pref.x Pref.y Pref.z Pref.alpha}
    xpos 34
    ypos 66
   }
-set N5a223400 [stack 0]
+set N5d1a6000 [stack 0]
   Dot {
    name Dot4
    xpos -130
    ypos 66
   }
-set N5a223800 [stack 0]
+set N5d1a6400 [stack 0]
   Dot {
    name Dot3
    xpos -292
@@ -914,7 +913,7 @@ set N5a223800 [stack 0]
    xpos 265
    ypos 200
   }
-push $N5a223400
+push $N5d1a6000
   Add {
    channels rgb
    value {{parent.Sample.rgbSample/-1} {parent.Sample.rgbSample/-1} {parent.Sample.rgbSample/-1} 0}
@@ -966,13 +965,13 @@ push $N5a223400
     xpos -110
     ypos -192
    }
-set N5a181400 [stack 0]
+set N5d1dc000 [stack 0]
    Dot {
     name Dot1
     xpos -76
     ypos -161
    }
-set N5a181800 [stack 0]
+set N5d1dc400 [stack 0]
    Expression {
     expr3 a>0
     name ExpressionA
@@ -985,8 +984,8 @@ set N5a181800 [stack 0]
     xpos -220
     ypos -112
    }
-push $N5a181800
-push $N5a181400
+push $N5d1dc400
+push $N5d1dc000
    Remove {
     name RemoveAll
     xpos 34
@@ -1027,7 +1026,7 @@ push $N5a181400
     xpos 34
     ypos -116
    }
-push $N5a181800
+push $N5d1dc400
    Merge2 {
     inputs 2+1
     operation copy
@@ -1075,7 +1074,7 @@ push $N5a181800
    xpos 34
    ypos 469
   }
-set N67fdc400 [stack 0]
+set N5d21f000 [stack 0]
   BlinkScript {
    recompileCount 5
    ProgramGroup 1
@@ -1096,7 +1095,7 @@ set N67fdc400 [stack 0]
    xpos 990
    ypos 615
   }
-push $N67fdc400
+push $N5d21f000
   BlinkScript {
    recompileCount 4
    ProgramGroup 1
@@ -1118,7 +1117,7 @@ push $N67fdc400
    xpos 880
    ypos 614
   }
-push $N67fdc400
+push $N5d21f000
   BlinkScript {
    recompileCount 15
    ProgramGroup 1
@@ -1140,7 +1139,7 @@ push $N67fdc400
    xpos 770
    ypos 613
   }
-push $N67fdc400
+push $N5d21f000
   BlinkScript {
    recompileCount 15
    ProgramGroup 1
@@ -1162,7 +1161,7 @@ push $N67fdc400
    xpos 658
    ypos 615
   }
-push $N67fdc400
+push $N5d21f000
   BlinkScript {
    recompileCount 3
    ProgramGroup 1
@@ -1184,7 +1183,7 @@ push $N67fdc400
    xpos 550
    ypos 615
   }
-push $N67fdc400
+push $N5d21f000
   Expression {
    channel0 rgba
    expr0 "sin( atan(r, g) *rays+rays_seed)"
@@ -1206,7 +1205,7 @@ push $N67fdc400
    xpos 400
    ypos 606
   }
-push $N67fdc400
+push $N5d21f000
   Expression {
    channel0 rgba
    expr0 "sin(sqrt( r*r + g*g + b*b)+rings_seed)"
@@ -1226,7 +1225,7 @@ push $N67fdc400
    xpos 259
    ypos 605
   }
-push $N67fdc400
+push $N5d21f000
   Expression {
    channel0 rgba
    expr0 "pow(turbulence (r, g, b, octaves, lacunarity, gain), 1/gamma)"
@@ -1246,7 +1245,7 @@ push $N67fdc400
    addUserKnob {7 gamma}
    gamma {{parent.gamma}}
   }
-push $N67fdc400
+push $N5d21f000
   Expression {
    channel0 rgba
    expr0 "pow((fBm (r, g, b, octaves, lacunarity, gain) +1)/2, 1/gamma)"
@@ -1287,7 +1286,7 @@ push $N67fdc400
    xpos 0
    ypos 885
   }
-push $N5a223800
+push $N5d1a6400
   NoOp {
    name SampleXY
    knobChanged "\nn = nuke.thisNode()\nrgbNode = nuke.toNode('Sample')\nposition = n.knob('Position2d').getValue()\npositionX = position\[0]\npositionY = position\[-1]\nrSample = n.sample(\"r\",positionX,positionY)\ngSample = n.sample(\"g\",positionX,positionY)\nbSample = n.sample(\"b\",positionX,positionY)\nrgbNode.knob('rgbSample').setValue(\[rSample, gSample, bSample])\n"
@@ -1313,13 +1312,13 @@ push $N5a223800
   xpos -170
   ypos 955
  }
-push $N63ad9000
+push $N5be0a800
  Dot {
   name Dot7
   xpos -364
   ypos 889
  }
-push $N63ad9400
+push $N5be0ac00
 add_layer {perimeter perimeter.perimeter}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -1331,7 +1330,7 @@ add_layer {perimeter perimeter.perimeter}
   xpos -503
   ypos 793
  }
- set C5c604000 [stack 0]
+ set Ccb576c00 [stack 0]
  Grade {
   inputs 1+1
   channels rgba
@@ -1378,7 +1377,7 @@ add_layer {perimeter perimeter.perimeter}
   xpos -469
   ypos 1143
  }
-push $N63ad8400
+push $N5bddbc00
  Copy {
   inputs 2
   from0 rgba.alpha
@@ -1393,7 +1392,7 @@ push $N63ad8400
   xpos 1
   ypos 1170
  }
-set Na688a000 [stack 0]
+set Ncb5acc00 [stack 0]
  Multiply {
   inputs 1+1
   channels alpha
@@ -1410,7 +1409,7 @@ set Na688a000 [stack 0]
   xpos 35
   ypos 1334
  }
-set Na688a800 [stack 0]
+set Ncb5ad400 [stack 0]
  Dot {
   name Dot63
   xpos -40
@@ -1421,7 +1420,7 @@ set Na688a800 [stack 0]
   xpos -40
   ypos 1389
  }
-push $Na688a800
+push $Ncb5ad400
  Group {
   name KUWAHARA20
   tile_color 0x6e49a7ff
@@ -1456,25 +1455,25 @@ push $Na688a800
    xpos 89
    ypos 48
   }
-set Na688b400 [stack 0]
+set Ncb5dc000 [stack 0]
   Dot {
    name Dot7
    xpos 0
    ypos 51
   }
-set Na688b800 [stack 0]
+set Ncb5dc400 [stack 0]
   Dot {
    name Dot8
    xpos -132
    ypos 51
   }
-set Na688bc00 [stack 0]
+set Ncb5dc800 [stack 0]
   Dot {
    name Dot6
    xpos -224
    ypos 51
   }
-push $Na688bc00
+push $Ncb5dc800
   Dilate {
    channels alpha
    size {{width*-1}}
@@ -1483,7 +1482,7 @@ push $Na688bc00
    ypos 106
    disable {{1-normalize}}
   }
-set Nbfaf0400 [stack 0]
+set Ncb5dd000 [stack 0]
   Merge2 {
    inputs 2
    operation minus
@@ -1495,7 +1494,7 @@ set Nbfaf0400 [stack 0]
    ypos 175
    disable {{1-normalize}}
   }
-push $Na688b800
+push $Ncb5dc400
   Dilate {
    channels alpha
    size {{width}}
@@ -1504,7 +1503,7 @@ push $Na688b800
    ypos 105
    disable {{1-normalize}}
   }
-push $Nbfaf0400
+push $Ncb5dd000
   Merge2 {
    inputs 2
    operation minus
@@ -1540,13 +1539,13 @@ push $Nbfaf0400
    xpos -169
    ypos 330
   }
-set Nbfaf1c00 [stack 0]
+set Ncb610800 [stack 0]
   Dot {
    name Dot2
    xpos 8
    ypos 337
   }
-push $Na688b400
+push $Ncb5dc000
   BlinkScript {
    kernelSourceFile /Users/Derek/Documents/GitHub/VFX-software-prefs/Nuke/Kuwahara/df_kuwahara_tensor.cpp
    recompileCount 1
@@ -1565,8 +1564,8 @@ push $Na688b400
    xpos 176
    ypos 213
   }
-set Nbf530800 [stack 0]
-push $Na688b400
+set Ncb611400 [stack 0]
+push $Ncb5dc000
   BlinkScript {
    inputs 3
    kernelSourceFile /Users/Derek/Documents/GitHub/VFX-software-prefs/Nuke/Kuwahara/df_kuwaharaAnisotropic_map.cpp
@@ -1587,8 +1586,8 @@ push $Na688b400
    xpos 111
    ypos 452
   }
-push $Nbf530800
-push $Na688b400
+push $Ncb611400
+push $Ncb5dc000
   Dot {
    name Dot1
    xpos 314
@@ -1627,13 +1626,13 @@ push $Na688b400
    xpos 178
    ypos 449
   }
-set Nbf577e00 [stack 0]
+set Ncb624800 [stack 0]
   Output {
    name Output1
    xpos 178
    ypos 557
   }
-push $Nbfaf1c00
+push $Ncb610800
 push 0
 push 0
 push 0
@@ -1642,7 +1641,7 @@ push 0
 push 0
 push 0
 push 0
-push $Nbf577e00
+push $Ncb624800
   Viewer {
    inputs 10
    frame_range 1001-1001
@@ -1682,13 +1681,13 @@ push $Nbf577e00
   xpos 34
   ypos 1908
  }
-set Nbf4c7800 [stack 0]
+set Ncb6ca400 [stack 0]
  Dot {
   name Dot11
   xpos -293
   ypos 1908
  }
-set Nbf4c7c00 [stack 0]
+set Ncb6ca800 [stack 0]
 add_layer {curveu curveu.curveu}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -1731,14 +1730,14 @@ add_layer {curveu curveu.curveu}
    xpos 57
    ypos -347
   }
-set Nbb66e400 [stack 0]
+set Ncb6cb000 [stack 0]
   Colorspace {
    colorspace_out HSL
    name Colorspace1
    xpos -181
    ypos -181
   }
-set Nbb66e800 [stack 0]
+set Ncb6cb400 [stack 0]
   Shuffle {
    red blue
    green blue
@@ -1761,15 +1760,15 @@ set Nbb66e800 [stack 0]
    ypos 446
    number 1
   }
-push $Nbb66e400
+push $Ncb6cb000
   Dot {
    name Dot5
    note_font_size 41
    xpos 91
    ypos 284
   }
-set Nbb66f800 [stack 0]
-push $Nbb66e800
+set Ncb700400 [stack 0]
+push $Ncb6cb400
   Expression {
    expr3 smoothstep(parent.picker.blackpoint,parent.picker.whitepoint,b)
    name Expression1
@@ -1782,7 +1781,7 @@ push $Nbb66e800
    xpos -147
    ypos -58
   }
-set Nbe14a000 [stack 0]
+set Ncb700c00 [stack 0]
   ColorLookup {
    channels {{{parent.ColorLookup_smooth.channels}}}
    lut {master {curve L 0 C k 1 s0}
@@ -1794,7 +1793,7 @@ set Nbe14a000 [stack 0]
    xpos -69
    ypos 33
   }
-push $Nbe14a000
+push $Ncb700c00
   ColorLookup {
    channels {{{parent.ColorLookup_smooth.channels}}}
    lut {master {curve L 0 s0 1}
@@ -1806,7 +1805,7 @@ push $Nbe14a000
    xpos -181
    ypos 32
   }
-push $Nbe14a000
+push $Ncb700c00
   ColorLookup {
    lut {master {curve L 0 s0 C k 1 s0}
      red {}
@@ -1817,7 +1816,7 @@ push $Nbe14a000
    xpos -293
    ypos 32
   }
-push $Nbe14a000
+push $Ncb700c00
   Dot {
    name Dot2
    note_font_size 41
@@ -1872,7 +1871,7 @@ push $Nbe14a000
    xpos -147
    ypos 450
   }
-push $Nbb66f800
+push $Ncb700400
   Shuffle {
    alpha black
    name Shuffle3
@@ -1911,13 +1910,13 @@ push $Nbb66f800
   xpos -293
   ypos 2100
  }
-push $Nbf4c7c00
+push $Ncb6ca800
  Dot {
   name Dot26
   xpos -390
   ypos 1908
  }
-clone $C5c604000 {
+clone $Ccb576c00 {
   xpos -424
   ypos 1926
   selected false
@@ -1953,14 +1952,14 @@ clone $C5c604000 {
    xpos 57
    ypos -347
   }
-set Nbf5f8400 [stack 0]
+set Ncb76f000 [stack 0]
   Colorspace {
    colorspace_out HSL
    name Colorspace1
    xpos -181
    ypos -181
   }
-set Nbf5f8800 [stack 0]
+set Ncb76f400 [stack 0]
   Shuffle {
    red blue
    green blue
@@ -1983,15 +1982,15 @@ set Nbf5f8800 [stack 0]
    ypos 446
    number 1
   }
-push $Nbf5f8400
+push $Ncb76f000
   Dot {
    name Dot5
    note_font_size 41
    xpos 91
    ypos 284
   }
-set Nbf5f9800 [stack 0]
-push $Nbf5f8800
+set Ncb7a8400 [stack 0]
+push $Ncb76f400
   Expression {
    expr3 smoothstep(parent.picker.blackpoint,parent.picker.whitepoint,b)
    name Expression1
@@ -2004,7 +2003,7 @@ push $Nbf5f8800
    xpos -147
    ypos -58
   }
-set N180ec000 [stack 0]
+set Ncb7a8c00 [stack 0]
   ColorLookup {
    channels {{{parent.ColorLookup_smooth.channels}}}
    lut {master {curve L 0 C k 1 s0}
@@ -2016,7 +2015,7 @@ set N180ec000 [stack 0]
    xpos -69
    ypos 33
   }
-push $N180ec000
+push $Ncb7a8c00
   ColorLookup {
    channels {{{parent.ColorLookup_smooth.channels}}}
    lut {master {curve L 0 s0 1}
@@ -2028,7 +2027,7 @@ push $N180ec000
    xpos -181
    ypos 32
   }
-push $N180ec000
+push $Ncb7a8c00
   ColorLookup {
    lut {master {curve L 0 s0 C k 1 s0}
      red {}
@@ -2039,7 +2038,7 @@ push $N180ec000
    xpos -293
    ypos 32
   }
-push $N180ec000
+push $Ncb7a8c00
   Dot {
    name Dot2
    note_font_size 41
@@ -2094,7 +2093,7 @@ push $N180ec000
    xpos -147
    ypos 450
   }
-push $Nbf5f9800
+push $Ncb7a8400
   Shuffle {
    alpha black
    name Shuffle3
@@ -2139,7 +2138,7 @@ push $Nbf5f9800
   xpos -390
   ypos 2052
  }
-push $N650d0400
+push $Nc5a47c00
  PostageStamp {
   name beauty2
   note_font "Verdana Bold"
@@ -2147,19 +2146,19 @@ push $N650d0400
   ypos 1604
   hide_input true
  }
-set N181fc000 [stack 0]
+set Ncb81ec00 [stack 0]
  Dot {
   name Dot35
   xpos -719
   ypos 1607
  }
-set N181fc400 [stack 0]
+set Ncb81f000 [stack 0]
  Dot {
   name Dot75
   xpos -845
   ypos 1607
  }
-set N181fc800 [stack 0]
+set Ncb81f400 [stack 0]
  Dot {
   name Dot76
   xpos -989
@@ -2181,7 +2180,7 @@ add_layer {furTex furTex.x furTex.y furTex.z}
   xpos -989
   ypos 1773
  }
-push $N181fc800
+push $Ncb81f400
 add_layer {furTex2 furTex2.x furTex2.y furTex2.z}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -2207,7 +2206,7 @@ add_layer {furTex2 furTex2.x furTex2.y furTex2.z}
   xpos -845
   ypos 1914
  }
-push $N181fc400
+push $Ncb81f000
 add_layer {N N.x N.y N.z N.red N.green N.blue N.alpha N.X N.Y N.Z}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -2225,8 +2224,8 @@ add_layer {N N.x N.y N.z N.red N.green N.blue N.alpha N.X N.Y N.Z}
   xpos -719
   ypos 1819
  }
-push $N181fc000
-clone $C5f751c00 {
+push $Ncb81ec00
+clone $C5d16c800 {
   xpos -590
   ypos 1664
   selected false
@@ -2277,9 +2276,9 @@ add_layer {dir dir.red dir.green dir.x dir.y dir.z}
   xpos -447
   ypos 1816
  }
-set Nbb094000 [stack 0]
-push $Nbb094000
-push $Nbb094000
+set Ncb86ec00 [stack 0]
+push $Ncb86ec00
+push $Ncb86ec00
  Group {
   inputs 5
   name TRIPLANAR
@@ -2321,13 +2320,13 @@ push $Nbb094000
    xpos -296
    ypos 29
   }
-set Nbb094c00 [stack 0]
+set Ncb86f800 [stack 0]
   Dot {
    name Dot3
    xpos -518
    ypos 29
   }
-set Nbb095000 [stack 0]
+set Ncb86fc00 [stack 0]
   Dot {
    name Dot4
    xpos -867
@@ -2356,7 +2355,7 @@ set Nbb095000 [stack 0]
    xpos -441
    ypos 109
   }
-set Nbbc00400 [stack 0]
+set Ncb8a9000 [stack 0]
   Dot {
    name Dot74
    xpos -783
@@ -2488,20 +2487,20 @@ set Nbbc00400 [stack 0]
    xpos -817
    ypos 530
   }
-  set C66b86400 [stack 0]
+  set Ccb95d000 [stack 0]
   Premult {
    name Premult4
    xpos -824
    ypos 564
   }
 push 0
-push $Nbb095000
+push $Ncb86fc00
   Dot {
    name Dot76
    xpos -518
    ypos 312
   }
-push $Nbbc00400
+push $Ncb8a9000
   Group {
    name Pworld_transform1
    xpos -475
@@ -2620,7 +2619,7 @@ push $Nbbc00400
    xpos -475
    ypos 415
   }
-clone $C66b86400 {
+clone $Ccb95d000 {
    xpos -465
    ypos 520
    selected false
@@ -2630,13 +2629,13 @@ clone $C66b86400 {
    xpos -465
    ypos 556
   }
-push $Nbb094c00
+push $Ncb86f800
   Dot {
    name Dot78
    xpos -292
    ypos 286
   }
-push $Nbbc00400
+push $Ncb8a9000
   Dot {
    name Dot77
    xpos -174
@@ -2759,7 +2758,7 @@ push $Nbbc00400
    xpos -208
    ypos 413
   }
-clone $C66b86400 {
+clone $Ccb95d000 {
    xpos -208
    ypos 494
    selected false
@@ -2770,13 +2769,13 @@ clone $C66b86400 {
    xpos -465
    ypos 612
   }
-set Na671f400 [stack 0]
+set Ncf366000 [stack 0]
   Output {
    name Output1
    xpos -465
    ypos 695
   }
-push $Na671f400
+push $Ncf366000
 push 0
 push 0
 push 0
@@ -2863,7 +2862,7 @@ push 0
   xpos -556
   ypos 2357
  }
-set Nbb065c00 [stack 0]
+set Ncf3e4800 [stack 0]
  PostageStamp {
   name BRUSHES_MAP
   note_font "Verdana Bold"
@@ -2871,7 +2870,7 @@ set Nbb065c00 [stack 0]
   ypos 3374
   hide_input true
  }
-push $Na688a000
+push $Ncb5acc00
  PostageStamp {
   name KWH_RM
   note_font "Verdana Bold"
@@ -2889,7 +2888,7 @@ push $Na688a000
   xpos -149
   ypos 3292
  }
-push $N650d0400
+push $Nc5a47c00
  PostageStamp {
   name beauty1
   note_font "Verdana Bold"
@@ -2897,24 +2896,25 @@ push $N650d0400
   ypos 2922
   hide_input true
  }
-set Nb7958c00 [stack 0]
+set Ncf3e5800 [stack 0]
  Dot {
   name Dot14
   xpos -521
   ypos 2925
  }
-set Nb7959000 [stack 0]
+set Ncf3e5c00 [stack 0]
  Dot {
   name Dot25
   xpos -651
   ypos 2925
  }
-set Nb7959400 [stack 0]
+set Ncf40c000 [stack 0]
  Dot {
   name Dot27
   xpos -795
   ypos 2925
  }
+set Ncf40c400 [stack 0]
 add_layer {CryptoPrimvar_part CryptoPrimvar_part.red CryptoPrimvar_part.green CryptoPrimvar_part.blue}
 add_layer {CryptoPrimvar_part00 CryptoPrimvar_part00.red CryptoPrimvar_part00.green CryptoPrimvar_part00.blue CryptoPrimvar_part00.alpha}
 add_layer {CryptoPrimvar_part01 CryptoPrimvar_part01.red CryptoPrimvar_part01.green CryptoPrimvar_part01.blue CryptoPrimvar_part01.alpha}
@@ -2934,7 +2934,7 @@ add_layer {CryptoPrimvar_part02 CryptoPrimvar_part02.red CryptoPrimvar_part02.gr
   xpos -795
   ypos 3228
  }
-push $Nb7959400
+push $Ncf40c000
 add_layer {CryptoPrimitives CryptoPrimitives.red CryptoPrimitives.green CryptoPrimitives.blue}
 add_layer {CryptoPrimitives00 CryptoPrimitives00.red CryptoPrimitives00.green CryptoPrimitives00.blue CryptoPrimitives00.alpha}
 add_layer {CryptoPrimitives01 CryptoPrimitives01.red CryptoPrimitives01.green CryptoPrimitives01.blue CryptoPrimitives01.alpha}
@@ -2954,7 +2954,7 @@ add_layer {CryptoPrimitives02 CryptoPrimitives02.red CryptoPrimitives02.green Cr
   xpos -651
   ypos 3155
  }
-push $Nb7959000
+push $Ncf3e5c00
 add_layer {CryptoMaterials CryptoMaterials.red CryptoMaterials.green CryptoMaterials.blue}
 add_layer {CryptoMaterials00 CryptoMaterials00.red CryptoMaterials00.green CryptoMaterials00.blue CryptoMaterials00.alpha}
 add_layer {CryptoMaterials01 CryptoMaterials01.red CryptoMaterials01.green CryptoMaterials01.blue CryptoMaterials01.alpha}
@@ -3008,16 +3008,16 @@ add_layer {CryptoMaterials02 CryptoMaterials02.red CryptoMaterials02.green Crypt
   xpos 181
   ypos 2925
  }
-set Nbb2c6000 [stack 0]
+set Ncf438c00 [stack 0]
  Dot {
   name Dot66
   xpos 181
   ypos 2972
  }
-push $Nbb2c6000
-push $Nb7958c00
-push $Nbb065c00
-push $Nbf4c7800
+push $Ncf438c00
+push $Ncf3e5800
+push $Ncf3e4800
+push $Ncb6ca400
 add_layer {disto01 disto01.x disto01.y disto01.z disto01.u disto01.v}
  Shuffle2 {
   inputs 2
@@ -3033,27 +3033,28 @@ add_layer {disto01 disto01.x disto01.y disto01.z disto01.u disto01.v}
  Dot {
   name Dot18
   xpos 34
-  ypos 2438
+  ypos 2450
  }
-set Nbb2c6c00 [stack 0]
+set Ncf439800 [stack 0]
  Dot {
   name Dot19
   xpos -50
-  ypos 2438
+  ypos 2450
  }
  Dot {
   name Dot20
   xpos -50
   ypos 2501
  }
-push $Nbb2c6c00
+push $Ncf439800
  IDistort {
+  channels rgba
   uv disto01
   uv_scale {{parent.brush_distort}}
   invert_mask true
   name IDistort1
   xpos 0
-  ypos 2456
+  ypos 2468
  }
  Shuffle2 {
   inputs 2
@@ -3068,6 +3069,7 @@ push $Nbb2c6c00
   ypos 2492
  }
  IDistort {
+  channels rgba
   uv disto01
   uv_scale {{-parent.IDistort1.uv_scale}}
   invert_mask true
@@ -3125,7 +3127,7 @@ push $Nbb2c6c00
   xpos 0
   ypos 3524
  }
-push $N650d0800
+push $N5bdb6000
  Dot {
   name Dot33
   xpos 269
@@ -3138,7 +3140,7 @@ push $N650d0800
   xpos 235
   ypos 434
  }
-push $N650d0c00
+push $N5bdb6400
  Group {
   name DeepFromDepth
   tile_color 0x66ff
@@ -3330,14 +3332,14 @@ push $N650d0c00
    xpos 2930
    ypos -1885
   }
-set N78325c00 [stack 0]
+set Ncf4c6800 [stack 0]
   DeepToImage2 {
    name DeepToImage7
    label static
    xpos 2710
    ypos -1703
   }
-set Ned524000 [stack 0]
+set Ncf4c6c00 [stack 0]
   Dot {
    name Dot1
    label static
@@ -3345,7 +3347,7 @@ set Ned524000 [stack 0]
    xpos 2744
    ypos 499
   }
-set Ned524400 [stack 0]
+set Ncf4c7000 [stack 0]
   Input {
    inputs 0
    name bokeh
@@ -3382,7 +3384,7 @@ set Ned524400 [stack 0]
    xpos 4315
    ypos -1476
   }
-set Ned525800 [stack 0]
+set Ncf4f6400 [stack 0]
   Noise {
    size {{parent.noiseSize i}}
    gain {{parent.noiseGain i}}
@@ -3393,7 +3395,7 @@ set Ned525800 [stack 0]
    xpos 4386
    ypos -1430
   }
-push $Ned525800
+push $Ncf4f6400
   Flare {
    position {{"250 * 1"} {"250 * 1"}}
    radius {0 {"249 - (parent.ringWidth*249)"} 249}
@@ -3467,7 +3469,7 @@ push $Ned525800
    xpos 4232
    ypos -1082
   }
-set N6a09f900 [stack 0]
+set Ncf50c300 [stack 0]
   Dot {
    name Dot4
    label static
@@ -3475,7 +3477,7 @@ set N6a09f900 [stack 0]
    xpos 4284
    ypos 764
   }
-push $N78325c00
+push $Ncf4c6800
   DeepReformat {
    type scale
    scale {{"\[value parent.truescale]"}}
@@ -3485,7 +3487,7 @@ push $N78325c00
    xpos 2930
    ypos -1822
   }
-set N5f568c00 [stack 0]
+set Ncf52b800 [stack 0]
   DeepExpression {
    temp_name0 dpcheck
    temp_expr0 "deep.front < zfar"
@@ -3523,8 +3525,8 @@ set N5f568c00 [stack 0]
    name Inpaint5
    disable {{"parent.inpaint ? 0 : 1"}}
   }
-set N5f7a2000 [stack 0]
-push $N6a09f900
+set Ncf56ec00 [stack 0]
+push $Ncf50c300
   Reformat {
    type scale
    scale {{parent.aspect} 1}
@@ -3534,8 +3536,8 @@ push $N6a09f900
    xpos 4340
    ypos -675
   }
-set N5f7a2800 [stack 0]
-push $N5f7a2000
+set Ncf56f400 [stack 0]
+push $Ncf56ec00
   ZDefocus2 {
    inputs 2
    useGPUIfAvailable {{parent.useGPU}}
@@ -3572,8 +3574,8 @@ push $N5f7a2000
    name ColorCorrect5
    disable {{"parent.view_type == 1 ? 0 : 1"}}
   }
-set N5f7a3c00 [stack 0]
-push $N5f568c00
+set Ncf59c800 [stack 0]
+push $Ncf52b800
   DeepExpression {
    temp_name0 dpcheck
    temp_expr0 "deep.front >= znear && deep.front < zfar"
@@ -3611,9 +3613,9 @@ push $N5f568c00
    name Inpaint4
    disable {{"parent.inpaint ? 0 : 1"}}
   }
-set N5f5eb000 [stack 0]
-push $N5f7a2800
-push $N5f5eb000
+set Ncf59dc00 [stack 0]
+push $Ncf56f400
+push $Ncf59dc00
   ZDefocus2 {
    inputs 2
    useGPUIfAvailable {{parent.useGPU}}
@@ -3650,8 +3652,8 @@ push $N5f5eb000
    name ColorCorrect4
    disable {{"parent.view_type == 1 ? 0 : 1"}}
   }
-set Nb75fe400 [stack 0]
-push $N5f568c00
+set Ncf5d3000 [stack 0]
+push $Ncf52b800
   DeepExpression {
    temp_name0 dpcheck
    temp_expr0 "deep.front >= znear && deep.front < zfar"
@@ -3689,9 +3691,9 @@ push $N5f568c00
    name Inpaint3
    disable {{"parent.inpaint ? 0 : 1"}}
   }
-set Nb75ff800 [stack 0]
-push $N5f7a2800
-push $Nb75ff800
+set Ncf616400 [stack 0]
+push $Ncf56f400
+push $Ncf616400
   ZDefocus2 {
    inputs 2
    useGPUIfAvailable {{parent.useGPU}}
@@ -3728,8 +3730,8 @@ push $Nb75ff800
    name ColorCorrect3
    disable {{"parent.view_type == 1 ? 0 : 1"}}
   }
-set Nba96ac00 [stack 0]
-push $N5f568c00
+set Ncf617800 [stack 0]
+push $Ncf52b800
   DeepExpression {
    temp_name0 dpcheck
    temp_expr0 "deep.front >= znear && deep.front < zfar"
@@ -3767,9 +3769,9 @@ push $N5f568c00
    name Inpaint2
    disable {{"parent.inpaint ? 0 : 1"}}
   }
-set Nbf976000 [stack 0]
-push $N5f7a2800
-push $Nbf976000
+set Ncf65cc00 [stack 0]
+push $Ncf56f400
+push $Ncf65cc00
   ZDefocus2 {
    inputs 2
    useGPUIfAvailable {{parent.useGPU}}
@@ -3806,8 +3808,8 @@ push $Nbf976000
    name ColorCorrect2
    disable {{"parent.view_type == 1 ? 0 : 1"}}
   }
-set Nbf977400 [stack 0]
-push $N5f568c00
+set Ncf68e000 [stack 0]
+push $Ncf52b800
   DeepExpression {
    temp_name0 dpcheck
    temp_expr0 "deep.front >= znear"
@@ -3845,9 +3847,9 @@ push $N5f568c00
    name Inpaint1
    disable {{"parent.inpaint ? 0 : 1"}}
   }
-set Nbde50800 [stack 0]
-push $N5f7a2800
-push $Nbde50800
+set Ncf68f400 [stack 0]
+push $Ncf56f400
+push $Ncf68f400
   ZDefocus2 {
    inputs 2
    useGPUIfAvailable {{parent.useGPU}}
@@ -3884,7 +3886,7 @@ push $Nbde50800
    name ColorCorrect1
    disable {{"parent.view_type == 1 ? 0 : 1"}}
   }
-set Nbde51c00 [stack 0]
+set Ncf6d0800 [stack 0]
 push 0
   Switch {
    inputs 6
@@ -3894,11 +3896,11 @@ push 0
    xpos 4728
    ypos 289
   }
-push $N5f7a3c00
-push $Nb75fe400
-push $Nba96ac00
-push $Nbf977400
-push $Nbde51c00
+push $Ncf59c800
+push $Ncf5d3000
+push $Ncf617800
+push $Ncf68e000
+push $Ncf6d0800
   Merge2 {
    inputs 2
    operation {{parent.mergeOpIndex}}
@@ -3954,7 +3956,7 @@ push $Nbde51c00
    ypos 1172
    disable {{"\[exists parent.input2] ? 0 : 1" x1 0}}
   }
-push $Ned524400
+push $Ncf4c7000
   Dissolve {
    inputs 2
    which {{parent.mix}}
@@ -3969,7 +3971,7 @@ push $Ned524400
    xpos 5330
    ypos 1446
   }
-push $N5f568c00
+push $Ncf52b800
   DeepToImage2 {
    name DeepToImage12
    label static
@@ -3983,7 +3985,7 @@ push $N5f568c00
    xpos 2854
    ypos 434
   }
-push $Ned524000
+push $Ncf4c6c00
   Shuffle {
    in deep
    green black
@@ -4039,7 +4041,7 @@ push $Ned524000
   addUserKnob {7 far_force l far% R 0 100}
   far_force {{far_percentage}}
  }
-push $N7aa93800
+push $Ncf40c400
 push 0
 push 0
 push 0
@@ -4048,10 +4050,9 @@ push 0
 push 0
 push 0
 push 0
-push $N5f7eb000
+push $N5be79c00
  Viewer {
   inputs 10
-  frame 1029
   frame_range 1001-1025
   fps 25
   input_number 9
@@ -4060,8 +4061,7 @@ push $N5f7eb000
     }
   viewerProcess "ACES 1.0 - SDR Video (sRGB - Display)"
   input_process false
-  monitorOutNDISenderName "Nuke - susan_sandboxRendu_v008 - Viewer1"
-  monitorOutOutputTransform "ACES 1.0 - SDR Video (sRGB - Display)"
+  monitorOutNDISenderName "Nuke - rivers_template_v007 - Viewer1"
   name Viewer1
   xpos 3195
   ypos 5759

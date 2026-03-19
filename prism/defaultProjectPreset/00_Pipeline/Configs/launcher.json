@@ -454,6 +454,36 @@
                 }
             ],
             "uid": "9b7897d1-ec7e-11f0-9448-74d02b2741ff"
+        },
+        {
+            "label": "Layers Dependency Checker",
+            "category": "Other",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Layers Dependency Checker.png",
+            "versions": [
+                {
+                    "label": "Version 1",
+                    "mode": "Python",
+                    "cmd": "import sys\nimport importlib\n\nsys.path.append(r\"R:\\pipeline\\pipe\\prism\\layers-dependencies-v2\")\n\nimport layers_dependency_checker\nimportlib.reload(layers_dependency_checker)\n\nlayers_dependency_checker.run()",
+                    "preferred": true,
+                    "environment": {}
+                }
+            ],
+            "uid": "af6a3ccd-214f-11f1-ae80-d096e2f1fab8"
+        },
+        {
+            "label": "Renders Dependency Checker",
+            "category": "Other",
+            "icon": "R:\\pipeline\\pipe\\prism\\defaultProjectPreset\\/00_Pipeline/Configs\\LauncherIcons\\Renders Dependency Checker.png",
+            "versions": [
+                {
+                    "label": "Version 1",
+                    "mode": "Python",
+                    "cmd": "import sys\nimport importlib\n\nsys.path.append(r\"R:\\pipeline\\pipe\\prism\\renders-dependencies\")\n\nimport renders_dependency_checker\nimportlib.reload(renders_dependency_checker)\n\nrenders_dependency_checker.run()",
+                    "preferred": true,
+                    "environment": {}
+                }
+            ],
+            "uid": "bc229cee-214f-11f1-9446-d096e2f1fab8"
         }
     ],
     "prismVersions": [

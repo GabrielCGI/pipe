@@ -69,7 +69,7 @@ def log_info(msg):
     print(msg)
 
 def log_warning(msg):
-    logging.warning
+    logging.warning(msg)
     print(msg)
 
 def log_error(msg):

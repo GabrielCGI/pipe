@@ -15,5 +15,6 @@ def __main__(*args):
         print("Job not found : Ending task")
         return
     print(f"Copy job : {copy_job}, id : {copy_job_id}")
-    RepositoryUtils.DeleteJob(copy_job)
-
+    # RepositoryUtils.DeleteJob(copy_job)
+    RepositoryUtils.CompleteJob(copy_job)
+    print("Artificially completed copy job")

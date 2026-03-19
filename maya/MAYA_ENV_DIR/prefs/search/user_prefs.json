@@ -28,15 +28,16 @@
             "DynamicRelationshipEditor",
             "LightCentricLightLinkingEditor",
             "cmdSkydomeLight",
-            "GraphEditor",
             "CreatePolygonCube",
-            "HotkeyPreferencesWindow",
             "ReferenceEditor",
-            "ParentConstraint",
-            "mayaUsdOpenUsdLayerEditor"
+            "HotkeyPreferencesWindow",
+            "mayaUsdOpenUsdLayerEditor",
+            "GraphEditor",
+            "ParentConstraint"
         ],
         [
-            "share"
+            "share",
+            "Fingers_L_Ctr_Grp_parentConstraint1"
         ],
         [],
         []
