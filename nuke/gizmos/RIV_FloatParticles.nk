@@ -1,0 +1,461 @@
+set cut_paste_input [stack 0]
+version 15.1 v5
+push $cut_paste_input
+Group {
+ name RIV_FloatParticles
+ tile_color 0x540054ff
+ note_font "Verdana Bold"
+ selected true
+ xpos 15179
+ ypos 2073
+ addUserKnob {20 Nuke_tab l Nuke}
+ addUserKnob {68 n_p_size l "particles size" M {.25 .5 1 2 4}}
+ n_p_size 1
+ addUserKnob {68 n_particles_speed l "particles speed" +INVISIBLE M {.25 .5 1 2 4}}
+ n_particles_speed 1
+ addUserKnob {20 NukeX_tab l NukeX}
+ addUserKnob {41 p_size l "particles size" T control_expression.p_size}
+ addUserKnob {7 nx_particles_speed l "particles speed" +INVISIBLE R 0 4}
+ nx_particles_speed 1
+}
+ BackdropNode {
+  inputs 0
+  name BackdropNode1
+  tile_color 0x5c4f55ff
+  label NukeX
+  note_font_size 42
+  xpos -234
+  ypos 697
+  bookmark false
+  bdwidth 268
+  bdheight 1153
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode2
+  tile_color 0x5c4f55ff
+  label Nuke
+  note_font_size 42
+  xpos 141
+  ypos 691
+  bookmark false
+  bdwidth 623
+  bdheight 1159
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode3
+  tile_color 0x285f57ff
+  label "particles library"
+  note_font_size 42
+  xpos -1160
+  ypos 291
+  bookmark false
+  bdwidth 600
+  bdheight 849
+ }
+ NoOp {
+  inputs 0
+  name control_expression
+  knobChanged "\nn = nuke.thisNode()\nk = nuke.thisKnob()\n\nif k.name() == \"p_size\" :\n    nuke.toNode(\"ParticleExpression1\").knob('temp_expr0').setValue(str(k.value()))\n"
+  xpos -70
+  ypos 734
+  addUserKnob {20 User}
+  addUserKnob {7 p_size l "p size"}
+  p_size 1
+ }
+ Read {
+  inputs 0
+  file_type exr
+  file I:/rivers_feature/04_Resources/nuke/Textures/BrushstrokesTextures/BrushSequence.####.exr
+  format "1024 1024 0 0 1024 1024 1 square_1K"
+  first 1001
+  last 1066
+  origfirst 1001
+  origlast 1066
+  origset true
+  name Read14
+  knobChanged "try:\n\tpcore.getPlugin(\"Nuke\").updateNodeUI(\"read\", nuke.toNode(nuke.thisNode().fullName().rsplit(\".\", 1)\[0]))\nexcept:\n\tpass"
+  xpos -1060
+  ypos 391
+  addUserKnob {20 tab_prism l Prism}
+  addUserKnob {26 fileName l File T I:/rivers_feature/04_Resources/nuke/Textures/BrushstrokesTextures/BrushSequence.%04d.exr}
+  addUserKnob {22 browse l Browse... T pcore.appPlugin.readNode_onBrowseClicked(nuke.thisNode()) +STARTLINE}
+  addUserKnob {22 openExplorer l "Open In Explorer..." -STARTLINE T pcore.appPlugin.readNode_onOpenInClicked(nuke.thisNode())}
+ }
+ Dot {
+  name Dot8
+  xpos -1026
+  ypos 595
+ }
+set Ne3972800 [stack 0]
+ Dot {
+  name Dot1
+  xpos -921
+  ypos 595
+ }
+set Ne3972c00 [stack 0]
+ Dot {
+  name Dot2
+  xpos -822
+  ypos 595
+ }
+set Ne3973000 [stack 0]
+ Dot {
+  name Dot3
+  xpos -706
+  ypos 595
+ }
+ FrameHold {
+  firstFrame 1004
+  name FrameHold23
+  xpos -740
+  ypos 785
+ }
+ Dot {
+  name Dot7
+  xpos -706
+  ypos 1028
+ }
+set Ne3973800 [stack 0]
+push $Ne3973000
+ FrameHold {
+  firstFrame 1003
+  name FrameHold22
+  xpos -856
+  ypos 787
+ }
+ Dot {
+  name Dot6
+  xpos -822
+  ypos 1028
+ }
+set Ne3973c00 [stack 0]
+push $Ne3972c00
+ FrameHold {
+  firstFrame 1002
+  name FrameHold21
+  xpos -955
+  ypos 789
+ }
+ Dot {
+  name Dot5
+  xpos -921
+  ypos 1028
+ }
+set Ne39bc000 [stack 0]
+push $Ne3972800
+ FrameHold {
+  firstFrame 1001
+  name FrameHold20
+  xpos -1060
+  ypos 786
+ }
+ Dot {
+  name Dot4
+  xpos -1026
+  ypos 1028
+ }
+set Ne39bc400 [stack 0]
+ Input {
+  inputs 0
+  name emitter_geo
+  xpos -134
+  ypos 458
+ }
+ Dot {
+  name Dot12
+  xpos -100
+  ypos 568
+ }
+set N986ac00 [stack 0]
+ Dot {
+  name Dot11
+  xpos 440
+  ypos 568
+ }
+push 0
+ ParticleEmitter {
+  inputs 6
+  start_frame 700
+  rate {{curve x1000 100 0}}
+  lifetime 350
+  size 5
+  spread {{curve x1000.25 1 x1001 0}}
+  name ParticleEmitter2
+  xpos 406
+  ypos 1025
+ }
+ ParticleCurve {
+  curves {r {}
+    g {}
+    b {}
+    a {}
+    size {curve 2 0}
+    mass {}}
+  affect_size true
+  name ParticleCurve2
+  xpos 406
+  ypos 1054
+ }
+ ParticleSpeedLimit {
+  maximum {{curve x1000 100 0.35}}
+  name ParticleSpeedLimit4
+  xpos 406
+  ypos 1107
+ }
+ ParticleSpeedLimit {
+  maximum {{curve x1000 100 0.15}}
+  probability 0.5
+  name ParticleSpeedLimit5
+  xpos 406
+  ypos 1143
+ }
+ ParticleGravity {
+  to {0 -0.2 0}
+  name ParticleGravity2
+  xpos 406
+  ypos 1179
+ }
+ ParticleTurbulence {
+  strength {1 0 {strength.x}}
+  scale {1000000 0 {scale.x}}
+  name ParticleTurbulence2
+  xpos 406
+  ypos 1231
+ }
+set Ne3a7f400 [stack 0]
+ ParticleExpression {
+  temp_name0 pSize
+  temp_expr0 4
+  sizeexpr size*pSize
+  name ParticleExpression6
+  xpos 621
+  ypos 1365
+ }
+push $Ne3a7f400
+ ParticleExpression {
+  temp_name0 pSize
+  temp_expr0 2
+  sizeexpr size*pSize
+  name ParticleExpression4
+  xpos 511
+  ypos 1365
+ }
+push $Ne3a7f400
+ ParticleExpression {
+  temp_name0 pSize
+  temp_expr0 1
+  sizeexpr size*pSize
+  name ParticleExpression3
+  xpos 401
+  ypos 1365
+ }
+push $Ne3a7f400
+ ParticleExpression {
+  temp_name0 pSize
+  temp_expr0 .5
+  sizeexpr size*pSize
+  name ParticleExpression5
+  xpos 291
+  ypos 1365
+ }
+push $Ne3a7f400
+ ParticleExpression {
+  temp_name0 pSize
+  temp_expr0 .25
+  sizeexpr size*pSize
+  name ParticleExpression2
+  xpos 181
+  ypos 1365
+ }
+ Switch {
+  inputs 5
+  which {{n_p_size}}
+  name Switch3
+  xpos 401
+  ypos 1509
+ }
+ Dot {
+  name Dot10
+  xpos 435
+  ypos 1565
+ }
+set Ne3a7fc00 [stack 0]
+ Dot {
+  name Dot9
+  xpos 435
+  ypos 1948
+ }
+push $Ne3973800
+push $Ne3973c00
+push $Ne39bc000
+push $Ne39bc400
+push $N986ac00
+push 0
+ ParticleEmitter {
+  inputs 6
+  start_frame 700
+  rate {{curve x1000 100 0}}
+  lifetime 350
+  size 5
+  spread {{curve x1000.25 1 x1001 0}}
+  name ParticleEmitter1
+  xpos -134
+  ypos 1025
+ }
+ ParticleCurve {
+  curves {r {}
+    g {}
+    b {}
+    a {}
+    size {curve 2 0}
+    mass {}}
+  affect_size true
+  name ParticleCurve1
+  xpos -134
+  ypos 1064
+ }
+ ParticleSpeedLimit {
+  maximum {{curve x1000 100 0.35}}
+  name ParticleSpeedLimit1
+  xpos -134
+  ypos 1112
+ }
+ ParticleSpeedLimit {
+  maximum {{curve x1000 100 0.15}}
+  probability 0.5
+  name ParticleSpeedLimit2
+  xpos -134
+  ypos 1163
+ }
+ ParticleGravity {
+  to {0 -0.2 0}
+  name ParticleGravity1
+  xpos -134
+  ypos 1221
+ }
+ ParticleTurbulence {
+  strength {1 0 {strength.x}}
+  scale {1000000 0 {scale.x}}
+  name ParticleTurbulence1
+  xpos -134
+  ypos 1269
+ }
+ ParticleExpression {
+  temp_name0 pSize
+  temp_expr0 1.0
+  sizeexpr size*pSize
+  name ParticleExpression1
+  xpos -134
+  ypos 1332
+ }
+ ParticleSpeedLimit {
+  minimum {{parent.nx_particles_speed-1}}
+  maximum {{minimum+1}}
+  strength {{curve x1000 0 1}}
+  probability 0.5
+  name ParticleSpeedLimit3
+  xpos -134
+  ypos 1393
+  disable true
+ }
+set Ne39fec00 [stack 0]
+ Switch {
+  inputs 2
+  which {{"\[python 0\\ if\\ nuke.env.get(\\\"nukex\\\")\\ else\\ 1]"}}
+  name Switch1
+  xpos -134
+  ypos 1945
+ }
+ TimeOffset {
+  time_offset {{root.first_frame-1001}}
+  time ""
+  name TimeOffset1
+  xpos -134
+  ypos 2037
+ }
+ Output {
+  name Output1
+  xpos -134
+  ypos 2315
+ }
+push $Ne39fec00
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+ Viewer {
+  inputs 10
+  frame_range 1001-1120
+  input_number 9
+  viewerProcess "ACES 1.0 - SDR Video (sRGB - Display)"
+  input_process false
+  monitorOutNDISenderName "NukeX - SQ050-SH0070_Compo_v024 - Viewer1"
+  name Viewer1
+  xpos -24
+  ypos 2037
+ }
+push $Ne3a7fc00
+ ParticleSpeedLimit {
+  minimum 0.25
+  maximum {{minimum*2}}
+  strength {{curve x1000 0 1}}
+  probability 0.5
+  name ParticleSpeedLimit10
+  xpos 621
+  ypos 1626
+ }
+push $Ne3a7fc00
+ ParticleSpeedLimit {
+  minimum 0.5
+  maximum {{minimum*2}}
+  strength {{curve x1000 0 1}}
+  probability 0.5
+  name ParticleSpeedLimit6
+  xpos 511
+  ypos 1626
+ }
+push $Ne3a7fc00
+ ParticleSpeedLimit {
+  minimum 4
+  maximum {{minimum*2}}
+  strength {{curve x1000 0 1}}
+  probability 0.5
+  name ParticleSpeedLimit9
+  xpos 401
+  ypos 1626
+ }
+push $Ne3a7fc00
+ ParticleSpeedLimit {
+  minimum 2
+  maximum {{minimum*2}}
+  strength {{curve x1000 0 1}}
+  probability 0.5
+  name ParticleSpeedLimit8
+  xpos 291
+  ypos 1626
+ }
+push $Ne3a7fc00
+ ParticleSpeedLimit {
+  minimum 1
+  maximum {{minimum*2}}
+  strength {{curve x1000 0 1}}
+  probability 0.5
+  name ParticleSpeedLimit7
+  xpos 181
+  ypos 1626
+ }
+ Switch {
+  inputs 5
+  name Switch2
+  xpos 401
+  ypos 1752
+  disable true
+ }
+end_group

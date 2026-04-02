@@ -36,18 +36,12 @@ from qtpy.QtCore import *
 from qtpy.QtGui import *
 from qtpy.QtWidgets import *
 
-import socket
-
 from PrismUtils.Decorators import err_catcher_plugin as err_catcher
 
-DEBUG = ["SPRINTER-04" , "CASTOR-02"]
-
 # Complete path to the pretask script !! REPLACE IF MOVED !!
-if socket.gethostname().upper() in DEBUG :
-    PRETASK_PATH =  r"R:\devAndrew\ranch\ranch_scripts\deadline_pretask_scripts\pretask.py"
-else : 
-    PRETASK_PATH =  r"R:\pipeline\pipe\deadline\ranch_copy\pretask.py"
-
+# Not deployed yet, will be moved
+PREJOB_PATH = r"R:\pipeline\pipe\deadline\ranch_copy\CopyJopScripts\render_ranch_prejob.py"
+POSTJOB_PATH = r"R:\pipeline\pipe\deadline\ranch_copy\CopyJopScripts\delete_ranchjob_postjob.py"
 
 class Prism_RanchExporter_Functions(object):
     def __init__(self, core, plugin):
@@ -59,17 +53,17 @@ class Prism_RanchExporter_Functions(object):
     def preSubmit_Deadline(self, origin, Settings, pluginInfos, arguments):
 
         print("preSubmit deadline plugin")
-        
+
         core = origin.core
         # Ensure the job is sent from Houdini
         if core.appPlugin.pluginName != "Houdini" : 
             return 
 
         # Ensure it's a render job
-        if(Settings["Name"].endswith("_render")):
-            # Attach the prestask script to the job 
-            Settings["PreTaskScript"] = PRETASK_PATH
-        
+        if "_render" in Settings["Name"]:   
+            # Attach the prejob and postjob script to the job 
+            Settings["PreJobScript"] = PREJOB_PATH  
+            Settings["PostJobScript"] = POSTJOB_PATH   
 
     # if returns true, the plugin will be loaded by Prism
     @err_catcher(name=__name__)

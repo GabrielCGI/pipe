@@ -3,7 +3,8 @@
         "ANIM": [
             "anim",
             "anim_playblast",
-            "playblast"
+            "playblast",
+            "AnimBlock"
         ],
         "LAYOUT": [
             "RoughtLayout",

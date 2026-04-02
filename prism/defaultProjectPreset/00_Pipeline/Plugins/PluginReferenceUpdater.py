@@ -30,51 +30,18 @@ class PluginReferenceUpdater:
             self.add_actions(menu, path)
 
     def add_actions(self, menu, path):
-        action = menu.addAction("Update Reference")
-        action.triggered.connect(lambda: self.updateReference(path))
-
         action = menu.addAction("Update/add reference UI")
         action.triggered.connect(lambda: self.updateReferenceWithUI(path))
-    
-    def updateReference(self, path):
-        try:
-            import referenceUpdater as refUp
-            reload(refUp)
-            self.worker = refUp.instanceWorker(self, "Maya", path, self.core.projectPath)
-            self.worker.runUpdate(True)
-            self.waiter = refUp.loadingScreen("waite the script process...")
-            self.waiter.show()
-        except:
-            self.core.popup("module refUpdater not found")
 
     def updateReferenceWithUI(self, path):
         try:
-            import referenceUpdater as refUp
-            reload(refUp)
+            import reference_updater
+            reload(reference_updater)
             self.waiter = None
-            self.win = refUp.mainUI(self, "Maya", path, self.core.projectPath, True)
+            self.win = reference_updater.mainUI(True, self.core, None, path)
             self.win.show()
         except Exception as e:
             print(e)
             print(traceback.format_exc())
             self.core.popup(f"module refUpdater not found")
-
-
-    def handleError(self, msg):
-        try:
-            self.waiter.close()
-        except:
-            pass
-        print(msg)
-        self.core.popup(f"ERROR" + msg, severity="warning")
-
-    def handleResult(self, msg):
-        try:
-            self.waiter.close()
-        except:
-            pass
-        print(msg)
-        if not msg:
-            self.core.popup(f"tout c'est bien passer", severity="info")
-        else:
-            self.core.popup(f"Error" + msg, severity="error")
+            self.core.popup(traceback.format_exc())

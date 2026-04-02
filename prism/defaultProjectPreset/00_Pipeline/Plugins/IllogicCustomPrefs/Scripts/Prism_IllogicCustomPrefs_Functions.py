@@ -69,11 +69,19 @@ class Prism_IllogicCustomPrefs_Functions(object):
         self.core.configs.cachedConfigs.pop(json_file_path, None)
 
         # Charge le fichier JSON existant
-        with open(json_file_path, 'r', encoding='utf-8') as file:
-            data = json.load(file)
+        try:
+            with open(json_file_path, 'r', encoding='utf-8') as file:
+                data = json.load(file)
+        except Exception:
+            return
 
         # Modifie les valeurs spécifiques
         # DCC Overrides options
+        if (data.get('dccoverrides') is None
+            or data.get('usd') is None
+            or data.get('globals') is None):
+            return
+        
         data['dccoverrides']['Houdini_path'] = 'launcher:Houdini'
         data['dccoverrides']['Maya_path'] = 'launcher:Maya'
         data['dccoverrides']['Houdini_override'] = True

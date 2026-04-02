@@ -10,9 +10,9 @@
 #     print(kwargs["outputpath"])
 
 
-# RANCH_EXPORTER_PATH = "R:/pipeline/pipe/prism/ranch_cache_scripts"
-# import sys
-# sys.path.append(RANCH_EXPORTER_PATH)
+RANCH_EXPORTER_PATH = "R:/pipeline/pipe/prism/ranch_cache_scripts"
+import sys
+sys.path.append(RANCH_EXPORTER_PATH)
 
 # TO enable print again set DEBUG to True
 DEBUG = False
@@ -84,7 +84,7 @@ def main(*args, **kwargs):
     core = kwargs["core"]
     scenefile = kwargs["scenefile"]
     
-    # if core.appPlugin.pluginName == 'Houdini':
-    #     import ranchExporter
-    #     if ranchExporter.is_light_cache(kwargs):
-    #         set_output_processors_search_path(kwargs)
+    if core.appPlugin.pluginName == 'Houdini':
+        import ranchExporter
+        if ranchExporter.is_light_cache(kwargs):
+            set_output_processors_search_path(kwargs)

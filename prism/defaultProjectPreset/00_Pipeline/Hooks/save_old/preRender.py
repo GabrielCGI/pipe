@@ -158,6 +158,35 @@ def updateContextOptions(kwargs):
         if hou.hasContextOption(parm_name.eval()):
             hou.setContextOption(parm_name.eval(), parm_value.eval())
 
+def catchInfo(node):
+    dataNodeForDeadLine = {}
+
+    if not node:
+        return dataNodeForDeadLine
+
+    for i in range(1, node.parm("executions").eval() + 1):
+        if not node.parm(f"execution_enabled_{i}").eval():
+            continue
+
+        shot = None
+        opti = None
+        layer = None
+        for t in range(1, node.parm(f"contextOptions_{i}").eval()+1):
+            options = node.parm(f"contextOptionsName_{i}_{t}").eval()
+            value = node.parm(f"contextOptionsValue_{i}_{t}").eval()
+            if "shot" == options:
+                shot = value
+            elif "layer" == options:
+                layer = value
+            elif "OPTI" == options:
+                opti = value
+        
+        if not layer:
+            continue
+        
+        dataNodeForDeadLine[layer] = {"shot": shot, "OPTI": opti}
+
+    return dataNodeForDeadLine
 
 def main(*args, **kwargs):
     
@@ -173,3 +202,7 @@ def main(*args, **kwargs):
             #changeEXRCompression(kwargs)
             #set_output_processors_search_path(kwargs)
             #hou.hipFile.save()
+            stateManager = kwargs["state"]
+            if stateManager.node.type().name() == "prism::LOP_Render::1.0":
+                import os 
+                os.environ["ILLOGIC_TEMP_NODE"] = str(catchInfo(stateManager.node))

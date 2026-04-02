@@ -11,7 +11,10 @@ except ImportError:
     try:
         from PySide2 import QtWidgets # type: ignore
     except ImportError:
-        sys.exit(1)
+        try: 
+            from PySide import QtWidgets # type: ignore
+        except ImportError:
+            sys.exit(1)
 
 
 PROJECT_CONFIG = os.path.join(os.path.dirname(__file__), 'projects_config.json')
@@ -41,9 +44,9 @@ def checkVersion(project_config=PROJECT_CONFIG):
             nuke.scriptClose()
             msg = (
                 "Cannot open this scene with current "
-                f"Nuke version ({nuke.NUKE_VERSION_STRING})\n"
+                "Nuke version ({})\n"
                 "Expected version:\n"
-            ) + "\n".join(allowed_version)
+            ).format(nuke.NUKE_VERSION_STRING) + "\n".join(allowed_version)
             nuke.message(msg)
             print(msg)
 

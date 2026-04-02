@@ -7,8 +7,8 @@ Group {
  tile_color 0x540054ff
  note_font "Verdana Bold"
  selected true
- xpos -212
- ypos -730
+ xpos -953
+ ypos 6475
  addUserKnob {20 OF_tab l OF}
  addUserKnob {41 Options T OpticalFlares1.Options}
  addUserKnob {41 Format T OpticalFlares1.Format}
@@ -134,6 +134,7 @@ Group {
  addUserKnob {20 TRACK_Tab l TRACK}
  addUserKnob {22 launchTrack l "Launch Track" T "nuke.thisNode()\['cleanTrack'].execute()\nnuke.thisNode()\['goTrack'].execute()\nnuke.thisNode()\['checkPoint'].setValue(0)" +STARTLINE}
  addUserKnob {6 checkPoint l "Preview Picker" -STARTLINE}
+ checkPoint true
  addUserKnob {6 customRange l "Custom Range ?" -STARTLINE}
  addUserKnob {3 firstF l first -STARTLINE}
  firstF {{"\[python nuke.root()\\\[\\\"first_frame\\\"\\].value()]"}}
@@ -152,7 +153,7 @@ Group {
  addUserKnob {41 maskCenterS1CKNB l Center T MaskBuddy_point_1.maskCenterS1CKNB}
  addUserKnob {3 smooth_curve l "Smooth Curve"}
  addUserKnob {20 info_tab l INFO}
- addUserKnob {26 info_text l "" +STARTLINE T "Tool made @ Illogic studios.\n\nTracking Glints/Flare by using PRef/Rest and depth Pass, useful for Swarovski productions.\n\nLogs :\nVersion 0.1 \[14/01/2026] : First Release\nVersion 0.2 \[20/01/2026] : Fixed bad Scale computing / Fixed Edge Selection on PRef / Added Rotation Animation settings\nVersion 0.3 \[21/01/2026] : Added Gain Animation settings\nVersion 0.4 \[22/01/2026] : Better UI"}
+ addUserKnob {26 info_text l "" +STARTLINE T "Tool made @ Illogic studios.\n\nTracking Glints/Flare by using PRef/Rest and depth Pass, useful for Swarovski productions.\n\nLogs :\nVersion 0.1 \[14/01/2026] : First Release\nVersion 0.2 \[20/01/2026] : Fixed bad Scale computing / Fixed Edge Selection on PRef / Added Rotation Animation settings\nVersion 0.3 \[21/01/2026] : Added Gain Animation settings\nVersion 0.4 \[22/01/2026] : Better UI\nVersion 0.5 \[25/03/2026] : Better position sampling / added selection mask input /removed backgrond and matte input / changed sine wave anim to noise wave anim"}
  addUserKnob {1 nametag +INVISIBLE}
  nametag ILGC_OFTracker
 }
@@ -160,9 +161,9 @@ Group {
   inputs 0
   name raw_beauty
   xpos 0
-  ypos -52
+  ypos -185
  }
-set Nc32cc000 [stack 0]
+set N2e668400 [stack 0]
  Group {
   name BBoxToFormat
   onCreate "n = nuke.thisNode()\ninputFormat = n.knob(\"inputFormat\")\ninputBBox = n.knob(\"inputBBox\")\ncrop = nuke.toNode(\"Crop6\")\ncropb = crop.knob('box')\noutputBBox = n.knob('outputBBox')\noutputBBoxCenter = n.knob(\"outputBBoxCenter\")\n\ninputFormat.setFlag(0x0000000000008000)\ninputBBox.setFlag(0x0000000000008000)\ncropb.setFlag(0x0000000000008000)\noutputBBox.setFlag(0x0000000000008000)\noutputBBoxCenter.setFlag(0x0000000000008000)\n\nn = nuke.thisNode()\nn.knob(\"overscan\").setRange(0,400)\nn.knob(\"overscanPercent\").setRange(1,4)"
@@ -171,7 +172,7 @@ set Nc32cc000 [stack 0]
   note_font "Verdana Bold"
   note_font_color 0xffffffff
   xpos -121
-  ypos -52
+  ypos -185
   addUserKnob {20 CropBBox}
   addUserKnob {4 type l Type +INVISIBLE M {"To Format" "To BBox"}}
   addUserKnob {41 intersect T Crop6.intersect}
@@ -208,15 +209,15 @@ set Nc32cc000 [stack 0]
    xpos 295
    ypos 462
   }
-set Nc32cc800 [stack 0]
+set N2e668c00 [stack 0]
   Dot {
    name Dot1
    note_font_size 41
    xpos -160
    ypos 462
   }
-set Nc32ccc00 [stack 0]
-push $Nc32cc800
+set N2e669000 [stack 0]
+push $N2e668c00
   Crop {
    box {{curve} {curve} {input.width} {input.height}}
    crop {{parent.blackOutside}}
@@ -226,7 +227,7 @@ push $Nc32cc800
    addUserKnob {20 User}
    addUserKnob {22 cropToBbox l "Crop to Bounding Box" -STARTLINE T codeBBox()}
   }
-set Nc32cd000 [stack 0]
+set N2e669400 [stack 0]
   Remove {
    operation keep
    channels none
@@ -234,7 +235,7 @@ set Nc32cd000 [stack 0]
    xpos 120
    ypos 504
   }
-set Nc32cd400 [stack 0]
+set N2e669800 [stack 0]
   Transform {
    scale {{parent.overscanPercent} {parent.overscanPercent}}
    center {{input.bbox.r/2} {input.bbox.t/2}}
@@ -243,7 +244,7 @@ set Nc32cd400 [stack 0]
    xpos 120
    ypos 555
   }
-push $Nc32cd400
+push $N2e669800
   AdjBBox {
    numpixels {{parent.overscan} {parent.overscan}}
    name AdjBBox1
@@ -269,7 +270,7 @@ push $Nc32cd400
    ypos 647
    disable {{!parent.Crop6.intersect}}
   }
-push $Nc32ccc00
+push $N2e669000
   CopyBBox {
    inputs 2
    name CopyBBox1
@@ -288,7 +289,7 @@ push $Nc32ccc00
    xpos -160
    ypos 769
   }
-push $Nc32cd000
+push $N2e669400
   Switch {
    inputs 2
    which {{"overscanType == 0 ? overscan.w != 0 || overscan.h != 0 : overscanPercent.w != 1 || overscanPercent.h != 1 ? 1 : 0"}}
@@ -297,13 +298,13 @@ push $Nc32cd000
    xpos 261
    ypos 759
   }
-set Nc31bc500 [stack 0]
+set N2e6d8000 [stack 0]
   Output {
    name Output1
    xpos 261
    ypos 921
   }
-push $Nc31bc500
+push $N2e6d8000
   NoOp {
    name OutputBBox1
    xpos 378
@@ -315,55 +316,114 @@ push $Nc31bc500
    outputBBoxCenter {{OutputBBox.x+(OutputBBox.r-OutputBBox.x)/2} {OutputBBox.y+(OutputBBox.t-OutputBBox.y)/2}}
   }
  end_group
-push $Nc32cc000
+push $N2e668400
+ Dot {
+  name Dot2
+  xpos 34
+  ypos -150
+ }
+set Na82fd800 [stack 0]
+ Input {
+  inputs 0
+  name mask_select
+  xpos 147
+  ypos -183
+  number 1
+ }
+set N33c4d400 [stack 0]
+ Shuffle2 {
+  inputs 2
+  fromInput1 {{0} B A}
+  in1 alpha
+  fromInput2 {{1} B A}
+  in2 alpha
+  mappings "4 rgba.alpha 0 0 rgba.blue 0 2 rgba.alpha 0 0 rgba.red 0 0 rgba.alpha 0 0 rgba.green 0 1 rgba.alpha 1 0 rgba.alpha 0 3"
+  name Shuffle5
+  label "\[value in1]"
+  xpos 147
+  ypos -159
+ }
+ Unpremult {
+  name Unpremult5
+  xpos 147
+  ypos -123
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 rgb
+  fromInput2 {{0} B}
+  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
+  name Shuffle6
+  label "\[value in1]"
+  xpos 147
+  ypos -99
+ }
+ Dot {
+  name Dot1
+  xpos 181
+  ypos 315
+ }
+push $Na82fd800
  Dot {
   name Dot3
   xpos 34
   ypos 65
  }
-set Nc31c7800 [stack 0]
+set N2e6b9c00 [stack 0]
  Dot {
   name Dot6
   xpos -71
   ypos 65
  }
-set Nc31c7c00 [stack 0]
+set N2e6ec000 [stack 0]
 add_layer {Pref Pref.red Pref.green Pref.blue Pref.x Pref.y Pref.z}
  Shuffle2 {
   fromInput1 {{0} B}
   in1 Pref
-  out1 rgb
   fromInput2 {{0} B}
-  mappings "3 Pref.x 0 3 rgba.red 0 0 Pref.y 0 4 rgba.green 0 1 Pref.z 0 5 rgba.blue 0 2"
+  in2 alpha
+  mappings "4 Pref.x 0 3 rgba.red 0 0 Pref.y 0 4 rgba.green 0 1 Pref.z 0 5 rgba.blue 0 2 rgba.alpha 1 0 rgba.alpha 0 3"
   name Shuffle2
   label "\[value in1]"
   xpos -105
   ypos 103
  }
+ Unpremult {
+  name Unpremult4
+  xpos -105
+  ypos 139
+  disable true
+ }
  Dot {
   name Dot7
   xpos -71
-  ypos 142
+  ypos 184
  }
-push $Nc31c7800
+push $N2e6b9c00
 add_layer {rest rest.red rest.green rest.blue}
  Shuffle2 {
   fromInput1 {{0} B}
   in1 rest
-  out1 rgb
   fromInput2 {{0} B}
-  mappings "3 rest.red 0 0 rgba.red 0 0 rest.green 0 1 rgba.green 0 1 rest.blue 0 2 rgba.blue 0 2"
+  in2 alpha
+  mappings "4 rest.red 0 0 rgba.red 0 0 rest.green 0 1 rgba.green 0 1 rest.blue 0 2 rgba.blue 0 2 rgba.alpha 1 0 rgba.alpha 0 3"
   name Shuffle1
   label "\[value in1]"
   xpos 0
   ypos 103
+ }
+ Unpremult {
+  name Unpremult3
+  xpos 0
+  ypos 139
+  disable true
  }
  Switch {
   inputs 2
   which {{parent.pref_choice}}
   name Switch2
   xpos 0
-  ypos 139
+  ypos 181
  }
  Group {
   name MaskBuddy_point_1
@@ -380,6 +440,7 @@ add_layer {rest rest.red rest.green rest.blue}
   previewToggleCHK true
   addUserKnob {6 edgeBlurCHK l "Edge Blur" -STARTLINE}
   addUserKnob {6 edgeFixCHK l "Precision Fix" -STARTLINE}
+  edgeFixCHK true
   addUserKnob {26 S1TXT l "<b><p style=\"color:#4CB6C7\">Shape 1</p></b>"}
   addUserKnob {41 typeS1PDC l Type T ShapesS1.shapeTypesPDC}
   addUserKnob {6 invertS1CHK l Invert -STARTLINE}
@@ -604,7 +665,7 @@ add_layer {rest rest.red rest.green rest.blue}
    xpos -19
    ypos -47
   }
-set Nc26e2000 [stack 0]
+set N2e738400 [stack 0]
   Dot {
    name Dot13
    xpos -239
@@ -615,13 +676,13 @@ set Nc26e2000 [stack 0]
    xpos -239
    ypos 38
   }
-set Nc26e2800 [stack 0]
+set N2e738c00 [stack 0]
   Dot {
    name Dot11
    xpos -239
    ypos 943
   }
-set Nc26e2c00 [stack 0]
+set N2e739000 [stack 0]
   Expression {
    channel0 alpha
    expr0 "a == 0 ? 1 :0"
@@ -632,8 +693,8 @@ set Nc26e2c00 [stack 0]
    xpos 484
    ypos 939
   }
-push $Nc26e2800
-push $Nc26e2000
+push $N2e738c00
+push $N2e738400
   Remove {
    operation keep
    channels none
@@ -688,31 +749,31 @@ push $Nc26e2000
    xpos -19
    ypos 228
   }
-set Nc270ec00 [stack 0]
+set N2e769000 [stack 0]
   Dot {
    name Dot14
    xpos 134
    ypos 228
   }
-set Nc270f000 [stack 0]
+set N2e769400 [stack 0]
   Dot {
    name Dot8
    xpos 262
    ypos 228
   }
-set Nc270f400 [stack 0]
+set N2e769800 [stack 0]
   Dot {
    name Dot5
    xpos 392
    ypos 228
   }
-set Nc270f800 [stack 0]
+set N2e769c00 [stack 0]
   Dot {
    name Dot4
    xpos 515
    ypos 228
   }
-set Nc270fc00 [stack 0]
+set N2e798000 [stack 0]
   Dot {
    name Dot3
    xpos 651
@@ -804,7 +865,7 @@ set Nc270fc00 [stack 0]
    xpos 617
    ypos 721
   }
-push $Nc270fc00
+push $N2e798000
   Add {
    channels rgb
    value {{-maskCenterCKNB} {-maskCenterCKNB} {-maskCenterCKNB} 0}
@@ -891,7 +952,7 @@ push $Nc270fc00
    xpos 481
    ypos 721
   }
-push $Nc270f800
+push $N2e769c00
   Add {
    channels rgb
    value {{-maskCenterCKNB} {-maskCenterCKNB} {-maskCenterCKNB} 0}
@@ -978,7 +1039,7 @@ push $Nc270f800
    xpos 358
    ypos 721
   }
-push $Nc270f400
+push $N2e769800
   Add {
    channels rgb
    value {{-maskCenterCKNB} {-maskCenterCKNB} {-maskCenterCKNB} 0}
@@ -1065,7 +1126,7 @@ push $Nc270f400
    xpos 228
    ypos 721
   }
-push $Nc270f000
+push $N2e769400
   Add {
    channels rgb
    value {{-maskCenterCKNB} {-maskCenterCKNB} {-maskCenterCKNB} 0}
@@ -1152,7 +1213,7 @@ push $Nc270f000
    xpos 100
    ypos 721
   }
-push $Nc270ec00
+push $N2e769000
   Add {
    channels rgb
    value {{-maskCenterCKNB} {-maskCenterCKNB} {-maskCenterCKNB} 0}
@@ -1383,7 +1444,7 @@ push $Nc270ec00
     xpos 23
     ypos 287
    }
-set Nc2770000 [stack 0]
+set N31d84400 [stack 0]
    Dilate {
     channels rgba
     size {{int(parent.size)}}
@@ -1403,7 +1464,7 @@ set Nc2770000 [stack 0]
     xpos 23
     ypos 678
    }
-set Nc2770c00 [stack 0]
+set N31d85000 [stack 0]
    Dot {
     name Dot8
     tile_color 0xcccccc00
@@ -1419,7 +1480,7 @@ set Nc2770c00 [stack 0]
     xpos 141
     ypos 829
    }
-push $Nc2770c00
+push $N31d85000
    Dot {
     name Dot7
     tile_color 0xcccccc00
@@ -1435,7 +1496,7 @@ push $Nc2770c00
     xpos -161
     ypos 789
    }
-push $Nc2770c00
+push $N31d85000
    Merge2 {
     inputs 2
     operation {{parent.size>0?17:18}}
@@ -1459,7 +1520,7 @@ push $Nc2770c00
     xpos 23
     ypos 910
    }
-set Nc279e800 [stack 0]
+set N31da4c00 [stack 0]
    Dot {
     name Dot10
     xpos 175
@@ -1474,7 +1535,7 @@ set Nc279e800 [stack 0]
     xpos 141
     ypos 1067
    }
-push $Nc279e800
+push $N31da4c00
    Dot {
     name Dot11
     xpos -127
@@ -1489,7 +1550,7 @@ push $Nc279e800
     xpos -161
     ypos 1021
    }
-push $Nc279e800
+push $N31da4c00
    Merge2 {
     inputs 2
     operation {{parent.size>0?17:18}}
@@ -1517,7 +1578,7 @@ push $Nc279e800
     xpos -11
     ypos 1165
    }
-push $Nc2770000
+push $N31d84400
    Dot {
     name Dot13
     tile_color 0xcccccc00
@@ -1579,14 +1640,14 @@ push $Nc2770000
    xpos 651
    ypos 1367
   }
-set Nc30d8400 [stack 0]
+set N31e0c800 [stack 0]
   Dot {
    name Dot16
    xpos 518
    ypos 1367
   }
-set Nc30d8800 [stack 0]
-push $Nc26e2c00
+set N31e0cc00 [stack 0]
+push $N2e739000
   Shuffle {
    in rgb
    alpha black
@@ -1608,7 +1669,7 @@ push $Nc26e2c00
    ypos 1331
    disable {{!previewClampCHK}}
   }
-push $Nc30d8800
+push $N31e0cc00
   Merge2 {
    inputs 2
    operation under
@@ -1637,7 +1698,7 @@ push $Nc30d8800
    ypos 1508
    disable {{"\$gui"}}
   }
-push $Nc30d8400
+push $N31e0c800
   Remove {
    operation keep
    channels alpha
@@ -1645,7 +1706,7 @@ push $Nc30d8400
    xpos 617
    ypos 1400
   }
-set Nc3108800 [stack 0]
+set N31e44c00 [stack 0]
   Shuffle {
    red alpha
    green alpha
@@ -1662,7 +1723,7 @@ set Nc3108800 [stack 0]
    ypos 1508
    disable {{!previewToggleCHK}}
   }
-push $Nc3108800
+push $N31e44c00
   Dot {
    name Dot7
    xpos 750
@@ -1774,6 +1835,16 @@ push $Nc3108800
    hide_input true
   }
  end_group
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  invert_mask true
+  name Multiply1
+  xpos 0
+  ypos 312
+  disable {{!parent.AlphaCheck.alpha}}
+ }
  Shuffle2 {
   fromInput1 {{0} B}
   in1 alpha
@@ -1784,398 +1855,42 @@ push $Nc3108800
   xpos 0
   ypos 370
  }
-set Nc3147800 [stack 0]
+ Median {
+  channels rgba
+  size 1
+  ignore_top_line false
+  name Median1
+  xpos 0
+  ypos 406
+ }
+set N33c4d000 [stack 0]
  Grade {
   white {1 0 0 1}
   white_panelDropped true
   name Grade_1
-  xpos 110
-  ypos 376
+  xpos 147
+  ypos 406
  }
- Group {
-  name Erode_Fine
-  help "Erode an image with fine controls, as opposed to Nuke's default erode node."
-  tile_color 0xef7033ff
-  label "\[value size]"
-  note_font "DejaVu Sans"
-  xpos 220
-  ypos 370
-  addUserKnob {20 erode_fine l "Fine Erode"}
-  addUserKnob {41 channels T NodeWrapper1.channels}
-  addUserKnob {26 ""}
-  addUserKnob {6 round_filter l "Round Filter" t "Erode the image with a round Filter (well, it's more of a dodecagon... but... you know..) instead of a square filter." +STARTLINE}
-  round_filter true
-  addUserKnob {7 size l Size t "Amount of erode/dilate. Positive values will grow the image, negative values will shrink it." R -10 10}
-  size 3
-  addUserKnob {26 ""}
-  addUserKnob {41 maskChannelInput l mask T NodeWrapper1.maskChannelInput}
-  addUserKnob {41 inject -STARTLINE T NodeWrapper1.inject}
-  addUserKnob {41 invert_mask l invert -STARTLINE T NodeWrapper1.invert_mask}
-  addUserKnob {41 fringe -STARTLINE T NodeWrapper1.fringe}
-  addUserKnob {41 mix T NodeWrapper1.mix}
-  addUserKnob {26 spin_copyright_div l "" +STARTLINE}
-  addUserKnob {26 spin_copyright l "" t "© <b>SPIN<span style=\"color:#b32026\">VFX</span></b>\nErode_Fine\nVersion 1.0\n2018" +STARTLINE T "<span style=\"color:#aaa;font-family:sans-serif;font-size:8pt\"><b>SPIN<span style=\"color:#b32026\">VFX</span></b> - Version 1.0 - 2018 - <a href=\"https://github.com/SpinVFX/spin_nuke_gizmos/\" style=\"color:#aaa\">Github Page</a></span>"}
- }
-  BackdropNode {
-   inputs 0
-   name BackdropNode1
-   tile_color 0x75667fff
-   label "round dilate trick"
-   note_font_size 40
-   xpos 212
-   ypos -67
-   bdwidth 299
-   bdheight 618
-  }
-  Input {
-   inputs 0
-   name Inputmask
-   xpos 251
-   ypos 1257
-   number 1
-  }
-  Input {
-   inputs 0
-   name Input
-   xpos -11
-   ypos -243
-  }
-  Dot {
-   name Dot15
-   tile_color 0xcccccc00
-   xpos 22
-   ypos -160
-  }
-set Nd1398800 [stack 0]
-  Dot {
-   name Dot3
-   tile_color 0xcccccc00
-   xpos 23
-   ypos 33
-  }
-set Nd1398c00 [stack 0]
-  Dot {
-   name Dot1
-   tile_color 0xcccccc00
-   xpos 296
-   ypos 33
-  }
-set Nd1399000 [stack 0]
-  Dot {
-   name Dot2
-   tile_color 0xcccccc00
-   xpos 415
-   ypos 33
-  }
-  AdjBBox {
-   numpixels {{abs(ceil(parent.size)*1.4)+2}}
-   name AdjBBox1
-   xpos 381
-   ypos 100
-  }
-  Dot {
-   name Dot4
-   tile_color 0xcccccc00
-   xpos 415
-   ypos 422
-  }
-push $Nd1399000
-  Dilate {
-   size {{"int(parent.size)//3 + (int(parent.size)%3 >= 1)"}}
-   name Dilate1
-   label "size \[value size]"
-   xpos 262
-   ypos 97
-  }
-  Transform {
-   rotate 30
-   shutteroffset centred
-   name Transform1
-   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
-   xpos 262
-   ypos 147
-  }
-  Dilate {
-   size {{"int(parent.size)//3 + (int(parent.size)%3 == 2)"}}
-   name Dilate2
-   label "size \[value size]"
-   xpos 262
-   ypos 185
-  }
-  Transform {
-   rotate 30
-   shutteroffset centred
-   name Transform2
-   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
-   xpos 262
-   ypos 235
-  }
-  Dilate {
-   size {{int(parent.size)//3}}
-   name Dilate3
-   label "size \[value size]"
-   xpos 262
-   ypos 273
-  }
-  Transform {
-   rotate -60
-   shutteroffset centred
-   name Transform3
-   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
-   xpos 262
-   ypos 323
-  }
-  CopyBBox {
-   inputs 2
-   name CopyBBox1
-   xpos 262
-   ypos 418
-  }
-push $Nd1398c00
-  Dilate {
-   size {{int(parent.size)}}
-   name Dilate4
-   label "size \[value size]"
-   xpos -11
-   ypos 97
-  }
-  Dot {
-   name Dot14
-   tile_color 0xcccccc00
-   xpos 23
-   ypos 491
-  }
-set Nd13f2000 [stack 0]
-  Dissolve {
-   inputs 2
-   which {{clamp(abs(parent.size))}}
-   name Dissolve1
-   xpos 262
-   ypos 481
-  }
-  Dot {
-   name Dot5
-   tile_color 0xcccccc00
-   xpos 296
-   ypos 539
-  }
-push $Nd13f2000
-  Switch {
-   inputs 2
-   which {{parent.round_filter}}
-   name Switch1
-   xpos -11
-   ypos 535
-  }
-  AdjBBox {
-   numpixels 1
-   name AdjBBox2
-   xpos -11
-   ypos 609
-  }
-  Dot {
-   name Dot6
-   tile_color 0xcccccc00
-   xpos 23
-   ypos 678
-  }
-set Nd13f3000 [stack 0]
-  Dot {
-   name Dot8
-   tile_color 0xcccccc00
-   xpos 175
-   ypos 678
-  }
-  Transform {
-   translate {{exp.expo(abs(parent.size-int(parent.size))*10)*-1} 0}
-   center {320 240}
-   black_outside false
-   shutteroffset centred
-   name Transform5
-   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
-   xpos 141
-   ypos 823
-  }
-push $Nd13f3000
-  Dot {
-   name Dot7
-   tile_color 0xcccccc00
-   xpos -127
-   ypos 678
-  }
-  Transform {
-   translate {{exp.expo(abs(parent.size-int(parent.size))*10) i} 0}
-   center {320 240}
-   black_outside false
-   shutteroffset centred
-   name Transform4
-   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
-   xpos -161
-   ypos 783
-  }
-push $Nd13f3000
-  Merge2 {
-   inputs 2
-   operation {{parent.size>0?17:18}}
-   bbox B
-   also_merge all
-   name Merge2
-   xpos -11
-   ypos 789
-  }
-  Merge2 {
-   inputs 2
-   operation {{parent.size>0?17:18}}
-   bbox B
-   also_merge all
-   name Merge1
-   xpos -11
-   ypos 829
-  }
-  Dot {
-   name Dot9
-   tile_color 0x4b5ec600
-   xpos 23
-   ypos 910
-  }
-set Nd1418c00 [stack 0]
-  Dot {
-   name Dot10
-   tile_color 0x4b5ec600
-   xpos 175
-   ypos 910
-  }
-  Transform {
-   translate {0 {exp.expo(abs(parent.size-int(parent.size))*10)*-1}}
-   center {320 240}
-   black_outside false
-   shutteroffset centred
-   name Transform6
-   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
-   xpos 141
-   ypos 1061
-  }
-push $Nd1418c00
-  Dot {
-   name Dot11
-   tile_color 0x4b5ec600
-   xpos -127
-   ypos 910
-  }
-  Transform {
-   translate {0 {exp.expo(abs(parent.size-int(parent.size))*10)}}
-   center {320 240}
-   black_outside false
-   shutteroffset centred
-   name Transform7
-   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
-   xpos -161
-   ypos 1015
-  }
-push $Nd1418c00
-  Merge2 {
-   inputs 2
-   operation {{parent.size>0?17:18}}
-   bbox B
-   also_merge all
-   name Merge3
-   xpos -11
-   ypos 1021
-  }
-  Merge2 {
-   inputs 2
-   operation {{parent.size>0?17:18}}
-   bbox B
-   also_merge all
-   name Merge4
-   xpos -11
-   ypos 1061
-  }
-push $Nd1398800
-  Dot {
-   name Dot13
-   tile_color 0xcccccc00
-   xpos -290
-   ypos -160
-  }
-  Dot {
-   name Dot12
-   tile_color 0xcccccc00
-   xpos -290
-   ypos 1261
-  }
-  NodeWrapper {
-   inputs 2+1
-   channels rgba
-   name NodeWrapper1
-   xpos -11
-   ypos 1257
-  }
-  Output {
-   name Output1
-   xpos -11
-   ypos 1389
-  }
-  NoOp {
-   inputs 0
-   name exp
-   label "The growth doesn't look visually linear. \nUsing curves helps a little."
-   xpos 396
-   ypos 766
-   addUserKnob {20 User}
-   addUserKnob {7 expo}
-   expo {{parent.size>0?positive_curve:negative_curve i}}
-   addUserKnob {7 positive_curve}
-   positive_curve {{curve 0 0.1037476063 0.1683235168 0.2209408283 0.2831250429 0.3357424736 0.3954704404 0.4731256962 0.5778000951 0.762029767 1}}
-   addUserKnob {7 negative_curve}
-   negative_curve {{curve 0 0.2209040523 0.3736710192 0.4841623592 0.5752981992 0.6541623592 0.7271137492 0.8043368459 0.8681262732 0.9249737263 1}}
-  }
- end_group
-push $Nc31c7800
+push $N2e6b9c00
  Saturation {
   saturation 0
   name Saturation1
   xpos 347
   ypos 62
  }
-set Nc2fb3c00 [stack 0]
  Merge2 {
   inputs 2
   name Merge_add_point_1
   xpos 347
-  ypos 376
+  ypos 406
  }
  Dot {
   name Dot4
   xpos 381
   ypos 936
  }
- Input {
-  inputs 0
-  name matte
-  xpos -159
-  ypos 487
-  number 1
- }
- Dot {
-  name Dot1
-  xpos -125
-  ypos 541
- }
- Input {
-  inputs 0
-  name background
-  xpos 146
-  ypos 487
-  number 2
- }
- Dot {
-  name Dot5
-  xpos 180
-  ypos 541
- }
  OpticalFlares {
-  inputs 2
+  inputs 0
   PositionXY {{"smooth_curve == 0 ? parent.CurveTool_Tracker1.maxlumapixdata.x+offset_p.x : parent.CurveSmoother.position_2d.x+offset_p.x"} {"smooth_curve == 0 ? parent.CurveTool_Tracker1.maxlumapixdata.y+offset_p.y : parent.CurveSmoother.position_2d.y+offset_p.y"}}
   CenterPosition {1024 1024}
   Scale {{"enableAutoSize == 1 ? parent.CurveTool_AutoSize.maxlumapixvalue.r*realScale : realScale"}}
@@ -2200,7 +1915,7 @@ set Nc2fb3c00 [stack 0]
   xpos 34
   ypos 651
  }
-set Nc301e000 [stack 0]
+set N32fbc400 [stack 0]
  Dot {
   name Dot13
   xpos -65
@@ -2223,7 +1938,7 @@ set Nc301e000 [stack 0]
   xpos -65
   ypos 786
  }
-push $Nc301e000
+push $N32fbc400
  Multiply {
   value {{"CurveTool_Tracker1.maxlumapixvalue(frame+CurveSmoother.smooth_i01) == 0 ? 0 : 1\n"}}
   name Multiply_cut_out
@@ -2279,28 +1994,6 @@ push $Nc301e000
   xpos 0
   ypos 968
  }
-push $Nc3147800
- CurveTool {
-  operation "Max Luma Pixel"
-  ROI {{parent.BBoxToFormat.inputBBox.x} {parent.BBoxToFormat.inputBBox.y} {parent.BBoxToFormat.inputBBox.r} {parent.BBoxToFormat.inputBBox.t}}
-  autocropdata {512 512 1536 1536}
-  intensitydata {{curve}}
-  maxlumapixvalue {0 0 0}
-  minlumapixvalue {0 0 0}
-  name CurveTool_Tracker1
-  xpos 0
-  ypos 414
- }
- NoOp {
-  name CurveSmoother
-  xpos 0
-  ypos 452
-  addUserKnob {20 User}
-  addUserKnob {7 smooth_i01 l smooth R 0.1 4}
-  smooth_i01 {{parent.smooth_curve+1}}
-  addUserKnob {12 position_2d}
-  position_2d {{"CurveTool_Tracker1.maxlumapixdata.x.integrate(frame-smooth_i01, frame+smooth_i01) / (2*smooth_i01)"} {"CurveTool_Tracker1.maxlumapixdata.y.integrate(frame-smooth_i01, frame+smooth_i01) / (2*smooth_i01)"}}
- }
  Constant {
   inputs 0
   color 1
@@ -2308,19 +2001,19 @@ push $Nc3147800
   xpos -447
   ypos 115
  }
-push $Nc31c7c00
+push $N2e6ec000
  Dot {
   name Dot9
   xpos -291
   ypos 65
  }
-add_layer {depth_extra depth_extra.depth depth_extra.z}
+add_layer {depth_extra depth_extra.z depth_extra.depth}
  Shuffle2 {
   fromInput1 {{0} B}
   in1 depth_extra
   fromInput2 {{0} B}
   in2 alpha
-  mappings "4 depth_extra.z 0 1 rgba.red 0 0 depth_extra.z 0 1 rgba.green 0 1 depth_extra.z 0 1 rgba.blue 0 2 rgba.alpha 1 0 rgba.alpha 0 3"
+  mappings "4 depth_extra.z 0 0 rgba.red 0 0 depth_extra.z 0 0 rgba.green 0 1 depth_extra.z 0 0 rgba.blue 0 2 rgba.alpha 1 0 rgba.alpha 0 3"
   name Shuffle3
   label "\[value in1]"
   xpos -325
@@ -2380,8 +2073,8 @@ add_layer {depth_extra depth_extra.depth depth_extra.z}
    xpos -356
    ypos 1509
   }
-set Nc2570800 [stack 0]
-push $Nc2570800
+set N339bac00 [stack 0]
+push $N339bac00
   Copy {
    inputs 2
    to0 rgba.alpha
@@ -2406,7 +2099,7 @@ push $Nc2570800
    xpos -651
    ypos -323
   }
-set Nc2571800 [stack 0]
+set N339bbc00 [stack 0]
   Dot {
    name Dot4
    xpos -931
@@ -2417,27 +2110,27 @@ set Nc2571800 [stack 0]
    xpos -931
    ypos 1051
   }
-set Nc25a2000 [stack 0]
+set N339f4400 [stack 0]
   Dot {
    name Dot5
    xpos -931
    ypos 1145
   }
-set Nc25a2400 [stack 0]
+set N339f4800 [stack 0]
   Dot {
    name Dot12
    xpos -931
    ypos 1301
   }
-set Nc25a2800 [stack 0]
+set N339f4c00 [stack 0]
   Dot {
    name Dot7
    xpos -931
    ypos 1579
   }
-set Nc25a2c00 [stack 0]
-push $Nc25a2800
-push $Nc25a2000
+set N339f5000 [stack 0]
+push $N339f4c00
+push $N339f4400
   Expression {
    expr0 1
    expr1 1
@@ -2447,7 +2140,7 @@ push $Nc25a2000
    xpos -844
    ypos 1047
   }
-push $Nc2571800
+push $N339bbc00
   Reformat {
    type scale
    scale {{(trunc(((precision/3.33333)+0.1)*10))/10 i}}
@@ -2463,7 +2156,7 @@ push $Nc2571800
    xpos -685
    ypos -180
   }
-set Nc25a3c00 [stack 0]
+set N33a16000 [stack 0]
   Dot {
    name Dot151
    xpos -795
@@ -2474,8 +2167,8 @@ set Nc25a3c00 [stack 0]
    xpos -795
    ypos 148
   }
-set Nc25c8400 [stack 0]
-push $Nc25a3c00
+set N33a16800 [stack 0]
+push $N33a16000
   Dot {
    name Dot1
    xpos -390
@@ -2531,7 +2224,7 @@ push $Nc25a3c00
    xpos -390
    ypos 211
   }
-set Nc25f8400 [stack 0]
+set N33a44800 [stack 0]
   FrameHold {
    firstFrame {{parent.hold i}}
    name FrameHold2
@@ -2539,7 +2232,7 @@ set Nc25f8400 [stack 0]
    ypos 331
    disable {{frames i x64 0}}
   }
-push $Nc25f8400
+push $N33a44800
   Dot {
    name Dot15
    xpos -266
@@ -2592,8 +2285,8 @@ push $Nc25f8400
    xpos -390
    ypos 769
   }
-set Nc25f9c00 [stack 0]
-push $Nc2571800
+set N33a84000 [stack 0]
+push $N339bbc00
   Dot {
    name Dot155
    xpos -112
@@ -2625,9 +2318,9 @@ push $Nc2571800
    xpos -112
    ypos 893
   }
-push $Nc25f9c00
-push $Nc25c8400
-push $Nc25a3c00
+push $N33a84000
+push $N33a16800
+push $N33a16000
   Dilate {
    channels rgb
    size {{"max(input.format.w, input.format.h)*2" i}}
@@ -2657,7 +2350,7 @@ push $Nc25a3c00
    xpos -651
    ypos 219
   }
-set Nc2e50000 [stack 0]
+set N33ab0400 [stack 0]
   FrameHold {
    firstFrame {{parent.FrameHold2.knob.first_frame i}}
    name FrameHold1
@@ -2665,7 +2358,7 @@ set Nc2e50000 [stack 0]
    ypos 331
    disable {{frames i}}
   }
-push $Nc2e50000
+push $N33ab0400
   Dot {
    name Dot9
    xpos -543
@@ -2731,7 +2424,7 @@ push $Nc2e50000
    xpos -685
    ypos 889
   }
-push $Nc25a2400
+push $N339f4800
   Keymix {
    inputs 3
    channels {{{parent.DilateMax.channels}}}
@@ -2754,7 +2447,7 @@ push $Nc25a2400
    xpos -651
    ypos 1439
   }
-set Nc2e9a800 [stack 0]
+set N33af4c00 [stack 0]
   Keymix {
    inputs 3
    name Keymix2
@@ -2762,7 +2455,7 @@ set Nc2e9a800 [stack 0]
    ypos 1569
    disable {{!parent.mask.in i}}
   }
-push $Nc2e9a800
+push $N33af4c00
   Switch {
    inputs 2
    which {{Copy3.from0 i}}
@@ -2770,7 +2463,7 @@ push $Nc2e9a800
    xpos -685
    ypos 1706
   }
-push $Nc25a2c00
+push $N339f5000
   Dot {
    name Dot8
    xpos -931
@@ -2789,14 +2482,13 @@ push $Nc25a2c00
    ypos 1929
   }
  end_group
-set Nc32b9b80 [stack 0]
  Blur {
   size 10
   name Blur1
   xpos -325
   ypos 354
  }
-set Nc2e9bc00 [stack 0]
+set N33b2c000 [stack 0]
  Shuffle2 {
   fromInput1 {{0} B}
   in1 alpha
@@ -2817,7 +2509,7 @@ set Nc2e9bc00 [stack 0]
   xpos -406
   ypos 428
  }
-push $Nc2e9bc00
+push $N33b2c000
  Unpremult {
   name Unpremult1
   xpos -325
@@ -2849,28 +2541,49 @@ push $Nc2e9bc00
   xpos -325
   ypos 538
  }
-push $Nc2fb3c00
-push 0
-push 0
-push 0
-push 0
-push 0
-push 0
-push 0
-push 0
-push $Nc32b9b80
- Viewer {
-  inputs 10
-  frame_range 1001-1174
-  input_number 9
-  colour_sample_bbox {0.5375999808 0.4648000002 0.5383999944 0.4656000137}
-  samplepoints {{-0.5952000022 0.4535999894}
-    }
-  viewerProcess "ACES 1.0 - SDR Video (sRGB - Display)"
-  monitorOutNDISenderName "Nuke - ILL_OFTracker - Viewer1"
-  name Viewer1
-  xpos 235
-  ypos 1033
+ NoOp {
+  inputs 0
+  name CODE
+  xpos -2
+  ypos -224
+  addUserKnob {20 User}
+  addUserKnob {3 firstFrame l first_frame}
+  firstFrame {{"customRange == 0 ? firstF : firstF2"}}
+  addUserKnob {3 lastFrame l last_frame -STARTLINE}
+  lastFrame {{"customRange == 0 ? lastF : lastF2"}}
+  addUserKnob {22 cleanTrack l "Clean Track" T "import nuke\n\nTARGET_KNOBS = \[\n    \"maxlumapixdata\",\n    \"maxlumapixvalue\",\n    \"minlumapixdata\",\n    \"minlumapixvalue\",\n]\n\ndef reset_curve_tool_knobs(node_names, verbose=True):\n    \"\"\"\n    Reset les knobs du CurveTool (ou équivalent) sur plusieurs nodes.\n\n    :param node_names: str ou list\[str]\n    :param verbose: affiche les infos dans le script editor\n    \"\"\"\n\n    if isinstance(node_names, str):\n        node_names = \[node_names]\n\n    for node_name in node_names:\n        node = nuke.toNode(node_name)\n        if not node:\n            if verbose:\n                print(\"Node introuvable :\", node_name)\n            continue\n\n        if verbose:\n            print(\"Traitement de :\", node_name)\n\n        for knob_name in TARGET_KNOBS:\n            if knob_name not in node.knobs():\n                continue\n\n            k = node\[knob_name]\n\n            # retire l'animation (keyframes/curves) si présente\n            try:\n                k.clearAnimated()\n            except Exception:\n                pass\n\n            # nb de composantes (XY=2, RGB=3, float=1, etc.)\n            try:\n                n = k.arraySize()\n            except Exception:\n                n = 1\n\n            # remet à 0 avec la bonne taille\n            try:\n                if n > 1:\n                    k.setValue(\[0.0] * n)\n                else:\n                    k.setValue(0.0)\n            except Exception as e:\n                if verbose:\n                    print(\"  Impossible de reset\", knob_name, \":\", e)\n\n    if verbose:\n        print(\"Terminé.\")\n\nreset_curve_tool_knobs(\[\n    \"CurveTool_Tracker1\",\n    \"CurveTool_AutoSize\",\n])" +STARTLINE}
+  addUserKnob {22 goTrack l "Go Track" -STARTLINE T "n = nuke.toNode(\"CurveTool_Tracker1\")\nfirst = int(nuke.thisNode()\['firstFrame'].value())\nlast  = int(nuke.thisNode()\['lastFrame'].value())\nnuke.execute(n, first, last)\n\n\nn = nuke.toNode(\"CurveTool_AutoSize\")\nfirst = int(nuke.thisNode()\['firstFrame'].value())\nlast  = int(nuke.thisNode()\['lastFrame'].value())\nnuke.execute(n, first, last)"}
+ }
+push $N33c4d000
+ CurveTool {
+  operation "Max Luma Pixel"
+  ROI {{parent.BBoxToFormat.inputBBox.x} {parent.BBoxToFormat.inputBBox.y} {parent.BBoxToFormat.inputBBox.r} {parent.BBoxToFormat.inputBBox.t}}
+  autocropdata {512 512 1536 1536}
+  intensitydata {{curve}}
+  maxlumapixvalue {0 0 0}
+  minlumapixvalue {0 0 0}
+  name CurveTool_Tracker1
+  xpos 0
+  ypos 451
+ }
+ NoOp {
+  name CurveSmoother
+  xpos 0
+  ypos 489
+  addUserKnob {20 User}
+  addUserKnob {7 smooth_i01 l smooth R 0.1 4}
+  smooth_i01 {{parent.smooth_curve+1}}
+  addUserKnob {12 position_2d}
+  position_2d {{"CurveTool_Tracker1.maxlumapixdata.x.integrate(frame-smooth_i01, frame+smooth_i01) / (2*smooth_i01)"} {"CurveTool_Tracker1.maxlumapixdata.y.integrate(frame-smooth_i01, frame+smooth_i01) / (2*smooth_i01)"}}
+ }
+push $N33c4d400
+ NoOp {
+  name AlphaCheck
+  xpos 257
+  ypos -183
+  addUserKnob {20 User}
+  addUserKnob {6 alpha +STARTLINE}
+  alpha {{"\[python \"len(\\\[n for n in nuke.channels(nuke.thisNode().input(0)) if n.find(\\\".a\\\") != -1])>0\"]"}}
  }
  Group {
   inputs 0
@@ -2898,6 +2611,7 @@ push $Nc32b9b80
   addUserKnob {68 wave1 l "Wave 1" -STARTLINE M {Sine Triangle Square Bounce Random Sawtooth/Sawtooth "Sawtooth/Sawtooth (Parabolic)" "Sawtooth/Sawtooth (Parabolic Reversed)" "Sawtooth/Sawtooth (Exponential)" "" ""}}
   wave1 Random
   addUserKnob {7 waveMix l "Wave Mix" t "0 = Only Wave 0\n1 = Only Wave 1"}
+  waveMix 1
   addUserKnob {26 ""}
   addUserKnob {7 power}
   power 1
@@ -2913,17 +2627,4 @@ push $Nc32b9b80
    ypos 300
   }
  end_group
- NoOp {
-  inputs 0
-  name CODE
-  xpos -2
-  ypos -91
-  addUserKnob {20 User}
-  addUserKnob {3 firstFrame l first_frame}
-  firstFrame {{"customRange == 0 ? firstF : firstF2"}}
-  addUserKnob {3 lastFrame l last_frame -STARTLINE}
-  lastFrame {{"customRange == 0 ? lastF : lastF2"}}
-  addUserKnob {22 cleanTrack l "Clean Track" T "import nuke\n\nTARGET_KNOBS = \[\n    \"maxlumapixdata\",\n    \"maxlumapixvalue\",\n    \"minlumapixdata\",\n    \"minlumapixvalue\",\n]\n\ndef reset_curve_tool_knobs(node_names, verbose=True):\n    \"\"\"\n    Reset les knobs du CurveTool (ou équivalent) sur plusieurs nodes.\n\n    :param node_names: str ou list\[str]\n    :param verbose: affiche les infos dans le script editor\n    \"\"\"\n\n    if isinstance(node_names, str):\n        node_names = \[node_names]\n\n    for node_name in node_names:\n        node = nuke.toNode(node_name)\n        if not node:\n            if verbose:\n                print(\"Node introuvable :\", node_name)\n            continue\n\n        if verbose:\n            print(\"Traitement de :\", node_name)\n\n        for knob_name in TARGET_KNOBS:\n            if knob_name not in node.knobs():\n                continue\n\n            k = node\[knob_name]\n\n            # retire l'animation (keyframes/curves) si présente\n            try:\n                k.clearAnimated()\n            except Exception:\n                pass\n\n            # nb de composantes (XY=2, RGB=3, float=1, etc.)\n            try:\n                n = k.arraySize()\n            except Exception:\n                n = 1\n\n            # remet à 0 avec la bonne taille\n            try:\n                if n > 1:\n                    k.setValue(\[0.0] * n)\n                else:\n                    k.setValue(0.0)\n            except Exception as e:\n                if verbose:\n                    print(\"  Impossible de reset\", knob_name, \":\", e)\n\n    if verbose:\n        print(\"Terminé.\")\n\nreset_curve_tool_knobs(\[\n    \"CurveTool_Tracker1\",\n    \"CurveTool_AutoSize\",\n])" +STARTLINE}
-  addUserKnob {22 goTrack l "Go Track" -STARTLINE T "n = nuke.toNode(\"CurveTool_Tracker1\")\nfirst = int(nuke.thisNode()\['firstFrame'].value())\nlast  = int(nuke.thisNode()\['lastFrame'].value())\nnuke.execute(n, first, last)\n\n\nn = nuke.toNode(\"CurveTool_AutoSize\")\nfirst = int(nuke.thisNode()\['firstFrame'].value())\nlast  = int(nuke.thisNode()\['lastFrame'].value())\nnuke.execute(n, first, last)"}
- }
 end_group

@@ -15,6 +15,7 @@
     <memberTool name="shotBuilder"/>
     <memberTool name="reduceTextureViewport"/>
     <memberTool name="CopRopImage"/>
+    <memberTool name="tool_1"/>
   </toolshelf>
 
   <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
@@ -203,5 +204,13 @@ run()]]></script>
 import cop_createRopImage
 reload(cop_createRopImage)
 cop_createRopImage.run()]]></script>
+  </tool>
+
+  <tool name="tool_1" label="Clean Light Mixer" icon="hicon:/SVGIcons.index?MISC_fix_repair.svg">
+    <script scriptType="python"><![CDATA[import importlib
+import clean_light_mixer
+
+importlib.reload(clean_light_mixer)
+clean_light_mixer.run()]]></script>
   </tool>
 </shelfDocument>

@@ -10,6 +10,11 @@ import os
 
 DEBUG_LIST = ["FOX-04", "FALCON-01"]
 DEBUG = False
+VARIABLE_TO_DELETE = [
+    "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES",
+    "KARMA_XPU_MAX_SHADER_TEXTURE_RES",
+    "HOUDINI_BUFFEREDSAVE"
+]
 
 def main(origin, Settings, pluginInfos, arguments):
     #object Prism_Deadline = origin       is a object
@@ -25,30 +30,37 @@ def main(origin, Settings, pluginInfos, arguments):
     #trouver toute les environments variables qui bride le mapping des textures
     AllEnvVariable = []
     copySettings = Settings.copy()
+    print(copySettings)
     for key, value in copySettings.items():
         if key.startswith("EnvironmentKeyValue"):
-            if not "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES" in value and not "KARMA_XPU_MAX_SHADER_TEXTURE_RES" in value and not "HOUDINI_BUFFEREDSAVE" in value:
+            should_skip = False
+            for ban_variable in VARIABLE_TO_DELETE:
+                if ban_variable in value:
+                    should_skip = True
+                    break
+            if not should_skip:
                 AllEnvVariable.append(value)
             del Settings[key]
 
-
+    # add specifics environnments variables
+    AllEnvVariable.append("KARMA_XPU_OPTIX_SPARSE_TEXTURES=1")
+    
     for i, data in enumerate(AllEnvVariable):
         Settings[f"EnvironmentKeyValue{i}"] = data
     
-
     #--------------------------------------------------- DEBUG --------------------------------------
     if socket.gethostname() in DEBUG_LIST and DEBUG:
         sys.path.append("R:/pipeline/networkInstall/python_shares/python311_debug_pkgs/Lib/site-packages")
-        from debug import debug
+        from debug import debug # type: ignore
         debug.debug()
         debug.debugpy.breakpoint()
     #--------------------------------------------------- DEBUG --------------------------------------
 
-    if not 'ILLOGIC_TEMP_NODE' in os.environ:
+    if 'ILLOGIC_TEMP_NODE' not in os.environ:
         return
 
     dataNodeExport = eval(os.environ.get("ILLOGIC_TEMP_NODE")) # environement variable creer dans le script preRender
-    if not "high_prio" in Settings["Name"]:
+    if "high_prio" not in Settings["Name"]:
         del os.environ['ILLOGIC_TEMP_NODE']
     if not dataNodeExport:
         return
@@ -60,13 +72,6 @@ def main(origin, Settings, pluginInfos, arguments):
         editVarEnviron(Settings, res, i)
         name = Settings["Name"]
         print(f"add environment variable for the job:\n   ---> {name}\n   ---> resolution set: {res}\n")
-
-
-    #force env var for foundry license 
-    if jobInfos["Plugin"] == "Nuke":
-        origin.addEnvironmentItem(jobInfos, "foundry_LICENSE", "4101@rlm-illogic")
-        # force deadline license limit for Nuke
-        jobInfos["LimitGroups"] = "nukelimit"
 
 
 

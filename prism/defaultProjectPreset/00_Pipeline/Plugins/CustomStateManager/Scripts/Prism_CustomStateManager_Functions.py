@@ -6,7 +6,8 @@ import sys
 
 
 # from  USDExport_anim import CustomExportAnim
-from Custom_Export import CustomExport
+from custom_export_UI import CustomExportUI
+from custom_preExport import CustomPreExport
 
 
 
@@ -18,9 +19,9 @@ class Prism_CustomStateManager_Functions(object):
     def __init__(self, core, plugin):
         self.core = core
         self.plugin = plugin
-
         self.core.registerCallback("onStateStartup", self.onStateStartup, plugin=self, priority=40)
         self.core.registerCallback("onStateManagerOpen", self.EditStateManagerUI, plugin=self)
+        self.core.registerCallback("preExport", self.preExport, plugin=self)
     #     self.core.registerCallback("onStateManagerOpen", self.createCustom_state_anim, plugin=self)
 
     # def createCustom_state_anim(self, origin):
@@ -31,23 +32,24 @@ class Prism_CustomStateManager_Functions(object):
     def onStateStartup(self, state):
         if self.core.appPlugin.pluginName != "Maya":
             return
-        
-        if state.className == "Export" or state.className == "USD Export":
-            CustomExport(state)
+        CustomExportUI(state)
+    
+    def preExport(self, **kwargs):
+        if self.core.appPlugin.pluginName != "Maya":
+            return
+        CustomPreExport(kwargs)
 
 
     # ------------------------ modification de l'interface du state Manager -------------------------
-    def EditStateManagerUI(self, origin):
+    def EditStateManagerUI(self, origin) -> None:
         if self.core.appPlugin.pluginName != 'Maya':
             return
         
         self.origin = origin
-
         self.origin.gb_import.hide()
 
         box_edit_import = qt.QGroupBox(self.origin.splitter_2)
         self.origin.splitter_2.insertWidget(0, box_edit_import)
-
         lay = qt.QHBoxLayout(box_edit_import)
 
         qt_btn_ReferenceUpdater = qt.QPushButton("Reference Updater")
@@ -61,13 +63,13 @@ class Prism_CustomStateManager_Functions(object):
         self.customSheet(qt_btn_showImport)
         lay.addWidget(qt_btn_showImport)
     
-    def showGroupBoxImport(self):
+    def showGroupBoxImport(self) -> None:
         if self.origin.gb_import.isHidden():
             self.origin.gb_import.show()
         else:
             self.origin.gb_import.hide()
     
-    def runReferenceUpdater(self):
+    def runReferenceUpdater(self) -> None:
         if not PRISM_SCRIPT_PATH in sys.path:
             sys.path.append(PRISM_SCRIPT_PATH)
         
@@ -91,7 +93,7 @@ class Prism_CustomStateManager_Functions(object):
         except Exception as e:
             print(e)
     
-    def customSheet(self, bb):
+    def customSheet(self, bb) -> None:
         bb.setStyleSheet("""
         QPushButton {
             background-color: #303030; 

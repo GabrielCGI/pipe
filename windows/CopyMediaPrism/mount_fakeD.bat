@@ -1,0 +1,1 @@
+subst D: C:/fakeD

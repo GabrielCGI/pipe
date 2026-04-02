@@ -19,7 +19,6 @@
             "CreatePolygonCylinder",
             "NodeEditorWindow",
             "NamespaceEditor",
-            "MatchTransform",
             "PluginManager",
             "HypershadeWindow",
             "CreateCameraOnly",
@@ -29,15 +28,23 @@
             "LightCentricLightLinkingEditor",
             "cmdSkydomeLight",
             "CreatePolygonCube",
-            "ReferenceEditor",
             "HotkeyPreferencesWindow",
-            "mayaUsdOpenUsdLayerEditor",
             "GraphEditor",
-            "ParentConstraint"
+            "SelectSimilar",
+            "MatchTransform",
+            "ReferenceEditor",
+            "mayaUsdOpenUsdLayerEditor",
+            "ParentConstraint",
+            "Symmetrize",
+            "MirrorPolygonGeometry",
+            "CreateLattice",
+            "CombinePolygons",
+            "PolyMerge"
         ],
         [
             "share",
-            "Fingers_L_Ctr_Grp_parentConstraint1"
+            "Fingers_L_Ctr_Grp_parentConstraint1",
+            "came"
         ],
         [],
         []

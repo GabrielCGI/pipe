@@ -1,0 +1,2 @@
+opentimelineio==0.16.0
+PySide6>=6.4

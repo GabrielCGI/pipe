@@ -1,0 +1,286 @@
+#! C:/Program Files/Nuke15.1v5/nuke-15.1.5.dll -nx
+version 15.1 v5
+Gizmo {
+ knobChanged "\n\nn=nuke.thisNode()\nk=nuke.thisKnob()\n\nif k.name() == \"custom_format\" and k.value() == True:\n    n\['delivery_format'].clearAnimated()\nif k.name() == \"custom_format\" and k.value() == False:\n    n\['delivery_format'].setExpression('root.format.w',0)\n    n\['delivery_format'].setExpression('root.format.h',1)\n"
+ tile_color 0x540054ff
+ note_font "Verdana Bold"
+ addUserKnob {20 FORMAT}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {14 delivery_format l "Delivery Format :" R 0 100}
+ delivery_format {{root.format.w} {root.format.h}}
+ addUserKnob {6 custom_format l "Custom Format ?" +STARTLINE}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {7 alpha_security l "Alpha Security :" R 0 0.1}
+ alpha_security 0.01
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos -732
+  ypos -1036
+ }
+ Expression {
+  temp_name0 security
+  temp_expr0 parent.alpha_security
+  expr3 "alpha < security ? 0 : alpha"
+  name Expression1
+  xpos -732
+  ypos -997
+ }
+ Group {
+  name BBoxToFormat
+  onCreate "n = nuke.thisNode()\ninputFormat = n.knob(\"inputFormat\")\ninputBBox = n.knob(\"inputBBox\")\ncrop = nuke.toNode(\"Crop6\")\ncropb = crop.knob('box')\noutputBBox = n.knob('outputBBox')\noutputBBoxCenter = n.knob(\"outputBBoxCenter\")\n\ninputFormat.setFlag(0x0000000000008000)\ninputBBox.setFlag(0x0000000000008000)\ncropb.setFlag(0x0000000000008000)\noutputBBox.setFlag(0x0000000000008000)\noutputBBoxCenter.setFlag(0x0000000000008000)\n\nn = nuke.thisNode()\nn.knob(\"overscan\").setRange(0,400)\nn.knob(\"overscanPercent\").setRange(1,4)"
+  knobChanged "n = nuke.thisNode()\nk = nuke.thisKnob()\nif k.name() == \"overscanType\":\n    if n.knob(\"overscanType\").getValue() == 1:\n        n.knob(\"overscanPercent\").setVisible(True)\n        n.knob(\"overscan\").setVisible(False)\n    else:\n        n.knob(\"overscanPercent\").setVisible(False)\n        n.knob(\"overscan\").setVisible(True)"
+  tile_color 0xa57aaaff
+  note_font "Verdana Bold"
+  note_font_color 0xffffffff
+  xpos -732
+  ypos -966
+  addUserKnob {20 CropBBox}
+  addUserKnob {4 type l Type +INVISIBLE M {"To Format" "To BBox"}}
+  addUserKnob {41 intersect T Crop6.intersect}
+  addUserKnob {6 blackOutside l "Black Outside" -STARTLINE}
+  addUserKnob {4 overscanType l "Overscan Type:" M {Pixels Percentage}}
+  overscanType Percentage
+  addUserKnob {14 overscan l Overscan +HIDDEN R 0 400}
+  addUserKnob {14 overscanPercent l "Overscan Percent" R 1 4}
+  overscanPercent 1
+  addUserKnob {20 inputBbox l "BBox Data" n 1}
+  inputBbox 0
+  addUserKnob {15 inputFormat l "Input Format"}
+  inputFormat {0 0 {input.width} {input.height}}
+  addUserKnob {15 inputBBox l "Input BBox"}
+  inputBBox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+  addUserKnob {12 outputBBoxCenter l OutputBBoxCenter}
+  outputBBoxCenter {{OutputBBox1.outputBBoxCenter.w} {OutputBBox1.outputBBoxCenter.h}}
+  addUserKnob {15 outputBBox l "Output BBox"}
+  outputBBox {{OutputBBox1.OutputBBox} {OutputBBox1.OutputBBox} {OutputBBox1.OutputBBox} {OutputBBox1.OutputBBox}}
+  addUserKnob {20 endGroup n -1}
+  addUserKnob {20 info_1 l Info}
+  addUserKnob {26 creator l Creator: T "<b><big>Tony Lyons"}
+  addUserKnob {26 desc l Description: t "crop to inputformat\n\ndisplays values of input bbox" T CropBBox}
+  addUserKnob {26 ver l Version: T v02}
+ }
+  Input {
+   inputs 0
+   name Input
+   xpos 261
+   ypos 394
+  }
+  Dot {
+   name Dot2
+   note_font_size 41
+   xpos 295
+   ypos 462
+  }
+set Ned641c00 [stack 0]
+  Dot {
+   name Dot1
+   note_font_size 41
+   xpos -160
+   ypos 462
+  }
+set N12eb5800 [stack 0]
+push $Ned641c00
+  Crop {
+   box {{curve} {curve} {input.width} {input.height}}
+   crop {{parent.blackOutside}}
+   name Crop6
+   xpos 261
+   ypos 510
+   addUserKnob {20 User}
+   addUserKnob {22 cropToBbox l "Crop to Bounding Box" -STARTLINE T codeBBox()}
+  }
+set N12eb5400 [stack 0]
+  Remove {
+   operation keep
+   channels none
+   name Remove1
+   xpos 120
+   ypos 504
+  }
+set N12eb5000 [stack 0]
+  Transform {
+   scale {{parent.overscanPercent} {parent.overscanPercent}}
+   center {{input.bbox.r/2} {input.bbox.t/2}}
+   shutteroffset centred
+   name Transform1
+   xpos 120
+   ypos 555
+  }
+push $N12eb5000
+  AdjBBox {
+   numpixels {{parent.overscan} {parent.overscan}}
+   name AdjBBox1
+   xpos -5
+   ypos 510
+  }
+  Switch {
+   inputs 2
+   which {{overscanType}}
+   name Switch2
+   label "\[value which]"
+   xpos -5
+   ypos 549
+  }
+  Merge2 {
+   inputs 2
+   bbox intersection
+   Achannels {-rgba.red -rgba.green -rgba.blue rgba.alpha}
+   Bchannels {-rgba.red -rgba.green -rgba.blue rgba.alpha}
+   output {-rgba.red -rgba.green -rgba.blue rgba.alpha}
+   name Merge1
+   xpos -5
+   ypos 647
+   disable {{!parent.Crop6.intersect}}
+  }
+push $N12eb5800
+  CopyBBox {
+   inputs 2
+   name CopyBBox1
+   xpos -194
+   ypos 653
+  }
+  BlackOutside {
+   name BlackOutside1
+   xpos -194
+   ypos 692
+   disable {{!parent.blackOutside}}
+  }
+  Dot {
+   name Dot4
+   note_font_size 41
+   xpos -160
+   ypos 769
+  }
+push $N12eb5400
+  Switch {
+   inputs 2
+   which {{"overscanType == 0 ? overscan.w != 0 || overscan.h != 0 : overscanPercent.w != 1 || overscanPercent.h != 1 ? 1 : 0"}}
+   name Switch1
+   label "\[value which]"
+   xpos 261
+   ypos 759
+  }
+set N22497700 [stack 0]
+  Output {
+   name Output1
+   xpos 261
+   ypos 921
+  }
+push $N22497700
+  NoOp {
+   name OutputBBox1
+   xpos 378
+   ypos 821
+   addUserKnob {20 User}
+   addUserKnob {15 OutputBBox l "Output BBox"}
+   OutputBBox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+   addUserKnob {14 outputBBoxCenter l "Output BBox Center" R 0 100}
+   outputBBoxCenter {{OutputBBox.x+(OutputBBox.r-OutputBBox.x)/2} {OutputBBox.y+(OutputBBox.t-OutputBBox.y)/2}}
+  }
+ end_group
+ Dot {
+  name Dot3
+  xpos -698
+  ypos -910
+ }
+set N30e2800 [stack 0]
+ Dot {
+  name Dot1
+  xpos -876
+  ypos -910
+ }
+set Ne2b1e000 [stack 0]
+ Dot {
+  name Dot2
+  xpos -1019
+  ypos -910
+ }
+add_layer {CryptoPrimitives CryptoPrimitives.red CryptoPrimitives.green CryptoPrimitives.blue}
+add_layer {CryptoPrimitives00 CryptoPrimitives00.red CryptoPrimitives00.green CryptoPrimitives00.blue CryptoPrimitives00.alpha}
+add_layer {CryptoPrimitives01 CryptoPrimitives01.red CryptoPrimitives01.green CryptoPrimitives01.blue CryptoPrimitives01.alpha}
+add_layer {CryptoPrimitives02 CryptoPrimitives02.red CryptoPrimitives02.green CryptoPrimitives02.blue CryptoPrimitives02.alpha}
+ Remove {
+  operation keep
+  channels CryptoPrimitives
+  channels2 CryptoPrimitives00
+  channels3 CryptoPrimitives01
+  channels4 CryptoPrimitives02
+  name Remove2
+  xpos -1053
+  ypos -873
+ }
+ Reformat {
+  type "to box"
+  box_width {{parent.delivery_format.w}}
+  box_height {{parent.delivery_format.h}}
+  box_fixed true
+  filter impulse
+  name Reformat2
+  xpos -1053
+  ypos -837
+ }
+push $Ne2b1e000
+add_layer {CryptoMaterials00 CryptoMaterials00.red CryptoMaterials00.green CryptoMaterials00.blue CryptoMaterials00.alpha}
+add_layer {CryptoMaterials01 CryptoMaterials01.red CryptoMaterials01.green CryptoMaterials01.blue CryptoMaterials01.alpha}
+add_layer {CryptoMaterials02 CryptoMaterials02.red CryptoMaterials02.green CryptoMaterials02.blue CryptoMaterials02.alpha}
+ Remove {
+  operation keep
+  channels CryptoMaterials00
+  channels2 CryptoMaterials00
+  channels3 CryptoMaterials01
+  channels4 CryptoMaterials02
+  name Remove1
+  xpos -910
+  ypos -873
+ }
+ Reformat {
+  type "to box"
+  box_width {{parent.delivery_format.w}}
+  box_height {{parent.delivery_format.h}}
+  box_fixed true
+  filter impulse
+  name Reformat3
+  xpos -910
+  ypos -837
+ }
+ Merge2 {
+  inputs 2
+  metainput All
+  rangeinput All
+  Achannels none
+  Bchannels none
+  output none
+  also_merge all
+  name Merge1
+  xpos -985
+  ypos -772
+ }
+push $N30e2800
+ Reformat {
+  type "to box"
+  box_width {{parent.delivery_format.w}}
+  box_height {{parent.delivery_format.h}}
+  box_fixed true
+  name Reformat1
+  xpos -732
+  ypos -877
+ }
+ Copy {
+  inputs 2
+  from0 -rgba.alpha
+  to0 -rgba.alpha
+  channels all
+  metainput All
+  rangeinput All
+  name Copy1
+  xpos -732
+  ypos -778
+ }
+ Output {
+  name Output1
+  xpos -732
+  ypos -540
+ }
+end_group

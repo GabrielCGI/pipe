@@ -4,9 +4,11 @@ classname = "kitsusetstatus"
 
 import os
 import sys
+import shutil
 import socket
 import logging
 import traceback
+from pathlib import Path
 from qtpy.QtGui import *
 from qtpy.QtWidgets import *
 from qtpy.QtCore import *
@@ -16,7 +18,7 @@ from PrismUtils.Decorators import err_catcher_plugin as err_catcher
 logger = logging.getLogger(__name__)
 
 DEV_LIST = [
-    # 'FALCON-01',
+    'FALCON-01',
     # 'FOX-04'
 ]
 ENABLE_DEBUG_MODE = False
@@ -202,7 +204,38 @@ class kitsusetstatus:
             selectedTask, selectedStatus = kitsu_infos
             self.status = selectedStatus
             self.taskselected = True
-            self.prjMng.publishNonExistentMedia(path, entity, selectedTask, version, description, uploadPreview, parent, task)
+            replace_version = version
+            # ------------------------------ déplacer et mettre la version exportée de Kitsu à l'endroit du publish ------------------------------
+            src = Path(path[0]) #exemple: I:\\McDonald_2511\\03_Production\\Shots\\SHOT-TEST\\fred\\Playblasts\\Anim\\v006\\SHOT-TEST-fred_Anim_v006.mp4
+            start_new_path = src.parent.parent.parent.__str__() + "\\" + selectedTask
+            file = src.parts[-1].__str__()
+            version_media = src.parts[-2].__str__()
+            task_media = src.parts[-3].__str__()
+            if selectedTask != task_media: # permet de voir si on publie dans la même tâche entre Kitsu et Prism pour éviter de réécrire une version en plus dans le même identifiant
+                new_version = None
+                if os.path.exists(start_new_path):
+                    new_version = sorted(os.listdir(start_new_path))
+                else:
+                    os.makedirs(start_new_path)
+                
+                if new_version:
+                    new_version = "v"  + str(int(new_version[-1][1:]) + 1).zfill(3)
+                else:
+                    new_version = "v001"
+
+                os.makedirs(f"{start_new_path}\\{new_version}")
+                new_file = file.replace(version_media, new_version).replace(task_media, selectedTask)
+                dst = f"{start_new_path}\\{new_version}\\{new_file}"
+                shutil.copy2(src, dst)
+
+                #ramplacer les variable du début par mes variables
+                replace_version = new_version
+                path[0] = dst
+                print("src:", src)
+                print("dst:", dst)
+            # ------------------------------ déplacer et mettre la version exportée de Kitsu à l'endroit du publish ------------------------------
+
+            self.prjMng.publishNonExistentMedia(path, entity, selectedTask, replace_version, description, uploadPreview, parent, task)
 
         self.prjMng.dlg_getTaskFromEnity = GetTaskDialog(self.kitsuplugin, tasks, parent=parent)
         if mode == "product":
@@ -226,12 +259,10 @@ class GetTaskDialog(QDialog):
         self.statusList = self.prjMng.getTaskStatusList()
         self.statuses = [
             'wip',
+            'to check',
             'wfa',
-            'WFA BLK',
-            'WFA SPL',
             'Q0',
-            'Q1',
-            'QC OK'
+            "ready"
         ]
         self.core.parentWindow(self, parent=parent)
         self.setupUi()

@@ -13,7 +13,7 @@
         "useMasterVersion": false,
         "useMasterRenderVersion": false,
         "backupScenesOnPublish": false,
-        "scenefileLocking": false,
+        "scenefileLocking": true,
         "productTasks": false,
         "matchScenefileVersions": false,
         "requirePublishComment": true,
@@ -134,7 +134,7 @@
                 "name": "Compo"
             }
         ],
-        "prism_version": "v2.0.9",
+        "prism_version": "v2.0.18",
         "versionPadding": 3,
         "framePadding": 4,
         "versionFormat": "v#",
@@ -747,7 +747,7 @@
         "HOUDINI_BUFFEREDSAVE": "1",
         "KARMA_XPU_OPTIX_SPARSE_TEXTURES": "1",
         "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio",
-        "PRISM_DEADLINE_HUSK_PATH": "C:/Program Files/Side Effects Software/Houdini 21.0.559/bin/husk.exe",
+        "PRISM_DEADLINE_HUSK_PATH": "C:/Program Files/Side Effects Software/Houdini 21.0.596/bin/husk.exe",
         "PRISM_HUSK_DEADLINE_GROUP": "husk_grp",
         "PXR_AR_DEFAULT_SEARCH_PATH": "R:/;I:/",
         "SANITY_CHECK_CONFIG": "I://00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml"
@@ -926,7 +926,7 @@
         "kitsu_includePathInComments": true,
         "kitsu_useUsername": true,
         "kitsu_syncPlaylists": true,
-        "kitsu_syncEntityConnections": false
+        "kitsu_syncEntityConnections": true
     },
     "deadline": {
         "submitScenes": false,
@@ -1028,12 +1028,12 @@
                 "name": "CFX"
             },
             {
-                "abbreviation": "anm",
-                "name": "Anim"
-            },
-            {
                 "abbreviation": "set",
                 "name": "SetDress"
+            },
+            {
+                "abbreviation": "anm",
+                "name": "Anim"
             },
             {
                 "abbreviation": "lay",
@@ -1042,10 +1042,6 @@
             {
                 "abbreviation": "ppd",
                 "name": "Preprod"
-            },
-            {
-                "abbreviation": "sdb",
-                "name": "sandbox"
             },
             {
                 "abbreviation": "rig",
@@ -1058,6 +1054,10 @@
             {
                 "abbreviation": "mod",
                 "name": "Modeling"
+            },
+            {
+                "abbreviation": "sdb",
+                "name": "sandbox"
             },
             {
                 "abbreviation": "ing",

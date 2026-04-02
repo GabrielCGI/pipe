@@ -190,6 +190,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     ilgcSubTracker.addCommand('ILGC_OFTracker', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/ILGC_OFTracker.nk\")')
     ilgcSubTracker.addCommand("Retrack Every Nodes", "ilcg_scripts.retrack_every_nodes()")
     ilgcSubTracker.addCommand("Retrack Selected Nodes", "ilcg_scripts.retrack_selected_nodes()")
+    ilcgMenu.addCommand('ILGC_ReadCleanup', 'nuke.createNode("ILGC_ReadCleanup")')
 
     # Rivers menus
     riversMenu: nuke.Menu = illogicMenu.addMenu("Rivers Tools")
@@ -201,6 +202,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     riversMenu.addCommand('RIV_ZDefocus', 'nuke.createNode("RIV_ZDefocus")')
     riversMenu.addCommand('RIV_BrushScatter', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_BrushScatter.nk\")')
     riversMenu.addCommand('RIV_ZDefocus_CHILD', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_ZDefocus_CHILD.nk\")')
+    riversMenu.addCommand('RIV_FloatParticles', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_FloatParticles.nk\")')
 
     # Tools menus
     toolsMenu: nuke.Menu = illogicMenu.addMenu("Tools")

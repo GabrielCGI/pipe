@@ -50,37 +50,47 @@ class Prism_IllogicCustomPrefs_Functions(object):
     def isActive(self):
         return True
 
-    def set_prism_prefs(*args):
+    def set_prism_prefs(self):
         import json
         import os
-        try:
-            # Récupère le chemin du dossier "Mes documents" de l'utilisateur actuel
-            user_documents = os.path.join(os.path.expanduser('~'), 'Documents', 'Prism2')
-            json_file_path = os.path.join(user_documents, 'Prism.json')
+        # import socket
+        # if socket.gethostname() == "FOX-04":
+        #     import sys
+        #     DEBUG_MODULE = "R:/devmaxime/dev/python/debug"
+        #     if not DEBUG_MODULE in sys.path:
+        #         sys.path.insert(0, DEBUG_MODULE)
+        #     import debug
+        #     debug.debug()
+        #     debug.debugpy.breakpoint()
+        # try:
+        # Récupère le chemin du dossier "Mes documents" de l'utilisateur actuel
+        user_documents = os.path.join(os.path.expanduser('~'), 'Documents', 'Prism2')
+        json_file_path = os.path.join(user_documents, 'Prism.json')
+        self.core.configs.cachedConfigs.pop(json_file_path, None)
 
-            # Charge le fichier JSON existant
-            with open(json_file_path, 'r', encoding='utf-8') as file:
-                data = json.load(file)
+        # Charge le fichier JSON existant
+        with open(json_file_path, 'r', encoding='utf-8') as file:
+            data = json.load(file)
 
-            # Modifie les valeurs spécifiques
-            # DCC Overrides options
-            data['dccoverrides']['Houdini_path'] = 'launcher:Houdini'
-            data['dccoverrides']['Maya_path'] = 'launcher:Maya'
-            data['dccoverrides']['Houdini_override'] = True
-            data['dccoverrides']['Maya_override'] = True
-            # USD options
-            data['usd']['openViewport'] = False
-            # asset search
-            data['showAssetSearch'] = True
-            # Media player
-            data['globals']['mediaPlayerName'] = "RV"
-            data['globals']['mediaPlayerPath'] = "C:\\ILLOGIC_APP\\OpenRV\\bin\\rv.exe"
-            print ("Prism Illogic Custom Prefs done working")
+        # Modifie les valeurs spécifiques
+        # DCC Overrides options
+        data['dccoverrides']['Houdini_path'] = 'launcher:Houdini'
+        data['dccoverrides']['Maya_path'] = 'launcher:Maya'
+        data['dccoverrides']['Houdini_override'] = True
+        data['dccoverrides']['Maya_override'] = True
+        # USD options
+        data['usd']['openViewport'] = False
+        # asset search
+        data['showAssetSearch'] = True
+        # Media player
+        data['globals']['mediaPlayerName'] = "RV"
+        data['globals']['mediaPlayerPath'] = "C:\\ILLOGIC_APP\\OpenRV\\bin\\rv.exe"
+        print ("Prism Illogic Custom Prefs done working")
 
 
-            # Sauvegarde les modifications dans le fichier JSON
-            with open(json_file_path, 'w', encoding='utf-8') as file:
-                json.dump(data, file, indent=4)
-        except:
-            pass
+        # Sauvegarde les modifications dans le fichier JSON
+        with open(json_file_path, 'w', encoding='utf-8') as file:
+            json.dump(data, file, indent=4)
+        # except:
+        #     pass
         #print("Les valeurs ont été modifiées avec succès.")

@@ -34,6 +34,9 @@ def run(core):
                 data_all_variants[product["product"]] = last_version_of_product
 
         name_ctrl, name_variant = findNameCtrlVariant(namespace)
+        if name_ctrl is None or name_variant is None:
+            continue
+        
         data[refNode] = {"path_variants": data_all_variants, "namespace" : namespace, "name_ctrl": name_ctrl, "name_variant": name_variant}
     
     cmds.scriptJob(ka=True)
@@ -44,6 +47,9 @@ def findNameCtrlVariant(namespace):
     #permet de trouver le bon controller world et de trouver le bon attribute qui à le bon nom
     name_variant = None
     name_ctrl = None
+    if namespace == ":":
+        return name_ctrl, name_variant
+    
     for ctrl in  ["ctrl_world", "c_world", "World_Ctr"]:
         if cmds.objExists(f"{namespace}:{ctrl}"):
             name_ctrl = f"{namespace}:{ctrl}"
@@ -87,5 +93,5 @@ def CreateScrpitJob(data):
                 cmds.disconnectAttr(src[0], f"{ctrl_world}.{name_variant}")
         except:
             continue
-
+        
         cmds.scriptJob(attributeChange=[f"{ctrl_world}.{name_variant}", partial(callBackFunc, data, refNode)], killWithScene=False, ro=True)

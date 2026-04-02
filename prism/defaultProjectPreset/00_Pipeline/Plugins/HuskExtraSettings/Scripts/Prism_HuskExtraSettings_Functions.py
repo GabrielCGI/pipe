@@ -37,21 +37,41 @@ from qtpy.QtGui import *
 from qtpy.QtWidgets import *
 
 from PrismUtils.Decorators import err_catcher_plugin as err_catcher
-
+from PrismCore import PrismCore
+import os
 from pathlib import Path
 
+PROD_PIPELINE_DIRECTORY = os.path.join(os.path.dirname(__file__), "..", '..', '..')
+AUTOCROP_AOVS_CONFIG = os.path.join(
+    PROD_PIPELINE_DIRECTORY,
+    "CustomModules",
+    "Python",
+    "autocrop",
+    "autocrop.yaml"
+)
 
 class Prism_HuskExtraSettings_Functions(object):
 
 
-    def __init__(self, core, plugin):
-        self.core = core
+    def __init__(self, core: PrismCore, plugin):
+        self.core: PrismCore = core
         self.plugin = plugin
         self.data_cached = {}
 
         self.core.registerCallback("preRender", self.preRender, plugin=self)
         self.core.registerCallback("preSubmit_Deadline", self.preSubmit_Deadline, plugin=self)
 
+    @err_catcher(name=__name__)
+    def read_yaml(self, filepath: str):
+        from ruamel.yaml import YAML
+        yaml = YAML()
+        try:
+            with open(filepath, 'r') as yaml_config:
+                data = yaml.load(yaml_config)
+        except Exception as e:
+            self.core.popup(f"Could not read autocrop config:\n{e}")
+            return {}
+        return data
 
     @err_catcher(name=__name__)
     def preRender(self, *args, **kwargs):
@@ -81,8 +101,7 @@ class Prism_HuskExtraSettings_Functions(object):
             data_cached['tiles_2'] = str(tiles_2.eval())
         data_cached['comment'] = state.getComment()
         self.data_cached[identifier] = data_cached
-            
-            
+
     @err_catcher(name=__name__)
     def preSubmit_Deadline(self, origin, Settings, pluginInfos, arguments):
         core = origin.core
@@ -113,8 +132,23 @@ class Prism_HuskExtraSettings_Functions(object):
         content['node_comment'] = comment
         content['tiles_1'] = tiles_1
         content['tiles_2'] = tiles_2
+        # add autocrop aovs if autocrop config exists
+        default_aovs = 'C,A,holdout_shadows'
+        if os.path.exists(AUTOCROP_AOVS_CONFIG):
+            aovs_data: dict = self.read_yaml(AUTOCROP_AOVS_CONFIG)
+            content['enable_autocrop'] = aovs_data.get('enable', True)
+            if content['enable_autocrop'] and aovs_data.get('aovs', False):
+                try:
+                    aovs = ','.join(aovs_data.get('aovs'))
+                except Exception:
+                    aovs = default_aovs
+            else:
+                aovs = default_aovs
+            content['autocrop_aovs'] = aovs
+        else:
+            content['enable_autocrop'] = True
+            content['autocrop_aovs'] = default_aovs
         core.setConfig(data=content, configPath=huskSettings)
-
 
     # if returns true, the plugin will be loaded by Prism
     @err_catcher(name=__name__)

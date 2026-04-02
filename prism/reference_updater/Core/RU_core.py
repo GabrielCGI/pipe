@@ -92,6 +92,7 @@ class RefUpdaterCore():
                 cmds.parent("rig", "|" + info["item"])
             elif info["item"] == "camRig" and cmds.objExists(info["item"]):
                 cmds.parent(info["item"], "cameras")
+                
             else:
                 # creer le grp root de la scene 
                 grp_type = info["Type"].lower()
