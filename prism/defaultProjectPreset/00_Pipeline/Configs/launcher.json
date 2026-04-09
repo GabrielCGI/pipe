@@ -231,7 +231,9 @@
                     "cmd": "C:\\Program Files\\Autodesk\\Maya2025\\bin\\maya.exe",
                     "preferred": true,
                     "environment": {
-                        "OCIO": "R:\\pipeline\\networkInstall\\OpenColorIO-Configs\\PRISM\\illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"
+                        "OCIO": "R:\\pipeline\\networkInstall\\OpenColorIO-Configs\\PRISM\\illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio",
+                        "PRISM_USD_CONVERT_TO_RELATIVE": "0",
+                        "PRISM_USD_UPDATE_AFTER_LAYER_EXPORT": "0"
                     }
                 }
             ],

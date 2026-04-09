@@ -88,7 +88,7 @@ class ScanWorker(QThread):
     # because it is typically rendered as separate layers and does not represent
     # the composited result.
     _FALLBACK_ORDER = [
-        "Compo", "MattePaint", "FX", "Simulation", "Anim", "Animation", "Layout",
+        "Compo", "MattePaint", "SlapComp", "QC", "CFX", "FX", "Simulation", "Anim", "Animation", "SetDress", "Layout",
     ]
 
     def _do_scan(self) -> None:
@@ -151,9 +151,8 @@ class ScanWorker(QThread):
                             version_str=f"[{fallback_task}] {fallback_version_entry.version_str}",
                         ))
                     else:
-                        status = f"{task}: no versions"
+                        status = f"{task}: no versions — skipped"
                         self.shot_scanned.emit(shot, status, False)
-                        result.append(ShotMedia(shot=shot, task=task, media=None, version_str="—"))
                     continue
 
                 # Select pinned or latest

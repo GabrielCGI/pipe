@@ -9,6 +9,10 @@ Crée/réutilise le venv dans `C:\ProgramData\otio_review_tool\venv`, installe l
 
 ---
 
+## Demonstration
+
+![](./demo/otiodemo_v0001.mp4)
+
 ## Structure des fichiers
 
 ### `app.py`

@@ -1,17 +1,16 @@
 @echo off
 cd /d "%~dp0"
 
-:: Each user gets their own local venv (network-share safe, multi-user safe)
-set VENV_DIR=R:\pipeline\networkInstall\python_shares\python312_otio_timelines_pkgs
+set UV_PROJECT_ENVIRONMENT=%userprofile%/.cache/uv-envs/otio_review_timeline_generator
 
 :: Patch OpenRV otio_reader.py for OTIO API compatibility
 call :patch_rv
 
 :: Launch the tool
 echo Launching OTIO Review Tool...
-echo Python: %VENV_DIR%\Scripts\python.exe
+echo Python: %UV_PROJECT_ENVIRONMENT%\Scripts\python.exe
 echo.
-"%VENV_DIR%\Scripts\python" "%~dp0app.py" 2>&1
+uv run "%~dp0app.py" 2>&1
 if errorlevel 1 (
     echo.
     echo ============================================================

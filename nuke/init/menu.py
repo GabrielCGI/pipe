@@ -202,7 +202,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     riversMenu.addCommand('RIV_ZDefocus', 'nuke.createNode("RIV_ZDefocus")')
     riversMenu.addCommand('RIV_BrushScatter', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_BrushScatter.nk\")')
     riversMenu.addCommand('RIV_ZDefocus_CHILD', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_ZDefocus_CHILD.nk\")')
-    riversMenu.addCommand('RIV_FloatParticles', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_FloatParticles.nk\")')
+    riversMenu.addCommand('RIV_FixEyeSpec', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_FixEyeSpec.nk\")')
 
     # Tools menus
     toolsMenu: nuke.Menu = illogicMenu.addMenu("Tools")

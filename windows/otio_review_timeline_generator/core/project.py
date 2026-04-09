@@ -246,6 +246,29 @@ class ProjectLoader:
         # Provide sensible defaults if pipeline.json has no department info
         if not departments:
             departments = _default_departments()
+        else:
+            # Filter out Lighting — replaced by SlapComp
+            departments = [d for d in departments if d.name.lower() != "lighting"]
+
+            existing_names = {d.name.lower() for d in departments}
+
+            # Inject missing extra departments (CFX, SetDress, QC, SlapComp)
+            for extra in _EXTRA_DEPARTMENTS:
+                if extra.name.lower() not in existing_names:
+                    departments.append(extra)
+
+            # Remove SlapComp from Compo's task list — it's a standalone dept in the UI
+            for dept in departments:
+                if dept.name.lower() == "compo":
+                    dept.default_tasks = [
+                        t for t in dept.default_tasks if t.lower() != "slapcomp"
+                    ]
+
+        # Sort departments according to canonical display order
+        departments.sort(
+            key=lambda d: _DISPLAY_ORDER.index(d.name.lower())
+            if d.name.lower() in _DISPLAY_ORDER else len(_DISPLAY_ORDER)
+        )
 
         return departments
 
@@ -281,11 +304,26 @@ class ProjectLoader:
 # Fallback departments when pipeline.json has no department data
 # ---------------------------------------------------------------------------
 
+_DISPLAY_ORDER = [
+    "layout", "setdress", "anim", "fx", "cfx", "qc", "slapcomp", "compo",
+]
+
+_EXTRA_DEPARTMENTS = [
+    Department("SetDress", "std", ["SetDress"]),
+    Department("CFX", "cfx", ["CFX"]),
+    Department("QC", "qc", ["QC"]),
+    Department("SlapComp", "slp", ["SlapComp"]),
+]
+
+
 def _default_departments() -> List[Department]:
     return [
         Department("Layout", "lay", ["Layout"]),
+        Department("SetDress", "std", ["SetDress"]),
         Department("Anim", "anm", ["Anim", "Animation"]),
         Department("FX", "fx", ["FX", "Simulation"]),
-        Department("Lighting", "lgt", ["Lighting"]),
+        Department("CFX", "cfx", ["CFX"]),
+        Department("QC", "qc", ["QC"]),
+        Department("SlapComp", "slp", ["SlapComp"]),
         Department("Compo", "cmp", ["Compo", "MattePaint"]),
     ]

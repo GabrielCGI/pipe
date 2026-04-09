@@ -3,8 +3,10 @@ classname = "CopyToCloud"
 
 import os
 import sys
-import shutil
-from qtpy.QtWidgets import QAction
+import json
+import tempfile
+import subprocess
+from qtpy.QtWidgets import QAction, QMessageBox
 from PrismUtils.Decorators import err_catcher_plugin as err_catcher
 
 
@@ -89,6 +91,10 @@ class CopyToCloud:
     def copy_to_local(self, src):
         self.copy_to(src, CLOUD, LOCAL)
 
+    def _ask(self, title, message):
+        reply = QMessageBox.question(None, title, message, QMessageBox.Yes | QMessageBox.No)
+        return reply == QMessageBox.Yes
+
     def copy_to(self, src, src_root, dest_root):
         norm_src = self.normalize_path(src)
         norm_src_root = self.normalize_path(src_root)
@@ -105,25 +111,67 @@ class CopyToCloud:
         relative_path = norm_src[len(norm_src_root):].lstrip("\\/")
         dst = os.path.join(dest_root, relative_path)
 
-        if os.path.exists(dst):
-            self.core.popup(f"Copy aborted: destination already exists:\n{dst}", severity="warning")
-            return
-
-        try:
-            os.makedirs(os.path.dirname(dst), exist_ok=True)
-
-            if os.path.isfile(src):
-                shutil.copy2(src, dst)
-                explorer_target = os.path.dirname(dst)
-            elif os.path.isdir(src):
-                shutil.copytree(src, dst)
-                explorer_target = dst
-            else:
-                self.core.popup("Invalid source type (not a file or folder)", severity="error")
+        # Prompt if destination folder already exists
+        if os.path.isdir(dst):
+            if not self._ask("Destination exists", f"Destination folder already exists:\n{dst}\n\nContinue?"):
                 return
 
-            self.core.popup(f"Copied successfully to:\n{dst}")
-            os.startfile(explorer_target)
+        if os.path.isfile(src):
+            if not self._collect_file_decision(dst):
+                return
+            decisions = {self.normalize_path(dst): self._file_overwrite_decision}
+        elif os.path.isdir(src):
+            decisions = {}
+            if not self._collect_dir_decisions(src, dst, decisions):
+                return
+        else:
+            self.core.popup("Invalid source type (not a file or folder)", severity="error")
+            return
 
-        except Exception as e:
-            self.core.popup(f"Copy failed:\n{e}", severity="error")
+        # Write decisions to a temp file and launch the worker subprocess
+        tmp = tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False)
+        json.dump(decisions, tmp)
+        tmp.close()
+
+        worker = os.path.join(os.path.dirname(os.path.abspath(__file__)), "_copy_worker.py")
+        subprocess.Popen(
+            [sys.executable, worker, src, dst, tmp.name],
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP,
+            close_fds=True,
+        )
+
+        self.core.popup(f"Copy started in the background to:\n{dst}")
+
+    def _collect_file_decision(self, dst):
+        """Prompt once if destination file exists. Stores decision on self."""
+        self._file_overwrite_decision = True
+        if os.path.exists(dst):
+            if not self._ask("File exists", f"File already exists:\n{dst}\n\nOverwrite?"):
+                return False
+        return True
+
+    def _collect_dir_decisions(self, src_dir, dst_dir, decisions):
+        """
+        Walk src tree upfront, prompt once per folder that has conflicts.
+        Populates decisions dict: { normpath(dst_folder): True/False }.
+        Returns False if user cancelled at any point.
+        """
+        items = os.listdir(src_dir)
+        files = [i for i in items if os.path.isfile(os.path.join(src_dir, i))]
+        subdirs = [i for i in items if os.path.isdir(os.path.join(src_dir, i))]
+
+        existing = [f for f in files if os.path.exists(os.path.join(dst_dir, f))]
+        if existing:
+            overwrite = self._ask(
+                "Files exist",
+                f"{len(existing)} file(s) already exist in:\n{dst_dir}\n\nOverwrite?"
+            )
+            decisions[self.normalize_path(dst_dir)] = overwrite
+
+        for d in subdirs:
+            src_sub = os.path.join(src_dir, d)
+            dst_sub = os.path.join(dst_dir, d)
+            if not self._collect_dir_decisions(src_sub, dst_sub, decisions):
+                return False
+
+        return True

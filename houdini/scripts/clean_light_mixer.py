@@ -26,6 +26,36 @@ def get_light_parm_groups(node):
 
     return groups
 
+def clear_light_transforms(node, light_path):
+    """Clear transform delta entry for a given prim path."""
+    try:
+        from edit import common
+    except ImportError:
+        print("  [transforms] Could not import 'edit.common' — skipping transform clear.")
+        return
+
+    delta_parm = node.parm("delta")
+    if delta_parm is None:
+        print("  [transforms] No 'delta' parm found — skipping transform clear.")
+        return
+
+    deltageo = delta_parm.eval()
+    if deltageo is None:
+        print(f"  [transforms] Delta geo is empty — nothing to clear for '{light_path}'.")
+        return
+
+    deltageo       = deltageo.freeze()
+    deltapointdict = common.makeDeltaPointDict(deltageo)
+    point          = deltapointdict.get(light_path)
+
+    if point is None:
+        print(f"  [transforms] No transform entry found for '{light_path}'.")
+        return
+
+    deltageo.deletePoints([point])
+    delta_parm.set(deltageo)
+    print(f"  [transforms] Cleared transform delta for '{light_path}'.")
+
 def clear_light_overrides(node, light_path):
     groups = get_light_parm_groups(node)
 
@@ -33,50 +63,46 @@ def clear_light_overrides(node, light_path):
         available = "\n  ".join(groups.keys())
         raise ValueError(f"Light '{light_path}' not found. Available:\n  {available}")
 
-    #parms_to_remove = [p for p in groups[light_path] if not p.isAtDefault()]
+    # ── Spare parms ───────────────────────────────────────────
     parms_to_remove = [p for p in groups[light_path]]
-    if not parms_to_remove:
-        print(f"  Nothing to remove — '{light_path}' has no overrides.")
-        return
+    if parms_to_remove:
+        print(f"\nRemoving {len(parms_to_remove)} parm(s) on '{light_path}':")
+        for p in parms_to_remove:
+            print(f"  - {p.description()}")
 
-    print(f"\nRemoving {len(parms_to_remove)} parm(s) on '{light_path}':")
-    for p in parms_to_remove:
-        print(f"  - {p.description()}")
+        ptg = node.parmTemplateGroup()
+        tuple_names_seen = set()
+        for p in parms_to_remove:
+            tuple_names_seen.add(p.tuple().name())
+        for tuple_name in tuple_names_seen:
+            ptg.remove(tuple_name)
+        node.setParmTemplateGroup(ptg)
+        print("  Done.")
+    else:
+        print(f"  Nothing to remove — '{light_path}' has no attribute overrides.")
 
-    ptg = node.parmTemplateGroup()
-    tuple_names_seen = set()
-    for p in parms_to_remove:
-        tuple_names_seen.add(p.tuple().name())
-    for tuple_name in tuple_names_seen:
-        ptg.remove(tuple_name)
-    node.setParmTemplateGroup(ptg)
-
-    print("  Done.")
+    # ── Transform delta ───────────────────────────────────────
+    clear_light_transforms(node, light_path)
 
 def run():
-    # ── Entry point ───────────────────────────────────────────
     selected = hou.selectedNodes()
     if not selected:
         print("No node selected.")
-    else:
-        node   = selected[0]
-        groups = get_light_parm_groups(node)
+        return
 
-        # ── Pick a light ─────────────────────────────────────
-        # Option A: prompt via Houdini UI
-        light_paths = list(groups.keys())
-        print("yo")
-        choice = hou.ui.selectFromList(
-            light_paths,
-            message="Select a light to clear overrides from:",
-            title="Clear Light Overrides",
-            num_visible_rows=min(len(light_paths), 10),
-        )
-        if choice:
-            with hou.undos.group("Remove Light Mixer overrides: multiple lights"):
-                for idx in choice:  
-                    clear_light_overrides(node, light_paths[idx])
-        else:
-            print("Cancelled.")
-        # ── Option B: hardcode for shelf tool / hotkey use ───
-        # clear_light_overrides(node, "/lights/light1")
+    node   = selected[0]
+    groups = get_light_parm_groups(node)
+
+    light_paths = list(groups.keys())
+    choice = hou.ui.selectFromList(
+        light_paths,
+        message="Select a light to clear overrides from:",
+        title="Clear Light Overrides",
+        num_visible_rows=min(len(light_paths), 10),
+    )
+    if choice:
+        with hou.undos.group("Remove Light Mixer overrides: multiple lights"):
+            for idx in choice:
+                clear_light_overrides(node, light_paths[idx])
+    else:
+        print("Cancelled.")

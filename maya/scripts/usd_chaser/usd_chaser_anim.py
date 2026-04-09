@@ -35,6 +35,8 @@ def main(file_path_usd):
         print("\n\n---USD CHASER: add Scale info")
     elif "I:/McDonald_2511/03_Production" in file_path_usd.replace("\\", "/"):
         addScaleInfo(layer, ["*:Rabbit_Root_Ctrl", "*:Bear_Root_Ctrl"], ["scaleY"], "primvars:globalScale")
+    elif "I:/rivers_feature/03_Production" in file_path_usd.replace("\\", "/"):
+        addScaleInfo(layer, ["*:Main*"], ["scaleY"], "primvars:globalScale")
 
     layer.Save()
     del layer

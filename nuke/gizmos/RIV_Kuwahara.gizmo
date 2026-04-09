@@ -28,54 +28,50 @@ Gizmo {
  Input {
   inputs 0
   name RadiusMap
-  xpos -57
+  xpos -187
   ypos 239
   number 1
  }
  NoOp {
   name AlphaCheck
-  xpos -57
+  xpos -187
   ypos 292
   addUserKnob {20 User}
   addUserKnob {6 alpha +STARTLINE}
   alpha {{"\[python \"len(\\\[n for n in nuke.channels(nuke.thisNode().input(0)) if n.find(\\\".a\\\") != -1])>0\"]"}}
  }
- AddChannels {
-  channels rgba
-  name AddAlpha
-  xpos -57
-  ypos 335
- }
-set Na475ec00 [stack 0]
  Clamp {
   channels alpha
   name Clamp1
-  xpos -57
-  ypos 388
+  xpos -187
+  ypos 348
  }
- Dot {
-  name Dot2
-  xpos 120
-  ypos 397
+ Crop {
+  box {{parent.BBoxToFormat.inputFormat.x} {parent.BBoxToFormat.inputFormat.y} {parent.BBoxToFormat.inputFormat.r} {parent.BBoxToFormat.inputFormat.t}}
+  name Crop1
+  xpos -187
+  ypos 394
  }
+set Nba8de000 [stack 0]
  Input {
   inputs 0
   name Image
   xpos 77
   ypos 82
  }
+set Nca349000 [stack 0]
  Dot {
   name Dot11
   xpos 111
   ypos 136
  }
-set Nc0508c00 [stack 0]
+set Nca349400 [stack 0]
  Dot {
   name Dot10
   xpos 111
   ypos 184
  }
-set Nc0508800 [stack 0]
+set Nca349800 [stack 0]
  BlinkScript {
   kernelSourceFile /Users/Derek/Documents/GitHub/VFX-software-prefs/Nuke/Kuwahara/df_kuwahara_tensor.cpp
   recompileCount 1
@@ -84,7 +80,7 @@ set Nc0508800 [stack 0]
   kernelSource "kernel df_StructureTensor : ImageComputationKernel<ePixelWise>\n\{\n    Image<eRead, eAccessRandom, eEdgeClamped> src; \n    Image<eWrite> dst; \n\n/*  \n *  Blink C++ implementation by Derek Flood, 2024\n *\n *  Adapted from the Blender GLSL script (Copyright: 2023 Blender Authors)\n *  https://projects.blender.org/blender/blender/src/source/blender/compositor/realtime_compositor/shaders/\n *     compositor_kuwahara_anisotropic_compute_structure_tensor.glsl\n *   ---------------------------------------------- \n *  \n *  Computes the structure tensor of the image using a Dirac delta window function as described in\n *  section \"3.2 Local Structure Estimation\" of the paper: Kyprianidis, Jan Eric. \n * \"Image and video abstraction by multi-scale anisotropic Kuwahara filtering.\" 2011.\n *  \n *  The structure tensor should then be smoothed using a Gaussian function to eliminate high frequency details.\n */\n\n    void process(int2 pos) \{\n        SampleType(src) input = src(pos.x, pos.y);\n\n  \t\t// The weight kernels of the filter optimized for rotational symmetry \n  \t\t// described in section \"3.2.1 Gradient Calculation\".\n\t\tconst float corner_weight = 0.182f;\n        const float center_weight = 1.0f - 2.0f * corner_weight;\n\n        float4 x_partial_derivative = src(pos.x - 1, pos.y + 1) * -corner_weight +                      \n                                        src(pos.x - 1, pos.y    ) * -center_weight +\n                                        src(pos.x - 1, pos.y - 1) * -corner_weight +\n                                        src(pos.x + 1, pos.y + 1) * corner_weight +\n                                        src(pos.x + 1, pos.y    ) * center_weight +\n                                        src(pos.x + 1, pos.y - 1) * corner_weight;\n\n    \tfloat4 y_partial_derivative = src(pos.x - 1, pos.y + 1) * corner_weight +\n                                        src(pos.x    , pos.y + 1) * center_weight +\n                                        src(pos.x + 1, pos.y + 1) * corner_weight +\n                                        src(pos.x - 1, pos.y - 1) * -corner_weight +\n                                        src(pos.x    , pos.y - 1) * -center_weight +\n                                        src(pos.x + 1, pos.y - 1) * -corner_weight;\n\n        float dxdx = dot(x_partial_derivative, x_partial_derivative);\n        float dxdy = dot(x_partial_derivative, y_partial_derivative);\n        float dydy = dot(y_partial_derivative, y_partial_derivative);\n        \n  \t\tdst(0) = dxdx;\n  \t\tdst(1) = dxdy;\n  \t\tdst(2) = dydy;\n\t\}\n\};\n"
   rebuild ""
   rebuild_finalise ""
-  name BlinkScript1
+  name BlinkScript4
   xpos 176
   ypos 175
  }
@@ -94,8 +90,8 @@ set Nc0508800 [stack 0]
   xpos 176
   ypos 231
  }
-set Nc0508000 [stack 0]
-push $Nc0508800
+set Nca372000 [stack 0]
+push $Nca349800
  BlinkScript {
   inputs 3
   kernelSourceFile /Users/Derek/Documents/GitHub/VFX-software-prefs/Nuke/Kuwahara/df_kuwaharaAnisotropic_map.cpp
@@ -116,8 +112,8 @@ push $Nc0508800
   xpos 111
   ypos 510
  }
-push $Nc0508000
-push $Nc0508c00
+push $Nca372000
+push $Nca349400
  Dot {
   name Dot1
   xpos 314
@@ -156,13 +152,12 @@ push $Nc0508c00
   xpos 178
   ypos 507
  }
-set Nbede3e00 [stack 0]
  Output {
   name Output1
   xpos 178
   ypos 705
  }
-push $Na475ec00
+push $Nba8de000
 push 0
 push 0
 push 0
@@ -171,16 +166,176 @@ push 0
 push 0
 push 0
 push 0
-push $Nbede3e00
+push $Nca349800
  Viewer {
   inputs 10
+  frame 998
   frame_range 1001-1001
   fps 25
   input_number 9
   colour_sample_bbox {0.271874994 0.396874994 0.2734375 0.3984375}
-  monitorOutNDISenderName "Nuke - TEST-gymChip_Compo_v009 - Viewer1"
+  viewerProcess "ACES 1.0 - SDR Video (sRGB - Display)"
+  monitorOutNDISenderName "Nuke - SQ050-SH0160_Compo_v024 - Viewer1"
   name Viewer1
   xpos -83
   ypos 740
  }
+push $Nca349000
+ Dot {
+  name Dot2
+  xpos 7
+  ypos 85
+ }
+ Group {
+  name BBoxToFormat
+  onCreate "n = nuke.thisNode()\ninputFormat = n.knob(\"inputFormat\")\ninputBBox = n.knob(\"inputBBox\")\ncrop = nuke.toNode(\"Crop6\")\ncropb = crop.knob('box')\noutputBBox = n.knob('outputBBox')\noutputBBoxCenter = n.knob(\"outputBBoxCenter\")\n\ninputFormat.setFlag(0x0000000000008000)\ninputBBox.setFlag(0x0000000000008000)\ncropb.setFlag(0x0000000000008000)\noutputBBox.setFlag(0x0000000000008000)\noutputBBoxCenter.setFlag(0x0000000000008000)\n\nn = nuke.thisNode()\nn.knob(\"overscan\").setRange(0,400)\nn.knob(\"overscanPercent\").setRange(1,4)"
+  knobChanged "n = nuke.thisNode()\nk = nuke.thisKnob()\nif k.name() == \"overscanType\":\n    if n.knob(\"overscanType\").getValue() == 1:\n        n.knob(\"overscanPercent\").setVisible(True)\n        n.knob(\"overscan\").setVisible(False)\n    else:\n        n.knob(\"overscanPercent\").setVisible(False)\n        n.knob(\"overscan\").setVisible(True)"
+  tile_color 0xa57aaaff
+  note_font "Verdana Bold"
+  note_font_color 0xffffffff
+  xpos -27
+  ypos 282
+  addUserKnob {20 CropBBox}
+  addUserKnob {4 type l Type +INVISIBLE M {"To Format" "To BBox"}}
+  addUserKnob {41 intersect T Crop6.intersect}
+  addUserKnob {6 blackOutside l "Black Outside" -STARTLINE}
+  addUserKnob {4 overscanType l "Overscan Type:" M {Pixels Percentage}}
+  overscanType Percentage
+  addUserKnob {14 overscan l Overscan +HIDDEN R 0 400}
+  addUserKnob {14 overscanPercent l "Overscan Percent" R 1 4}
+  overscanPercent 1
+  addUserKnob {20 inputBbox l "BBox Data" n 1}
+  addUserKnob {15 inputFormat l "Input Format"}
+  inputFormat {0 0 {input.width} {input.height}}
+  addUserKnob {15 inputBBox l "Input BBox"}
+  inputBBox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+  addUserKnob {12 outputBBoxCenter l OutputBBoxCenter}
+  outputBBoxCenter {{OutputBBox1.outputBBoxCenter.w} {OutputBBox1.outputBBoxCenter.h}}
+  addUserKnob {15 outputBBox l "Output BBox"}
+  outputBBox {{OutputBBox1.OutputBBox} {OutputBBox1.OutputBBox} {OutputBBox1.OutputBBox} {OutputBBox1.OutputBBox}}
+  addUserKnob {20 endGroup n -1}
+  addUserKnob {20 info_1 l Info}
+  addUserKnob {26 creator l Creator: T "<b><big>Tony Lyons"}
+  addUserKnob {26 desc l Description: t "crop to inputformat\n\ndisplays values of input bbox" T CropBBox}
+  addUserKnob {26 ver l Version: T v02}
+ }
+  Input {
+   inputs 0
+   name Input
+   xpos 261
+   ypos 394
+  }
+  Dot {
+   name Dot2
+   note_font_size 41
+   xpos 295
+   ypos 462
+  }
+set N7958e800 [stack 0]
+  Dot {
+   name Dot1
+   note_font_size 41
+   xpos -160
+   ypos 462
+  }
+set N98903000 [stack 0]
+push $N7958e800
+  Crop {
+   box {{curve} {curve} {input.width} {input.height}}
+   crop {{parent.blackOutside}}
+   name Crop6
+   xpos 261
+   ypos 510
+   addUserKnob {20 User}
+   addUserKnob {22 cropToBbox l "Crop to Bounding Box" -STARTLINE T codeBBox()}
+  }
+set Nd08c7c00 [stack 0]
+  Remove {
+   operation keep
+   channels none
+   name Remove1
+   xpos 120
+   ypos 504
+  }
+set Nd08c8000 [stack 0]
+  Transform {
+   scale {{parent.overscanPercent} {parent.overscanPercent}}
+   center {{input.bbox.r/2} {input.bbox.t/2}}
+   shutteroffset centred
+   name Transform1
+   xpos 120
+   ypos 555
+  }
+push $Nd08c8000
+  AdjBBox {
+   numpixels {{parent.overscan} {parent.overscan}}
+   name AdjBBox1
+   xpos -5
+   ypos 510
+  }
+  Switch {
+   inputs 2
+   which {{overscanType}}
+   name Switch2
+   label "\[value which]"
+   xpos -5
+   ypos 549
+  }
+  Merge2 {
+   inputs 2
+   bbox intersection
+   Achannels {-rgba.red -rgba.green -rgba.blue rgba.alpha}
+   Bchannels {-rgba.red -rgba.green -rgba.blue rgba.alpha}
+   output {-rgba.red -rgba.green -rgba.blue rgba.alpha}
+   name Merge1
+   xpos -5
+   ypos 647
+   disable {{!parent.Crop6.intersect}}
+  }
+push $N98903000
+  CopyBBox {
+   inputs 2
+   name CopyBBox1
+   xpos -194
+   ypos 653
+  }
+  BlackOutside {
+   name BlackOutside1
+   xpos -194
+   ypos 692
+   disable {{!parent.blackOutside}}
+  }
+  Dot {
+   name Dot4
+   note_font_size 41
+   xpos -160
+   ypos 769
+  }
+push $Nd08c7c00
+  Switch {
+   inputs 2
+   which {{"overscanType == 0 ? overscan.w != 0 || overscan.h != 0 : overscanPercent.w != 1 || overscanPercent.h != 1 ? 1 : 0"}}
+   name Switch1
+   label "\[value which]"
+   xpos 261
+   ypos 759
+  }
+set N7ec66000 [stack 0]
+  Output {
+   name Output1
+   xpos 261
+   ypos 921
+  }
+push $N7ec66000
+  NoOp {
+   name OutputBBox1
+   xpos 378
+   ypos 821
+   addUserKnob {20 User}
+   addUserKnob {15 OutputBBox l "Output BBox"}
+   OutputBBox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+   addUserKnob {14 outputBBoxCenter l "Output BBox Center" R 0 100}
+   outputBBoxCenter {{OutputBBox.x+(OutputBBox.r-OutputBBox.x)/2} {OutputBBox.y+(OutputBBox.t-OutputBBox.y)/2}}
+  }
+ end_group
 end_group

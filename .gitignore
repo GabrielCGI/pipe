@@ -21,3 +21,4 @@ nuke/*/Cattery/*
 windows/temperature_alert/.venv/*
 /deadline/daily_report
 /assetsDefault/Assets
+/deadline/benchmark_ranch/output

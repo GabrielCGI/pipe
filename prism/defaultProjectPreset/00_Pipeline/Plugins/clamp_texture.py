@@ -1,13 +1,10 @@
-from PrismUtils.Decorators import err_catcher_plugin as err_catcher
-from importlib import reload
-import qtpy.QtWidgets as qt
-import traceback
+from PrismUtils.Decorators import err_catcher_plugin as err_catcher #type: ignore
 import sys
 
 
 MODULES_SEARCH_PATH = ["R:/pipeline/pipe/prism"]
 for module_path in MODULES_SEARCH_PATH:
-    if not module_path in sys.path:
+    if module_path not in sys.path:
         sys.path.insert(0, module_path)
 
 
@@ -39,7 +36,7 @@ class ClampTextures:
             self.cropViewport()
 
     def cropViewport(self):
-        import hou
+        import hou #type: ignore
         pane = hou.ui.desktop("Solaris").paneTabOfType(hou.paneTabType.SceneViewer)
         if not pane:
             raise RuntimeError("Pas de SceneViewer ouvert")

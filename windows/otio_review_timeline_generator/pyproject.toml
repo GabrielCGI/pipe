@@ -1,0 +1,10 @@
+[project]
+name = "otio_review_timeline_generator"
+version = "1.0.0"
+description = "Generate otio timeline for hiero and openRV"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "opentimelineio==0.16.0",
+    "pyside6>=6.4",
+]

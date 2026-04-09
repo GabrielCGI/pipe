@@ -1,0 +1,1645 @@
+set cut_paste_input [stack 0]
+version 15.1 v5
+push 0
+push $cut_paste_input
+Group {
+ inputs 2
+ name RIV_FixEyeSpec
+ tile_color 0x530054ff
+ note_font "Verdana Bold"
+ selected true
+ xpos 431
+ ypos -476
+ addUserKnob {20 User}
+ addUserKnob {41 file T ReadGeo4.file}
+ addUserKnob {41 reload T ReadGeo4.reload}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {6 chip +STARTLINE}
+ chip true
+ addUserKnob {6 twiggy -STARTLINE}
+ addUserKnob {6 bucky -STARTLINE}
+ addUserKnob {6 susan -STARTLINE}
+ addUserKnob {7 erode l "erode size" R -4 4}
+ erode 1
+ addUserKnob {7 noise_size l "noise size" R 0 100}
+ noise_size 40
+ addUserKnob {7 distort l "distort force" R 0 4}
+ distort 0.5
+ addUserKnob {6 Grade2_multiply_panelDropped l "panel dropped state" +HIDDEN +STARTLINE}
+ addUserKnob {19 Grade2_multiply l gain R 0 4}
+ Grade2_multiply {1 1 1 1}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {7 mix}
+ mix 0.5
+}
+ Input {
+  inputs 0
+  name beauty
+  xpos 0
+ }
+ Dot {
+  name Dot5
+  xpos 34
+  ypos 274
+ }
+set N9955800 [stack 0]
+ Dot {
+  name Dot10
+  xpos 496
+  ypos 274
+ }
+set N9954000 [stack 0]
+ Dot {
+  name Dot1
+  xpos 688
+  ypos 274
+ }
+set N7549c00 [stack 0]
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0 0 0 0 0 0 0 0}
+  matteList *chip*
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte1
+  xpos 654
+  ypos 325
+ }
+ Multiply {
+  channels rgba
+  value 0
+  name Multiply4
+  xpos 654
+  ypos 349
+  disable {{parent.chip}}
+ }
+push $N7549c00
+ Dot {
+  name Dot2
+  xpos 866
+  ypos 274
+ }
+set N7549000 [stack 0]
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0 0 0 0 0 0 0 0}
+  matteList *twiggy*
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte2
+  xpos 832
+  ypos 325
+ }
+ Multiply {
+  channels rgba
+  value 0
+  name Multiply3
+  xpos 832
+  ypos 349
+  disable {{parent.twiggy}}
+ }
+push 0
+push $N7549000
+ Dot {
+  name Dot3
+  xpos 1048
+  ypos 274
+ }
+set Na542c00 [stack 0]
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0 0 0 0 0 0 0 0}
+  matteList *bucky*
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte3
+  xpos 1014
+  ypos 325
+ }
+ Multiply {
+  channels rgba
+  value 0
+  name Multiply2
+  xpos 1014
+  ypos 349
+  disable {{parent.bucky}}
+ }
+push $Na542c00
+ Dot {
+  name Dot4
+  xpos 1229
+  ypos 274
+ }
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0 0 0 0 0 0 0 0}
+  matteList *susan*
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte7
+  xpos 1195
+  ypos 325
+ }
+ Multiply {
+  channels rgba
+  value 0
+  name Multiply1
+  xpos 1195
+  ypos 349
+  disable {{parent.susan}}
+ }
+ Merge2 {
+  inputs 4+1
+  name Merge2
+  xpos 1195
+  ypos 510
+ }
+set N754d400 [stack 0]
+ Dot {
+  name Dot8
+  xpos 1229
+  ypos 982
+ }
+push $N9954000
+ Cryptomatte {
+  pickerAdd {1.179611683 1.123785973 0.2451438904 1 1232 604 1233 605}
+  matteList "*specular*\n*cornea*"
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte4
+  xpos 462
+  ypos 902
+ }
+ Input {
+  inputs 0
+  name cam
+  xpos 147
+  number 1
+ }
+ Camera {
+  projection_mode {{"\[expression \[value the_cam]projection_mode(\[value the_frame])]"}}
+  focal {{"\[expression \[value the_cam]focal(\[value the_frame])]"}}
+  haperture {{"\[expression \[value the_cam]haperture(\[value the_frame])]"}}
+  vaperture {{"\[expression \[value the_cam]vaperture(\[value the_frame])]"}}
+  near {{"\[expression \[value the_cam]near(\[value the_frame])]"}}
+  far {{"\[expression \[value the_cam]far(\[value the_frame])]"}}
+  win_translate {{"\[expression \[value the_cam]win_translate.u(\[value the_frame])]"} {"\[expression \[value the_cam]win_translate.v(\[value the_frame])]"}}
+  win_scale {{"\[expression \[value the_cam]win_scale.u(\[value the_frame])]"} {"\[expression \[value the_cam]win_scale.v(\[value the_frame])]"}}
+  winroll {{"\[expression \[value the_cam]winroll(\[value the_frame])]"}}
+  focal_point {{"\[expression \[value the_cam]focal_point(\[value the_frame])]"}}
+  fstop {{"\[expression \[value the_cam]fstop(\[value the_frame])]"}}
+  name DummyCam
+  help "DummyCam by Adrian Pueyo\n\nCamera that apart from the matrices also grabs all the \"Projection\" values from the upstream camera that it's connected to. Turns into a default Camera if no Camera connected. Can also be used inside of groups and gizmos, as many levels deep as you want :D All using live and super fast TCL.\n\nUpdated v1.1: Now grabs the correct frame too (thanks Erwan Leroy for the idea).\n\nUpdated v1.3: Now accepts Nuke13's Camera3\n\nadrianpueyo.com, 2019-2021"
+  onCreate "n = nuke.thisNode()\nfor k in \[\"projection_mode\",\"focal\",\"haperture\",\"vaperture\",\"near\",\"far\",\"win_translate\",\"win_scale\",\"winroll\",\"focal_point\",\"fstop\"]:\n    n\[k].setFlag(0x0000000010000000)"
+  xpos 157
+  ypos 598
+  addUserKnob {20 DummyCam l Defaults}
+  addUserKnob {43 the_cam +INVISIBLE}
+  the_cam "\[\n#DummyCam v1.3 - Updated 5 May 2021.\nset starting_point \"this.input0\"\nset default \"this.d_\"\n\n# If cam has no inputs, return the default.\nif \{\[exists \$starting_point]\} \{\n    set x \[node \$starting_point]\n\} \{ \n    return \$default\n\}\n\nset finished 0\nwhile \{\$finished != 1\} \{\n\n    # First look for a Cam or Input or topnode.\n    while \{\[class \$x] != \"Camera3\" && \[class \$x] != \"Camera2\" && \[class \$x] != \"Camera\" && \[class \$x] != \"Input\" && \$x != \[topnode \$x]\} \{\n        set x \[node \$x.input0]\n    \}\n\n    # Then, check if node is a cam (and return), and otherwise, if it's an input, see if the parent exists and move to it.\n    if \{\[class \$x]==\"Camera3\"||\[class \$x]==\"Camera2\"||\[class \$x]==\"Camera\"\} \{\n        set x \[append x \".\"]\n        return \$x\n    \} \{ \n        if \{ \[class \$x]==\"Input\" \} \{ \n            set inp \"\$x.parent.input\"\n            set inputNum \[value \$x.number]\n            set inp \[append inp \$inputNum]\n            if \{ \[exists \$inp] \} \{\n                set x \[node \$inp]\n            \} \{ \n                set finished 1\n            \}\n        \} \{ \n            set finished 1\n        \}\n    \}\n\}\nreturn \$default\n]"
+  addUserKnob {43 the_frame +INVISIBLE}
+  the_frame "\[\nset the_camera \[string trimright \[value the_cam] .]\nif \{\[exists \$the_camera]\} \{\n    return \[value \$the_camera.frame]\n\} \{ \n    return \[frame]\n\}\n]"
+  addUserKnob {4 d_projection_mode l projection M {perspective orthographic uv spherical ""}}
+  addUserKnob {7 d_focal l "focal length" R 0 100}
+  d_focal 50
+  addUserKnob {7 d_haperture l "horiz aperture" R 0 50}
+  d_haperture 24.576
+  addUserKnob {7 d_vaperture l "vert aperture" R 0 50}
+  d_vaperture 18.672
+  addUserKnob {7 d_near l near R 0 10}
+  d_near 0.1
+  addUserKnob {7 d_far l far R 0 10000}
+  d_far 10000
+  addUserKnob {30 d_win_translate l "window translate"}
+  addUserKnob {30 d_win_scale l "window scale"}
+  d_win_scale {1 1}
+  addUserKnob {7 d_winroll l "window roll" R 0 45}
+  addUserKnob {7 d_focal_point l "focal distance" R 0 10}
+  d_focal_point 2
+  addUserKnob {7 d_fstop l fstop R 0 30}
+  d_fstop 16
+  addUserKnob {26 version l " " t "Updated 5 May 2021" T "<span style=\"color:#666\"><br/><b>DummyCam v1.3</b> - <a href=\"http://www.adrianpueyo.com\" style=\"color:#666;text-decoration: none;\">adrianpueyo.com</a>, 2019-2021</span>"}
+ }
+ Group {
+  inputs 0
+  name NoiseAdvanced2
+  help "Noise node with various time sliders.  Can quickly create animated noise.\n\nAdded an Overscan Slider for when you need the noise pattern to extend beyond the format edges."
+  onCreate "n = nuke.thisNode()\no = n.knob('overscan')\no.setRange(0, 500)"
+  tile_color 0x5f5f5fff
+  note_font "Verdana Bold"
+  note_font_color 0xffffffff
+  xpos 275
+  ypos 438
+  addUserKnob {20 Noise}
+  addUserKnob {41 output T Noise1.output}
+  addUserKnob {41 premult T Noise1.premult}
+  addUserKnob {41 cliptype l "clip to" T Noise1.cliptype}
+  addUserKnob {41 replace -STARTLINE T Noise1.replace}
+  addUserKnob {41 invert -STARTLINE T Noise1.invert}
+  addUserKnob {41 opacity T Noise1.opacity}
+  addUserKnob {41 maskChannelInput l mask T Noise1.maskChannelInput}
+  addUserKnob {41 inject -STARTLINE T Noise1.inject}
+  addUserKnob {41 invert_mask l invert -STARTLINE T Noise1.invert_mask}
+  addUserKnob {26 ""}
+  addUserKnob {14 overscan l Overscan R 0 500}
+  addUserKnob {26 ""}
+  addUserKnob {41 type T Noise1.type}
+  addUserKnob {41 size l x/ysize T FOR_SETTINGS.size}
+  addUserKnob {7 speedSizeX l "Speed of size X" R 0 4}
+  addUserKnob {7 speedSizeY l "Speed of size Y" R 0 4}
+  addUserKnob {26 ""}
+  addUserKnob {41 zoffset l z T FOR_SETTINGS.zoffset}
+  addUserKnob {7 speedZ l "Speed of Z" R 0 0.25}
+  addUserKnob {26 ""}
+  addUserKnob {41 octaves T Noise1.octaves}
+  addUserKnob {41 nyquist l "clip at Nyquist limit" -STARTLINE T Noise1.nyquist}
+  addUserKnob {41 lacunarity T Noise1.lacunarity}
+  addUserKnob {41 gain T Noise1.gain}
+  addUserKnob {41 gamma T Noise1.gamma}
+  addUserKnob {20 Transform}
+  addUserKnob {41 transform T Noise1.transform}
+  addUserKnob {41 translate T FOR_SETTINGS.translate}
+  addUserKnob {7 transX l "Speed of Trans X" R 0 400}
+  addUserKnob {7 transY l "Speed of Trans Y" R 0 400}
+  addUserKnob {26 ""}
+  addUserKnob {41 rotate T FOR_SETTINGS.rotate}
+  addUserKnob {7 rotSpeed l "Speed of Rotation" R 0 60}
+  addUserKnob {26 ""}
+  addUserKnob {41 scale T FOR_SETTINGS.scale}
+  addUserKnob {7 speedScaleX l "Speed of Scale X" R 0 4}
+  addUserKnob {7 speedScaleY l "Speed of Scale Y" R 0 4}
+  addUserKnob {26 ""}
+  addUserKnob {41 skew +INVISIBLE T Noise1.skew}
+  addUserKnob {41 skewX l "skew X" T FOR_SETTINGS.skewX}
+  addUserKnob {41 skewY l "skew Y" T FOR_SETTINGS.skewY}
+  addUserKnob {41 skew_order l "skew order" T FOR_SETTINGS.skew_order}
+  addUserKnob {41 center T FOR_SETTINGS.center}
+  addUserKnob {41 xrotate T Noise1.xrotate}
+  addUserKnob {41 yrotate T Noise1.yrotate}
+  addUserKnob {20 "" l Color}
+  addUserKnob {41 color T Noise1.color}
+  addUserKnob {20 info l Info}
+  addUserKnob {26 creator l Creator: T "<b><big>Tony Lyons"}
+  addUserKnob {26 desc l Name: T NoiseAdvanced}
+  addUserKnob {26 ver l Version: T v03}
+ }
+  Input {
+   inputs 0
+   name Inputmask
+   xpos -79
+   ypos -147
+   number 1
+  }
+  Input {
+   inputs 0
+   name Input
+   xpos -205
+   ypos -295
+  }
+  Group {
+   name CropBBox
+   onCreate "n = nuke.thisNode()\ninputFormat = n.knob(\"inputFormat\")\ninputBBox = n.knob(\"inputBBox\")\ncrop = nuke.toNode(\"Crop6\")\ncropb = crop.knob('box')\n\n\ninputFormat.setFlag(0x0000000000008000)\ninputBBox.setFlag(0x0000000000008000)\ncropb.setFlag(0x0000000000008000)"
+   tile_color 0xa57aaaff
+   note_font "Verdana Bold"
+   note_font_color 0xffffffff
+   xpos -205
+   ypos -256
+   disable {{"\[exists parent.input0]\n"}}
+   addUserKnob {20 CropBBox}
+   addUserKnob {4 type l Type +INVISIBLE M {"To Format" "To BBox"}}
+   addUserKnob {41 intersect T Crop6.intersect}
+   addUserKnob {6 blackOutside l "Black Outside" -STARTLINE}
+   addUserKnob {20 inputBbox l "input Bbox Data" n 1}
+   inputBbox 0
+   addUserKnob {15 inputFormat l "Input Format"}
+   inputFormat {0 0 {input.width} {input.height}}
+   addUserKnob {15 inputBBox l "Input BBox"}
+   inputBBox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+   addUserKnob {14 bboxCenter l "BBox Center" R 0 100}
+   bboxCenter {{"(this.Crop6.box.r-this.Crop6.box.x)/2 + this.Crop6.box.x"} {"(this.Crop6.box.t-this.Crop6.box.y)/2 + this.Crop6.box.y"}}
+   addUserKnob {20 endGroup n -1}
+   addUserKnob {20 info_1 l Info}
+   addUserKnob {26 creator l Creator: T "<b><big>Tony Lyons"}
+   addUserKnob {26 desc l Description: t "crop to inputformat\n\ndisplays values of input bbox" T CropBBox}
+   addUserKnob {26 ver l Version: T v02}
+  }
+   Input {
+    inputs 0
+    name Input
+    xpos 261
+    ypos 369
+   }
+   Crop {
+    box {{curve} {curve} {input.width} {input.height}}
+    crop {{parent.blackOutside}}
+    name Crop6
+    xpos 261
+    ypos 466
+   }
+   Output {
+    name Output1
+    xpos 261
+    ypos 583
+   }
+  end_group
+set Na4891700 [stack 0]
+  AdjBBox {
+   numpixels {{parent.overscan} {parent.overscan}}
+   name AdjBBox1
+   xpos -205
+   ypos -206
+  }
+  Noise {
+   inputs 1+1
+   cliptype none
+   size {{parent.FOR_SETTINGS.size.0+(t*parent.speedSizeX)} {parent.FOR_SETTINGS.size.1+(t*parent.speedSizeY)}}
+   zoffset {{parent.FOR_SETTINGS.zoffset+(frame*speedZ)}}
+   gain 0.68
+   gamma 0.638
+   translate {{parent.FOR_SETTINGS.translate.x+t*transX} {parent.FOR_SETTINGS.translate.y+t*transY}}
+   rotate {{parent.FOR_SETTINGS.rotate+(t*rotSpeed)}}
+   scale {{parent.FOR_SETTINGS.scale.w+(t*speedScaleX)} {parent.FOR_SETTINGS.scale.h+(t*speedScaleY)}}
+   center {{parent.FOR_SETTINGS.center} {parent.FOR_SETTINGS.center}}
+   name Noise1
+   xpos -205
+   ypos -147
+  }
+  Output {
+   name Output1
+   xpos -205
+   ypos -35
+  }
+push $Na4891700
+  Noise {
+   size {{parent.parent.noise_size}}
+   center {{input.width/2} {input.height/2}}
+   name FOR_SETTINGS
+   xpos -331
+   ypos -200
+  }
+ end_group
+ Expression {
+  expr3 1
+  name Expression2
+  xpos 275
+  ypos 466
+ }
+ ReadGeo2 {
+  file I:/rivers_feature/03_Production/Shots/SQ050/SH0140/Export/USD/v084/SQ050-SH0140_USD_v084.usda
+  localizationPolicy off
+  version 1
+  scene_graph {{0} version: 1 + /assets - /assets/characters/bucky + /assets/characters/bucky/bucky/geo/render/eyes_grp/l_eye_grp/l_cornea + /assets/characters/bucky/bucky/geo/render/eyes_grp/r_eye_grp/r_cornea - /assets/characters/chip/chip/fur - /assets/characters/chip/chip/geo/render/body - /assets/characters/chip/chip/geo/render/bodyProxy - /assets/characters/chip/chip/geo/render/clawsFeet - /assets/characters/chip/chip/geo/render/clawsHands - /assets/characters/chip/chip/geo/render/eyebrows - /assets/characters/chip/chip/geo/render/eyes_grp/l_eye_grp/l_eyeBall - /assets/characters/chip/chip/geo/render/eyes_grp/l_eye_grp/l_specular_01 - /assets/characters/chip/chip/geo/render/eyes_grp/l_eye_grp/l_specular_02 - /assets/characters/chip/chip/geo/render/eyes_grp/l_eye_grp/l_specular_03 - /assets/characters/chip/chip/geo/render/eyes_grp/r_eye_grp/r_eyeBall - /assets/characters/chip/chip/geo/render/eyes_grp/r_eye_grp/r_specular_01 - /assets/characters/chip/chip/geo/render/eyes_grp/r_eye_grp/r_specular_02 - /assets/characters/chip/chip/geo/render/eyes_grp/r_eye_grp/r_specular_03 - /assets/characters/chip/chip/geo/render/mouth_grp - /assets/characters/chip/chip/geo/render/mustaches - /assets/characters/chip/chip/mtl - /assets/characters/susan + /assets/characters/susan/susan/geo/render/eyes_grp/l_eye_grp/l_cornea + /assets/characters/susan/susan/geo/render/eyes_grp/r_eye_grp/r_cornea - /assets/characters/twiggy/twiggy/geo/proxy - /assets/characters/twiggy/twiggy/geo/render + /assets/characters/twiggy/twiggy/geo/render/eyes_grp/l_eye_grp/l_cornea + /assets/characters/twiggy/twiggy/geo/render/eyes_grp/r_eye_grp/r_cornea - /assets/environments - /assets/extras - /assets/props - /assets/sets}
+  all_objects true
+  name ReadGeo4
+  xpos 275
+  ypos 559
+ }
+push 0
+ ScanlineRender {
+  inputs 3
+  conservative_shader_sampling false
+  motion_vectors_type distance
+  name ScanlineRender4
+  xpos 275
+  ypos 619
+ }
+ Group {
+  name BBoxToFormat2
+  onCreate "n = nuke.thisNode()\ninputFormat = n.knob(\"inputFormat\")\ninputBBox = n.knob(\"inputBBox\")\ncrop = nuke.toNode(\"Crop6\")\ncropb = crop.knob('box')\noutputBBox = n.knob('outputBBox')\noutputBBoxCenter = n.knob(\"outputBBoxCenter\")\n\ninputFormat.setFlag(0x0000000000008000)\ninputBBox.setFlag(0x0000000000008000)\ncropb.setFlag(0x0000000000008000)\noutputBBox.setFlag(0x0000000000008000)\noutputBBoxCenter.setFlag(0x0000000000008000)\n\nn = nuke.thisNode()\nn.knob(\"overscan\").setRange(0,400)\nn.knob(\"overscanPercent\").setRange(1,4)"
+  knobChanged "n = nuke.thisNode()\nk = nuke.thisKnob()\nif k.name() == \"overscanType\":\n    if n.knob(\"overscanType\").getValue() == 1:\n        n.knob(\"overscanPercent\").setVisible(True)\n        n.knob(\"overscan\").setVisible(False)\n    else:\n        n.knob(\"overscanPercent\").setVisible(False)\n        n.knob(\"overscan\").setVisible(True)"
+  tile_color 0xa57aaaff
+  note_font "Verdana Bold"
+  note_font_color 0xffffffff
+  xpos 275
+  ypos 669
+  addUserKnob {20 CropBBox}
+  addUserKnob {4 type l Type +INVISIBLE M {"To Format" "To BBox"}}
+  addUserKnob {41 intersect T Crop6.intersect}
+  addUserKnob {6 blackOutside l "Black Outside" -STARTLINE}
+  addUserKnob {4 overscanType l "Overscan Type:" M {Pixels Percentage}}
+  overscanType Percentage
+  addUserKnob {14 overscan l Overscan +HIDDEN R 0 400}
+  addUserKnob {14 overscanPercent l "Overscan Percent" R 1 4}
+  overscanPercent 1
+  addUserKnob {20 inputBbox l "BBox Data" n 1}
+  inputBbox 0
+  addUserKnob {15 inputFormat l "Input Format"}
+  inputFormat {0 0 {input.width} {input.height}}
+  addUserKnob {15 inputBBox l "Input BBox"}
+  inputBBox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+  addUserKnob {12 outputBBoxCenter l OutputBBoxCenter}
+  outputBBoxCenter {{OutputBBox1.outputBBoxCenter.w} {OutputBBox1.outputBBoxCenter.h}}
+  addUserKnob {15 outputBBox l "Output BBox"}
+  outputBBox {{OutputBBox1.OutputBBox} {OutputBBox1.OutputBBox} {OutputBBox1.OutputBBox} {OutputBBox1.OutputBBox}}
+  addUserKnob {20 endGroup n -1}
+  addUserKnob {20 info_1 l Info}
+  addUserKnob {26 creator l Creator: T "<b><big>Tony Lyons"}
+  addUserKnob {26 desc l Description: t "crop to inputformat\n\ndisplays values of input bbox" T CropBBox}
+  addUserKnob {26 ver l Version: T v02}
+ }
+  Input {
+   inputs 0
+   name Input
+   xpos 261
+   ypos 394
+  }
+  Dot {
+   name Dot2
+   note_font_size 41
+   xpos 295
+   ypos 462
+  }
+set N739bec00 [stack 0]
+  Dot {
+   name Dot1
+   note_font_size 41
+   xpos -160
+   ypos 462
+  }
+set N739bf000 [stack 0]
+push $N739bec00
+  Crop {
+   box {{curve} {curve} {input.width} {input.height}}
+   crop {{parent.blackOutside}}
+   name Crop6
+   xpos 261
+   ypos 510
+   addUserKnob {20 User}
+   addUserKnob {22 cropToBbox l "Crop to Bounding Box" -STARTLINE T codeBBox()}
+  }
+set N7cf8800 [stack 0]
+  Remove {
+   operation keep
+   channels none
+   name Remove1
+   xpos 120
+   ypos 504
+  }
+set N7cf8c00 [stack 0]
+  Transform {
+   scale {{parent.overscanPercent} {parent.overscanPercent}}
+   center {{input.bbox.r/2} {input.bbox.t/2}}
+   shutteroffset centred
+   name Transform1
+   xpos 120
+   ypos 555
+  }
+push $N7cf8c00
+  AdjBBox {
+   numpixels {{parent.overscan} {parent.overscan}}
+   name AdjBBox1
+   xpos -5
+   ypos 510
+  }
+  Switch {
+   inputs 2
+   which {{overscanType}}
+   name Switch2
+   label "\[value which]"
+   xpos -5
+   ypos 549
+  }
+  Merge2 {
+   inputs 2
+   bbox intersection
+   Achannels {-rgba.red -rgba.green -rgba.blue rgba.alpha}
+   Bchannels {-rgba.red -rgba.green -rgba.blue rgba.alpha}
+   output {-rgba.red -rgba.green -rgba.blue rgba.alpha}
+   name Merge1
+   xpos -5
+   ypos 647
+   disable {{!parent.Crop6.intersect}}
+  }
+push $N739bf000
+  CopyBBox {
+   inputs 2
+   name CopyBBox1
+   xpos -194
+   ypos 653
+  }
+  BlackOutside {
+   name BlackOutside1
+   xpos -194
+   ypos 692
+   disable {{!parent.blackOutside}}
+  }
+  Dot {
+   name Dot4
+   note_font_size 41
+   xpos -160
+   ypos 769
+  }
+push $N7cf8800
+  Switch {
+   inputs 2
+   which {{"overscanType == 0 ? overscan.w != 0 || overscan.h != 0 : overscanPercent.w != 1 || overscanPercent.h != 1 ? 1 : 0"}}
+   name Switch1
+   label "\[value which]"
+   xpos 261
+   ypos 759
+  }
+set Na258b700 [stack 0]
+  Output {
+   name Output1
+   xpos 261
+   ypos 921
+  }
+push $Na258b700
+  NoOp {
+   name OutputBBox1
+   xpos 378
+   ypos 821
+   addUserKnob {20 User}
+   addUserKnob {15 OutputBBox l "Output BBox"}
+   OutputBBox {{input.bbox.x} {input.bbox.y} {input.bbox.r} {input.bbox.t}}
+   addUserKnob {14 outputBBoxCenter l "Output BBox Center" R 0 100}
+   outputBBoxCenter {{OutputBBox.x+(OutputBBox.r-OutputBBox.x)/2} {OutputBBox.y+(OutputBBox.t-OutputBBox.y)/2}}
+  }
+ end_group
+ Group {
+  name LumaKeyer2
+  onCreate "n = nuke.thisNode()\nn.knob('blackpoint').setRange(0, 1)\nn.knob('whitepoint').setRange(0, 1)"
+  tile_color 0x421010ff
+  note_font "Bitstream Vera Sans Bold"
+  xpos 275
+  ypos 742
+  addUserKnob {20 User l lumaKeyer}
+  addUserKnob {4 output M {Alpha RGBA}}
+  output RGBA
+  addUserKnob {41 blackpoint T picker.blackpoint}
+  addUserKnob {41 whitepoint T picker.whitepoint}
+  addUserKnob {6 invert +STARTLINE}
+  addUserKnob {4 smoothing l Smoothing: M {None Smooth Smooth0 Smooth1 ""}}
+  addUserKnob {26 ""}
+  addUserKnob {26 "" l mask T ""}
+  addUserKnob {41 maskChannelInput l "" -STARTLINE T Merge1.maskChannelInput}
+  addUserKnob {41 inject -STARTLINE T Merge1.inject}
+  addUserKnob {41 invert_mask l invert -STARTLINE T Merge1.invert_mask}
+  addUserKnob {41 fringe -STARTLINE T Merge1.fringe}
+  addUserKnob {41 mix T Merge1.mix}
+  addUserKnob {20 info}
+  addUserKnob {22 btn l DerekVFX.ca T "import os\nimport sys\n\ntry:\n    import subprocess\n    def _run(cmd, shell, wait):\n        opener = subprocess.Popen(cmd, shell=shell)\n        if wait:\n            opener.wait()\n        return opener.pid\nexcept ImportError:\n    import popen2\n    def _run(cmd, shell, wait):\n        opener = popen2.Popen3(cmd)\n        if wait:\n            opener.wait()\n        return opener.pid\n\ndef _open(url, wait=0):\n    if sys.platform == \"darwin\":\n        cmd = \[\"open\", url]\n    elif hasattr(os, \"startfile\"):\n        return os.startfile(url)\n    elif os.environ.has_key(\"KDE_FULL_SESSION\") or os.environ.has_key(\"KDE_MULTIHEAD\") or \\\n        os.environ.has_key(\"GNOME_DESKTOP_SESSION_ID\") or os.environ.has_key(\"GNOME_KEYRING_SOCKET\"):\n        cmd = \[\"xdg-open\", url]\n    else:\n        raise OSError, \"Desktop not supported.\"\n\n    return _run(cmd, 0, wait)\n\n_open('http://www.derekvfx.ca/')" +STARTLINE}
+  addUserKnob {26 versionUpdate l "" -STARTLINE T "<font color = gray> adjusted by Tony Lyons </font color = gray>"}
+ }
+  Input {
+   inputs 0
+   name Input1
+   xpos 57
+   ypos -347
+  }
+set Nde8b2400 [stack 0]
+  Colorspace {
+   colorspace_out HSL
+   name Colorspace1
+   xpos -181
+   ypos -181
+  }
+set Nde8b2c00 [stack 0]
+  Shuffle {
+   red blue
+   green blue
+   alpha blue
+   name Shuffle1
+   tile_color 0x3d3f8e00
+   xpos -336
+   ypos -181
+  }
+  Grade {
+   blackpoint 0.296
+   name picker
+   xpos -336
+   ypos -139
+  }
+  Input {
+   inputs 0
+   name Inputmask
+   xpos 231
+   ypos 446
+   number 1
+  }
+push $Nde8b2400
+  Dot {
+   name Dot5
+   note_font_size 41
+   xpos 91
+   ypos 284
+  }
+set Nde8b3400 [stack 0]
+push $Nde8b2c00
+  Expression {
+   expr3 smoothstep(parent.picker.blackpoint,parent.picker.whitepoint,b)
+   name Expression1
+   xpos -181
+   ypos -138
+  }
+  Dot {
+   name Dot1
+   note_font_size 41
+   xpos -147
+   ypos -58
+  }
+set Na47f9400 [stack 0]
+  ColorLookup {
+   channels {{{parent.ColorLookup_smooth.channels}}}
+   lut {master {curve L 0 C k 1 s0}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth1
+   xpos -69
+   ypos 33
+  }
+push $Na47f9400
+  ColorLookup {
+   channels {{{parent.ColorLookup_smooth.channels}}}
+   lut {master {curve L 0 s0 1}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth0
+   xpos -181
+   ypos 32
+  }
+push $Na47f9400
+  ColorLookup {
+   lut {master {curve L 0 s0 C k 1 s0}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth
+   xpos -293
+   ypos 32
+  }
+push $Na47f9400
+  Dot {
+   name Dot2
+   note_font_size 41
+   xpos -345
+   ypos -52
+  }
+  Dot {
+   name Dot3
+   note_font_size 41
+   xpos -345
+   ypos 131
+  }
+  Switch {
+   inputs 4
+   which {{parent.smoothing}}
+   name Switch1
+   label "\[value which]"
+   xpos -181
+   ypos 121
+  }
+  Expression {
+   expr3 1-a
+   name Expression2
+   xpos -181
+   ypos 191
+   disable {{"parent.invert == 0"}}
+  }
+  Merge2 {
+   inputs 2
+   operation copy
+   Achannels {rgba.red rgba.green rgba.blue -rgba.alpha}
+   Bchannels {rgba.red rgba.green rgba.blue -rgba.alpha}
+   output {rgba.red rgba.green rgba.blue -rgba.alpha}
+   name Merge2
+   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
+   xpos -181
+   ypos 280
+  }
+  Shuffle {
+   red alpha
+   green alpha
+   blue alpha
+   name Shuffle2
+   tile_color 0xffffffff
+   xpos -181
+   ypos 328
+   disable {{!parent.output}}
+  }
+  Dot {
+   name Dot4
+   note_font_size 41
+   xpos -147
+   ypos 450
+  }
+push $Nde8b3400
+  Shuffle {
+   alpha black
+   name Shuffle3
+   label "\[value in]"
+   xpos 57
+   ypos 331
+  }
+  Shuffle {
+   red black
+   green black
+   blue black
+   alpha black
+   name Shuffle4
+   label "\[value in]"
+   xpos 57
+   ypos 369
+   disable {{!parent.output}}
+  }
+  Merge2 {
+   inputs 2+1
+   operation copy
+   also_merge rgba
+   name Merge1
+   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
+   xpos 57
+   ypos 446
+  }
+  Output {
+   name Output1
+   xpos 57
+   ypos 602
+  }
+ end_group
+ Dot {
+  name Dot11
+  xpos 309
+  ypos 846
+ }
+push $N9955800
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0 0 0 0 0 0 0 0}
+  matteList *specular*
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte5
+  xpos 0
+  ypos 379
+ }
+set N7cfcc00 [stack 0]
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 alpha
+  fromInput2 {{0} B}
+  mappings "4 rgba.alpha 0 0 rgba.alpha 0 3 rgba.alpha 0 0 rgba.red 0 0 rgba.alpha 0 0 rgba.green 0 1 rgba.alpha 0 0 rgba.blue 0 2"
+  name Shuffle1
+  label "\[value in1]"
+  xpos 0
+  ypos 647
+ }
+ Grade {
+  multiply 10
+  white_clamp true
+  name Grade1
+  xpos 0
+  ypos 705
+ }
+ Group {
+  name Erode_Fine1
+  help "Erode an image with fine controls, as opposed to Nuke's default erode node."
+  tile_color 0xef7033ff
+  label "\[value size]"
+  note_font "DejaVu Sans"
+  xpos 0
+  ypos 739
+  addUserKnob {20 erode_fine l "Fine Erode"}
+  addUserKnob {41 channels T NodeWrapper1.channels}
+  addUserKnob {26 ""}
+  addUserKnob {6 round_filter l "Round Filter" t "Erode the image with a round Filter (well, it's more of a dodecagon... but... you know..) instead of a square filter." +STARTLINE}
+  round_filter true
+  addUserKnob {7 size l Size t "Amount of erode/dilate. Positive values will grow the image, negative values will shrink it." R -10 10}
+  size {{parent.erode}}
+  addUserKnob {26 ""}
+  addUserKnob {41 maskChannelInput l mask T NodeWrapper1.maskChannelInput}
+  addUserKnob {41 inject -STARTLINE T NodeWrapper1.inject}
+  addUserKnob {41 invert_mask l invert -STARTLINE T NodeWrapper1.invert_mask}
+  addUserKnob {41 fringe -STARTLINE T NodeWrapper1.fringe}
+  addUserKnob {41 mix T NodeWrapper1.mix}
+  addUserKnob {26 spin_copyright_div l "" +STARTLINE}
+  addUserKnob {26 spin_copyright l "" t "© <b>SPIN<span style=\"color:#b32026\">VFX</span></b>\nErode_Fine\nVersion 1.0\n2018" +STARTLINE T "<span style=\"color:#aaa;font-family:sans-serif;font-size:8pt\"><b>SPIN<span style=\"color:#b32026\">VFX</span></b> - Version 1.0 - 2018 - <a href=\"https://github.com/SpinVFX/spin_nuke_gizmos/\" style=\"color:#aaa\">Github Page</a></span>"}
+ }
+  BackdropNode {
+   inputs 0
+   name BackdropNode1
+   tile_color 0x75667fff
+   label "round dilate trick"
+   note_font_size 40
+   xpos 212
+   ypos -67
+   bdwidth 299
+   bdheight 618
+  }
+  Input {
+   inputs 0
+   name Inputmask
+   xpos 251
+   ypos 1257
+   number 1
+  }
+  Input {
+   inputs 0
+   name Input
+   xpos -11
+   ypos -243
+  }
+  Dot {
+   name Dot15
+   tile_color 0xcccccc00
+   xpos 22
+   ypos -160
+  }
+set N108f8c00 [stack 0]
+  Dot {
+   name Dot3
+   tile_color 0xcccccc00
+   xpos 23
+   ypos 33
+  }
+set N108f8000 [stack 0]
+  Dot {
+   name Dot1
+   tile_color 0xcccccc00
+   xpos 296
+   ypos 33
+  }
+set N9939000 [stack 0]
+  Dot {
+   name Dot2
+   tile_color 0xcccccc00
+   xpos 415
+   ypos 33
+  }
+  AdjBBox {
+   numpixels {{abs(ceil(parent.size)*1.4)+2}}
+   name AdjBBox1
+   xpos 381
+   ypos 100
+  }
+  Dot {
+   name Dot4
+   tile_color 0xcccccc00
+   xpos 415
+   ypos 422
+  }
+push $N9939000
+  Dilate {
+   size {{"int(parent.size)//3 + (int(parent.size)%3 >= 1)"}}
+   name Dilate1
+   label "size \[value size]"
+   xpos 262
+   ypos 97
+  }
+  Transform {
+   rotate 30
+   shutteroffset centred
+   name Transform1
+   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
+   xpos 262
+   ypos 147
+  }
+  Dilate {
+   size {{"int(parent.size)//3 + (int(parent.size)%3 == 2)"}}
+   name Dilate2
+   label "size \[value size]"
+   xpos 262
+   ypos 185
+  }
+  Transform {
+   rotate 30
+   shutteroffset centred
+   name Transform2
+   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
+   xpos 262
+   ypos 235
+  }
+  Dilate {
+   size {{int(parent.size)//3}}
+   name Dilate3
+   label "size \[value size]"
+   xpos 262
+   ypos 273
+  }
+  Transform {
+   rotate -60
+   shutteroffset centred
+   name Transform3
+   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
+   xpos 262
+   ypos 323
+  }
+  CopyBBox {
+   inputs 2
+   name CopyBBox1
+   xpos 262
+   ypos 418
+  }
+push $N108f8000
+  Dilate {
+   size {{int(parent.size)}}
+   name Dilate4
+   label "size \[value size]"
+   xpos -11
+   ypos 97
+  }
+  Dot {
+   name Dot14
+   tile_color 0xcccccc00
+   xpos 23
+   ypos 491
+  }
+set N73a09000 [stack 0]
+  Dissolve {
+   inputs 2
+   which {{clamp(abs(parent.size))}}
+   name Dissolve1
+   xpos 262
+   ypos 481
+  }
+  Dot {
+   name Dot5
+   tile_color 0xcccccc00
+   xpos 296
+   ypos 539
+  }
+push $N73a09000
+  Switch {
+   inputs 2
+   which {{parent.round_filter}}
+   name Switch1
+   xpos -11
+   ypos 535
+  }
+  AdjBBox {
+   numpixels 1
+   name AdjBBox2
+   xpos -11
+   ypos 609
+  }
+  Dot {
+   name Dot6
+   tile_color 0xcccccc00
+   xpos 23
+   ypos 678
+  }
+set N754b000 [stack 0]
+  Dot {
+   name Dot8
+   tile_color 0xcccccc00
+   xpos 175
+   ypos 678
+  }
+  Transform {
+   translate {{exp.expo(abs(parent.size-int(parent.size))*10)*-1} 0}
+   center {320 240}
+   black_outside false
+   shutteroffset centred
+   name Transform5
+   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
+   xpos 141
+   ypos 823
+  }
+push $N754b000
+  Dot {
+   name Dot7
+   tile_color 0xcccccc00
+   xpos -127
+   ypos 678
+  }
+  Transform {
+   translate {{exp.expo(abs(parent.size-int(parent.size))*10) i} 0}
+   center {320 240}
+   black_outside false
+   shutteroffset centred
+   name Transform4
+   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
+   xpos -161
+   ypos 783
+  }
+push $N754b000
+  Merge2 {
+   inputs 2
+   operation {{parent.size>0?17:18}}
+   bbox B
+   also_merge all
+   name Merge2
+   xpos -11
+   ypos 789
+  }
+  Merge2 {
+   inputs 2
+   operation {{parent.size>0?17:18}}
+   bbox B
+   also_merge all
+   name Merge1
+   xpos -11
+   ypos 829
+  }
+  Dot {
+   name Dot9
+   tile_color 0x4b5ec600
+   xpos 23
+   ypos 910
+  }
+set Nde7f1000 [stack 0]
+  Dot {
+   name Dot10
+   tile_color 0x4b5ec600
+   xpos 175
+   ypos 910
+  }
+  Transform {
+   translate {0 {exp.expo(abs(parent.size-int(parent.size))*10)*-1}}
+   center {320 240}
+   black_outside false
+   shutteroffset centred
+   name Transform6
+   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
+   xpos 141
+   ypos 1061
+  }
+push $Nde7f1000
+  Dot {
+   name Dot11
+   tile_color 0x4b5ec600
+   xpos -127
+   ypos 910
+  }
+  Transform {
+   translate {0 {exp.expo(abs(parent.size-int(parent.size))*10)}}
+   center {320 240}
+   black_outside false
+   shutteroffset centred
+   name Transform7
+   label "\[if \{\[value translate.x] != 0 || \[value translate.y] != 0\} then \{return \"t \[value translate.x] \[value translate.y]\n\"\} else \{return \"\"\}]\[if \{\[value rotate] != 0\} then \{return \"r \[value rotate]\n\"\} else \{return \"\"\}] \[if \{\[value scale] != 1\} then \{return \"s \[value scale]\"\} else \{return \"\"\}]\[if \{\[value skewX] != 0 || \[value skewY] != 0\} then \{return \"sk \[value skewX] \[value skewY]\n\"\} else \{return \"\"\}]\[if \{\[value motionblur] != 0\} then \{return \"mb \[value motionblur] sh \[value shutter] \[value shutteroffset]\n\"\} else \{return \"\"\}]"
+   xpos -161
+   ypos 1015
+  }
+push $Nde7f1000
+  Merge2 {
+   inputs 2
+   operation {{parent.size>0?17:18}}
+   bbox B
+   also_merge all
+   name Merge3
+   xpos -11
+   ypos 1021
+  }
+  Merge2 {
+   inputs 2
+   operation {{parent.size>0?17:18}}
+   bbox B
+   also_merge all
+   name Merge4
+   xpos -11
+   ypos 1061
+  }
+push $N108f8c00
+  Dot {
+   name Dot13
+   tile_color 0xcccccc00
+   xpos -290
+   ypos -160
+  }
+  Dot {
+   name Dot12
+   tile_color 0xcccccc00
+   xpos -290
+   ypos 1261
+  }
+  NodeWrapper {
+   inputs 2+1
+   channels rgba
+   name NodeWrapper1
+   xpos -11
+   ypos 1257
+  }
+  Output {
+   name Output1
+   xpos -11
+   ypos 1389
+  }
+  NoOp {
+   inputs 0
+   name exp
+   label "The growth doesn't look visually linear. \nUsing curves helps a little."
+   xpos 396
+   ypos 766
+   addUserKnob {20 User}
+   addUserKnob {7 expo}
+   expo {{parent.size>0?positive_curve:negative_curve i}}
+   addUserKnob {7 positive_curve}
+   positive_curve {{curve 0 0.1037476063 0.1683235168 0.2209408283 0.2831250429 0.3357424736 0.3954704404 0.4731256962 0.5778000951 0.762029767 1}}
+   addUserKnob {7 negative_curve}
+   negative_curve {{curve 0 0.2209040523 0.3736710192 0.4841623592 0.5752981992 0.6541623592 0.7271137492 0.8043368459 0.8681262732 0.9249737263 1}}
+  }
+ end_group
+ ColorCorrect {
+  contrast 1.5
+  name ColorCorrect15
+  xpos 0
+  ypos 791
+ }
+ Group {
+  inputs 2
+  name ITM_XDistort2
+  help "Create distortion with great control and flexibility."
+  knobChanged "n = nuke.thisNode()\nif n.input(2):\n    n\[\"mask\"].setEnabled(True)\nelse:\n    n\[\"mask\"].setEnabled(False)\n    \n    \nif n\[\"distort_from\"].value() == \"Noise\":\n    n\[\"noise_size\"].setVisible(True)\n    n\[\"noise_z\"].setVisible(True)\nelse:\n    n\[\"noise_size\"].setVisible(False)\n    n\[\"noise_z\"].setVisible(False)\n\nif n\[\"enable_chroma\"].value() == 1:\n    n\[\"aberration\"].setVisible(True)\n    n\[\"blur_aberration\"].setVisible(True)\nelse:\n    n\[\"aberration\"].setVisible(False)\n    n\[\"blur_aberration\"].setVisible(False)\n    \nn\[\"mix\"].setValue(min(max(0,n\[\"mix\"].value()),1))\nn\[\"blur_map\"].setValue(max(0,n\[\"blur_map\"].value()))\nn\[\"max_blur\"].setValue(max(0,n\[\"max_blur\"].value()))\n"
+  tile_color 0x540054ff
+  note_font "Verdana Bold"
+  note_font_color 0xffffffff
+  xpos 0
+  ypos 843
+  addUserKnob {20 X_Distort}
+  addUserKnob {6 aberration_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  aberration_panelDropped true
+  addUserKnob {41 "Local GPU: " T BlinkScript.gpuName}
+  addUserKnob {41 "Use GPU if Available" T BlinkScript.useGPUIfAvailable}
+  addUserKnob {26 ""}
+  addUserKnob {7 distort t "The amount of displacement going to be applied." R -100 100}
+  distort {{parent.distort}}
+  addUserKnob {7 blur t "The amount of smoothing going to be applied." R -100 100}
+  addUserKnob {3 max_blur l max t "Limit the vector blur to this number of samples.\nVector Blur can be expensive, this limits the time it takes to render, but sometimes artifacts can appear.\n\nSetting this parameter to 0 will disable the limit." -STARTLINE}
+  max_blur 50
+  addUserKnob {7 direction t "The direction of the generated vector map:\n\n  <b>At 0:</b> Pixels will be attracted to the brighter areas.\n  <b>At 0.5:</b> Pixels will be attracted to the darker areas.\n  <b>At 0.25 or .75:</b> Pixels will spin around the bright ans dark areas.\n\nThis pattern repeats, so a value of 1 will produce the same result as a value of 0 and a value of 0.5 will produce the same result as a value of 1.5."}
+  direction 0.5
+  addUserKnob {4 filter t "<b>impulse</b> very fast but can sometimes show pixelation or moire patterns.\n<b>bilinear</b> slower but smoothes out  most artifacts or unwanted patterns." M {impulse bilinear}}
+  filter bilinear
+  addUserKnob {26 ""}
+  addUserKnob {4 distort_from l "distortion from" t "Choose where do you want to create the distortion map from:\n\n<b>· Auto</b> will look at the inputs of the node and decid which one to use.\n<b>· Source</b> will distort the image using the information on the original image.\n<b>· Dist Map</b> will distort the image using the information on the secondary input of this node.\n<b>· Noise</b> will generate an animated fractal that will be used to create the distortion map." M {Auto Source Map Noise "" ""}}
+  distort_from Map
+  addUserKnob {6 use_all_channels l "use all channels" t "By default the distortion map will be generated from the average of the rgb channel. If this setting is enabled the channels will be paired up.\nThe red from the source will be distorted with the red from the map, the green with the green and so on. This allows you to have different distortion maps per each channel." -STARTLINE}
+  use_all_channels true
+  addUserKnob {7 noise_size l size t "The relative frequency of the turbulence pattern. Big values will generate low frequency distortion." +HIDDEN R 1 1000}
+  noise_size 100
+  addUserKnob {7 noise_z l z t "Use this to animate the noise pattern.\nFor instance you could try with the expression \"frame/100\".\n\nRight click --> Add expression" -STARTLINE +HIDDEN}
+  noise_z 4.815162342
+  addUserKnob {7 blur_map l "blur map" t "Filter the map to make it smoother and get rid of the high frequency distortions. Increase this value to make a smoother distortion." R 0 100}
+  blur_map 1
+  addUserKnob {6 fast_blur_map l fast t "Uses a multipass blur that, altough not as accurate as a bruteforce blur, gets rid of the artifacts at a reduced cost. It is recommended to keep this on." -STARTLINE}
+  fast_blur_map true
+  addUserKnob {26 ""}
+  addUserKnob {6 enable_chroma l "chromatic aberration" t "Enable per-channel control on the distortion." +STARTLINE}
+  addUserKnob {19 aberration l distort t "This is a multiplier on the distortion for every channel. Use this to simulate light frequencies being separated." +HIDDEN R -2 2}
+  aberration {1.2 1 0.8 1}
+  addUserKnob {6 aberration_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {6 aberration_panelDropped_1 l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {19 blur_aberration l blur t "This is a multiplier on the blur for every channel. Use this to simulate light frequencies being separated." +HIDDEN}
+  blur_aberration {1 1 1 1}
+  addUserKnob {6 blur_aberration_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {6 blur_aberration_panelDropped_1 l "panel dropped state" -STARTLINE +HIDDEN}
+  addUserKnob {26 ""}
+  addUserKnob {4 output_form l output t "Choose what type of data you would like to output.\n\n<b>Result</b> will output the distorted and filtered input.\n<b>STMap</b> will output a UV map to be used in conjunction with the STMap node.\n<b>IDistort</b> will output a displacement map to be used in conjunction with the IDistort node." M {Result STMap IDistort ""}}
+  addUserKnob {41 mask l "  mask" t "This will mask the distortion map before the effect. Use this to limit the influence of the distortion to certain areas." -STARTLINE T Mask.maskChannelMask}
+  addUserKnob {6 invert_mask l invert t "invert the effect of the mask" -STARTLINE}
+  addUserKnob {41 fringe t "Limits the effect on the edges of the mask." -STARTLINE T Mask.fringe}
+  addUserKnob {7 mix t "Blend between the original source and the applied effect."}
+  mix 1
+  addUserKnob {20 Settings l "GPU Settings"}
+  addUserKnob {20 about l About}
+  addUserKnob {26 about_1 l "" t "A bunny:\n(\\(\\ \n( - -)\n((') (')" +STARTLINE T "<br>\n<b>Xavier Martín © 2017</b>"}
+  addUserKnob {26 ""}
+  addUserKnob {26 website l "" +STARTLINE T "<a href=\"http://www.xaviermartinvfx.com\"><span style=\"color:#C8C8C8;\">www.xaviermartinvfx.com</span></a>"}
+  addUserKnob {26 space4_1 l "" +STARTLINE T <br>}
+  addUserKnob {22 version l <center>version</center> T "nuke.message('X_Distort Gizmo <i>v4.1</i><br><b>Xavier Martín © 2017</b>')" +STARTLINE}
+  addUserKnob {22 help_documentation l <center>?</center> -STARTLINE T "nuke.message('You can find more documentation<br>on <a href=\"http://www.nukepedia.com/gizmos/transform/x_distort\"><span style=\"color:#BCBCBC;\">Nukepedia</span></a> or my <a href=\"http://www.xaviermartinvfx.com/x_distort/\"><span style=\"color:#BCBCBC;\">website</span></a>.')"}
+ }
+  Input {
+   inputs 0
+   name InputSrc
+   xpos -140
+   ypos -460
+  }
+  Dot {
+   name Dot3
+   xpos -106
+   ypos -406
+  }
+set N8450c00 [stack 0]
+  Dot {
+   name Dot2
+   xpos 94
+   ypos -406
+  }
+set Nd38b9800 [stack 0]
+  Dot {
+   name Dot1
+   xpos 94
+   ypos -356
+  }
+set Nd38b8000 [stack 0]
+  Noise {
+   cliptype bbox
+   replace true
+   size {{parent.noise_size}}
+   zoffset {{parent.noise_z}}
+   gamma 1
+   center {1024 778}
+   name Noise1
+   xpos 60
+   ypos -310
+  }
+  Input {
+   inputs 0
+   name InputDist_Map
+   xpos 260
+   ypos -460
+   number 1
+  }
+  AdjBBox {
+   numpixels 1
+   name AdjBBox2
+   xpos 260
+   ypos -436
+  }
+set Nd38b9c00 [stack 0]
+push $Nd38b8000
+push $Nd38b9c00
+push $Nd38b9800
+  Switch {
+   inputs 2
+   which {{parent.input1.name+1}}
+   name Auto
+   xpos 160
+   ypos -360
+  }
+  Switch {
+   inputs 4
+   which {{distort_from}}
+   name Switch1
+   xpos 260
+   ypos -310
+  }
+  Remove {
+   operation keep
+   channels rgba
+   name Remove1
+   xpos 260
+   ypos -258
+  }
+  Saturation {
+   saturation 0
+   mode Average
+   name Saturation1
+   xpos 260
+   ypos -210
+   disable {{use_all_channels}}
+  }
+  Remove {
+   operation keep
+   channels {rgba.red -rgba.green -rgba.blue -rgba.alpha}
+   name Remove2
+   xpos 260
+   ypos -160
+   disable {{use_all_channels}}
+  }
+set N7563800 [stack 0]
+  Dot {
+   name Dot6
+   xpos 194
+   ypos -156
+  }
+  Dot {
+   name Dot7
+   xpos 194
+   ypos 144
+  }
+  Input {
+   inputs 0
+   name Inputmask
+   xpos 460
+   ypos -10
+   number 2
+  }
+  Dot {
+   name Dot9
+   xpos 494
+   ypos 94
+  }
+push $N7563800
+  Blur {
+   size {{blur_map}}
+   quality {{parent.fast_blur_map?15:blur_map+1}}
+   crop false
+   name Blur1
+   xpos 260
+   ypos -116
+   disable {{size<1}}
+  }
+  Blur {
+   size {{blur_map/15}}
+   crop false
+   name Blur2
+   xpos 260
+   ypos -66
+   disable {{(size<1)+(1-parent.fast_blur_map)}}
+  }
+  Blur {
+   size {{blur_map/225}}
+   crop false
+   name Blur3
+   xpos 260
+   ypos -16
+   disable {{(size<1)+(1-parent.fast_blur_map)}}
+  }
+  Shuffle {
+   green red
+   blue red
+   alpha red
+   name Shuffle1
+   xpos 260
+   ypos 40
+   disable {{use_all_channels}}
+  }
+  Multiply {
+   inputs 1+1
+   value 0
+   invert_mask {{1-parent.invert_mask}}
+   name Mask
+   xpos 260
+   ypos 84
+   disable {{parent.inputs!=3}}
+  }
+  CopyBBox {
+   inputs 2
+   name CopyBBox1
+   xpos 260
+   ypos 140
+  }
+  Dot {
+   name Dot8
+   xpos 294
+   ypos 194
+  }
+set N7488c00 [stack 0]
+  BlinkScript {
+   ProgramGroup 1
+   KernelDescription "2 \"X_Distort\" iterate pixelWise c808228749d48a9f044958c8efc9a2b21aa668de9616076bf59cb1bcfcd28dcc 2 \"map\" Read Ranged2D \"dst\" Write Point 4 \"distortion\" Float 4 AAAAAAAAAAAAAAAAAAAAAA== \"direction\" Float 1 AAAAAA== \"stmap\" Int 1 AAAAAA== \"format\" Int 2 AAAAAAAAAAA= 4 \"distortion\" 4 1 \"direction\" 1 1 \"stmap\" 1 1 \"format\" 2 1 4 \"maprangeMin\" Int 2 1 AAAAAAAAAAA= \"maprangeMax\" Int 2 1 AAAAAAAAAAA= \"mapconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA== \"rotate\" Float 2 1 AAAAAAAAAAA="
+   kernelSource "kernel X_Distort : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRanged2D, eEdgeConstant> map; // the distortion map image\n  Image<eWrite> dst; // the output image\n\n  param:\n    float4 distortion;\n    float direction;\n    int stmap;\n    int2 format;\n\n  local:\n    float2 rotate;\n\n  void init() \{\n    // Initialise trigonometric functions.\n    rotate = float2(sin(direction*6.28318f),\n                    cos(direction*6.28318f));\n    map.setRange(-1,-1,1,1);\n  \}\n\n  void process(int2 pos) \{\n\n    // Sample gradient\n    float2 distort;\n    distort = float2(map(1,0,0)-map(-1,0,0),\n                    map(0,1,0)-map(0,-1,0));\n\n    // Rotate vector\n    distort = float2(distort.x*rotate.y+distort.y*rotate.x,\n                    -distort.x*rotate.x+distort.y*rotate.y);\n    distort *= distortion.x;\n\n    if(stmap==1)\n      distort = (distort+float2(pos.x,pos.y))/float2(format.x,format.y);\n\n    dst() = float4(distort.x,distort.y,0,0);\n  \}\n\};\n"
+   useGPUIfAvailable {{parent.BlinkScript.useGPUIfAvailable}}
+   rebuild ""
+   X_Distort_distortion {{parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2}}
+   X_Distort_direction {{parent.direction+.5}}
+   X_Distort_stmap {{2-output_form}}
+   X_Distort_format {{width} {height}}
+   rebuild_finalise ""
+   name BlinkScript1
+   xpos 260
+   ypos 234
+  }
+  Dot {
+   name Dot11
+   xpos 294
+   ypos 344
+  }
+push $N7488c00
+push $N8450c00
+  AdjBBox {
+   numpixels 1
+   name AdjBBox1
+   xpos -140
+   ypos -360
+  }
+  Dot {
+   name Dot10
+   xpos -106
+   ypos 144
+  }
+  BlinkScript {
+   inputs 2
+   ProgramGroup 1
+   KernelDescription "1 \"X_Distort\" iterate componentWise b9627c0324b2a89d1b941c7c64b5afb3310f15cfcf6b1f077dd0574498415168 3 \"src\" Read Random \"map\" Read Ranged2D \"dst\" Write Point 5 \"distortion\" Float 4 AAAAAAAAAAAAAAAAAAAAAA== \"vector_blur\" Float 4 AAAAAAAAAAAAAAAAAAAAAA== \"direction\" Float 1 AAAAAA== \"filter\" Int 1 AAAAAA== \"max_steps\" Int 1 AAAAAA=="
+   kernelSource "kernel X_Distort : ImageComputationKernel<eComponentWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeClamped> src; // the input image\n  Image<eRead, eAccessRanged2D, eEdgeClamped> map; // the distortion map image\n  Image<eWrite> dst; // the output image\n\n  param:\n    float4 distortion;\n    float4 vector_blur;\n    float direction;\n    int filter;\n    int max_steps;\n\n  local:\n    float2 rotate;\n\n  void init() \{\n    // Initialise trigonometric functions.\n    rotate = float2(sin(direction*6.28318f),\n                    cos(direction*6.28318f));\n    map.setRange(-1,-1,1,1);\n  \}\n\n  void process(int3 pos) \{\n\n    // Sample gradient\n    float2 distort;\n    distort = float2(map(1,0)-map(-1,0),\n                    map(0,1)-map(0,-1));\n\n    // Rotate vector\n    distort = float2(distort.x*rotate.y+distort.y*rotate.x,\n                    -distort.x*rotate.x+distort.y*rotate.y);\n\n    // Sample source (no blur)\n    if(fabs(vector_blur\[pos.z])<0.01)\{\n      distort *= distortion\[pos.z];\n      distort += float2(pos.x,pos.y);\n      if(filter==0)\n        dst() = src(int(distort.x),int(distort.y));\n      else\n        dst() = bilinear(src,distort.x,distort.y);\n    \}\n\n    else \{\n\n    // If vector blur is enabled\n    // Create vector blur final coordiantes\n      float2 blur = distort;\n      blur *= distortion\[pos.z]+vector_blur\[pos.z];\n      blur += float2(pos.x,pos.y);\n      distort *= distortion\[pos.z];\n      distort += float2(pos.x,pos.y);\n\n    // Calculate length of the blur\n      int distance;\n      distance = ceil(length(distort-blur));\n      if(max_steps>0)\n        distance = min(distance,max_steps);\n\n\n    // Accumulate pixels through blur\n      if(filter==0)\{\n        float sum = src(int(distort.x),int(distort.y));\n        float step = 0.0f;\n        float2 dist_blur;\n        for(int i = 0; i < distance; i++)\{\n          step = float(i)/(distance);\n          dist_blur = distort*step+blur*(1.0-step);\n          sum += src(int(dist_blur.x),int(dist_blur.y));\n        \}\n        dst() = sum/(distance+1);\n      \}\n\n      else \{\n        float sum = bilinear(src,distort.x,distort.y);\n        float step = 0.0f;\n        float2 dist_blur;\n        for(int i = 0; i < distance; i++)\{\n          step = float(i)/(distance);\n          dist_blur = distort*step+blur*(1.0-step);\n          sum += bilinear(src,dist_blur.x,dist_blur.y);\n        \}\n        dst() = sum/(distance+1);\n      \}\n    \}\n  \}\n\};\n"
+   rebuild ""
+   X_Distort_distortion {{parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2} {parent.distort*(blur_map+1)*((aberration-1)*enable_chroma+1)*2}}
+   X_Distort_vector_blur {{parent.blur*(blur_map+1)*((blur_aberration-1)*enable_chroma+1)*2} {parent.blur*(blur_map+1)*((blur_aberration-1)*enable_chroma+1)*2} {parent.blur*(blur_map+1)*((blur_aberration-1)*enable_chroma+1)*2} {parent.blur*(blur_map+1)*((blur_aberration-1)*enable_chroma+1)*2}}
+   X_Distort_direction {{parent.direction+.5}}
+   X_Distort_filter {{filter}}
+   X_Distort_max_steps {{max_blur}}
+   rebuild_finalise ""
+   name BlinkScript
+   xpos -140
+   ypos 184
+  }
+push $N8450c00
+  Dot {
+   name Dot5
+   xpos -206
+   ypos -406
+  }
+  Dot {
+   name Dot4
+   xpos -206
+   ypos 294
+  }
+  Dissolve {
+   inputs 2
+   channels rgba
+   which {{parent.mix}}
+   name Dissolve1
+   xpos -140
+   ypos 291
+  }
+  Switch {
+   inputs 2
+   which {{output_form}}
+   name Switch3
+   xpos -140
+   ypos 340
+  }
+  Output {
+   name Output1
+   xpos -140
+   ypos 440
+  }
+push $N7488c00
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+  Viewer {
+   inputs 10
+   frame 1
+   frame_range 1001-1100
+   fps 25
+   input_number 9
+   viewerProcess "ACES 1.0 - SDR Video (sRGB - Display)"
+   monitorOutNDISenderName "Nuke - testShot-testComp_testCompo_v037 - Viewer1"
+   name Viewer1
+   xpos 370
+   ypos -460
+  }
+ end_group
+ Grade {
+  multiply {{parent.Grade2_multiply.r} {parent.Grade2_multiply.g} {parent.Grade2_multiply.b} {parent.Grade2_multiply.a}}
+  multiply_panelDropped {{parent.Grade2_multiply_panelDropped}}
+  name Grade2
+  selected true
+  xpos 0
+  ypos 867
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  invert_mask true
+  name Multiply5
+  xpos 0
+  ypos 902
+ }
+ Median {
+  channels rgba
+  size 1
+  ignore_top_line false
+  name Median1
+  xpos 0
+  ypos 926
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  invert_mask true
+  name Multiply6
+  xpos 0
+  ypos 979
+ }
+push $N754d400
+push $N9955800
+ Dot {
+  name Dot12
+  xpos -433
+  ypos 274
+ }
+set Nd5278800 [stack 0]
+ Dot {
+  name Dot15
+  xpos -686
+  ypos 274
+ }
+set Nb163b800 [stack 0]
+ Dot {
+  name Dot7
+  xpos -792
+  ypos 274
+ }
+ Dot {
+  name Dot6
+  xpos -792
+  ypos 513
+ }
+push $N7cfcc00
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 alpha
+  fromInput2 {{0} B}
+  mappings "4 rgba.alpha 0 0 rgba.alpha 0 3 rgba.alpha 0 0 rgba.red 0 0 rgba.alpha 0 0 rgba.green 0 1 rgba.alpha 0 0 rgba.blue 0 2"
+  name Shuffle5
+  label "\[value in1]"
+  xpos -135
+  ypos 373
+ }
+ Unpremult {
+  name Unpremult2
+  xpos -248
+  ypos 379
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
+  name Shuffle6
+  label "\[value in1]"
+  xpos -358
+  ypos 373
+ }
+set Nb163a400 [stack 0]
+ Dot {
+  name Dot14
+  xpos -324
+  ypos 444
+ }
+push 0
+push $Nd5278800
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0.2212511897 0.04001903534 0.1600761414 0 1272 518 1273 519}
+  matteList "*main\n*body"
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte6
+  xpos -467
+  ypos 332
+ }
+push $Nb163a400
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  name Multiply7
+  xpos -467
+  ypos 379
+ }
+push $Nb163b800
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  name Multiply8
+  xpos -720
+  ypos 379
+ }
+ EdgeExtend {
+  inputs 2+1
+  sourceIsPremultiplied true
+  detailAmount 0
+  premultiply false
+  name EdgeExtend2
+  xpos -720
+  ypos 441
+ }
+ Dissolve {
+  inputs 2+1
+  which 1
+  invert_mask true
+  name Dissolve1
+  xpos -720
+  ypos 504
+ }
+ Dot {
+  name Dot16
+  xpos -686
+  ypos 1035
+ }
+ Merge2 {
+  inputs 2
+  mix {{parent.mix}}
+  name Merge1
+  xpos 0
+  ypos 1032
+ }
+set N75785400 [stack 0]
+ Output {
+  name Output1
+  xpos 0
+  ypos 1441
+ }
+push $N75785400
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+ Viewer {
+  inputs 10
+  frame_range 974-1157
+  input_number 9
+  viewerProcess "ACES 1.0 - SDR Video (sRGB - Display)"
+  monitorOutNDISenderName "Nuke - untitled - Viewer1"
+  name Viewer1
+  xpos 394
+  ypos 619
+ }
+end_group
