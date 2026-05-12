@@ -49,9 +49,10 @@ from PrismCore import PrismCore
 logger = logging.getLogger(__name__)
 
 DEV_LIST = [
-    'FOX-04'
+    'FOX-04',
+    'SPRINTER-03'
 ]
-ENABLE_DEBUG_MODE = False
+ENABLE_DEBUG_MODE = True
 DEBUG_MODE = ENABLE_DEBUG_MODE and socket.gethostname() in DEV_LIST
 if DEBUG_MODE:
    DEBUG_PATH = "R:/pipeline/networkInstall/python_shares/python311_debug_pkgs/Lib/site-packages"
@@ -65,7 +66,7 @@ class Prism_KitsuPublishMedia_Functions(object):
         self.core: PrismCore = core
         self.plugin = plugin
         
-        # self.initialize()
+        self.initialize()
         self.core.registerCallback("postInitialize", self.initialize, plugin=self)
         
     @err_catcher(name=__name__)
@@ -76,6 +77,17 @@ class Prism_KitsuPublishMedia_Functions(object):
         self.status = None
         self.taskselected = False
         self.core.plugins.monkeyPatch(self.kitsuplugin.publishMedia, self.publishMedia, self.kitsuplugin, force=True)
+
+    @err_catcher(name=__name__)
+    def findStatusFromCurrentState(self):
+        if self.core.appPlugin.pluginName != 'Maya':
+            return
+        state = self.core.getStateManager().curExecutedState
+        if state.className != "Playblast":
+            return
+        status = state.lo_prjMngPublish.itemAt(2).wid.currentText()
+        self.status = status
+        self.taskselected = True
 
     @err_catcher(name=__name__)
     def publishMedia(self, paths, entity, task, version, description="", uploadPreview=True, parent=None, origTask=None, user=None, createTask=False, department=None, playlist=None):
@@ -119,7 +131,10 @@ class Prism_KitsuPublishMedia_Functions(object):
                 if taskName == task:
                     task_found = True
                     break
-            
+
+            # Illogic Custom: Parse status from current state
+            self.findStatusFromCurrentState()
+
             if not task_found and createTask and self.kitsuplugin.canCreateTasks:
                 department = department or os.getenv("PRISM_KITSU_DFT_MEDIA_PUBLISH_DEPARTMENT", "Compositing")
                 ktask = self.kitsuplugin.createTask(entity, department, task)
@@ -127,6 +142,7 @@ class Prism_KitsuPublishMedia_Functions(object):
                     return
             elif not self.taskselected or not task_found:
                 if self.kitsuplugin.getAllowNonExistentTaskPublishes() and self.kitsuplugin.core.uiAvailable:
+                    # Illogic Custom: Change publish task pop up to add identifier and status selection
                     self.showPublishNonExistentTaskDlg(paths, entity, task, version, description=description, uploadPreview=uploadPreview, parent=parent, mode="media")
                     return
                 else:
@@ -342,7 +358,7 @@ class GetTaskDialog(QDialog):
     def onTaskChanged(self, text):
         taskname = self.cb_tasks.currentText()
         task = self.getTaskStatus(taskname)
-        if not task or not task.get('status') in self.statuses:
+        if not task or task.get('status') not in self.statuses:
             self.cb_status.setCurrentText('wfa')
             return
         self.cb_status.setCurrentText(task.get('status'))

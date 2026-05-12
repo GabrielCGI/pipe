@@ -1,6 +1,5 @@
 from importlib import reload
-from pxr import Usd, Sdf, Vt
-import socket
+from pxr import Sdf
 import sys
 import os
 
@@ -186,9 +185,10 @@ def startInheriteClass(core):
     
     #ensuite on import l'outil inherite class qu'on run en lui donnant le path du dernier fichier usd du shot actuelle
     sys.path.append("R:\pipeline\pipe\houdini\scripts")
-    import inheriteClassVariant as icv
+    import inheriteClassVariant as icv #type: ignore
     reload(icv)
     inClass = icv.inheriteClassAttr(file_path_usd, "Maya", forceAsset = force_asset)
 
     #afficher un message suivant le type d'erreur que va nous retourner l'inherite class
-    core.popup(inClass.message, severity=inClass.error_type)
+    if not inClass.result:
+        core.popup(inClass.message, severity=inClass.error_type)

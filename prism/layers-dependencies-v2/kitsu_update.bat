@@ -1,6 +1,8 @@
 @echo off
 
-@REM set SCRIPT_PATH=R:\pipeline\pipe\prism\layers-dependencies-v2\outdated.py
-@REM set PYTHONPATH=R:\pipeline\networkInstall\python_shares\python311_deadline_discord_pkgs\Lib\site-packages
+set UV_PROJECT_ENVIRONMENT=%userprofile%/.cache/uv-envs/layers-dependencies-v2
+set SCRIPT_PATH=outdated.py
 
-R:\pipeline\networkInstall\python\Python.3.11.9\python.exe outdated.py
+uv run %SCRIPT_PATH%
+
+pause

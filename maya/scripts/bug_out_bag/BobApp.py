@@ -6,7 +6,7 @@ from functools import partial
 try:
     import pymel.core as pm
 except ImportError:
-    sys.path.append(r"R:/pipeline/networkInstall/python_shares/python311_pymel_pkgs/Lib/site-packages/pymel")
+    sys.path.insert(0, r"R:/pipeline/networkInstall/python_shares/python311_pymel_pkgs/Lib/site-packages/pymel")
     import pymel.core as pm
 
 import maya.OpenMayaUI as omui
@@ -71,6 +71,7 @@ from .tool_instances.USDcopyPaste import USDCopyPaste
 from .tool_instances.selectGeoToExport import GeoExport
 from .tool_instances.FixUsdColorspaceManagement import FixUsdColorspaceManagement
 from .tool_instances.matchTransformUSD import *
+from .tool_instances.UtilsUSD import *
 from .tool_instances.RiggingTools import RiggingTools
 from .tool_instances.AnimLayoutTools import AnimLayoutTools
 from .tool_instances.ApplyPeak import ApplyPeak
@@ -116,6 +117,7 @@ class BobApp(QDialog):
                 USDCopyPaste(),
                 GeoExport(),
                 MatchTransform(),
+                UtilsUSD(),
 
             ]),
             BobCategory("Clean", self.__prefs, [

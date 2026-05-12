@@ -22,6 +22,10 @@ RENDER_ROOTS = [
     "Playblasts",
 ]
 
+# Priority order for AOV/pass subfolders inside version folders (e.g. v001/beauty/).
+# Lower index = higher priority. "beauty" is the hero/main render pass.
+AOV_PRIORITY = ["beauty", "rgba", "rgb", "main", "master"]
+
 # ---------------------------------------------------------------------------
 # Media file extensions
 # ---------------------------------------------------------------------------
@@ -92,6 +96,11 @@ def _find_latest_hiero():
     return candidates[0][1]
 
 HIERO_EXECUTABLE = _find_latest_hiero() or r"C:\Program Files\Nuke15.1v5\Nuke15.1.exe"
+
+# ---------------------------------------------------------------------------
+# Version completeness cache
+# ---------------------------------------------------------------------------
+VERSION_CACHE_SUBPATH = "04_Resources/otio/version_cache.json"
 
 # ---------------------------------------------------------------------------
 # UI constants

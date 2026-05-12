@@ -1,5 +1,4 @@
 import qtpy.QtWidgets as qt
-from pathlib import Path
 import random
 import json
 import os
@@ -109,7 +108,7 @@ class CustomExportUI():
         cmds.select(clear=True)
         if save_mode == "Layer":
             if not from_sceneFile and sublayer_checked:
-                if departement_select == "lay" and sublayer == "camera":
+                if (departement_select == "lay" or departement_select == "cam") and sublayer == "camera":
                     self.selectCamera()
                 elif departement_select == "anm" and sublayer == "main":
                     self.selectAnimation()
@@ -205,7 +204,7 @@ class CustomExportUI():
         import maya.cmds as cmds
 
         nodes_find = set()
-        for parent in ["assets|sets", "assets|characters", "assets|props"]:
+        for parent in ["assets|sets", "assets|characters", "assets|props", "assets|kits"]:
             if not cmds.objExists(parent):
                 continue
 
@@ -220,7 +219,7 @@ class CustomExportUI():
                     nodes_find.add(node)
         
         if not nodes_find:
-            return self.PrintMSG('no geo to export, nice have: ["assets|sets", "assets|characters", "assets|props"')
+            return self.PrintMSG('no geo to export, nice have: "assets|sets", "assets|characters", "assets|props", "assets|kits"')
         
         cmds.select(nodes_find)
     

@@ -127,7 +127,8 @@ def parse_license(request: requests.models.Response):
         else:
             license_data = licenses_data.setdefault(id, {})
 
-        license_data["used"] = bool(int(inuse))
+        used = bool(int(inuse)) or license_data.get("used", False)
+        license_data["used"] = used
 
         if state == "permanent":
             license_data["limited"] = True

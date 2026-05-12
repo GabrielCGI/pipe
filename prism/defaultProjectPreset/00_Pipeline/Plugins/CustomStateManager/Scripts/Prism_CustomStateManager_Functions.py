@@ -8,7 +8,7 @@ import sys
 # from  USDExport_anim import CustomExportAnim
 from custom_export_UI import CustomExportUI
 from custom_preExport import CustomPreExport
-
+from custom_playblast import CustomPlayblast
 
 
 PRISM_SCRIPT_PATH = "R:/pipeline/pipe/prism"
@@ -20,6 +20,8 @@ class Prism_CustomStateManager_Functions(object):
         self.core = core
         self.plugin = plugin
         self.core.registerCallback("onStateStartup", self.onStateStartup, plugin=self, priority=40)
+        self.core.registerCallback("onStateManagerShow", self.onStateManagerShow, plugin=self)
+        self.core.registerCallback("onStateCreated", self.onStateCreated, plugin=self, priority=40)
         self.core.registerCallback("onStateManagerOpen", self.EditStateManagerUI, plugin=self)
         self.core.registerCallback("preExport", self.preExport, plugin=self)
     #     self.core.registerCallback("onStateManagerOpen", self.createCustom_state_anim, plugin=self)
@@ -29,6 +31,19 @@ class Prism_CustomStateManager_Functions(object):
 
 
     # ---------------- modification de l'interface des states Export et D'USD export ----------------
+    def onStateCreated(self, *args, **kwargs):
+        if self.core.appPlugin.pluginName != "Maya":
+            return
+        ui = args[1]
+        CustomPlayblast(ui.state)
+        
+    def onStateManagerShow(self, sm):
+        if self.core.appPlugin.pluginName != "Maya":
+            return
+        states = sm.states
+        for state in states:
+            CustomPlayblast(state)
+    
     def onStateStartup(self, state):
         if self.core.appPlugin.pluginName != "Maya":
             return
@@ -70,13 +85,13 @@ class Prism_CustomStateManager_Functions(object):
             self.origin.gb_import.hide()
     
     def runReferenceUpdater(self) -> None:
-        if not PRISM_SCRIPT_PATH in sys.path:
+        if PRISM_SCRIPT_PATH not in sys.path:
             sys.path.append(PRISM_SCRIPT_PATH)
         
         try:
             import referenceUpdater as refUp #type: ignore
             reload(refUp)
-        except:
+        except ImportError:
             traceback.print_exc()
             print("impossible de load refUpdater")
             return

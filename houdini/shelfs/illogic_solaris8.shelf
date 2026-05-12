@@ -16,7 +16,6 @@
     <memberToolshelf name="illogicShading"/>
     <memberToolshelf name="illogicFxCfx"/>
     <memberToolshelf name="prism"/>
-    <memberToolshelf name="shelf_debug"/>
   </shelfSet>
 
   <toolshelf name="illogicSolaris" label="Illogic Solaris">

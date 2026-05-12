@@ -15,7 +15,10 @@ DEPARTMENTS = {
     "_layer_anm_master": "Anim",
     "_layer_cfx_master": "CFX",
     "_layer_fx_master": "FX",
-    "_layer_lay_master": "Layout"
+    "_layer_rig_master": "Rigging",
+    "_layer_lay_master": "Layout",
+    "_layer_cmp_master": "Compo",
+    "_layer_set_master": "SetDress",
 }
 
 def update_kitsu_shot_tag(proj_name, seq_name, shot_name, layers_to_update):
@@ -50,6 +53,7 @@ def update_kitsu_shot_tag(proj_name, seq_name, shot_name, layers_to_update):
     gazu.shot.update_shot(shot)
 
 if __name__ == "__main__":
+    print("Starting Kitsu update process...")
     gazu.set_host(KITSU_API_URL)
     gazu.set_token(ACCESS_TOKEN)
 
@@ -59,5 +63,6 @@ if __name__ == "__main__":
         tree = get_status_tree(root_path)
         for seq_name, shots in tree.items():
             for shot_name, layers in shots.items():
+                print(f"Processing {proj_name} - {seq_name} - {shot_name}")
                 outdated_layers = {layer_name: info for layer_name, info in layers.items() if info.get("status") == "outdated"}
                 update_kitsu_shot_tag(proj_name, seq_name, shot_name, list(outdated_layers.keys()))

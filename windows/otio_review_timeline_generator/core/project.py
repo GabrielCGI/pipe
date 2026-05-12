@@ -55,6 +55,10 @@ class PrismProject:
         key = f"{sequence}/{shot}"
         return self.shot_ranges.get(key, (DEFAULT_FRAME_START, DEFAULT_FRAME_START + 99))
 
+    def has_shot_range(self, sequence: str, shot: str) -> bool:
+        """Return True if this shot has an explicit entry in shotInfo.json."""
+        return f"{sequence}/{shot}" in self.shot_ranges
+
     def resolve_task_name(self, folder_name: str) -> Optional[str]:
         """
         Map a filesystem folder name to a canonical task name.

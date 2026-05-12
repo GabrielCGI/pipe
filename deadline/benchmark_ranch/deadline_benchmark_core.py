@@ -38,14 +38,14 @@ VIRTUAL_ADAPTER_HINTS = (
 
 TIER1_BENCHMARK_WORKSTATIONS = frozenset(
     (
-        "RANCH-135",
-        "RANCH-138",
-        "RANCH-139",
-        "RANCH-140",
-        "RANCH-141",
         "RANCH-142",
         "RANCH-143",
         "RANCH-144",
+        "RANCH-145",
+        "RANCH-146",
+        "RANCH-147",
+        "RANCH-148",
+        "RANCH-149",
     )
 )
 

@@ -38,6 +38,7 @@ class ShotEntry:
     shot: str                                   # e.g. "SH060", "sh010", "040"
     shot_path: Path                             # absolute path to shot folder
     frame_range: Tuple[int, int]                # (frame_in, frame_out)
+    has_shot_range: bool = False               # True if range comes from shotInfo.json
     # task_name -> list of VersionEntry sorted by version_num ascending
     versions_by_task: Dict[str, List[VersionEntry]] = field(default_factory=dict)
 
@@ -121,6 +122,7 @@ class ProjectScanner:
                     shot=shot_name,
                     shot_path=shot_dir,
                     frame_range=frame_range,
+                    has_shot_range=self.project.has_shot_range(sequence, shot_name),
                 ))
 
         return shots
@@ -160,6 +162,117 @@ class ProjectScanner:
             fps=fps or self.project.fps,
             fallback_frame_range=fallback_frame_range,
         )
+
+    def find_complete_media(
+        self,
+        versions: List[VersionEntry],
+        expected_frame_count: int,
+        fps: Optional[float] = None,
+        fallback_frame_range: Optional[Tuple[int, int]] = None,
+        cache=None,  # Optional[VersionCache] — local import to avoid circular
+        has_shot_range: bool = True,
+    ) -> Tuple[Optional[MediaItem], Optional[VersionEntry], bool]:
+        """
+        Walk *versions* from latest to oldest and return the first complete one.
+
+        Two completeness strategies:
+        - has_shot_range=True  → compare frame_count against expected_frame_count
+                                 (from shotInfo.json)
+        - has_shot_range=False → compare frame_count of vN against v(N-1).
+                                 If vN has fewer frames than its predecessor, it is
+                                 considered incomplete (render still in progress).
+                                 Only version 1 (no predecessor) is always complete.
+
+        Returns:
+            (media, version_entry, was_complete)
+            - was_complete=True  → selected version passed the completeness check
+            - was_complete=False → no complete version found; latest is returned
+
+        *cache* is an optional VersionCache instance. complete=True hits skip the
+        disk scan; incomplete entries are always re-scanned.
+        """
+        if not versions:
+            return None, None, False
+
+        resolved_fps = fps or self.project.fps
+        last_media: Optional[MediaItem] = None
+        last_entry: Optional[VersionEntry] = versions[-1]
+
+        # If shotInfo.json had no entry for this shot, use inter-version comparison
+        is_fallback_range = not has_shot_range
+
+        # Build an index for fast predecessor lookup (version_num -> index in versions)
+        # versions is sorted ascending by version_num
+        version_index = {v.version_num: i for i, v in enumerate(versions)}
+
+        for version_entry in reversed(versions):
+            # --- positive cache hit: skip disk scan ---
+            # Only trust the cache for completeness when shotInfo.json is available.
+            # In fallback mode (no shotInfo.json), the cache frame_count may be stale
+            # (frames deleted after the last scan), so always re-scan from disk.
+            if cache is not None and not is_fallback_range:
+                cached = cache.get(version_entry.path)
+                if cached is not None:
+                    # complete=True entry — still need to resolve the media object
+                    media = self.find_media(version_entry, resolved_fps, fallback_frame_range)
+                    if media is not None:
+                        media.is_complete = True
+                        return media, version_entry, True
+                    # folder disappeared — try older version
+                    continue
+
+            # --- disk scan ---
+            media = self.find_media(version_entry, resolved_fps, fallback_frame_range)
+            if media is None:
+                continue
+
+            if is_fallback_range and media.media_type == "image_sequence":
+                # No shotInfo.json: compare against predecessor frame_count
+                idx = version_index[version_entry.version_num]
+                if idx == 0:
+                    # Oldest version — no predecessor, always consider complete
+                    complete = True
+                else:
+                    prev_entry = versions[idx - 1]
+                    # Try cache first to avoid an extra disk scan
+                    prev_frame_count: Optional[int] = None
+                    if cache is not None:
+                        prev_frame_count = cache.get_frame_count(prev_entry.path)
+                    if prev_frame_count is None:
+                        prev_media = self.find_media(prev_entry, resolved_fps, fallback_frame_range)
+                        if prev_media is not None:
+                            prev_frame_count = prev_media.frame_count
+                            if cache is not None:
+                                # Store predecessor in cache (completeness unknown → use complete=True
+                                # as best-effort since it's a "reference" version)
+                                cache.set(prev_entry.path, True, prev_frame_count)
+                    complete = (prev_frame_count is None) or (media.frame_count >= prev_frame_count)
+            else:
+                complete = MediaDiscovery.check_completeness(
+                    media, expected_frame_count, is_fallback_range=False
+                )
+
+            media.is_complete = complete
+
+            if cache is not None:
+                cache.set(version_entry.path, complete, media.frame_count)
+
+            if complete:
+                return media, version_entry, True
+
+            # Keep latest as fallback in case no complete version exists
+            if last_media is None:
+                last_media = media
+                last_entry = version_entry
+
+        # No complete version found — return latest incomplete
+        if last_media is None:
+            # latest was not scanned yet (all were positive cache hits that failed)
+            last_media = self.find_media(last_entry, resolved_fps, fallback_frame_range)
+            if last_media is not None:
+                last_media.is_complete = False
+
+        return last_media, last_entry, False
 
     # ------------------------------------------------------------------
     # Private helpers

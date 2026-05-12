@@ -1,0 +1,26 @@
+{
+    "filters": {
+        "ANIM": [
+            "anim",
+            "anim_playblast",
+            "playblast",
+            "AnimBlock"
+        ],
+        "ANIM_BLOCK": [
+            "AnimBlock"
+        ],
+        "LAYOUT": [
+            "RoughtLayout",
+            "layout",
+            "Previz",
+            "RoughLayout_playblast"
+        ],
+        "COMPO": [
+            "Compo",
+            "slapComp"
+        ]
+    },
+    "source_path": "I:/mikes_2511",
+    "dest_path": "D:/cache_resolve/mikes_2511",
+    "production": "MIKES_block"
+}

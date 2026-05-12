@@ -21,6 +21,7 @@ core/
   project.py        # PrismProject, ProjectLoader — lit pipeline.json / Prism.json
   scanner.py        # ProjectScanner — parcourt 03_Production/Shots
   media.py          # MediaDiscovery — détecte séquences images et vidéos
+  version_cache.py  # VersionCache — cache JSON de complétude des versions rendues
   builder.py        # TimelineBuilder — construit et exporte l'otio.Timeline
   exceptions.py     # Hiérarchie d'exceptions custom
 ui/
@@ -42,6 +43,7 @@ ui/
 | Shots root | `03_Production/Shots` |
 | Pipeline config | `00_Pipeline/pipeline.json` |
 | Shot ranges | `00_Pipeline/Shotinfo/shotInfo.json` |
+| Version cache | `04_Resources/otio/version_cache.json` |
 | Render roots (priorité) | `Renders/2dRender` → `Renders/3dRender` → `Playblasts` |
 | Image ext | `.exr .dpx .tiff .tif .png .jpg .jpeg` |
 | Video ext | `.mp4 .mov .mxf .avi` |
@@ -58,13 +60,16 @@ ui/
 ProjectLoader.from_path()
   → PrismProject (fps, departments, shot_ranges)
     → ProjectScanner.scan_shots()
-      → ShotEntry[] (sequence/shot/frames)
+      → ShotEntry[] (sequence/shot/frames/has_shot_range)
         → ProjectScanner.scan_versions()
-          → MediaDiscovery.find_in_version_folder()
-            → MediaItem (path, type, frame_start/end, abstract_path)
-              → TimelineBuilder.build()
-                → otio.Timeline (1 Track par tâche)
-                  → .otio file(s)
+          → VersionCache.load()
+            → ProjectScanner.find_complete_media()
+              → MediaDiscovery.find_in_version_folder()
+                → MediaItem (path, type, frame_start/end, abstract_path, is_complete)
+                  → TimelineBuilder.build()
+                    → otio.Timeline (1 Track par tâche)
+                      → .otio file(s)
+            → VersionCache.flush()
 ```
 
 ---
@@ -79,3 +84,7 @@ ProjectLoader.from_path()
 - **Métadonnées OTIO** : chaque clip embarque un dict `prism` (sequence, shot, task, version, frame range, media type) pour round-tripping.
 - **Output auto** : `%TEMP%/{date}_{project}_{tasks}_timeline_v{n}.otio`
 - **Crash log** : `%TEMP%\otio_review_error.log`
+- **Détection de versions incomplètes** : `find_complete_media()` remonte les versions de la plus récente à la plus ancienne et retourne la première complète. Deux stratégies selon `ShotEntry.has_shot_range` :
+  - `has_shot_range=True` (shotInfo.json présent) : compare `frame_count` réel vs `frame_count` attendu.
+  - `has_shot_range=False` (ex. projet Kitsu sans shotInfo.json) : compare `frame_count` de vN vs v(N-1). Si vN a moins de frames que sa version précédente, elle est considérée incomplète.
+- **VersionCache** : cache JSON dans `04_Resources/otio/version_cache.json`. Les entrées `complete=True` évitent le re-scan disque (projets avec shotInfo.json uniquement — en mode fallback, le disque est toujours relu). Les entrées `complete=False` sont ignorées comme cache positif.

@@ -21,18 +21,12 @@ stream_handler.setFormatter(FORMATTER)
 logger.addHandler(stream_handler)
 
 CURRENT_DATE = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-LOG_NAME = os.path.join(r"R:\logs\ranch_cache_exterminatus", f"{CURRENT_DATE}")
+LOG_NAME = os.path.join("R:/logs/ranch_cache_exterminatus", f"{CURRENT_DATE}")
 
-VSCODE_PATH = r"C:\Program Files\Microsoft VS Code\Code.exe"
-
-DEBUG_MODE = False
+VSCODE_PATH = "C:/Program Files/Microsoft VS Code/Code.exe"
 
 INCLUDE_MODE = False
 NOT_EMPTY = False
-
-RCLONE_DIR = r'\\Il-mpl-fs-01\RESSOURCES\it\backups\rclone'
-FILTER_DIR = os.path.join(RCLONE_DIR, 'filters_files')
-PROD_TO_BACKUP_FILE = os.path.join(RCLONE_DIR, "prod2_to_backup.txt")
 
 TARGET_SHOT = True
 TARGET_ASSET = True
@@ -117,8 +111,6 @@ def getExcludeCopyList(entity_list: list[str], nbVersion: dict) -> list[str]:
     exclude_list = []
     
     for i, entity in enumerate(entity_list):
-        if DEBUG_MODE and i > 3:
-            return exclude_list
         # Export versions
         exclude_list += getExcludeListFromExport(entity, nbVersion["export"])
         # Render versions
@@ -280,8 +272,6 @@ def getExcludeListScenefile(entity_list: list[str], nbVersion: int) -> list[str]
 
     # entity can be either a shot or an asset root
     for i, entity in enumerate(entity_list): 
-        if DEBUG_MODE and i > 3:
-            return exclude_path_list
         
         task_paths = []
         

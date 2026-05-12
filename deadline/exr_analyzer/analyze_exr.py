@@ -639,7 +639,8 @@ def main():
     parser.add_argument("--reports-dir", default=None, help="Dossier racine des rapports (défaut: ./reports/)")
     parser.add_argument("--log-dir",     default=None, help="Dossier pour les logs (optionnel)")
     parser.add_argument("--job-name",    default=None, help="Nom du job Deadline (optionnel, pour le log)")
-    parser.add_argument("--open-html",   action="store_true", help="Ouvrir le rapport HTML dans le navigateur une fois terminé")
+    parser.add_argument("--open-html",     action="store_true", help="Ouvrir le rapport HTML dans le navigateur une fois terminé")
+    parser.add_argument("--metadata-only", action="store_true", help="Lire uniquement les métadonnées, ignorer l'analyse pixels (plus rapide)")
     args = parser.parse_args()
 
     input_path = Path(args.path)
@@ -689,6 +690,8 @@ def main():
         analyzer_cmd = [sys.executable, str(analyzer), analyze_path, "--html", str(html_out)]
         if not args.open_html:
             analyzer_cmd.append("--no-browser")
+        if args.metadata_only:
+            analyzer_cmd.append("--metadata-only")
         result   = subprocess.run(
             analyzer_cmd,
             stdout=log_fh or sys.stdout,

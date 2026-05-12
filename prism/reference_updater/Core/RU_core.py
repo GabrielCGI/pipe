@@ -1,4 +1,5 @@
 from pathlib import Path
+from pxr import Usd, UsdUtils
 import maya.cmds as cmds
 import json
 import sys
@@ -90,8 +91,11 @@ class RefUpdaterCore():
             
             if info["entity"] == "toRig" and cmds.objExists(info["item"]):
                 cmds.parent("rig", "|" + info["item"])
-            elif info["item"] == "camRig" and cmds.objExists(info["item"]):
-                cmds.parent(info["item"], "cameras")
+            elif info["item"] == "camRig" and cmds.objExists("cameras"):
+                try:
+                    cmds.parent(f'{info["reference"].replace("RN", "")}:{info["item"]}', "cameras")
+                except Exception as e:
+                    print(e)
                 
             else:
                 # creer le grp root de la scene 
@@ -156,7 +160,14 @@ class RefUpdaterCore():
         if compare:
             datacompare = self.makeDifference()
 
+        self.findStageUSD()
         for info in self.iteration_Data(data):
+            if info["entity"] == "USD" or info["entity"].startswith("_layer_"):
+                # importer de la data dans L'usdShape 
+                self.importDataUSD(info)
+                continue
+
+            # importer de la data en data maya 
             if self.cantImport(info, datacompare):
                 continue
 
@@ -165,12 +176,46 @@ class RefUpdaterCore():
             if file_path is None:
                 self.emitdata(f"--- path not Found: {showPath[0]}/{showPath[1]}/<file>")
                 continue
+
+            reference_name = info["reference"]
+            if info["entity"] == "toRig":
+                reference_name = ":"
             
             try:
-                cmds.file(file_path, reference=True, namespace=info["reference"])
+                cmds.file(file_path, reference=True, namespace=reference_name)
                 self.emitdata(f"Référence importée avec le namespace: {info['reference']}, file: {file_path}\n")
             except Exception as e:
                 self.emitdata(f"\Erreur lors de l'import de la référence: {e}\n")
+
+    def findStageUSD(self):
+        proxy_shapes = cmds.ls(type='mayaUsdProxyShape', long=True) or []
+        
+
+    def importDataUSD(self, info):
+        # Trouver le fichier USD
+        file_path, showPath = self.findFile(info)
+        if file_path is None:
+            self.emitdata(f"--- USD path not Found: {showPath[0]}/{showPath[1]}/<file>")
+            return
+
+
+        """file_name = f'{name_asset}_USD_{data_product["version"]}'
+        assetPath = None
+        for f in os.listdir(data_product["path"]):
+            if not f.startswith(file_name):
+                continue
+            for extention in [".usd", ".usda", ".usdc"]:
+                if f.endswith(extention):
+                    assetPath = f'{data_product["path"]}/{f}'
+        if assetPath is None:
+            logger.warning(f'fichier usd introuvable:{data_product["path"]}/{file_name}')
+            self.status = True
+            return False
+        prim = stage.DefinePrim(f"/assets/{cat}/{name_asset}", "Xform")
+        targetPrimPath = Sdf.Path(f"/{name_asset}")
+        payloads = prim.GetPayloads()
+        payloads.AddPayload(assetPath=assetPath, primPath=targetPrimPath)"""
+
 
     def UpdateReference(self, data: dict) -> None:
         if not data:

@@ -21,16 +21,16 @@ def import_qtpy():
     if not os.path.exists(pyside_path):
         return False
     
-    if not Python_path in sys.path:
+    if Python_path not in sys.path:
         sys.path.append(Python_path)
     
-    if not pyside_path in sys.path:
+    if pyside_path not in sys.path:
         sys.path.append(pyside_path)
     
     return True
 if import_qtpy():
     import qtpy.QtWidgets as qt
-    import qtpy.QtCore as qtc
+
 
 
 
@@ -67,7 +67,7 @@ class UISelectExport(qt.QDialog):
         container_ligne = qt.QVBoxLayout(container_data)
 
         
-        text_info = qt.QLabel("This tool allows you to create a custom export for each variant along with its rig. It will export the geometry and the rig variants, if any, in order to optimize the rig scenes. Then, it will reassemble the rigging products.\n\nExample: You have 3 variants A, B, and C. It will export 3 scenes: A.ma, B.ma, and C.ma, and reference them in the Rigging products.")
+        text_info = qt.QLabel("This tool allows you to create a custom export for each variant along with its rig. It will export the geometry and the rig variants, if any, in order to optimize the rig scenes. Then, it will reassemble the rigging products.\n\nExample: You have 3 variants A, B, and C. It will export 3 scenes: A.mb, B.mb, and C.mb, and reference them in the Rigging products.")
         text_info.setStyleSheet("font-size: 13px;")
         text_info.setWordWrap(True)
         container_ligne.addWidget(text_info)
@@ -335,7 +335,8 @@ class QvariantLineUI(qt.QListWidgetItem):
         layouV_geo.addWidget(geometry_Label)
 
         self.all_string_geo = qt.QTextEdit()
-        if list_geo_save: self.saveDataGeo(self.list_geo_save)
+        if list_geo_save:
+            self.saveDataGeo(self.list_geo_save)
         self.all_string_geo.setMaximumHeight(50)
         self.all_string_geo.setMinimumWidth(10)
         layouV_geo.addWidget(self.all_string_geo)
@@ -358,7 +359,8 @@ class QvariantLineUI(qt.QListWidgetItem):
         layouV_rig.addWidget(rig_label)
 
         self.all_string_rig = qt.QTextEdit()
-        if list_rig_save: self.saveDataRig(self.list_rig_save)
+        if list_rig_save:
+            self.saveDataRig(self.list_rig_save)
         self.all_string_rig.setMaximumHeight(50)
         self.all_string_rig.setMinimumSize(0, 0)
         layouV_rig.addWidget(self.all_string_rig)

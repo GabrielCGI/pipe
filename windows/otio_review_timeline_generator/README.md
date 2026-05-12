@@ -33,12 +33,22 @@ Lit `pipeline.json` et `Prism.json` pour construire un objet `PrismProject` (FPS
 ### `core/scanner.py`
 Parcourt `03_Production/Shots` et retourne des `ShotEntry[]`.
 - `scan_versions()` cherche les dossiers de version (`v001`, `v002`...) dans l'ordre `RENDER_ROOTS` de `config.py`
-- Le fallback de tâche suit `_FALLBACK_ORDER` dans ce fichier si la tâche demandée est absente d'un shot
+- `find_complete_media()` remonte les versions de la plus récente à la plus ancienne et retourne la première complète (voir détection d'incomplétude ci-dessous)
+- Le fallback de tâche suit `_FALLBACK_ORDER` dans `main_window.py` si la tâche demandée est absente d'un shot
+- `ShotEntry.has_shot_range` : `True` si le range vient de `shotInfo.json`, `False` si c'est le fallback (ex. projet Kitsu)
+
+### `core/version_cache.py`
+Cache JSON de complétude des versions rendues, stocké dans `04_Resources/otio/version_cache.json`.
+- `complete=True` : la version a passé le test de complétude — évite le re-scan disque au prochain run (uniquement pour les projets avec `shotInfo.json`)
+- `complete=False` : version incomplète au dernier scan — toujours re-scannée
+- En mode sans `shotInfo.json` (`has_shot_range=False`), le disque est toujours relu (le cache ne peut pas être périmé)
+- `_prune_missing_paths()` : nettoyage automatique des entrées dont le dossier n'existe plus (déclenché si > 500 entrées)
 
 ### `core/media.py`
 Détecte les séquences images et vidéos dans un dossier de version.
 - Durée vidéo : parsing natif MP4/MOV (`mvhd`), puis `ffprobe`, puis fallback sur le shot range Prism
 - Les séquences images utilisent le pattern `fichier.1001.exr` (point-séparateur Prism)
+- `MediaItem.is_complete` : résultat du test de complétude (`None` si non vérifié)
 
 ### `core/builder.py`
 Construit le fichier `.otio`. **Un track par task**, tous dans un seul fichier.
@@ -55,7 +65,7 @@ Hiérarchie d'exceptions custom. Rien de complexe.
 
 ### `ui/main_window.py`
 Orchestrateur principal. Contient :
-- `ScanWorker` (QThread) — le scan tourne hors thread principal
+- `ScanWorker` (QThread) — le scan tourne hors thread principal ; gère le cycle de vie du `VersionCache` (load avant scan, flush après)
 - `_export_timeline()` — construit et exporte le `.otio`
 - `_launch_hiero()` — déploie le script startup Hiero puis lance l'exe
 - `_launch_rv()` — lance OpenRV avec le fichier `.otio`
@@ -78,7 +88,7 @@ Choix de version : "Latest" automatique ou override manuel par shot.
 Nom de timeline, FPS, chemin output. L'output par défaut est auto-généré dans `%TEMP%`.
 
 ### `ui/log_panel.py`
-Log coloré en temps réel (info / warning / error / success).
+Log coloré en temps réel (info / success / warning / error).
 
 ---
 
@@ -91,6 +101,7 @@ Log coloré en temps réel (info / warning / error / success).
 | **Startup script Hiero** | Écrasé à chaque lancement Hiero depuis le tool. Toute modification manuelle de `~/.nuke/Python/Startup/otio_review_autoload.py` sera perdue. Modifier `_HIERO_STARTUP_SCRIPT` dans `main_window.py`. |
 | **Thread scan** | `ScanWorker` émet des signaux Qt — ne jamais appeler directement des méthodes UI depuis `core/`. |
 | **ImageSequenceReference** | Utilisé à la place d'`ExternalReference` pour les séquences (compatibilité RV 2.0 + Hiero). |
+| **Versions incomplètes** | `find_complete_media()` détecte les renders en cours et recule vers la version précédente. Stratégie inter-versions (vN vs v(N-1)) pour les projets sans `shotInfo.json`. Cache dans `04_Resources/otio/version_cache.json`. |
 | **Crash log** | `%TEMP%\otio_review_error.log` — consulter en premier en cas de crash silencieux. |
 
 ---

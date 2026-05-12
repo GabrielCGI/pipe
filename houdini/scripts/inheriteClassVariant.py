@@ -1,5 +1,4 @@
 from pxr import Sdf, Usd, Kind, UsdGeom
-from datetime import datetime
 from pathlib import Path
 import socket
 import sys
@@ -20,7 +19,7 @@ class inheriteClassAttr():
         self.result = True
         self.soft = soft
         if self.soft == "Houdini":
-            import hou
+            import hou #type: ignore
             self.message = "Everything went well\nReload Prism Import"
             self.error_type = hou.severityType.Message
         elif self.soft == "Maya":
@@ -40,7 +39,7 @@ class inheriteClassAttr():
     def debugger(self):
         if socket.gethostname() in LIST_MACHINE_DEBUG:
             sys.path.append("R:/pipeline/networkInstall/python_shares/python311_debug_pkgs/Lib/site-packages/debug")
-            import debug
+            import debug #type: ignore
             debug.debug()
             debug.debugpy.breakpoint()
 
@@ -100,12 +99,12 @@ class inheriteClassAttr():
 
 
 
-            print(f"\nadd subLayer in _layer_anm_master")
+            print("\nadd subLayer in _layer_anm_master")
             self.AppendLayer(masterLayer, newPath)
 
 
             print("\n\nnow find charaters and props....")
-            allPathPrim = self.getAllPrimPath(self.root, ["/assets/props/", "/assets/sets/", "/assets/characters/"])
+            allPathPrim = self.getAllPrimPath(self.root, ["/assets/props/", "/assets/sets/", "/assets/characters/", "/assets/kits/"])
             if not allPathPrim:
                 self.sendError("no props and no characters", "importMessage")
                 return
@@ -113,7 +112,7 @@ class inheriteClassAttr():
 
             print(f"{self.prefix} USD-----------------------------------------------------------------------------------------------")
             if not self.clearFile:
-                self.NewLayer.CreateClassPrim(f"/__class__")
+                self.NewLayer.CreateClassPrim("/__class__")
 
         
             for prim in allPathPrim:
@@ -143,12 +142,20 @@ class inheriteClassAttr():
                 
                 print("\n")
 
-
+        self.showAssetPropsSetsAllTime()
 
         print("\n\nsave file....")
         self.NewLayer.GetRootLayer().Save()
         print("inherite class finish.")
         return self.result
+
+    def showAssetPropsSetsAllTime(self):
+        for categorie in ["props", "characters", "sets", "environments", "environment", "kits"]:
+            primitive = self.NewLayer.GetPrimAtPath(f"/assets/{categorie}")
+            if primitive:
+                over_proxy = self.NewLayer.OverridePrim(primitive.GetPath().pathString)
+                overImage = UsdGeom.Imageable(over_proxy)
+                overImage.CreateVisibilityAttr().Set("inherited")
 
     def showAllChild(self, prim):
         imageable = UsdGeom.Imageable(prim)
@@ -157,7 +164,7 @@ class inheriteClassAttr():
             if name.startswith("xform"):
                 return
             
-            if not "/characters/" in str(prim.GetPath()):
+            if "/characters/" not in str(prim.GetPath()):
                 over = self.NewLayer.OverridePrim(prim.GetPath())
                 overImage = UsdGeom.Imageable(over)
                 overImage.CreateVisibilityAttr().Set("inherited")
@@ -184,7 +191,7 @@ class inheriteClassAttr():
     def showProxyAndRender(self, prim):
         imageable = UsdGeom.Imageable(prim)
         if imageable:
-            if not "/characters/" in str(prim.GetPath()):
+            if "/characters/" not in str(prim.GetPath()):
                 for purpose in ["render", "proxy"]:
                     over_proxy = self.NewLayer.OverridePrim(str(prim.GetPath()) + "/geo/" + purpose)
                     overImage = UsdGeom.Imageable(over_proxy)
@@ -218,7 +225,7 @@ class inheriteClassAttr():
             print("_|_|_| WARNING |_|_|_ not variant found")
             return
         
-        if not variant in getVarRef:
+        if variant not in getVarRef:
             print("_|_|_| WARNING |_|_|_ not same variant beteewn usdClass and Rig", getVarRef, visible)
             print("set default variant:", getVarRef[0])
             variant = getVarRef[0]
@@ -288,11 +295,11 @@ class inheriteClassAttr():
             find_to_rm = "Shots"
 
         for layer in used_layers:
-            if layerName_main in layer.identifier and not find_to_rm in layer.identifier:
+            if layerName_main in layer.identifier and find_to_rm not in layer.identifier:
                 infoLay = layer.identifier.split("/")[-1]
                 layerFilePath.append(layer.identifier)
                 layerPath.append(layer.realPath)
-            elif layerName_master in layer.identifier and not find_to_rm in layer.identifier:
+            elif layerName_master in layer.identifier and find_to_rm not in layer.identifier:
                 layerMaster = layer
         
             """if layerMaster and layerPath and infoLay:
@@ -306,12 +313,12 @@ class inheriteClassAttr():
             alltraverse = None
             try:
                 alltraverse = stage.Traverse()
-            except:
+            except TypeError:
                 pass
 
 
             for prim in alltraverse:
-                if not find in str(prim.GetPath()):
+                if find not in str(prim.GetPath()):
                     continue
                 
                 if prim.GetMetadata("kind") == "component":
@@ -321,7 +328,7 @@ class inheriteClassAttr():
     
     def pathReference(self, primName):
         pathUSD = None
-        for element in ["Props", "Characters", "Sets", "sandbox"]:
+        for element in ["Props", "Characters", "Sets", "Kits", "sandbox"]:
             USD = "USD"
             if primName == "dishOmeletFull":
                 primName =  "dishOmelet"
@@ -380,7 +387,8 @@ class inheriteClassAttr():
             if self.NameFolder in pathlayer:
                 try:
                     layer.subLayerPaths.remove(pathlayer)
-                except:pass
+                except TypeError:
+                    pass
         
 
         sublayer = f"../../{self.NameFolder}/" + sublayer.split(f"\\{self.NameFolder}\\")[-1].replace("\\", "/")
@@ -396,7 +404,7 @@ class inheriteClassAttr():
         data = prim.GetReferences()
         data.ClearReferences()
         if isProps:
-            print(f"ref prim: /geo")
+            print("ref prim: /geo")
             data.AddReference(refPath, Sdf.Path(f"/{primName}"), position=Usd.ListPositionFrontOfPrependList)
         else:
             print(f"prim geo not valide convert Prim: /{primName}")

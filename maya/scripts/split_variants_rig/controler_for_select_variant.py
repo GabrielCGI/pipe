@@ -14,7 +14,7 @@ def run(core):
         try:
             file_path = cmds.referenceQuery(refNode, f=True, wcn=True)
             namespace = cmds.referenceQuery(refNode, ns=True)
-        except:
+        except Exception:
             continue
 
         # récupérer les entity du porudcts via prism
@@ -27,11 +27,16 @@ def run(core):
             if not product["product"].startswith("Rigging_"):
                 continue
             
-            file_name = product["asset"] + "_" + product["product"] + "_" + product["version"] + ".ma"
+            file_name = product["asset"] + "_" + product["product"] + "_" + product["version"] + ".mb"
             last_version_of_product = product["path"] + "\\" + product["version"] + "\\" + file_name
 
-            if os.path.exists(last_version_of_product):
-                data_all_variants[product["product"]] = last_version_of_product
+            if not os.path.exists(last_version_of_product):
+                file_name = product["asset"] + "_" + product["product"] + "_" + product["version"] + ".ma"
+                last_version_of_product = product["path"] + "\\" + product["version"] + "\\" + file_name
+                if not os.path.exists(last_version_of_product):
+                    continue
+
+            data_all_variants[product["product"]] = last_version_of_product
 
         name_ctrl, name_variant = findNameCtrlVariant(namespace)
         if name_ctrl is None or name_variant is None:
@@ -71,7 +76,7 @@ def callBackFunc(data, refNode):
     variant = cmds.getAttr(f"{ctrl_world}.{name_variant}", asString=True)
     try:
         scene_path = data[refNode]["path_variants"]["Rigging_" + variant]
-    except:
+    except Exception:
         return
 
     cmds.file(scene_path, loadReference=refNode)
@@ -91,7 +96,7 @@ def CreateScrpitJob(data):
             src = cmds.listConnections(f"{ctrl_world}.{name_variant}", plugs=True, source=True, destination=False)
             if src:
                 cmds.disconnectAttr(src[0], f"{ctrl_world}.{name_variant}")
-        except:
+        except Exception:
             continue
         
         cmds.scriptJob(attributeChange=[f"{ctrl_world}.{name_variant}", partial(callBackFunc, data, refNode)], killWithScene=False, ro=True)

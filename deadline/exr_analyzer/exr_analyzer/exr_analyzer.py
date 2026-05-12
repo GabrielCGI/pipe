@@ -635,7 +635,7 @@ def _parse_xpu_metadata(header: dict) -> dict:
 #  Analyse d'une frame
 # ──────────────────────────────────────────────
 
-def analyze_frame(filepath: str, threshold: float = 5.0) -> FrameResult:
+def analyze_frame(filepath: str, threshold: float = 5.0, metadata_only: bool = False) -> FrameResult:
     path = Path(filepath)
 
     # Extraire le numéro de frame depuis le nom de fichier (ex: render.0042.exr)
@@ -684,7 +684,7 @@ def analyze_frame(filepath: str, threshold: float = 5.0) -> FrameResult:
         # ── Analyse pixels excessifs ──────────
         # Gère canaux séparés R/G/B ET canaux packagés (RGBA, C, beauty…)
         # Ignoré si fallback chunk (lecture pixels non disponible avec InputFile)
-        arrays = {} if chunk_fallback else _extract_rgb_arrays(exr, result.channels, header)
+        arrays = {} if (chunk_fallback or metadata_only) else _extract_rgb_arrays(exr, result.channels, header)
 
         if arrays:
             labels = list(arrays.keys())
@@ -1807,6 +1807,8 @@ def main():
     parser.add_argument("--html", metavar="FILE", nargs="?", const="",
         help="Exporter les résultats en HTML (optionnel : chemin du fichier)")
     parser.add_argument("--no-browser", action="store_true", help="Ne pas ouvrir le rapport HTML dans le navigateur")
+    parser.add_argument("--metadata-only", action="store_true",
+        help="Lire uniquement les métadonnées, ignorer l'analyse pixels (plus rapide)")
     parser.add_argument("--quiet", action="store_true", help="Affichage minimal")
     parser.add_argument("--debug", action="store_true",
         help="Dump les canaux et valeurs min/max de chaque frame (diagnostic)")
@@ -1834,7 +1836,7 @@ def main():
     results: list[FrameResult] = []
     with concurrent.futures.ThreadPoolExecutor(max_workers=args.jobs) as executor:
         futures = {
-            executor.submit(analyze_frame, f, args.threshold): f
+            executor.submit(analyze_frame, f, args.threshold, args.metadata_only): f
             for f in files
         }
         done = 0

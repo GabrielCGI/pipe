@@ -36,6 +36,7 @@ from config import APP_NAME, APP_VERSION, WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT, R
 from core.builder import ShotMedia, TimelineBuilder
 from core.project import PrismProject
 from core.scanner import ProjectScanner, ShotEntry
+from core.version_cache import VersionCache
 from ui.log_panel import LogPanel
 from ui.output_panel import OutputPanel
 from ui.project_panel import ProjectPanel
@@ -65,6 +66,7 @@ class ScanWorker(QThread):
         tasks: List[str],
         version_overrides: Dict[str, Dict[str, Optional[str]]],
         fps: float,
+        cache_path: Optional[Path] = None,
     ) -> None:
         super().__init__()
         self.project = project
@@ -72,16 +74,22 @@ class ScanWorker(QThread):
         self.tasks = tasks
         self.version_overrides = version_overrides  # full_name -> task -> version_str or None
         self.fps = fps
+        self.cache_path = cache_path
         self._abort = False
+        self._cache: Optional[VersionCache] = None
 
     def abort(self) -> None:
         self._abort = True
 
     def run(self) -> None:
+        self._cache = VersionCache.load(self.cache_path) if self.cache_path else None
         try:
             self._do_scan()
         except Exception as exc:
             self.scan_error.emit(str(exc))
+        finally:
+            if self._cache is not None:
+                self._cache.flush()
 
     # Fallback pipeline steps tried when the requested task has no versions.
     # Ordered from most to least preferred. Lighting is intentionally excluded
@@ -119,17 +127,20 @@ class ScanWorker(QThread):
                     fallback_media = None
                     fallback_task = None
                     fallback_version_entry = None
+                    expected_count = shot.frame_range[1] - shot.frame_range[0] + 1
                     for fb_task in self._FALLBACK_ORDER:
                         if fb_task == task:
                             continue
                         fb_versions = shot.versions_by_task.get(fb_task, [])
                         if not fb_versions:
                             continue
-                        fb_entry = fb_versions[-1]
-                        fb_media = scanner.find_media(
-                            fb_entry,
+                        fb_media, fb_entry, _fb_complete = scanner.find_complete_media(
+                            versions=fb_versions,
+                            expected_frame_count=expected_count,
                             fps=self.fps,
                             fallback_frame_range=shot.frame_range,
+                            cache=self._cache,
+                            has_shot_range=shot.has_shot_range,
                         )
                         if fb_media:
                             fallback_media = fb_media
@@ -155,33 +166,51 @@ class ScanWorker(QThread):
                         self.shot_scanned.emit(shot, status, False)
                     continue
 
-                # Select pinned or latest
+                # Select pinned or latest-complete
                 if pinned_version:
                     version_entry = next(
                         (v for v in versions if v.version_str == pinned_version), versions[-1]
                     )
+                    media = scanner.find_media(
+                        version_entry,
+                        fps=self.fps,
+                        fallback_frame_range=shot.frame_range,
+                    )
+                    version_used = version_entry.version_str
+                    was_complete = True  # user made an explicit choice
                 else:
-                    version_entry = versions[-1]  # latest
-
-                # Resolve media
-                media = scanner.find_media(
-                    version_entry,
-                    fps=self.fps,
-                    fallback_frame_range=shot.frame_range,
-                )
+                    expected_count = shot.frame_range[1] - shot.frame_range[0] + 1
+                    media, version_entry, was_complete = scanner.find_complete_media(
+                        versions=versions,
+                        expected_frame_count=expected_count,
+                        fps=self.fps,
+                        fallback_frame_range=shot.frame_range,
+                        cache=self._cache,
+                        has_shot_range=shot.has_shot_range,
+                    )
+                    version_used = version_entry.version_str if version_entry else "?"
 
                 if media:
-                    status = f"{task}: {version_entry.version_str} OK"
-                    self.shot_scanned.emit(shot, status, True)
+                    if not was_complete:
+                        latest_ver = versions[-1].version_str
+                        if version_entry and version_entry.version_str != latest_ver:
+                            note = f" [incomplet: {latest_ver} → {version_used}]"
+                        else:
+                            note = f" [incomplet: {media.frame_count}/{expected_count} frames]"
+                        status = f"{task}: {version_used}{note}"
+                        self.shot_scanned.emit(shot, status, False)
+                    else:
+                        status = f"{task}: {version_used} OK"
+                        self.shot_scanned.emit(shot, status, True)
                 else:
-                    status = f"{task}: {version_entry.version_str} no media"
+                    status = f"{task}: {version_used} no media"
                     self.shot_scanned.emit(shot, status, False)
 
                 result.append(ShotMedia(
                     shot=shot,
                     task=task,
                     media=media,
-                    version_str=version_entry.version_str,
+                    version_str=version_used,
                 ))
 
         self.scan_complete.emit(result)
@@ -197,6 +226,7 @@ class MainWindow(QMainWindow):
         super().__init__()
         self.setWindowTitle(f"{APP_NAME} v{APP_VERSION}")
         self.setMinimumSize(WINDOW_MIN_WIDTH, WINDOW_MIN_HEIGHT)
+        self.showMaximized()
 
         self._project: Optional[PrismProject] = None
         self._shots: List[ShotEntry] = []
@@ -414,6 +444,7 @@ class MainWindow(QMainWindow):
             tasks=tasks,
             version_overrides=self._build_version_overrides(shots, tasks),
             fps=self.output_panel.get_fps(),
+            cache_path=self._project.root_path,
         )
         self._worker.shot_scanned.connect(self._on_shot_scanned)
         self._worker.scan_complete.connect(self._on_scan_complete)
@@ -531,6 +562,7 @@ class MainWindow(QMainWindow):
             tasks=tasks,
             version_overrides=self._build_version_overrides(shots, tasks),
             fps=self.output_panel.get_fps(),
+            cache_path=self._project.root_path,
         )
         self._worker.shot_scanned.connect(self._on_shot_scanned)
         self._worker.scan_complete.connect(self._on_scan_complete_then_export)

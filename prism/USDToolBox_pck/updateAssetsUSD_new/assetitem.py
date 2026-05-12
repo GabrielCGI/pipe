@@ -1,14 +1,5 @@
-
-
-class AssetItem():
-    
-    
-    def __init__(
-            self,
-            original_path,
-            updated_path,
-            from_version,
-            to_version):
+class AssetItem:
+    def __init__(self, original_path, updated_path, from_version, to_version):
         self.original_path = original_path
         self.updated_path = updated_path
         self.from_version = from_version
@@ -16,9 +7,8 @@ class AssetItem():
         self.layer_path = None
         self.can_be_updated = True
         self.should_be_updated = True
-        
-        
-    def __str__(self): # pragma: no cover
+
+    def __str__(self):  # pragma: no cover
         asset_item_str = (
             f"{self.layer_path}:\n"
             f" - {self.original_path}\n"

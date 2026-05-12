@@ -22,3 +22,5 @@ windows/temperature_alert/.venv/*
 /deadline/daily_report
 /assetsDefault/Assets
 /deadline/benchmark_ranch/output
+/deadline/exr_analyzer/reports
+/houdini/procedurals/illogic_hair_procedural/backup

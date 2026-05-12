@@ -10,9 +10,10 @@
     <memberTool name="kmx"/>
     <memberTool name="kmx_geosubset"/>
     <memberTool name="kma_mat_char"/>
-    <memberTool name="CreateAutoVariant"/>
     <memberTool name="material_finder"/>
     <memberTool name="rat_manager"/>
+    <memberTool name="CreateAutoVariant"/>
+    <memberTool name="USD Preview"/>
   </toolshelf>
 
   <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
@@ -43,41 +44,31 @@ else:
   </tool>
 
   <tool name="kmx" label="kmx_col" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
-    <script scriptType="python"><![CDATA[from imp import reload
-import socket
-import sys
+    <script scriptType="python"><![CDATA[import importlib
 
+import kmx_mat
+importlib.reload(kmx_mat)
 
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
-import kma_mat_from_attr as kmfa
-reload(kmfa)
-
-
-
-kmfa.execute(collectionMode=True)]]></script>
+kmx_mat.kmfa_execute(collectionMode=True)]]></script>
   </tool>
 
   <tool name="kmx_geosubset" label="kmx_sub" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+    <script scriptType="python"><![CDATA[import importlib
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_from_attr")
+import kmx_mat
+importlib.reload(kmx_mat)
 
-import kma_mat_from_attr
-reload(kma_mat_from_attr)
-kma_mat_from_attr.execute(collectionMode=False)]]></script>
+kmx_mat.kmfa_execute(collectionMode=False)
+]]></script>
   </tool>
 
   <tool name="kma_mat_char" label="kmx_char" icon="hicon:/SVGIcons.index?BUTTONS_material_include.svg">
-    <script scriptType="python"><![CDATA[import sys
-import importlib
+    <script scriptType="python"><![CDATA[import importlib
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\kma_mat_char")
+import kmx_mat
+importlib.reload(kmx_mat)
 
-import kmxChar
-importlib.reload(kmxChar)
-kmxChar.execute()]]></script>
+kmx_mat.kmxchar_execute()]]></script>
   </tool>
 
   <tool name="CreateAutoVariant" label="CAV" icon="hicon:/SVGIcons.index?CROWDS_popsteeralign.svg">
@@ -126,5 +117,78 @@ reload(ratmanager)
 
 ratmanager.run()
 ]]></script>
+  </tool>
+
+  <tool name="USD Preview" label="auto USDPreview" icon="hicon:/SVGIcons.index?BUTTONS_donut.svg">
+    <script scriptType="python"><![CDATA[import hou
+
+def create_usd_shader_from_selected():
+    """
+    CrÃ©e un usduvtexture et un usdpreviewsurface connectÃ©s ensemble.
+    Le paramÃ¨tre 'file' du usduvtexture est rÃ©cupÃ©rÃ© depuis le node 
+    sÃ©lectionnÃ© au moment de l'exÃ©cution.
+    """
+    # RÃ©cupÃ©rer le(s) node(s) sÃ©lectionnÃ©(s)
+    selected = hou.selectedNodes()
+    if not selected:
+        raise hou.Error("Aucun node sÃ©lectionnÃ©. SÃ©lectionnez un node avec un paramÃ¨tre 'file'.")
+    
+    source_node = selected[0]
+    
+    # Chercher le paramÃ¨tre file (avec fallback sur des noms courants)
+    file_parm = source_node.parm("file")
+    if file_parm is None:
+        for parm_name in ("filename", "map", "texture", "tex0", "filename1"):
+            file_parm = source_node.parm(parm_name)
+            if file_parm is not None:
+                break
+    
+    if file_parm is None:
+        raise hou.Error(
+            "Le node '{}' n'a pas de paramÃ¨tre 'file' reconnu.".format(source_node.name())
+        )
+    
+    # On utilise unexpandedString pour garder les variables ($HIP, <UDIM>, etc.)
+    file_path = file_parm.unexpandedString() or file_parm.evalAsString()
+    
+    parent = source_node.parent()
+    
+    with hou.undos.group("Create USD Preview Shader"):
+        # CrÃ©ation du usduvtexture
+        uv_tex = parent.createNode("usduvtexture::2.0", "usduvtexture1")
+        
+        # CrÃ©ation du usdpreviewsurface
+        preview = parent.createNode("usdpreviewsurface", "usdpreviewsurface1")
+        
+        # Assigner le file
+        uv_tex.parm("file").set(file_path)
+        
+        # Connexion : rgb du usduvtexture -> diffuseColor du usdpreviewsurface
+        preview.setNamedInput("diffuseColor", uv_tex, "rgb")
+        
+        # Layout Ã  cÃ´tÃ© du node source
+        src_pos = source_node.position()
+        uv_tex.setPosition(src_pos + hou.Vector2(0.0, -15.0))
+        preview.setPosition(src_pos + hou.Vector2(3.5, -15.0))
+        
+        # SÃ©lectionner le rÃ©sultat final
+        preview.setCurrent(True, clear_all_selected=True)
+
+        # Connexion au subnetconnector "surface" du materialBuilder
+        sortie = parent.node("Material_Outputs_and_AOVs")
+        if sortie is None:
+            print("Attention : node 'Material_Outputs_and_AOVs' introuvable dans '{}'.".format(parent.path()))
+            print("Noeuds disponibles :", [n.name() for n in parent.children()])
+        else:
+            con = len(sortie.inputs())
+            sortie.setInput(con, preview, 0)
+
+    
+    print("CrÃ©Ã©s : {}  ->  {}".format(uv_tex.path(), preview.path()))
+    print("File source : {}".format(file_path))
+    return uv_tex, preview
+
+
+create_usd_shader_from_selected()]]></script>
   </tool>
 </shelfDocument>

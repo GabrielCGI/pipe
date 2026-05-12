@@ -36,12 +36,19 @@
             "CreateLattice",
             "CombinePolygons",
             "PolyMerge",
-            "CreateText",
             "Revolve",
+            "LayerRelationshipEditor",
             "HotkeyPreferencesWindow",
+            "mayaUsdOpenUsdLayerEditor",
+            "ArtPaintBlendShapeWeightsTool",
+            "CreateBlendShape",
+            "TransferVertexOrder",
             "ParentConstraint",
+            "CreateText",
             "ReferenceEditor",
-            "mayaUsdOpenUsdLayerEditor"
+            "CreateWrap",
+            "ReversePolygonNormals",
+            "SubdividePolygon"
         ],
         [
             "share",

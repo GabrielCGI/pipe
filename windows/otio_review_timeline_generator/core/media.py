@@ -21,6 +21,7 @@ from config import (
     VIDEO_EXTENSIONS,
     FRAME_PATTERN,
     DEFAULT_FPS,
+    AOV_PRIORITY,
 )
 
 
@@ -40,6 +41,7 @@ class MediaItem:
     abstract_path: str           # %04d path for OTIO (image seq) or file path (video)
     width: Optional[int] = None  # Resolution — populated if versioninfo.json has it
     height: Optional[int] = None
+    is_complete: Optional[bool] = None  # None = not checked / not applicable
 
 
 # ---------------------------------------------------------------------------
@@ -66,18 +68,63 @@ class MediaDiscovery:
         if not version_path.is_dir():
             return None
 
-        # Collect all files directly in the version folder (non-recursive)
         try:
-            entries = [p for p in version_path.iterdir() if p.is_file()]
+            children = list(version_path.iterdir())
         except PermissionError:
             return None
 
-        item = cls._detect_image_sequence(entries, fps)
-        if item:
-            return item
+        root_files = [p for p in children if p.is_file()]
+        subdirs = [p for p in children if p.is_dir()]
 
-        item = cls._detect_video(entries, fps, fallback_frame_range)
-        return item
+        # Try root-level files first (backward compat)
+        root_item = cls._detect_image_sequence(root_files, fps)
+        if root_item is None:
+            root_item = cls._detect_video(root_files, fps, fallback_frame_range)
+
+        # If root found something or no subdirs exist, return root result
+        if root_item is not None or not subdirs:
+            return root_item
+
+        # Pick the best AOV/pass subfolder and scan it
+        best_sub = cls._pick_best_subfolder(subdirs)
+        if best_sub is None:
+            return None
+
+        try:
+            sub_files = [p for p in best_sub.iterdir() if p.is_file()]
+        except PermissionError:
+            return None
+
+        sub_item = cls._detect_image_sequence(sub_files, fps)
+        if sub_item is None:
+            sub_item = cls._detect_video(sub_files, fps, fallback_frame_range)
+        return sub_item
+
+    # ------------------------------------------------------------------
+    # AOV / pass subfolder selection
+    # ------------------------------------------------------------------
+
+    @classmethod
+    def _pick_best_subfolder(cls, subdirs: List[Path]) -> Optional[Path]:
+        """Pick the best AOV/pass subfolder based on AOV_PRIORITY, or
+        fall back to the subfolder with the most files."""
+        subdirs_by_name = {d.name.lower(): d for d in subdirs}
+        for name in AOV_PRIORITY:
+            if name in subdirs_by_name:
+                return subdirs_by_name[name]
+
+        # No known name matched — pick the subfolder with the most files
+        best: Optional[Path] = None
+        best_count = 0
+        for d in subdirs:
+            try:
+                count = sum(1 for p in d.iterdir() if p.is_file())
+            except PermissionError:
+                continue
+            if count > best_count:
+                best_count = count
+                best = d
+        return best
 
     # ------------------------------------------------------------------
     # Image sequence detection
@@ -184,6 +231,27 @@ class MediaDiscovery:
                     abstract_path=abs_path,
                 )
         return None
+
+    @staticmethod
+    def check_completeness(
+        media: "MediaItem",
+        expected_frame_count: int,
+        is_fallback_range: bool = False,
+    ) -> bool:
+        """
+        Return True if *media* represents a complete sequence.
+        Always returns True for videos or when the frame range is the default
+        fallback (shotInfo.json absent) — in that case the expected count is
+        unreliable and we cannot determine completeness.
+        *expected_frame_count* = frame_out - frame_in + 1 from shotInfo.json.
+        """
+        if media.media_type != "image_sequence":
+            return True
+        if is_fallback_range:
+            return True  # frame range not reliable — skip completeness check
+        if expected_frame_count <= 0:
+            return True
+        return media.frame_count >= expected_frame_count
 
     @staticmethod
     def _read_mp4_duration(video_path: Path, fps: float) -> Optional[int]:

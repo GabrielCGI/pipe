@@ -4,7 +4,6 @@ pour faire en sorte que tu ai une scene
 
 from importlib import reload
 import maya.cmds as cmds
-from pathlib import Path
 import json
 import os
 
@@ -21,7 +20,7 @@ class splitVariantsRig():
         self.core = core
         self.data = {}
 
-    def passPrePublish(self, force=False):
+    def passPrePublish(self, force=False, autoExport=True):
         if cmds.about(batch=True):
             return
         
@@ -38,60 +37,33 @@ class splitVariantsRig():
         if not have_variant:
             cmds.warning("test " + str(have_variant)+ " " + str(data))
             return None
-        
+
+
         self.UI_select_relationShip_export(data)
-        if self.result and not self.windowRig.bypass:
-            data_path = self.ExportDataInScene()
+        if self.result and not self.windowRig.bypass and autoExport:
+            self.ExportDataInScene()
             #self.saveDataInScene("IllogicVariantRIG", self.windowRig.data_to_Export)
             #self.saveDataInScene("IllogicPathRIG", data_path)
 
-    #--------------------------------- methode pass PostExport ---------------------------------
-    # !!!!!!!!!!!!!!!!!!WARNING WARNING!!!!!!!!!!!!!!!!!! j'ai commennter la methode car je crois qu'elle est pas utiliser dans la pipe elle ne sert a rien je crois
-    # def passPostExport(self):
-    #     data = self.getDataInScene("IllogicPathRIG")
-    #     if not data:
-    #         return
+    def execAfterImportReference(self):
+        if cmds.about(batch=True):
+            return
         
-    #     # reccuper le dernirer export de rigging pour re ecrire le products
-    #     data_last_version = self.core.products.getLatestVersionFromProduct("Rigging", self.entity)
-    #     product = data_last_version["product"]
-    #     version = data_last_version["version"]
-    #     asset = data_last_version["asset"]
-    #     path = data_last_version["path"]
-
-    #     path_packages = str(Path(os.path.abspath(__file__)).parent)
-    #     new_scene_name = f"{asset}_{product}_{version}.ma"
-    #     path_scene = f"{path}/{new_scene_name}"
-
-
-    #     with open(f"{path_packages}/template_scene_rigging.ma", "r") as f:
-    #         file_texte =f.read()
+        have_variant = True
+        self.findNameCtrlVariant()
+        if not self.name_variant or not self.name_ctrl:
+            return 
         
-    #     # convertie les donner en mel script
-    #     all_import_Reference = ""
-    #     for i, reference in enumerate(data):
-    #         if i == 0:
-    #             all_import_Reference += f'file -rdi 1 -ns ":" -rfn "{reference}" -op "v=0;"\n'
-    #             all_import_Reference += f'		 -typ "mayaAscii" "{data[reference]}";\n'
-    #         else:
-    #             all_import_Reference += f'file -rdi 1 -ns ":" -dr 1 -rfn "{reference}" -op "v=0;"\n'
-    #             all_import_Reference += f'		  -typ "mayaAscii" "{data[reference]}";\n'
+        data = self.getDataInScene("IllogicVariantRIG")
+        if data is None:
+            data, have_variant = self.getAutoData()
         
-    #     for reference in data:
-    #         all_import_Reference += f'file -r -ns ":" -dr 1 -rfn "{reference}" -op "v=0;" -typ "mayaAscii"\n'
-    #         all_import_Reference += f'		 "{data[reference]}";\n'
+        if not have_variant:
+            return None
 
-
-    #     #edite le template pour correcpondre a l'assets
-    #     file_texte = file_texte.replace("__nameScene__.ma", new_scene_name)
-    #     file_texte = file_texte.replace("__insert__information__all_data__here__", all_import_Reference)
-
-    #     #save le fichier aux bon endroits dans la pipe
-    #     with open(path_scene, "w") as f:
-    #         f.write(file_texte)
-
-
-
+        if data:
+            self.data = data
+            self.ExportDataInScene()
 
 
     #--------------------------------- methode pass PrePublish ---------------------------------
@@ -148,11 +120,12 @@ class splitVariantsRig():
         all_last_version_product = []
         data_path = {}
 
-        # import socket
-        # if socket.gethostname() == "FALCON-01":
-        #     from . import debug
-        #     debug.debug()
-        #     debug.debugpy.breakpoint()
+        import socket
+        if socket.gethostname() == "FALCON-01":
+            from . import debug
+            debug.debug()
+            debug.debugpy.breakpoint()
+        
         #trouver la plus grande version possible de creer pour faire en sorte que tout les variants on la meme last_version possible
         #pour eviter aux moment de changer les variant qu'il y ai pas de soucis de mélange entre les ancienne version des variant  
         for export in self.data:
@@ -163,13 +136,13 @@ class splitVariantsRig():
 
         real_next_version = sorted(all_last_version_product)[-1]
 
-
+        have_set, _list_geo, _list_rig = self.findSet() 
         for export in self.data:
             pur_name = "Rigging_" + export.split("|")[-1]
             # creation est gestion des fichier via prism pour garder le workflow de prism
             folder_product = self.core.products.createProduct(self.entity, pur_name).replace("\\", "/")
             os.makedirs(folder_product + "/" + real_next_version, exist_ok=True) 
-            file_path = f"{folder_product}/{real_next_version}/{self.name_asset}_{pur_name}_{real_next_version}.ma"
+            file_path = f"{folder_product}/{real_next_version}/{self.name_asset}_{pur_name}_{real_next_version}.mb"
 
 
             #passer le attribute Variant avec le variant qu'on veux exporter comme sa quand le variant sera importer il aura l'attriubte bien setup
@@ -191,12 +164,59 @@ class splitVariantsRig():
             shapes_to_add = self.detecShape(self.data[export]["rig"])
             sel = self.data[export]["geo"] + self.data[export]["rig"] + shapes_to_add
             cmds.select(sel)
+            
+            #reconstruire tout les set suivant le variant pour avoir un bon export
+            if have_set:
+                cmds.delete("all_set")
+                self.constructionSets(self.data[export]["geo"], "geometry_set")
+                self.constructionSets(self.data[export]["rig"] + shapes_to_add, "control_set")
+                cmds.sets(["geometry_set", "control_set"],n= "all_set")
+                cmds.select("all_set", noExpand=True ,add=True)
+            
+
             cmds.file(file_path, type="mayaAscii", exportSelected=True, exportAsReference=False)
 
             #make dict for the next tap  to merge all file exported for each variant
             data_path[f"{self.name_asset}_{pur_name}_{data_next_version}RN"] = file_path
+        
 
+        #reconstruire tout les set comme c'était à l'origine pour permetre à prism d'export l'assets correctement
+        if have_set:
+            cmds.delete("all_set")
+            cmds.delete("geometry_set")
+            cmds.delete("control_set")
+            cmds.sets(_list_geo, n="geometry_set")
+            cmds.sets(_list_rig, n="control_set")
+            cmds.sets(["geometry_set", "control_set"],n= "all_set")
+        
         return data_path
+    
+    def findSet(self) -> tuple:
+        have_set = False
+        _list_geo = None
+        _list_rig = None
+        if cmds.objExists("all_set") and cmds.nodeType("all_set") == "objectSet":
+            have_set = True
+            cmds.select("control_set")
+            _list_rig = cmds.ls(sl=True, l=True)
+            cmds.select("geometry_set")
+            _list_geo = cmds.ls(sl=True, l=True)
+        
+        return have_set, _list_geo, _list_rig
+    
+    def constructionSets(self, geo_shape, set_name):
+        if cmds.objExists(set_name) and cmds.nodeType(set_name) == "objectSet":
+            cmds.delete(set_name)
+
+        good_geo = []
+        for i in geo_shape:
+            for child in cmds.listRelatives(i, s=False, ad=True, f=True):
+                if cmds.nodeType(child) in ["mesh", "nurbsCurve"]:
+                    shape = cmds.listRelatives(child, s=False, p=True, f=True)[0]
+                    good_geo.append(shape)
+
+        cmds.sets(good_geo, n=set_name)
+        #cmds.parent(set, "all_set")
             
     def detecShape(self, nodes):
         add_shape = []
@@ -234,7 +254,7 @@ class splitVariantsRig():
         cmds.refresh()
 
         self.data.clear()
-        # interface pour choirisir si oui ou non on veux exporter telle modé avec telle variant
+        # interface pour choisir si oui ou non on veux exporter telle modé avec telle variant
         self.windowRig = UI.UISelectExport(self.core, self.name_asset, data, outliner_widget, self.name_variant, self.name_ctrl, main_window)
         self.windowRig.exec()
 

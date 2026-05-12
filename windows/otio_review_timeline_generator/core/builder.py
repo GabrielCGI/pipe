@@ -22,6 +22,7 @@ except ImportError as exc:
         "opentimelineio is not installed. Run: pip install opentimelineio"
     ) from exc
 
+from config import DEFAULT_FRAME_START
 from core.media import MediaItem
 from core.scanner import ShotEntry
 from core.exceptions import TimelineBuildError
@@ -136,14 +137,24 @@ class TimelineBuilder:
         if media.media_type == "video":
             source_start = RationalTime(media.frame_start, self.fps)
             source_duration = RationalTime(media.frame_count, self.fps)
-        elif (media.frame_start <= shot_frame_in
-                and shot_frame_out <= media.frame_end):
-            source_start = RationalTime(shot_frame_in, self.fps)
-            source_duration = RationalTime(shot_frame_count, self.fps)
         else:
-            # Image seq doesn't fully cover the shot range — use what we have
-            source_start = RationalTime(media.frame_start, self.fps)
-            source_duration = RationalTime(media.frame_count, self.fps)
+            # Image sequence: determine which range to trust
+            is_fallback_range = (
+                shot_frame_in == DEFAULT_FRAME_START and shot_frame_count == 100
+            )
+            if is_fallback_range and media.frame_count > shot_frame_count:
+                # shot.frame_range is the default fallback (shotInfo absent) and
+                # the actual media is longer — trust the media, not the fallback.
+                source_start = RationalTime(media.frame_start, self.fps)
+                source_duration = RationalTime(media.frame_count, self.fps)
+            elif (media.frame_start <= shot_frame_in
+                    and shot_frame_out <= media.frame_end):
+                source_start = RationalTime(shot_frame_in, self.fps)
+                source_duration = RationalTime(shot_frame_count, self.fps)
+            else:
+                # Image seq doesn't fully cover the shot range — use what we have
+                source_start = RationalTime(media.frame_start, self.fps)
+                source_duration = RationalTime(media.frame_count, self.fps)
 
         source_range = TimeRange(
             start_time=source_start,

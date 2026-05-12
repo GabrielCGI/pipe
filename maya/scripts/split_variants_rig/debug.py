@@ -7,7 +7,7 @@ DEBUG_MODE = True
 try:
     sys.path.append('R:/pipeline/networkInstall/python_shares/python311_debug_pkgs/Lib/site-packages')
     import debugpy
-except:
+except Exception:
     DEBUG_MODE = False
 
 

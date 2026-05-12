@@ -61,6 +61,7 @@ class autoVariant():
         
         list_variant = self.find_variant(withVar, nameAssets)
         if not list_variant:
+            hou.ui.displayMessage("no variant found", buttons=("OK",) ,severity=hou.severityType.ImportantMessage)
             return
 
         compoGeo = self.create_variant(list_variant.copy(), withVar)
@@ -92,9 +93,9 @@ class autoVariant():
                 have_matlib = True
 
 
-        import kma_mat_from_attr.kma_mat_from_attr as kmfa
-        reload(kmfa)
-        kmfa.execute(collectionMode=True, sel=all_Nodes)
+        import kmx_mat
+        reload(kmx_mat)
+        kmx_mat.kmfa_execute(collectionMode=True, sel=all_Nodes)
 
     def create_variant(self, list_variant, withVar):
         tmp_ref = self.refDupi.parent()
