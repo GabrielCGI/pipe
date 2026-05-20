@@ -1,5 +1,6 @@
+import mayaUsd.lib as mayaUsdLib #type: ignore
 from pathlib import Path
-from pxr import Usd, UsdUtils
+from pxr import Usd, Sdf
 import maya.cmds as cmds
 import json
 import sys
@@ -27,10 +28,16 @@ class RefUpdaterCore():
         self.Data_in_scene = self.findAssetsInScene()[0]
 
         # start process to import and update reference.
+        if "importUSD" in data_update:
+            self.importDataUSD(data_update["importUSD"], compare)
+        else:
+            self.emitdata("no import found")
+
         if "import" in data_update:
             self.ImportNewReference(data_update["import"], compare)
         else:
             self.emitdata("no import found")
+        
         if "update" in data_update:
             self.UpdateReference(data_update["update"])
         else:
@@ -54,7 +61,7 @@ class RefUpdaterCore():
             try:
                 reference_path = cmds.referenceQuery(refNode, f=True, wcn=True)
             except Exception as e:
-                self.emitdata(str(e))
+                self.emitdata(str(e), True)
                 continue
 
             if not reference_path:
@@ -160,13 +167,7 @@ class RefUpdaterCore():
         if compare:
             datacompare = self.makeDifference()
 
-        self.findStageUSD()
         for info in self.iteration_Data(data):
-            if info["entity"] == "USD" or info["entity"].startswith("_layer_"):
-                # importer de la data dans L'usdShape 
-                self.importDataUSD(info)
-                continue
-
             # importer de la data en data maya 
             if self.cantImport(info, datacompare):
                 continue
@@ -174,7 +175,7 @@ class RefUpdaterCore():
             # ---------------- get file product -------------------
             file_path, showPath = self.findFile(info)
             if file_path is None:
-                self.emitdata(f"--- path not Found: {showPath[0]}/{showPath[1]}/<file>")
+                self.emitdata(f"--- path not Found: {showPath[0]}/{showPath[1]}/<file>", True)
                 continue
 
             reference_name = info["reference"]
@@ -185,36 +186,47 @@ class RefUpdaterCore():
                 cmds.file(file_path, reference=True, namespace=reference_name)
                 self.emitdata(f"Référence importée avec le namespace: {info['reference']}, file: {file_path}\n")
             except Exception as e:
-                self.emitdata(f"\Erreur lors de l'import de la référence: {e}\n")
+                self.emitdata(f"\Erreur lors de l'import de la référence: {e}\n", True)
 
-    def findStageUSD(self):
-        proxy_shapes = cmds.ls(type='mayaUsdProxyShape', long=True) or []
-        
+    # ------------- import USD elemen---------------
+    def findStageUSD(self) -> Usd.Stage:
+        proxy_shapes = cmds.ls(sl=True, type='mayaUsdProxyShape', long=True) or []
+        if not proxy_shapes:
+            return None
 
-    def importDataUSD(self, info):
-        # Trouver le fichier USD
-        file_path, showPath = self.findFile(info)
-        if file_path is None:
-            self.emitdata(f"--- USD path not Found: {showPath[0]}/{showPath[1]}/<file>")
+        prim: Usd.Prim = mayaUsdLib.GetPrim(proxy_shapes[0])
+        if prim and prim.IsValid():
+            return prim.GetStage()
+
+        return None
+    
+    def importDataUSD(self, data: dict, compare: bool):
+        if not data:
             return
 
+        stage = self.findStageUSD()
+        if stage is None:
+            self.emitdata("Stack USD not Found select a USDShape", True)
+            return
+        
+        for info in self.iteration_Data(data):
+            file_path, showPath = self.findFile(info)
+            if file_path is None:
+                self.emitdata(f"--- USD path not Found: {showPath[0]}/{showPath[1]}/<file>", True)
+                return
+            
 
-        """file_name = f'{name_asset}_USD_{data_product["version"]}'
-        assetPath = None
-        for f in os.listdir(data_product["path"]):
-            if not f.startswith(file_name):
-                continue
-            for extention in [".usd", ".usda", ".usdc"]:
-                if f.endswith(extention):
-                    assetPath = f'{data_product["path"]}/{f}'
-        if assetPath is None:
-            logger.warning(f'fichier usd introuvable:{data_product["path"]}/{file_name}')
-            self.status = True
-            return False
-        prim = stage.DefinePrim(f"/assets/{cat}/{name_asset}", "Xform")
-        targetPrimPath = Sdf.Path(f"/{name_asset}")
-        payloads = prim.GetPayloads()
-        payloads.AddPayload(assetPath=assetPath, primPath=targetPrimPath)"""
+            prim = stage.GetPrimAtPath(f'/assets/{info["cat"]}')
+            if not prim:
+                prim = stage.DefinePrim(f'/assets/{info["cat"]}', "Scope")
+            
+            name = self._reDifineName(f'/assets/{info["cat"]}', info["item"], [i.GetName() for i in prim.GetAllChildren()])
+
+
+            prim_payload = stage.DefinePrim(f'/assets/{info["cat"]}/{name}', "Xform")
+            targetPrimPath = Sdf.Path(f"/{info['item']}")
+            payloads = prim_payload.GetPayloads()
+            payloads.AddPayload(assetPath=file_path, primPath=targetPrimPath)
 
 
     def UpdateReference(self, data: dict) -> None:
@@ -229,7 +241,7 @@ class RefUpdaterCore():
             # ---------------- get file product -------------------
             file_path, showPath = self.findFile(info)
             if file_path is None:
-                self.emitdata(f"--- path not Found: {showPath[0]}/{showPath[1]}/<file>")
+                self.emitdata(f"--- path not Found: {showPath[0]}/{showPath[1]}/<file>", True)
                 continue
             
             # --------------- Recuperer le path de la reference pour la comparer avec le file_path trouver ---------------
@@ -244,7 +256,7 @@ class RefUpdaterCore():
                 cmds.file(file_path, loadReference=info["reference"])
                 self.emitdata(f"Référence Update  new scene: {file_path}\n")
             except Exception as e:
-                self.emitdata(f"Erreur lors de l'import de la référence :{file_path} {e}\n")
+                self.emitdata(f"Erreur lors de l'import de la référence :{file_path} {e}\n", True)
 
 
     # ---------------------------------- METHODE COMMUN ----------------------------------
@@ -343,6 +355,27 @@ class RefUpdaterCore():
 
         return grp
     
+    def _reDifineName(self, path: str, name: str, allNodes: list[str])-> str:
+        name = name.replace(" ", "_")
+        if name not in allNodes:
+            return name
+
+        match = re.match(r"^(.*?)(\d+)?$", name)
+        base = match.group(1)
+
+        used_indices = set()
+        for n in allNodes:
+            m = re.match(rf"^{re.escape(base)}(\d+)?$", n)
+            if m:
+                used_indices.add(int(m.group(1)) if m.group(1) else 0)
+
+        i = 1
+        while i in used_indices:
+            i += 1
+        
+        name = f'{base.split("/")[-1]}{i}'
+        return name
+    
 
 
     # ----------------------- methode pour les execution en standalone ------------------
@@ -400,6 +433,7 @@ class RefUpdaterCore():
         new_scene = findLastVersionScene(folderPath, scene)
         return folderPath + "/" + new_scene
     
-
-    def emitdata(self, msg):
+    def emitdata(self, msg, error=False):
         print(f"SIGNAL:{msg}", flush=sys.stdout)
+        if not self.standalone and error:
+            cmds.inViewMessage(amg=msg, pos = "midCenter", fade=True, bkc=0xcc0101)

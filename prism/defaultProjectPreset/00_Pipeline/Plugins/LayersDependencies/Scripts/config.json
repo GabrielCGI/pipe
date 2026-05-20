@@ -1,0 +1,11 @@
+{
+    "dependencies": {
+        "toRig" : ["RIG"],
+        "toSubstance" : ["LKD"]
+    },
+    "path_to_project_mapping": {
+        "yuka_2604": "Yuka",
+        "frederic_2603": "Frederic",
+        "shotgridPlayground_2604": "shotgridPlayground_2604"
+    }
+}

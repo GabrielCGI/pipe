@@ -29,6 +29,8 @@ class MainUI(qt.QMainWindow):
         self.Standalone = Standalone
         self.scene_file = scene_file
         self.core = None
+        self.importUSD = False
+        self.product_selected = None
         
 
         main_widget = qt.QWidget(self)
@@ -92,6 +94,11 @@ class MainUI(qt.QMainWindow):
         self.hide_product.toggled.connect(lambda nul: self.changeAllComboAssets(False))
         options.addWidget(self.hide_product)
 
+        self.importBtnUSD = qt.QCheckBox("import in USDShape")
+        self.importBtnUSD.setChecked(self.importUSD)
+        self.importBtnUSD.toggled.connect(self.ImportUSDSettings)
+        options.addWidget(self.importBtnUSD)
+
         self.select_product_show = qt.QComboBox()
         self.select_product_show.addItems(["Rigging", "Modeling", "USD", "toRig"])
         self.select_product_show.currentTextChanged.connect(lambda nul: self.changeAllComboAssets(True))
@@ -102,14 +109,18 @@ class MainUI(qt.QMainWindow):
         self.folder_assets = qt.QTabWidget()
         container.addWidget(self.folder_assets)
         self.createTabsImport()
+        self.select_product_show.setCurrentText(self.product_selected)
+    
+    def ImportUSDSettings(self) -> None:
+        self.importUSD = not self.importUSD
     
     def changeAllComboAssets(self, change):
-        new_product = self.select_product_show.currentText()
+        self.product_selected = self.select_product_show.currentText()
         for combo, titre_index, row in self.all_combo_product:
             if change:
-                combo.setCurrentText(new_product)
+                combo.setCurrentText(self.product_selected)
 
-            if new_product not in combo.currentText() and self.hide_product.isChecked():
+            if self.product_selected not in combo.currentText() and self.hide_product.isChecked():
                 self.folder_assets.widget(titre_index).setRowHidden(row, True)
             else:
                 self.folder_assets.widget(titre_index).setRowHidden(row, False)
@@ -352,7 +363,7 @@ class MainUI(qt.QMainWindow):
             return self.core.findAssetsInScene()
     
     def autoHiearchie(self):
-        data = {"import":{}, "update":{}}
+        data = {"importUSD":{}, "import":{}, "update":{}}
         
         if self.Standalone:
             self.prepareSubprocess(data)
@@ -362,9 +373,11 @@ class MainUI(qt.QMainWindow):
             self.core.ExecutionProcedure(data)
 
     def startScript(self):
-        data = {"import":{}, "update":{}}
-
-        data["import"] = self.getDataToImport()
+        data = {"importUSD":{}, "import":{}, "update":{}}
+        if self.importUSD:
+            data["importUSD"] = self.getDataToImport()
+        else:
+            data["import"] = self.getDataToImport()
         data["update"] = self.getDataToUpdate()
 
         if self.Standalone:

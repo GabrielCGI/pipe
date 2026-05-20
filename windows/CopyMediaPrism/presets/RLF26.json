@@ -6,7 +6,25 @@
             "nuke",
             "beauty"
         ],
-        "ANIM": [],
+        "COMPOSITING_VER": [
+            "Compo_VER"
+        ],
+        "COMPOSITING_CHINA_VER": [
+            "Compo_China_VER"
+        ],
+        "COMPOSITING_HOR": [
+            "Compo_HOR"
+        ],
+        "COMPOSITING_CHINA_HOR": [
+            "Compo_China_HOR"
+        ],
+        "COMPOSITING_SQ": [
+            "Compo_SQUARE",
+            "Compo_SQR"
+        ],
+        "COMPOSITING_CHINA_SQ": [
+            "Compo_China_SQUARE"
+        ],
         "LAYOUT": [
             "RoughtLayout",
             "layout",

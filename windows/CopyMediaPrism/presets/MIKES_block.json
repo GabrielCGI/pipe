@@ -18,6 +18,9 @@
         "COMPO": [
             "Compo",
             "slapComp"
+        ],
+        "COMPO_MASTER": [
+            "CompoMastering"
         ]
     },
     "source_path": "I:/mikes_2511",

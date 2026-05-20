@@ -905,7 +905,8 @@ class MainInterface(Qt.QMainWindow):
             self.log(f"Error loading layer from file: {e}", severity=logging.WARNING)
             return
         if layer:
-            layer.Reload(True)
+            if not layer.anonymous:
+                layer.Reload(True)
             self._usd_parser.parse(
                 layer=layer,
                 enable_recursion=self._enable_recursion,

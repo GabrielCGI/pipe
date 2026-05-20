@@ -117,7 +117,7 @@ class CustomExportUI():
             
             elif not from_sceneFile and not sublayer_checked:
                 if departement_select == "mod":
-                    self.selectAssets()
+                    self.selectAssets(departement_select)
                 else:
                     self.PrintMSG("Unable to find what to select")
             else:
@@ -127,7 +127,7 @@ class CustomExportUI():
 
         elif save_mode == "Custom":
             if product == "toRig" or product == "Modeling":
-                self.selectAssets()
+                self.selectAssets(product)
             else:
                 self.PrintMSG("Unable to find what to select")
 
@@ -166,7 +166,7 @@ class CustomExportUI():
         if product_name == "cameraToAnim":
             self.selectCamera()
         if product_name == "Rigging":
-            self.selectAssets()
+            self.selectAssets(product_name)
 
         self.state.b_add.click()
     # -------------------------------------------------- FOR EXPORT --------------------------------------------------
@@ -223,7 +223,7 @@ class CustomExportUI():
         
         cmds.select(nodes_find)
     
-    def selectAssets(self) -> None:
+    def selectAssets(self, product: str) -> None:
         import maya.cmds as cmds
 
         path_scene = self.state.core.getCurrentFileName()
@@ -233,6 +233,9 @@ class CustomExportUI():
             self.PrintMSG(f"the '|{asset_name}' group does not exist")
         
         cmds.select(asset_name)
+        if cmds.objExists("all_set") and product == "Rigging":
+            cmds.select("all_set", add=True, ne=True)
+            
     
     def hideWidget(self, layout: qt.QLayout)-> None:
         if isinstance(layout, qt.QGroupBox):

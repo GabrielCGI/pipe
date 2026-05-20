@@ -259,7 +259,7 @@ class MainInterface(Qt.QMainWindow):
         if self.openType == 'maya':
             updateModeItem = [
                 "Update from USDA file",
-                "Update Current Work Layer"
+                "Update Selected Target Layer"
             ]
         else:
             updateModeItem = [
@@ -713,8 +713,9 @@ class MainInterface(Qt.QMainWindow):
             return
 
         layer = stage.GetEditTarget().GetLayer()
-        content = layer.ExportToString()
-        self._usd_parser.parse_payloads(content)
+        self.load_USD(layer.identifier)
+        # content = layer.ExportToString()
+        # self._usd_parser.parse_payloads(content)
 
 
     def get_selected_stageMaya(self) -> Usd.Stage:
@@ -779,7 +780,8 @@ class MainInterface(Qt.QMainWindow):
             self.log(f"⚠️ Error loading layer from file: {e}")
             return
         if layer:
-            layer.Reload(True)
+            if not layer.anonymous:
+                layer.Reload(True)
             self._usd_parser.parse(
                 layer=layer,
                 enable_recursion=self._enable_recursion,
@@ -915,7 +917,7 @@ class MainInterface(Qt.QMainWindow):
         tab_number = self.QTabLayers.count()+1
         self.QTabLayers.addTab(asset_list, f"Layer {tab_number}")
         
-        layer_path = Path(layer.realPath)
+        layer_path = Path(layer.identifier)
         if len(layer_path.parts) < 3:
             layer_text = layer_path.parts[-1]
         else:
@@ -959,7 +961,8 @@ class MainInterface(Qt.QMainWindow):
             )
             self._usd_parser.set_assets_to_update(assets_to_update)
             self._usd_parser.update_layer(current_layer)
-            current_layer.Reload(True)
+            if not current_layer.anonymous:
+                current_layer.Reload(True)
                 
             if current_mode == 0:
                 self.load_USD(current_layer.identifier)
@@ -994,8 +997,9 @@ class MainInterface(Qt.QMainWindow):
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         backup = f"{current_layer.realPath}.{timestamp}.bak"
         
-        shutil.copy2(current_layer.realPath, backup)
-        self.log(f"🗂️ Backup created: {backup}")
+        if not current_layer.anonymous:
+            shutil.copy2(current_layer.realPath, backup)
+            self.log(f"🗂️ Backup created: {backup}")
         
         assets_to_update = self._assetsToUpdate[current_layer.identifier]
         self.log(
@@ -1003,7 +1007,8 @@ class MainInterface(Qt.QMainWindow):
         )
         self._usd_parser.set_assets_to_update(assets_to_update)
         self._usd_parser.update_layer(current_layer)
-        current_layer.Reload(True)
+        if not current_layer.anonymous:
+            current_layer.Reload(True)
             
         current_mode = self.updateMode.currentIndex()
         if current_mode == 0:

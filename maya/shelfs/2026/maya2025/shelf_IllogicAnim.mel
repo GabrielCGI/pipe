@@ -106,6 +106,40 @@ global proc shelf_IllogicAnim () {
         -commandRepeatable 1
         -flat 1
     ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "USD Maya Manager" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "USD Maya Manager" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/anim/USDMayaManager.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/anim/USDMayaManager.png"
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import USDMayaManager\nUSDMayaManager.mainRun()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
     separator
         -enable 1
         -width 12
@@ -621,6 +655,40 @@ global proc shelf_IllogicAnim () {
         -marginHeight 1
         -command "import maya.cmds as cmds\nfrom maya_to_keyframe_pro_2 import MayaToKeyframePro2\n\nMayaToKeyframePro2.display()" 
         -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "WIP Blast" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "WIP Blast" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/anim/WIP_blast.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/anim/WIP_blast.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nimport fastblast as blast\nimportlib.reload(blast)\nblast.main()"
+        -sourceType "python"
         -commandRepeatable 1
         -flat 1
     ;

@@ -292,13 +292,15 @@ class USDParser():
         self.changed = False
         UsdUtils.ModifyAssetPaths(layer, self._update_filter)
         if self.changed:
-            layer.Save()
+            if not layer.anonymous:
+                layer.Save()
             logger.debug("Update complete.")
             self._log("🎉 Update complete.")
         else:
             logger.debug("Nothing to update.")
             self._log("✅ Nothing to update.")
-        layer.Save()
+        if not layer.anonymous:
+            layer.Save()
         logger.debug('Update saved')
         self.changed = False
 
