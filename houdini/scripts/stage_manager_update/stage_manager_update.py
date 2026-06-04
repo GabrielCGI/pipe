@@ -1,4 +1,4 @@
-import hou
+import hou # type: ignore
 
 import re
 import os

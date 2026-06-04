@@ -184,25 +184,27 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     illogicMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
 
     # Scripts menus
-    ilcgMenu: nuke.Menu = illogicMenu.addMenu("ILGC Suite")
-    ilcgMenu.addCommand('ILGC_PosProject', 'nuke.createNode("ILGC_PosProject")')
-    ilgcSubTracker: nuke.Menu = ilcgMenu.addMenu("ILGC_OFTracker")
+    ilgcMenu: nuke.Menu = illogicMenu.addMenu("ILGC Suite")
+    ilgcMenu.addCommand('ILGC_PosProject', 'nuke.createNode("ILGC_PosProject")')
+    ilgcSubTracker: nuke.Menu = ilgcMenu.addMenu("ILGC_OFTracker")
     ilgcSubTracker.addCommand('ILGC_OFTracker', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/ILGC_OFTracker.nk\")')
     ilgcSubTracker.addCommand("Retrack Every Nodes", "ilcg_scripts.retrack_every_nodes()")
     ilgcSubTracker.addCommand("Retrack Selected Nodes", "ilcg_scripts.retrack_selected_nodes()")
-    ilcgMenu.addCommand('ILGC_ReadCleanup', 'nuke.createNode("ILGC_ReadCleanup")')
+    ilgcMenu.addCommand('ILGC_ReadCleanup', 'nuke.createNode("ILGC_ReadCleanup")')
+    ilgcMenu.addCommand('ILGC_Kuwahara', 'nuke.createNode("ILGC_Kuwahara")')
+    ilgcMenu.addCommand('ILGC_HexTile', 'nuke.createNode("ILGC_HexTile")')
 
     # Rivers menus
-    riversMenu: nuke.Menu = illogicMenu.addMenu("Rivers Tools")
-    riversMenu.addCommand('RIV_BringBackDetails', 'nuke.createNode("RIV_BringBackDetails")')
-    riversMenu.addCommand('RIV_EdgeCrushChar', 'nuke.createNode("RIV_EdgeCrushChar")')
-    riversMenu.addCommand('RIV_Kuwahara', 'nuke.createNode("RIV_Kuwahara")')
-    riversMenu.addCommand('RIV_ReadCleanup', 'nuke.createNode("RIV_ReadCleanup")')
-    riversMenu.addCommand('RIV_StylisedChar', 'nuke.createNode("RIV_StylisedChar")')
-    riversMenu.addCommand('RIV_ZDefocus', 'nuke.createNode("RIV_ZDefocus")')
-    riversMenu.addCommand('RIV_BrushScatter', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_BrushScatter.nk\")')
-    riversMenu.addCommand('RIV_ZDefocus_CHILD', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_ZDefocus_CHILD.nk\")')
-    riversMenu.addCommand('RIV_FixEyeSpec', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_FixEyeSpec.nk\")')
+    #riversMenu: nuke.Menu = illogicMenu.addMenu("Rivers Tools")
+    #riversMenu.addCommand('RIV_BringBackDetails', 'nuke.createNode("RIV_BringBackDetails")')
+    #riversMenu.addCommand('RIV_EdgeCrushChar', 'nuke.createNode("RIV_EdgeCrushChar")')
+    #riversMenu.addCommand('RIV_Kuwahara', 'nuke.createNode("RIV_Kuwahara")')
+    #riversMenu.addCommand('RIV_ReadCleanup', 'nuke.createNode("RIV_ReadCleanup")')
+    #riversMenu.addCommand('RIV_StylisedChar', 'nuke.createNode("RIV_StylisedChar")')
+    #riversMenu.addCommand('RIV_ZDefocus', 'nuke.createNode("RIV_ZDefocus")')
+    #riversMenu.addCommand('RIV_BrushScatter', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_BrushScatter.nk\")')
+    #riversMenu.addCommand('RIV_ZDefocus_CHILD', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_ZDefocus_CHILD.nk\")')
+    #riversMenu.addCommand('RIV_FixEyeSpec', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_FixEyeSpec.nk\")')
 
     # Tools menus
     toolsMenu: nuke.Menu = illogicMenu.addMenu("Tools")
@@ -283,3 +285,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
         # Set the path to the custom config
         nuke.root()['customOCIOConfigPath'].setValue(custom_config_path)
         print("End OCIO FIX ...")
+
+    # Nuke Ref Install
+    import nuke_ref
+    nuke_ref.install()

@@ -337,5 +337,39 @@ global proc shelf_Illogic () {
         -commandRepeatable 1
         -flat 1
     ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "import sys, importlib\npath = r\"R:/devGabi/meshyai\"\nif path not in sys.path:\n    sys.path.append(path)\nimport meshy_bridge.api as _api\nimport meshy_bridge.config as _cfg\nimport meshy_bridge.maya_tool as _t\nimportlib.reload(_api)\nimportlib.reload(_cfg)\nimportlib.reload(_t)\n_t.run()" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "import sys, importlib\npath = r\"R:/devGabi/meshyai\"\nif path not i..." 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/icons/meshyia.png" 
+        -image1 "R:/pipeline/pipe/maya/icons/meshyia.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import sys, importlib\npath = r\"R:/devGabi/meshyai\"\nif path not in sys.path:\n    sys.path.append(path)\nimport meshy_bridge.api as _api\nimport meshy_bridge.config as _cfg\nimport meshy_bridge.maya_tool as _t\nimportlib.reload(_api)\nimportlib.reload(_cfg)\nimportlib.reload(_t)\n_t.run()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
 
 } 

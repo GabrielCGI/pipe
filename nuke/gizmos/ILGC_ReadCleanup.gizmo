@@ -5,19 +5,24 @@ Gizmo {
  tile_color 0x540054ff
  note_font "Verdana Bold"
  addUserKnob {20 FORMAT}
- addUserKnob {26 "" +STARTLINE}
- addUserKnob {14 delivery_format l "Delivery Format :" R 0 100}
- delivery_format {{root.format.w} {root.format.h}}
+ addUserKnob {14 format_1 l "Format :" R 0 100}
+ format_1 {{root.format.w} {root.format.h}}
  addUserKnob {6 custom_format l "Custom Format ?" +STARTLINE}
- addUserKnob {26 "" +STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {14 overscan l "Overscan :" R 0 100}
+ overscan {{parent.CTRL_OVERSCAN.overscan_ctrl.w} {parent.CTRL_OVERSCAN.overscan_ctrl.h}}
+ addUserKnob {26 ""}
  addUserKnob {7 alpha_security l "Alpha Security :" R 0 0.1}
  alpha_security 0.01
+ addUserKnob {20 User}
+ addUserKnob {6 fromShotLoader -STARTLINE}
+ fromShotLoader true
 }
  Input {
   inputs 0
   name Input1
   xpos -732
-  ypos -1036
+  ypos -1217
  }
  Expression {
   temp_name0 security
@@ -25,8 +30,17 @@ Gizmo {
   expr3 "alpha < security ? 0 : alpha"
   name Expression1
   xpos -732
-  ypos -997
+  ypos -1115
  }
+ Crop {
+  box {{-parent.overscan.w} {-parent.overscan.h} {parent.input.format.w+parent.overscan.w} {parent.input.format.h+parent.overscan.h}}
+  reformat true
+  crop false
+  name Crop1
+  xpos -732
+  ypos -1091
+ }
+set N72774000 [stack 0]
  Group {
   name BBoxToFormat
   onCreate "n = nuke.thisNode()\ninputFormat = n.knob(\"inputFormat\")\ninputBBox = n.knob(\"inputBBox\")\ncrop = nuke.toNode(\"Crop6\")\ncropb = crop.knob('box')\noutputBBox = n.knob('outputBBox')\noutputBBoxCenter = n.knob(\"outputBBoxCenter\")\n\ninputFormat.setFlag(0x0000000000008000)\ninputBBox.setFlag(0x0000000000008000)\ncropb.setFlag(0x0000000000008000)\noutputBBox.setFlag(0x0000000000008000)\noutputBBoxCenter.setFlag(0x0000000000008000)\n\nn = nuke.thisNode()\nn.knob(\"overscan\").setRange(0,400)\nn.knob(\"overscanPercent\").setRange(1,4)"
@@ -35,7 +49,7 @@ Gizmo {
   note_font "Verdana Bold"
   note_font_color 0xffffffff
   xpos -732
-  ypos -966
+  ypos -1067
   addUserKnob {20 CropBBox}
   addUserKnob {4 type l Type +INVISIBLE M {"To Format" "To BBox"}}
   addUserKnob {41 intersect T Crop6.intersect}
@@ -73,15 +87,15 @@ Gizmo {
    xpos 295
    ypos 462
   }
-set Ned641c00 [stack 0]
+set N3a30f000 [stack 0]
   Dot {
    name Dot1
    note_font_size 41
    xpos -160
    ypos 462
   }
-set N12eb5800 [stack 0]
-push $Ned641c00
+set Nfcbb9400 [stack 0]
+push $N3a30f000
   Crop {
    box {{curve} {curve} {input.width} {input.height}}
    crop {{parent.blackOutside}}
@@ -91,7 +105,7 @@ push $Ned641c00
    addUserKnob {20 User}
    addUserKnob {22 cropToBbox l "Crop to Bounding Box" -STARTLINE T codeBBox()}
   }
-set N12eb5400 [stack 0]
+set Nf41e9000 [stack 0]
   Remove {
    operation keep
    channels none
@@ -99,7 +113,7 @@ set N12eb5400 [stack 0]
    xpos 120
    ypos 504
   }
-set N12eb5000 [stack 0]
+set Nf41e8800 [stack 0]
   Transform {
    scale {{parent.overscanPercent} {parent.overscanPercent}}
    center {{input.bbox.r/2} {input.bbox.t/2}}
@@ -108,7 +122,7 @@ set N12eb5000 [stack 0]
    xpos 120
    ypos 555
   }
-push $N12eb5000
+push $Nf41e8800
   AdjBBox {
    numpixels {{parent.overscan} {parent.overscan}}
    name AdjBBox1
@@ -134,7 +148,7 @@ push $N12eb5000
    ypos 647
    disable {{!parent.Crop6.intersect}}
   }
-push $N12eb5800
+push $Nfcbb9400
   CopyBBox {
    inputs 2
    name CopyBBox1
@@ -153,7 +167,7 @@ push $N12eb5800
    xpos -160
    ypos 769
   }
-push $N12eb5400
+push $Nf41e9000
   Switch {
    inputs 2
    which {{"overscanType == 0 ? overscan.w != 0 || overscan.h != 0 : overscanPercent.w != 1 || overscanPercent.h != 1 ? 1 : 0"}}
@@ -162,13 +176,13 @@ push $N12eb5400
    xpos 261
    ypos 759
   }
-set N22497700 [stack 0]
+set Nabcd6800 [stack 0]
   Output {
    name Output1
    xpos 261
    ypos 921
   }
-push $N22497700
+push $Nabcd6800
   NoOp {
    name OutputBBox1
    xpos 378
@@ -185,13 +199,13 @@ push $N22497700
   xpos -698
   ypos -910
  }
-set N30e2800 [stack 0]
+set N8ceb400 [stack 0]
  Dot {
   name Dot1
   xpos -876
   ypos -910
  }
-set Ne2b1e000 [stack 0]
+set N38483000 [stack 0]
  Dot {
   name Dot2
   xpos -1019
@@ -213,15 +227,15 @@ add_layer {CryptoPrimitives02 CryptoPrimitives02.red CryptoPrimitives02.green Cr
  }
  Reformat {
   type "to box"
-  box_width {{parent.delivery_format.w}}
-  box_height {{parent.delivery_format.h}}
+  box_width {{parent.format_1.w}}
+  box_height {{parent.format_1.h}}
   box_fixed true
   filter impulse
   name Reformat2
   xpos -1053
   ypos -837
  }
-push $Ne2b1e000
+push $N38483000
 add_layer {CryptoMaterials00 CryptoMaterials00.red CryptoMaterials00.green CryptoMaterials00.blue CryptoMaterials00.alpha}
 add_layer {CryptoMaterials01 CryptoMaterials01.red CryptoMaterials01.green CryptoMaterials01.blue CryptoMaterials01.alpha}
 add_layer {CryptoMaterials02 CryptoMaterials02.red CryptoMaterials02.green CryptoMaterials02.blue CryptoMaterials02.alpha}
@@ -237,8 +251,8 @@ add_layer {CryptoMaterials02 CryptoMaterials02.red CryptoMaterials02.green Crypt
  }
  Reformat {
   type "to box"
-  box_width {{parent.delivery_format.w}}
-  box_height {{parent.delivery_format.h}}
+  box_width {{parent.format_1.w}}
+  box_height {{parent.format_1.h}}
   box_fixed true
   filter impulse
   name Reformat3
@@ -257,16 +271,17 @@ add_layer {CryptoMaterials02 CryptoMaterials02.red CryptoMaterials02.green Crypt
   xpos -985
   ypos -772
  }
-push $N30e2800
+push $N8ceb400
  Reformat {
   type "to box"
-  box_width {{parent.delivery_format.w}}
-  box_height {{parent.delivery_format.h}}
+  box_width {{parent.format_1.w}}
+  box_height {{parent.format_1.h}}
   box_fixed true
   name Reformat1
   xpos -732
   ypos -877
  }
+set N8f70e400 [stack 0]
  Copy {
   inputs 2
   from0 -rgba.alpha
@@ -278,9 +293,49 @@ push $N30e2800
   xpos -732
   ypos -778
  }
+add_layer {depth_extra depth_extra.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 depth_extra
+  out1 depth
+  fromInput2 {{0} B}
+  mappings "1 depth_extra.z 0 0 depth.Z 0 0"
+  name Shuffle1
+  label "\[value in1]"
+  xpos -732
+  ypos -730
+ }
+ Remove {
+  channels depth_extra
+  name Remove3
+  xpos -732
+  ypos -694
+ }
  Output {
   name Output1
   xpos -732
   ypos -540
+ }
+push $N8f70e400
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push $N72774000
+ Viewer {
+  inputs 10
+  frame_range 1001-1041
+  fps 25
+  input_number 9
+  viewerProcess "ACES 1.0 - SDR Video (sRGB - Display)"
+  input_process false
+  monitorOutNDISenderName "Nuke - SQ0010-SH0010_Compo_v004 - Viewer1"
+  name Viewer1
+  xpos -622
+  ypos -1091
  }
 end_group

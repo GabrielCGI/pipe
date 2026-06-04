@@ -1,0 +1,52 @@
+#! C:/Program Files/Nuke15.1v5/nuke-15.1.5.dll -nx
+version 15.1 v5
+Gizmo {
+ tile_color 0x540054ff
+ note_font "Verdana Bold"
+ addUserKnob {20 HexTile}
+ addUserKnob {41 "Local GPU: " T BlinkScript8.gpuName}
+ addUserKnob {41 "Use GPU if Available" T BlinkScript8.useGPUIfAvailable}
+ addUserKnob {26 ""}
+ addUserKnob {6 checkPattern +STARTLINE}
+ addUserKnob {7 size R 0 10}
+ size 1.5
+ addUserKnob {7 hexScale R 0 5}
+ hexScale 4.5
+ addUserKnob {7 blend}
+ blend 0.4
+ addUserKnob {7 rotation R -180 180}
+ addUserKnob {3 seed}
+ seed 1
+}
+ Input {
+  inputs 0
+  name src
+  xpos 76
+  ypos 5
+ }
+ BlinkScript {
+  recompileCount 2
+  ProgramGroup 1
+  KernelDescription "3 \"HexTile\" iterate pixelWise a029c39edc94a2aa69a1761bf885c29107878b77c9dc4b864372e0be9a3d3fb5 2 \"src\" Read Random \"dst\" Write Point 7 \"size\" Float 1 AACAPw== \"hexScale\" Float 1 AACAPw== \"blendContrast\" Float 1 AACAPw== \"randomRotation\" Bool 1 AA== \"rotationAmount\" Float 1 AACAPw== \"seed\" Float 1 AAAAAA== \"checkPattern\" Bool 1 AA== 7 \"size\" 1 1 Default \"hexScale\" 1 1 Default \"blendContrast\" 1 1 Default \"randomRotation\" 1 1 Default \"rotationAmount\" 1 1 Default \"seed\" 1 1 Default \"checkPattern\" 1 1 Default 4 \"srcW\" Float 1 1 AAAAAA== \"srcH\" Float 1 1 AAAAAA== \"ox\" Float 1 1 AAAAAA== \"oy\" Float 1 1 AAAAAA=="
+  kernelSource "// ---------------------------------------------------------------------------\n// HexTile.blink\n// Tiling hexagonal 2D facon \"Tile node\" mais sans repetition visible.\n// Technique : hex-tiling (Inigo Quilez / Mikkelsen).\n//   - grille triangulaire/hexagonale posee sur les UV\n//   - chaque hexagone decale la lecture texture d'un offset aleatoire\n//   - blend des 3 sommets voisins par poids barycentriques\n// ---------------------------------------------------------------------------\n\nkernel HexTile : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeClamped> src;   // texture source a tiler\n  Image<eWrite> dst;                               // sortie\n\n  param:\n    float size;            // zoom de la texture (1 = taille native). >1 = plus gros\n    float hexScale;        // densite des hexagones par rapport a la tuile\n    float blendContrast;   // 1 = lineaire ; >1 durcit les transitions (moins de ghosting)\n    bool  randomRotation;  // rotation aleatoire de la texture par hexagone\n    float rotationAmount;  // intensite de la rotation (0..1)\n    float seed;            // graine du random\n    bool  checkPattern;    // previsualisation : couleur d'ID par hexagone (ignore la texture)\n\n  local:\n    float srcW;\n    float srcH;\n    float ox;\n    float oy;\n\n  void define() \{\n    defineParam(size,           \"size\",            1.0f);\n    defineParam(hexScale,       \"hexScale\",        1.0f);\n    defineParam(blendContrast,  \"blendContrast\",   1.0f);\n    defineParam(randomRotation, \"randomRotation\",  false);\n    defineParam(rotationAmount, \"rotationAmount\",  1.0f);\n    defineParam(seed,           \"seed\",            0.0f);\n    defineParam(checkPattern,   \"checkPattern\",    false);\n  \}\n\n  void init() \{\n    srcW = float(src.bounds.width());\n    srcH = float(src.bounds.height());\n    ox   = float(src.bounds.x1);\n    oy   = float(src.bounds.y1);\n  \}\n\n  // hash 2D -> float2 dans \[0,1)\n  float2 hash2(float2 p) \{\n    p.x = p.x + seed * 0.1234f;\n    p.y = p.y + seed * 0.7654f;\n    float a = 127.1f * p.x + 269.5f * p.y;\n    float b = 311.7f * p.x + 183.3f * p.y;\n    float2 r;\n    r.x = sin(a) * 43758.5453f;\n    r.y = sin(b) * 43758.5453f;\n    r.x = r.x - floor(r.x);\n    r.y = r.y - floor(r.y);\n    return r;\n  \}\n\n  // hash 2D -> float3 dans \[0,1) : couleur d'ID par hexagone\n  float3 hash3(float2 p) \{\n    p.x = p.x + seed * 0.1234f;\n    p.y = p.y + seed * 0.7654f;\n    float a = 127.1f * p.x + 269.5f * p.y;\n    float b = 311.7f * p.x + 183.3f * p.y;\n    float d = 419.2f * p.x + 371.9f * p.y;\n    float3 r;\n    r.x = sin(a) * 43758.5453f; r.x = r.x - floor(r.x);\n    r.y = sin(b) * 43758.5453f; r.y = r.y - floor(r.y);\n    r.z = sin(d) * 43758.5453f; r.z = r.z - floor(r.z);\n    // remap pour eviter les couleurs trop sombres et mieux distinguer les cellules\n    r.x = 0.25f + 0.75f * r.x;\n    r.y = 0.25f + 0.75f * r.y;\n    r.z = 0.25f + 0.75f * r.z;\n    return r;\n  \}\n\n  float2 rot2(float2 p, float ang) \{\n    float c = cos(ang);\n    float s = sin(ang);\n    float2 r;\n    r.x = c * p.x - s * p.y;\n    r.y = s * p.x + c * p.y;\n    return r;\n  \}\n\n  // lecture de la source en repetition (wrap) a partir d'UV en espace texture\n  float4 sampleTiled(float2 uv) \{\n    float2 f;\n    f.x = uv.x - floor(uv.x);   // fract -> \[0,1)\n    f.y = uv.y - floor(uv.y);\n    float sx = ox + f.x * srcW;\n    float sy = oy + f.y * srcH;\n    return bilinear(src, sx, sy);\n  \}\n\n  void process(int2 pos) \{\n    float sz = max(size, 0.0001f);\n\n    // UV en espace texture : repete tous les 1.0\n    float2 uv;\n    uv.x = float(pos.x) / (srcW * sz);\n    uv.y = float(pos.y) / (srcH * sz);\n\n    // --- grille hexagonale (via grille simplex/triangle) ---\n    float2 g;\n    g.x = uv.x * hexScale * 3.464101615f;   // 2*sqrt(3)\n    g.y = uv.y * hexScale * 3.464101615f;\n\n    // skew vers l'espace triangulaire\n    float2 sk;\n    sk.x = g.x - 0.57735027f * g.y;\n    sk.y = 1.15470054f * g.y;\n\n    float2 baseId;\n    baseId.x = floor(sk.x);\n    baseId.y = floor(sk.y);\n\n    float2 fr;\n    fr.x = sk.x - baseId.x;\n    fr.y = sk.y - baseId.y;\n    float fz = 1.0f - fr.x - fr.y;\n\n    float s  = (fz < 0.0f) ? 1.0f : 0.0f;\n    float s2 = 2.0f * s - 1.0f;\n\n    // poids barycentriques\n    float w1 = -fz * s2;\n    float w2 = s - fr.y * s2;\n    float w3 = s - fr.x * s2;\n\n    // sommets (= centres d'hexagones) en coords entieres de grille\n    float2 v1; v1.x = baseId.x + s;        v1.y = baseId.y + s;\n    float2 v2; v2.x = baseId.x + s;        v2.y = baseId.y + (1.0f - s);\n    float2 v3; v3.x = baseId.x + (1.0f - s); v3.y = baseId.y + s;\n\n    // --- previsualisation du pattern (ID map des hexagones) ---\n    if (checkPattern) \{\n      // poids contrastes pour montrer la cellule dominante (= forme hexagonale nette)\n      float pw1 = (blendContrast != 1.0f) ? pow(max(w1, 0.0f), blendContrast) : w1;\n      float pw2 = (blendContrast != 1.0f) ? pow(max(w2, 0.0f), blendContrast) : w2;\n      float pw3 = (blendContrast != 1.0f) ? pow(max(w3, 0.0f), blendContrast) : w3;\n      float pws = pw1 + pw2 + pw3;\n      if (pws > 0.0f) \{ pw1 /= pws; pw2 /= pws; pw3 /= pws; \}\n\n      // couleur de la cellule dominante -> on voit les hexagones pleins\n      float3 col;\n      if (pw1 >= pw2 && pw1 >= pw3) \{\n        col = hash3(v1);\n      \} else if (pw2 >= pw3) \{\n        col = hash3(v2);\n      \} else \{\n        col = hash3(v3);\n      \}\n\n      // assombrit les zones de blend (2 cellules proches) -> revele les frontieres\n      float top    = max(pw1, max(pw2, pw3));\n      float border = clamp((top - 0.5f) * 2.0f, 0.0f, 1.0f); // 0 sur la frontiere, 1 au centre\n      col.x *= (0.35f + 0.65f * border);\n      col.y *= (0.35f + 0.65f * border);\n      col.z *= (0.35f + 0.65f * border);\n\n      dst() = float4(col.x, col.y, col.z, 1.0f);\n      return;\n    \}\n\n    // offsets aleatoires par hexagone (en espace texture)\n    float2 o1 = hash2(v1);\n    float2 o2 = hash2(v2);\n    float2 o3 = hash2(v3);\n\n    float2 uv1 = uv;\n    float2 uv2 = uv;\n    float2 uv3 = uv;\n\n    if (randomRotation) \{\n      float a1 = o1.x * 6.2831853f * rotationAmount;\n      float a2 = o2.x * 6.2831853f * rotationAmount;\n      float a3 = o3.x * 6.2831853f * rotationAmount;\n      uv1 = rot2(uv, a1);\n      uv2 = rot2(uv, a2);\n      uv3 = rot2(uv, a3);\n    \}\n\n    uv1.x = uv1.x + o1.x; uv1.y = uv1.y + o1.y;\n    uv2.x = uv2.x + o2.x; uv2.y = uv2.y + o2.y;\n    uv3.x = uv3.x + o3.x; uv3.y = uv3.y + o3.y;\n\n    // durcissement optionnel des transitions\n    if (blendContrast != 1.0f) \{\n      w1 = pow(max(w1, 0.0f), blendContrast);\n      w2 = pow(max(w2, 0.0f), blendContrast);\n      w3 = pow(max(w3, 0.0f), blendContrast);\n    \}\n    float wsum = w1 + w2 + w3;\n    if (wsum > 0.0f) \{ w1 /= wsum; w2 /= wsum; w3 /= wsum; \}\n\n    float4 c = w1 * sampleTiled(uv1)\n             + w2 * sampleTiled(uv2)\n             + w3 * sampleTiled(uv3);\n\n    dst() = c;\n  \}\n\};\n"
+  rebuild ""
+  HexTile_size {{lerp(0,0,10,1.75,parent.size)}}
+  HexTile_hexScale {{lerp(0,-10,5,0,parent.hexScale)}}
+  HexTile_blendContrast {{lerp(0,0,1,25,parent.blend)}}
+  HexTile_randomRotation true
+  HexTile_rotationAmount {{lerp(-180,0,180,2,parent.rotation)}}
+  HexTile_seed {{parent.seed}}
+  HexTile_checkPattern {{parent.checkPattern}}
+  outputGroup 0
+  format "2048 2048 0 0 2048 2048 1 square_2K"
+  rebuild_finalise ""
+  name BlinkScript8
+  xpos 76
+  ypos 61
+ }
+ Output {
+  name Output1
+  xpos 76
+  ypos 145
+ }
+end_group

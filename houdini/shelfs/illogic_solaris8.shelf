@@ -15,8 +15,11 @@
     <memberToolshelf name="illogicSolaris"/>
     <memberToolshelf name="illogicShading"/>
     <memberToolshelf name="illogicFxCfx"/>
+    <memberToolshelf name="illogic_cop"/>
+    <memberToolshelf name="illogic_sop"/>
     <memberToolshelf name="prism"/>
     <memberToolshelf name="particles"/>
+    <memberToolshelf name="guidemodify"/>
   </shelfSet>
 
   <toolshelf name="illogicSolaris" label="Illogic Solaris">
@@ -24,16 +27,12 @@
     <memberTool name="stage_manager_update"/>
     <memberTool name="copy"/>
     <memberTool name="paste"/>
-    <memberTool name="autoconnect_ui"/>
-    <memberTool name="Lib_Importer"/>
     <memberTool name="update_assets_USD"/>
     <memberTool name="update_assets_USD_NEW"/>
     <memberTool name="usd_update_check"/>
     <memberTool name="restart_houdini"/>
     <memberTool name="set_node_parameters"/>
-    <memberTool name="blast"/>
     <memberTool name="select_prim_with_attributes"/>
-    <memberTool name="create OUT"/>
   </toolshelf>
 
   <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
@@ -111,17 +110,6 @@ reload(stage_manager)
 stage_manager.checkUpdate()]]></script>
   </tool>
 
-  <tool name="Lib_Importer" label="Lib Importer" icon="R:/pipeline/pipe/houdini/shelfs/icons/lib_importer.png">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\Lib_Importer")
-
-import Lib_Importer.Lib_Importer as Lib_Importer
-reload(Lib_Importer)
-Lib_Importer.libImport()]]></script>
-  </tool>
-
   <tool name="restart_houdini" label="Restart" icon="hicon:/SVGIcons.index?BUTTONS_cook.svg">
     <helpText><![CDATA[= Restart =
 
@@ -132,12 +120,6 @@ Lib_Importer.libImport()]]></script>
 restart.restart_houdini()]]></script>
   </tool>
 
-  <tool name="autoconnect_ui" label="Auto Connect" icon="R:/pipeline/pipe/houdini/shelfs/icons/autoconnect.png">
-    <script scriptType="python"><![CDATA[import autoconnect
-
-autoconnect.main()]]></script>
-  </tool>
-
   <tool name="set_node_parameters" label="Set Nodes Parameters" icon="hicon:/SVGIcons.index?VOP_complement.svg">
     <script scriptType="python"><![CDATA[import set_lights_parameters.set_lights_parameters as set_lights
 from imp import reload
@@ -145,17 +127,6 @@ from imp import reload
 reload(set_lights)
 
 set_lights.showUI()]]></script>
-  </tool>
-
-  <tool name="blast" label="Blast" icon="hicon:/SVGIcons.index?SOP_blast.svg">
-    <script scriptType="python"><![CDATA[import blast.blast as blast
-import blast.prim_tree as pt
-
-import imp
-
-imp.reload(blast)
-imp.reload(pt)
-blast.run()]]></script>
   </tool>
 
   <tool name="select_prim_with_attributes" label="Select Prims With Attributes" icon="hicon:/SVGIcons.index?book.svg">
@@ -200,7 +171,25 @@ UD.reload_modules()
 UD.checkHoudiniImportsUpdates()]]></script>
   </tool>
 
-  <tool name="create OUT" label="Create a out null and object merge" icon="PLASMA_App">
+  <tool name="update_assets_USD_NEW" label="Update Assets USD (New)" icon="hicon:/SVGIcons.index?NETVIEW_lop_info.svg">
+    <script scriptType="python"><![CDATA[import sys
+
+MODULE_PATH = "r:/pipeline/pipe/prism"
+    
+if not MODULE_PATH in sys.path:
+    sys.path.insert(0, MODULE_PATH)
+
+import USDToolBox_pck
+import PrismInit
+
+USDToolBox_pck.updateAssetsUSD_new.reload_modules()
+USDToolBox_pck.updateAssetsUSD_new.startUpdateAssetsUSD(
+    'houdini',
+    prism_core=PrismInit.pcore
+)]]></script>
+  </tool>
+
+  <tool name="create_out" label="QuicK Object Merge" icon="hicon:/SVGIcons.index?SOP_merge.svg">
     <script scriptType="python"><![CDATA[import hou
 import random
 
@@ -288,21 +277,14 @@ create_out_and_merge_from_selection()
 ]]></script>
   </tool>
 
-  <tool name="update_assets_USD_NEW" label="Update Assets USD (New)" icon="hicon:/SVGIcons.index?NETVIEW_lop_info.svg">
-    <script scriptType="python"><![CDATA[import sys
+  <tool name="recursive_blast" label="Recursive Blast" icon="hicon:/SVGIcons.index?SOP_blast.svg">
+    <script scriptType="python"><![CDATA[import blast.blast as blast
+import blast.prim_tree as pt
 
-MODULE_PATH = "r:/pipeline/pipe/prism"
-    
-if not MODULE_PATH in sys.path:
-    sys.path.insert(0, MODULE_PATH)
+import importlib
 
-import USDToolBox_pck
-import PrismInit
-
-USDToolBox_pck.updateAssetsUSD_new.reload_modules()
-USDToolBox_pck.updateAssetsUSD_new.startUpdateAssetsUSD(
-    'houdini',
-    prism_core=PrismInit.pcore
-)]]></script>
+importlib.reload(blast)
+importlib.reload(pt)
+blast.run()]]></script>
   </tool>
 </shelfDocument>

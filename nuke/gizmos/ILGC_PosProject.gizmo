@@ -16,7 +16,6 @@ Gizmo {
  addUserKnob {6 premult +STARTLINE}
  premult true
  addUserKnob {20 grp_stmap l "STMap setting" n 1}
- grp_stmap 0
  addUserKnob {41 channels l "apply channels" T DVProjection.channels}
  addUserKnob {41 filter T DVProjection.filter}
  addUserKnob {41 black_outside l "black outside" T DVProjection.black_outside}
@@ -28,7 +27,7 @@ Gizmo {
   xpos 0
   ypos -232
  }
-set Nd6ab3c00 [stack 0]
+set Nd7a05c00 [stack 0]
  Dot {
   name Dot1
   xpos 363
@@ -37,7 +36,7 @@ set Nd6ab3c00 [stack 0]
  Dot {
   name Dot2
   xpos 363
-  ypos 112
+  ypos 73
  }
  Input {
   inputs 0
@@ -96,7 +95,7 @@ set Nd6ab3c00 [stack 0]
   d_fstop 16
   addUserKnob {26 version l " " t "Updated 5 April 2020" T "<span style=\"color:#666\"><br/><b>DummyCam v1.1</b> - <a href=\"http://www.adrianpueyo.com\" style=\"color:#666;text-decoration: none;\">adrianpueyo.com</a>, 2019-2020</span>"}
  }
-push $Nd6ab3c00
+push $Nd7a05c00
  Group {
   inputs 2
   name DeepFromPosition
@@ -124,19 +123,19 @@ push $Nd6ab3c00
    xpos 34
    ypos 251
   }
-set N110f2c00 [stack 0]
+set Nf324e400 [stack 0]
   Dot {
    name Dot4
    xpos 134
    ypos 251
   }
-set N110f3800 [stack 0]
+set Nf324e800 [stack 0]
   Dot {
    name Dot3
    xpos 134
    ypos 661
   }
-push $N110f3800
+push $Nf324e800
   Dot {
    name Dot1
    xpos 235
@@ -187,7 +186,7 @@ push $N110f3800
    xpos 201
    ypos 749
   }
-push $N110f2c00
+push $Nf324e400
   ShuffleCopy {
    inputs 2
    red blue
@@ -505,19 +504,19 @@ add_layer {deepPosition deepPosition.red deepPosition.green deepPosition.blue de
    xpos 34
    ypos 404
   }
-set N3a380400 [stack 0]
+set N2fc53800 [stack 0]
   Dot {
    name Dot12
    xpos 215
    ypos 404
   }
-set N3a381c00 [stack 0]
+set N2fc53c00 [stack 0]
   Dot {
    name Dot33
    xpos 1868
    ypos 404
   }
-set N3a381400 [stack 0]
+set N72268000 [stack 0]
   Dot {
    name Dot14
    xpos 2742
@@ -539,13 +538,13 @@ set N3a381400 [stack 0]
    xpos 2742
    ypos 1777
   }
-set N3a380800 [stack 0]
+set N72268c00 [stack 0]
   Dot {
    name Dot28
    xpos 3150
    ypos 1777
   }
-set N5e100800 [stack 0]
+set N72269000 [stack 0]
   Dot {
    name Dot13
    xpos 3732
@@ -586,7 +585,7 @@ set N5e100800 [stack 0]
    xpos 3340
    ypos 1989
   }
-set N4b5fa000 [stack 0]
+set N465aa800 [stack 0]
   Remove {
    operation keep
    channels rgb
@@ -601,7 +600,7 @@ set N4b5fa000 [stack 0]
    xpos 3306
    ypos 2158
   }
-push $N5e100800
+push $N72269000
   DeepRecolor {
    inputs 2
    channels {deepNormal.red deepNormal.green deepNormal.blue none}
@@ -625,7 +624,7 @@ push $N5e100800
    xpos 3150
    ypos 3330
   }
-push $N4b5fa000
+push $N465aa800
   Remove {
    operation keep
    channels rgb
@@ -651,7 +650,7 @@ push $N4b5fa000
    xpos 2888
    ypos 2144
   }
-push $N3a380800
+push $N72268c00
   DeepRecolor {
    inputs 2
    channels {deepNormal.red deepNormal.green deepNormal.blue none}
@@ -675,13 +674,13 @@ push $N3a380800
    xpos 2742
    ypos 3338
   }
-push $N3a381400
+push $N72268000
   Dot {
    name Dot22
    xpos 1868
    ypos 1064
   }
-set N107eec00 [stack 0]
+set Nd5337800 [stack 0]
   Group {
    name DeepPositionToImage1
    tile_color 0x3d99ff
@@ -705,7 +704,7 @@ set N107eec00 [stack 0]
     xpos 542
     ypos 31
    }
-set Nd6ab2c00 [stack 0]
+set N607f4000 [stack 0]
    DeepExpression {
     chans1 none
     rgba.red deepPosition.red
@@ -721,7 +720,7 @@ set Nd6ab2c00 [stack 0]
     xpos 656
     ypos 185
    }
-push $Nd6ab2c00
+push $N607f4000
    DeepToImage {
     name DeepToImage1
     xpos 508
@@ -764,7 +763,7 @@ push $Nd6ab2c00
    xpos 2215
    ypos 1316
   }
-set Nd06cc000 [stack 0]
+set Nf1ba6000 [stack 0]
   Dot {
    name Dot32
    xpos 2080
@@ -775,7 +774,7 @@ set Nd06cc000 [stack 0]
    xpos 2080
    ypos 1670
   }
-push $Nd06cc000
+push $Nf1ba6000
   BlinkScript {
    recompileCount 382
    ProgramGroup 1
@@ -828,7 +827,7 @@ push $Nd06cc000
    xpos 2215
    ypos 2276
   }
-push $N107eec00
+push $Nd5337800
   DeepExpression {
    chans0 {deepPosition.red deepPosition.green deepPosition.blue none}
    chans1 none
@@ -881,7 +880,7 @@ push $N107eec00
    xpos 1868
    ypos 3354
   }
-push $N3a381c00
+push $N2fc53c00
   Group {
    name DeepPositionToImage2
    tile_color 0x3d99ff
@@ -905,7 +904,7 @@ push $N3a381c00
     xpos 542
     ypos 31
    }
-set N4c96f400 [stack 0]
+set Nb2d08000 [stack 0]
    DeepExpression {
     chans1 none
     rgba.red deepPosition.red
@@ -921,7 +920,7 @@ set N4c96f400 [stack 0]
     xpos 656
     ypos 185
    }
-push $N4c96f400
+push $Nb2d08000
    DeepToImage {
     name DeepToImage1
     xpos 508
@@ -956,43 +955,43 @@ push $N4c96f400
    xpos 215
    ypos 850
   }
-set N2592a800 [stack 0]
+set Nb2d09c00 [stack 0]
   Dot {
    name Dot5
    xpos 342
    ypos 850
   }
-set N72a8b800 [stack 0]
+set N19a04000 [stack 0]
   Dot {
    name Dot7
    xpos 465
    ypos 850
   }
-set N72a8ac00 [stack 0]
+set N19a04400 [stack 0]
   Dot {
    name Dot8
    xpos 592
    ypos 850
   }
-set N458a5c00 [stack 0]
+set N19a04800 [stack 0]
   Dot {
    name Dot11
    xpos 722
    ypos 850
   }
-set N59d64000 [stack 0]
+set N19a04c00 [stack 0]
   Dot {
    name Dot16
    xpos 848
    ypos 850
   }
-set N59d64400 [stack 0]
+set N19a05000 [stack 0]
   Dot {
    name Dot18
    xpos 994
    ypos 850
   }
-set N75b5e400 [stack 0]
+set N19a05400 [stack 0]
   Dot {
    name Dot20
    xpos 1120
@@ -1017,7 +1016,7 @@ set N75b5e400 [stack 0]
    xpos 1120
    ypos 2404
   }
-push $N75b5e400
+push $N19a05400
   Transform {
    translate {-1 1}
    name Transform7
@@ -1037,7 +1036,7 @@ push $N75b5e400
    xpos 994
    ypos 2318
   }
-push $N59d64400
+push $N19a05000
   Transform {
    translate {1 1}
    name Transform6
@@ -1057,7 +1056,7 @@ push $N59d64400
    xpos 848
    ypos 2140
   }
-push $N59d64000
+push $N19a04c00
   Transform {
    translate {-1 -1}
    name Transform5
@@ -1077,7 +1076,7 @@ push $N59d64000
    xpos 722
    ypos 2054
   }
-push $N458a5c00
+push $N19a04800
   Transform {
    translate {0 -1}
    name Transform3
@@ -1100,7 +1099,7 @@ push $N458a5c00
    xpos 592
    ypos 1686
   }
-push $N72a8ac00
+push $N19a04400
   Transform {
    translate {0 1}
    name Transform4
@@ -1123,7 +1122,7 @@ push $N72a8ac00
    xpos 465
    ypos 1573
   }
-push $N72a8b800
+push $N19a04000
   Transform {
    translate {-1 0}
    name Transform2
@@ -1146,7 +1145,7 @@ push $N72a8b800
    xpos 342
    ypos 1382
   }
-push $N2592a800
+push $Nb2d09c00
   Transform {
    translate {1 0}
    name Transform1
@@ -1168,7 +1167,7 @@ push $N2592a800
    xpos 215
    ypos 1269
   }
-push $N3a380400
+push $N2fc53800
   DeepExpression {
    chans0 {deepPosition.red deepPosition.green deepPosition.blue none}
    chans1 none
@@ -1330,7 +1329,7 @@ push $N3a380400
    addUserKnob {1 tempB}
    tempB "(pi/2) - atan( sqrt( pow2(red-deepPosition.red) + pow2(green-deepPosition.green) ) / -(blue-deepPosition.blue) )"
   }
-set N568e000 [stack 0]
+set N731c3400 [stack 0]
   DeepExpression {
    chans0 {deepNormal.red -deepNormal.green deepNormal.blue none}
    chans1 none
@@ -1425,7 +1424,7 @@ set N568e000 [stack 0]
    addUserKnob {20 User}
    addUserKnob {4 normal_data l "output normal data" M {"generated deep normal (est from position) " "generated 2D normal (est from position) " "input 2D normal (camera space) " "input 2D normal (world space) " "shuffle input deep normal (world space)" ""}}
   }
-push $N568e000
+push $N731c3400
   DeepExpression {
    chans0 {-deepNormal.red -deepNormal.green deepNormal.blue none}
    chans1 none
@@ -1541,16 +1540,16 @@ push $N568e000
    inputs 0
    useMatrix true
    matrix {
-       {{parent.parent.Deep2VP.cam_data.matrix} {parent.parent.Deep2VP.cam_data.matrix} {parent.parent.Deep2VP.cam_data.matrix} {parent.parent.Deep2VP.cam_data.matrix}}
-       {{parent.parent.Deep2VP.cam_data.matrix} {parent.parent.Deep2VP.cam_data.matrix} {parent.parent.Deep2VP.cam_data.matrix} {parent.parent.Deep2VP.cam_data.matrix}}
-       {{parent.parent.Deep2VP.cam_data.matrix} {parent.parent.Deep2VP.cam_data.matrix} {parent.parent.Deep2VP.cam_data.matrix} {parent.parent.Deep2VP.cam_data.matrix}}
-       {{parent.parent.Deep2VP.cam_data.matrix} {parent.parent.Deep2VP.cam_data.matrix} {parent.parent.Deep2VP.cam_data.matrix} {parent.parent.Deep2VP.cam_data.matrix}}
+       {{DummyCam.world_matrix} {DummyCam.world_matrix} {DummyCam.world_matrix} {DummyCam.world_matrix}}
+       {{DummyCam.world_matrix} {DummyCam.world_matrix} {DummyCam.world_matrix} {DummyCam.world_matrix}}
+       {{DummyCam.world_matrix} {DummyCam.world_matrix} {DummyCam.world_matrix} {DummyCam.world_matrix}}
+       {{DummyCam.world_matrix} {DummyCam.world_matrix} {DummyCam.world_matrix} {DummyCam.world_matrix}}
      }
-   focal {{parent.parent.Deep2VP.cam_focal}}
-   haperture {{parent.parent.Deep2VP.cam_haperture}}
-   win_translate {{parent.parent.Deep2VP.cam_win_translate.u} {parent.parent.Deep2VP.cam_win_translate.v}}
-   win_scale {{parent.parent.Deep2VP.cam_win_scale.u} {parent.parent.Deep2VP.cam_win_scale.v}}
-   winroll {{parent.parent.Deep2VP.cam_winroll}}
+   focal {{DummyCam.focal}}
+   haperture {{DummyCam.haperture}}
+   win_translate {{DummyCam.win_translate} {DummyCam.win_translate}}
+   win_scale {{DummyCam.win_scale} {DummyCam.win_scale}}
+   winroll {{DummyCam.winroll}}
    name projCam
    gl_color 0xb2ffff
   }
@@ -1587,7 +1586,7 @@ push 0
    xpos 528
    ypos -154
   }
-set Nbed3f400 [stack 0]
+set Nc8875000 [stack 0]
   Dot {
    name Dot18
    xpos 1340
@@ -1630,13 +1629,13 @@ set Nbed3f400 [stack 0]
     xpos 542
     ypos 117
    }
-set N458a4c00 [stack 0]
+set N6b9a8000 [stack 0]
    Dot {
     name Dot2
     xpos 704
     ypos 117
    }
-set N458a4800 [stack 0]
+set N6b9a8400 [stack 0]
    Dot {
     name Dot1
     xpos 973
@@ -1662,7 +1661,7 @@ set N458a4800 [stack 0]
     xpos 973
     ypos 531
    }
-push $N458a4800
+push $N6b9a8400
    DeepExpression {
     chans1 none
     rgba.red deepPosition.red
@@ -1683,7 +1682,7 @@ push $N458a4800
     xpos 704
     ypos 449
    }
-push $N458a4c00
+push $N6b9a8000
    DeepToImage {
     name DeepToImage1
     xpos 508
@@ -1732,20 +1731,20 @@ push $N458a4c00
    xpos 1339
    ypos 1827
   }
-set Ne5e9e000 [stack 0]
+set N825f7800 [stack 0]
   Dot {
    name Dot5
    xpos 1588
    ypos 1827
   }
-set Ne5e9e400 [stack 0]
+set N825f7c00 [stack 0]
   Shuffle {
    in deepPosition
    name Shuffle2
    xpos 1554
    ypos 2645
   }
-push $Nbed3f400
+push $Nc8875000
   DeepExpression {
    chans0 {rgba.red rgba.green rgba.blue none}
    chans1 none
@@ -1776,7 +1775,7 @@ push $Nbed3f400
    xpos 528
    ypos 339
   }
-set N2378e000 [stack 0]
+set N24c20c00 [stack 0]
   DeepExpression {
    chans0 alpha
    chans1 none
@@ -1835,13 +1834,13 @@ set N2378e000 [stack 0]
     xpos 542
     ypos 117
    }
-set N32be7400 [stack 0]
+set N19a0e000 [stack 0]
    Dot {
     name Dot2
     xpos 704
     ypos 117
    }
-set N32be7800 [stack 0]
+set N19a0e400 [stack 0]
    Dot {
     name Dot1
     xpos 973
@@ -1867,7 +1866,7 @@ set N32be7800 [stack 0]
     xpos 973
     ypos 531
    }
-push $N32be7800
+push $N19a0e400
    DeepExpression {
     chans1 none
     rgba.red deepPosition.red
@@ -1888,7 +1887,7 @@ push $N32be7800
     xpos 704
     ypos 449
    }
-push $N32be7400
+push $N19a0e000
    DeepToImage {
     name DeepToImage1
     xpos 508
@@ -1937,19 +1936,19 @@ push $N32be7400
    xpos 528
    ypos 1359
   }
-set Nb23db400 [stack 0]
+set Nb531f800 [stack 0]
   Dot {
    name Dot3
    xpos 808
    ypos 1359
   }
-set N34531c00 [stack 0]
+set Nb531fc00 [stack 0]
   Dot {
    name Dot4
    xpos 808
    ypos 2237
   }
-push $N2378e000
+push $N24c20c00
   Dot {
    name Dot7
    xpos 123
@@ -2006,13 +2005,13 @@ push $N2378e000
     xpos 542
     ypos 117
    }
-set N4dbb5c00 [stack 0]
+set N3bca5400 [stack 0]
    Dot {
     name Dot2
     xpos 704
     ypos 117
    }
-set N4dbb4c00 [stack 0]
+set N3bca5800 [stack 0]
    Dot {
     name Dot1
     xpos 973
@@ -2038,7 +2037,7 @@ set N4dbb4c00 [stack 0]
     xpos 973
     ypos 531
    }
-push $N4dbb4c00
+push $N3bca5800
    DeepExpression {
     chans1 none
     rgba.red deepPosition.red
@@ -2059,7 +2058,7 @@ push $N4dbb4c00
     xpos 704
     ypos 449
    }
-push $N4dbb5c00
+push $N3bca5400
    DeepToImage {
     name DeepToImage1
     xpos 508
@@ -2123,7 +2122,7 @@ push $N4dbb5c00
    xpos 123
    ypos 1477
   }
-push $Nb23db400
+push $Nb531f800
   Merge2 {
    inputs 2
    operation mask
@@ -2131,7 +2130,7 @@ push $Nb23db400
    xpos 494
    ypos 1474
   }
-push $N34531c00
+push $Nb531fc00
   Input {
    inputs 0
    name tex
@@ -2172,15 +2171,15 @@ push $N34531c00
    xpos 1073
    ypos 1697
   }
-set Nfee6000 [stack 0]
+set N89bbb000 [stack 0]
   Dot {
    name Dot19
    xpos 1073
    ypos 2225
   }
-set N3684400 [stack 0]
-push $N3684400
-push $Ne5e9e000
+set N89bbb400 [stack 0]
+push $N89bbb400
+push $N825f7800
   Merge2 {
    inputs 2
    name Merge3
@@ -2258,13 +2257,13 @@ push $Ne5e9e000
    xpos -174
    ypos 19
   }
-push $Nfee6000
+push $N89bbb000
   Dot {
    name Dot25
    xpos 1854
    ypos 1697
   }
-push $Ne5e9e400
+push $N825f7c00
   Merge2 {
    inputs 2
    name Merge5
@@ -2384,16 +2383,16 @@ push $Ne5e9e400
   invert_mask true
   name Multiply1
   xpos 0
-  ypos 103
+  ypos 64
   disable {{!parent.premult}}
  }
-set N83f5b800 [stack 0]
+set N6e7ffc00 [stack 0]
  Output {
   name Output1
   xpos 0
   ypos 310
  }
-push $N83f5b800
+push $N6e7ffc00
 push 0
 push 0
 push 0
@@ -2402,7 +2401,7 @@ push 0
 push 0
 push 0
 push 0
-push $Nd6ab3c00
+push $Nd7a05c00
  Viewer {
   inputs 10
   frame_range 1001-1100

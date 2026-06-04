@@ -1,0 +1,380 @@
+global proc shelf_IllogicMTLayout () {
+    global string $gBuffStr;
+    global string $gBuffStr0;
+    global string $gBuffStr1;
+
+
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Scene Builder" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Scene Builder" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/logo_sceneBuilder.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/logo_sceneBuilder.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import qtpy.QtWidgets as qt\nimport qtpy.QtCore as qtc\nimport importlib\nimport PrismInit\nimport sys\n\n\nsys.path.insert(0, \"R:/pipeline/pipe_public/prism-scene-builder\")\nimport sceneBuilder\nimportlib.reload(sceneBuilder)\n\nprism_core = PrismInit.pcore\npath = prism_core.getCurrentFileName()\nproject_path = prism_core.projectPath\n\n\nyaml_path       = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml\"\nroutine_path    = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/templates\"\n\n\ndcc ={\"name\": \"MAYA\", \"pathSoft\": \"\", \"pathPy\": \"\"}\nshotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path, False)\n\nif qt.QApplication.keyboardModifiers() & qtc.Qt.ControlModifier:\n\tshotbuild.main(path, dcc, UI=True)\nelse:\n\tshotbuild.main(path, dcc, UI=False)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Shotgrid frame info check" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "check frame range" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "frameCache.svg" 
+        -image1 "frameCache.svg" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import importlib\nimport qtpy.QtWidgets as qt\nimport qtpy.QtCore as qtc\nimport sg_master_frame_check as frame\n\n\nimportlib.reload(frame)\nif qt.QApplication.keyboardModifiers() & (qtc.Qt.ShiftModifier | qtc.Qt.ControlModifier):\n\tframe.main(compare=False)\nelse:\n\tframe.main(compare=True)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Split Shot" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Split Shot" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/splitShot.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/splitShot.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.splitShots()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Edits add supp shots on the sequencer" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "EditsShots" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/manageShots.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/manageShots.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.manageShots()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    separator
+        -enable 1
+        -width 12
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -style "shelf" 
+        -horizontal 0
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "active Gates masks on all cameras" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Gates masks ON" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/camGateBlack.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/camGateBlack.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.camGateOn()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "desactive Gates masks on all cameras" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Gates masks OFF" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/NoCamGate.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/NoCamGate.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.camGateOff()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "transform camRig in to Free Cam" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Free Cam" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/FreeCam.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/FreeCam.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.freeCam()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "retarget the Rig on Free camera" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "convertFreeCam" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/convertFreeCam.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/convertFreeCam.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.freeCamtoRig('WORLD')" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+        -mi "orientation World" ( "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.freeCamtoRig('WORLD')" )
+        -mip 0
+        -mi "orientation Object" ( "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.freeCamtoRig('OBJECT')" )
+        -mip 1
+        -mi "orientation centerPivot" ( "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.freeCamtoRig('AIM')" )
+        -mip 2
+    ;
+    separator
+        -enable 1
+        -width 12
+        -height 35
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -style "shelf" 
+        -horizontal 0
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "Offset shot with all dependencies" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Offset Shot" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/addSuppTime.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/addSuppTime.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.editTimeShot()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "export shot layer USD" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "shotLayerExport" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/exportAsLayer.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/MTLayout/exportAsLayer.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.exportAsLayer()" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+
+} 

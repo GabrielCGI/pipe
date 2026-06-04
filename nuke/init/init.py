@@ -207,3 +207,11 @@ nuke.pluginAddPath("R:/pipeline/pipe/nuke/gizmos")
 ##  set blur and multiply nodes default configs
 nuke.knobDefault("Multiply.channels", "rgba")
 nuke.knobDefault("Blur.channels", "rgba")
+
+## edit 2026.05.22 (YY.MM.DD)
+##  ShotLoader Added
+nuke.pluginAddPath(r"R:\pipeline\pipe\nuke\script\nukeShotLoader") 
+
+## edit 2026.06.04 (YY.MM.DD)
+##  DMP EXR Layer Builder Added
+nuke.pluginAddPath(r"R:/pipeline/pipe/nuke/script/dmpExrLayerBuilder") 

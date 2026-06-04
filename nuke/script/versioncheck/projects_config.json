@@ -10,6 +10,16 @@
             "mismatch_list": [
                 "Resolution mismatch"
             ]
+        },
+        {
+            "project_name": "yuka_2604",
+            "allowed_version": [
+                "15.1v5"
+            ],
+            "bypass_mismatch": true,
+            "mismatch_list": [
+                "Resolution mismatch"
+            ]
         }
     ]
 }

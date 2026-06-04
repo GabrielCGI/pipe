@@ -14,8 +14,8 @@
     <memberTool name="batchrender"/>
     <memberTool name="shotBuilder"/>
     <memberTool name="reduceTextureViewport"/>
-    <memberTool name="CopRopImage"/>
     <memberTool name="tool_1"/>
+    <memberTool name="set_local_render_gallery"/>
   </toolshelf>
 
   <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
@@ -199,11 +199,13 @@ run()]]></script>
 
   <tool name="CopRopImage" label="Cop Rop Image" icon="hicon:/SVGIcons.index?SCENEGRAPH_primtype_renderproduct.svg">
     <helpText><![CDATA[select a node first]]></helpText>
-    <script scriptType="python"><![CDATA[from imp import reload
+    <script scriptType="python"><![CDATA[import cop_snippets
+from importlib import reload
 
-import cop_createRopImage
-reload(cop_createRopImage)
-cop_createRopImage.run()]]></script>
+reload(cop_snippets)
+print(cop_snippets)
+cop_snippets.create_rop_image()
+]]></script>
   </tool>
 
   <tool name="tool_1" label="Clean Light Mixer" icon="hicon:/SVGIcons.index?MISC_fix_repair.svg">
@@ -212,5 +214,11 @@ import clean_light_mixer
 
 importlib.reload(clean_light_mixer)
 clean_light_mixer.run()]]></script>
+  </tool>
+
+  <tool name="set_local_render_gallery" label="Gallery" icon="hicon:/SVGIconsUI.index?VIEW_control_playbar.svg">
+    <script scriptType="python"><![CDATA[import lop_snippets
+
+lop_snippets.set_local_render_gallery()]]></script>
   </tool>
 </shelfDocument>

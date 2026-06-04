@@ -22,16 +22,17 @@ def get_shotgrid_shotlist(sg, project_name):
 
     # First get the project ID
     projects = sg.find("Project",
-                        filters=[["name", "is", project_name]],
-                        fields=["id"])
-    
+                        filters=[["sg_project_folder_name", "is", project_name]],
+                        fields=["id","name"])
+
     if projects:
         project_ref = projects[0]
+        shots = []
         # Now find shots in that sequence
         shots = sg.find("Shot",
-                        filters=[["project", "is", project_ref]],
-                        fields=["code", "sg_cut_order", "sg_status_list"])
-        # print(shots)
+                        filters=[["project", "is", project_ref], ["sg_cut_order", "is_not", None]],
+                        fields=["code", "sg_cut_order", "sg_status_list", "sg_sequence"])
+        
         return shots
 
     return []
@@ -57,19 +58,19 @@ def format_shots_with_sequence(shots, sg):
     
     # Format with sequence data from ShotGrid
     formatted_shots = []
+
     for shot in sorted_shots:
+
         # Get sequence info from ShotGrid
-        sequence_data = sg.find_one("Shot",
-                                    filters=[["id", "is", shot['id']]],
-                                    fields=["sg_sequence"])
-        
         sequence = None
-        if sequence_data and sequence_data.get('sg_sequence'):
-            sequence = sequence_data['sg_sequence']['name']
+        if shot and shot.get('sg_sequence'):
+            sequence = shot['sg_sequence']['name']
         
+        if not sequence:
+            continue
+
         formatted_shots.append(sequence + "/" + shot['code'])
 
-    
     return formatted_shots
 
 def get_shot_order(project_name):
@@ -90,6 +91,7 @@ def get_shot_order(project_name):
     if sg:
         shots = get_shotgrid_shotlist(project_name=project_name, sg=sg)
         shot_order = format_shots_with_sequence(shots=shots, sg=sg)
+        print("Shot order found: ", shot_order)
 
     if "API_URL" in os.environ:
         del os.environ["API_URL"]

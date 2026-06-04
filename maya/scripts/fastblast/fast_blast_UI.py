@@ -6,6 +6,8 @@ from importlib import reload
 from shiboken6 import wrapInstance
 import maya.OpenMayaUI as omui # type: ignore
 
+WINDOW_TITLE = "Illogic WIP Blast V1"
+
 class FastBlastUI(QtWidgets.QMainWindow):
 
     def __init__(self, parent=None):
@@ -16,7 +18,7 @@ class FastBlastUI(QtWidgets.QMainWindow):
 
         # self.setWindowFlags(QtGui.Qt.Window)
 
-        self.setWindowTitle("WIP Blast")
+        self.setWindowTitle(WINDOW_TITLE)
         self.setGeometry(50,50,250,50)
 
         main_widget = QtWidgets.QWidget()
@@ -146,6 +148,12 @@ def get_main_window():
     return maya_window
 
 def run_ui():
+
+    tops = QtWidgets.QApplication.topLevelWidgets()
+    for top in tops:
+        if top.windowTitle() == WINDOW_TITLE:
+            top.close()
+
     app = get_main_window()
     widget = FastBlastUI(app)
     widget.show()

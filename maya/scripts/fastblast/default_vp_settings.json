@@ -1,0 +1,47 @@
+{
+    "edit":true,
+    "displayAppearance":"smoothShaded",
+    "displayTextures":true,
+
+    "dimensions":false,
+    "nurbsCurves":false,
+    "nurbsSurfaces":true,
+    "controlVertices":false,
+    "hulls":false,
+    "polymeshes":true,
+    "subdivSurfaces":true,
+
+    "dynamics":true,
+    "dynamicConstraints":false,
+    "fluids":true,
+    "follicles":false,
+    "hairSystems":true,
+    "nCloths":true,
+    "nParticles":true,
+    "nRigids":true,
+    "particleInstancers":false,
+
+    "clipGhosts":false,
+    "controllers":false,
+    "deformers":false,
+    "handles":false,
+    "ikHandles":false,
+    "joints":false,
+    "locators":false,
+    "motionTrails":false,
+    "pivots":false,
+
+    "cameras":false,
+    "planes":false,
+    "lights":false,
+    "strokes":false,
+    "useRGBImagePlane":false,
+
+    "headsUpDisplay":false,
+    "holdOuts":false,
+    "grid":false,
+    "selectionHiliteDisplay":false,
+
+    "bluePencil":true,
+    "pluginShapes":true
+}

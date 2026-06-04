@@ -196,7 +196,8 @@ class ModGroup(RigObjectBase):
             controllers = [RigControl(c.name(long=True)) for c in controllers]
             return controllers
         else:
-            return []
+            return [RigControl(obj.name(long=True)) for obj in self.ctrGp.getChildren(ad=True) if
+                    RigControl.is_valid(obj.name(long=True))]
 
 
 class RigControl(RigObjectBase):

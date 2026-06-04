@@ -6,10 +6,10 @@ import os
 
 
 try:
-    from PySide6 import QtWidgets
+    from PySide2 import QtWidgets # type: ignore
 except ImportError:
     try:
-        from PySide2 import QtWidgets # type: ignore
+        from PySide6 import QtWidgets # type: ignore
     except ImportError:
         try: 
             from PySide import QtWidgets # type: ignore

@@ -131,7 +131,7 @@ global proc shelf_IllogicAnim () {
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
         -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/anim/USDMayaManager.png" 
-        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/anim/USDMayaManager.png"
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/anim/USDMayaManager.png" 
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
@@ -687,8 +687,8 @@ global proc shelf_IllogicAnim () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "import importlib\nimport fastblast as blast\nimportlib.reload(blast)\nblast.main()"
-        -sourceType "python"
+        -command "import importlib\nimport fastblast as blast\nimportlib.reload(blast)\nblast.main()" 
+        -sourceType "python" 
         -commandRepeatable 1
         -flat 1
     ;

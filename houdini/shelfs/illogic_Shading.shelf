@@ -10,6 +10,7 @@
     <memberTool name="kmx"/>
     <memberTool name="kmx_geosubset"/>
     <memberTool name="kma_mat_char"/>
+    <memberTool name="autoconnect_ui"/>
     <memberTool name="material_finder"/>
     <memberTool name="rat_manager"/>
     <memberTool name="CreateAutoVariant"/>
@@ -122,20 +123,14 @@ ratmanager.run()
   <tool name="USD Preview" label="auto USDPreview" icon="hicon:/SVGIcons.index?BUTTONS_donut.svg">
     <script scriptType="python"><![CDATA[import hou
 
-def create_usd_shader_from_selected():
-    """
-    CrÃ©e un usduvtexture et un usdpreviewsurface connectÃ©s ensemble.
-    Le paramÃ¨tre 'file' du usduvtexture est rÃ©cupÃ©rÃ© depuis le node 
-    sÃ©lectionnÃ© au moment de l'exÃ©cution.
-    """
-    # RÃ©cupÃ©rer le(s) node(s) sÃ©lectionnÃ©(s)
+
+
+def create_usd_shader_from_selected() -> None:
     selected = hou.selectedNodes()
     if not selected:
         raise hou.Error("Aucun node sÃ©lectionnÃ©. SÃ©lectionnez un node avec un paramÃ¨tre 'file'.")
     
     source_node = selected[0]
-    
-    # Chercher le paramÃ¨tre file (avec fallback sur des noms courants)
     file_parm = source_node.parm("file")
     if file_parm is None:
         for parm_name in ("filename", "map", "texture", "tex0", "filename1"):
@@ -144,51 +139,42 @@ def create_usd_shader_from_selected():
                 break
     
     if file_parm is None:
-        raise hou.Error(
-            "Le node '{}' n'a pas de paramÃ¨tre 'file' reconnu.".format(source_node.name())
-        )
+        hou.Error("Le node '{}' n'a pas de paramÃ¨tre 'file' reconnu.".format(source_node.name()))
+        return
     
-    # On utilise unexpandedString pour garder les variables ($HIP, <UDIM>, etc.)
+    parent: hou.LopNode = source_node.parent()
     file_path = file_parm.unexpandedString() or file_parm.evalAsString()
-    
-    parent = source_node.parent()
-    
     with hou.undos.group("Create USD Preview Shader"):
-        # CrÃ©ation du usduvtexture
-        uv_tex = parent.createNode("usduvtexture::2.0", "usduvtexture1")
+        preview = parent.createNode("usdpreviewsurface", f"USDpreview_{parent.name()}")
+        uv_tex = parent.createNode("usduvtexture::2.0", f"USDtexture_{parent.name()}")
+        reader = parent.createNode("usdprimvarreader", f"reader_{parent.name()}")
         
-        # CrÃ©ation du usdpreviewsurface
-        preview = parent.createNode("usdpreviewsurface", "usdpreviewsurface1")
+        reader.parm("varname").set("st")
+        reader.parm("signature").set("float2")
         
-        # Assigner le file
         uv_tex.parm("file").set(file_path)
-        
-        # Connexion : rgb du usduvtexture -> diffuseColor du usdpreviewsurface
+        uv_tex.setInput(1, reader, 0)
+
+        preview.parm("roughness").set(0.7)
         preview.setNamedInput("diffuseColor", uv_tex, "rgb")
         
-        # Layout Ã  cÃ´tÃ© du node source
         src_pos = source_node.position()
+        reader.setPosition(src_pos + hou.Vector2(-3.5, -15.0))
         uv_tex.setPosition(src_pos + hou.Vector2(0.0, -15.0))
         preview.setPosition(src_pos + hou.Vector2(3.5, -15.0))
-        
-        # SÃ©lectionner le rÃ©sultat final
-        preview.setCurrent(True, clear_all_selected=True)
 
-        # Connexion au subnetconnector "surface" du materialBuilder
+        preview.setCurrent(True, clear_all_selected=True)
         sortie = parent.node("Material_Outputs_and_AOVs")
-        if sortie is None:
-            print("Attention : node 'Material_Outputs_and_AOVs' introuvable dans '{}'.".format(parent.path()))
-            print("Noeuds disponibles :", [n.name() for n in parent.children()])
-        else:
+        if sortie:
             con = len(sortie.inputs())
             sortie.setInput(con, preview, 0)
 
-    
-    print("CrÃ©Ã©s : {}  ->  {}".format(uv_tex.path(), preview.path()))
-    print("File source : {}".format(file_path))
-    return uv_tex, preview
-
-
 create_usd_shader_from_selected()]]></script>
+  </tool>
+
+  <tool name="autoconnect_ui" label="Auto Connect" icon="R:/pipeline/pipe/houdini/shelfs/icons/autoconnect.png">
+    <script scriptType="python"><![CDATA[import autoconnect
+
+autoconnect.main()]]></script>
   </tool>
 </shelfDocument>

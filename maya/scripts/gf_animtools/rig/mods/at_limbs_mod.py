@@ -94,23 +94,38 @@ class LimbsGroup(ModGroup):
 
         jnt_shoulder = joints['shoulder']
         jnt_elbow = joints['elbow']
+        gp_hand = self.extremityGp.get()
 
         if self.clavicle:
+            jnt_clavicle = joints['clav']
             clavMtx = clavicle.worldMatrix.get()
 
         if limb_options.IKFK.get():     # FK to IK
-            ik_hand.setMatrix(fk_hand.worldMatrix.get(), worldSpace=True)
+            print('FK to IK')
+            ik_hand.setMatrix(gp_hand.worldMatrix.get(), worldSpace=True)
             pole_vector.setMatrix(jnt_elbow.worldMatrix.get(), worldSpace=True)
             limb_options.IKFK.set(0)
             if self.clavicle:
                 clavicle.setMatrix(clavMtx, worldSpace=True)
+
         else:
-            fk_shoulder.setMatrix(jnt_shoulder.worldMatrix.get(), worldSpace=True)
-            fk_elbow.setMatrix(jnt_elbow.worldMatrix.get(), worldSpace=True)
-            fk_hand.setMatrix(ik_hand.worldMatrix.get(), worldSpace=True)
-            limb_options.IKFK.set(1)
+            ref_before = {
+                "shoulder": jnt_shoulder.worldMatrix.get(),
+                "elbow": jnt_elbow.worldMatrix.get(),
+                "hand": gp_hand.worldMatrix.get(),
+            }
             if self.clavicle:
-                clavicle.setMatrix(clavMtx, worldSpace=True)
+                ref_before['clav'] = jnt_clavicle.worldMatrix.get()
+
+            # switch to FK here
+            limb_options.IKFK.set(1)
+
+            # --- AFTER SWITCH (FK) ---
+            if self.clavicle:
+                apply_fk_from_refs(ref_before["clav"], jnt_clavicle, clavicle)
+            apply_fk_from_refs(ref_before["shoulder"], jnt_shoulder, fk_shoulder)
+            apply_fk_from_refs(ref_before["elbow"], jnt_elbow, fk_elbow)
+            apply_fk_from_refs(ref_before["hand"], gp_hand, fk_hand)
 
 
 class QLimbsGroup(LimbsGroup):
@@ -153,7 +168,8 @@ class QLimbsGroup(LimbsGroup):
         controllers = self.controllers
         joints = self.joints
 
-        clavicle = RigControl.findFromName(ctrNames['clav'], controllers)
+        if self.clavicle:
+            clavicle = RigControl.findFromName(ctrNames['clav'], controllers)
         fk_shoulder = RigControl.findFromName(ctrNames['fk_shoulder'], controllers)
         fk_elbow = RigControl.findFromName(ctrNames['fk_elbow'], controllers)
         fk_hand = RigControl.findFromName(ctrNames['fk_hand'], controllers)
@@ -167,15 +183,18 @@ class QLimbsGroup(LimbsGroup):
         jnt_elbow = joints['elbow']
         jnt_wrist_root = joints['wrist_root']
         jnt_wrist_end = joints['wrist_end']
+        gp_hand = self.extremityGp.get()
 
-        clavMtx = clavicle.worldMatrix.get()
+        if self.clavicle:
+            jnt_clavicle = joints['clav']
+            clavMtx = clavicle.worldMatrix.get()
 
         if limb_options.IKFK.get():     # FK to IK
             elbow_mtx = jnt_elbow.worldMatrix.get()
             fk_wrist_root_mtx = jnt_wrist_root.worldMatrix.get()
 
             # build ik hand matrix
-            ik_hand_mtx = dt.TransformationMatrix(fk_wrist.worldMatrix.get())
+            ik_hand_mtx = dt.TransformationMatrix(gp_hand.worldMatrix.get())
             wrist_end_mtx = dt.TransformationMatrix(jnt_wrist_end.worldMatrix.get())
             ik_hand_mtx.setTranslation(wrist_end_mtx.getTranslation('world'), 'world')
             ik_hand_mtx = ik_hand_mtx.matrix
@@ -190,12 +209,54 @@ class QLimbsGroup(LimbsGroup):
 
             ik_wrist.setMatrix(new_ik_wrist, worldSpace=True)
             pole_vector.setMatrix(elbow_mtx, worldSpace=True)
-            clavicle.setMatrix(clavMtx, worldSpace=True)
+            if self.clavicle:
+                clavicle.setMatrix(clavMtx, worldSpace=True)
 
         else:       # IK to FK
-            fk_shoulder.setMatrix(jnt_shoulder.worldMatrix.get(), worldSpace=True)
-            fk_elbow.setMatrix(jnt_elbow.worldMatrix.get(), worldSpace=True)
-            fk_hand.setMatrix(jnt_wrist_root.worldMatrix.get(), worldSpace=True)
-            fk_wrist.setMatrix(ik_hand.worldMatrix.get(), worldSpace=True)
+            ref_before = {
+                "shoulder": jnt_shoulder.worldMatrix.get(),
+                "elbow": jnt_elbow.worldMatrix.get(),
+                "hand": jnt_wrist_root.worldMatrix.get(),
+                "wrist":gp_hand.worldMatrix.get(),
+            }
+            if self.clavicle:
+                ref_before['clav'] = jnt_clavicle.worldMatrix.get()
+
+            # switch to FK here
             limb_options.IKFK.set(1)
-            clavicle.setMatrix(clavMtx, worldSpace=True)
+
+            # --- AFTER SWITCH (FK) ---
+            if self.clavicle:
+                apply_fk_from_refs(ref_before["clav"], jnt_clavicle, clavicle)
+            apply_fk_from_refs(ref_before["shoulder"], jnt_shoulder, fk_shoulder)
+            apply_fk_from_refs(ref_before["elbow"], jnt_elbow, fk_elbow)
+            apply_fk_from_refs(ref_before["hand"], jnt_wrist_root, fk_hand)
+            apply_fk_from_refs(ref_before["wrist"], gp_hand, fk_wrist)
+
+
+def compute_fk_target_from_refs(ref_before_mtx, ref_after_node, control):
+    """
+    ref_before_mtx: pm.datatypes.Matrix stored in IK mode (ref world matrix BEFORE switch)
+    ref_after_node: PyNode of the same reference object AFTER switch (now in FK mode)
+    control:        PyNode of the FK control AFTER switch
+    """
+
+    # current matrices (after switch)
+    ref_after_matrix = ref_after_node.worldMatrix.get()
+    fk_world_mtx = control.worldMatrix.get()
+    fk_parent = control.getParent().worldMatrix.get()
+
+    # delta between CURRENT ref and CURRENT fk
+    delta_mtx = fk_world_mtx * ref_after_matrix.inverse()
+
+    # target world matrix for FK (delta applied to BEFORE ref)
+    target_world_mtx = delta_mtx * ref_before_mtx
+
+    # convert to FK local
+    fk_local_mtx = target_world_mtx * fk_parent.inverse()
+
+    return fk_local_mtx
+
+def apply_fk_from_refs(ref_before_mtx, ref_after_node, control):
+    fk_local_mtx = compute_fk_target_from_refs(ref_before_mtx, ref_after_node, control)
+    control.setMatrix(fk_local_mtx, objectSpace=True)

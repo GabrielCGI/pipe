@@ -37,6 +37,7 @@ from qtpy.QtGui import *
 from qtpy.QtWidgets import *
 
 from PrismUtils.Decorators import err_catcher_plugin as err_catcher
+import os
 
 # Complete path to the pretask script !! REPLACE IF MOVED !!
 # Not deployed yet, will be moved
@@ -47,6 +48,10 @@ class Prism_RanchExporter_Functions(object):
     def __init__(self, core, plugin):
         self.core = core
         self.plugin = plugin
+
+        if not os.getenv("ILL_RANCHCOPY_ENABLED",False):
+            return
+
         self.core.registerCallback("preSubmit_Deadline" , self.preSubmit_Deadline, plugin=self)
 
     @err_catcher(name=__name__)

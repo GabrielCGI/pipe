@@ -40,17 +40,18 @@
             "ArtPaintBlendShapeWeightsTool",
             "CreateBlendShape",
             "TransferVertexOrder",
-            "ReferenceEditor",
             "CreateWrap",
             "ReversePolygonNormals",
             "SubdividePolygon",
-            "CreateLattice",
-            "mayaUsdOpenUsdLayerEditor",
             "CreateVolumeSphere",
             "CreatePolygonCylinder",
             "CreateText",
             "CreatePolygonSphere",
-            "ParentConstraint"
+            "ParentConstraint",
+            "CreateLattice",
+            "ReferenceEditor",
+            "mayaUsdOpenUsdLayerEditor",
+            "BakeDeformerTool"
         ],
         [
             "share",

@@ -216,14 +216,14 @@ class RefUpdaterCore():
                 return
             
 
-            prim = stage.GetPrimAtPath(f'/assets/{info["cat"]}')
+            prim = stage.GetPrimAtPath(f'/assets/{info["cat"].lower()}')
             if not prim:
-                prim = stage.DefinePrim(f'/assets/{info["cat"]}', "Scope")
+                prim = stage.DefinePrim(f'/assets/{info["cat"].lower()}', "Scope")
             
-            name = self._reDifineName(f'/assets/{info["cat"]}', info["item"], [i.GetName() for i in prim.GetAllChildren()])
+            name = self._reDifineName(f'/assets/{info["cat"].lower()}', info["item"], [i.GetName() for i in prim.GetAllChildren()])
 
 
-            prim_payload = stage.DefinePrim(f'/assets/{info["cat"]}/{name}', "Xform")
+            prim_payload = stage.DefinePrim(f'/assets/{info["cat"].lower()}/{name}', "Xform")
             targetPrimPath = Sdf.Path(f"/{info['item']}")
             payloads = prim_payload.GetPayloads()
             payloads.AddPayload(assetPath=file_path, primPath=targetPrimPath)
