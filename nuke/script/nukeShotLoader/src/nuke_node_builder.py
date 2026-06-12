@@ -24,7 +24,6 @@ class NukeNodeBuilder:
         self.created_nodes = []
         self.created_backdrops = []
         self.asset_colorspaces = {}
-        self.camera_configs = {}
         self.project_root = Config.DEFAULT_PROJECT_ROOT
 
         # Set by _create_backdrop, read by load_assets to chain slot positions.
@@ -37,7 +36,6 @@ class NukeNodeBuilder:
         assets: Dict,
         asset_colorspaces: Optional[Dict] = None,
         project_root: Optional[str] = None,
-        camera_configs: Optional[Dict] = None,
     ):
         """
         Load all selected assets into Nuke.
@@ -48,8 +46,6 @@ class NukeNodeBuilder:
             assets (Dict): Assets dict from AssetDiscoverer
             asset_colorspaces (Optional[Dict]): Colorspace overrides per asset
             project_root (Optional[str]): Prism project root path
-            camera_configs (Optional[Dict]): Per-camera config, keyed by cam_name:
-                {"node_name": <str>, "prim_path": <str>}
         """
         print(f"\n[NukeNodeBuilder] Loading assets for {sequence}/{shot}")
 
@@ -59,7 +55,6 @@ class NukeNodeBuilder:
 
         # Store colorspaces and project root for access by loading methods
         self.asset_colorspaces = asset_colorspaces or {}
-        self.camera_configs = camera_configs or {}
         if project_root:
             self.project_root = project_root
 
@@ -415,16 +410,14 @@ class NukeNodeBuilder:
 
             node_x, node_y = self._get_grid_position(base_x, base_y, self._read_count)
 
-            cam_cfg = self.camera_configs.get(cam_name, {})
-            custom_node_name = cam_cfg.get("node_name") or f"{sequence}_{shot}_{cam_name}"
-            prim_path = cam_cfg.get("prim_path") or None
+            # Fixed canonical node name — one camera per shot.
+            custom_node_name = "CAM_SHOT"
 
-            # Create Camera4 node with USD import
+            # Create Camera3 node with USD import
             camera_node = self._create_camera_node(
                 usd_file=usd_file,
                 node_name=custom_node_name,
                 position=(node_x, node_y),
-                prim_path=prim_path,
             )
 
             if camera_node:
@@ -434,7 +427,7 @@ class NukeNodeBuilder:
                 nodes_in_group.append(camera_node)
                 self.created_nodes.append(camera_node)
 
-                # Same anchor+wired flow as Reads — Stamps now types Camera4
+                # Same anchor+wired flow as Reads — Stamps types Camera3
                 # natively, and passing the title at creation skips the
                 # "update linked stamps?" prompt entirely.
                 stamps = self._create_stamp_for_node(camera_node, stamp_name="cam")
@@ -604,39 +597,29 @@ class NukeNodeBuilder:
         usd_file: str,
         node_name: str,
         position: Tuple[int, int],
-        prim_path: Optional[str] = None,
     ):
         """
-        Create a Camera4 node from USD file.
+        Create a Camera3 node from USD file.
 
         Args:
             usd_file (str): Path to USD file
             node_name (str): Name for the node
             position (Tuple[int, int]): Node position
-            prim_path (Optional[str]): USD prim to import (sets import_prim_path knob)
 
         Returns:
-            Camera4 node or None
+            Camera3 node or None
         """
         try:
-            # Create Camera4 node
-            camera_node = nuke.createNode("Camera4", inpanel=False)
+            # Create Camera3 node
+            camera_node = nuke.createNode("Camera3", inpanel=False)
             camera_node.setName(node_name, uncollide=True)
 
             if 'file' in camera_node.knobs():
                 camera_node['file'].setValue(usd_file.replace("\\", "/"))
 
-            # Enable USD import
-            if 'import_enabled' in camera_node.knobs():
-                camera_node['import_enabled'].setValue(True)
-
             # Enable read from file
             if 'read_from_file' in camera_node.knobs():
                 camera_node['read_from_file'].setValue(True)
-
-            if prim_path and 'import_prim_path' in camera_node.knobs():
-                camera_node['import_prim_path'].setValue(prim_path)
-                print(f"[NukeNodeBuilder] Set import_prim_path: {prim_path}")
 
             if 'frame_rate' in camera_node.knobs():
                 fps = self._resolve_scene_fps()
@@ -646,11 +629,11 @@ class NukeNodeBuilder:
             # Set position
             camera_node.setXYpos(position[0], position[1])
 
-            print(f"[NukeNodeBuilder] Created Camera4 node: {node_name}")
+            print(f"[NukeNodeBuilder] Created Camera3 node: {node_name}")
             return camera_node
 
         except Exception as e:
-            print(f"[NukeNodeBuilder] Error creating Camera4 node: {e}")
+            print(f"[NukeNodeBuilder] Error creating Camera3 node: {e}")
             return None
 
     def _create_backdrop(
@@ -769,7 +752,7 @@ class NukeNodeBuilder:
         existing = self._find_backdrop_by_label(backdrop_label)
         if existing:
             existing_nodes = self._nodes_inside_backdrop(existing)
-            grid_nodes = [n for n in existing_nodes if n.Class() in ("Read", "Camera4")]
+            grid_nodes = [n for n in existing_nodes if n.Class() in ("Read", "Camera3")]
             if grid_nodes:
                 base_x = min(n.xpos() for n in grid_nodes)
                 base_y = min(n.ypos() for n in grid_nodes)
@@ -1281,10 +1264,10 @@ class NukeNodeBuilder:
     ) -> bool:
         """
         Update a node to a new version. Handles Read (image sequence) and
-        Camera4 (USD file) nodes — they look up files differently.
+        Camera3 (USD file) nodes — they look up files differently.
 
         Args:
-            node: Nuke node (Read or Camera4)
+            node: Nuke node (Read or Camera3)
             new_version_path (str): Path to new version folder
             frame_range (Optional[Tuple[int, int]]): New frame range (Read only)
 
@@ -1292,9 +1275,9 @@ class NukeNodeBuilder:
             bool: Success status
         """
         try:
-            # Camera4: find a USD file in the folder, set the file knob, ensure
-            # import is enabled. Don't touch first/last — Camera4 has no such knobs.
-            if node.Class() == "Camera4":
+            # Camera3: find a USD file in the folder, set the file knob, ensure
+            # import is enabled. Don't touch first/last — Camera3 has no such knobs.
+            if node.Class() == "Camera3":
                 usd_file = self._find_usd_file(new_version_path)
                 if not usd_file:
                     print(f"[NukeNodeBuilder] No USD file found in {new_version_path}")
@@ -1304,8 +1287,6 @@ class NukeNodeBuilder:
                     node['file'].setValue(usd_file.replace("\\", "/"))
                 if 'read_from_file' in node.knobs():
                     node['read_from_file'].setValue(True)
-                if 'import_enabled' in node.knobs():
-                    node['import_enabled'].setValue(True)
 
                 # Re-apply scene FPS on update too — the artist may have
                 # changed the scene framerate since the camera was first loaded.

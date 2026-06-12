@@ -376,10 +376,6 @@ class AssetItem:
         self.versions_dict = versions_dict  # Full version data
         self.selected_colorspace = "Auto"  # Colorspace selection (Auto = Nuke default)
 
-        # Camera-specific config (ignored for other asset types)
-        self.node_name = ""
-        self.prim_path = ""
-
         # Update tracking
         self.loaded_node = None  # Nuke node if loaded
         self.loaded_version = None  # Version currently loaded in scene
@@ -791,12 +787,12 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
         # Asset table
         self.table = QtWidgets.QTableWidget()
-        self.table.setColumnCount(7)
+        self.table.setColumnCount(5)
         self.table.setHorizontalHeaderLabels([
             "Name", "Type", "Version",
-            "Colorspace", "Status", "Node Name", "Prim Path",
+            "Colorspace", "Status",
         ])
-        column_widths = [180, 80, 80, 130, 220, 150, 170]
+        column_widths = [200, 100, 100, 150, 280]
         for i, w in enumerate(column_widths):
             self.table.setColumnWidth(i, w)
         self.table.setAlternatingRowColors(True)
@@ -1137,8 +1133,6 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
                 continue
 
             item = AssetItem("Camera", cam_name, versions, versions_dict, source_type="Camera")
-            item.node_name = cam_name
-            item.prim_path = "/root/cameras/shotcam"
             self.asset_items.append(item)
             self._add_row(row, item)
             row += 1
@@ -1229,21 +1223,6 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
             status_item.setBackground(QtGui.QColor(item.status_color))
         self.table.setItem(row, 4, status_item)
 
-        # Col 5 / 6 - Node Name & Prim Path (Camera-only, editable)
-        if item.asset_type == "Camera":
-            node_name_edit = QtWidgets.QLineEdit(item.node_name)
-            node_name_edit.textChanged.connect(lambda t, r=row: self._on_node_name_changed(r, t))
-            self.table.setCellWidget(row, 5, node_name_edit)
-
-            prim_path_edit = QtWidgets.QLineEdit(item.prim_path)
-            prim_path_edit.textChanged.connect(lambda t, r=row: self._on_prim_path_changed(r, t))
-            self.table.setCellWidget(row, 6, prim_path_edit)
-        else:
-            for col in (5, 6):
-                placeholder = QtWidgets.QTableWidgetItem("")
-                placeholder.setFlags(placeholder.flags() & ~QtCore.Qt.ItemIsEditable)
-                self.table.setItem(row, col, placeholder)
-
     def _get_selected_items(self):
         """Return asset items for the rows currently highlighted in the table.
         Hidden rows (filtered out) are excluded even if still in the selection model."""
@@ -1319,16 +1298,6 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         if row < len(self.asset_items):
             self.asset_items[row].selected_colorspace = colorspace
             print(f"[ShotAssetLoader] Set colorspace for {self.asset_items[row].asset_name} to {colorspace}")
-
-    def _on_node_name_changed(self, row, text):
-        """Handle Camera node-name edit."""
-        if row < len(self.asset_items):
-            self.asset_items[row].node_name = text
-
-    def _on_prim_path_changed(self, row, text):
-        """Handle Camera prim-path edit."""
-        if row < len(self.asset_items):
-            self.asset_items[row].prim_path = text
 
     def _select_all(self):
         """Select all visible asset rows (rows hidden by the active filter are skipped)."""
@@ -1459,9 +1428,6 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         # Build colorspaces dict (maps asset_name to colorspace)
         asset_colorspaces = {}
 
-        # Per-camera config (node_name + prim_path), keyed by cam_name
-        camera_configs = {}
-
         for item in items:
             # Store colorspace for this asset (only if not "Auto")
             colorspace_key = f"{item.asset_type}_{item.asset_name}"
@@ -1486,10 +1452,6 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
                 filtered_assets["cameras"][item.asset_name] = {
                     item.selected_version: item.versions_dict[item.selected_version]
                 }
-                camera_configs[item.asset_name] = {
-                    "node_name": item.node_name,
-                    "prim_path": item.prim_path,
-                }
 
         # Load
         try:
@@ -1499,7 +1461,6 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
                 assets=filtered_assets,
                 asset_colorspaces=asset_colorspaces,
                 project_root=self._project_root,
-                camera_configs=camera_configs,
             )
 
             # Re-câble les PostageStamp existants (par titre) pour qu'ils
@@ -1510,6 +1471,12 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
                 run_reconnect_on_postage_stamps(silent=True)
             except Exception as e:
                 print(f"[ShotAssetLoader] reconnect_stamps failed (non-fatal): {e}")
+
+            # Resolve the freshly-created Read/Camera nodes back onto their
+            # asset items and push the status (tile_color + label suffix) onto
+            # them — without this pass, a first load lands with default-colored
+            # tiles until the user manually hits "Check for Updates".
+            self._do_check_for_updates(silent=True)
 
             msg = (
                 f"Successfully loaded {len(self.node_builder.created_nodes)} node(s) "
@@ -1551,7 +1518,7 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         # Scan all nodes in scene
         all_nodes = nuke.allNodes()
         read_nodes = [n for n in all_nodes if n.Class() == "Read"]
-        camera_nodes = [n for n in all_nodes if n.Class() == "Camera4"]
+        camera_nodes = [n for n in all_nodes if n.Class() == "Camera3"]
 
         # Scene frame range — used to grade updates as full vs partial coverage.
         try:
@@ -1599,20 +1566,6 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
             if node:
                 # Node found in scene
                 item.loaded_node = node
-
-                # For cameras: pre-fill the Node Name / Prim Path cells from the
-                # live node so the user sees what's actually in the scene.
-                if item.asset_type == "Camera":
-                    item.node_name = node.name()
-                    if 'import_prim_path' in node.knobs():
-                        item.prim_path = node['import_prim_path'].value() or ""
-
-                    node_name_widget = self.table.cellWidget(row, 5)
-                    if isinstance(node_name_widget, QtWidgets.QLineEdit):
-                        node_name_widget.setText(item.node_name)
-                    prim_path_widget = self.table.cellWidget(row, 6)
-                    if isinstance(prim_path_widget, QtWidgets.QLineEdit):
-                        prim_path_widget.setText(item.prim_path)
 
                 # Extract version from node's file path
                 file_path = None
@@ -1683,6 +1636,11 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         # Mirror the freshly-computed state onto the Read/Camera nodes (label
         # suffix + tile_color) so the node graph shows the same cue as the UI.
         self._apply_status_to_loaded_nodes()
+
+        # Force a reload on every loaded Read so Nuke drops any cached frame
+        # set and picks up whatever is currently on disk (farm renders that
+        # landed while the dialog was open, etc.).
+        self._reload_all_loaded_reads()
 
         # Show message (only when not silent)
         if silent:
@@ -1897,11 +1855,11 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         the highest version and flag the duplicate.
         """
         # Cameras: a shot generally has one camera, so first try the project
-        # convention — a Camera4 named "SHOT_CAM". Fall back to file-knob
+        # convention — a Camera3 named "CAM_SHOT". Fall back to file-knob
         # matching for renamed / non-canonical setups.
         if item.asset_type == "Camera":
             for cam_node in camera_nodes:
-                if cam_node.name().upper() == "SHOT_CAM":
+                if cam_node.name().upper() == "CAM_SHOT":
                     return cam_node, False
 
             for cam_node in camera_nodes:
@@ -2202,6 +2160,25 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
             except Exception as e:
                 print(f"[ShotAssetLoader] label sync failed for {node.name()}: {e}")
 
+    def _reload_read(self, node):
+        """Kick a Read's frame cache via its `reload` knob. No-op for non-Read
+        nodes (Camera3 has no such knob)."""
+        if not node or node.Class() != "Read":
+            return
+        if 'reload' not in node.knobs():
+            return
+        try:
+            node['reload'].execute()
+        except Exception as e:
+            print(f"[ShotAssetLoader] reload knob failed for {node.name()}: {e}")
+
+    def _reload_all_loaded_reads(self):
+        """Reload every Read bound to an asset item. _reload_read is a no-op
+        for non-Read nodes (Camera3) so we don't need to filter by type here."""
+        for item in self.asset_items:
+            if item.loaded_node:
+                self._reload_read(item.loaded_node)
+
     def _node_status_key(self, item):
         """Map an item's current state to one of `_NODE_STATUS_VISUALS` keys,
         or None if the node shouldn't carry a status marker (e.g. rollback,
@@ -2309,19 +2286,8 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
                     # Defensive reload: kick the Read's cache so Nuke shows the
                     # frames just written to disk rather than anything it may
-                    # have cached from the previous version's path. Camera4
-                    # has no reload knob — guarded so it's a Read-only action.
-                    if (
-                        item.loaded_node.Class() == "Read"
-                        and 'reload' in item.loaded_node.knobs()
-                    ):
-                        try:
-                            item.loaded_node['reload'].execute()
-                        except Exception as e:
-                            print(
-                                f"[ShotAssetLoader] reload knob failed for "
-                                f"{item.loaded_node.name()}: {e}"
-                            )
+                    # have cached from the previous version's path.
+                    self._reload_read(item.loaded_node)
                 else:
                     failed_updates.append(f"{item.asset_type} - {item.asset_name}")
 

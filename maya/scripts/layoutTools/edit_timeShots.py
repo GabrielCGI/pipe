@@ -2,7 +2,6 @@ import qtpy.QtWidgets as qt
 import maya.cmds as cmds
 
 
-
 class offsetShot(qt.QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
@@ -33,7 +32,9 @@ class offsetShot(qt.QMainWindow):
     def _decalShot(self, inverte: bool) -> None:
         selected_shots = cmds.ls(selection=True, type="shot")
         if not selected_shots:
-            cmds.warning("No shot is selected. Please select a shot in the Camera Sequencer.")
+            cmds.warning(
+                "No shot is selected. Please select a shot in the Camera Sequencer."
+            )
             return
         shot_name = selected_shots[0]
         if not cmds.objExists(shot_name) or cmds.nodeType(shot_name) != "shot":
@@ -41,11 +42,11 @@ class offsetShot(qt.QMainWindow):
         sequence = cmds.listConnections(shot_name, type="sequencer")
         if not sequence:
             return
-        
+
         offset = self.spin.value()
         if inverte:
             offset = offset.__invert__() + 1
-        
+
         self.applyOffsetOnShotName(offset, shot_name, sequence)
         self.applyOffsetOnKey(offset)
 
@@ -72,7 +73,12 @@ class offsetShot(qt.QMainWindow):
             next_track = cmds.getAttr(f"{next_shot}.track")
 
             new_sequence_start = next_sequence_start + cumulative_offset
-            cmds.shot(next_shot, e=True, startTime=next_start + cumulative_offset, endTime=next_end + cumulative_offset)
+            cmds.shot(
+                next_shot,
+                e=True,
+                startTime=next_start + cumulative_offset,
+                endTime=next_end + cumulative_offset,
+            )
             cmds.setAttr(f"{next_shot}.sequenceStartFrame", new_sequence_start)
             cmds.setAttr(f"{next_shot}.track", next_track)
 
@@ -90,7 +96,13 @@ class offsetShot(qt.QMainWindow):
                 if keys:
                     keys_to_shift = [k for k in keys if k >= start_frame]
                     if keys_to_shift:
-                        cmds.keyframe(curve, edit=True, time=(min(keys_to_shift), max(keys_to_shift)), relative=True, timeChange=offset)
+                        cmds.keyframe(
+                            curve,
+                            edit=True,
+                            time=(min(keys_to_shift), max(keys_to_shift)),
+                            relative=True,
+                            timeChange=offset,
+                        )
                         print(f"Clés déplacées pour {curve} à partir de {start_frame}.")
             except RuntimeError as e:
                 cmds.warning(f"Erreur lors du déplacement des clés pour {curve}: {e}")

@@ -120,7 +120,7 @@ class StampsIntegration:
 
             # Center the anchor horizontally under the source node. Aligning by
             # xpos alone leaves a visible offset whenever the source and the
-            # anchor have different widths (e.g. Camera4 vs anchor stamp).
+            # anchor have different widths (e.g. Camera3 vs anchor stamp).
             source_center_x = source_node.xpos() + source_node.screenWidth() / 2
             anchor_x = int(source_center_x - anchor.screenWidth() / 2)
             anchor.setXYpos(anchor_x, source_node.ypos() + y_offset)

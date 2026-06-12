@@ -107,10 +107,6 @@ mtlximage_path_updatev2.run()]]></script>
 import sys
 import socket
 
-MODULE_PATH = r"R:\pipeline\pipe\houdini\scripts"
-
-#if not MODULE_PATH in sys.path :
-#sys.path.insert(0,MODULE_PATH)
     
 import ratmanager
 print(ratmanager)

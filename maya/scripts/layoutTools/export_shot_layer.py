@@ -1,20 +1,15 @@
 import qtpy.QtWidgets as qt
 import qtpy.QtCore as qtc
-import qtpy.QtGui as qtg
-import mayaUsd.lib as mayaUsdLib #type: ignore
-import maya.cmds as cmds
+import mayaUsd.lib as mayaUsdLib  # type: ignore
 from pxr import Sdf, Usd, UsdUtils
-import re
-
-
+import maya.cmds as cmds
 
 
 class ExportAsLayer(qt.QMainWindow):
-    def __init__(self, parent = None):
+    def __init__(self, parent=None):
         super().__init__(parent)
         self.setWindowTitle("Export data as Layer USD")
         self.resize(800, 400)
-
 
         mw = qt.QWidget()
         self.setCentralWidget(mw)
@@ -25,7 +20,6 @@ class ExportAsLayer(qt.QMainWindow):
         cc_lds.setFixedHeight(50)
         container_main.addWidget(cc_lds)
 
-        
         ligne_data_shot = qt.QHBoxLayout(cc_lds)
         ligne_data_shot.setContentsMargins(0, 0, 0, 0)
 
@@ -50,20 +44,16 @@ class ExportAsLayer(qt.QMainWindow):
 
         ligne_data_shot.addStretch()
 
-
-
         separator(container_main)
 
-
-
-        #-------------------------- coupé la fenêtre en deux morceau gauche USD est à droite Data Maya --------------------------
+        # -------------------------- coupé la fenêtre en deux morceau gauche USD est à droite Data Maya --------------------------
         split_windows = qt.QHBoxLayout()
         container_main.addLayout(split_windows)
 
-        #--------------------- section USD ---------------------
+        # --------------------- section USD ---------------------
         section_USD = qt.QVBoxLayout()
         split_windows.addLayout(section_USD)
-        
+
         data_USD = qt.QLabel("Export USD Layer")
         data_USD.setStyleSheet("font-size: 20px;")
         data_USD.setAlignment(qtc.Qt.AlignCenter)
@@ -94,11 +84,9 @@ class ExportAsLayer(qt.QMainWindow):
         export_USD.clicked.connect(self._exportUSDLayer)
         section_USD.addWidget(export_USD)
 
-
         separator(split_windows, True)
 
-
-        #------------------ section Data Maya ------------------
+        # ------------------ section Data Maya ------------------
         section_DataMaya = qt.QVBoxLayout()
         split_windows.addLayout(section_DataMaya)
 
@@ -127,11 +115,9 @@ class ExportAsLayer(qt.QMainWindow):
         export_data.clicked.connect(self.exportDataMaya)
         section_DataMaya.addWidget(export_data)
 
-
         # execute
         self._refreshFramerange(self.all_shot_combo.currentText())
         self._buildTree(self.all_proxyShape.currentText())
-
 
     # ---------------- methode general ----------------
     def _findAllShot(self) -> list[str]:
@@ -144,29 +130,27 @@ class ExportAsLayer(qt.QMainWindow):
         start = str(int(cmds.shot(text, q=True, st=True)))
         end = str(int(cmds.shot(text, q=True, et=True)))
 
-        self.start_time_shot.setText("frame start: "+start)
-        self.end_time_shot.setText("frame end: "+end)
-
-
+        self.start_time_shot.setText("frame start: " + start)
+        self.end_time_shot.setText("frame end: " + end)
 
     # ---------------- section USD methode ----------------
     def _findUSDProxyShape(self) -> list[str]:
         return cmds.ls(type="mayaUsdProxyShape", long=True) or []
-    
+
     def _buildTree(self, shape: str):
         if not shape:
             return
         prim = mayaUsdLib.GetPrim(shape)
         if not prim or not prim.IsValid():
             return
-        
+
         self.view_layer.clear()
 
         session_layer = prim.GetStage().GetSessionLayer()
         session_item = qt.QTreeWidgetItem([session_layer.identifier])
         self.view_layer.addTopLevelItem(session_item)
         self._addSubLayers(session_layer, session_item)
-        
+
         root_layer = prim.GetStage().GetRootLayer()
         root_item = qt.QTreeWidgetItem([root_layer.identifier])
         self.view_layer.addTopLevelItem(root_item)
@@ -186,11 +170,10 @@ class ExportAsLayer(qt.QMainWindow):
 
             # récursion
             self._addSubLayers(sub_layer, item)
-    
+
     def _activeQTree(self, value: bool) -> None:
         self.view_layer.setDisabled(value)
         self.view_layer.clearSelection()
-
 
     def _layerAutoDetect(self) -> list[Sdf.Layer]:
         return []
@@ -219,9 +202,6 @@ class ExportAsLayer(qt.QMainWindow):
         new_layer.Export(r"D:\toto\Export_usd_test\test.usda")
         print("export USD")
 
-
-
-
     # ---------------- section data maya methode ----------------
     def dd(self):
         pass
@@ -230,37 +210,41 @@ class ExportAsLayer(qt.QMainWindow):
         import maya.cmds as cmds
 
         nodes_find = set()
-        for parent in ["assets|sets", "assets|characters", "assets|props", "assets|kits"]:
+        for parent in [
+            "assets|sets",
+            "assets|characters",
+            "assets|props",
+            "assets|kits",
+        ]:
             if not cmds.objExists(parent):
                 continue
 
-            hierarchy_nodes = cmds.listRelatives(parent, allDescendents=True, s=False, f=True)
+            hierarchy_nodes = cmds.listRelatives(
+                parent, allDescendents=True, s=False, f=True
+            )
             if hierarchy_nodes is None:
                 continue
-            
+
             for node in hierarchy_nodes:
                 if ":rig|" in node:
                     continue
                 elif node.endswith(":geo"):
                     nodes_find.add(node)
-        
+
         if not nodes_find:
-            return self.PrintMSG('no geo to export, nice have: "assets|sets", "assets|characters", "assets|props", "assets|kits"')
-        
+            return self.PrintMSG(
+                'no geo to export, nice have: "assets|sets", "assets|characters", "assets|props", "assets|kits"'
+            )
+
         cmds.select(nodes_find)
 
         return nodes_find
-
 
     def exportDataMaya(self):
         print("export maya")
 
 
-
-
-
-    
-def separator( layout: qt.QVBoxLayout, vert=False):
+def separator(layout: qt.QVBoxLayout, vert=False):
     separator = qt.QFrame()
     separator.setFrameShape(qt.QFrame.HLine if not vert else qt.QFrame.VLine)
     separator.setFrameShadow(qt.QFrame.Sunken)

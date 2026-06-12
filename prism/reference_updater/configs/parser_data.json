@@ -1,7 +1,7 @@
 {
     "Assets":{
         "hide_PahtAssets":[
-            "Shooting", "sandbox", "test", "PrevizSets", "Environments", "Environment", "@asset_path@", "LineUps"
+            "Shooting", "sandbox", "test", "PrevizSets", "@asset_path@", "LineUps"
         ],
         "hide_assets":[
             

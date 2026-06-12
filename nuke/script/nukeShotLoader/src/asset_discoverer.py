@@ -216,8 +216,8 @@ class AssetDiscoverer:
         cameras = {}
         try:
             for cam_folder, cam_path in _iter_subdirs(camera_base):
-                # Only load layout camera (_layer_lay_camera)
-                if cam_folder != "_layer_lay_camera":
+                # Only load the per-shot camera export (_layer_cam_camera)
+                if cam_folder != "_layer_cam_camera":
                     continue
 
                 cam_name = cam_folder.lstrip("_")

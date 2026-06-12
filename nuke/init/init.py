@@ -214,4 +214,8 @@ nuke.pluginAddPath(r"R:\pipeline\pipe\nuke\script\nukeShotLoader")
 
 ## edit 2026.06.04 (YY.MM.DD)
 ##  DMP EXR Layer Builder Added
-nuke.pluginAddPath(r"R:/pipeline/pipe/nuke/script/dmpExrLayerBuilder") 
+nuke.pluginAddPath(r"R:/pipeline/pipe/nuke/script/dmpExrLayerBuilder")
+
+## edit 2026.06.06 (YY.MM.DD)
+##  DMP TOolKit Added
+nuke.pluginAddPath(r"R:/pipeline/pipe/nuke/script/nukeDmpToolKit") 

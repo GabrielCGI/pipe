@@ -269,7 +269,7 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
             w.setSelected(True)
 
     # Ajoute la commande dans le menu Nuke (avec raccourci Ctrl+Alt+W)
-    nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, 'ctrl+alt+w')
+    # nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, 'ctrl+alt+w')
     # Si tu preferes SANS raccourci : remplace la ligne ci-dessus par :
     # nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, '')
 
@@ -289,3 +289,13 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     # Nuke Ref Install
     import nuke_ref
     nuke_ref.install()
+
+    #menus added the 26.06.06 by Mat A.
+    # R:\pipeline\pipe\nuke\script\nukeDmpToolKit
+    import main
+
+    #R:\pipeline\pipe\nuke\script\dmpExrLayerBuilder
+    import export_layers
+
+    nuke.menu('Nuke').addCommand('DMP Tools/ProjIT',main.run, '')
+    nuke.menu('Nuke').addCommand('DMP Tools/exrLayerBuilderNode',export_layers.run, '')
