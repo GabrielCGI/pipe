@@ -27,6 +27,34 @@ RENDER_ROOTS = [
 AOV_PRIORITY = ["beauty", "rgba", "rgb", "main", "master"]
 
 # ---------------------------------------------------------------------------
+# Pipeline step catalog (new production tracker / ShotGrid)
+# Ordered mapping: pipeline step (department) -> ordered list of task names.
+# Task names equal the on-disk render/playblast folder names. Used to populate
+# the step tree (UI) and to resolve folder names to canonical tasks.
+# Source: ShotGrid task list (Pipeline Step / Task Name columns), Sort Order.
+# ---------------------------------------------------------------------------
+STEP_CATALOG = [
+    ("Art",          ["Reference", "Concept", "Design", "Color"]),
+    ("StoryBoard",   ["Storyboard"]),
+    ("Editing",      ["Edit", "Mastering"]),
+    ("Layout",       ["Previz", "RoughLayout", "RoughLayoutCrowd", "ConfoLayout", "FinalLayout"]),
+    ("Camera",       ["CameraRough", "CameraFix", "CameraPolish"]),
+    ("SetDressing",  ["RoughSetdress", "FinalSetdress"]),
+    ("Animation",    ["AnimBlock", "AnimSpline", "AnimFix"]),
+    ("AnimCrowd",    ["AnimCrowd"]),
+    ("Lighting",     ["ConfoRenderA", "ConfoRenderB", "PreLighting", "Lighting"]),
+    ("CFX",          ["CFX"]),
+    ("FX",           ["FX"]),
+    ("Lookdev",      ["TweaksShading", "TweaksGroom"]),
+    ("Compositing",  ["SlapComp", "PreComp", "Compo"]),
+    ("DMP",          ["MattePaint", "camProjection"]),
+    ("Grading",      ["FinalGrading"]),
+]
+
+# Catch-all bucket for on-disk task folders that match no known task name.
+OTHER_STEP = "Autres"
+
+# ---------------------------------------------------------------------------
 # Media file extensions
 # ---------------------------------------------------------------------------
 IMAGE_SEQ_EXTENSIONS = [".exr", ".dpx", ".tiff", ".tif", ".png", ".jpg", ".jpeg"]

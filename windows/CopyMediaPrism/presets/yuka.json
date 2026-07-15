@@ -1,0 +1,26 @@
+{
+    "filters": {
+        "COMPOSITING": [
+            "compo",
+            "comp",
+            "nuke",
+            "beauty"
+        ],
+        "ANIM": [
+            "anim",
+            "AnimBlock",
+            "AnimSpline",
+            "anim_playblast",
+            "playblast"
+        ],
+        "RLO": [
+            "RoughtLayout",
+            "layout",
+            "Previz",
+            "RoughLayout_playblast"
+        ]
+    },
+    "source_path": "I:/yuka_2604",
+    "dest_path": "D:/cache_resolve/yuka_2604",
+    "production": "Yuka"
+}

@@ -92,11 +92,19 @@ class ScanWorker(QThread):
                 self._cache.flush()
 
     # Fallback pipeline steps tried when the requested task has no versions.
-    # Ordered from most to least preferred. Lighting is intentionally excluded
-    # because it is typically rendered as separate layers and does not represent
-    # the composited result.
+    # Ordered from most to least preferred (composited result first, then upstream
+    # steps). New-tracker (ShotGrid) task names come first; legacy names are kept
+    # at the end for backward compatibility with older projects.
     _FALLBACK_ORDER = [
-        "Compo", "MattePaint", "SlapComp", "QC", "CFX", "FX", "Simulation", "Anim", "Animation", "SetDress", "Layout",
+        # New tracker — Compositing → Lighting → Anim → Layout → SetDress → Camera
+        "Compo", "PreComp", "SlapComp",
+        "Lighting", "PreLighting", "ConfoRenderB", "ConfoRenderA",
+        "AnimFix", "AnimSpline", "AnimBlock", "AnimCrowd",
+        "FinalLayout", "ConfoLayout", "RoughLayoutCrowd", "RoughLayout", "Previz",
+        "FinalSetdress", "RoughSetdress",
+        "CameraPolish", "CameraFix", "CameraRough",
+        # Legacy tracker (kept for backward compatibility)
+        "MattePaint", "QC", "CFX", "FX", "Simulation", "Anim", "Animation", "SetDress", "Layout",
     ]
 
     def _do_scan(self) -> None:

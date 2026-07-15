@@ -25,16 +25,24 @@ Points d'attention :
 - `opentimelineio==0.16.0` est **figé** — ne pas mettre à jour sans tester avec OpenRV (le patch dans `launch.bat` est lié à cette version)
 - `_find_latest_hiero()` détecte automatiquement la version Nuke installée sous `C:\Program Files\`. Le filtre `major < 17` exclut Nuke 17 (installation défectueuse sur la machine). À ajuster si une nouvelle version est installée.
 - `HIERO_EXECUTABLE` : fallback sur Nuke 15.1v5 si aucune version < 17 n'est détectée
+- `STEP_CATALOG` : **catalogue des pipeline steps du nouveau tracker (ShotGrid)** — mapping ordonné *pipeline step → tasks* (ex. `Layout → [Previz, RoughLayout, RoughLayoutCrowd, ConfoLayout, FinalLayout]`). Source de vérité pour l'arbre des steps et la résolution des tasks. C'est ici qu'on ajoute/renomme une task.
+- `OTHER_STEP = "Autres"` : nom du bucket fourre-tout pour les dossiers sur disque ne correspondant à aucune task connue
 
 ### `core/project.py`
 Lit `pipeline.json` et `Prism.json` pour construire un objet `PrismProject` (FPS, départements, shot ranges).
 - Si le projet n'a pas de `pipeline.json`, certains champs seront absents — le code tolère ça
+- `_parse_departments()` a **deux chemins gatés** :
+  - **Nouveau tracker (ShotGrid)** : le `STEP_CATALOG` de `config.py` fait autorité (catalogue fixe, tous les steps garantis dans l'arbre) ; `taskpresets_shot` ne complète que les steps *hors* catalogue (ex. `Matchmove`, `Confo`). Détecté via la présence de `taskpresets_shot` ou une intersection des steps avec `STEP_CATALOG`.
+  - **Legacy** : ancien comportement inchangé (filtre Lighting, injection SlapComp/CFX/QC, `_DISPLAY_ORDER`).
+- `_parse_taskpresets()` : lit et fusionne `taskpresets_shot` du `pipeline.json` en un mapping *step → tasks*
+- `resolve_task_name()` : match **exact** (abréviation / nom / task), puis **fallback préfixe** — un dossier libre (`allowAdditionalTasks`) dont le nom *commence par* une task connue y est rattaché (`CompoExtended` → `Compo`, `LightingShading` → `Lighting`) ; le plus long match gagne pour que `RoughLayoutCrowd` garde sa propre task
 
 ### `core/scanner.py`
 Parcourt `03_Production/Shots` et retourne des `ShotEntry[]`.
 - `scan_versions()` cherche les dossiers de version (`v001`, `v002`...) dans l'ordre `RENDER_ROOTS` de `config.py`
 - `find_complete_media()` remonte les versions de la plus récente à la plus ancienne et retourne la première complète (voir détection d'incomplétude ci-dessous)
-- Le fallback de tâche suit `_FALLBACK_ORDER` dans `main_window.py` si la tâche demandée est absente d'un shot
+- Le fallback de tâche suit `_FALLBACK_ORDER` dans `main_window.py` si la tâche demandée est absente d'un shot (noms du nouveau tracker en tête, anciens noms en fin pour la rétrocompat)
+- `_resolve_task_folder()` mappe un dossier disque vers une task sélectionnée : match exact, puis rattachement par préfixe via `resolve_task_name()` ; un dossier vraiment inconnu (ex. `laohf`) est placé dans le bucket **« Autres »** si la feuille est cochée
 - `ShotEntry.has_shot_range` : `True` si le range vient de `shotInfo.json`, `False` si c'est le fallback (ex. projet Kitsu)
 
 ### `core/version_cache.py`
@@ -79,7 +87,7 @@ Combo des projets récents (lu depuis `Prism.json`) + bouton Browse.
 Liste des shots avec inclusion/exclusion et filtre regex.
 
 ### `ui/step_panel.py`
-Checkboxes des départements/tâches disponibles dans le projet.
+**Arbre dépliable** (`QTreeWidget`) des pipeline steps/tasks : chaque pipeline step (département) est un parent **tri-state** repliable, chaque task un enfant cochable indépendamment, plus une feuille **« Autres »** pour les dossiers non reconnus. Boutons All / None / Expand / Collapse. Émet `selection_changed(list[str])` avec les **tasks feuilles** cochées (cocher un parent coche toutes ses tasks). Peuplé depuis `project.departments_shot`.
 
 ### `ui/version_panel.py`
 Choix de version : "Latest" automatique ou override manuel par shot.
@@ -97,6 +105,7 @@ Log coloré en temps réel (info / success / warning / error).
 | Sujet | Détail |
 |-------|--------|
 | **opentimelineio** | Bloqué à `0.16.0`. `launch.bat` patche `otio_reader.py` d'OpenRV (`clip_if()` → `find_clips()`). Ne pas upgrader sans tester. |
+| **Catalogue pipeline steps** | Le nouveau tracker (ShotGrid) est piloté par `STEP_CATALOG` dans `config.py`. Pour ajouter/renommer une task ou un step, éditer ce catalogue. `taskpresets_shot` du `pipeline.json` ne sert qu'aux steps hors catalogue. Les anciens projets passent par le chemin legacy de `_parse_departments()`, inchangé. Les dossiers libres sont rattachés par préfixe ; les inconnus tombent dans « Autres ». |
 | **Hiero < 17** | Le filtre `major < 17` dans `config._find_latest_hiero()` est intentionnel — Nuke 17 installé sur la machine est défectueux. Adapter si besoin. |
 | **Startup script Hiero** | Écrasé à chaque lancement Hiero depuis le tool. Toute modification manuelle de `~/.nuke/Python/Startup/otio_review_autoload.py` sera perdue. Modifier `_HIERO_STARTUP_SCRIPT` dans `main_window.py`. |
 | **Thread scan** | `ScanWorker` émet des signaux Qt — ne jamais appeler directement des méthodes UI depuis `core/`. |

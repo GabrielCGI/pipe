@@ -3,13 +3,15 @@ from importlib import reload
 import qtpy.QtWidgets as qt
 import traceback
 import sys
+import os
 
 
-MODULES_SEARCH_PATH = ["R:/pipeline/pipe/prism"]
-for module_path in MODULES_SEARCH_PATH:
-    if not module_path in sys.path:
-        sys.path.insert(0, module_path)
+file_path = os.path.dirname(__file__)
+projet = file_path.split("\\")[1]
 
+MODULES_SEARCH_PATH = f"i:/{projet}/.pipelines_deploy/maya/scripts"
+if MODULES_SEARCH_PATH not in sys.path:
+    sys.path.insert(0, MODULES_SEARCH_PATH)
 
 
 name = "Plugin Reference Updater"
@@ -35,13 +37,13 @@ class PluginReferenceUpdater:
 
     def updateReferenceWithUI(self, path):
         try:
-            import reference_updater
-            reload(reference_updater)
+            import anm_reference_updater
+            reload(anm_reference_updater)
             self.waiter = None
-            self.win = reference_updater.mainUI(True, self.core, None, path)
+            self.win = anm_reference_updater.mainUI(True, self.core, None, path)
             self.win.show()
         except Exception as e:
             print(e)
             print(traceback.format_exc())
-            self.core.popup(f"module refUpdater not found")
+            self.core.popup("module refUpdater not found\n" + MODULES_SEARCH_PATH)
             self.core.popup(traceback.format_exc())

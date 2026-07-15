@@ -21,6 +21,7 @@ from config import (
     DEFAULT_FPS,
     DEFAULT_FRAME_START,
     PRISM_CONFIG_PATH,
+    STEP_CATALOG,
 )
 from core.exceptions import InvalidProjectError, PipelineConfigError, ShotInfoError
 
@@ -62,21 +63,43 @@ class PrismProject:
     def resolve_task_name(self, folder_name: str) -> Optional[str]:
         """
         Map a filesystem folder name to a canonical task name.
-        Handles direct name match and abbreviation lookup.
-        Returns None if no match is found.
+
+        Two passes:
+          1. Exact match against abbreviation, department name, or any task.
+          2. Prefix fallback — a free folder (allowAdditionalTasks) whose name
+             *starts with* a known task name is attached to that task
+             (e.g. "CompoExtended" -> "Compo", "LightingShading" -> "Lighting").
+             The longest matching task wins so "RoughLayoutCrowd" keeps its own
+             exact task over the shorter "RoughLayout".
+        Returns None if nothing matches.
         """
         lower = folder_name.lower()
+
+        # --- pass 1: exact match ---
         for dept in self.departments_shot:
-            # Match by abbreviation
-            if dept.abbreviation.lower() == lower:
+            # Treat as an abbreviation only when it is a genuine short code
+            # (distinct from the department name). New-tracker projects set the
+            # abbreviation equal to the name, which must not hijack the lookup.
+            if (
+                dept.abbreviation.lower() != dept.name.lower()
+                and dept.abbreviation.lower() == lower
+            ):
                 return dept.default_tasks[0] if dept.default_tasks else dept.name
-            # Match directly against department name or any default task
             if dept.name.lower() == lower:
                 return dept.name
             for task in dept.default_tasks:
                 if task.lower() == lower:
                     return task
-        return None
+
+        # --- pass 2: longest-prefix fallback ---
+        best_task: Optional[str] = None
+        best_len = 0
+        for dept in self.departments_shot:
+            for task in dept.default_tasks:
+                tl = task.lower()
+                if len(tl) > best_len and lower.startswith(tl):
+                    best_task, best_len = task, len(tl)
+        return best_task
 
     def all_task_names(self) -> List[str]:
         """Return a flat, deduplicated list of all canonical task names."""
@@ -218,10 +241,47 @@ class ProjectLoader:
         return DEFAULT_FPS
 
     @staticmethod
+    def _parse_taskpresets(data: dict) -> Dict[str, List[str]]:
+        """
+        Parse `taskpresets_shot` into a {step_name_lower: [tasks]} mapping.
+
+        Prism's taskpresets_shot is a list of presets, each holding a list of
+        departments with their tasks. We merge all presets so the mapping is the
+        superset of tasks declared anywhere for each pipeline step.
+        """
+        presets = (
+            data.get("taskpresets_shot")
+            or data.get("globals", {}).get("taskpresets_shot")
+            or []
+        )
+        result: Dict[str, List[str]] = {}
+        for preset in presets:
+            if not isinstance(preset, dict):
+                continue
+            for dept in preset.get("departments", []):
+                if not isinstance(dept, dict):
+                    continue
+                name = (dept.get("name") or "").strip()
+                if not name:
+                    continue
+                bucket = result.setdefault(name.lower(), [])
+                for task in dept.get("tasks") or []:
+                    if isinstance(task, str) and task and task not in bucket:
+                        bucket.append(task)
+        return result
+
+    @staticmethod
     def _parse_departments(data: dict) -> List[Department]:
         """
         Parse departments from pipeline.json.
         Prism stores them under "departments_shot" (or "globals" -> "departments").
+
+        Two code paths:
+          - New tracker (ShotGrid): department -> task lists are enriched from the
+            built-in STEP_CATALOG and the project's taskpresets_shot, and every
+            catalog step is guaranteed to appear (fixed catalog).
+          - Legacy tracker: the historical post-processing (Lighting removal,
+            SlapComp/CFX/QC injection, MattePaint, _DISPLAY_ORDER) is kept intact.
         """
         depts_raw = (
             data.get("departments_shot")
@@ -249,24 +309,68 @@ class ProjectLoader:
 
         # Provide sensible defaults if pipeline.json has no department info
         if not departments:
-            departments = _default_departments()
-        else:
-            # Filter out Lighting — replaced by SlapComp
-            departments = [d for d in departments if d.name.lower() != "lighting"]
+            return _default_departments()
 
-            existing_names = {d.name.lower() for d in departments}
+        catalog = {step.lower(): tasks for step, tasks in STEP_CATALOG}
+        catalog_order = [step.lower() for step, _ in STEP_CATALOG]
+        presets = ProjectLoader._parse_taskpresets(data)
 
-            # Inject missing extra departments (CFX, SetDress, QC, SlapComp)
-            for extra in _EXTRA_DEPARTMENTS:
-                if extra.name.lower() not in existing_names:
-                    departments.append(extra)
+        # New tracker if the project declares taskpresets or shares any step name
+        # with the ShotGrid catalog.
+        is_new_tracker = bool(presets) or any(
+            d.name.lower() in catalog for d in departments
+        )
 
-            # Remove SlapComp from Compo's task list — it's a standalone dept in the UI
+        if is_new_tracker:
+            existing = {d.name.lower() for d in departments}
+            # Guarantee the full fixed catalog: inject any missing catalog step.
+            for step, tasks in STEP_CATALOG:
+                if step.lower() not in existing:
+                    departments.append(
+                        Department(step, step[:3].lower(), list(tasks))
+                    )
+
+            # Assign each department its task list. The ShotGrid catalog is the
+            # authoritative source for known steps (fixed catalog). taskpresets_shot
+            # only fills steps absent from the catalog (Matchmove, Confo, future
+            # projects) — it is intentionally not merged into catalog steps to avoid
+            # cross-contamination (e.g. its "All" preset lumps SetDressing under
+            # Layout and MattePaint under Compositing).
             for dept in departments:
-                if dept.name.lower() == "compo":
-                    dept.default_tasks = [
-                        t for t in dept.default_tasks if t.lower() != "slapcomp"
-                    ]
+                key = dept.name.lower()
+                if key in catalog:
+                    dept.default_tasks = list(catalog[key])
+                else:
+                    preset_tasks = presets.get(key, [])
+                    if preset_tasks:
+                        dept.default_tasks = list(preset_tasks)
+                    elif not dept.default_tasks:
+                        dept.default_tasks = [dept.name]
+
+            # Sort by catalog order; non-catalog steps (Matchmove, Confo…) last.
+            departments.sort(
+                key=lambda d: catalog_order.index(d.name.lower())
+                if d.name.lower() in catalog_order else len(catalog_order)
+            )
+            return departments
+
+        # --- legacy tracker path (unchanged behaviour) ---
+        # Filter out Lighting — replaced by SlapComp
+        departments = [d for d in departments if d.name.lower() != "lighting"]
+
+        existing_names = {d.name.lower() for d in departments}
+
+        # Inject missing extra departments (CFX, SetDress, QC, SlapComp)
+        for extra in _EXTRA_DEPARTMENTS:
+            if extra.name.lower() not in existing_names:
+                departments.append(extra)
+
+        # Remove SlapComp from Compo's task list — it's a standalone dept in the UI
+        for dept in departments:
+            if dept.name.lower() == "compo":
+                dept.default_tasks = [
+                    t for t in dept.default_tasks if t.lower() != "slapcomp"
+                ]
 
         # Sort departments according to canonical display order
         departments.sort(

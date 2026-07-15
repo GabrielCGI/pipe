@@ -99,6 +99,8 @@ nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/scripts/nuke
 nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/aeRefractor")
 nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/stamps")
 
+# add copernicus bridge: 26.07.02
+nuke.pluginAddPath("I:/frederic_2603/.pipelines_deploy/nuke/scripts")
 # ### load magic defocus only if nuke 13 ou 16
 if nuke.NUKE_VERSION_MAJOR == 13:
     nuke.pluginAddPath("R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/MagicDefocus2_v1.0.3")

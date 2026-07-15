@@ -10,6 +10,7 @@ Ajoute "Analyser la sequence EXR..." dans le menu clic-droit du Media Browser.
 from __future__ import annotations
 
 import os
+import re
 import sys
 import subprocess
 import datetime
@@ -19,7 +20,7 @@ import traceback
 # ── Constantes (alignees avec le tool live) ─────────────────────────────────
 TOOL_ROOT   = r"R:\pipeline\pipe\deadline\exr_analyzer"
 REPORTS_DIR = r"R:\pipeline\pipe\deadline\exr_analyzer\reports"
-LOGS_DIR    = r"R:\devToto\Claude\exr-analyzer\logs-deadline"
+LOGS_DIR    = r"R:\pipeline\pipe\deadline\exr_analyzer\logs"
 PYTHON_EXE  = r"C:\Program Files\Thinkbox\Deadline10\bin\python3\python.exe"
 SITE_PKG    = r"R:\pipeline\networkInstall\python_shares\python310_deadline_discord_pkgs\Lib\site-packages"
 
@@ -33,6 +34,9 @@ _CALLBACKS = (
     "productSelectorContextMenuRequested",
     "mediaBrowserContextMenuRequested",
 )
+
+# Regex pour reconnaitre un dossier de version (v001, v009, V12...).
+_VERSION_RE = re.compile(r'^v\d+', re.IGNORECASE)
 
 
 class Prism_ExrAnalyzer:
@@ -178,18 +182,62 @@ class Prism_ExrAnalyzer:
         return None, "\n".join(debug)
 
     @staticmethod
-    def _resolve_to_exr_dir(path: str):
-        """Si path est un .exr, retourne le parent. Si dossier contenant des
-        .exr, retourne path. Sinon None."""
+    def _dir_has_exr(path: str, max_walk: int = 5000) -> bool:
+        """True si path contient au moins un .exr (recursif). Court-circuite au
+        premier trouve et borne le parcours pour ne pas bloquer l'UI sur un
+        arbre geant ou un lecteur reseau lent."""
+        seen = 0
+        for _root, _dirs, files in os.walk(path):
+            for f in files:
+                if f.lower().endswith(".exr"):
+                    return True
+                seen += 1
+                if seen >= max_walk:
+                    return False
+        return False
+
+    @classmethod
+    def _resolve_to_exr_dir(cls, path: str):
+        """Resout un chemin vers le dossier d'EXR a analyser.
+
+        - un .exr                      -> son dossier parent
+        - un chemin passant par un v### -> ce dossier de version (le moteur
+                                          globbe **/*.exr, donc il descend dans
+                                          beauty/ et les AOV tout seul)
+        - un conteneur de versions      -> None (enfants = v001, v002... : on
+          (clic sur l'identifiant/layer)   refuse pour ne pas analyser en
+                                          silence toutes les versions a la fois)
+        - un autre dossier avec des .exr -> ce dossier (AOV precis, asset...)
+        Sinon None.
+        """
         if not isinstance(path, str) or not path:
             return None
         try:
             if os.path.isfile(path) and path.lower().endswith(".exr"):
                 return os.path.dirname(path)
-            if os.path.isdir(path):
-                for f in os.listdir(path):
-                    if f.lower().endswith(".exr"):
-                        return path
+            if not os.path.isdir(path):
+                return None
+
+            # 1) Ancrage sur le dossier de version si le chemin passe par un v###
+            #    (jamais sur les versions soeurs).
+            parts = os.path.normpath(path).split(os.sep)
+            for i in range(len(parts) - 1, -1, -1):
+                if _VERSION_RE.match(parts[i]):
+                    version_dir = os.sep.join(parts[: i + 1])
+                    if os.path.isdir(version_dir) and cls._dir_has_exr(version_dir):
+                        return version_dir
+                    break
+
+            # 2) Conteneur de versions (enfants directs = v001, v002...) : refus.
+            try:
+                if any(_VERSION_RE.match(c) for c in os.listdir(path)):
+                    return None
+            except OSError:
+                return None
+
+            # 3) Sinon, dossier contenant directement/recursivement des .exr.
+            if cls._dir_has_exr(path):
+                return path
         except Exception:
             return None
         return None

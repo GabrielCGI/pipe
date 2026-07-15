@@ -299,3 +299,42 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
 
     nuke.menu('Nuke').addCommand('DMP Tools/ProjIT',main.run, '')
     nuke.menu('Nuke').addCommand('DMP Tools/exrLayerBuilderNode',export_layers.run, '')
+
+    #ADDED on 26.07.02 by Gab
+    try:
+        import comp_copernicus_bridge
+    except Exception as _e:
+        nuke.tprint("CopernicusBridge load error: {}".format(_e))
+
+    _m = nuke.menu("Nodes").addMenu("Copernicus", icon="")
+    _m.addCommand(
+        "Copernicus Bridge",
+        "import comp_copernicus_bridge; comp_copernicus_bridge.create_node()")
+    
+    #ADDED on 26.07.08 by Ben
+    if nuke.GUI:
+        try:
+            from PySide6 import QtWidgets, QtCore
+        except ImportError:
+            from PySide2 import QtWidgets, QtCore
+
+        print("[nukex-popup] timer installe")  # doit apparaitre dans la Script Editor
+
+        def _scan():
+            for w in QtWidgets.QApplication.topLevelWidgets():
+                if not w.isVisible():
+                    continue
+                title = w.windowTitle()
+                cls = type(w).__name__
+                labels = [l.text() for l in w.findChildren(QtWidgets.QLabel) if l.text().strip()]
+                if labels:
+                    print("[nukex-popup] visible:", cls, repr(title), labels)
+                for txt in labels:
+                    if "NukeX" in txt or "license" in txt.lower():
+                        print("[nukex-popup] -> match, fermeture de", cls)
+                        w.close()
+
+        _nukex_popup_timer = QtCore.QTimer()
+        _nukex_popup_timer.setInterval(100)
+        _nukex_popup_timer.timeout.connect(_scan)
+        _nukex_popup_timer.start()

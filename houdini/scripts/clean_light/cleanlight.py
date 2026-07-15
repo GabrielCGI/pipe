@@ -1,4 +1,4 @@
-import hou
+import hou #type: ignore
 
 # Nodes identifiers
 LIGHT_MAKER_ID = 'illogic::Light_maker'

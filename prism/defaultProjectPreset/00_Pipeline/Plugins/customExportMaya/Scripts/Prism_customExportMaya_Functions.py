@@ -83,7 +83,7 @@ class Prism_customExportMaya_Functions(object):
 
             try:
                 topLevelShelf = mel.eval("string $m = $gShelfTopLevel")
-            except:
+            except Exception:
                 return False
 
             if not topLevelShelf:

@@ -33,7 +33,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "import qtpy.QtWidgets as qt\nimport qtpy.QtCore as qtc\nimport importlib\nimport PrismInit\nimport sys\n\n\nsys.path.insert(0, \"R:/pipeline/pipe_public/prism-scene-builder\")\nimport sceneBuilder\nimportlib.reload(sceneBuilder)\n\nprism_core = PrismInit.pcore\npath = prism_core.getCurrentFileName()\nproject_path = prism_core.projectPath\n\n\nyaml_path       = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml\"\nroutine_path    = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/templates\"\n\n\ndcc ={\"name\": \"MAYA\", \"pathSoft\": \"\", \"pathPy\": \"\"}\nshotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path, False)\n\nif qt.QApplication.keyboardModifiers() & qtc.Qt.ControlModifier:\n\tshotbuild.main(path, dcc, UI=True)\nelse:\n\tshotbuild.main(path, dcc, UI=False)" 
+        -command "import qtpy.QtWidgets as qt\nimport qtpy.QtCore as qtc\nimport importlib\nimport PrismInit\n\n\n\nimport scene_builder\nimportlib.reload(scene_builder)\n\nprism_core = PrismInit.pcore\npath = prism_core.getCurrentFileName()\nproject_path = prism_core.projectPath\n\n\nyaml_path       = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml\"\nroutine_path    = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/templates\"\n\n\ndcc ={\"name\": \"MAYA\", \"pathSoft\": \"\", \"pathPy\": \"\"}\nshotbuild = scene_builder.sceneBuilder(prism_core, yaml_path, routine_path, False)\n\nif qt.QApplication.keyboardModifiers() & qtc.Qt.ControlModifier:\n\tshotbuild.main(path, dcc, UI=True)\nelse:\n\tshotbuild.main(path, dcc, UI=False)" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -67,7 +67,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\nimport traceback\nimport PrismInit\nimport sys\n\n\nsys.path.insert(0, \"R:/pipeline/pipe/prism\")\n            \n\nimport reference_updater\nreload(reference_updater)\n\nfrom maya import OpenMayaUI\nfrom shiboken6 import wrapInstance\nfrom PySide6.QtWidgets import QWidget\nmain_window_ptr = OpenMayaUI.MQtUtil.mainWindow()\ninstance = wrapInstance(int(main_window_ptr), QWidget)\n\nwindow = reference_updater.mainUI(False, PrismInit.pcore, instance)\nwindow.show()\nwindow.tabs.setCurrentIndex(1)" 
+        -command "from importlib import reload\nimport traceback\nimport PrismInit\n\n\n     \nimport anm_reference_updater\nreload(anm_reference_updater)\n\nfrom maya import OpenMayaUI\nfrom shiboken6 import wrapInstance\nfrom PySide6.QtWidgets import QWidget\nmain_window_ptr = OpenMayaUI.MQtUtil.mainWindow()\ninstance = wrapInstance(int(main_window_ptr), QWidget)\n\nwindow = anm_reference_updater.mainUI(False, PrismInit.pcore, instance)\nwindow.show()\nwindow.tabs.setCurrentIndex(1)" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -140,6 +140,40 @@ global proc shelf_Illogic () {
         -commandRepeatable 1
         -flat 1
     ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "clear all transformation on selected geometry" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "clear Transform" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "CenterPivot.png" 
+        -image1 "CenterPivot.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "import maya.cmds as cmds\n\n\nsel = cmds.ls(sl=True)\nfor node in sel:\n\tcmds.delete(node, ch=True)\n\tcmds.makeIdentity(node, apply=True)\n\tcmds.xform(node, pivots=(0, 0, 0), ws=True)" 
+        -sourceType "python" 
+        -commandRepeatable 1
+        -flat 1
+    ;
     separator
         -enable 1
         -width 12
@@ -168,13 +202,14 @@ global proc shelf_Illogic () {
         -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "USD Updater" 
+        -label "Edit Hearchie" 
         -labelOffset 0
         -rotation 0
         -flipX 0
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
+        -imageOverlayLabel "edit" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
         -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/Edit_hearchie_USD.png" 
@@ -182,7 +217,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\n\nimport edit_hearchie_USD\nreload(edit_hearchie_USD)\n\nedit_hearchie_USD.mainRun()" 
+        -command "from importlib import reload\n\nimport usd_maya_shelf_snippets\nreload(usd_maya_shelf_snippets)\n\nusd_maya_shelf_snippets.openEditHearchie()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -209,6 +244,7 @@ global proc shelf_Illogic () {
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
+        -imageOverlayLabel "update" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
         -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/USD_updater.png" 
@@ -231,27 +267,65 @@ global proc shelf_Illogic () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "copy paste usd from target layer" 
+        -annotation "take last version of your stack usd and mute layers" 
         -enableBackground 0
         -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "" 
+        -label "User Script" 
         -labelOffset 0
         -rotation 0
         -flipX 0
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
+        -imageOverlayLabel "UP Stack" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "commandButton.png" 
-        -image1 "commandButton.png" 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/USD_updater.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/USD_updater.png" 
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "print('nice WIP TOOL')" 
+        -command "from importlib import reload\nimport usd_maya_shelf_snippets\nreload(usd_maya_shelf_snippets)\n\n\nusd_maya_shelf_snippets.updateUSD(False)" 
         -sourceType "python" 
+        -doubleClickCommand "from importlib import reload\nimport usd_maya_shelf_snippets\nreload(usd_maya_shelf_snippets)\n\n\nusd_maya_shelf_snippets.updateUSD(True)" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "copy usd from target layer" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "Copy Paste USD" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -imageOverlayLabel "cp pt" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/usd_copy_paste.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/usd_copy_paste.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from importlib import reload\n\nimport usd_maya_shelf_snippets\nreload(usd_maya_shelf_snippets)\n\nusd_maya_shelf_snippets.copyWorkLayerUSD()" 
+        -sourceType "python" 
+        -doubleClickCommand "from importlib import reload\n\nimport usd_maya_shelf_snippets\nreload(usd_maya_shelf_snippets)\n\nusd_maya_shelf_snippets.pastWorkLayerUSD()" 
         -commandRepeatable 1
         -flat 1
     ;
@@ -277,14 +351,50 @@ global proc shelf_Illogic () {
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
+        -imageOverlayLabel "attr" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
-        -image "commandButton.png" 
-        -image1 "commandButton.png" 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/create_attr_usd.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/create_attr_usd.png" 
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "print('tool wip')" 
+        -command "from importlib import reload\n\nimport usd_maya_shelf_snippets\nreload(usd_maya_shelf_snippets)\n\nusd_maya_shelf_snippets.autoCreateAttribute()" 
+        -sourceType "python" 
+        -doubleClickCommand "from importlib import reload\n\nimport usd_maya_shelf_snippets\nreload(usd_maya_shelf_snippets)\n\nusd_maya_shelf_snippets.openWidow()" 
+        -commandRepeatable 1
+        -flat 1
+    ;
+    shelfButton
+        -enableCommandRepeat 1
+        -flexibleWidthType 3
+        -flexibleWidthValue 32
+        -enable 1
+        -width 35
+        -height 34
+        -manage 1
+        -visible 1
+        -preventOverride 0
+        -annotation "manage all payloads and layer on your scene maya" 
+        -enableBackground 0
+        -backgroundColor 0 0 0 
+        -highlightColor 0.321569 0.521569 0.65098 
+        -align "center" 
+        -label "User Script" 
+        -labelOffset 0
+        -rotation 0
+        -flipX 0
+        -flipY 0
+        -useAlpha 1
+        -font "plainLabelFont" 
+        -overlayLabelColor 0.8 0.8 0.8 
+        -overlayLabelBackColor 0 0 0 0.5 
+        -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/USDMayaManager.png" 
+        -image1 "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/USDMayaManager.png" 
+        -style "iconOnly" 
+        -marginWidth 0
+        -marginHeight 1
+        -command "from importlib import reload\n\nimport usd_payloads_manager\nreload(usd_payloads_manager)\n\nusd_payloads_manager.mainRun()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -381,12 +491,12 @@ global proc shelf_Illogic () {
         -manage 1
         -visible 1
         -preventOverride 0
-        -annotation "import sys, importlib\npath = r\"R:/devGabi/meshyai\"\nif path not in sys.path:\n    sys.path.append(path)\nimport meshy_bridge.api as _api\nimport meshy_bridge.config as _cfg\nimport meshy_bridge.maya_tool as _t\nimportlib.reload(_api)\nimportlib.reload(_cfg)\nimportlib.reload(_t)\n_t.run()" 
+        -annotation "mesh IA" 
         -enableBackground 0
         -backgroundColor 0 0 0 
         -highlightColor 0.321569 0.521569 0.65098 
         -align "center" 
-        -label "import sys, importlib\npath = r\"R:/devGabi/meshyai\"\nif path not i..." 
+        -label "meshIA" 
         -labelOffset 0
         -rotation 0
         -flipX 0

@@ -1,41 +1,41 @@
 """
 ui/step_panel.py — Pipeline step (task) selector.
 
-Populated dynamically from PrismProject.departments_shot.
-Supports single-step mode (radio buttons) or multi-step (checkboxes).
+Populated dynamically from PrismProject.departments_shot. Shown as a collapsible
+tree: each pipeline step (department) is a tri-state parent, each task a checkable
+child. A trailing "Autres" leaf catches on-disk folders matching no known task.
 """
 
 from __future__ import annotations
 
-from typing import List, Optional
+from typing import List
 
-from PySide6.QtCore import Signal
+from PySide6.QtCore import Qt, Signal
 from PySide6.QtWidgets import (
-    QCheckBox,
     QGroupBox,
     QHBoxLayout,
-    QLabel,
+    QHeaderView,
     QPushButton,
-    QScrollArea,
-    QSizePolicy,
+    QTreeWidget,
+    QTreeWidgetItem,
     QVBoxLayout,
-    QWidget,
 )
 
-from core.project import PrismProject, Department
+from config import OTHER_STEP
+from core.project import PrismProject
 
 
 class StepPanel(QGroupBox):
     """
     Lets the user select one or more pipeline tasks to include in the OTIO timeline.
-    Emits *selection_changed* whenever the selection changes.
+    Emits *selection_changed* (list[str] of canonical task names) on every change.
     """
 
     selection_changed = Signal(list)  # list[str] — canonical task names
 
     def __init__(self, parent=None) -> None:
         super().__init__("Pipeline Steps", parent)
-        self._checkboxes: List[QCheckBox] = []
+        self._updating = False
         self._build_ui()
 
     # ------------------------------------------------------------------
@@ -43,29 +43,52 @@ class StepPanel(QGroupBox):
     # ------------------------------------------------------------------
 
     def populate(self, project: PrismProject) -> None:
-        """Rebuild the task list from the project's departments."""
-        self._clear_checkboxes()
+        """Rebuild the step/task tree from the project's departments."""
+        self._updating = True
+        self._tree.clear()
+
         for dept in project.departments_shot:
-            for task in dept.default_tasks:
-                if "storyboard" in task.lower():
-                    continue
-                self._add_task(task, dept)
-        # Pre-select Compositing/Compo if available, otherwise the first task
-        compo_cb = next(
-            (cb for cb in self._checkboxes if "compo" in cb.text().lower()), None
-        )
-        if compo_cb:
-            compo_cb.setChecked(True)
-        elif self._checkboxes:
-            self._checkboxes[0].setChecked(True)
+            tasks = list(dept.default_tasks) or [dept.name]
+            parent = QTreeWidgetItem(self._tree, [dept.name])
+            parent.setFlags(
+                parent.flags() | Qt.ItemIsUserCheckable | Qt.ItemIsAutoTristate
+            )
+            tooltip = f"Department: {dept.name}  |  Abbreviation: {dept.abbreviation}"
+            if dept.color:
+                tooltip += f"  |  Color: {dept.color}"
+            parent.setToolTip(0, tooltip)
+            for task in tasks:
+                child = QTreeWidgetItem(parent, [task])
+                child.setFlags(child.flags() | Qt.ItemIsUserCheckable)
+                child.setCheckState(0, Qt.Unchecked)
+            parent.setExpanded(False)
+
+        # Catch-all bucket for unrecognised folders (allowAdditionalTasks).
+        other = QTreeWidgetItem(self._tree, [OTHER_STEP])
+        other.setFlags(other.flags() | Qt.ItemIsUserCheckable)
+        other.setCheckState(0, Qt.Unchecked)
+        other.setToolTip(0, "Folders matching no known task")
+
+        self._updating = False
+        self._preselect_default()
 
     def get_selected_tasks(self) -> List[str]:
-        """Return canonical task names that are currently checked."""
-        return [cb.text() for cb in self._checkboxes if cb.isChecked()]
+        """Return canonical task names of all checked leaf items."""
+        tasks: List[str] = []
+        for leaf in self._iter_leaves():
+            if leaf.checkState(0) == Qt.Checked:
+                tasks.append(leaf.text(0))
+        return tasks
 
     def set_selected_tasks(self, tasks: List[str]) -> None:
-        for cb in self._checkboxes:
-            cb.setChecked(cb.text() in tasks)
+        wanted = set(tasks)
+        self._updating = True
+        for leaf in self._iter_leaves():
+            leaf.setCheckState(
+                0, Qt.Checked if leaf.text(0) in wanted else Qt.Unchecked
+            )
+        self._updating = False
+        self.selection_changed.emit(self.get_selected_tasks())
 
     # ------------------------------------------------------------------
     # Private
@@ -74,62 +97,72 @@ class StepPanel(QGroupBox):
     def _build_ui(self) -> None:
         outer = QVBoxLayout(self)
 
-        # Scrollable area for the checkboxes
-        scroll = QScrollArea()
-        scroll.setWidgetResizable(True)
-        scroll.setFrameShape(QScrollArea.NoFrame)
+        self._tree = QTreeWidget()
+        self._tree.setHeaderHidden(True)
+        self._tree.setColumnCount(1)
+        self._tree.header().setSectionResizeMode(QHeaderView.Stretch)
+        self._tree.itemChanged.connect(self._on_item_changed)
+        outer.addWidget(self._tree)
 
-        self._container = QWidget()
-        self._container_layout = QVBoxLayout(self._container)
-        self._container_layout.setSpacing(2)
-        self._container_layout.addStretch()
-
-        scroll.setWidget(self._container)
-        outer.addWidget(scroll)
-
-        # Helper: select all / none
+        # Helper: select all / none / expand / collapse
         btn_row = QHBoxLayout()
         all_btn = QPushButton("All")
         none_btn = QPushButton("None")
+        expand_btn = QPushButton("Expand")
+        collapse_btn = QPushButton("Collapse")
         all_btn.setFixedWidth(50)
         none_btn.setFixedWidth(50)
         all_btn.clicked.connect(self._select_all)
         none_btn.clicked.connect(self._select_none)
+        expand_btn.clicked.connect(lambda: self._tree.expandAll())
+        collapse_btn.clicked.connect(lambda: self._tree.collapseAll())
         btn_row.addWidget(all_btn)
         btn_row.addWidget(none_btn)
+        btn_row.addWidget(expand_btn)
+        btn_row.addWidget(collapse_btn)
         btn_row.addStretch()
         outer.addLayout(btn_row)
 
-        self._placeholder = QLabel("Load a project to see pipeline steps.")
-        self._placeholder.setStyleSheet("color: #888;")
-        self._container_layout.insertWidget(0, self._placeholder)
+    def _iter_leaves(self):
+        """Yield every selectable leaf item (tasks + the 'Autres' bucket)."""
+        root = self._tree.invisibleRootItem()
+        for i in range(root.childCount()):
+            top = root.child(i)
+            if top.childCount() == 0:
+                yield top
+            else:
+                for j in range(top.childCount()):
+                    yield top.child(j)
 
-    def _clear_checkboxes(self) -> None:
-        for cb in self._checkboxes:
-            cb.deleteLater()
-        self._checkboxes.clear()
-        self._placeholder.hide()
-
-    def _add_task(self, task: str, dept: Department) -> None:
-        cb = QCheckBox(task)
-        tooltip = f"Department: {dept.name}  |  Abbreviation: {dept.abbreviation}"
-        if dept.color:
-            tooltip += f"  |  Color: {dept.color}"
-        cb.setToolTip(tooltip)
-        cb.stateChanged.connect(self._on_state_changed)
-        # Insert before the stretch spacer
-        self._container_layout.insertWidget(
-            self._container_layout.count() - 1, cb
+    def _preselect_default(self) -> None:
+        """Check 'Compo' by default (else the first task) and reveal it."""
+        leaves = list(self._iter_leaves())
+        if not leaves:
+            return
+        target = next(
+            (lf for lf in leaves if lf.text(0).lower() == "compo"), leaves[0]
         )
-        self._checkboxes.append(cb)
+        self._updating = True
+        target.setCheckState(0, Qt.Checked)
+        self._updating = False
+        if target.parent():
+            target.parent().setExpanded(True)
+        self.selection_changed.emit(self.get_selected_tasks())
 
-    def _on_state_changed(self) -> None:
+    def _on_item_changed(self, _item: QTreeWidgetItem, _column: int) -> None:
+        if self._updating:
+            return
+        self.selection_changed.emit(self.get_selected_tasks())
+
+    def _set_all(self, state: Qt.CheckState) -> None:
+        self._updating = True
+        for leaf in self._iter_leaves():
+            leaf.setCheckState(0, state)
+        self._updating = False
         self.selection_changed.emit(self.get_selected_tasks())
 
     def _select_all(self) -> None:
-        for cb in self._checkboxes:
-            cb.setChecked(True)
+        self._set_all(Qt.Checked)
 
     def _select_none(self) -> None:
-        for cb in self._checkboxes:
-            cb.setChecked(False)
+        self._set_all(Qt.Unchecked)

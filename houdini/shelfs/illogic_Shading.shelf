@@ -10,8 +10,7 @@
     <memberTool name="kmx"/>
     <memberTool name="kmx_geosubset"/>
     <memberTool name="kma_mat_char"/>
-    <memberTool name="autoconnect_ui"/>
-    <memberTool name="material_finder"/>
+    <memberTool name="autoconnect"/>
     <memberTool name="rat_manager"/>
     <memberTool name="CreateAutoVariant"/>
     <memberTool name="USD Preview"/>
@@ -73,22 +72,12 @@ kmx_mat.kmxchar_execute()]]></script>
   </tool>
 
   <tool name="CreateAutoVariant" label="CAV" icon="hicon:/SVGIcons.index?CROWDS_popsteeralign.svg">
-    <script scriptType="python"><![CDATA[import CreateAutoVariant as cav
-from imp import reload
+    <script scriptType="python"><![CDATA[from importlib import reload
+import ldv_create_auto_variant
+reload(ldv_create_auto_variant)
 
-reload(cav)
-cav.autoVariant()]]></script>
-  </tool>
 
-  <tool name="material_finder" label="Get mat" icon="PLASMA_App">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
-
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts")
-
-import materialFinder
-reload(materialFinder)
-materialFinder.run()]]></script>
+ldv_create_auto_variant.autoVariant()]]></script>
   </tool>
 
   <tool name="update_tex" label="update_tex" icon="hicon:/SVGIcons.index?BUTTONS_colors.svg">
@@ -168,7 +157,7 @@ def create_usd_shader_from_selected() -> None:
 create_usd_shader_from_selected()]]></script>
   </tool>
 
-  <tool name="autoconnect_ui" label="Auto Connect" icon="R:/pipeline/pipe/houdini/shelfs/icons/autoconnect.png">
+  <tool name="autoconnect" label="Autoconnect" icon="R:/pipeline/pipe/houdini/shelfs/icons/autoconnect.png">
     <script scriptType="python"><![CDATA[import autoconnect
 
 autoconnect.main()]]></script>

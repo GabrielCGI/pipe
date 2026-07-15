@@ -95,6 +95,7 @@ class autoVariant():
 
         import kmx_mat
         reload(kmx_mat)
+        print(kmx_mat)
         kmx_mat.kmfa_execute(collectionMode=True, sel=all_Nodes)
 
     def create_variant(self, list_variant, withVar):

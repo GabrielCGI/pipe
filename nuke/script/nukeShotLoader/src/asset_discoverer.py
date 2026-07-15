@@ -355,6 +355,13 @@ class AssetDiscoverer:
 
         return frames if frames else None
 
+    def folder_has_image(self, folder_path: str) -> bool:
+        """Return True if `folder_path` has at least one file matching
+        Config.IMAGE_EXTENSIONS. Used to distinguish a static-image folder
+        (paintover .psd, stMap.png, ...) from an unreadable/empty one — both
+        cases return None from get_frame_numbers_from_files."""
+        return _folder_has_file_with_ext(folder_path, _IMAGE_EXTS)
+
     def get_frame_range_from_files(self, folder_path: str) -> Optional[Tuple[int, int]]:
         """
         Detect (first, last) frame range by scanning image files in a folder.

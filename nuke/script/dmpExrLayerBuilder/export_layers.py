@@ -34,9 +34,7 @@ DEFAULT_NUM_LAYERS = 3
 _DEFAULT_PRESETS = ["BG", "FG", "MG"]
 
 # Common preamble for callback scripts: import + hot-reload
-_SCRIPT_PREAMBLE = (
-    "import importlib, export_layers; importlib.reload(export_layers)\n"
-)
+_SCRIPT_PREAMBLE = "import importlib, export_layers; importlib.reload(export_layers)\n"
 
 # knobChanged script stored on the Group node — delegates to module function
 KNOB_CHANGED_SCRIPT = (
@@ -44,26 +42,22 @@ KNOB_CHANGED_SCRIPT = (
     + "export_layers._on_knob_changed(nuke.thisNode(), nuke.thisKnob())\n"
 )
 
-BUILD_SCRIPT = (
-    _SCRIPT_PREAMBLE
-    + "export_layers._rebuild_from_ui(nuke.thisNode())"
-)
+BUILD_SCRIPT = _SCRIPT_PREAMBLE + "export_layers._rebuild_from_ui(nuke.thisNode())"
 
-ADD_SCRIPT = (
-    _SCRIPT_PREAMBLE
-    + "export_layers._add_one_layer(nuke.thisNode())"
-)
+ADD_SCRIPT = _SCRIPT_PREAMBLE + "export_layers._add_one_layer(nuke.thisNode())"
+
+CLEAN_SCRIPT = _SCRIPT_PREAMBLE + "export_layers._clean_channels()"
 
 # Template for per-layer delete button (index replaced at creation time)
 _DELETE_SCRIPT_TPL = (
-    _SCRIPT_PREAMBLE
-    + "export_layers._delete_layer(nuke.thisNode(), {idx})"
+    _SCRIPT_PREAMBLE + "export_layers._delete_layer(nuke.thisNode(), {idx})"
 )
 
 
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
 
 def _extract_prefix(value):
     """Extract the actual prefix from a dropdown value.
@@ -188,7 +182,9 @@ def _check_duplicates(grp):
     try:
         if dupes:
             grp["status"].setValue(
-                '<font color="red">Duplicates : {}</font>'.format(", ".join(sorted(dupes)))
+                '<font color="red">Duplicates : {}</font>'.format(
+                    ", ".join(sorted(dupes))
+                )
             )
         else:
             grp["status"].setValue(
@@ -201,6 +197,7 @@ def _check_duplicates(grp):
 # ---------------------------------------------------------------------------
 # Knob management
 # ---------------------------------------------------------------------------
+
 
 def _add_layer_knob_rows(grp, count, start_index=0, defs=None):
     """Add per-layer knob rows to the Group.
@@ -216,19 +213,24 @@ def _add_layer_knob_rows(grp, count, start_index=0, defs=None):
         if defs and rel < len(defs):
             def_prefix, def_preset, def_name = defs[rel]
         else:
-            def_prefix = PREFIX_STRINGS[i] if i < len(PREFIX_STRINGS) else PREFIX_STRINGS[-1]
+            def_prefix = (
+                PREFIX_STRINGS[i] if i < len(PREFIX_STRINGS) else PREFIX_STRINGS[-1]
+            )
             def_preset = _DEFAULT_PRESETS[i] if i < len(_DEFAULT_PRESETS) else "Custom"
             def_name = def_preset if def_preset != "Custom" else ""
 
         # Layer header
-        header = nuke.Text_Knob("layer_header_{}".format(i), "", "<b>Layer {}</b>".format(i + 1))
+        header = nuke.Text_Knob(
+            "layer_header_{}".format(i), "", "<b>Layer {}</b>".format(i + 1)
+        )
         grp.addKnob(header)
 
         # Prefix dropdown (cascading menu via TCL addUserKnob)
         prefix_values_str = _build_prefix_menu_tcl()
         tcl_cmd = 'addUserKnob {{68 prefix_{idx} l "" M {{{vals}}}}}'.format(
-            idx=i, vals=prefix_values_str)
-        nuke.tcl('in {} {{{}}}'.format(grp.fullName(), tcl_cmd))
+            idx=i, vals=prefix_values_str
+        )
+        nuke.tcl("in {} {{{}}}".format(grp.fullName(), tcl_cmd))
         grp["prefix_{}".format(i)].clearFlag(nuke.STARTLINE)
         if def_prefix:
             try:
@@ -250,13 +252,16 @@ def _add_layer_knob_rows(grp, count, start_index=0, defs=None):
 
         # Preview (read-only)
         preview_val = "{}{}".format(_extract_prefix(def_prefix), def_name)
-        preview = nuke.Text_Knob("layername_{}".format(i), "", "  <b>{}</b>".format(preview_val))
+        preview = nuke.Text_Knob(
+            "layername_{}".format(i), "", "  <b>{}</b>".format(preview_val)
+        )
         preview.clearFlag(nuke.STARTLINE)
         grp.addKnob(preview)
 
         # Delete button
         del_btn = nuke.PyScript_Knob(
-            "delete_{}".format(i), "X", _DELETE_SCRIPT_TPL.format(idx=i))
+            "delete_{}".format(i), "X", _DELETE_SCRIPT_TPL.format(idx=i)
+        )
         del_btn.clearFlag(nuke.STARTLINE)
         grp.addKnob(del_btn)
 
@@ -275,7 +280,7 @@ def _remove_layer_knobs(grp, from_idx, to_idx):
 
 def _remove_bottom_knobs(grp):
     """Remove the bottom section knobs (divider, buttons, status)."""
-    for name in ("divider2", "add_layer_btn", "status"):
+    for name in ("divider2", "add_layer_btn", "clean_channels_btn", "status"):
         try:
             grp.removeKnob(grp[name])
         except (NameError, ValueError):
@@ -290,6 +295,12 @@ def _add_bottom_knobs(grp):
     add_btn = nuke.PyScript_Knob("add_layer_btn", "Add Layer", ADD_SCRIPT)
     grp.addKnob(add_btn)
 
+    clean_btn = nuke.PyScript_Knob(
+        "clean_channels_btn", "Clean Channels…", CLEAN_SCRIPT
+    )
+    clean_btn.clearFlag(nuke.STARTLINE)
+    grp.addKnob(clean_btn)
+
     status = nuke.Text_Knob("status", "")
     status.clearFlag(nuke.STARTLINE)
     grp.addKnob(status)
@@ -298,6 +309,7 @@ def _add_bottom_knobs(grp):
 # ---------------------------------------------------------------------------
 # Internal node management
 # ---------------------------------------------------------------------------
+
 
 def _rebuild_internals(grp):
     """Recreate all AddChannels nodes inside the Group."""
@@ -312,12 +324,15 @@ def _rebuild_internals(grp):
             continue
         ln = _get_full_layer_name(grp, i)
         layer_names.append(ln)
-        nuke.Layer(ln, [
-            "{}.red".format(ln),
-            "{}.green".format(ln),
-            "{}.blue".format(ln),
-            "{}.alpha".format(ln),
-        ])
+        nuke.Layer(
+            ln,
+            [
+                "{}.red".format(ln),
+                "{}.green".format(ln),
+                "{}.blue".format(ln),
+                "{}.alpha".format(ln),
+            ],
+        )
 
     # 2. Rebuild inside the Group
     grp.begin()
@@ -354,7 +369,9 @@ def _rebuild_internals(grp):
     if output_node and prev:
         output_node.setInput(0, prev)
         if input_node:
-            output_node.setXYpos(input_node.xpos(), input_node.ypos() + 80 * (len(layer_names) + 1))
+            output_node.setXYpos(
+                input_node.xpos(), input_node.ypos() + 80 * (len(layer_names) + 1)
+            )
 
     grp.end()
 
@@ -364,6 +381,7 @@ def _rebuild_internals(grp):
 # ---------------------------------------------------------------------------
 # Callbacks
 # ---------------------------------------------------------------------------
+
 
 def _on_knob_changed(grp, knob):
     """Dispatch knob changes on the Group."""
@@ -404,6 +422,7 @@ def _update_preview(grp, index):
 # Build / Add actions
 # ---------------------------------------------------------------------------
 
+
 def _rebuild_from_ui(grp):
     """Rebuild everything when user clicks Build Layers."""
     new_count = int(grp["num_layers"].value())
@@ -426,6 +445,20 @@ def _rebuild_from_ui(grp):
     # Rebuild internals
     _rebuild_internals(grp)
     _check_duplicates(grp)
+
+
+def _clean_channels():
+    """Launch the Channels Cleaner (strip obsolete layers into a new script)."""
+    import importlib
+
+    # Support both layouts: dev package (from .) and flat Nuke deployment (top-level).
+    try:
+        from . import channels_cleaner
+    except ImportError:
+        import channels_cleaner
+
+    importlib.reload(channels_cleaner)
+    channels_cleaner.run_cleaner()
 
 
 def _add_one_layer(grp):
@@ -516,6 +549,7 @@ def _reorder_layers(grp):
 # Entry point
 # ---------------------------------------------------------------------------
 
+
 def run():
     """Create the EXR Layer Builder Group node."""
     grp = nuke.nodes.Group(name="DMP_EXR_Layers")
@@ -535,7 +569,9 @@ def run():
     tab = nuke.Tab_Knob("layers_tab", "Layer Definition")
     grp.addKnob(tab)
 
-    title = nuke.Text_Knob("title", "", "<font size='5'><b>DMP EXR Layer Builder</b></font>")
+    title = nuke.Text_Knob(
+        "title", "", "<font size='5'><b>DMP EXR Layer Builder</b></font>"
+    )
     grp.addKnob(title)
 
     num = nuke.Int_Knob("num_layers", "Number of Layers")

@@ -43,6 +43,7 @@ def ocio_node_from_media(config, node, default, media=None, attributes={}):
         file_extension=pathlib.Path(media).suffix
         print("ext: %s" % file_extension)
 
+
         # if extension is .exr
         if file_extension == ".exr":
             sourceColorSpace = EXR_LINEAR_FILE_COLOURSPACE
@@ -57,15 +58,16 @@ def ocio_node_from_media(config, node, default, media=None, attributes={}):
             sourceColorSpace = JPG_COLOURSPACE
             display = DISPLAY
             view = VIEW
+            
         # if extension isn't .exr or .mov, 
         # set a default value for sourceColorSpace, display and view
         else:
-            sourceColorSpace = EXR_LINEAR_FILE_COLOURSPACE
+            sourceColorSpace = QT_COLOURSPACE
             display = DISPLAY
             view = VIEW
-        print("color: %s" % sourceColorSpace)
-        print("display: %s" % display)
-        print("view: %s" % view)
+        #print("color: %s" % sourceColorSpace)
+        #print("display: %s" % display)
+        #print("view: %s" % view)
     else:
         display = DISPLAY
         view = VIEW

@@ -8,14 +8,12 @@
   <toolshelf name="illogicLighting" label="Illogic Lighting">
     <memberTool name="sceneBuilder"/>
     <memberTool name="copy_light"/>
-    <memberTool name="inheriteclass"/>
     <memberTool name="domelight_create"/>
     <memberTool name="clean_light"/>
-    <memberTool name="batchrender"/>
     <memberTool name="shotBuilder"/>
     <memberTool name="reduceTextureViewport"/>
     <memberTool name="tool_1"/>
-    <memberTool name="set_local_render_gallery"/>
+    <memberTool name="batchrender"/>
   </toolshelf>
 
   <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
@@ -46,58 +44,30 @@ else:
   </tool>
 
   <tool name="copy_light" label="Copy Light" icon="hicon:/SVGIcons.index?LOP_lightlinker.svg">
-    <script scriptType="python"><![CDATA[import imp
-import copylight.copylight as copylight
-
-imp.reload(copylight)
-
-copylight.copySelectedLights()]]></script>
-  </tool>
-
-  <tool name="inheriteclass" label="inherite Class" icon="hicon:/SVGIcons.index?ENGINE_asset_help.svg">
-    <helpText><![CDATA["""'The inherited variant' is a tool used to link USD container assets with their corresponding animations, enabling the merging of textures, fur, lighting, rigging, and more with the animation exported from Maya."""]]></helpText>
-    <script scriptType="python"><![CDATA[import importlib
-import hou
-import inheriteClassVariant as icv
-importlib.reload(icv)
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lgt_hou_shelf_snippets
+reload(lgt_hou_shelf_snippets)
 
 
-
-START = True
-nodes = hou.selectedNodes()
-
-if not nodes or len(nodes) >=2:
-    hou.ui.displayMessage("Select 1 LOP_import node", buttons=("OK",) ,severity=hou.severityType.Error)
-    START = False
-
-
-if START and nodes[0].type().name() != "prism::LOP_Import::1.0":
-    hou.ui.displayMessage("Select 1 LOP_import node", buttons=("OK",) ,severity=hou.severityType.Error)
-    START = False
-
-
-    
-    
-if START:
-    path = nodes[0].parm("filepath").eval()
-    if "03_production/shots" in path.lower():
-        inClass = icv.inheriteClassAttr(path, "Houdini")
-        hou.ui.displayMessage(inClass.message , buttons=("OK",) ,severity=inClass.error_type)
-    ]]></script>
+lgt_hou_shelf_snippets.copyLight()]]></script>
   </tool>
 
   <tool name="domelight_create" label="Dome Light Create" icon="hicon:/SVGIcons.index?BUTTONS_add_light.svg">
-    <script scriptType="python"><![CDATA[import domelight_create.domelight_create as domelight
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lgt_hou_shelf_snippets
+reload(lgt_hou_shelf_snippets)
 
-domelight.create_domelight()]]></script>
+
+lgt_hou_shelf_snippets.domeLight()]]></script>
   </tool>
 
   <tool name="clean_light" label="Clean Light" icon="hicon:/SVGIcons.index?BUTTONS_clear.svg">
-    <script scriptType="python"><![CDATA[import clean_light.cleanlight as cleanlight
-import imp
-imp.reload(cleanlight)
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lgt_hou_shelf_snippets
+reload(lgt_hou_shelf_snippets)
 
-cleanlight.clean()]]></script>
+
+lgt_hou_shelf_snippets.cleanLight()]]></script>
   </tool>
 
   <tool name="batchrender" label="Batch Render" icon="hicon:/SVGIcons.index?BUTTONS_render.svg">
@@ -121,9 +91,8 @@ sendranchcopy.run(True)
     <script scriptType="python"><![CDATA[from imp import reload
 import PrismInit
 
-import shotBuilder
-reload(shotBuilder)
-
+import lgt_shot_builder
+reload(lgt_shot_builder)
 
 
 core = PrismInit.pcore
@@ -133,92 +102,36 @@ shots = []
 for Dshot in data_shots:
     shots.append(Dshot["shot"])
 
-shotBuilder.ShotBuilder(hou.selectedItems(), shots)]]></script>
+print(dir(lgt_shot_builder))
+lgt_shot_builder.shotBuilder(hou.selectedItems(), shots)]]></script>
   </tool>
 
   <tool name="reduceTextureViewport" label="Reduce Texture Viewport" icon="hicon:/SVGIcons.index?BUTTONS_visible.svg">
-    <script scriptType="python"><![CDATA[from hutil.Qt import QtWidgets
-import hou
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lgt_hou_shelf_snippets
+reload(lgt_hou_shelf_snippets)
 
 
-
-def run():
-    pane = hou.ui.curDesktop().paneTabOfType(hou.paneTabType.SceneViewer)
-    if not pane:
-        raise RuntimeError("Pas de SceneViewer ouvert")
-
-    viewport = pane.curViewport()
-    settings = viewport.settings()
-
-    if kwargs["ctrlclick"]:
-        value = [hou.viewportTextureDepth.HDR16 , 1.0, 4096]
-    else:
-        value = [hou.viewportTextureDepth.Fixed8, 0.1, 1024]
-
-
-
-    #------------------------  |  Texture  |  ---------------------
-    # -- Texture 2D --
-    settings.setTextureBitDepthLimit2D(value[0])
-    settings.setTextureScale2D(value[1])
-
-    # -- Texture Cache (volumes) --
-    settings.setTextureCacheSize(value[2])
-
-    # -- Texture 3D (volumes) --
-    settings.setTexture2DSettingsFor3D(True)
-
-
-    displayMessage()
-    hou.hscript("glcache -c")
-
-
-def displayMessage():
-    dialog = hou.qt.createDialog()
-    dialog.setWindowTitle("Info")
-
-    # Layout vertical
-    layout = QtWidgets.QVBoxLayout(dialog)
-
-    # Texte
-    label = QtWidgets.QLabel("wait clear texture cache...")
-    layout.addWidget(label)
-
-    # Bouton OK
-    ok_btn = QtWidgets.QPushButton("OK")
-    layout.addWidget(ok_btn)
-
-    # Connexion du clic : ferme la fenÃªtre
-    ok_btn.clicked.connect(dialog.close)
-
-    # Affiche la fenÃªtre
-    dialog.show()
-
-run()]]></script>
+lgt_hou_shelf_snippets.reducteTextureViewport()]]></script>
   </tool>
 
   <tool name="CopRopImage" label="Cop Rop Image" icon="hicon:/SVGIcons.index?SCENEGRAPH_primtype_renderproduct.svg">
     <helpText><![CDATA[select a node first]]></helpText>
-    <script scriptType="python"><![CDATA[import cop_snippets
-from importlib import reload
+    <script scriptType="python"><![CDATA[from importlib import reload
+import cop_hou_shelf_snippets
+reload(cop_hou_shelf_snippets)
 
-reload(cop_snippets)
-print(cop_snippets)
-cop_snippets.create_rop_image()
+
+cop_hou_shelf_snippets.create_rop_image()
 ]]></script>
   </tool>
 
   <tool name="tool_1" label="Clean Light Mixer" icon="hicon:/SVGIcons.index?MISC_fix_repair.svg">
-    <script scriptType="python"><![CDATA[import importlib
-import clean_light_mixer
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lgt_hou_shelf_snippets
+reload(lgt_hou_shelf_snippets)
 
-importlib.reload(clean_light_mixer)
-clean_light_mixer.run()]]></script>
-  </tool>
 
-  <tool name="set_local_render_gallery" label="Gallery" icon="hicon:/SVGIconsUI.index?VIEW_control_playbar.svg">
-    <script scriptType="python"><![CDATA[import lop_snippets
-
-lop_snippets.set_local_render_gallery()]]></script>
+lgt_hou_shelf_snippets.cleanLightMixer()]]></script>
   </tool>
 </shelfDocument>

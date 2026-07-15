@@ -34,8 +34,6 @@ class Config:
     IGNORE_VERSION_SUFFIXES = ["(mp4)", "(mov)", "(preview)", "_thumbs", "Thumbs.db"]
 
     # ==================== NODE GRAPH LAYOUT ====================
-    NODE_SPACING_X = 200
-
     # Grid layout for reads inside an asset-type backdrop. Reads are placed in
     # rows of READS_PER_ROW columns and wrap to the next row beyond that.
     READS_PER_ROW = 10
@@ -61,7 +59,7 @@ class Config:
     }
 
     # ==================== FILE EXTENSIONS ====================
-    IMAGE_EXTENSIONS = [".exr", ".dpx", ".tif", ".tiff", ".jpg", ".jpeg", ".png"]
+    IMAGE_EXTENSIONS = [".exr", ".dpx", ".tif", ".tiff", ".jpg", ".jpeg", ".png", ".psd"]
     USD_EXTENSIONS = [".usd", ".usda", ".usdc", ".usdz"]
 
     # ==================== PYSIDE COMPATIBILITY ====================

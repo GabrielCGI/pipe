@@ -1,33 +1,24 @@
-import socket
 import time
-import sys
 import os
 
 
 
 #------------ import sanitycheck et creation de ses variable ------------
-SANITYCHECK_PATH = "R:/pipeline/pipe_public/sanitycheck"
+YAML_LOCATION = os.environ.get('SANITY_CHECK_CONFIG', None)
 ENABLE_SANITY_CHECK = True
-sys.path.insert(0, SANITYCHECK_PATH)
 try:
-    import sanitycheck
-except:
+    import sanity_check
+except Exception:
     ENABLE_SANITY_CHECK = False
 
-try:
-    YAML_LOCATION = os.environ['SANITY_CHECK_CONFIG']
-except:
-    YAML_LOCATION = "None"
+
 
 
 #------------ import splitVariantRig et creation de ses variable ------------
-SPLIT_VARIANT_RIG_PATH = "R:/pipeline/pipe/maya/scripts"
 ENABLE_SPLIT_VARIANT_RIG = True
-sys.path.append(SPLIT_VARIANT_RIG_PATH)
 try:
-    import split_variants_rig as svr
-except Exception as e:
-    print(e)
+    import rig_split_variants as svr
+except Exception:
     ENABLE_SPLIT_VARIANT_RIG = False
 
 
@@ -35,16 +26,8 @@ except Exception as e:
 def main(*args):
     core = args[0].core
     if ENABLE_SANITY_CHECK:
-        
-        # import socket
-        # if socket.gethostname() == 'SPRINTER-03':
-        #     import sys
-        #     sys.path.insert(0, r'R:\pipeline\pipe_public\sanitycheck\sanitycheck\debug')
-        #     import debug
-        #     debug.debug()
-        #     debug.debugpy.breakpoint()
         args = (*args, YAML_LOCATION)
-        res = sanitycheck.main(*args)
+        res = sanity_check.main(*args)
         if not res:
             print('Cancel publish')
             return {"cancel": True}

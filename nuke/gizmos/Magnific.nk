@@ -1,0 +1,152 @@
+set cut_paste_input [stack 0]
+version 16.0 v6
+push $cut_paste_input
+Group {
+ name Magnific
+ tile_color 0xff6600ff
+ label "Magnific Upscaler v0.1"
+ selected true
+ xpos 24
+ ypos 3
+ addUserKnob {20 magnific_tab l "Magnific Upscaler"}
+ addUserKnob {26 Header l "" +STARTLINE T "<font color=#80dddd size=\"7\">M</font><font color=#90dede size=\"7\">a</font><font color=#a0dfdf size=\"7\">g</font><font color=#b0e0e0 size=\"7\">n</font><font color=#c0e1e1 size=\"7\">i</font><font color=#b0e0e0 size=\"7\">f</font><font color=#a0dfdf size=\"7\">i</font><font color=#90dede size=\"7\">c</font><font color=#80dddd size=\"2\">1.0</font>"}
+ addUserKnob {26 info l "" +STARTLINE T "le script Nuke doit etre pipé dans PRISM"}
+ addUserKnob {26 ""}
+ addUserKnob {1 api_key l "API Key" +INVISIBLE}
+ api_key FPSX78c4e1380053f095a11d38988b013563
+ addUserKnob {41 Render l "<b><font  size=\"5\">Send to Magific API</font><b>" T Write1.Render}
+ addUserKnob {26 ""}
+ addUserKnob {1 status l Status}
+ status Complete!
+ addUserKnob {7 progress l Progress R 0 100}
+ progress 100
+ addUserKnob {26 ""}
+ addUserKnob {4 scale_factor l "Scale Factor" M {2x 4x 8x 16x}}
+ addUserKnob {26 ""}
+ addUserKnob {4 engine l Engine t "(Advanced) \n\n• Illusio: better for illustrations, landscapes, and nature. The smoother one. Also good for the first pass of several upscales. Removes JPEG artifacts. \n\n• Sharpy: better for realistic images like photographs. It provides the sharpest and most detailed images! However, it doesn't remove JPEG artifacts and can sometimes even create \"fake JPEG artifacts\". \n\n• Sparkle: also good for realistic images. It's a middle ground between Illusio and Sharpy. Removes JPEG artifacts. For multiple upscales, you can experiment: start, for example, with Illusio and finish with Sharpy to find the \"sweet spot\" for the style of your images." M {automatic illusio sharpy sparkle "" ""}}
+ addUserKnob {26 ""}
+ addUserKnob {1 prompt l Prompt t "You can guide the upscaling process with a descriptive prompt. If the image you're upscaling is AI-generated, reusing the original prompt here can greatly improve the upscaling quality!\n\n You can also use your imagination to alter images: for example, transform a city into ruins during the upscaling process (typically after at least 4x upscale), change a person's eye color, or give a portrait the look of a famous person.\n\n IMPORTANT: You can weigh specific parts of the prompt by using a number in parentheses, ranging from 1 to 1.4, like \"(beautiful green eyes:1.3)\". Magnific AI sometimes ages faces in its outputs. To counter this, adjust your prompt weights, for example: \"(young woman:1.3), (cute young face:1.2), (cute:1.2)\"."}
+ addUserKnob {7 creativity l Creativity t "Allows the AI to \"hallucinate\" additional details, achieving greater realism at the cost of moving further away from the original image. Here's where Magnific's magic shines! But be careful: really high values can lead to some pretty strange results." R -10 10}
+ creativity 1
+ addUserKnob {7 hdr l HDR t "Increases definition and detail, though very high values can result in images with an artificial appearance or blotches." R -10 10}
+ addUserKnob {7 resemblance l Resemblance t "(Advanced) Increasing this value will make the generation more closely resemble the original image, but very high values can result in blotches or a dirtier look. Lower values give more freedom to the generation at the cost of moving further away from the original image." R -10 10}
+ resemblance 1
+ addUserKnob {26 ""}
+ addUserKnob {6 in l "show input" +STARTLINE}
+ addUserKnob {20 control_group l Controls +INVISIBLE}
+ addUserKnob {6 process_button l Upscale! t "Start upscaling process" +STARTLINE}
+ addUserKnob {6 cancel_button l Cancel t "Cancel current upscale operation" +STARTLINE}
+ addUserKnob {20 info_group l Information}
+ addUserKnob {1 task_id l "Task ID"}
+ task_id e0eedeb3-637a-4fbd-b46c-4fcfcb9a5f71
+ addUserKnob {1 error_message l "Error Message"}
+ addUserKnob {1 output_file l "Output File"}
+ output_file I:/VCA_Perlee_2510/03_Production/Shots/SANDBOX/DEV/Renders/2dRender/toMagnific/v030/upscaled_SANDBOX-DEV_toMagnific_v030.0001.png
+ addUserKnob {1 log_file l "Log File"}
+ log_file ~/.nuke/magnific_upscaler.log
+ addUserKnob {6 debug_mode l "Debug Mode" +STARTLINE}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos -47
+  ypos -14
+ }
+set N84828480 [stack 0]
+ Dot {
+  name Dot1
+  xpos -229
+  ypos 278
+ }
+ Read {
+  inputs 0
+  file_type png
+  format "4096 4096 0 0 4096 4096 1 square_4k"
+  origset true
+  on_error black
+  version 16
+  raw true
+  name ReadMagnific
+  label "Magnific Result"
+  xpos 159
+  ypos 134
+ }
+ OCIODisplay {
+  colorspace scene_linear
+  display "sRGB - Display"
+  view "ACES 1.0 - SDR Video"
+  invert true
+  name OCIODisplay2
+  xpos 159
+  ypos 284
+ }
+push $N84828480
+ OCIODisplay {
+  colorspace scene_linear
+  display "sRGB - Display"
+  view "ACES 1.0 - SDR Video"
+  name OCIODisplay1
+  xpos -47
+  ypos 34
+ }
+ Write {
+  file "\[value fileName]"
+  file_type png
+  raw true
+  create_directories true
+  checkHashOnRead false
+  version 20
+  ocioColorspace scene_linear
+  display "sRGB - Display"
+  view "ACES 1.0 - SDR Video"
+  beforeRender "try: pcore.appPlugin.getOutputPath(nuke.thisNode(), render=True)\nexcept: pass"
+  afterRender "try: pcore.appPlugin.finishedRendering(nuke.thisNode())\nexcept: pass\nfrom nuke_magnific.nodes.nuke_callbacks import on_write_after_render\non_write_after_render()"
+  name Write1
+  knobChanged "try:\n\tpcore.getPlugin(\"Nuke\").updateNodeUI(\"write\", nuke.toNode(nuke.thisNode().fullName().rsplit(\".\", 1)\[0]))\nexcept:\n\tpass"
+  label "\[value file]"
+  xpos -47
+  ypos 71
+  addUserKnob {20 tab_prism l Prism}
+  addUserKnob {1 identifier}
+  identifier toMagnific
+  addUserKnob {1 comment l "comment (optional)"}
+  addUserKnob {4 location M {global}}
+  addUserKnob {26 ""}
+  addUserKnob {1 fileName l filepath}
+  fileName I:/VCA_Perlee_2510/03_Production/Shots/SANDBOX/DEV/Renders/2dRender/toMagnific/v030/SANDBOX-DEV_toMagnific_v030.####.png
+  addUserKnob {22 refresh l Refresh T pcore.appPlugin.getOutputPath(nuke.thisNode()) +STARTLINE}
+  addUserKnob {26 ""}
+  addUserKnob {22 startRender l Render -STARTLINE T pcore.appPlugin.startRender(nuke.thisNode())}
+  addUserKnob {22 startRenderPrevVersion l "Render as previous version..." -STARTLINE T pcore.appPlugin.renderAsVersion(nuke.thisNode())}
+  addUserKnob {6 submitJob l "Submit Job" -STARTLINE}
+  addUserKnob {26 prevFileName l "previous filepath" T I:/VCA_Perlee_2510/03_Production/Shots/SANDBOX/DEV/Renders/2dRender/toMagnific/v030/SANDBOX-DEV_toMagnific_v030.####.png}
+  addUserKnob {22 openDir l "Open In..." T pcore.appPlugin.openInClicked(nuke.thisNode()) +STARTLINE}
+  addUserKnob {22 createRead l "Create Read" -STARTLINE T pcore.appPlugin.createRead(nuke.thisNode())}
+  addUserKnob {26 media_conversion_divider l "" +STARTLINE}
+  addUserKnob {6 media_conversion_use l "media conversion" +STARTLINE}
+  addUserKnob {4 media_conversion_preset l preset M {jpg "mov (prores)" "mp4 (burn-in)" "mp4 (slate + burn-in)" mp4 png slate 6k_VCA}}
+  addUserKnob {22 media_conversion_refresh l refresh -STARTLINE T "pcore.getPlugin(\"MediaExtension\").nuke_onMediaConversionRefresh()"}
+  addUserKnob {22 media_conversion_edit l edit... -STARTLINE T "pcore.getPlugin(\"MediaExtension\").onEditMediaConversionClicked()"}
+  addUserKnob {26 project_management_divider l "" +STARTLINE}
+  addUserKnob {6 project_management_publish l "publish to Kitsu" +STARTLINE}
+ }
+ Switch {
+  inputs 2
+  which 1
+  name magniSwitch
+  xpos -47
+  ypos 284
+ }
+ Switch {
+  inputs 2
+  which {{"\[python nuke.thisGroup().knob(\\\"in\\\").getValue()]"}}
+  name showInput
+  xpos -47
+  ypos 400
+ }
+ Output {
+  name Output1
+  xpos -47
+  ypos 479
+ }
+end_group

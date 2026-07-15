@@ -1,5 +1,5 @@
 from datetime import datetime
-from pxr import Sdf, Usd
+from pxr import Sdf
 
 import shutil
 import os 
@@ -74,7 +74,9 @@ class EditPreviewUSD():
             else:
                 PrimOVERAssetsPath = primchild.name
 
-        if not primAssetPath or not PrimOVERAssetsPath: self.superPrint('is not a variant');variant = False
+        if not primAssetPath or not PrimOVERAssetsPath:
+            self.superPrint('is not a variant')
+            variant = False
         
         materialMtlPath = None
         if variant:
@@ -89,7 +91,7 @@ class EditPreviewUSD():
         for child in materialMtlPath.nameChildren.values():
             materials.append(child.name)
             for shader in child.nameChildren.values():
-                if not shader.name in shader_names and "_preview" in shader.name:
+                if shader.name not in shader_names and "_preview" in shader.name:
                     shader_names.append(shader.name)
         
         return materialMtlPath

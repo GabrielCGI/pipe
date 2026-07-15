@@ -4,9 +4,10 @@ Standalone Qt window for loading shot assets.
 Compatible with both Nuke 15 (PySide2) and Nuke 16+ (PySide6).
 """
 
-import nuke
+import nuke  # type: ignore
 import os
 import re
+import json
 import subprocess
 import webbrowser
 from .config import Config
@@ -14,6 +15,7 @@ from .asset_discoverer import AssetDiscoverer
 from .nuke_node_builder import NukeNodeBuilder
 from .version_utils import version_int, extract_version_from_path
 from .reconnect_stamps import run_reconnect_on_postage_stamps
+from .distribute_write_render_order import distribute_write_render_order
 
 # Import appropriate PySide version
 QtWidgets, QtCore, QtGui, PYSIDE_VERSION = Config.get_pyside_module()
@@ -37,11 +39,13 @@ QFrame#projectTitle {
 }
 QFrame#projectTitle QLabel { background: transparent; color: #f0f0f0; }
 
-QLabel#headerBanner {
-    padding: 14px 18px;
+QFrame#headerBanner {
     background-color: #252526;
     border: 1px solid #3a3a3a;
     border-radius: 6px;
+}
+QLabel#bannerText {
+    background: transparent;
     color: #e8e8e8;
     font-size: 13px;
 }
@@ -164,6 +168,36 @@ QPushButton#dangerAction {
 QPushButton#dangerAction:hover {
     background-color: #7a3838;
     border-color: #a64a4a;
+}
+
+/* Hide (trash) button — transparent icon-only button, one per asset row */
+QPushButton#hideButton {
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 0;
+    color: #9a6a6a;
+}
+QPushButton#hideButton:hover {
+    background-color: #3a2a2a;
+    border-color: #7a3a3a;
+    color: #f5d6d6;
+}
+
+/* Recover button — mirrors hideButton but with a green tint so it reads as
+   a restore/undo action instead of a destructive one. Shown in place of the
+   trash icon for rows that are currently in the shot's hidden list. */
+QPushButton#recoverButton {
+    background-color: transparent;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    padding: 0;
+    color: #6a9a6a;
+}
+QPushButton#recoverButton:hover {
+    background-color: #2a3a2a;
+    border-color: #4a7a4a;
+    color: #d6f5d6;
 }
 
 /* Table */
@@ -365,6 +399,26 @@ class _ConsoleStream:
         return False
 
 
+class _PackageComboBox(QtWidgets.QComboBox):
+    """QComboBox that displays only the bare package name (Qt::UserRole) when
+    collapsed, while the popup list shows the full
+    "PKG_v001    (v053 / 09/07/26)" annotation. Keeps the closed banner
+    compact without hiding the traceability info on scroll."""
+
+    def paintEvent(self, event):
+        painter = QtWidgets.QStylePainter(self)
+        painter.setPen(self.palette().color(QtGui.QPalette.Text))
+        opt = QtWidgets.QStyleOptionComboBox()
+        self.initStyleOption(opt)
+        idx = self.currentIndex()
+        if idx >= 0:
+            short = self.itemData(idx, QtCore.Qt.UserRole)
+            if short:
+                opt.currentText = short
+        painter.drawComplexControl(QtWidgets.QStyle.CC_ComboBox, opt)
+        painter.drawControl(QtWidgets.QStyle.CE_ComboBoxLabel, opt)
+
+
 class AssetItem:
     """Represents an asset in the table."""
     def __init__(self, asset_type, asset_name, versions, versions_dict, source_type=""):
@@ -393,6 +447,12 @@ class AssetItem:
         self.foreign_sequence = ""
         self.foreign_shot = ""
 
+        # True when this row is present in the shot's hidden list. Only ever
+        # set to True while the "Show Hidden Assets" checkbox is on — when the
+        # checkbox is off, hidden entries are filtered out before an AssetItem
+        # is even constructed. Drives the "recover vs trash" button switch.
+        self.is_hidden = False
+
 
 class ShotAssetLoaderWindow(QtWidgets.QDialog):
     """Standalone Qt window for shot asset loading."""
@@ -404,6 +464,15 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
         self.setWindowTitle("Shot Asset Loader")
         self.setMinimumSize(1200, 600)
+
+        # Destroy the dialog on close instead of merely hiding it (Qt's
+        # default). Without this, every call to show_shot_asset_loader()
+        # spawns a fresh instance that stays parented to Nuke's main window
+        # forever — old dialogs remain alive, quietly receiving broadcast
+        # events like EnterWhatsThisMode (so clicking the title-bar "?" would
+        # open one help tab per accumulated instance) and stacking their
+        # _ConsoleStream wrappers on top of sys.stdout.
+        self.setAttribute(QtCore.Qt.WA_DeleteOnClose)
 
         # Build the Logs widget first and tee sys.stdout/sys.stderr through it
         # right away, so prints fired during the rest of __init__ (project
@@ -427,6 +496,11 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         self._project_root = detected_root or Config.DEFAULT_PROJECT_ROOT
         self._project_detected = detected_root is not None
 
+        # Per-project prefs JSON — created empty on the first-ever open for a
+        # production. Path stored on self so later features (read/write of
+        # remembered settings) can reuse it.
+        self._prefs_path = self._ensure_prefs_file()
+
         # Backend modules
         self.discoverer = AssetDiscoverer(self._project_root)
         self.node_builder = NukeNodeBuilder()
@@ -436,6 +510,11 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         self.current_shot = None
         self.current_assets = {}
         self.asset_items = []
+
+        # Whether the "Show Hidden Assets" checkbox is on. Controls whether
+        # _populate_table skips shot-hidden entries (default) or includes
+        # them with a Recover button in place of the trash icon.
+        self._show_hidden = False
 
         # Cache: folder_path → set(frame_numbers) — populated on first coverage
         # check, reused across silent re-checks (filter switches, etc.). We
@@ -451,6 +530,9 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
         self._init_ui()
         self._detect_script_context()  # Auto-detect context from Nuke script path
+        # Populate the Render Manager tables so they're ready if the user
+        # switches straight to that tab without triggering a lazy refresh.
+        self._refresh_render_manager()
 
     def event(self, e):
         # The title-bar "?" button (WindowContextHelpButtonHint, shown by
@@ -571,6 +653,473 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
             print(f"[ShotAssetLoader] Failed to detect project root: {e}")
             return None
 
+    def _ensure_prefs_file(self):
+        """
+        Ensure the per-project prefs JSON exists on disk. Called once when the
+        dialog opens; on the first-ever open for a production it creates the
+        folder tree and writes an empty `{}` JSON file.
+
+        Path: <project_root>/04_Resources/Nuke/prefs/shotloader/<prod>_prefs_shotloader.json
+
+        Returns the absolute path on success, or None if no project was
+        detected or the file couldn't be created (e.g. disk not accessible).
+        """
+        if not self._project_detected:
+            return None
+
+        project_name = os.path.basename(self._project_root.rstrip(os.sep))
+        prefs_dir = os.path.join(
+            self._project_root, "04_Resources", "Nuke", "prefs", "shotloader",
+        )
+        prefs_path = os.path.join(prefs_dir, f"{project_name}_prefs_shotloader.json")
+
+        if os.path.exists(prefs_path):
+            print(f"[ShotAssetLoader] Prefs file found: {prefs_path}")
+            return prefs_path
+
+        try:
+            os.makedirs(prefs_dir, exist_ok=True)
+            with open(prefs_path, "w", encoding="utf-8") as f:
+                f.write("{}\n")
+            print(f"[ShotAssetLoader] Created empty prefs file: {prefs_path}")
+            return prefs_path
+        except Exception as e:
+            print(f"[ShotAssetLoader] Failed to create prefs file at {prefs_path}: {e}")
+            return None
+
+    def _load_prefs(self):
+        """Read the per-project prefs JSON. Returns {} on missing/malformed
+        file — persistence must never crash the dialog on corrupt data."""
+        if not self._prefs_path or not os.path.exists(self._prefs_path):
+            return {}
+        try:
+            with open(self._prefs_path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if isinstance(data, dict):
+                return data
+            print("[ShotAssetLoader] Prefs root is not a dict, ignoring")
+            return {}
+        except Exception as e:
+            print(f"[ShotAssetLoader] Failed to read prefs: {e}")
+            return {}
+
+    def _save_prefs(self, data):
+        """Persist the prefs dict back to disk. No-ops if the path is unset."""
+        if not self._prefs_path:
+            return
+        try:
+            with open(self._prefs_path, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            print(f"[ShotAssetLoader] Failed to write prefs: {e}")
+
+    def _shot_key(self):
+        """Composite key used to scope prefs entries to the current shot."""
+        return f"{self.current_sequence}/{self.current_shot}"
+
+    def _is_precomp_asset(self, name):
+        """True if an asset name looks like a precomp render (case-insensitive
+        substring match on 'precomp'). Precomps are cached to disk by the
+        Render Manager and reloaded via the Precomp gizmo, not through this
+        loader — surfacing them here would only clutter the table."""
+        return "precomp" in (name or "").lower()
+
+    def _hidden_set_for_shot(self):
+        """Return (asset_type, asset_name) tuples the user has marked as
+        hidden for the current sequence/shot. Consumed by _populate_table
+        to skip those assets during rendering."""
+        if not self.current_sequence or not self.current_shot:
+            return set()
+        prefs = self._load_prefs()
+        entries = prefs.get("hidden_assets", {}).get(self._shot_key(), [])
+        result = set()
+        for entry in entries:
+            if isinstance(entry, dict) and "type" in entry and "name" in entry:
+                result.add((entry["type"], entry["name"]))
+        return result
+
+    def _hide_asset(self, item):
+        """Persist an asset as hidden for the current shot, then refresh the
+        table so it disappears immediately. Called by the per-row trash button."""
+        if not self._prefs_path:
+            QtWidgets.QMessageBox.warning(
+                self, "Cannot Hide Asset",
+                "No prefs file available for this project.\n"
+                "Save your script inside a detected project so the loader "
+                "can persist hidden-asset choices."
+            )
+            return
+        if not self.current_sequence or not self.current_shot:
+            return
+
+        prefs = self._load_prefs()
+        hidden_map = prefs.setdefault("hidden_assets", {})
+        entries = hidden_map.setdefault(self._shot_key(), [])
+        key = {"type": item.asset_type, "name": item.asset_name}
+        if key not in entries:
+            entries.append(key)
+        self._save_prefs(prefs)
+        print(
+            f"[ShotAssetLoader] Hidden '{item.asset_type}/{item.asset_name}' "
+            f"from {self._shot_key()} — restore by editing {self._prefs_path}"
+        )
+        # Rebuild the table with the new filter applied, refresh the ASSETS
+        # count in the banner, then re-tag loaded state on the freshly
+        # created AssetItem instances (populate discards the previous
+        # loaded_node references, so without this pass every remaining row
+        # would flip back to "Not loaded" until the user hits refresh).
+        self._populate_table()
+        self._refresh_info_banner()
+        self._do_check_for_updates(silent=True)
+
+    def _recover_asset(self, item):
+        """Drop an asset's entry from the shot's hidden list in prefs, so it
+        starts appearing normally again. Also tidies up empty containers in
+        the JSON (empty shot list → remove key; empty hidden_assets → remove
+        key) so the file stays clean over time."""
+        if not self._prefs_path:
+            return
+        if not self.current_sequence or not self.current_shot:
+            return
+
+        prefs = self._load_prefs()
+        hidden_map = prefs.get("hidden_assets", {})
+        shot_key = self._shot_key()
+        entries = hidden_map.get(shot_key, [])
+        remaining = [
+            e for e in entries
+            if not (
+                isinstance(e, dict)
+                and e.get("type") == item.asset_type
+                and e.get("name") == item.asset_name
+            )
+        ]
+        if len(remaining) == len(entries):
+            return  # Nothing matched — nothing to remove
+
+        if remaining:
+            hidden_map[shot_key] = remaining
+        else:
+            hidden_map.pop(shot_key, None)
+        if not hidden_map:
+            prefs.pop("hidden_assets", None)
+
+        self._save_prefs(prefs)
+        print(
+            f"[ShotAssetLoader] Recovered '{item.asset_type}/{item.asset_name}' "
+            f"in {shot_key}"
+        )
+        # Same triple-step as _hide_asset: repopulate → refresh banner →
+        # re-tag loaded state so status colors don't flip to "Not loaded".
+        self._populate_table()
+        self._refresh_info_banner()
+        self._do_check_for_updates(silent=True)
+
+    # --- Package snapshots -------------------------------------------------
+    # A "package" is a snapshot of the selected version of every asset in the
+    # table at a given moment, saved to prefs so the artist can rewind the
+    # comp to any previously-loaded state. Save is triggered by successful
+    # Load / Update actions; recall is via the "Choose Package" button.
+
+    _PACKAGE_NAME_RE = re.compile(r'^PKG_v(\d+)$')
+
+    def _extract_compo_version_from_script(self):
+        """Pull the 'v###' token from the current Nuke script filename so we
+        can stamp it on each saved package. Returns None when the script
+        isn't saved or the filename doesn't follow the pipeline convention."""
+        try:
+            script_path = nuke.root().name()
+            if not script_path or script_path == "Root":
+                return None
+            filename = os.path.basename(script_path)
+            m = re.search(r'_v(\d{3,4})\.nk$', filename)
+            if m:
+                return f"v{m.group(1)}"
+        except Exception:
+            pass
+        return None
+
+    def _packages_for_shot(self):
+        """Return the list of package dicts for the current shot (empty when
+        no shot context or no packages saved yet)."""
+        if not self.current_sequence or not self.current_shot:
+            return []
+        prefs = self._load_prefs()
+        packages = prefs.get("packages", {}).get(self._shot_key(), [])
+        return packages if isinstance(packages, list) else []
+
+    def _current_package_for_shot(self):
+        """Return the PKG_v### name pinned as 'current' for this shot, or None
+        if no pin exists. Updated by _save_package_snapshot (bumped to the
+        newest package after every Load/Update) and by _on_choose_package
+        (set to whichever package the artist explicitly recalls). Drives the
+        default selection of the package combo on refresh."""
+        if not self.current_sequence or not self.current_shot:
+            return None
+        prefs = self._load_prefs()
+        current_map = prefs.get("current_package", {})
+        if not isinstance(current_map, dict):
+            return None
+        val = current_map.get(self._shot_key())
+        return val if isinstance(val, str) else None
+
+    def _next_package_name(self, packages):
+        """Compute the next PKG_v### slot. We scan the existing names rather
+        than just len()+1 so a manually edited prefs (deleted middle entry)
+        doesn't produce a colliding name."""
+        highest = 0
+        for pkg in packages:
+            m = self._PACKAGE_NAME_RE.match(pkg.get("name", ""))
+            if m:
+                n = int(m.group(1))
+                if n > highest:
+                    highest = n
+        return f"PKG_v{highest + 1:03d}"
+
+    def _snapshot_current_assets(self):
+        """Freeze the currently-selected version of every row into a list of
+        plain dicts, ready to serialise into prefs. Foreign-shot items carry
+        their origin seq/shot so lookup on recall still works."""
+        snapshot = []
+        for item in self.asset_items:
+            if not item.selected_version:
+                continue
+            entry = {
+                "type": item.asset_type,
+                "name": item.asset_name,
+                "version": item.selected_version,
+            }
+            if item.is_foreign:
+                entry["foreign_sequence"] = item.foreign_sequence
+                entry["foreign_shot"] = item.foreign_shot
+            snapshot.append(entry)
+        return snapshot
+
+    def _save_package_snapshot(self):
+        """Persist the current selection as a new PKG_v### entry in prefs and
+        pin the shot's `current_package` to the newest snapshot so any prior
+        rollback is undone. De-dups against the previous package (same
+        compo_version + same asset versions) so a Load followed by an Update
+        on the same state doesn't produce two identical records back-to-back;
+        the current_package pin is still refreshed either way."""
+        if not self._prefs_path:
+            return
+        if not self.current_sequence or not self.current_shot:
+            return
+        if not self.asset_items:
+            return
+
+        import datetime as _dt
+        date_str = _dt.date.today().strftime("%d/%m/%y")
+
+        prefs = self._load_prefs()
+        packages_map = prefs.setdefault("packages", {})
+        packages = packages_map.setdefault(self._shot_key(), [])
+
+        new_snapshot = self._snapshot_current_assets()
+        if not new_snapshot:
+            return
+        compo_version = self._extract_compo_version_from_script() or ""
+
+        matches_last = False
+        if packages:
+            last = packages[-1]
+            matches_last = (
+                last.get("compo_version", "") == compo_version
+                and last.get("assets") == new_snapshot
+            )
+
+        if not matches_last:
+            pkg_name = self._next_package_name(packages)
+            packages.append({
+                "name": pkg_name,
+                "compo_version": compo_version,
+                "date": date_str,
+                "assets": new_snapshot,
+            })
+            print(
+                f"[ShotAssetLoader] Saved snapshot {pkg_name} "
+                f"({compo_version or '?'} / {date_str}) for {self._shot_key()} "
+                f"— {len(new_snapshot)} asset(s)"
+            )
+
+        # Any Load/Update snaps current_package to the newest entry, so a
+        # user previously rolled back is automatically re-aligned. The pin
+        # is refreshed even on a dedup no-append, since the state now
+        # matches the last saved snapshot by definition.
+        if packages:
+            current_map = prefs.setdefault("current_package", {})
+            current_map[self._shot_key()] = packages[-1]["name"]
+
+        self._save_prefs(prefs)
+        self._refresh_package_dropdown()
+
+    def _refresh_package_dropdown(self):
+        """Rebuild the package combo from the packages stored for the current
+        shot. Selects the newest entry by default. When there are none, shows
+        a disabled placeholder so the widget stays visible."""
+        combo = getattr(self, "package_combo", None)
+        if combo is None:
+            return
+        packages = self._packages_for_shot()
+        combo.blockSignals(True)
+        combo.clear()
+        if not packages:
+            combo.addItem("(no packages yet)")
+            combo.setEnabled(False)
+            if hasattr(self, "choose_package_btn"):
+                self.choose_package_btn.setEnabled(False)
+        else:
+            for pkg in packages:
+                name = pkg.get("name", "?")
+                compo = pkg.get("compo_version") or "?"
+                date_str = pkg.get("date") or "?"
+                # The full "PKG_v001  (v053 / 09/07/26)" text becomes the item's
+                # display role — visible in the popup list. userData carries the
+                # bare name so _PackageComboBox.paintEvent can show just that
+                # when the combo is collapsed.
+                combo.addItem(f"{name}    ({compo} / {date_str})", name)
+            # Default to the shot's pinned current_package; fall back to newest
+            # when no pin is stored (fresh shot, or older prefs file).
+            current_pkg = self._current_package_for_shot()
+            target_idx = combo.count() - 1
+            if current_pkg:
+                for i in range(combo.count()):
+                    if combo.itemData(i) == current_pkg:
+                        target_idx = i
+                        break
+            combo.setCurrentIndex(target_idx)
+            combo.setEnabled(True)
+            if hasattr(self, "choose_package_btn"):
+                self.choose_package_btn.setEnabled(True)
+        combo.blockSignals(False)
+
+    def _on_choose_package(self):
+        """Apply the versions from the package selected in the combo to the
+        table dropdowns AND update any already-loaded nodes to match. Rows
+        that are only listed (not loaded) simply have their dropdown adjusted
+        so the next Load picks the package's version."""
+        packages = self._packages_for_shot()
+        if not packages:
+            return
+        idx = self.package_combo.currentIndex()
+        if idx < 0 or idx >= len(packages):
+            return
+        pkg = packages[idx]
+        pkg_name = pkg.get("name", "package")
+        entries = pkg.get("assets", [])
+        if not entries:
+            QtWidgets.QMessageBox.information(
+                self, "Empty Package",
+                f"{pkg_name} has no assets recorded."
+            )
+            return
+
+        # Lookup by (type, name). Foreign items share the same asset_name/type
+        # as local ones would; the seq/shot fields are only used for display,
+        # so we don't need to include them in the key.
+        version_lookup = {
+            (e.get("type"), e.get("name")): e.get("version")
+            for e in entries if e.get("version")
+        }
+
+        adjusted_rows = []
+        missing_on_disk = []
+        not_in_current = []
+
+        for row, item in enumerate(self.asset_items):
+            target = version_lookup.pop((item.asset_type, item.asset_name), None)
+            if not target:
+                continue
+            if target not in item.versions:
+                missing_on_disk.append(
+                    f"{item.asset_type} / {item.asset_name} ({target})"
+                )
+                continue
+            item.selected_version = target
+            combo = self.table.cellWidget(row, 2)
+            if isinstance(combo, QtWidgets.QComboBox):
+                combo.blockSignals(True)
+                combo.setCurrentText(target)
+                combo.blockSignals(False)
+            adjusted_rows.append(item)
+
+        # Anything left in version_lookup is in the package but not in the
+        # current table — probably a hidden asset or an asset that no longer
+        # exists on disk. Worth surfacing so the artist knows.
+        for (t, n), v in version_lookup.items():
+            not_in_current.append(f"{t} / {n} ({v})")
+
+        # Items where the loaded scene node's version differs from the package
+        # target — those need an actual node update. The rest just get their
+        # status recomputed against the new selection.
+        to_update = [
+            it for it in adjusted_rows
+            if it.loaded_node and it.loaded_version != it.selected_version
+        ]
+
+        applied = True
+        if to_update:
+            for it in to_update:
+                it.update_target_version = it.selected_version
+                it.has_update = True
+            applied = self._perform_updates(
+                to_update,
+                scope_label="package",
+                confirm_message=(
+                    f"Apply {pkg_name} to {len(to_update)} loaded asset(s)?"
+                ),
+                save_snapshot=False,
+            )
+        else:
+            # No node updates needed — just recompute Status against the new
+            # dropdown selections and refresh the visible cells.
+            for it in adjusted_rows:
+                self._refresh_status_for_selection(it)
+            self._refresh_table_status()
+
+        if not applied:
+            # User cancelled the confirm dialog inside _perform_updates.
+            # Leave current_package alone and skip the warnings popup — the
+            # artist explicitly backed out.
+            return
+
+        # Pin this package as the shot's current so subsequent opens and any
+        # future dropdown refresh default back to it. Only the next Load or
+        # Update will unpin it (back to the newest snapshot).
+        prefs = self._load_prefs()
+        current_map = prefs.setdefault("current_package", {})
+        current_map[self._shot_key()] = pkg_name
+        self._save_prefs(prefs)
+        self._refresh_package_dropdown()
+
+        # Report the mismatch cases in a single non-blocking dialog so the
+        # artist can see what didn't apply cleanly.
+        warnings = []
+        if missing_on_disk:
+            warnings.append(
+                "Versions from the package no longer available on disk:\n  - "
+                + "\n  - ".join(missing_on_disk[:10])
+            )
+        if not_in_current:
+            warnings.append(
+                "Assets recorded in the package but not in the current table "
+                "(hidden or removed):\n  - "
+                + "\n  - ".join(not_in_current[:10])
+            )
+        if warnings:
+            QtWidgets.QMessageBox.warning(
+                self, f"{pkg_name} — Partial Apply", "\n\n".join(warnings)
+            )
+
+    def _on_show_hidden_toggled(self, checked):
+        """React to the 'Show Hidden Assets' checkbox: rebuild the table so
+        hidden entries appear (with Recover buttons) or disappear."""
+        self._show_hidden = bool(checked)
+        self._populate_table()
+        self._refresh_info_banner()
+        self._do_check_for_updates(silent=True)
+
     def _get_ocio_colorspaces(self):
         """
         Get list of available colorspaces from Nuke's OCIO configuration.
@@ -601,7 +1150,7 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
             if color_management == "OCIO":
                 # Try to get OCIO colorspaces using PyOpenColorIO
                 try:
-                    import PyOpenColorIO as OCIO
+                    import PyOpenColorIO as OCIO # type: ignore
                     config = OCIO.GetCurrentConfig()
 
                     # Support both OCIO v1 and v2 APIs
@@ -673,6 +1222,96 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         self._colorspaces_cache = colorspaces
         return colorspaces
 
+    def _make_trash_icon(self, color="#c8a0a0", size=16):
+        """Draw a small trash-can icon programmatically. SP_TrashIcon renders
+        inconsistently across Qt versions/platforms — on this project's Nuke
+        build it came out looking like a generic emoji glyph that testers
+        didn't recognise as a bin. Drawing it ourselves gives a predictable,
+        readable silhouette everywhere."""
+        pixmap = QtGui.QPixmap(size, size)
+        pixmap.fill(QtCore.Qt.transparent)
+        painter = QtGui.QPainter(pixmap)
+        try:
+            painter.setRenderHint(QtGui.QPainter.Antialiasing)
+            pen = QtGui.QPen(QtGui.QColor(color))
+            pen.setWidthF(1.3)
+            pen.setCapStyle(QtCore.Qt.RoundCap)
+            pen.setJoinStyle(QtCore.Qt.RoundJoin)
+            painter.setPen(pen)
+            # Coordinates assume a 16x16 canvas; the visual scales cleanly at
+            # the small icon sizes we use (14–16px).
+            # Lid handle (small bump above the lid)
+            painter.drawLine(6, 3, 10, 3)
+            painter.drawLine(6, 3, 6, 5)
+            painter.drawLine(10, 3, 10, 5)
+            # Lid line
+            painter.drawLine(3, 5, 13, 5)
+            # Body — slight trapezoid so it reads as a bin
+            painter.drawLine(4, 6, 5, 13)
+            painter.drawLine(12, 6, 11, 13)
+            painter.drawLine(5, 13, 11, 13)
+            # Interior vertical strokes
+            painter.drawLine(7, 7, 7, 12)
+            painter.drawLine(9, 7, 9, 12)
+        finally:
+            painter.end()
+        return QtGui.QIcon(pixmap)
+
+    def _make_recover_icon(self, color="#8ac68a", size=16):
+        """Draw a leftward-hook arrow (↩) suggesting 'put this back'. Shown
+        on rows that are currently hidden (visible only via 'Show Hidden
+        Assets') so the artist can restore them without editing the JSON."""
+        pixmap = QtGui.QPixmap(size, size)
+        pixmap.fill(QtCore.Qt.transparent)
+        painter = QtGui.QPainter(pixmap)
+        try:
+            painter.setRenderHint(QtGui.QPainter.Antialiasing)
+            pen = QtGui.QPen(QtGui.QColor(color))
+            pen.setWidthF(1.4)
+            pen.setCapStyle(QtCore.Qt.RoundCap)
+            pen.setJoinStyle(QtCore.Qt.RoundJoin)
+            painter.setPen(pen)
+            # Coordinates on a 16x16 canvas. The glyph is a right-angle bend:
+            # a vertical stem on the right, coming down and turning left into
+            # a horizontal shaft ending in a leftward arrowhead.
+            # Vertical stem (top-right, coming down)
+            painter.drawLine(12, 3, 12, 10)
+            # Horizontal shaft (going left from stem bottom)
+            painter.drawLine(12, 10, 4, 10)
+            # Arrowhead (left tip)
+            painter.drawLine(4, 10, 7, 7)
+            painter.drawLine(4, 10, 7, 13)
+        finally:
+            painter.end()
+        return QtGui.QIcon(pixmap)
+
+    def _load_thumbnail_pixmap(self, path, height, radius=6):
+        """Load a project thumbnail, scale to `height`, and clip corners to
+        `radius`. Silent when the file is missing/unreadable (thumbnails are
+        optional per-project, unlike the studio logo). Returns None on any
+        failure so the caller can just skip adding the widget."""
+        if not path or not os.path.exists(path):
+            return None
+        src = QtGui.QPixmap(path)
+        if src.isNull():
+            return None
+        scaled = src.scaledToHeight(height, QtCore.Qt.SmoothTransformation)
+        rounded = QtGui.QPixmap(scaled.size())
+        rounded.fill(QtCore.Qt.transparent)
+        painter = QtGui.QPainter(rounded)
+        try:
+            painter.setRenderHint(QtGui.QPainter.Antialiasing)
+            clip = QtGui.QPainterPath()
+            clip.addRoundedRect(
+                QtCore.QRectF(0, 0, scaled.width(), scaled.height()),
+                radius, radius,
+            )
+            painter.setClipPath(clip)
+            painter.drawPixmap(0, 0, scaled)
+        finally:
+            painter.end()
+        return rounded
+
     def _load_logo_pixmap(self, path, opacity, height):
         """Load a logo image, scale to `height`, and pre-multiply alpha by
         `opacity` so it renders as a semi-transparent QPixmap. Returns None
@@ -729,6 +1368,23 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         title_layout.setContentsMargins(18, 12, 18, 12)
         title_layout.setSpacing(12)
 
+        # Per-project thumbnail — lives at <project_root>/00_Pipeline/project.jpg.
+        # Optional: skipped silently when absent so unconfigured projects don't
+        # spam the console. Placed left of the PROJECT text as a small avatar-
+        # style preview.
+        if self._project_detected:
+            thumbnail_pixmap = self._load_thumbnail_pixmap(
+                os.path.join(self._project_root, "00_Pipeline", "project.jpg"),
+                height=56,
+            )
+            if thumbnail_pixmap is not None:
+                thumbnail_label = QtWidgets.QLabel()
+                thumbnail_label.setPixmap(thumbnail_pixmap)
+                thumbnail_label.setFixedSize(thumbnail_pixmap.size())
+                title_layout.addWidget(
+                    thumbnail_label, alignment=QtCore.Qt.AlignVCenter,
+                )
+
         title_text = QtWidgets.QLabel()
         title_text.setTextFormat(QtCore.Qt.RichText)
         title_text.setText(
@@ -751,11 +1407,36 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
         main_layout.addWidget(project_frame)
 
-        # Header banner — populated by _detect_script_context / _scan_shot_assets
+        # Header banner — SHOT/FRAMES/FPS/FORMAT/ASSETS chips on the left,
+        # the PKG snapshot browser on the right, all inside one framed strip
+        # so the shot context reads as a single line.
+        banner_frame = QtWidgets.QFrame()
+        banner_frame.setObjectName("headerBanner")
+        banner_layout = QtWidgets.QHBoxLayout(banner_frame)
+        banner_layout.setContentsMargins(14, 10, 14, 10)
+        banner_layout.setSpacing(12)
+
         self.info_label = QtWidgets.QLabel("Detecting shot context from script path…")
-        self.info_label.setObjectName("headerBanner")
+        self.info_label.setObjectName("bannerText")
         self.info_label.setTextFormat(QtCore.Qt.RichText)
-        main_layout.addWidget(self.info_label)
+        banner_layout.addWidget(self.info_label)
+        banner_layout.addStretch()
+
+        package_label = QtWidgets.QLabel("PACKAGE :")
+        package_label.setObjectName("filterLabel")
+        banner_layout.addWidget(package_label)
+
+        self.package_combo = _PackageComboBox()
+        self.package_combo.setMinimumWidth(140)
+        banner_layout.addWidget(self.package_combo)
+
+        self.choose_package_btn = QtWidgets.QPushButton("Choose Package")
+        self.choose_package_btn.setObjectName("secondaryAction")
+        self.choose_package_btn.setCursor(QtCore.Qt.PointingHandCursor)
+        self.choose_package_btn.clicked.connect(self._on_choose_package)
+        banner_layout.addWidget(self.choose_package_btn)
+
+        main_layout.addWidget(banner_frame)
 
         # Assets section
         assets_group = QtWidgets.QGroupBox("AVAILABLE ASSETS")
@@ -783,16 +1464,27 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
             self.filter_buttons[source] = btn
 
         filter_layout.addStretch()
+
+        # Show-hidden toggle — sits on the right, past the stretch, so it's
+        # visually separated from the exclusive source pills on the left.
+        # Toggling it repopulates the table: on = includes hidden entries with
+        # a Recover button, off = filters them out entirely.
+        self.show_hidden_checkbox = QtWidgets.QCheckBox("Show Hidden Assets")
+        self.show_hidden_checkbox.setCursor(QtCore.Qt.PointingHandCursor)
+        self.show_hidden_checkbox.setChecked(self._show_hidden)
+        self.show_hidden_checkbox.toggled.connect(self._on_show_hidden_toggled)
+        filter_layout.addWidget(self.show_hidden_checkbox)
+
         assets_layout.addLayout(filter_layout)
 
         # Asset table
         self.table = QtWidgets.QTableWidget()
-        self.table.setColumnCount(5)
+        self.table.setColumnCount(6)
         self.table.setHorizontalHeaderLabels([
             "Name", "Type", "Version",
-            "Colorspace", "Status",
+            "Colorspace", "Status", "",
         ])
-        column_widths = [200, 100, 100, 150, 280]
+        column_widths = [200, 100, 100, 150, 280, 36]
         for i, w in enumerate(column_widths):
             self.table.setColumnWidth(i, w)
         self.table.setAlternatingRowColors(True)
@@ -802,7 +1494,12 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         self.table.verticalHeader().setVisible(False)
         self.table.verticalHeader().setDefaultSectionSize(34)
         self.table.horizontalHeader().setHighlightSections(False)
-        self.table.horizontalHeader().setStretchLastSection(True)
+        # Status stretches to fill; the hide-button column stays fixed-narrow
+        # regardless of window width.
+        header = self.table.horizontalHeader()
+        header.setStretchLastSection(False)
+        header.setSectionResizeMode(4, QtWidgets.QHeaderView.Stretch)
+        header.setSectionResizeMode(5, QtWidgets.QHeaderView.Fixed)
         self.table.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.table.customContextMenuRequested.connect(self._show_context_menu)
 
@@ -890,6 +1587,83 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
         main_layout.addLayout(button_layout)
 
+        # ---- Render Manager page ----
+        # Two tables side-by-side vertically: Precomp writes on top (Write
+        # nodes whose name contains "Precomp"), other writes below. Both
+        # are refreshed lazily when the tab becomes visible so newly-added
+        # Writes are picked up without restarting the dialog.
+        self.render_tab = QtWidgets.QWidget()
+        render_layout = QtWidgets.QVBoxLayout(self.render_tab)
+        render_layout.setContentsMargins(14, 14, 14, 14)
+        render_layout.setSpacing(12)
+
+        precomp_group = QtWidgets.QGroupBox("WRITES PRECOMP")
+        precomp_group_layout = QtWidgets.QVBoxLayout()
+        precomp_group_layout.setContentsMargins(6, 4, 6, 6)
+        self.precomp_writes_table = self._build_writes_table(
+            ["Name", "Identifier", "Version", "Render Order", "Status"]
+        )
+        self.precomp_writes_table.setColumnWidth(0, 220)
+        self.precomp_writes_table.setColumnWidth(1, 220)
+        self.precomp_writes_table.setColumnWidth(2, 80)
+        self.precomp_writes_table.setColumnWidth(3, 110)
+        # Same delegate as the loader table so the Cached/Live tint is not
+        # washed out by the row-selection highlight.
+        self.precomp_writes_table.setItemDelegateForColumn(
+            4, _StatusColorDelegate(self.precomp_writes_table)
+        )
+        precomp_group_layout.addWidget(self.precomp_writes_table)
+        precomp_group.setLayout(precomp_group_layout)
+        render_layout.addWidget(precomp_group, stretch=1)
+
+        # Write Compo — typically a single final-output Write. stretch=0 +
+        # a height cap on the table itself (see _size_writes_table_to_content)
+        # keeps the section from claiming half the tab for one row.
+        compo_group = QtWidgets.QGroupBox("WRITES COMPO")
+        compo_group_layout = QtWidgets.QVBoxLayout()
+        compo_group_layout.setContentsMargins(6, 4, 6, 6)
+        self.compo_writes_table = self._build_writes_table(
+            ["Name", "Identifier", "Version", "Render Order"]
+        )
+        self.compo_writes_table.setColumnWidth(0, 220)
+        self.compo_writes_table.setColumnWidth(2, 80)
+        self.compo_writes_table.setColumnWidth(3, 110)
+        # Identifier takes the leftover width so long identifiers stay
+        # readable; Name, Version and Render Order keep their fixed size.
+        compo_header = self.compo_writes_table.horizontalHeader()
+        compo_header.setStretchLastSection(False)
+        compo_header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        compo_group_layout.addWidget(self.compo_writes_table)
+        compo_group.setLayout(compo_group_layout)
+        render_layout.addWidget(compo_group, stretch=0)
+
+        render_actions = QtWidgets.QHBoxLayout()
+
+        render_all_btn = QtWidgets.QPushButton("Render Compo and Precomps")
+        render_all_btn.setObjectName("primaryAction")
+        render_all_btn.setCursor(QtCore.Qt.PointingHandCursor)
+        render_all_btn.clicked.connect(self._submit_render_all)
+        render_actions.addWidget(render_all_btn)
+
+        render_compo_btn = QtWidgets.QPushButton("Render Compo")
+        render_compo_btn.setObjectName("secondaryAction")
+        render_compo_btn.setCursor(QtCore.Qt.PointingHandCursor)
+        render_compo_btn.clicked.connect(self._submit_render_compo)
+        render_actions.addWidget(render_compo_btn)
+
+        render_precomps_btn = QtWidgets.QPushButton("Render Precomps")
+        render_precomps_btn.setObjectName("updateAction")
+        render_precomps_btn.setCursor(QtCore.Qt.PointingHandCursor)
+        render_precomps_btn.clicked.connect(self._submit_render_precomps)
+        render_actions.addWidget(render_precomps_btn)
+
+        render_actions.addStretch()
+        refresh_writes_btn = QtWidgets.QPushButton("Refresh")
+        refresh_writes_btn.setCursor(QtCore.Qt.PointingHandCursor)
+        refresh_writes_btn.clicked.connect(self._refresh_render_manager)
+        render_actions.addWidget(refresh_writes_btn)
+        render_layout.addLayout(render_actions)
+
         # ---- Logs page ----
         logs_tab = QtWidgets.QWidget()
         logs_layout = QtWidgets.QVBoxLayout(logs_tab)
@@ -905,12 +1679,16 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         logs_buttons.addWidget(clear_log_btn)
         logs_layout.addLayout(logs_buttons)
 
-        # Register both pages, then build the matching tab buttons
+        # Register all pages, then build the matching tab buttons. Order
+        # matters — the index passed to _add_tab_button must match the
+        # widget's position in tab_stack.
         self.tab_stack.addWidget(loader_tab)
+        self.tab_stack.addWidget(self.render_tab)
         self.tab_stack.addWidget(logs_tab)
 
         self._add_tab_button("Loader", 0)
-        self._add_tab_button("Logs", 1)
+        self._add_tab_button("Render Manager", 1)
+        self._add_tab_button("Logs", 2)
         self.tab_buttons[0].setChecked(True)
         self.tab_bar_layout.addStretch()
 
@@ -933,6 +1711,533 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
     def _switch_tab(self, index):
         self.tab_stack.setCurrentIndex(index)
+        # Render Manager lazily re-scans on every visit so Writes added
+        # or renamed since the last look show up without a manual refresh.
+        if self.tab_stack.currentWidget() is getattr(self, "render_tab", None):
+            self._refresh_render_manager()
+
+    def _build_writes_table(self, columns):
+        """Factory for a Write-node table with the given column labels. The
+        two Render Manager tables share styling (row height, selection
+        behaviour, header colouring) but not their column layout — Precomp
+        writes carry Version/Status metadata while the Compo table just
+        lists the node."""
+        table = QtWidgets.QTableWidget()
+        table.setColumnCount(len(columns))
+        table.setHorizontalHeaderLabels(columns)
+        table.setSelectionBehavior(QtWidgets.QAbstractItemView.SelectRows)
+        table.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        table.setAlternatingRowColors(True)
+        table.setShowGrid(False)
+        table.verticalHeader().setVisible(False)
+        table.verticalHeader().setDefaultSectionSize(28)
+        table.horizontalHeader().setHighlightSections(False)
+        table.horizontalHeader().setStretchLastSection(True)
+        return table
+
+    def _refresh_render_manager(self):
+        """Scan the current scene for Write nodes and split them across the
+        two tables: nodes carrying the studio's `tag` knob set to
+        "PrecompWrite" go to the top table (matching the gizmo tag is more
+        robust than a name check since the artist can rename the node);
+        the remaining writes whose name contains "Compo" go to the bottom.
+        Writes matching neither rule are silently skipped — they aren't
+        part of the comp render pipeline."""
+        precomp_writes = []
+        compo_writes = []
+        for node in nuke.allNodes("Write"):
+            if self._read_tag(node) == "PrecompWrite":
+                precomp_writes.append(node)
+            elif "Compo" in node.name():
+                compo_writes.append(node)
+        # Redistribute render_order across every Write upstream of
+        # Write_Compo before displaying, so the Render Order column
+        # reflects the freshly-computed topological order rather than a
+        # stale value the artist may have left behind.
+        self._distribute_render_orders()
+        self._populate_precomp_table(precomp_writes)
+        self._populate_compo_table(compo_writes)
+        # Compo table is usually a single row — cap its height so it doesn't
+        # split the tab in half. Done after populate so the row count is
+        # already reflected in the table.
+        self._size_writes_table_to_content(self.compo_writes_table)
+
+    def _read_tag(self, node):
+        """Safe read of a node's `tag` knob (empty string if absent). Wrapped
+        because the knob is set by the Precomp gizmo, so unrelated Writes
+        won't have it and we don't want a bare `node['tag']` KeyError."""
+        try:
+            if 'tag' in node.knobs():
+                return (node['tag'].value() or "").strip()
+        except Exception:
+            pass
+        return ""
+
+    def _distribute_render_orders(self):
+        """Auto-assign render_order on every Write upstream of the Compo
+        Write via the studio helper so precomps render before the final
+        comp. The Compo Write is located by matching the same filter as
+        the Write Compo table (any Write whose name contains "Compo" and
+        doesn't carry the PrecompWrite tag) so variant namings like
+        "Write_Compo_v001" still trigger the distribution — an earlier
+        version hardcoded "Write_Compo" and silently skipped in every
+        other case. Errors are swallowed with a log so a broken graph
+        doesn't break the tab."""
+        compo_write = None
+        for node in nuke.allNodes("Write"):
+            if self._read_tag(node) == "PrecompWrite":
+                continue
+            if "Compo" in node.name():
+                compo_write = node
+                break
+
+        if compo_write is None:
+            print(
+                "[ShotAssetLoader] No Compo Write found in the scene — "
+                "skipping render_order distribution"
+            )
+            return
+
+        print(
+            f"[ShotAssetLoader] Distributing render_order upstream of "
+            f"{compo_write.name()}"
+        )
+        try:
+            distribute_write_render_order(root_name=compo_write.name())
+        except Exception as e:
+            print(f"[ShotAssetLoader] distribute_write_render_order failed: {e}")
+
+    def _submit_render_all(self):
+        compo = self._find_compo_write()
+        live = self._find_live_precomp_writes()
+        if not (live or compo):
+            print(
+                "[ShotAssetLoader] Nothing to render (no Live precomps and no "
+                "Compo write) — aborting Deadline submit"
+            )
+            return
+        self._prism_save_version()
+        self._bump_precomp_versions(live)
+        self._refresh_compo_write(compo)
+        self._select_only(list(live) + ([compo] if compo else []))
+        self._launch_deadline_submit("Render Compo and Precomps")
+
+    def _submit_render_compo(self):
+        compo = self._find_compo_write()
+        if compo is None:
+            print(
+                "[ShotAssetLoader] No Compo write found — aborting Deadline submit"
+            )
+            return
+        self._prism_save_version()
+        self._refresh_compo_write(compo)
+        self._select_only([compo])
+        self._launch_deadline_submit("Render Compo")
+
+    def _submit_render_precomps(self):
+        live = self._find_live_precomp_writes()
+        if not live:
+            print(
+                "[ShotAssetLoader] No Live precomps to render — aborting "
+                "Deadline submit"
+            )
+            return
+        self._prism_save_version()
+        self._bump_precomp_versions(live)
+        self._select_only(live)
+        self._launch_deadline_submit("Render Precomps")
+
+    def _prism_save_version(self):
+        """Trigger Prism's 'Save Version' menu action so every farm submit
+        is pinned to a fresh, versioned .nk on disk — Deadline copies the
+        current script to the farm, and without a save the artist could
+        submit a stale version to renders."""
+        item = nuke.menu("Nuke").findItem("Prism/Save Version")
+        if item is None:
+            print(
+                "[ShotAssetLoader] Prism/Save Version not found in the Nuke "
+                "menu — skipping save (submitting current on-disk state)"
+            )
+            return
+        try:
+            item.invoke()
+            print("[ShotAssetLoader] Prism Save Version invoked")
+        except Exception as e:
+            print(f"[ShotAssetLoader] Prism Save Version failed: {e}")
+
+    def _bump_precomp_versions(self, nodes):
+        """Kick each precomp Write's `add_version` knob so its output path
+        rolls to the next version before we submit — otherwise the farm
+        would overwrite the current cache in place."""
+        for node in nodes:
+            if 'add_version' not in node.knobs():
+                print(
+                    f"[ShotAssetLoader] No 'add_version' knob on {node.name()} "
+                    "— skipping"
+                )
+                continue
+            try:
+                node['add_version'].execute()
+                print(f"[ShotAssetLoader] add_version on {node.name()}")
+            except Exception as e:
+                print(
+                    f"[ShotAssetLoader] add_version failed on {node.name()}: {e}"
+                )
+
+    def _refresh_compo_write(self, node):
+        """Kick the Compo write's `refresh` knob so its metadata (typically
+        the versioned output path and frame range) matches the just-saved
+        script before the submit dialog reads it."""
+        if node is None:
+            return
+        if 'refresh' not in node.knobs():
+            print(
+                f"[ShotAssetLoader] No 'refresh' knob on {node.name()} — skipping"
+            )
+            return
+        try:
+            node['refresh'].execute()
+            print(f"[ShotAssetLoader] refresh on {node.name()}")
+        except Exception as e:
+            print(f"[ShotAssetLoader] refresh failed on {node.name()}: {e}")
+
+    def _iter_precomp_writes(self):
+        """Yield every Write node carrying the studio's PrecompWrite tag.
+        recurseGroups=True so Writes wrapped inside a studio gizmo still get
+        picked up — the table's own scan runs at root only, so if this
+        starts returning extras that don't appear in the table, we'll need
+        to bring the two scans back in sync."""
+        for node in nuke.allNodes("Write", recurseGroups=True):
+            if self._read_tag(node) == "PrecompWrite":
+                yield node
+
+    def _find_compo_write(self):
+        """The Compo Write is any non-PrecompWrite Write whose name contains
+        'Compo' — mirrors the Write Compo table and _distribute_render_orders
+        so the three code paths agree on which node is the final output."""
+        for node in nuke.allNodes("Write", recurseGroups=True):
+            if self._read_tag(node) == "PrecompWrite":
+                continue
+            if "Compo" in node.name():
+                return node
+        return None
+
+    def _find_live_precomp_writes(self):
+        """Precomps whose cache is missing/stale — the gizmo's hasError() is
+        True when its internal cache Read fails, matching the 'Live' state
+        shown in the Render Manager table. Cached precomps are skipped
+        because their disk output already exists; re-rendering them would
+        just burn farm time."""
+        live = []
+        for node in self._iter_precomp_writes():
+            try:
+                err = node.hasError()
+            except Exception as e:
+                print(
+                    f"[ShotAssetLoader]   {node.name()} hasError raised {e}"
+                    " — treating as Live"
+                )
+                err = True
+            state = "Live" if err else "Cached"
+            print(f"[ShotAssetLoader]   {node.name()}: {state}")
+            if err:
+                live.append(node)
+        return live
+
+    def _select_only(self, nodes):
+        """Clear the whole scene's selection then select the given nodes.
+        Deadline's 'Selected Nodes Only' (set by our sanity check) uses this
+        selection to decide which Writes to submit, so any stray selection
+        the artist left behind would silently join the job."""
+        for n in nuke.allNodes(recurseGroups=True):
+            try:
+                n.setSelected(False)
+            except Exception:
+                pass
+        names = []
+        for n in nodes:
+            try:
+                n.setSelected(True)
+                names.append(n.name())
+            except Exception:
+                pass
+        print(f"[ShotAssetLoader] Selected for submit: {', '.join(names) or '(none)'}")
+
+    def _launch_deadline_submit(self, source):
+        """Invoke the Illogic fork of the Nuke-to-Deadline submitter. The fork
+        (SubmitNukeToDeadline_Illogic on the Deadline repo, next to the stock
+        SubmitNukeToDeadline) groups Writes by render_order for dependencies so
+        siblings run in parallel instead of chaining. Falls back to the stock
+        Thinkbox menu action if the fork isn't importable — e.g. the network
+        share is unreachable or the fork hasn't been deployed yet."""
+        print(f"[ShotAssetLoader] {source} -> Submit Nuke To Deadline (Illogic fork)")
+        self._prime_deadline_sticky()
+        try:
+            import SubmitNukeToDeadline_Illogic  # type: ignore
+            SubmitNukeToDeadline_Illogic.SubmitToDeadline()
+            return
+        except Exception as e:
+            print(
+                f"[ShotAssetLoader] Illogic submitter unavailable ({e}) — "
+                "falling back to Thinkbox menu"
+            )
+
+        item = nuke.menu("Nuke").findItem("Thinkbox/Submit Nuke To Deadline")
+        if item is None:
+            print(
+                "[ShotAssetLoader] Thinkbox/Submit Nuke To Deadline not found "
+                "in the Nuke menu — is the Deadline submitter installed?"
+            )
+            return
+        try:
+            item.invoke()
+        except Exception as e:
+            print(f"[ShotAssetLoader] Deadline submitter failed: {e}")
+
+    def _prime_deadline_sticky(self):
+        """Overwrite the Deadline Nuke sticky ini with our per-project defaults
+        before the submit dialog opens. The submitter reads the ini at startup
+        (ReadStickySettings) and pipes it through DeadlineGlobals, so anything
+        we write here shows up in the dialog. Pool/group come from the project's
+        pipeline.json (poolPresets 'Nuke' entry); the rest are studio-wide
+        constants requested for these buttons."""
+        import configparser
+
+        pool = None
+        group = None
+        pipeline_json = os.path.join(
+            self._project_root, "00_Pipeline", "pipeline.json"
+        )
+        try:
+            with open(pipeline_json, "r", encoding="utf-8") as fh:
+                data = json.load(fh)
+            for preset in data.get("deadline", {}).get("poolPresets", []):
+                if preset.get("name") == "Nuke":
+                    pool = preset.get("pool")
+                    group = preset.get("group")
+                    break
+            if pool is None or group is None:
+                print(
+                    "[ShotAssetLoader] pipeline.json has no poolPresets 'Nuke' "
+                    f"entry at {pipeline_json} — pool/group left untouched"
+                )
+        except Exception as e:
+            print(
+                f"[ShotAssetLoader] Could not read {pipeline_json}: {e} — "
+                "pool/group left untouched"
+            )
+
+        sticky_path = os.path.join(
+            os.environ.get("LOCALAPPDATA", ""),
+            "Thinkbox", "Deadline10", "settings", "nuke_py_submission.ini",
+        )
+        try:
+            os.makedirs(os.path.dirname(sticky_path), exist_ok=True)
+            config = configparser.ConfigParser()
+            if os.path.isfile(sticky_path):
+                config.read(sticky_path)
+            if not config.has_section("Sticky"):
+                config.add_section("Sticky")
+
+            if pool:
+                config.set("Sticky", "Pool", pool)
+            if group:
+                config.set("Sticky", "Group", group)
+            config.set("Sticky", "Priority", "90")
+            config.set("Sticky", "FrameListMode", "Global")
+            config.set("Sticky", "EnforceRenderOrder", "True")
+            config.set("Sticky", "SubmitScene", "False")
+            config.set("Sticky", "BatchMode", "True")
+
+            with open(sticky_path, "w") as fh:
+                config.write(fh)
+            print(
+                f"[ShotAssetLoader] Deadline sticky primed (pool={pool} "
+                f"group={group}) at {sticky_path}"
+            )
+        except Exception as e:
+            print(f"[ShotAssetLoader] Could not prime Deadline sticky: {e}")
+
+        # Deadline's ReadSceneStickySettings reads hidden String knobs stored
+        # on nuke.root() by previous submissions and OVERWRITES the ini-derived
+        # values. If any of those knobs exist, we have to update them too or
+        # the .ini is silently ignored. Absent knobs are left alone so the ini
+        # wins for scenes that were never submitted before.
+        root = nuke.root()
+        root_overrides = {}
+        if pool:
+            root_overrides["Pool"] = pool
+        if group:
+            root_overrides["Group"] = group
+        root_overrides["Priority"] = "90"
+        root_overrides["FrameListMode"] = "Global"
+        root_overrides["EnforceRenderOrder"] = "True"
+        root_overrides["SubmitScene"] = "False"
+        root_overrides["BatchMode"] = "True"
+        updated = []
+        for name, value in root_overrides.items():
+            if name in root.knobs():
+                try:
+                    root.knob(name).setValue(value)
+                    updated.append(name)
+                except Exception as e:
+                    print(
+                        f"[ShotAssetLoader] Could not update root knob {name}: {e}"
+                    )
+        if updated:
+            print(
+                "[ShotAssetLoader] Root sticky knobs overridden: "
+                f"{', '.join(updated)}"
+            )
+
+    def _size_writes_table_to_content(self, table):
+        """Pin a writes table's height to just enough for its rows. Used on
+        the Write Compo table so a single entry doesn't get half the tab
+        to itself. Clamped to at least one row (empty table still reads as
+        a table, not a collapsed strip) and at most four rows before it
+        starts scrolling."""
+        row_h = table.verticalHeader().defaultSectionSize()
+        header_h = table.horizontalHeader().height() or 30
+        frame_pad = table.frameWidth() * 2
+        rows = max(1, min(4, table.rowCount()))
+        height = header_h + row_h * rows + frame_pad + 6
+        table.setMinimumHeight(height)
+        table.setMaximumHeight(height)
+
+    def _make_bold_name_cell(self, node):
+        """Read-only bold-font table cell showing a node's name. Shared by
+        both Render Manager tables so styling stays in sync."""
+        item = QtWidgets.QTableWidgetItem(node.name())
+        item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
+        font = item.font()
+        font.setBold(True)
+        item.setFont(font)
+        return item
+
+    def _make_render_order_cell(self, node):
+        """Read-only cell showing a node's render_order as an integer.
+        Empty when the knob is absent (shouldn't happen on a real Write)
+        or unreadable."""
+        text = ""
+        try:
+            if 'render_order' in node.knobs():
+                text = str(int(node['render_order'].value()))
+        except Exception:
+            text = ""
+        item = QtWidgets.QTableWidgetItem(text)
+        item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
+        return item
+
+    def _make_version_cell(self, node):
+        """Read-only cell showing a Write's version as vNNN.
+
+        Two conventions coexist: the Precomp gizmo exposes an integer
+        `versions` knob, while the Compo Write publishes its resolved
+        output path through a `fileName` text knob (e.g.
+        `.../Compo/v007/SBX-mathieu_Compo_v007.####.exr`). We try both,
+        plus the vanilla `file` knob as a last resort so a hand-built
+        Write still surfaces a version instead of a blank cell."""
+        version_text = ""
+        try:
+            if 'versions' in node.knobs():
+                raw = node['versions'].value()
+                try:
+                    version_text = f"v{int(raw):03d}"
+                except (TypeError, ValueError):
+                    # Non-numeric knob value (unusual) — surface as-is
+                    # rather than dropping the info silently.
+                    version_text = "" if raw is None else str(raw)
+        except Exception:
+            version_text = ""
+        if not version_text:
+            for knob_name in ("fileName", "file"):
+                try:
+                    if knob_name not in node.knobs():
+                        continue
+                    path = node[knob_name].value() or ""
+                    if not path:
+                        continue
+                    parsed = extract_version_from_path(path)
+                    if parsed:
+                        version_text = parsed
+                        break
+                except Exception:
+                    continue
+        item = QtWidgets.QTableWidgetItem(version_text)
+        item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
+        return item
+
+    def _make_identifier_cell(self, node, prefix=""):
+        """Read-only cell showing the node's `identifier` knob value, with
+        an optional prefix (used for Precomp writes so their identifier
+        reads as e.g. 'precomp_shot010_bg' and can't be confused with a
+        Compo identifier of the same base name)."""
+        text = ""
+        try:
+            if 'identifier' in node.knobs():
+                raw = node['identifier'].value()
+                if raw:
+                    text = f"{prefix}{raw}"
+        except Exception:
+            text = ""
+        item = QtWidgets.QTableWidgetItem(text)
+        item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
+        return item
+
+    def _populate_precomp_table(self, nodes):
+        """Fill the Precomp Writes table with (Name, Version, Status) rows.
+
+        Version comes from the `versions` knob, formatted as vNNN. Status
+        is "Live" when the Write's input(0) has an error (typically the
+        cached precomp is missing / stale so the graph falls through to the
+        live comp), and "Cached" otherwise — mirroring the TCL expression
+        the studio uses on the node's own label."""
+        table = self.precomp_writes_table
+        table.setRowCount(0)
+        for row, node in enumerate(nodes):
+            table.insertRow(row)
+            table.setItem(row, 0, self._make_bold_name_cell(node))
+            table.setItem(row, 1, self._make_identifier_cell(node, prefix="precomp_"))
+            table.setItem(row, 2, self._make_version_cell(node))
+            table.setItem(row, 3, self._make_render_order_cell(node))
+
+            # The studio's TCL uses `input(0).hasError()` from *inside* the
+            # gizmo, where input(0) is the internal Read pointing at the
+            # cache file. Called from Python on the outer gizmo, input(0)
+            # would resolve to the external upstream (usually a Grade or
+            # similar) which is not what we want — a live comp with a
+            # healthy upstream would then report "Cached" even though the
+            # cache Read is failing. Reading `hasError()` directly on the
+            # gizmo is equivalent for this purpose since the internal Read
+            # error propagates to the gizmo's error state.
+            try:
+                status_text = "Live" if node.hasError() else "Cached"
+            except Exception:
+                status_text = "?"
+            s_item = QtWidgets.QTableWidgetItem(status_text)
+            s_item.setFlags(s_item.flags() & ~QtCore.Qt.ItemIsEditable)
+            # Same greens/reds as the loader Status column so the two tables
+            # speak the same visual language (green = ready, red = stale).
+            if status_text == "Cached":
+                s_item.setBackground(QtGui.QColor("#3a5a3a"))
+            elif status_text == "Live":
+                s_item.setBackground(QtGui.QColor("#aa2c2c"))
+            table.setItem(row, 4, s_item)
+
+    def _populate_compo_table(self, nodes):
+        """Fill the Write Compo table (Name + Identifier + Version + Render
+        Order). Render Order completes the picture from the Precomp table:
+        the Compo write is the root of the topological distribution and
+        receives the highest value, so seeing it next to the Precomp orders
+        makes the whole render sequence readable at a glance."""
+        table = self.compo_writes_table
+        table.setRowCount(0)
+        for row, node in enumerate(nodes):
+            table.insertRow(row)
+            table.setItem(row, 0, self._make_bold_name_cell(node))
+            table.setItem(row, 1, self._make_identifier_cell(node))
+            table.setItem(row, 2, self._make_version_cell(node))
+            table.setItem(row, 3, self._make_render_order_cell(node))
 
     def _detect_script_context(self):
         """Auto-detect sequence/shot from the Nuke script path, then scan."""
@@ -952,9 +2257,13 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
             detected_shot = None
 
             # 1. Try filename pattern: <sequence>-<shot>_<task>_v<###>.nk
-            #    e.g. SEQ_busInt-SH130_comp_v001.nk
+            #    e.g. SEQ_busInt-SH130_comp_v001.nk or LINEUP-CHAR_ALL_Compo_v001.nk.
+            #    The shot itself may contain underscores (CHAR_ALL), so we
+            #    anchor on `_<task>_v###.nk` at the tail and let the shot
+            #    group greedily consume everything before it. Task is assumed
+            #    to be a single token (no underscore).
             filename = normalized.rsplit('/', 1)[-1]
-            filename_match = re.match(r'^([^-]+)-([^_]+)_.+_v\d{3,4}\.nk$', filename)
+            filename_match = re.match(r'^([^-]+)-(.+)_[^_]+_v\d{3,4}\.nk$', filename)
             if filename_match:
                 detected_sequence = filename_match.group(1)
                 detected_shot = filename_match.group(2)
@@ -1012,6 +2321,20 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
         # Populate table
         self._populate_table()
+        self._refresh_info_banner()
+        # Packages are shot-scoped — reload the combo whenever the shot
+        # context changes.
+        self._refresh_package_dropdown()
+
+    def _refresh_info_banner(self):
+        """Rebuild the SHOT/FRAMES/FPS/FORMAT/ASSETS chip banner from the
+        current scene state and asset list. Extracted from _scan_shot_assets
+        so a lightweight refresh (e.g. after hiding an asset) can update the
+        ASSETS count without triggering a full disk re-scan."""
+        sequence = self.current_sequence
+        shot = self.current_shot
+        if not sequence or not shot:
+            return
 
         # Frame range comes from the current Nuke scene — that's what the
         # artist is actually working in.
@@ -1066,6 +2389,11 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         self.asset_items.clear()
         self.table.setRowCount(0)
 
+        # Assets the user has explicitly hidden for this shot via the trash
+        # button — read from the per-project prefs JSON. Any (type, name)
+        # match here is silently skipped below.
+        hidden_set = self._hidden_set_for_shot()
+
         # Scene frame range — used to default the Version dropdown to the
         # highest *full-coverage* version rather than the absolute latest, so
         # the first load doesn't silently pick up a partial render.
@@ -1081,11 +2409,17 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
         # Plates
         for plate_name, versions_dict in self.current_assets.get("plates", {}).items():
+            if self._is_precomp_asset(plate_name):
+                continue
+            is_hidden = ("Plate", plate_name) in hidden_set
+            if is_hidden and not self._show_hidden:
+                continue
             versions = sorted(versions_dict.keys())
             if not versions:
                 continue
 
             item = AssetItem("Plate", plate_name, versions, versions_dict, source_type="external")
+            item.is_hidden = is_hidden
             self._default_to_latest_full(item, scene_range)
             self.asset_items.append(item)
             self._add_row(row, item)
@@ -1093,11 +2427,17 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
         # 3D Renders
         for render_name, versions_dict in self.current_assets.get("3d_renders", {}).items():
+            if self._is_precomp_asset(render_name):
+                continue
+            is_hidden = ("3D Render", render_name) in hidden_set
+            if is_hidden and not self._show_hidden:
+                continue
             versions = sorted(versions_dict.keys())
             if not versions:
                 continue
 
             item = AssetItem("3D Render", render_name, versions, versions_dict, source_type="3dRender")
+            item.is_hidden = is_hidden
             self._default_to_latest_full(item, scene_range)
             self.asset_items.append(item)
             self._add_row(row, item)
@@ -1105,34 +2445,51 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
         # 2D Renders
         for render_name, versions_dict in self.current_assets.get("2d_renders", {}).items():
+            if self._is_precomp_asset(render_name):
+                continue
+            is_hidden = ("2D Render", render_name) in hidden_set
+            if is_hidden and not self._show_hidden:
+                continue
             versions = sorted(versions_dict.keys())
             if not versions:
                 continue
 
             item = AssetItem("2D Render", render_name, versions, versions_dict, source_type="2dRender")
+            item.is_hidden = is_hidden
             self._default_to_latest_full(item, scene_range)
             self.asset_items.append(item)
             self._add_row(row, item)
             row += 1
 
-        # Rotos (all versions)
+        # Rotos (all versions). Hidden as a group under the shared name
+        # "roto" — one trash click hides every version row at once, matching
+        # how the user thinks about "the roto" as one asset.
         rotos = self.current_assets.get("rotos", {})
-        for version in sorted(rotos.keys()):
-            layers = rotos[version]
+        roto_hidden = ("Roto", "roto") in hidden_set
+        if self._show_hidden or not roto_hidden:
+            for version in sorted(rotos.keys()):
+                layers = rotos[version]
 
-            item = AssetItem("Roto", "roto", [version], {version: layers}, source_type="external")
-            item.selected_version = version
-            self.asset_items.append(item)
-            self._add_row(row, item)
-            row += 1
+                item = AssetItem("Roto", "roto", [version], {version: layers}, source_type="external")
+                item.selected_version = version
+                item.is_hidden = roto_hidden
+                self.asset_items.append(item)
+                self._add_row(row, item)
+                row += 1
 
         # Cameras
         for cam_name, versions_dict in self.current_assets.get("cameras", {}).items():
+            if self._is_precomp_asset(cam_name):
+                continue
+            is_hidden = ("Camera", cam_name) in hidden_set
+            if is_hidden and not self._show_hidden:
+                continue
             versions = sorted(versions_dict.keys())
             if not versions:
                 continue
 
             item = AssetItem("Camera", cam_name, versions, versions_dict, source_type="Camera")
+            item.is_hidden = is_hidden
             self.asset_items.append(item)
             self._add_row(row, item)
             row += 1
@@ -1141,6 +2498,12 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         # loaded_node is bound at creation time so _do_check_for_updates can
         # treat them like already-loaded local assets.
         for foreign_item in self._discover_foreign_assets():
+            if self._is_precomp_asset(foreign_item.asset_name):
+                continue
+            is_hidden = (foreign_item.asset_type, foreign_item.asset_name) in hidden_set
+            if is_hidden and not self._show_hidden:
+                continue
+            foreign_item.is_hidden = is_hidden
             self.asset_items.append(foreign_item)
             self._add_row(row, foreign_item)
             row += 1
@@ -1222,6 +2585,44 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         if item.status_color:
             status_item.setBackground(QtGui.QColor(item.status_color))
         self.table.setItem(row, 4, status_item)
+
+        # Col 5 - Trash button (normal rows) OR Recover button (rows shown
+        # only because "Show Hidden Assets" is on). The recover button drops
+        # the asset's entry from the prefs JSON so it re-appears normally
+        # on subsequent openings.
+        if item.is_hidden:
+            action_btn = QtWidgets.QPushButton()
+            action_btn.setObjectName("recoverButton")
+            action_btn.setToolTip(
+                "Recover this asset — removes it from the hidden list in "
+                "the prefs JSON so it appears normally again."
+            )
+            action_btn.setIcon(self._make_recover_icon())
+            action_btn.clicked.connect(
+                lambda _=False, it=item: self._recover_asset(it)
+            )
+        else:
+            action_btn = QtWidgets.QPushButton()
+            action_btn.setObjectName("hideButton")
+            action_btn.setToolTip(
+                "Hide this asset from the loader for the current shot.\n"
+                "Tick 'Show Hidden Assets' to see and recover it later."
+            )
+            action_btn.setIcon(self._make_trash_icon())
+            action_btn.clicked.connect(
+                lambda _=False, it=item: self._hide_asset(it)
+            )
+        action_btn.setCursor(QtCore.Qt.PointingHandCursor)
+        action_btn.setFixedSize(24, 22)
+        action_btn.setIconSize(QtCore.QSize(14, 14))
+        # Wrap the button in a centered container so the cell's leftover space
+        # doesn't stretch the button.
+        cell = QtWidgets.QWidget()
+        cell_layout = QtWidgets.QHBoxLayout(cell)
+        cell_layout.setContentsMargins(0, 0, 0, 0)
+        cell_layout.setAlignment(QtCore.Qt.AlignCenter)
+        cell_layout.addWidget(action_btn)
+        self.table.setCellWidget(row, 5, cell)
 
     def _get_selected_items(self):
         """Return asset items for the rows currently highlighted in the table.
@@ -1486,6 +2887,11 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
                 msg += f"\n\nSkipped {len(already_loaded)} already-loaded asset(s)."
             QtWidgets.QMessageBox.information(self, "Success", msg)
 
+            # Record a package snapshot after a successful load — this is one
+            # of the user-triggered moments where "the compo state changed"
+            # and traceability matters.
+            self._save_package_snapshot()
+
         except Exception as e:
             QtWidgets.QMessageBox.critical(self, "Error", f"Error loading assets:\n{e}")
             print(f"[ShotAssetLoader] Error: {e}")
@@ -1519,6 +2925,23 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         all_nodes = nuke.allNodes()
         read_nodes = [n for n in all_nodes if n.Class() == "Read"]
         camera_nodes = [n for n in all_nodes if n.Class() == "Camera3"]
+
+        # Pre-filter Reads once (loader-owned + current shot/sequence) so
+        # _find_node_for_asset doesn't re-check `_is_loader_owned` and re-read
+        # the `file` knob for every (asset × Read) pair. Knob reads are the
+        # main cost in the per-asset loop on heavy scenes.
+        loader_reads = []
+        for r in read_nodes:
+            if not self._is_loader_owned(r):
+                continue
+            if 'file' not in r.knobs():
+                continue
+            fp = (r['file'].value() or "").replace('\\', '/')
+            if not fp:
+                continue
+            if self.current_sequence not in fp or self.current_shot not in fp:
+                continue
+            loader_reads.append((r, fp, fp.lower()))
 
         # Scene frame range — used to grade updates as full vs partial coverage.
         try:
@@ -1560,7 +2983,7 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
                 continue
 
             # Try to find corresponding node in scene
-            node, has_duplicates = self._find_node_for_asset(item, read_nodes, camera_nodes)
+            node, has_duplicates = self._find_node_for_asset(item, loader_reads, camera_nodes)
             item.has_duplicates = has_duplicates
 
             if node:
@@ -1829,30 +3252,47 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
                 self._frame_set_cache[folder_path] = frames
 
             if not frames:
-                return False
+                # No frame-numbered images found. Could be a static-image
+                # asset (paintover .psd, stMap.png, ...) — those have no
+                # per-frame coverage to check, so treat them as full when
+                # there's at least one image file present. Otherwise the
+                # folder is empty/unreadable and we fall back to False.
+                return self.discoverer.folder_has_image(folder_path)
 
             return frames.issuperset(range(scene_range[0], scene_range[1] + 1))
         except Exception as e:
             print(f"[ShotAssetLoader] Frame coverage check failed for {item.asset_name}: {e}")
             return False
 
-    def _find_node_for_asset(self, item, read_nodes, camera_nodes):
+    # Trailing "_N" / "N" pattern Nuke appends when the artist Ctrl+C/Ctrl+V's
+    # a loader Read. Precompiled here so the duplicate-tiebreaker doesn't
+    # recompile it on every `_find_node_for_asset` call.
+    _COPY_SUFFIX_RE = re.compile(r'_?\d+$')
+
+    def _find_node_for_asset(self, item, loader_reads, camera_nodes):
         """Find the Nuke node corresponding to an asset item.
+
+        Args:
+            loader_reads: list of (read_node, file_path, file_path_lower)
+                tuples pre-filtered by the caller — loader-owned Reads whose
+                file path already matches the current sequence/shot. The
+                caller does this once per check to save re-reading `file`
+                knobs for every asset × Read pair.
+            camera_nodes: raw list of Camera3 nodes from `nuke.allNodes()`.
 
         Returns:
             (node, has_duplicates):
                 node: the matched Nuke node, or None if nothing matches.
-                has_duplicates: True only for Reads when, after filtering on
-                    `fromShotLoader` and applying the name-suffix tiebreaker,
-                    more than one candidate still remains — the caller should
-                    surface this as a "duplicate" status to the user.
+                has_duplicates: True only for Reads when, after applying the
+                    name-suffix tiebreaker, more than one candidate remains —
+                    the caller should surface this as a "duplicate" status.
 
-        Reads must carry the `fromShotLoader` knob (True) to be considered —
-        this excludes manually-imported Reads that happen to share the path.
-        When the artist Ctrl+C/Ctrl+V's a loader Read, Nuke copies the knob
-        too, so we then prefer the candidate whose name has no trailing-digit
-        suffix (the original load). If that still leaves multiple, we pick
-        the highest version and flag the duplicate.
+        Cameras are still resolved from the raw camera_nodes list — a shot
+        typically has one Camera3, so pre-filtering isn't worth it there.
+        When several Reads match the same asset, we prefer the candidate
+        whose name has no trailing-digit suffix (the original load). If
+        that still leaves multiple, we pick the highest version and flag
+        the duplicate.
         """
         # Cameras: a shot generally has one camera, so first try the project
         # convention — a Camera3 named "CAM_SHOT". Fall back to file-knob
@@ -1873,26 +3313,14 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
         # Reads: asset_name is "plate"/"3D pass"/"2D pass"/"roto" → always
         # appears as a path component between slashes in the Prism layout.
-        needle = f"/{item.asset_name}/"
-        candidates = []
-
-        for read_node in read_nodes:
-            # Only consider Reads tagged by the loader — manual imports are
-            # ignored even if their file path matches.
-            if not self._is_loader_owned(read_node):
-                continue
-            if 'file' not in read_node.knobs():
-                continue
-
-            file_path = (read_node['file'].value() or "").replace('\\', '/')
-            if not file_path:
-                continue
-            if self.current_sequence not in file_path or self.current_shot not in file_path:
-                continue
-            if needle.lower() not in file_path.lower():
-                continue
-
-            candidates.append((read_node, file_path))
+        # The caller already dropped Reads that don't belong to this shot,
+        # so we only need to match the name needle against the (cached)
+        # lowercased path.
+        needle_lower = f"/{item.asset_name.lower()}/"
+        candidates = [
+            (r, fp) for r, fp, fp_lower in loader_reads
+            if needle_lower in fp_lower
+        ]
 
         if not candidates:
             return None, False
@@ -1903,8 +3331,7 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         # Multiple candidates — duplicate suspicion. Nuke renames copies by
         # appending an incrementing number (usually just digits, sometimes
         # `_N`), so the un-suffixed name is the original load.
-        suffix_pattern = re.compile(r'_?\d+$')
-        unsuffixed = [c for c in candidates if not suffix_pattern.search(c[0].name())]
+        unsuffixed = [c for c in candidates if not self._COPY_SUFFIX_RE.search(c[0].name())]
 
         if len(unsuffixed) == 1:
             return unsuffixed[0][0], False
@@ -2213,8 +3640,22 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
         self._perform_updates(self.asset_items, scope_label="loaded")
 
-    def _perform_updates(self, items, scope_label="selected"):
-        """Shared update logic: keeps only items with available updates that are loaded, confirms, then applies."""
+    def _perform_updates(self, items, scope_label="selected", confirm_message=None, save_snapshot=True):
+        """Shared update logic: keeps only items with available updates that are loaded, confirms, then applies.
+
+        `confirm_message` overrides the default confirmation text — used by
+        Choose Package so the dialog says "Apply PKG_v003 to N asset(s)?"
+        instead of the generic "Update to latest version?".
+
+        `save_snapshot` disables the automatic PKG_v### save at the end of a
+        successful update. Choose Package sets this to False since the artist
+        is deliberately time-travelling to an existing package and creating a
+        new snapshot on top of it would be confusing.
+
+        Returns True if updates were actually applied, False when the user
+        cancelled the confirm dialog or there was nothing to update. The
+        return is consumed by Choose Package so it only pins current_package
+        when the operation went through."""
         updateable = [item for item in items if item.has_update and item.loaded_node]
 
         if not updateable:
@@ -2223,18 +3664,20 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
                 "No Updates",
                 f"No {scope_label} assets have updates available"
             )
-            return
+            return False
 
         # Confirm update
+        if confirm_message is None:
+            confirm_message = f"Update {len(updateable)} asset(s) to latest version?"
         reply = QtWidgets.QMessageBox.question(
             self,
             "Confirm Update",
-            f"Update {len(updateable)} asset(s) to latest version?",
+            confirm_message,
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No
         )
 
         if reply != QtWidgets.QMessageBox.Yes:
-            return
+            return False
 
         # Perform updates
         updated_count = 0
@@ -2309,6 +3752,14 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
                 message += f"\n... and {len(failed_updates) - 5} more"
 
         QtWidgets.QMessageBox.information(self, "Update Complete", message)
+
+        # Record a package snapshot after a successful update. Skipped when
+        # the caller opted out (e.g. Choose Package, which is itself applying
+        # a previously-saved snapshot).
+        if save_snapshot and updated_count > 0:
+            self._save_package_snapshot()
+
+        return True
 
     def _show_context_menu(self, position):
         """

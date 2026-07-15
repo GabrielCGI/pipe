@@ -20,6 +20,7 @@
     <memberToolshelf name="prism"/>
     <memberToolshelf name="particles"/>
     <memberToolshelf name="guidemodify"/>
+    <memberToolshelf name="modify"/>
   </shelfSet>
 
   <toolshelf name="illogicSolaris" label="Illogic Solaris">
@@ -33,6 +34,8 @@
     <memberTool name="restart_houdini"/>
     <memberTool name="set_node_parameters"/>
     <memberTool name="select_prim_with_attributes"/>
+    <memberTool name="Render Galerie"/>
+    <memberTool name="cache_updater"/>
   </toolshelf>
 
   <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
@@ -41,9 +44,8 @@ import PrismInit
 import sys
 
 
-sys.path.insert(0, "R:/pipeline/pipe_public/prism-scene-builder")
-import sceneBuilder
-importlib.reload(sceneBuilder)
+import scene_builder
+importlib.reload(scene_builder)
 
 prism_core = PrismInit.pcore
 path = prism_core.getCurrentFileName()
@@ -55,7 +57,7 @@ routine_path    = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder
 
 
 dcc ={"name": "HOUDINI", "pathSoft": "", "pathPy": ""}
-shotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path, False)
+shotbuild = scene_builder.sceneBuilder(prism_core, yaml_path, routine_path, False)
 if kwargs["ctrlclick"]:
     shotbuild.main(path, dcc, UI=True)
 else:
@@ -80,34 +82,30 @@ USDToolBox_pck.updateAssetsUSD.startUpdateAssetsUSD('houdini')]]></script>
   </tool>
 
   <tool name="paste" label="Paste" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lop_hou_shelf_snippets
+reload(lop_hou_shelf_snippets)
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\copy_paste")
 
-import copy_paste
-reload(copy_paste)
-copy_paste.paste()]]></script>
+lop_hou_shelf_snippets.pastClipboard()]]></script>
   </tool>
 
   <tool name="copy" label="Copy" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lop_hou_shelf_snippets
+reload(lop_hou_shelf_snippets)
 
-sys.path.append(r"R:\pipeline\pipe\houdini\scripts\copy_paste")
 
-import copy_paste
-reload(copy_paste)
-copy_paste.copy()]]></script>
+lop_hou_shelf_snippets.copyClipboard()]]></script>
   </tool>
 
   <tool name="stage_manager_update" label="Stage Manager Update" icon="hicon:/SVGIcons.index?BUTTONS_page_reload.svg">
-    <script scriptType="python"><![CDATA[import sys
-from imp import reload
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lop_hou_shelf_snippets
+reload(lop_hou_shelf_snippets)
 
-import stage_manager_update.stage_manager_update as stage_manager
-reload(stage_manager)
-stage_manager.checkUpdate()]]></script>
+
+lop_hou_shelf_snippets.stageManagerUpdate()]]></script>
   </tool>
 
   <tool name="restart_houdini" label="Restart" icon="hicon:/SVGIcons.index?BUTTONS_cook.svg">
@@ -115,24 +113,30 @@ stage_manager.checkUpdate()]]></script>
 
 """Save current scene then restart Houdini."""
 ]]></helpText>
-    <script scriptType="python"><![CDATA[import restart.restart as restart
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lop_hou_shelf_snippets
+reload(lop_hou_shelf_snippets)
 
-restart.restart_houdini()]]></script>
+
+lop_hou_shelf_snippets.restartHoudini()]]></script>
   </tool>
 
   <tool name="set_node_parameters" label="Set Nodes Parameters" icon="hicon:/SVGIcons.index?VOP_complement.svg">
-    <script scriptType="python"><![CDATA[import set_lights_parameters.set_lights_parameters as set_lights
-from imp import reload
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lop_hou_shelf_snippets
+reload(lop_hou_shelf_snippets)
 
-reload(set_lights)
 
-set_lights.showUI()]]></script>
+lop_hou_shelf_snippets.editLightParameter()]]></script>
   </tool>
 
   <tool name="select_prim_with_attributes" label="Select Prims With Attributes" icon="hicon:/SVGIcons.index?book.svg">
-    <script scriptType="python"><![CDATA[import primselector
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lop_hou_shelf_snippets
+reload(lop_hou_shelf_snippets)
 
-primselector.run()]]></script>
+
+lop_hou_shelf_snippets.primSelector()]]></script>
   </tool>
 
   <tool name="usd_update_checker" label="USD Update Checker" icon="hicon:/SVGIcons.index?NETVIEW_reload_needsupdate.svg">
@@ -190,101 +194,58 @@ USDToolBox_pck.updateAssetsUSD_new.startUpdateAssetsUSD(
   </tool>
 
   <tool name="create_out" label="QuicK Object Merge" icon="hicon:/SVGIcons.index?SOP_merge.svg">
-    <script scriptType="python"><![CDATA[import hou
-import random
+    <script scriptType="python"><![CDATA[from importlib import reload
+import sop_hou_shelf_snippets
+reload(sop_hou_shelf_snippets)
 
-def create_out_and_merge_from_selection():
-    # Get selected nodes
-    sel = hou.selectedNodes()
-    if not sel:
-        hou.ui.displayMessage("Please select at least one node.")
-        return
 
-    # === SINGLE SELECTION: prompt for name ===
-    if len(sel) == 1:
-        src = sel[0]
-
-        # Ask user for name, default is selected node name
-        button, text = hou.ui.readInput(
-            "Enter a base name:",
-            buttons=("OK", "Cancel"),
-            initial_contents=src.name()
-        )
-
-        if button != 0:  # user hit Cancel
-            return
-
-        base_name = text.strip()
-        if not base_name:
-            hou.ui.displayMessage("Name cannot be empty.")
-            return
-
-        parent = src.parent()
-
-        # Build names
-        null_name = f"OUT_{base_name}"
-        merge_name = f"merge_out_{base_name}"
-
-        # Create OUT null
-        out_null = parent.createNode("null", null_name)
-        out_null.setInput(0, src)
-        out_null.moveToGoodPosition()
-
-        # Create object merge
-        obj_merge = parent.createNode("object_merge", merge_name)
-        obj_merge.parm("objpath1").set(out_null.path())
-        obj_merge.parm("xformtype").set(1)
-
-        # Position object merge directly below the OUT null
-        pos = out_null.position()
-        obj_merge.setPosition((pos[0], pos[1] - 1.5))
-
-        # Random color
-        col = hou.Color((random.random(), random.random(), random.random()))
-        out_null.setColor(col)
-        obj_merge.setColor(col)
-
-    # === MULTI-SELECTION: auto, no prompt ===
-    else:
-        for src in sel:
-            parent = src.parent()
-            base_name = src.name()
-
-            null_name = f"OUT_{base_name}"
-            merge_name = f"merge_out_{base_name}"
-
-            # Create OUT null
-            out_null = parent.createNode("null", null_name)
-            out_null.setInput(0, src)
-            out_null.moveToGoodPosition()
-
-            # Create object merge
-            obj_merge = parent.createNode("object_merge", merge_name)
-            obj_merge.parm("objpath1").set(out_null.path())
-            obj_merge.parm("xformtype").set(1)
-
-            # Position object merge directly below the OUT null
-            pos = out_null.position()
-            obj_merge.setPosition((pos[0], pos[1] - 1.5))
-
-            # Random color
-            col = hou.Color((random.random(), random.random(), random.random()))
-            out_null.setColor(col)
-            obj_merge.setColor(col)
-
-# Run it
-create_out_and_merge_from_selection()
-]]></script>
+sop_hou_shelf_snippets.createQuickObjectMergeConn()]]></script>
   </tool>
 
   <tool name="recursive_blast" label="Recursive Blast" icon="hicon:/SVGIcons.index?SOP_blast.svg">
-    <script scriptType="python"><![CDATA[import blast.blast as blast
-import blast.prim_tree as pt
+    <script scriptType="python"><![CDATA[from importlib import reload
+import sop_hou_shelf_snippets
+reload(sop_hou_shelf_snippets)
 
-import importlib
 
-importlib.reload(blast)
-importlib.reload(pt)
-blast.run()]]></script>
+sop_hou_shelf_snippets.blastGEO()]]></script>
+  </tool>
+
+  <tool name="Render Galerie" label="Render Galerie" icon="hicon:/SVGIcons.index?LOP_renderproduct.svg">
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lop_hou_shelf_snippets
+reload(lop_hou_shelf_snippets)
+
+
+lop_hou_shelf_snippets.setLocalRenderGallery()]]></script>
+  </tool>
+
+  <tool name="cache_updater" label="Update Caches" icon="R:/devToto/shelf/icons/cache_updater.png">
+    <script scriptType="python"><![CDATA[import os
+import subprocess
+
+ROOT = r"R:\pipeline\pipe\windows\lop_update_cache"
+env = dict(os.environ)
+
+# projet Prism courant -> auto-detecte dans l'UI
+try:
+    import PrismInit
+    pcore = getattr(PrismInit, "pcore", None) or getattr(PrismInit, "core", None)
+    proj = getattr(pcore, "prismIni", "") if pcore else ""
+    if proj and os.path.isfile(proj):
+        env["LOP_UPDATE_CACHE_PROJECT"] = proj
+except Exception:
+    pass
+
+# scene courante -> fallback pour deriver le projet + pre-remplissage
+try:
+    import hou
+    hip = hou.hipFile.path()
+    if hip and os.path.isfile(hip):
+        env["LOP_UPDATE_CACHE_HIP"] = hip
+except Exception:
+    pass
+
+subprocess.Popen([ROOT + r"\main_ui.bat"], cwd=ROOT, shell=True, env=env)]]></script>
   </tool>
 </shelfDocument>

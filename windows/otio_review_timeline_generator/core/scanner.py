@@ -12,7 +12,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Dict, List, Optional, Tuple
 
-from config import SHOTS_SUBPATH, RENDER_ROOTS, VERSION_PATTERN, NATURAL_SORT_RE
+from config import SHOTS_SUBPATH, RENDER_ROOTS, VERSION_PATTERN, NATURAL_SORT_RE, OTHER_STEP
 from core.media import MediaDiscovery, MediaItem
 from core.project import PrismProject
 
@@ -330,12 +330,18 @@ class ProjectScanner:
         if lower in tasks_lower:
             return tasks_lower[lower]
 
-        # Fallback: ask the project to resolve via abbreviations / all known tasks
+        # Fallback: ask the project to resolve via abbreviations / prefix / tasks
         resolved = self.project.resolve_task_name(folder_name)
         if resolved:
             resolved_lower = resolved.lower()
             if resolved_lower in tasks_lower:
                 return tasks_lower[resolved_lower]
+            # Resolved to a known task the user did not select — skip it.
+            return None
+
+        # Unknown folder (allowAdditionalTasks) — bucket under "Autres" if selected.
+        if OTHER_STEP.lower() in tasks_lower:
+            return tasks_lower[OTHER_STEP.lower()]
 
         return None
 

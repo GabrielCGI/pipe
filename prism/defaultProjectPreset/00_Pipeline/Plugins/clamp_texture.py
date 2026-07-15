@@ -1,18 +1,10 @@
 from PrismUtils.Decorators import err_catcher_plugin as err_catcher #type: ignore
-import sys
 
 
-MODULES_SEARCH_PATH = ["R:/pipeline/pipe/prism"]
-for module_path in MODULES_SEARCH_PATH:
-    if module_path not in sys.path:
-        sys.path.insert(0, module_path)
-
-
-
-name = "Clamp Textures"
-classname = "ClampTextures"
 
 EXECUTE_DEPARTEMENT = ["Lighting", "Setdress"]
+classname = "ClampTextures"
+name = "Clamp Textures"
 
 
 

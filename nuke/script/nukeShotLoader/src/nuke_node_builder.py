@@ -14,6 +14,17 @@ from .stamps_integration import get_stamps_integration
 from .version_utils import latest_version as _latest
 
 
+# Precompiled once at import time — these all live inside hot paths hit
+# per Read node loaded / updated / probed for the "static image" check.
+_SEQUENCE_FRAME_RE = re.compile(r'\.(\d{4})\.(exr|dpx|jpg|png)$')
+_STATIC_IMAGE_FRAME_RE = re.compile(
+    r'\.(\d{4})\.(exr|dpx|jpg|jpeg|png|tif|tiff)$', re.IGNORECASE
+)
+_STMAP_FRAME_RE = re.compile(
+    r'^(.+)\.(\d{4})\.(exr|dpx|jpg|jpeg|png)$', re.IGNORECASE
+)
+
+
 class NukeNodeBuilder:
     """Builds Nuke nodes for shot assets."""
 
@@ -314,9 +325,27 @@ class NukeNodeBuilder:
                     nodes_in_group.append(read_node)
                     self.created_nodes.append(read_node)
 
-                    # Create stamp with short name (render pass name)
+                    # PSD paintovers get the pipeline cleanup gizmo downstream
+                    # (same pattern as 3D renders): the .psd usually carries
+                    # premult + auxiliary channels that ILGC_ReadCleanup
+                    # normalizes for the comp graph. Non-psd 2D renders keep
+                    # their historical bare-Read → stamp chain.
+                    is_psd = (read_node['file'].value() or "").lower().endswith('.psd')
+                    cleanup = self._insert_read_cleanup(read_node) if is_psd else None
+                    if cleanup:
+                        nodes_in_group.append(cleanup)
+                        stamp_source = cleanup
+                    else:
+                        stamp_source = read_node
+
+                    # Create stamp with short name (render pass name).
+                    # When a cleanup gizmo sits between Read and anchor,
+                    # shrink the anchor offset so the chain stays compact.
                     stamp_name = render_pass
-                    stamps = self._create_stamp_for_node(read_node, stamp_name)
+                    anchor_offset = 50 if cleanup else 150
+                    stamps = self._create_stamp_for_node(
+                        stamp_source, stamp_name, anchor_y_offset=anchor_offset,
+                    )
                     nodes_in_group.extend(stamps)
                     self._read_count += 1
 
@@ -481,6 +510,12 @@ class NukeNodeBuilder:
             read_node['file'].setValue(sequence_path.replace("\\", "/"))
             if 'on_error' in read_node.knobs():
                 read_node['on_error'].setValue('black')
+
+            # PSD paintovers are authored in Photoshop's own working space —
+            # enable `raw` so Nuke skips its default input color transform
+            # and doesn't double-convert the file.
+            if sequence_path.lower().endswith('.psd') and 'raw' in read_node.knobs():
+                read_node['raw'].setValue(True)
 
             # Set frame range from detected files
             if frame_range:
@@ -967,7 +1002,7 @@ class NukeNodeBuilder:
             else:
                 # Sequence - replace frame number with ####
                 # Pattern: filename.1001.exr -> filename.####.exr
-                sequence_file = re.sub(r'\.(\d{4})\.(exr|dpx|jpg|png)$', r'.####.\2', first_file)
+                sequence_file = _SEQUENCE_FRAME_RE.sub(r'.####.\2', first_file)
                 print(f"[NukeNodeBuilder] Detected sequence: {sequence_file}")
                 return os.path.join(folder_path, sequence_file)
 
@@ -1014,8 +1049,7 @@ class NukeNodeBuilder:
             bool: True if static image (no frame number), False if sequence
         """
         # Pattern for frame-numbered sequences: filename.1001.exr
-        frame_pattern = re.compile(r'\.(\d{4})\.(exr|dpx|jpg|jpeg|png|tif|tiff)$', re.IGNORECASE)
-        return not frame_pattern.search(filename)
+        return not _STATIC_IMAGE_FRAME_RE.search(filename)
 
     def _set_project_fps(self):
         """
@@ -1213,10 +1247,8 @@ class NukeNodeBuilder:
                     print(f"[NukeNodeBuilder] Warning: Found sequence files in stMaps folder, loading as sequences")
                     # Group sequence files by base name
                     file_groups = {}
-                    frame_pattern = re.compile(r'^(.+)\.(\d{4})\.(exr|dpx|jpg|jpeg|png)$', re.IGNORECASE)
-
                     for f in sequence_files:
-                        match = frame_pattern.match(f)
+                        match = _STMAP_FRAME_RE.match(f)
                         if match:
                             base_name = match.group(1)
                             if base_name not in file_groups:

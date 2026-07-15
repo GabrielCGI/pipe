@@ -1,0 +1,26 @@
+{
+    "filters": {
+        "COMPOSITING": [
+            "compo",
+            "comp",
+            "nuke",
+            "beauty"
+        ],
+        "ANIM": [
+            "anim",
+            "AnimBlock",
+            "AnimSpline",
+            "anim_playblast",
+            "playblast"
+        ],
+        "RLO": [
+            "RoughtLayout",
+            "layout",
+            "ConfoLayout",
+            "RoughLayout_playblast"
+        ]
+    },
+    "source_path": "I:/frederic_2603",
+    "dest_path": "D:/cache_resolve/frederic_2603",
+    "production": "FRED"
+}

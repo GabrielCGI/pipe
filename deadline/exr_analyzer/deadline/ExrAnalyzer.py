@@ -23,7 +23,7 @@ TOOL_ROOT   = r"R:\pipeline\pipe\deadline\exr_analyzer"
 PYTHON_EXE  = r"C:\Program Files\Thinkbox\Deadline10\bin\python3\python.exe"
 SITE_PKG    = r"R:\pipeline\networkInstall\python_shares\python310_deadline_discord_pkgs\Lib\site-packages"
 REPORTS_DIR = r"R:\pipeline\pipe\deadline\exr_analyzer\reports"
-LOGS_DIR    = r"R:\devToto\Claude\exr-analyzer\logs-deadline"
+LOGS_DIR    = r"R:\pipeline\pipe\deadline\exr_analyzer\logs"
 # ─────────────────────────────────────────────────────────────────────────────
 
 _dialog       = None

@@ -481,14 +481,14 @@
         "playblastFilesShots": {
             "value": "@playblastversion_path@/@sequence@-@shot@_@identifier@_@version@@.(frame)@@extension@"
         },
-        "textureVersions": {
-            "value": "@entity_path@/Libraries/@identifier@/@version@"
-        },
         "deadlineJobName": {
             "value": "[expression,#  available variables:\n#  \"core\" - PrismCore\n#  \"context\" - dict\n\nif context.get(\"type\") == \"asset\":\n    base = \"@project_name@_@asset@\"\nelse:\n    base = \"@project_name@_@sequence@-@shot@\"\n\ntemplate = base + \"_@product@@identifier@_@version@\"]"
         },
         "houdini_HDAs": {
             "value": "@project_path@/04_Resources/HDAs"
+        },
+        "textureVersions": {
+            "value": "@entity_path@/Libraries/@identifier@/@version@"
         },
         "polyHaven": {
             "value": "@project_path@/04_Resources/Libraries/PolyHaven"
@@ -787,10 +787,11 @@
     "environmentVariables": {
         "HOUDINI_BUFFEREDSAVE": "1",
         "OCIO": "R:/pipeline/networkInstall/OpenColorIO-Configs/PRISM/illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio",
-        "PRISM_DEADLINE_HUSK_PATH": "C:/Program Files/Side Effects Software/Houdini 21.0.596/bin/husk.exe",
+        "PRISM_DEADLINE_HUSK_PATH": "C:/Program Files/Side Effects Software/Houdini 21.0.729/bin/husk.exe",
         "PRISM_HUSK_DEADLINE_GROUP": "husk_grp",
         "PXR_AR_DEFAULT_SEARCH_PATH": "R:/;I:/",
-        "SANITY_CHECK_CONFIG": "I://00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml"
+        "SANITY_CHECK_CONFIG": "I://00_Pipeline/CustomModules/Python/sanitycheck/configs/check_hierarchy.yaml",
+        "KARMA_XPU_OPTIX_SPARSE_TEXTURES": "1"
     },
     "export_paths": {},
     "render_paths": {},

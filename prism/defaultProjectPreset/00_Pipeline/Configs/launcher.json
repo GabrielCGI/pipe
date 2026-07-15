@@ -128,7 +128,7 @@
                 {
                     "label": "Houdini 21.0.596",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.596\\bin\\houdinicore.exe",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.729\\bin\\houdinicore.exe",
                     "preferred": false,
                     "environment": {
                         "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "4096",
@@ -139,7 +139,7 @@
                 {
                     "label": "shaderMax1024",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.596\\bin\\houdinicore.exe",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.729\\bin\\houdinicore.exe",
                     "preferred": false,
                     "environment": {
                         "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "2048",
@@ -150,7 +150,7 @@
                 {
                     "label": "shaderMax512",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.596\\bin\\houdinicore.exe",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.729\\bin\\houdinicore.exe",
                     "preferred": false,
                     "environment": {
                         "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES": "1024",
@@ -161,7 +161,7 @@
                 {
                     "label": "Full",
                     "mode": "Shell Command",
-                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.596\\bin\\houdinicore.exe",
+                    "cmd": "C:\\Program Files\\Side Effects Software\\Houdini 21.0.729\\bin\\houdinicore.exe",
                     "preferred": true,
                     "environment": {
                         "OCIO": "R:\\pipeline\\networkInstall\\OpenColorIO-Configs\\PRISM\\illogic_V01-cg-config-v1.0.0_aces-v1.3_ocio-v2.1.ocio"

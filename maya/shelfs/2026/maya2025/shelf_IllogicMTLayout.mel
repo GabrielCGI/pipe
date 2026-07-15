@@ -33,7 +33,7 @@ global proc shelf_IllogicMTLayout () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "import qtpy.QtWidgets as qt\nimport qtpy.QtCore as qtc\nimport importlib\nimport PrismInit\nimport sys\n\n\nsys.path.insert(0, \"R:/pipeline/pipe_public/prism-scene-builder\")\nimport sceneBuilder\nimportlib.reload(sceneBuilder)\n\nprism_core = PrismInit.pcore\npath = prism_core.getCurrentFileName()\nproject_path = prism_core.projectPath\n\n\nyaml_path       = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml\"\nroutine_path    = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/templates\"\n\n\ndcc ={\"name\": \"MAYA\", \"pathSoft\": \"\", \"pathPy\": \"\"}\nshotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path, False)\n\nif qt.QApplication.keyboardModifiers() & qtc.Qt.ControlModifier:\n\tshotbuild.main(path, dcc, UI=True)\nelse:\n\tshotbuild.main(path, dcc, UI=False)" 
+        -command "import qtpy.QtWidgets as qt\nimport qtpy.QtCore as qtc\nimport importlib\nimport PrismInit\n\n\n\nimport scene_builder\nimportlib.reload(scene_builder)\n\nprism_core = PrismInit.pcore\npath = prism_core.getCurrentFileName()\nproject_path = prism_core.projectPath\n\n\nyaml_path       = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml\"\nroutine_path    = project_path + \"/00_Pipeline/CustomModules/Python/sceneBuilder/templates\"\n\n\ndcc ={\"name\": \"MAYA\", \"pathSoft\": \"\", \"pathPy\": \"\"}\nshotbuild = scene_builder.sceneBuilder(prism_core, yaml_path, routine_path, False)\n\nif qt.QApplication.keyboardModifiers() & qtc.Qt.ControlModifier:\n\tshotbuild.main(path, dcc, UI=True)\nelse:\n\tshotbuild.main(path, dcc, UI=False)" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -135,7 +135,7 @@ global proc shelf_IllogicMTLayout () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.manageShots()" 
+        -command "from importlib import reload\nimport lay_maya_shelf_snippets\nreload(lay_maya_shelf_snippets)\n\n\nlay_maya_shelf_snippets.manageShots()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -182,7 +182,7 @@ global proc shelf_IllogicMTLayout () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.camGateOn()" 
+        -command "from importlib import reload\nimport lay_maya_shelf_snippets\nreload(lay_maya_shelf_snippets)\n\n\nlay_maya_shelf_snippets.camGateOn()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -216,7 +216,7 @@ global proc shelf_IllogicMTLayout () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.camGateOff()" 
+        -command "from importlib import reload\nimport lay_maya_shelf_snippets\nreload(lay_maya_shelf_snippets)\n\n\nlay_maya_shelf_snippets.camGateOff()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -250,7 +250,7 @@ global proc shelf_IllogicMTLayout () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.freeCam()" 
+        -command "from importlib import reload\nimport lay_maya_shelf_snippets\nreload(lay_maya_shelf_snippets)\n\n\nlay_maya_shelf_snippets.freeCam()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -284,15 +284,15 @@ global proc shelf_IllogicMTLayout () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.freeCamtoRig('WORLD')" 
+        -command "from importlib import reload\nimport lay_maya_shelf_snippets\nreload(lay_maya_shelf_snippets)\n\n\nlay_maya_shelf_snippets.freeCamtoRig('WORLD')" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
-        -mi "orientation World" ( "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.freeCamtoRig('WORLD')" )
+        -mi "orientation World" ( "from importlib import reload\nimport lay_maya_shelf_snippets\nreload(lay_maya_shelf_snippets)\n\n\nlay_maya_shelf_snippets.freeCamtoRig('WORLD')" )
         -mip 0
-        -mi "orientation Object" ( "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.freeCamtoRig('OBJECT')" )
+        -mi "orientation Object" ( "from importlib import reload\nimport lay_maya_shelf_snippets\nreload(lay_maya_shelf_snippets)\n\n\nlay_maya_shelf_snippets.freeCamtoRig('OBJECT')" )
         -mip 1
-        -mi "orientation centerPivot" ( "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.freeCamtoRig('AIM')" )
+        -mi "orientation centerPivot" ( "from importlib import reload\nimport lay_maya_shelf_snippets\nreload(lay_maya_shelf_snippets)\n\n\nlay_maya_shelf_snippets.freeCamtoRig('AIM')" )
         -mip 2
     ;
     shelfButton
@@ -324,7 +324,7 @@ global proc shelf_IllogicMTLayout () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.openPickerCam()" 
+        -command "from importlib import reload\nimport lay_maya_shelf_snippets\nreload(lay_maya_shelf_snippets)\n\n\nlay_maya_shelf_snippets.openPickerCam()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -371,7 +371,7 @@ global proc shelf_IllogicMTLayout () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.editTimeShot()" 
+        -command "from importlib import reload\nimport lay_maya_shelf_snippets\nreload(lay_maya_shelf_snippets)\n\nlay_maya_shelf_snippets.editTimeShot()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -405,7 +405,7 @@ global proc shelf_IllogicMTLayout () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.exportAsLayer()" 
+        -command "from importlib import reload\nimport lay_maya_shelf_snippets\nreload(lay_maya_shelf_snippets)\n\n\nlay_maya_shelf_snippets.exportAsLayer()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

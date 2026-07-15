@@ -1,15 +1,6 @@
-import socket
-# try:
-#     import hou #type: ignore
-#     HOUDINI_IMPORT = True
-# except:
-#     HOUDINI_IMPORT = False
-import sys
 import os
 
 
-DEBUG_LIST = ["FOX-04", "FALCON-01"]
-DEBUG = False
 
 def main(origin, Settings, pluginInfos, arguments):
     #object Prism_Deadline = origin       is a object
@@ -27,28 +18,21 @@ def main(origin, Settings, pluginInfos, arguments):
     copySettings = Settings.copy()
     for key, value in copySettings.items():
         if key.startswith("EnvironmentKeyValue"):
-            if not "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES" in value and not "KARMA_XPU_MAX_SHADER_TEXTURE_RES" in value and not "HOUDINI_BUFFEREDSAVE" in value:
+            if "KARMA_XPU_MAX_LIGHTING_TEXTURE_RES" not in value and "KARMA_XPU_MAX_SHADER_TEXTURE_RES" not in value and "HOUDINI_BUFFEREDSAVE" not in value:
                 AllEnvVariable.append(value)
             del Settings[key]
 
 
     for i, data in enumerate(AllEnvVariable):
         Settings[f"EnvironmentKeyValue{i}"] = data
+
+
+    if 'ILLOGIC_TEMP_NODE' not in os.environ:
+        return
     
 
-    #--------------------------------------------------- DEBUG --------------------------------------
-    if socket.gethostname() in DEBUG_LIST and DEBUG:
-        sys.path.append("R:/pipeline/networkInstall/python_shares/python311_debug_pkgs/Lib/site-packages")
-        from debug import debug
-        debug.debug()
-        debug.debugpy.breakpoint()
-    #--------------------------------------------------- DEBUG --------------------------------------
-
-    if not 'ILLOGIC_TEMP_NODE' in os.environ:
-        return
-
     dataNodeExport = eval(os.environ.get("ILLOGIC_TEMP_NODE")) # environement variable creer dans le script preRender
-    if not "high_prio" in Settings["Name"]:
+    if "high_prio" not in Settings["Name"]:
         del os.environ['ILLOGIC_TEMP_NODE']
     if not dataNodeExport:
         return

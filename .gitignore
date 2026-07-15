@@ -24,3 +24,6 @@ windows/temperature_alert/.venv/*
 /deadline/benchmark_ranch/output
 /deadline/exr_analyzer/reports
 /houdini/procedurals/illogic_hair_procedural/backup
+/nuke/plugins/NukeSurvivalToolkit
+/nuke/plugins/OpticalFlares
+/nuke/plugins
