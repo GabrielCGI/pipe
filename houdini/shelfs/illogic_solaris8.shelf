@@ -21,6 +21,8 @@
     <memberToolshelf name="particles"/>
     <memberToolshelf name="guidemodify"/>
     <memberToolshelf name="modify"/>
+    <memberToolshelf name="copbrushify"/>
+    <memberToolshelf name="mcp"/>
   </shelfSet>
 
   <toolshelf name="illogicSolaris" label="Illogic Solaris">

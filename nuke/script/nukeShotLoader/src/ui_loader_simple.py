@@ -16,6 +16,7 @@ from .nuke_node_builder import NukeNodeBuilder
 from .version_utils import version_int, extract_version_from_path
 from .reconnect_stamps import run_reconnect_on_postage_stamps
 from .distribute_write_render_order import distribute_write_render_order
+from . import module_precomp as mp
 
 # Import appropriate PySide version
 QtWidgets, QtCore, QtGui, PYSIDE_VERSION = Config.get_pyside_module()
@@ -168,6 +169,18 @@ QPushButton#dangerAction {
 QPushButton#dangerAction:hover {
     background-color: #7a3838;
     border-color: #a64a4a;
+}
+
+QPushButton#selectedAction {
+    background-color: #2a5a5a;
+    border: 1px solid #3a7a7a;
+    color: #d6f5f5;
+    font-weight: 600;
+    padding: 8px 18px;
+}
+QPushButton#selectedAction:hover {
+    background-color: #35706a;
+    border-color: #4aa8a0;
 }
 
 /* Hide (trash) button — transparent icon-only button, one per asset row */
@@ -338,6 +351,26 @@ QPlainTextEdit#logView {
     selection-background-color: #2c4870;
     selection-color: #ffffff;
 }
+
+/* Bottom status bar — auto-refresh spinner + countdown */
+QFrame#statusBar {
+    background-color: #202021;
+    border-top: 1px solid #2a2a2a;
+}
+QLabel#statusText {
+    color: #7d7d7d;
+    font-size: 10px;
+    letter-spacing: 0.4px;
+}
+QProgressBar#tickBar {
+    background-color: #2a2a2a;
+    border: none;
+    border-radius: 3px;
+}
+QProgressBar#tickBar::chunk {
+    background-color: #5a8cff;
+    border-radius: 3px;
+}
 """
 
 
@@ -367,6 +400,13 @@ class _ConsoleStream:
     def __init__(self, original, text_widget):
         self._original = original
         self._text_widget = text_widget
+        # When non-None, widget-side writes are diverted into this list
+        # instead of the QPlainTextEdit — the caller (currently the render
+        # manager's auto-refresh) then decides whether to replay the
+        # buffered text based on whether anything actually changed. The
+        # underlying console stream (Nuke's script editor) still gets
+        # everything, so nothing is lost from a debugging standpoint.
+        self._widget_buffer = None
 
     def write(self, text):
         if self._original is not None:
@@ -374,7 +414,12 @@ class _ConsoleStream:
                 self._original.write(text)
             except Exception:
                 pass
-        if not text or self._text_widget is None:
+        if not text:
+            return
+        if self._widget_buffer is not None:
+            self._widget_buffer.append(text)
+            return
+        if self._text_widget is None:
             return
         # PySide raises RuntimeError when the underlying C++ widget has been
         # destroyed (dialog closed without restoring streams). Swallow it so
@@ -546,6 +591,11 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         return super(ShotAssetLoaderWindow, self).event(e)
 
     def closeEvent(self, event):
+        # Stop the auto-refresh timer before teardown — the callbacks touch
+        # widgets that Qt is about to destroy.
+        timer = getattr(self, "_ui_tick_timer", None)
+        if timer is not None:
+            timer.stop()
         # Restore the original streams before the dialog (and its log widget)
         # are destroyed. Otherwise a stray print after teardown would write
         # into a deleted QPlainTextEdit.
@@ -1334,6 +1384,11 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
     def _init_ui(self):
         """Initialize UI."""
+        # Every tab that surfaces the shot context (Loader, Render Manager)
+        # calls _build_context_banner, which appends its info_label here.
+        # _set_info_text writes to all of them so the tabs stay in sync
+        # when _detect_script_context resolves the shot.
+        self._info_labels = []
         # Top-level: a custom tab bar (checkable QPushButtons) above a
         # QStackedWidget. The existing dialog content goes on page 0 (Loader);
         # the Logs page reuses self.log_view (already created in __init__ so
@@ -1355,88 +1410,8 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         main_layout.setContentsMargins(14, 14, 14, 14)
         main_layout.setSpacing(12)
 
-        # Project title — drive letter prefix stripped, e.g. "I:\McDonald_2511" → "McDonald_2511".
-        # If detection from the script path failed, advertise it explicitly
-        # instead of silently displaying the fallback project's name.
-        if self._project_detected:
-            project_name = os.path.basename(self._project_root.rstrip(os.sep))
-        else:
-            project_name = "No Project Found"
-        project_frame = QtWidgets.QFrame()
-        project_frame.setObjectName("projectTitle")
-        title_layout = QtWidgets.QHBoxLayout(project_frame)
-        title_layout.setContentsMargins(18, 12, 18, 12)
-        title_layout.setSpacing(12)
-
-        # Per-project thumbnail — lives at <project_root>/00_Pipeline/project.jpg.
-        # Optional: skipped silently when absent so unconfigured projects don't
-        # spam the console. Placed left of the PROJECT text as a small avatar-
-        # style preview.
-        if self._project_detected:
-            thumbnail_pixmap = self._load_thumbnail_pixmap(
-                os.path.join(self._project_root, "00_Pipeline", "project.jpg"),
-                height=56,
-            )
-            if thumbnail_pixmap is not None:
-                thumbnail_label = QtWidgets.QLabel()
-                thumbnail_label.setPixmap(thumbnail_pixmap)
-                thumbnail_label.setFixedSize(thumbnail_pixmap.size())
-                title_layout.addWidget(
-                    thumbnail_label, alignment=QtCore.Qt.AlignVCenter,
-                )
-
-        title_text = QtWidgets.QLabel()
-        title_text.setTextFormat(QtCore.Qt.RichText)
-        title_text.setText(
-            '<span style="font-size:10px; color:#8a8a8a; letter-spacing:2.5px; '
-            'font-weight:600;">PROJECT</span><br>'
-            f'<span style="font-size:20px; color:#f0f0f0; font-weight:700; '
-            f'letter-spacing:0.5px;">{project_name}</span>'
-        )
-        title_layout.addWidget(title_text)
-        title_layout.addStretch()
-
-        logo_pixmap = self._load_logo_pixmap(
-            Config.LOGO_PATH, opacity=Config.LOGO_OPACITY, height=56,
-        )
-        if logo_pixmap is not None:
-            logo_label = QtWidgets.QLabel()
-            logo_label.setPixmap(logo_pixmap)
-            logo_label.setFixedSize(logo_pixmap.size())
-            title_layout.addWidget(logo_label, alignment=QtCore.Qt.AlignVCenter)
-
-        main_layout.addWidget(project_frame)
-
-        # Header banner — SHOT/FRAMES/FPS/FORMAT/ASSETS chips on the left,
-        # the PKG snapshot browser on the right, all inside one framed strip
-        # so the shot context reads as a single line.
-        banner_frame = QtWidgets.QFrame()
-        banner_frame.setObjectName("headerBanner")
-        banner_layout = QtWidgets.QHBoxLayout(banner_frame)
-        banner_layout.setContentsMargins(14, 10, 14, 10)
-        banner_layout.setSpacing(12)
-
-        self.info_label = QtWidgets.QLabel("Detecting shot context from script path…")
-        self.info_label.setObjectName("bannerText")
-        self.info_label.setTextFormat(QtCore.Qt.RichText)
-        banner_layout.addWidget(self.info_label)
-        banner_layout.addStretch()
-
-        package_label = QtWidgets.QLabel("PACKAGE :")
-        package_label.setObjectName("filterLabel")
-        banner_layout.addWidget(package_label)
-
-        self.package_combo = _PackageComboBox()
-        self.package_combo.setMinimumWidth(140)
-        banner_layout.addWidget(self.package_combo)
-
-        self.choose_package_btn = QtWidgets.QPushButton("Choose Package")
-        self.choose_package_btn.setObjectName("secondaryAction")
-        self.choose_package_btn.setCursor(QtCore.Qt.PointingHandCursor)
-        self.choose_package_btn.clicked.connect(self._on_choose_package)
-        banner_layout.addWidget(self.choose_package_btn)
-
-        main_layout.addWidget(banner_frame)
+        main_layout.addWidget(self._build_project_frame())
+        main_layout.addWidget(self._build_context_banner(include_package_ui=True))
 
         # Assets section
         assets_group = QtWidgets.QGroupBox("AVAILABLE ASSETS")
@@ -1597,16 +1572,29 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         render_layout.setContentsMargins(14, 14, 14, 14)
         render_layout.setSpacing(12)
 
+        # Mirror the Loader tab's PROJECT + SHOT/FRAMES/... header so the
+        # user always sees which shot they're rendering. Package picker is
+        # skipped — it drives Load/Update, not renders.
+        render_layout.addWidget(self._build_project_frame())
+        render_layout.addWidget(
+            self._build_context_banner(
+                include_package_ui=False, mode="render_manager"
+            )
+        )
+
+        # Shared column widths for the four Precomp/Compo columns that
+        # match up (Name, Identifier, Version, Render Order). Kept as a
+        # tuple so both tables and _link_column_widths agree on the layout.
+        _SHARED_WRITE_COL_WIDTHS = (220, 220, 80, 110)
+
         precomp_group = QtWidgets.QGroupBox("WRITES PRECOMP")
         precomp_group_layout = QtWidgets.QVBoxLayout()
         precomp_group_layout.setContentsMargins(6, 4, 6, 6)
         self.precomp_writes_table = self._build_writes_table(
             ["Name", "Identifier", "Version", "Render Order", "Status"]
         )
-        self.precomp_writes_table.setColumnWidth(0, 220)
-        self.precomp_writes_table.setColumnWidth(1, 220)
-        self.precomp_writes_table.setColumnWidth(2, 80)
-        self.precomp_writes_table.setColumnWidth(3, 110)
+        for i, w in enumerate(_SHARED_WRITE_COL_WIDTHS):
+            self.precomp_writes_table.setColumnWidth(i, w)
         # Same delegate as the loader table so the Cached/Live tint is not
         # washed out by the row-selection highlight.
         self.precomp_writes_table.setItemDelegateForColumn(
@@ -1622,20 +1610,36 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         compo_group = QtWidgets.QGroupBox("WRITES COMPO")
         compo_group_layout = QtWidgets.QVBoxLayout()
         compo_group_layout.setContentsMargins(6, 4, 6, 6)
+        # Same 5-column layout as Precomp so the two tables align pixel-
+        # for-pixel. The Compo table has no Status; its column-4 header
+        # is blank and each row leaves the cell empty, giving it the same
+        # stretching-spacer role Status plays in the Precomp table.
         self.compo_writes_table = self._build_writes_table(
-            ["Name", "Identifier", "Version", "Render Order"]
+            ["Name", "Identifier", "Version", "Render Order", ""]
         )
-        self.compo_writes_table.setColumnWidth(0, 220)
-        self.compo_writes_table.setColumnWidth(2, 80)
-        self.compo_writes_table.setColumnWidth(3, 110)
-        # Identifier takes the leftover width so long identifiers stay
-        # readable; Name, Version and Render Order keep their fixed size.
-        compo_header = self.compo_writes_table.horizontalHeader()
-        compo_header.setStretchLastSection(False)
-        compo_header.setSectionResizeMode(1, QtWidgets.QHeaderView.Stretch)
+        # No selection on the Compo table — there's always exactly one
+        # Compo Write and Render Selected shouldn't need to disambiguate
+        # it. Also removes the visual "selected row" flicker that would
+        # otherwise fight with the alternating-row colouring.
+        self.compo_writes_table.setSelectionMode(
+            QtWidgets.QAbstractItemView.NoSelection
+        )
+        self.compo_writes_table.setFocusPolicy(QtCore.Qt.NoFocus)
+        for i, w in enumerate(_SHARED_WRITE_COL_WIDTHS):
+            self.compo_writes_table.setColumnWidth(i, w)
         compo_group_layout.addWidget(self.compo_writes_table)
         compo_group.setLayout(compo_group_layout)
         render_layout.addWidget(compo_group, stretch=0)
+
+        # Link Name/Identifier/Version/Render Order widths — when the
+        # artist drags one header, the other table follows so the two
+        # tables never drift out of alignment. Column 4 (Status / spacer)
+        # is the stretcher on both and doesn't need linking.
+        self._link_column_widths(
+            self.precomp_writes_table,
+            self.compo_writes_table,
+            len(_SHARED_WRITE_COL_WIDTHS),
+        )
 
         render_actions = QtWidgets.QHBoxLayout()
 
@@ -1656,6 +1660,12 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         render_precomps_btn.setCursor(QtCore.Qt.PointingHandCursor)
         render_precomps_btn.clicked.connect(self._submit_render_precomps)
         render_actions.addWidget(render_precomps_btn)
+
+        render_selected_btn = QtWidgets.QPushButton("Render Selected")
+        render_selected_btn.setObjectName("selectedAction")
+        render_selected_btn.setCursor(QtCore.Qt.PointingHandCursor)
+        render_selected_btn.clicked.connect(self._submit_render_selected)
+        render_actions.addWidget(render_selected_btn)
 
         render_actions.addStretch()
         refresh_writes_btn = QtWidgets.QPushButton("Refresh")
@@ -1694,10 +1704,134 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
         outer_layout.addLayout(self.tab_bar_layout)
         outer_layout.addWidget(self.tab_stack)
+        outer_layout.addWidget(self._build_status_bar())
         self.setLayout(outer_layout)
 
         # Apply the global stylesheet last so all objectName tags resolve.
         self.setStyleSheet(STYLESHEET)
+
+        # Auto-refresh loop — fires _auto_refresh_tick() every 15s. A single
+        # 100ms UI timer drives both the spinner rotation and the progress
+        # bar so the two animations stay in lockstep and we only pay one
+        # QTimer's worth of overhead.
+        self._tick_interval_ms = 15000
+        self._tick_step_ms = 100
+        self._tick_elapsed_ms = 0
+        self._spin_angle = 0.0
+        self._ui_tick_timer = QtCore.QTimer(self)
+        self._ui_tick_timer.setInterval(self._tick_step_ms)
+        self._ui_tick_timer.timeout.connect(self._on_ui_tick)
+        self._ui_tick_timer.start()
+        self._paint_status_spinner()
+
+    def _build_project_frame(self):
+        """Framed strip that shows the studio logo and the current project
+        name. Called once per tab that surfaces the shot context (Loader,
+        Render Manager) so the two tabs share the same visual header. Path
+        drive letter is stripped, e.g. "I:\\McDonald_2511" → "McDonald_2511";
+        when auto-detection failed we advertise it explicitly instead of
+        silently showing the fallback project's name."""
+        if self._project_detected:
+            project_name = os.path.basename(self._project_root.rstrip(os.sep))
+        else:
+            project_name = "No Project Found"
+
+        project_frame = QtWidgets.QFrame()
+        project_frame.setObjectName("projectTitle")
+        title_layout = QtWidgets.QHBoxLayout(project_frame)
+        title_layout.setContentsMargins(18, 12, 18, 12)
+        title_layout.setSpacing(12)
+
+        # Per-project thumbnail — lives at <project_root>/00_Pipeline/project.jpg.
+        # Optional: skipped silently when absent so unconfigured projects don't
+        # spam the console. Placed left of the PROJECT text as a small avatar-
+        # style preview.
+        if self._project_detected:
+            thumbnail_pixmap = self._load_thumbnail_pixmap(
+                os.path.join(self._project_root, "00_Pipeline", "project.jpg"),
+                height=56,
+            )
+            if thumbnail_pixmap is not None:
+                thumbnail_label = QtWidgets.QLabel()
+                thumbnail_label.setPixmap(thumbnail_pixmap)
+                thumbnail_label.setFixedSize(thumbnail_pixmap.size())
+                title_layout.addWidget(
+                    thumbnail_label, alignment=QtCore.Qt.AlignVCenter,
+                )
+
+        title_text = QtWidgets.QLabel()
+        title_text.setTextFormat(QtCore.Qt.RichText)
+        title_text.setText(
+            '<span style="font-size:10px; color:#8a8a8a; letter-spacing:2.5px; '
+            'font-weight:600;">PROJECT</span><br>'
+            f'<span style="font-size:20px; color:#f0f0f0; font-weight:700; '
+            f'letter-spacing:0.5px;">{project_name}</span>'
+        )
+        title_layout.addWidget(title_text)
+        title_layout.addStretch()
+
+        logo_pixmap = self._load_logo_pixmap(
+            Config.LOGO_PATH, opacity=Config.LOGO_OPACITY, height=56,
+        )
+        if logo_pixmap is not None:
+            logo_label = QtWidgets.QLabel()
+            logo_label.setPixmap(logo_pixmap)
+            logo_label.setFixedSize(logo_pixmap.size())
+            title_layout.addWidget(logo_label, alignment=QtCore.Qt.AlignVCenter)
+
+        return project_frame
+
+    def _build_context_banner(self, include_package_ui=True, mode="loader"):
+        """SHOT/FRAMES/FPS/FORMAT/<count> chip strip. The last chip is
+        per-tab: Loader shows ASSETS (rows in the asset table) while the
+        Render Manager shows PRECOMPS (PrecompWrite nodes in the scene).
+        The banner also carries the PACKAGE combo + Choose Package button
+        on the Loader tab, but the Render Manager tab hides those since
+        packages don't apply there.
+
+        Each banner registers (label, mode) in self._info_labels so
+        _refresh_info_banner can pick the right last chip per label.
+        _set_info_text broadcasts identical text to every registered
+        label — used for error/loading messages that apply to both tabs.
+        Package UI, when included, is created once and stashed on self
+        (package_combo, choose_package_btn)."""
+        banner_frame = QtWidgets.QFrame()
+        banner_frame.setObjectName("headerBanner")
+        banner_layout = QtWidgets.QHBoxLayout(banner_frame)
+        banner_layout.setContentsMargins(14, 10, 14, 10)
+        banner_layout.setSpacing(12)
+
+        info_label = QtWidgets.QLabel("Detecting shot context from script path…")
+        info_label.setObjectName("bannerText")
+        info_label.setTextFormat(QtCore.Qt.RichText)
+        banner_layout.addWidget(info_label)
+        self._info_labels.append((info_label, mode))
+        banner_layout.addStretch()
+
+        if include_package_ui:
+            package_label = QtWidgets.QLabel("PACKAGE :")
+            package_label.setObjectName("filterLabel")
+            banner_layout.addWidget(package_label)
+
+            self.package_combo = _PackageComboBox()
+            self.package_combo.setMinimumWidth(140)
+            banner_layout.addWidget(self.package_combo)
+
+            self.choose_package_btn = QtWidgets.QPushButton("Choose Package")
+            self.choose_package_btn.setObjectName("secondaryAction")
+            self.choose_package_btn.setCursor(QtCore.Qt.PointingHandCursor)
+            self.choose_package_btn.clicked.connect(self._on_choose_package)
+            banner_layout.addWidget(self.choose_package_btn)
+
+        return banner_frame
+
+    def _set_info_text(self, html):
+        """Broadcast the same string to every registered banner — used
+        for error/loading messages that read identically on both tabs.
+        Chip-strip updates go through _refresh_info_banner instead, which
+        selects the last chip per-mode."""
+        for label, _ in getattr(self, "_info_labels", ()):
+            label.setText(html)
 
     def _add_tab_button(self, label, page_index):
         btn = QtWidgets.QPushButton(label)
@@ -1715,6 +1849,129 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         # or renamed since the last look show up without a manual refresh.
         if self.tab_stack.currentWidget() is getattr(self, "render_tab", None):
             self._refresh_render_manager()
+
+    def _build_status_bar(self):
+        """Bottom strip showing the auto-refresh spinner + countdown bar."""
+        bar = QtWidgets.QFrame()
+        bar.setObjectName("statusBar")
+        layout = QtWidgets.QHBoxLayout(bar)
+        layout.setContentsMargins(10, 4, 10, 4)
+        layout.setSpacing(8)
+
+        self.status_spin_label = QtWidgets.QLabel()
+        self.status_spin_label.setFixedSize(18, 18)
+        layout.addWidget(self.status_spin_label)
+
+        self.status_text_label = QtWidgets.QLabel("Auto-refresh")
+        self.status_text_label.setObjectName("statusText")
+        layout.addWidget(self.status_text_label)
+
+        layout.addStretch()
+
+        self.tick_progress_bar = QtWidgets.QProgressBar()
+        self.tick_progress_bar.setObjectName("tickBar")
+        self.tick_progress_bar.setFixedWidth(220)
+        self.tick_progress_bar.setFixedHeight(6)
+        self.tick_progress_bar.setTextVisible(False)
+        # Range set once here; _on_ui_tick fills it up until the next tick.
+        self.tick_progress_bar.setRange(0, 15000)
+        self.tick_progress_bar.setValue(0)
+        layout.addWidget(self.tick_progress_bar)
+        return bar
+
+    def _on_ui_tick(self):
+        """100ms cadence — advances the spinner by a small angle and the
+        countdown bar, then fires _auto_refresh_tick() when the interval is
+        reached."""
+        self._tick_elapsed_ms += self._tick_step_ms
+        # ~3° per 100ms = 30°/s, a gentle rotation.
+        self._spin_angle = (self._spin_angle + 3.0) % 360.0
+        self._paint_status_spinner()
+        if hasattr(self, "tick_progress_bar"):
+            self.tick_progress_bar.setValue(
+                min(self._tick_elapsed_ms, self._tick_interval_ms)
+            )
+        if self._tick_elapsed_ms >= self._tick_interval_ms:
+            self._tick_elapsed_ms = 0
+            self._auto_refresh_tick()
+
+    def _auto_refresh_tick(self):
+        """Fired every 15s. Refreshes the Render Manager and does a silent
+        asset-update check. Errors are logged but never raised so a broken
+        graph doesn't stall the timer.
+
+        Skipped when Nuke is currently executing a script/render (Deadline
+        submit dialog open, precomp gizmo callback in flight, farm-side
+        eval, etc.) — poking the graph in that state raises "I'm already
+        executing something else" and cascades into a spammy failure loop.
+        We just wait for the next tick; nothing here is time-critical."""
+        try:
+            if nuke.executing():
+                if not getattr(self, "_auto_refresh_skipped_logged", False):
+                    print(
+                        "[ShotAssetLoader] Nuke busy — auto-refresh skipped"
+                    )
+                    self._auto_refresh_skipped_logged = True
+                return
+        except Exception:
+            pass
+        self._auto_refresh_skipped_logged = False
+        try:
+            self._refresh_render_manager()
+        except Exception as e:
+            print(f"[ShotAssetLoader] auto-refresh render manager failed: {e}")
+        try:
+            self._do_check_for_updates(silent=True)
+        except Exception as e:
+            print(f"[ShotAssetLoader] auto-refresh asset check failed: {e}")
+
+    def _paint_status_spinner(self):
+        """Draw a small sync/refresh icon (two arcs with arrow heads) rotated
+        by the current _spin_angle, into status_spin_label. Drawn from scratch
+        each frame — cheap enough at ~10Hz and avoids shipping a PNG asset."""
+        label = getattr(self, "status_spin_label", None)
+        if label is None:
+            return
+        import math
+        size = 18
+        pm = QtGui.QPixmap(size, size)
+        pm.fill(QtCore.Qt.transparent)
+        p = QtGui.QPainter(pm)
+        try:
+            p.setRenderHint(QtGui.QPainter.Antialiasing)
+            p.translate(size / 2.0, size / 2.0)
+            p.rotate(self._spin_angle)
+            color = QtGui.QColor("#b7b7b7")
+            pen = QtGui.QPen(color)
+            pen.setWidth(2)
+            pen.setCapStyle(QtCore.Qt.RoundCap)
+            p.setPen(pen)
+            r = size / 2.0 - 3.0
+            rect = QtCore.QRectF(-r, -r, 2 * r, 2 * r)
+            # Two 140° arcs opposite each other, leaving a 40° gap at each
+            # end so the arrow heads have room. Qt drawArc uses 1/16° units.
+            p.drawArc(rect, int(40 * 16), int(140 * 16))
+            p.drawArc(rect, int(220 * 16), int(140 * 16))
+            # Filled triangular arrow heads at each arc's leading end.
+            p.setPen(QtCore.Qt.NoPen)
+            p.setBrush(QtGui.QBrush(color))
+            for start_deg in (40.0, 220.0):
+                rad = math.radians(start_deg)
+                tx, ty = r * math.cos(rad), -r * math.sin(rad)
+                # Small triangle: tip along +tangent, base 3px wide.
+                tangent = math.radians(start_deg + 90.0)
+                nx, ny = math.cos(tangent), -math.sin(tangent)
+                radial_x, radial_y = math.cos(rad), -math.sin(rad)
+                tip_x = tx + nx * 3.5
+                tip_y = ty + ny * 3.5
+                base1 = QtCore.QPointF(tx + radial_x * 2.0, ty + radial_y * 2.0)
+                base2 = QtCore.QPointF(tx - radial_x * 2.0, ty - radial_y * 2.0)
+                p.drawPolygon(QtGui.QPolygonF([
+                    QtCore.QPointF(tip_x, tip_y), base1, base2,
+                ]))
+        finally:
+            p.end()
+        label.setPixmap(pm)
 
     def _build_writes_table(self, columns):
         """Factory for a Write-node table with the given column labels. The
@@ -1735,21 +1992,99 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         table.horizontalHeader().setStretchLastSection(True)
         return table
 
+    def _link_column_widths(self, table_a, table_b, count):
+        """Keep the first `count` column widths of two tables in sync so
+        the Render Manager's Precomp and Compo tables read as one visual
+        block. Dragging a header in either table mirrors the change to
+        the other. Guarded by a busy flag: setColumnWidth fires the same
+        sectionResized signal, so without it the two handlers would
+        ping-pong indefinitely."""
+        self._column_link_busy = False
+
+        def make_syncer(dst):
+            def sync(logical, _, new):
+                if logical >= count or self._column_link_busy:
+                    return
+                if dst.columnWidth(logical) == new:
+                    return
+                self._column_link_busy = True
+                try:
+                    dst.setColumnWidth(logical, new)
+                finally:
+                    self._column_link_busy = False
+            return sync
+
+        table_a.horizontalHeader().sectionResized.connect(make_syncer(table_b))
+        table_b.horizontalHeader().sectionResized.connect(make_syncer(table_a))
+
     def _refresh_render_manager(self):
+        """Public entry point — buffers widget-side log writes during the
+        refresh work and only replays them into the Logs tab if this
+        cycle's output differs from the previous one. The auto-refresh
+        timer fires this every 15s; without the dedupe the Logs tab would
+        get spammed with the same 'Distributing render_order…', 'refresh
+        on WriteCompo', etc. lines forever, drowning out anything
+        genuinely new. Nuke's own script editor still receives every
+        line via _ConsoleStream._original."""
+        import sys as _sys
+        streams = [
+            s for s in (_sys.stdout, _sys.stderr)
+            if isinstance(s, _ConsoleStream)
+        ]
+        buf = []
+        # Divert widget writes into `buf` for this cycle. Restore
+        # afterwards even if the refresh raises, so a broken graph
+        # doesn't silently kill the Logs tab for the rest of the session.
+        for s in streams:
+            s._widget_buffer = buf
+        try:
+            self._do_refresh_render_manager()
+        finally:
+            for s in streams:
+                s._widget_buffer = None
+
+        current = "".join(buf)
+        prev = getattr(self, "_last_refresh_log", "")
+        if current and current != prev:
+            widget = self.log_view
+            if widget is not None:
+                try:
+                    cursor = widget.textCursor()
+                    cursor.movePosition(QtGui.QTextCursor.End)
+                    cursor.insertText(current)
+                    widget.setTextCursor(cursor)
+                    widget.ensureCursorVisible()
+                except Exception:
+                    pass
+        self._last_refresh_log = current
+
+    def _do_refresh_render_manager(self):
         """Scan the current scene for Write nodes and split them across the
         two tables: nodes carrying the studio's `tag` knob set to
         "PrecompWrite" go to the top table (matching the gizmo tag is more
         robust than a name check since the artist can rename the node);
         the remaining writes whose name contains "Compo" go to the bottom.
         Writes matching neither rule are silently skipped — they aren't
-        part of the comp render pipeline."""
+        part of the comp render pipeline.
+
+        recurseGroups=True so PrecompWrites wrapped inside a studio gizmo
+        are picked up too. Without it, nested precomps were missed by the
+        table (and by the reload phase) while _iter_precomp_writes did
+        find them, breaking the invariant that both views agree on the
+        set of nodes to manage."""
         precomp_writes = []
         compo_writes = []
-        for node in nuke.allNodes("Write"):
+        for node in nuke.allNodes("Write", recurseGroups=True):
             if self._read_tag(node) == "PrecompWrite":
                 precomp_writes.append(node)
             elif "Compo" in node.name():
                 compo_writes.append(node)
+        # Kick each PrecompWrite's `reload` and the Compo's `refresh` before
+        # scanning statuses, so the graph is up-to-date (fresh Reads for
+        # newly-rendered frames, updated compo metadata) when the tables
+        # compute Cached/Live from the downstream Switch.
+        self._reload_precomp_writes(precomp_writes)
+        self._refresh_compo_write(self._find_compo_write())
         # Redistribute render_order across every Write upstream of
         # Write_Compo before displaying, so the Render Order column
         # reflects the freshly-computed topological order rather than a
@@ -1757,6 +2092,10 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         self._distribute_render_orders()
         self._populate_precomp_table(precomp_writes)
         self._populate_compo_table(compo_writes)
+        # Keep the PRECOMPS count in the Render Manager banner in sync
+        # with the scene — the artist may have added or removed
+        # PrecompWrites since the tab last drew.
+        self._refresh_info_banner()
         # Compo table is usually a single row — cap its height so it doesn't
         # split the tab in half. Done after populate so the row count is
         # already reflected in the table.
@@ -1817,7 +2156,10 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
             )
             return
         self._prism_save_version()
+        self._refresh_precomp_writes(live)
         self._bump_precomp_versions(live)
+        self._hash_precomp_writes(list(self._iter_precomp_writes()))
+        self._reset_render_states(live)
         self._refresh_compo_write(compo)
         self._select_only(list(live) + ([compo] if compo else []))
         self._launch_deadline_submit("Render Compo and Precomps")
@@ -1843,9 +2185,64 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
             )
             return
         self._prism_save_version()
+        self._refresh_precomp_writes(live)
         self._bump_precomp_versions(live)
+        self._hash_precomp_writes(list(self._iter_precomp_writes()))
+        self._reset_render_states(live)
         self._select_only(live)
         self._launch_deadline_submit("Render Precomps")
+
+    def _selected_nodes_from_table(self, table):
+        """Return the nuke.Node instances corresponding to the currently
+        selected rows in `table`. Resolves via nuke.toNode() on the
+        fullName stashed by _make_bold_name_cell so a stale row (node
+        renamed/deleted since populate) is silently dropped rather than
+        crashing the submit."""
+        nodes = []
+        rows = sorted({idx.row() for idx in table.selectionModel().selectedRows()})
+        for row in rows:
+            name_item = table.item(row, 0)
+            if name_item is None:
+                continue
+            full = name_item.data(QtCore.Qt.UserRole)
+            if not full:
+                continue
+            node = nuke.toNode(full)
+            if node is not None:
+                nodes.append(node)
+        return nodes
+
+    def _submit_render_selected(self):
+        """Render only the Write nodes currently selected in the Render
+        Manager tables. Precomp selections go through the same version-bump
+        + hash + state-reset dance as _submit_render_precomps; a selected
+        Compo write is refreshed like _submit_render_compo. Selection
+        across both tables is unioned so the artist can mix a precomp and
+        the compo in one submit."""
+        selected_precomps = self._selected_nodes_from_table(self.precomp_writes_table)
+        selected_compos = self._selected_nodes_from_table(self.compo_writes_table)
+
+        if not (selected_precomps or selected_compos):
+            print(
+                "[ShotAssetLoader] No Write selected in the Render Manager "
+                "— aborting Deadline submit"
+            )
+            return
+
+        self._prism_save_version()
+        if selected_precomps:
+            self._refresh_precomp_writes(selected_precomps)
+            self._bump_precomp_versions(selected_precomps)
+            # Hash every PrecompWrite in scene (not just the selected ones),
+            # same as _submit_render_all: cached precomps need their hash
+            # kept in sync too, otherwise the next scene load would flip
+            # them to Live for the wrong reason.
+            self._hash_precomp_writes(list(self._iter_precomp_writes()))
+            self._reset_render_states(selected_precomps)
+        for compo in selected_compos:
+            self._refresh_compo_write(compo)
+        self._select_only(list(selected_precomps) + list(selected_compos))
+        self._launch_deadline_submit("Render Selected")
 
     def _prism_save_version(self):
         """Trigger Prism's 'Save Version' menu action so every farm submit
@@ -1865,6 +2262,20 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         except Exception as e:
             print(f"[ShotAssetLoader] Prism Save Version failed: {e}")
 
+    def _refresh_precomp_writes(self, nodes):
+        """Kick each precomp Write's `refresh` knob (Prism's
+        pcore.appPlugin.getOutputPath) so the renderpath reflects the
+        current shot/scene context before add_version bumps it — otherwise
+        a .nk moved between shots would bump the version on the old path."""
+        for node in nodes:
+            if 'refresh' not in node.knobs():
+                continue
+            try:
+                node['refresh'].execute()
+                print(f"[ShotAssetLoader] refresh on {node.name()}")
+            except Exception as e:
+                print(f"[ShotAssetLoader] refresh failed on {node.name()}: {e}")
+
     def _bump_precomp_versions(self, nodes):
         """Kick each precomp Write's `add_version` knob so its output path
         rolls to the next version before we submit — otherwise the farm
@@ -1883,6 +2294,131 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
                 print(
                     f"[ShotAssetLoader] add_version failed on {node.name()}: {e}"
                 )
+
+    def _hash_precomp_writes(self, nodes):
+        """Kick each precomp Write's `hasher` knob so cache_ref.json is
+        written next to the current renderpath — call on all PrecompWrites,
+        not just Live ones, so Cached precomps get their hash refreshed too
+        (matters on first use of the system or when the folder was cleared).
+        For Live nodes must run after add_version so the renderpath already
+        points at the fresh version's folder.
+
+        The hasher knob's script references `n` as a free variable (not
+        nuke.thisNode()), so neither .execute() nor nuke.runIn() route it
+        to the right target — both leave `n` pointing at whatever the
+        global namespace happens to hold, which is why only one
+        cache_ref.json ever got written. We pull the script with .value()
+        and exec it ourselves with `n` bound to the actual target node."""
+        print(f"[ShotAssetLoader] Hashing {len(nodes)} PrecompWrite(s)")
+        for node in nodes:
+            if 'hasher' not in node.knobs():
+                print(
+                    f"[ShotAssetLoader] No 'hasher' knob on {node.name()} "
+                    "— skipping"
+                )
+                continue
+            try:
+                folder = os.path.dirname(node['renderpath'].value())
+                if folder:
+                    os.makedirs(folder, exist_ok=True)
+            except Exception as e:
+                print(
+                    f"[ShotAssetLoader] could not create folder for "
+                    f"{node.name()}: {e}"
+                )
+                continue
+            try:
+                source = node['hasher'].value()
+                if source:
+                    exec(source, {'nuke': nuke, 'os': os, 'n': node})
+                else:
+                    node['hasher'].execute()
+                print(f"[ShotAssetLoader] hasher on {node.name()}")
+            except Exception as e:
+                print(
+                    f"[ShotAssetLoader] hasher failed on {node.name()}: {e}"
+                )
+
+    def _reset_render_states(self, nodes):
+        """Write {"Render_Done": False} to each Live precomp's
+        render_state.json before submitting to Deadline. This is the single
+        'a new render is starting' signal.
+
+        Doing the reset per-task in beforeRender used to work in single-task
+        renders but races badly on parallel farm renders: a laggard task
+        starting mid-render would clobber a True already written by a peer
+        that finished earlier. We now do it once, here, before any Deadline
+        task exists — and after_render_precomp.py only ever writes True.
+        Combined, the state can only progress False -> True.
+
+        Only touch the Live nodes about to be re-rendered — Cached precomps
+        keep their existing True."""
+        print(f"[ShotAssetLoader] Resetting render_state.json for {len(nodes)} Live precomp(s)")
+        for node in nodes:
+            try:
+                renderpath = node['renderpath'].value()
+                folder = os.path.dirname(renderpath)
+                if not folder:
+                    continue
+                os.makedirs(folder, exist_ok=True)
+                mp._atomic_json(
+                    os.path.join(folder, 'render_state.json'),
+                    {"Render_Done": False},
+                )
+            except Exception as e:
+                print(
+                    f"[ShotAssetLoader] reset render_state failed on "
+                    f"{node.name()}: {e}"
+                )
+
+    def _reload_precomp_writes(self, nodes):
+        """Reload any Read that consumes a PrecompWrite's output. The
+        Write itself has nothing to reload — what carries stale frames
+        (and shows the red 'error' state until manually refreshed) is
+        the Read living inside the downstream Switch group (SW_Precomp*)
+        that reads the rendered sequence back. Kicking the Write's own
+        `reload` knob doesn't reliably reach that internal Read across
+        Nuke versions and gizmo layouts, which was the 'I still see
+        errors until I press Reload by hand' symptom.
+
+        Instead we match Reads by their resolved file path: any Read
+        (root or nested) whose file sits inside the Write's render
+        folder gets its own reload knob executed. Index the DAG once
+        into folder → Reads so N precomps don't do N full scans."""
+        reads_by_folder = {}
+        try:
+            for r in nuke.allNodes("Read", recurseGroups=True):
+                if 'reload' not in r.knobs():
+                    continue
+                try:
+                    resolved = nuke.filename(r) or ""
+                except Exception:
+                    resolved = ""
+                if not resolved:
+                    continue
+                folder = os.path.dirname(
+                    resolved.replace('\\', '/')
+                ).rstrip('/')
+                reads_by_folder.setdefault(folder, []).append(r)
+        except Exception as e:
+            print(f"[ShotAssetLoader] Failed to index Reads for reload: {e}")
+            return
+
+        for pw in nodes:
+            try:
+                pw_folder = os.path.dirname(
+                    pw['renderpath'].value().replace('\\', '/')
+                ).rstrip('/')
+            except Exception:
+                continue
+            for r in reads_by_folder.get(pw_folder, ()):
+                try:
+                    r['reload'].execute()
+                except Exception as e:
+                    print(
+                        f"[ShotAssetLoader] reload failed on "
+                        f"{r.fullName()}: {e}"
+                    )
 
     def _refresh_compo_write(self, node):
         """Kick the Compo write's `refresh` knob so its metadata (typically
@@ -1922,25 +2458,69 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
                 return node
         return None
 
-    def _find_live_precomp_writes(self):
-        """Precomps whose cache is missing/stale — the gizmo's hasError() is
-        True when its internal cache Read fails, matching the 'Live' state
-        shown in the Render Manager table. Cached precomps are skipped
-        because their disk output already exists; re-rendering them would
-        just burn farm time."""
-        live = []
-        for node in self._iter_precomp_writes():
+    def _precomp_switch_which(self, precomp_write):
+        """Return the current which value of the switch whose one of its
+        inputs (walking through Dots) is the given PrecompWrite. Supports
+        both the old plain Switch (Class == "Switch", knob "which") and the
+        new studio Group gizmo (Class == "Group", knob "which_custom").
+        Scans all inputs, not just input(0), so it's robust regardless of
+        which port the artist wired the Cached branch on."""
+        pw_full = precomp_write.fullName()
+        for node in nuke.allNodes(recurseGroups=True):
+            knobs = node.knobs()
+            if node.Class() != "Switch" and 'which' not in knobs and 'which_custom' not in knobs:
+                continue
+            if not self._node_has_precomp_input(node, pw_full):
+                continue
+            knob_name = 'which_custom' if 'which_custom' in knobs else 'which'
             try:
-                err = node.hasError()
+                return int(node[knob_name].value())
             except Exception as e:
                 print(
-                    f"[ShotAssetLoader]   {node.name()} hasError raised {e}"
-                    " — treating as Live"
+                    f"[ShotAssetLoader] {precomp_write.name()}: reading "
+                    f"{node.name()}.{knob_name} failed ({e}) — status will show '?'"
                 )
-                err = True
-            state = "Live" if err else "Cached"
+                return None
+        print(
+            f"[ShotAssetLoader] {precomp_write.name()}: no Switch/Group has "
+            f"any input pointing at this PrecompWrite ({pw_full}) — status will show '?'"
+        )
+        return None
+
+    def _node_has_precomp_input(self, switch_node, pw_full):
+        """True if any of switch_node's inputs is (or resolves through Dots
+        to) the PrecompWrite identified by pw_full."""
+        try:
+            n_inputs = switch_node.inputs()
+        except Exception:
+            n_inputs = 2
+        for i in range(n_inputs):
+            try:
+                n = switch_node.input(i)
+            except Exception:
+                continue
+            seen = set()
+            while n is not None and n.Class() == "Dot" and n.fullName() not in seen:
+                seen.add(n.fullName())
+                try:
+                    n = n.input(0)
+                except Exception:
+                    n = None
+            if n is not None and n.fullName() == pw_full:
+                return True
+        return False
+
+    def _find_live_precomp_writes(self):
+        """Precomps whose downstream Switch reports Live (which != 0). Cached
+        precomps are skipped because their disk output already exists;
+        re-rendering them would just burn farm time. Missing Switch is treated
+        as Live so a suspicious graph still gets a render."""
+        live = []
+        for node in self._iter_precomp_writes():
+            which = self._precomp_switch_which(node)
+            state = "Cached" if which == 0 else "Live"
             print(f"[ShotAssetLoader]   {node.name()}: {state}")
-            if err:
+            if which != 0:
                 live.append(node)
         return live
 
@@ -2106,9 +2686,15 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
     def _make_bold_name_cell(self, node):
         """Read-only bold-font table cell showing a node's name. Shared by
-        both Render Manager tables so styling stays in sync."""
+        both Render Manager tables so styling stays in sync.
+
+        The node's fullName is stashed on UserRole so _selected_nodes_from_table
+        can resolve a row back to the actual nuke.Node via nuke.toNode() at
+        submit time — safer than caching the Node wrapper here, which would
+        break if the scene has been re-scanned between populate and submit."""
         item = QtWidgets.QTableWidgetItem(node.name())
         item.setFlags(item.flags() & ~QtCore.Qt.ItemIsEditable)
+        item.setData(QtCore.Qt.UserRole, node.fullName())
         font = item.font()
         font.setBold(True)
         item.setFont(font)
@@ -2201,19 +2787,15 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
             table.setItem(row, 2, self._make_version_cell(node))
             table.setItem(row, 3, self._make_render_order_cell(node))
 
-            # The studio's TCL uses `input(0).hasError()` from *inside* the
-            # gizmo, where input(0) is the internal Read pointing at the
-            # cache file. Called from Python on the outer gizmo, input(0)
-            # would resolve to the external upstream (usually a Grade or
-            # similar) which is not what we want — a live comp with a
-            # healthy upstream would then report "Cached" even though the
-            # cache Read is failing. Reading `hasError()` directly on the
-            # gizmo is equivalent for this purpose since the internal Read
-            # error propagates to the gizmo's error state.
-            try:
-                status_text = "Live" if node.hasError() else "Cached"
-            except Exception:
+            # Delegate to the downstream Switch's `which` knob so the table
+            # matches exactly what the graph will actually render.
+            which = self._precomp_switch_which(node)
+            if which == 0:
+                status_text = "Cached"
+            elif which is None:
                 status_text = "?"
+            else:
+                status_text = "Live"
             s_item = QtWidgets.QTableWidgetItem(status_text)
             s_item.setFlags(s_item.flags() & ~QtCore.Qt.ItemIsEditable)
             # Same greens/reds as the loader Status column so the two tables
@@ -2246,7 +2828,7 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
 
             # nuke.root().name() returns "Root" when the script isn't saved.
             if not script_path or script_path == "Root":
-                self.info_label.setText(
+                self._set_info_text(
                     "Save your Nuke script inside a shot folder to use the loader"
                 )
                 return
@@ -2278,7 +2860,7 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
                     print(f"[ShotAssetLoader] Detected from path: {detected_sequence}/{detected_shot}")
 
             if not detected_sequence or not detected_shot:
-                self.info_label.setText(
+                self._set_info_text(
                     "Could not detect sequence/shot from the script path"
                 )
                 return
@@ -2302,7 +2884,7 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         if not sequence or not shot:
             return
 
-        self.info_label.setText(f"Scanning assets for {sequence}/{shot}...")
+        self._set_info_text(f"Scanning assets for {sequence}/{shot}...")
         QtWidgets.QApplication.processEvents()
 
         print(f"\n[ShotAssetLoader] === SCAN START ===")
@@ -2327,10 +2909,17 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
         self._refresh_package_dropdown()
 
     def _refresh_info_banner(self):
-        """Rebuild the SHOT/FRAMES/FPS/FORMAT/ASSETS chip banner from the
-        current scene state and asset list. Extracted from _scan_shot_assets
-        so a lightweight refresh (e.g. after hiding an asset) can update the
-        ASSETS count without triggering a full disk re-scan."""
+        """Rebuild the SHOT/FRAMES/FPS/FORMAT/<count> chip banner from the
+        current scene state. Extracted from _scan_shot_assets so a
+        lightweight refresh (e.g. after hiding an asset, or when the
+        Render Manager auto-refreshes) can update the counts without a
+        full disk re-scan.
+
+        The last chip is per-tab: the Loader banner shows ASSETS (rows
+        currently in the asset table) while the Render Manager banner
+        shows PRECOMPS (PrecompWrite nodes in the scene) — same shared
+        prefix, different tail chip, so the artist sees the count that
+        matches whichever tab they're on."""
         sequence = self.current_sequence
         shot = self.current_shot
         if not sequence or not shot:
@@ -2368,11 +2957,19 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
             pass
 
         total_assets = len(self.asset_items)
+        try:
+            total_precomps = sum(
+                1 for node in nuke.allNodes("Write", recurseGroups=True)
+                if self._read_tag(node) == "PrecompWrite"
+            )
+        except Exception:
+            total_precomps = 0
+
         chip = (
             "<span style='color:#9a9a9a; font-size:10px; letter-spacing:1.2px;'>"
             "{label}</span> &nbsp;<span style='color:#ffffff;'>{value}</span>"
         )
-        self.info_label.setText(
+        prefix = (
             chip.format(label="SHOT", value=f"<b>{sequence}</b> / <b>{shot}</b>")
             + " &nbsp;&nbsp;&nbsp;&nbsp; "
             + chip.format(label="FRAMES", value=frame_text)
@@ -2381,8 +2978,13 @@ class ShotAssetLoaderWindow(QtWidgets.QDialog):
             + " &nbsp;&nbsp;&nbsp;&nbsp; "
             + chip.format(label="FORMAT", value=format_text)
             + " &nbsp;&nbsp;&nbsp;&nbsp; "
-            + chip.format(label="ASSETS", value=str(total_assets))
         )
+        for label, mode in getattr(self, "_info_labels", ()):
+            if mode == "render_manager":
+                tail = chip.format(label="PRECOMPS", value=str(total_precomps))
+            else:
+                tail = chip.format(label="ASSETS", value=str(total_assets))
+            label.setText(prefix + tail)
 
     def _populate_table(self):
         """Populate asset table."""

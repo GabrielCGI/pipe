@@ -1,25 +1,26 @@
-import nuke, os, json, tempfile
+import nuke, os
+import module_precomp as mp
 
 def _write_render_state():
     n = nuke.thisNode()
-    renderpath = n.knob('renderpath').value()
-    folder = os.path.dirname(renderpath)
+    folder = os.path.dirname(n['renderpath'].value())
     if not folder:
         return
-    if not os.path.isdir(folder):
-        os.makedirs(folder, exist_ok=True)
+    os.makedirs(folder, exist_ok=True)
 
-    state_path = os.path.join(folder, 'render_state.json')
-    data = {"Render_Done": True}
-
-    fd, tmp_path = tempfile.mkstemp(dir=folder, prefix='.render_state_', suffix='.tmp')
-    try:
-        with os.fdopen(fd, 'w') as f:
-            json.dump(data, f, indent=4)
-        os.replace(tmp_path, state_path)
-    except Exception:
-        if os.path.exists(tmp_path):
-            os.remove(tmp_path)
-        raise
+    # Only ever write True from here — never False. On Deadline, tasks
+    # run in parallel across workers, so this hook fires N times
+    # concurrently. Making the write monotonic (True-only) means the
+    # last task that observes a complete render wins, and no laggard
+    # can undo completion. The reset to False happens exactly once, at
+    # submit time (ui_loader_simple._reset_render_states), before any
+    # task starts.
+    #
+    # Even monotonic writes can leave the state stuck at False when the
+    # last task's all_present check races the network share; that case
+    # is handled by _compute_which's self-heal, not here.
+    if mp._all_frames_present(n):
+        mp._atomic_json(os.path.join(folder, "render_state.json"),
+                        {"Render_Done": True})
 
 _write_render_state()

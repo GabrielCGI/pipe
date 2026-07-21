@@ -193,6 +193,8 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     ilgcMenu.addCommand('ILGC_ReadCleanup', 'nuke.createNode("ILGC_ReadCleanup")')
     ilgcMenu.addCommand('ILGC_Kuwahara', 'nuke.createNode("ILGC_Kuwahara")')
     ilgcMenu.addCommand('ILGC_HexTile', 'nuke.createNode("ILGC_HexTile")')
+    ilgcMenu.addCommand('WritePrecomp', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/WritePrecomp.nk\")')
+    ilgcMenu.addCommand('WriteCompo', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/WriteCompo.nk\")')
 
     # Rivers menus
     #riversMenu: nuke.Menu = illogicMenu.addMenu("Rivers Tools")
@@ -311,30 +313,8 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
         "Copernicus Bridge",
         "import comp_copernicus_bridge; comp_copernicus_bridge.create_node()")
     
-    #ADDED on 26.07.08 by Ben
-    if nuke.GUI:
-        try:
-            from PySide6 import QtWidgets, QtCore
-        except ImportError:
-            from PySide2 import QtWidgets, QtCore
-
-        print("[nukex-popup] timer installe")  # doit apparaitre dans la Script Editor
-
-        def _scan():
-            for w in QtWidgets.QApplication.topLevelWidgets():
-                if not w.isVisible():
-                    continue
-                title = w.windowTitle()
-                cls = type(w).__name__
-                labels = [l.text() for l in w.findChildren(QtWidgets.QLabel) if l.text().strip()]
-                if labels:
-                    print("[nukex-popup] visible:", cls, repr(title), labels)
-                for txt in labels:
-                    if "NukeX" in txt or "license" in txt.lower():
-                        print("[nukex-popup] -> match, fermeture de", cls)
-                        w.close()
-
-        _nukex_popup_timer = QtCore.QTimer()
-        _nukex_popup_timer.setInterval(100)
-        _nukex_popup_timer.timeout.connect(_scan)
-        _nukex_popup_timer.start()
+    #ADDED on 26.07.20 by Ben
+    import DeadlineNukeClient
+    menubar = nuke.menu("Nuke")
+    tbmenu = menubar.addMenu("&Thinkbox")
+    tbmenu.addCommand("Submit Nuke To Deadline", DeadlineNukeClient.main, "")

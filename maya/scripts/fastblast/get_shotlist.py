@@ -12,7 +12,7 @@ if MODULE_PATH not in sys.path:
 
 from dotenv import load_dotenv  # noqa: E402
 
-load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
+load_dotenv(r"R:\custom_envs\fastblast\.env")
 
 API_URL = os.getenv("API_URL")
 SCRIPT_NAME = os.getenv("SCRIPT_NAME")
@@ -88,6 +88,8 @@ def get_shot_order(project_name):
     except Exception as e:
         print("Could not connect to shotgrid project", e)
     
+    print(f"Connecting to shotgrid: {sg}")
+
     if sg:
         shots = get_shotgrid_shotlist(project_name=project_name, sg=sg)
         shot_order = format_shots_with_sequence(shots=shots, sg=sg)

@@ -212,7 +212,11 @@ nuke.knobDefault("Blur.channels", "rgba")
 
 ## edit 2026.05.22 (YY.MM.DD)
 ##  ShotLoader Added
-nuke.pluginAddPath(r"R:\pipeline\pipe\nuke\script\nukeShotLoader") 
+nuke.pluginAddPath(r"R:\pipeline\pipe\nuke\script\nukeShotLoader")
+## src on the path so `import module_precomp` works from PrecompWrite
+## before/afterRender knobs, from the Switch's `which` expression, and
+## from the `hasher` knob — including on Deadline workers.
+nuke.pluginAddPath(r"R:\pipeline\pipe\nuke\script\nukeShotLoader\src")
 
 ## edit 2026.06.04 (YY.MM.DD)
 ##  DMP EXR Layer Builder Added

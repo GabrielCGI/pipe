@@ -1,0 +1,129 @@
+set cut_paste_input [stack 0]
+version 15.1 v5
+push $cut_paste_input
+Remove {
+ operation keep
+ channels rgba
+ channels2 depth
+ name Remove1
+ selected true
+ xpos 4918
+ ypos 9078
+}
+Dot {
+ name Dot1
+ selected true
+ xpos 4952
+ ypos 9102
+}
+set Ndc99e800 [stack 0]
+Write {
+ channels all
+ file "\[value renderpath]"
+ file_type exr
+ dw_compression_level 85
+ interleave channels
+ first_part rgba
+ raw true
+ create_directories true
+ first 1001
+ last 1100
+ reading true
+ checkHashOnRead false
+ version 148
+ ocioColorspace scene_linear
+ display "sRGB - Display"
+ view "ACES 1.0 - SDR Video"
+ beforeRender "exec(open(r\"R:\\pipeline\\pipe\\nuke\\script\\nukeShotLoader\\src\\before_render_precomp.py\").read())"
+ afterRender "exec(open(r\"R:\\pipeline\\pipe\\nuke\\script\\nukeShotLoader\\src\\after_render_precomp.py\").read())"
+ name WritePrecomp1
+ knobChanged "try:\n\tpcore.getPlugin(\"Nuke\").updateNodeUI(\"write\", nuke.toNode(nuke.thisNode().fullName().rsplit(\".\", 1)\[0]))\nexcept:\n\tpass"
+ autolabel "nuke.thisNode().name() + ('\\n' + nuke.thisNode()\['label'].evaluate() if nuke.thisNode()\['label'].evaluate() else '')"
+ label "\[lindex \[regexp -inline \{^\[^_]+\} \[file tail \[value root.name]]] 0]_precomp_\[value identifier]_v\[format %03d \[value versions]].####.exr"
+ selected true
+ xpos 4918
+ ypos 9126
+ postage_stamp true
+ addUserKnob {20 tab_prism l Prism}
+ addUserKnob {1 identifier l "identifier : precomp_"}
+ identifier xxxx
+ addUserKnob {3 versions l "version :" t "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()-1)\n"}
+ addUserKnob {22 add_version l + -STARTLINE T "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()+1)\n"}
+ addUserKnob {22 sub_version l - -STARTLINE T "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()-1)\n"}
+ addUserKnob {1 comment l "comment (optional)" +INVISIBLE}
+ addUserKnob {4 location +INVISIBLE M {global}}
+ addUserKnob {26 ""}
+ addUserKnob {1 fileName l filepath +INVISIBLE}
+ fileName I:/yuka_2604/03_Production/Shots/SQ0010/SH0010/Renders/2dRender/FAR_BG/v001/SQ0010-SH0010_FAR_BG_v001.####.exr
+ addUserKnob {22 refresh l Refresh +INVISIBLE T pcore.appPlugin.getOutputPath(nuke.thisNode()) +STARTLINE}
+ addUserKnob {22 startRender l Render T "n = nuke.thisNode()\nn\['refresh'].execute()\nn\['add_version'].execute()\nn\['hasher'].execute()\npcore.appPlugin.startRender(n)" +STARTLINE}
+ addUserKnob {22 hasher +INVISIBLE T "import module_precomp as mp\nrp = n\['renderpath'].value()\nfolder = os.path.dirname(rp)\nos.makedirs(folder, exist_ok=True)\nmp._atomic_json(os.path.join(folder, \"cache_ref.json\"), \{\n    \"ref_hash\": mp.upstream_hash(n),\n    \"first\": int(n\['first'].value()),\n    \"last\":  int(n\['last'].value()),\n\})\n" +STARTLINE}
+ addUserKnob {22 startRenderPrevVersion l "Render as previous version..." -STARTLINE +INVISIBLE T pcore.appPlugin.renderAsVersion(nuke.thisNode())}
+ addUserKnob {6 submitJob l "Submit Job" -STARTLINE +INVISIBLE}
+ addUserKnob {26 prevFileName l "previous filepath" +INVISIBLE T "I:/frederic_2603/03_Production/Shots/SBX/mathieu/Renders/2dRender/test01/v001/SBX-mathieu_test01_v001.####. "}
+ addUserKnob {22 openDir l "Open In..." +INVISIBLE T pcore.appPlugin.openInClicked(nuke.thisNode()) +STARTLINE}
+ addUserKnob {22 createRead l "Create Read" -STARTLINE +INVISIBLE T pcore.appPlugin.createRead(nuke.thisNode())}
+ addUserKnob {6 media_conversion_use l "media conversion" +INVISIBLE +STARTLINE}
+ addUserKnob {4 media_conversion_preset l preset +INVISIBLE M {jpg "mov (prores)" "mp4 (burn-in)" "mp4 (slate + burn-in)" mp4 png slate "Illogic - mp4 to Shotgrid - ACEScg to Rec.709" "Illogic - mp4 with burnin - ACEScg to sRGB" "Illogic - mp4 with burnin - ACEScg to REC709.json" "Illogic - proRes with burnin - ACEScg to REC709" "Illogic - mp4 with burnin - Crop to 1.77 - ACEScg to REC709" mp4_discord "Illogic - mp4 with burnin" "illogic - mp4 data burnin - anim"}}
+ addUserKnob {22 media_conversion_refresh l refresh -STARTLINE +INVISIBLE T "pcore.getPlugin(\"MediaExtension\").nuke_onMediaConversionRefresh()"}
+ addUserKnob {22 media_conversion_edit l edit... -STARTLINE +INVISIBLE T "pcore.getPlugin(\"MediaExtension\").onEditMediaConversionClicked()"}
+ addUserKnob {6 project_management_publish l "publish to Shotgrid" +INVISIBLE +STARTLINE}
+ addUserKnob {1 folderpath l "folderpath :" +INVISIBLE}
+ folderpath "\[lindex \[regexp -inline \{^.*?/Shots/\} \[value fileName]] 0]\[join \[lrange \[regexp -inline \{^(\[^-]+)-(\[^_]+)\} \[file tail \[value root.name]]] 1 2] /]/Renders/2dRender/precomp_\[value identifier]/"
+ addUserKnob {1 renderpath l "renderpath :" +INVISIBLE}
+ renderpath "\[value folderpath]v\[format %03d \[value versions]]/\[lindex \[regexp -inline \{^\[^_]+\} \[file tail \[value root.name]]] 0]_precomp_\[value identifier]_v\[format %03d \[value versions]].####.exr"
+ addUserKnob {1 tag +INVISIBLE}
+ tag PrecompWrite
+}
+push $Ndc99e800
+Dot {
+ name Dot2
+ selected true
+ xpos 4870
+ ypos 9102
+}
+Dot {
+ name Dot3
+ selected true
+ xpos 4870
+ ypos 9227
+}
+Group {
+ inputs 2
+ name SW_Precomp3
+ tile_color 0xaa2c2cff
+ label Live
+ note_font "Verdana Bold"
+ selected true
+ xpos 4918
+ ypos 9218
+ addUserKnob {20 switch l Switch}
+ addUserKnob {3 which_custom l which}
+ which_custom {{"\[python __import__('module_precomp').precomp_which(nuke.thisNode())]"}}
+}
+ Input {
+  inputs 0
+  name Input1
+  xpos -540
+  ypos -257
+ }
+ Input {
+  inputs 0
+  name Input0
+  xpos -388
+  ypos -354
+  number 1
+ }
+ Switch {
+  inputs 2
+  which {{parent.which_custom}}
+  name Switch1
+  xpos -388
+  ypos -257
+ }
+ Output {
+  name Output1
+  xpos -388
+  ypos -178
+ }
+end_group

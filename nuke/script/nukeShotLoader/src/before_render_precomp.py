@@ -1,25 +1,16 @@
-import nuke, os, json, tempfile
-
-def _write_render_state():
-    n = nuke.thisNode()
-    renderpath = n.knob('renderpath').value()
-    folder = os.path.dirname(renderpath)
-    if not folder:
-        return
-    if not os.path.isdir(folder):
-        os.makedirs(folder, exist_ok=True)
-
-    state_path = os.path.join(folder, 'render_state.json')
-    data = {"Render_Done": False}
-
-    fd, tmp_path = tempfile.mkstemp(dir=folder, prefix='.render_state_', suffix='.tmp')
-    try:
-        with os.fdopen(fd, 'w') as f:
-            json.dump(data, f, indent=4)
-        os.replace(tmp_path, state_path)
-    except Exception:
-        if os.path.exists(tmp_path):
-            os.remove(tmp_path)
-        raise
-
-_write_render_state()
+# beforeRender hook: intentionally a no-op.
+#
+# Previously this reset render_state.json to {"Render_Done": False} at the
+# start of each Deadline task. Tasks run in parallel across workers, so a
+# task starting mid-render would race-clobber a True written by a peer
+# task that had already finished — leaving render_state.json stuck at
+# False even though the render completed successfully.
+#
+# The reset is now performed exactly once at submit time, in
+# ui_loader_simple._reset_render_states, before any Deadline task starts.
+# Combined with after_render_precomp.py being monotonic (True-only), this
+# guarantees the state can only progress False -> True and never race
+# backwards.
+#
+# This file is kept as an empty hook so that any Write node whose
+# beforeRender knob still references it continues to execute cleanly.

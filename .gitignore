@@ -27,3 +27,5 @@ windows/temperature_alert/.venv/*
 /nuke/plugins/NukeSurvivalToolkit
 /nuke/plugins/OpticalFlares
 /nuke/plugins
+/deadline/exr_analyzer
+/deadline/blatted_retasker

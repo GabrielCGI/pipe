@@ -2,9 +2,12 @@
     "filters": {
         "COMPOSITING": [
             "compo",
-            "comp",
-            "nuke",
-            "beauty"
+            "comp"
+        ],
+        "QC": [
+            "ConfoRenderA",
+            "3dRender",
+            "rgb"
         ],
         "ANIM": [
             "anim",

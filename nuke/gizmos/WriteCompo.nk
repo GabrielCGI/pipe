@@ -1,0 +1,50 @@
+set cut_paste_input [stack 0]
+version 15.1 v5
+push $cut_paste_input
+Write {
+ file "\[value fileName]"
+ file_type exr
+ compression DWAB
+ dw_compression_level 85
+ interleave channels
+ first_part rgba
+ create_directories true
+ render_order 4
+ first 1001
+ last 1100
+ checkHashOnRead false
+ ocioColorspace scene_linear
+ display "sRGB - Display"
+ view "ACES 1.0 - SDR Video"
+ beforeRender "try: pcore.appPlugin.getOutputPath(nuke.thisNode(), render=True)\nexcept: pass"
+ afterRender "exec(open(r\"R:\\pipeline\\pipe\\nuke\\script\\nukeShotLoader\\src\\after_compo_render_diagnostic.py\").read())"
+ name WriteCompo
+ knobChanged "\nn=nuke.thisNode()\nk=nuke.thisKnob()\n\nif k.name() == \"name\" and n.name() != 'WriteCompo':\n    k.setValue('WriteCompo')\nif k.name() == \"identifier\" and k.value() != \"Compo\":\n    k.setValue('Compo')\n"
+ selected true
+ xpos 3157
+ ypos 40821
+ addUserKnob {20 tab_prism l Prism}
+ addUserKnob {1 identifier}
+ identifier Compo
+ addUserKnob {1 comment l "comment (optional)"}
+ addUserKnob {4 location M {global}}
+ addUserKnob {26 ""}
+ addUserKnob {1 fileName l filepath}
+ fileName I:/yuka_2604/03_Production/Shots/SQ0010/SH0010/Renders/2dRender/Compo/v098/SQ0010-SH0010_Compo_v098.####.exr
+ addUserKnob {22 refresh l Refresh T pcore.appPlugin.getOutputPath(nuke.thisNode()) +STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {22 startRender l Render -STARTLINE T pcore.appPlugin.startRender(nuke.thisNode())}
+ addUserKnob {22 startRenderPrevVersion l "Render as previous version..." -STARTLINE T pcore.appPlugin.renderAsVersion(nuke.thisNode())}
+ addUserKnob {6 submitJob l "Submit Job" -STARTLINE}
+ submitJob true
+ addUserKnob {26 prevFileName l "previous filepath" T -}
+ addUserKnob {22 openDir l "Open In..." T pcore.appPlugin.openInClicked(nuke.thisNode()) +STARTLINE}
+ addUserKnob {22 createRead l "Create Read" -STARTLINE T pcore.appPlugin.createRead(nuke.thisNode())}
+ addUserKnob {26 media_conversion_divider l "" +STARTLINE}
+ addUserKnob {6 media_conversion_use l "media conversion" +STARTLINE}
+ addUserKnob {4 media_conversion_preset l preset M {jpg "mov (prores)" "mp4 (burn-in)" "mp4 (slate + burn-in)" mp4 png slate "Illogic - mp4 to Shotgrid - ACEScg to Rec.709" "Illogic - mp4 with burnin - ACEScg to sRGB" "Illogic - mp4 with burnin - ACEScg to REC709.json" "Illogic - proRes with burnin - ACEScg to REC709" "Illogic - mp4 with burnin - Crop to 1.77 - ACEScg to REC709" mp4_discord "Illogic - mp4 with burnin" "illogic - mp4 data burnin - anim"}}
+ addUserKnob {22 media_conversion_refresh l refresh -STARTLINE T "pcore.getPlugin(\"MediaExtension\").nuke_onMediaConversionRefresh()"}
+ addUserKnob {22 media_conversion_edit l edit... -STARTLINE T "pcore.getPlugin(\"MediaExtension\").onEditMediaConversionClicked()"}
+ addUserKnob {26 project_management_divider l "" +STARTLINE}
+ addUserKnob {6 project_management_publish l "publish to Shotgrid" +STARTLINE}
+}
