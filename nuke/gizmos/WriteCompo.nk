@@ -9,7 +9,6 @@ Write {
  interleave channels
  first_part rgba
  create_directories true
- render_order 4
  first 1001
  last 1100
  checkHashOnRead false
@@ -21,8 +20,8 @@ Write {
  name WriteCompo
  knobChanged "\nn=nuke.thisNode()\nk=nuke.thisKnob()\n\nif k.name() == \"name\" and n.name() != 'WriteCompo':\n    k.setValue('WriteCompo')\nif k.name() == \"identifier\" and k.value() != \"Compo\":\n    k.setValue('Compo')\n"
  selected true
- xpos 3157
- ypos 40821
+ xpos 1895
+ ypos 33513
  addUserKnob {20 tab_prism l Prism}
  addUserKnob {1 identifier}
  identifier Compo
@@ -30,7 +29,7 @@ Write {
  addUserKnob {4 location M {global}}
  addUserKnob {26 ""}
  addUserKnob {1 fileName l filepath}
- fileName I:/yuka_2604/03_Production/Shots/SQ0010/SH0010/Renders/2dRender/Compo/v098/SQ0010-SH0010_Compo_v098.####.exr
+ fileName I:/yuka_2604/03_Production/Shots/SQ0010/SH0070/Renders/2dRender/Compo/v036/SQ0010-SH0070_Compo_v036.####.exr
  addUserKnob {22 refresh l Refresh T pcore.appPlugin.getOutputPath(nuke.thisNode()) +STARTLINE}
  addUserKnob {26 ""}
  addUserKnob {22 startRender l Render -STARTLINE T pcore.appPlugin.startRender(nuke.thisNode())}

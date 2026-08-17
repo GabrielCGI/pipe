@@ -7,16 +7,16 @@ Remove {
  channels2 depth
  name Remove1
  selected true
- xpos 4918
- ypos 9078
+ xpos -53
+ ypos -149
 }
 Dot {
  name Dot1
  selected true
- xpos 4952
- ypos 9102
+ xpos -19
+ ypos -125
 }
-set Ndc99e800 [stack 0]
+set N2ac65c00 [stack 0]
 Write {
  channels all
  file "\[value renderpath]"
@@ -37,19 +37,19 @@ Write {
  beforeRender "exec(open(r\"R:\\pipeline\\pipe\\nuke\\script\\nukeShotLoader\\src\\before_render_precomp.py\").read())"
  afterRender "exec(open(r\"R:\\pipeline\\pipe\\nuke\\script\\nukeShotLoader\\src\\after_render_precomp.py\").read())"
  name WritePrecomp1
- knobChanged "try:\n\tpcore.getPlugin(\"Nuke\").updateNodeUI(\"write\", nuke.toNode(nuke.thisNode().fullName().rsplit(\".\", 1)\[0]))\nexcept:\n\tpass"
+ knobChanged "\nn=nuke.thisNode()\nn\['postage_stamp'].setValue(False)\n"
  autolabel "nuke.thisNode().name() + ('\\n' + nuke.thisNode()\['label'].evaluate() if nuke.thisNode()\['label'].evaluate() else '')"
  label "\[lindex \[regexp -inline \{^\[^_]+\} \[file tail \[value root.name]]] 0]_precomp_\[value identifier]_v\[format %03d \[value versions]].####.exr"
  selected true
- xpos 4918
- ypos 9126
- postage_stamp true
+ xpos -53
+ ypos -107
  addUserKnob {20 tab_prism l Prism}
  addUserKnob {1 identifier l "identifier : precomp_"}
  identifier xxxx
  addUserKnob {3 versions l "version :" t "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()-1)\n"}
  addUserKnob {22 add_version l + -STARTLINE T "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()+1)\n"}
  addUserKnob {22 sub_version l - -STARTLINE T "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()-1)\n"}
+ addUserKnob {22 go_to_latest l "Go To Latest Version" -STARTLINE T "import os\nimport re\nimport nuke\n\nnuke.thisNode()\['refresh'].execute()\nVERSION_RE = re.compile(r'^v(\\d+)\$', re.IGNORECASE)\n\n\ndef update_versions_knob(node=None):\n    \"\"\"Evalue le knob 'file' (expression TCL \[value renderpath]) et ajuste\n    le knob integer 'versions' :\n      - monte a la version la plus haute trouvee sur disque (v###)\n      - passe a 0 si aucun dossier de version n'existe\n    \"\"\"\n    node = node or nuke.thisNode()\n\n    file_knob = node.knob('file')\n    versions_knob = node.knob('versions')\n    if file_knob is None or versions_knob is None:\n        return\n\n    # evaluate() resout l'expression TCL et la frame courante\n    path = file_knob.evaluate()\n    if not path:\n        versions_knob.setValue(0)\n        return\n\n    path = path.replace('\\\\', '/')\n\n    # .../precomp_CHARS/v009/SQ0010-SH0040_..._v009.1001.exr\n    version_dir = os.path.dirname(path)          # .../precomp_CHARS/v009\n    parent_dir = os.path.dirname(version_dir)    # .../precomp_CHARS\n    version_name = os.path.basename(version_dir)\n\n    # Si le dossier parent du chemin n'est pas un dossier de version v###,\n    # ou que le parent n'existe pas, on ne peut rien scanner -> 0\n    if not VERSION_RE.match(version_name) or not os.path.isdir(parent_dir):\n        versions_knob.setValue(0)\n        return\n\n    # Scan des dossiers freres v### existants\n    found = \[]\n    for entry in os.listdir(parent_dir):\n        m = VERSION_RE.match(entry)\n        if m and os.path.isdir(os.path.join(parent_dir, entry)):\n            found.append(int(m.group(1)))\n\n    if not found:\n        # Aucun dossier de version n'existe (meme pas le courant)\n        versions_knob.setValue(0)\n        return\n\n    highest = max(found)\n    if int(versions_knob.value()) != highest:\n        versions_knob.setValue(highest)\n\n\nif __name__ == '__main__':\n    update_versions_knob()"}
  addUserKnob {1 comment l "comment (optional)" +INVISIBLE}
  addUserKnob {4 location +INVISIBLE M {global}}
  addUserKnob {26 ""}
@@ -75,28 +75,28 @@ Write {
  addUserKnob {1 tag +INVISIBLE}
  tag PrecompWrite
 }
-push $Ndc99e800
+push $N2ac65c00
 Dot {
  name Dot2
  selected true
- xpos 4870
- ypos 9102
+ xpos -101
+ ypos -125
 }
 Dot {
  name Dot3
  selected true
- xpos 4870
- ypos 9227
+ xpos -101
+ ypos -62
 }
 Group {
  inputs 2
- name SW_Precomp3
+ name SW_Precomp1
  tile_color 0xaa2c2cff
  label Live
  note_font "Verdana Bold"
  selected true
- xpos 4918
- ypos 9218
+ xpos -53
+ ypos -71
  addUserKnob {20 switch l Switch}
  addUserKnob {3 which_custom l which}
  which_custom {{"\[python __import__('module_precomp').precomp_which(nuke.thisNode())]"}}

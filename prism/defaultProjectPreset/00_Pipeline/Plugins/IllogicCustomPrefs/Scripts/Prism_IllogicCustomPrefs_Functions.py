@@ -32,73 +32,46 @@
 # along with Prism.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from qtpy.QtCore import *
-from qtpy.QtGui import *
-from qtpy.QtWidgets import *
+import copy
 
 from PrismUtils.Decorators import err_catcher_plugin as err_catcher
 
 
 class Prism_IllogicCustomPrefs_Functions(object):
+    PREFS = {
+        "globals": {
+            "mediaPlayerName": "RV",
+            "mediaPlayerPath": r"C:\ILLOGIC_APP\OpenRV\bin\rv.exe",
+        },
+        "dccoverrides": {
+            "Houdini_override": True,
+            "Houdini_path": "launcher:Houdini",
+            "Maya_override": True,
+            "Maya_path": "launcher:Maya",
+        },
+        "usd": {
+            "openViewport": False,
+        },
+        "browser": {
+            "showAssetSearch": True,
+        },
+    }
+
     def __init__(self, core, plugin):
         self.core = core
         self.plugin = plugin
         self.set_prism_prefs()
+        self.core.registerCallback("postInitialize", self.set_prism_prefs, plugin=self)
+        # self.core.registerCallback("onUserSettingsOpen", self.on_user_settings_open, plugin=self)
+        # self.core.registerCallback("userSettings_saveSettings", self.on_user_settings_save, plugin=self)
 
-    # if returns true, the plugin will be loaded by Prism
     @err_catcher(name=__name__)
     def isActive(self):
         return True
 
-    def set_prism_prefs(self):
-        import json
-        import os
-        # import socket
-        # if socket.gethostname() == "FOX-04":
-        #     import sys
-        #     DEBUG_MODULE = "R:/devmaxime/dev/python/debug"
-        #     if not DEBUG_MODULE in sys.path:
-        #         sys.path.insert(0, DEBUG_MODULE)
-        #     import debug
-        #     debug.debug()
-        #     debug.debugpy.breakpoint()
-        # try:
-        # Récupère le chemin du dossier "Mes documents" de l'utilisateur actuel
-        user_documents = os.path.join(os.path.expanduser('~'), 'Documents', 'Prism2')
-        json_file_path = os.path.join(user_documents, 'Prism.json')
-        self.core.configs.cachedConfigs.pop(json_file_path, None)
-
-        # Charge le fichier JSON existant
-        try:
-            with open(json_file_path, 'r', encoding='utf-8') as file:
-                data = json.load(file)
-        except Exception:
-            return
-
-        # Modifie les valeurs spécifiques
-        # DCC Overrides options
-        if (data.get('dccoverrides') is None
-            or data.get('usd') is None
-            or data.get('globals') is None):
+    @err_catcher(name=__name__)
+    def set_prism_prefs(self, *args, **kwargs):
+        if self.core.getConfig() is None:
             return
         
-        data['dccoverrides']['Houdini_path'] = 'launcher:Houdini'
-        data['dccoverrides']['Maya_path'] = 'launcher:Maya'
-        data['dccoverrides']['Houdini_override'] = True
-        data['dccoverrides']['Maya_override'] = True
-        # USD options
-        data['usd']['openViewport'] = False
-        # asset search
-        data['showAssetSearch'] = True
-        # Media player
-        data['globals']['mediaPlayerName'] = "RV"
-        data['globals']['mediaPlayerPath'] = "C:\\ILLOGIC_APP\\OpenRV\\bin\\rv.exe"
-        print ("Prism Illogic Custom Prefs done working")
-
-
-        # Sauvegarde les modifications dans le fichier JSON
-        with open(json_file_path, 'w', encoding='utf-8') as file:
-            json.dump(data, file, indent=4)
-        # except:
-        #     pass
-        #print("Les valeurs ont été modifiées avec succès.")
+        self.core.setConfig(data=copy.deepcopy(self.PREFS), configPath=self.core.userini)

@@ -181,7 +181,8 @@ class CustomExportUI():
 
         data = cmds.ls(dag=True, long=True)
         cleaned = []
-        camera_found = None
+        camera_found = False
+        all_cam = []
         for item in data:
             cleaned.clear()
             for segment in item.split("|"):
@@ -191,14 +192,15 @@ class CustomExportUI():
                 elif segment:  # si pas de ":" mais chaîne non vide
                     cleaned.append(segment)
 
-            if "|".join(cleaned) == 'cameras|camRig|camera|shotCam':
-                camera_found = item
+            if "|".join(cleaned) == 'cameras|camRig|cam|shotCam':
+                camera_found = True
+                all_cam.append(item)
                 break
             
         if not camera_found:
-            return self.PrintMSG("camera not found, nice have:\n '(nameSpcae):cameras|nameSpace:camRig|nameSpace:camera|nameSpace:shotCam'")
+            return self.PrintMSG("camera not found, nice have:\n '(nameSpcae):cameras|nameSpace:camRig|nameSpace:cam|nameSpace:shotCam'")
 
-        cmds.select(item)
+        cmds.select(all_cam)
 
     def selectAnimation(self) -> None:
         import maya.cmds as cmds

@@ -1,0 +1,291 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <toolshelf name="illogic_Paint" label="Illogic Paint">
+    <memberTool name="copstartsample_toggle"/>
+    <memberTool name="quick_null"/>
+    <memberTool name="copbrushify_qol"/>
+  </toolshelf>
+
+  <tool name="copstartsample_toggle" label="Sample Start" icon="COP2_color">
+    <helpText><![CDATA[Toggle: each PAINT stroke starts by sampling the canvas colour under its start point and painting the whole stroke with it. Patches the Cop/paint viewer state (all paint nodes).]]></helpText>
+    <script scriptType="python"><![CDATA[import importlib
+from paint_cop_recolor import recolor
+importlib.reload(recolor)
+hou.ui.setStatusMessage("Sample-at-start: " + recolor.start_sample_toggle())]]></script>
+  </tool>
+
+  <tool name="quick_null" label="quick_null" icon="PLASMA_App">
+    <script scriptType="python"><![CDATA[import hou
+import random
+import colorsys
+
+
+def random_node_color():
+    """Generate a reasonably bright, saturated random color."""
+    hue = random.random()
+    saturation = random.uniform(0.45, 0.75)
+    value = random.uniform(0.65, 0.90)
+
+    rgb = colorsys.hsv_to_rgb(hue, saturation, value)
+    return hou.Color(rgb)
+
+
+def find_parm_by_label(node, labels):
+    """Find a parameter using its displayed label."""
+    labels = {label.lower() for label in labels}
+
+    for parm in node.parms():
+        label = parm.parmTemplate().label().lower()
+
+        if label in labels:
+            return parm
+
+    return None
+
+
+def choose_output(node):
+    """
+    Return the selected output index.
+
+    If the node only has one output, return 0 without displaying a dialog.
+    """
+    output_names = node.outputNames()
+    output_labels = node.outputLabels()
+
+    output_count = max(
+        len(output_names),
+        len(output_labels),
+    )
+
+    if output_count == 0:
+        raise hou.Error(
+            "The selected node does not have any available outputs."
+        )
+
+    if output_count == 1:
+        return 0
+
+    choices = []
+
+    for index in range(output_count):
+        name = (
+            output_names[index]
+            if index < len(output_names)
+            else ""
+        )
+
+        label = (
+            output_labels[index]
+            if index < len(output_labels)
+            else ""
+        )
+
+        # Build a useful display name.
+        if label and name and label != name:
+            display_name = "{}  [{}]".format(label, name)
+        elif label:
+            display_name = label
+        elif name:
+            display_name = name
+        else:
+            display_name = "Output {}".format(index)
+
+        choices.append(
+            "{}: {}".format(index, display_name)
+        )
+
+    selection = hou.ui.selectFromList(
+        choices,
+        exclusive=True,
+        message="Choose the output to connect from:\n{}".format(
+            node.path()
+        ),
+        title="Choose COP Output",
+        column_header="Available outputs",
+        clear_on_cancel=True,
+    )
+
+    if not selection:
+        raise hou.Error("Cancelled.")
+
+    return selection[0]
+
+
+# --------------------------------------------------------------------------
+# Get selected source node
+# --------------------------------------------------------------------------
+
+selected_nodes = hou.selectedNodes()
+
+if not selected_nodes:
+    hou.ui.displayMessage(
+        "Select a Copernicus node first.",
+        severity=hou.severityType.Warning,
+    )
+    raise hou.Error("No node selected.")
+
+source_node = selected_nodes[-1]
+parent = source_node.parent()
+
+
+# --------------------------------------------------------------------------
+# Choose source output before creating anything
+# --------------------------------------------------------------------------
+
+selected_output_index = choose_output(source_node)
+
+
+# --------------------------------------------------------------------------
+# Ask for the new output name
+# --------------------------------------------------------------------------
+
+default_name = "out_" + source_node.name()
+
+button, entered_name = hou.ui.readInput(
+    "Enter the output name:",
+    buttons=("Create", "Cancel"),
+    default_choice=0,
+    close_choice=1,
+    title="Create COP Output",
+    initial_contents=default_name,
+)
+
+if button != 0:
+    raise hou.Error("Cancelled.")
+
+entered_name = entered_name.strip()
+
+if not entered_name:
+    hou.ui.displayMessage(
+        "The output name cannot be empty.",
+        severity=hou.severityType.Warning,
+    )
+    raise hou.Error("Empty output name.")
+
+
+# Avoid adding prefixes twice.
+base_name = entered_name
+
+if base_name.lower().startswith("out_"):
+    base_name = base_name[4:]
+
+if base_name.lower().startswith("fetch_"):
+    base_name = base_name[6:]
+
+null_name = "OUT_" + base_name
+fetch_name = "fetch_" + base_name
+
+color = random_node_color()
+
+
+# --------------------------------------------------------------------------
+# Create nodes
+# --------------------------------------------------------------------------
+
+with hou.undos.group("Create COP output and fetch"):
+
+    # Create the Null.
+    null_node = parent.createNode(
+        "null",
+        node_name=null_name,
+        force_valid_node_name=True,
+    )
+
+    # Connect the specifically selected output.
+    null_node.setInput(
+        0,
+        source_node,
+        selected_output_index,
+    )
+
+    null_node.setColor(color)
+    null_node.setPosition(
+        source_node.position() + hou.Vector2(0, -2)
+    )
+
+    # Create the Fetch.
+    fetch_node = parent.createNode(
+        "fetch",
+        node_name=fetch_name,
+        force_valid_node_name=True,
+    )
+
+    fetch_node.setColor(color)
+    fetch_node.setPosition(
+        null_node.position() + hou.Vector2(3, 0)
+    )
+
+    # Set the Fetch COP Path.
+    cop_path_parm = find_parm_by_label(
+        fetch_node,
+        (
+            "COP Path",
+            "COP",
+        ),
+    )
+
+    if cop_path_parm is None:
+        fetch_node.destroy()
+        null_node.destroy()
+
+        raise hou.Error(
+            "Could not find the Fetch COP Path parameter."
+        )
+
+    cop_path_parm.set(null_node.path())
+
+    # Select the Null before pressing the Fetch setup button.
+    # The button may use the currently selected COP.
+    null_node.setSelected(
+        True,
+        clear_all_selected=True,
+    )
+
+    # Configure the Fetch outputs from the target COP.
+    setup_button = find_parm_by_label(
+        fetch_node,
+        (
+            "Set Outputs from Selected COP",
+            "Setup Outputs from Selected COP",
+        ),
+    )
+
+    if setup_button is not None:
+        setup_button.pressButton()
+
+    null_node.setSelected(
+        True,
+        clear_all_selected=True,
+    )
+    null_node.setDisplayFlag(True)]]></script>
+  </tool>
+
+  <tool name="copbrushify_qol" label="QoL Setup" icon="MISC_preferences">
+    <script scriptType="python"><![CDATA[import hou
+
+CACHE_MB = 32607   # COP file cache limit, in MB
+
+# --- 1) Tint Backfaces OFF (Display Options > Markers) on every viewport ---
+sets = (hou.displaySetType.SceneObject, hou.displaySetType.SelectedObject,
+        hou.displaySetType.GhostObject, hou.displaySetType.DisplayModel,
+        hou.displaySetType.CurrentModel, hou.displaySetType.TemplateModel)
+n = 0
+for pane in hou.ui.paneTabs():
+    if pane.type() == hou.paneTabType.SceneViewer:
+        for vp in pane.viewports():
+            for dst in sets:
+                vp.settings().displaySet(dst).showPrimBackfaces(False)
+            n += 1
+print("[copBrushify QoL] tint backfaces OFF on %d viewport(s)." % n)
+
+# --- 2) COP file cache size (Copernicus File COP RAM cache) ---
+hou.hscript("copcache -F %d" % CACHE_MB)
+print("[copBrushify QoL] " + hou.hscript("copcache -s")[0].strip().splitlines()[-1])
+]]></script>
+  </tool>
+</shelfDocument>

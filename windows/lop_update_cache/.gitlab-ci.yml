@@ -1,0 +1,4 @@
+include:
+  - project: "illogic/cicd_pipelines"
+    ref: "main"
+    file: "/all_python_deploy.gitlab-ci.yml"

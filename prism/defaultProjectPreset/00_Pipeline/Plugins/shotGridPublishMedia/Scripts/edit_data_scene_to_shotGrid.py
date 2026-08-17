@@ -1,16 +1,8 @@
 
 
-def findStatusFromCurrentState(core)-> str:
-    if core.appPlugin.pluginName != 'Maya':
-        return "rev"
-    
-    state = core.getStateManager().curExecutedState
-    if state is None:
-        return "rev"
-    return state.lo_prjMngPublish.itemAt(2).wid.currentText()
 
 def _findToExport(core):
-        import maya.cmds as cmds
+        import maya.cmds as cmds #type: ignore
         import json
         import re
 
@@ -31,10 +23,10 @@ def _findToExport(core):
                 continue
             if not state["stateenabled"]:
                 continue
-            
+
             good_state.append(state)
 
-        
+
         data_Export = ""
         path_scene = core.getCurrentFileName()
         entity = core.getScenefileData(path_scene)
@@ -45,17 +37,17 @@ def _findToExport(core):
                 export = findGoodSetsUSD(state)
             elif state["stateclass"] == "Export":
                 export = state["productname"]
-            
+
             if export is None:
                 continue
-            
+
             data_version = core.products.getLatestVersionpathFromProduct(export, entity=entity)
             next_version = core.products.getNextAvailableVersion(entity, export)
             if data_version:
                 next_export = re.sub(r'v\d+', next_version, data_version)
             else:
                 root_path = core.products.getProductPathFromEntity(entity)
-                
+
                 next_export = f"{root_path}\\{export}\\{next_version}\\{export}_{next_version}..."
 
             data_Export += f"- file exported: {next_export}\n"
@@ -66,7 +58,7 @@ def _findToExport(core):
 def findGoodSetsUSD(State: dict) -> str:
         if State["saveMode"] == "Custom":
             return State["product"]
-        
+
         elif State["saveMode"] == "Layer":
             dep = State["departmentLayer"]
             sublayer = State["sublayer"]
@@ -82,17 +74,18 @@ def addPathGeometryCustom(core) -> str:
     name_scene = "Unknow"
     data_export = "Unknow"
     if core.appPlugin.pluginName == 'Maya':
-        import maya.cmds as cmds
+        import maya.cmds as cmds #type: ignore
         name_scene = cmds.file(q=True, sn=True)
         export = _findToExport(core)
         if export:
             data_export = export
         else:
             data_export = "Nothing has been exported"
-    
+
     elif core.appPlugin.pluginName == 'Nuke':
-        name_scene = "Nuke "
-    
+        import nuke #type: ignore
+        name_scene = nuke.root().name()
+
     elif core.appPlugin.pluginName == 'Standalone':
         name_scene = "Panel Media of Prism"
 
@@ -105,8 +98,4 @@ def addPathGeometryCustom(core) -> str:
 # main execution
 def mainCustom(data, core)-> dict:
     data["sg_path_to_geometry"] = addPathGeometryCustom(core)
-    status = findStatusFromCurrentState(core)
-    if status:
-        data["sg_status_list"] = status
-    
     return data

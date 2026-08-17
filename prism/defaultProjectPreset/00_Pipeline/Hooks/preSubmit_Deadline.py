@@ -26,7 +26,6 @@ def main(origin, Settings, pluginInfos, arguments):
     for i, data in enumerate(AllEnvVariable):
         Settings[f"EnvironmentKeyValue{i}"] = data
 
-
     if 'ILLOGIC_TEMP_NODE' not in os.environ:
         return
     
@@ -47,10 +46,13 @@ def main(origin, Settings, pluginInfos, arguments):
 
 
     #force env var for foundry license 
-    if jobInfos["Plugin"] == "Nuke":
-        origin.addEnvironmentItem(jobInfos, "foundry_LICENSE", "4101@rlm-illogic")
-        # force deadline license limit for Nuke
-        jobInfos["LimitGroups"] = "nukelimit"
+    try:
+        if jobInfos["Plugin"] == "Nuke":
+            origin.addEnvironmentItem(jobInfos, "foundry_LICENSE", "4101@rlm-illogic")
+            # force deadline license limit for Nuke
+            jobInfos["LimitGroups"] = "nukelimit"
+    except Exception:
+        pass
 
 
 

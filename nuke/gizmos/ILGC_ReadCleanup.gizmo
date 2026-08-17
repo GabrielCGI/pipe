@@ -14,6 +14,9 @@ Gizmo {
  addUserKnob {26 ""}
  addUserKnob {7 alpha_security l "Alpha Security :" R 0 0.1}
  alpha_security 0.01
+ addUserKnob {20 User}
+ addUserKnob {6 fromShotLoader -STARTLINE}
+ fromShotLoader true
 }
  BackdropNode {
   inputs 0
@@ -35,11 +38,11 @@ Gizmo {
   label ITM
   note_font "Verdana Bold"
   note_font_size 42
-  xpos -13
+  xpos -61
   ypos -1324
   bookmark false
-  bdwidth 1747
-  bdheight 1829
+  bdwidth 1795
+  bdheight 2252
  }
  BackdropNode {
   inputs 0
@@ -60,45 +63,25 @@ Gizmo {
   xpos -732
   ypos -1481
  }
-set N23a9c800 [stack 0]
+set Ndb51c800 [stack 0]
  ViewMetaData {
   name ViewMetaData1
   xpos -732
   ypos -1537
  }
-push $N23a9c800
- NoOp {
-  name CTRL_CLEANUP
-  tile_color 0xff0000ff
-  note_font "Verdana Bold"
-  xpos -571
-  ypos -1481
-  addUserKnob {20 User}
-  addUserKnob {26 text01 l "" +STARTLINE T global}
-  addUserKnob {6 classicOrItm l "Classic or ITM ?" +STARTLINE}
-  classicOrItm {{"\[python 1\\ if\\ nuke.thisNode().input(0)\\ and\\ \\\"frederic_2603\\\"\\ in\\ (nuke.thisNode().input(0).metadata(\\\"input/filename\\\")\\ or\\ \\\"\\\")\\ else\\ 0]"}}
-  addUserKnob {6 check_psd l "PSD ?" +STARTLINE}
-  check_psd {{"\[python 1\\ if\\ nuke.thisNode().input(0)\\ and\\ \\\"psd\\\"\\ in\\ (nuke.thisNode().input(0).metadata(\\\"input/filereader\\\")\\ or\\ \\\"\\\")\\ else\\ 0]"}}
-  addUserKnob {26 ""}
-  addUserKnob {26 itm l "" +STARTLINE T itm}
-  addUserKnob {6 cryptoPrimvarPart l "CryptoPrimvar_Part ?" +STARTLINE}
-  cryptoPrimvarPart {{"\[python 1\\ if\\ nuke.thisNode().input(0)\\ and\\ any(c.startswith(\\\"CryptoPrimvar_part\\\")\\ for\\ c\\ in\\ nuke.thisNode().input(0).channels())\\ else\\ 0]"}}
-  addUserKnob {6 characters l "Characters ?" +STARTLINE}
-  characters {{"\[python 1\\ if\\ nuke.thisNode().input(0)\\ and\\ \\\"char\\\"\\ in\\ (nuke.thisNode().input(0).metadata(\\\"input/filename\\\")\\ or\\ \\\"\\\").lower()\\ else\\ 0]"}}
- }
-push $N23a9c800
+push $Ndb51c800
  Dot {
   name Dot8
   xpos -698
   ypos -1388
  }
-set N33246c00 [stack 0]
+set Ndbefec00 [stack 0]
  Dot {
   name Dot30
   xpos -283
   ypos -1388
  }
-set N33247400 [stack 0]
+set Ndbeff000 [stack 0]
  OCIODisplay {
   colorspace scene_linear
   display "sRGB - Display"
@@ -111,9 +94,9 @@ set N33247400 [stack 0]
  Dot {
   name Dot31
   xpos -283
-  ypos 655
+  ypos 1051
  }
-push $N33247400
+push $Ndbeff000
  Dot {
   name Dot9
   xpos 1200
@@ -181,15 +164,15 @@ push $N33247400
    xpos 295
    ypos 462
   }
-set N3befd400 [stack 0]
+set Nab43e000 [stack 0]
   Dot {
    name Dot1
    note_font_size 41
    xpos -160
    ypos 462
   }
-set N3befd800 [stack 0]
-push $N3befd400
+set Nab43e400 [stack 0]
+push $Nab43e000
   Crop {
    box {{curve} {curve} {input.width} {input.height}}
    crop {{parent.blackOutside}}
@@ -199,7 +182,7 @@ push $N3befd400
    addUserKnob {20 User}
    addUserKnob {22 cropToBbox l "Crop to Bounding Box" -STARTLINE T codeBBox()}
   }
-set Ne3944400 [stack 0]
+set Nab43e800 [stack 0]
   Remove {
    operation keep
    channels none
@@ -207,7 +190,7 @@ set Ne3944400 [stack 0]
    xpos 120
    ypos 504
   }
-set Ne3944800 [stack 0]
+set Nab43ec00 [stack 0]
   Transform {
    scale {{parent.overscanPercent} {parent.overscanPercent}}
    center {{input.bbox.r/2} {input.bbox.t/2}}
@@ -216,7 +199,7 @@ set Ne3944800 [stack 0]
    xpos 120
    ypos 555
   }
-push $Ne3944800
+push $Nab43ec00
   AdjBBox {
    numpixels {{parent.overscan} {parent.overscan}}
    name AdjBBox1
@@ -242,7 +225,7 @@ push $Ne3944800
    ypos 647
    disable {{!parent.Crop6.intersect}}
   }
-push $N3befd800
+push $Nab43e400
   CopyBBox {
    inputs 2
    name CopyBBox1
@@ -261,7 +244,7 @@ push $N3befd800
    xpos -160
    ypos 769
   }
-push $Ne3944400
+push $Nab43e800
   Switch {
    inputs 2
    which {{"overscanType == 0 ? overscan.w != 0 || overscan.h != 0 : overscanPercent.w != 1 || overscanPercent.h != 1 ? 1 : 0"}}
@@ -270,13 +253,13 @@ push $Ne3944400
    xpos 261
    ypos 759
   }
-set Ne843b200 [stack 0]
+set Nffd92500 [stack 0]
   Output {
    name Output1
    xpos 261
    ypos 921
   }
-push $Ne843b200
+push $Nffd92500
   NoOp {
    name OutputBBox1
    xpos 378
@@ -307,19 +290,19 @@ add_layer {CryptoPrimvar_part02 CryptoPrimvar_part02.red CryptoPrimvar_part02.gr
   xpos 1200
   ypos -908
  }
-set Ne6ec5800 [stack 0]
+set N6b1ff400 [stack 0]
  Dot {
   name Dot6
   xpos 1022
   ypos -908
  }
-set Ne6ec5c00 [stack 0]
+set N6b1ff800 [stack 0]
  Dot {
   name Dot7
   xpos 879
   ypos -908
  }
-set N238ef400 [stack 0]
+set N6b1ffc00 [stack 0]
 add_layer {CryptoPrimitives CryptoPrimitives.red CryptoPrimitives.green CryptoPrimitives.blue}
 add_layer {CryptoPrimitives00 CryptoPrimitives00.red CryptoPrimitives00.green CryptoPrimitives00.blue CryptoPrimitives00.alpha}
 add_layer {CryptoPrimitives01 CryptoPrimitives01.red CryptoPrimitives01.green CryptoPrimitives01.blue CryptoPrimitives01.alpha}
@@ -349,7 +332,7 @@ add_layer {CryptoPrimitives02 CryptoPrimitives02.red CryptoPrimitives02.green Cr
   xpos 879
   ypos -761
  }
-push $Ne6ec5c00
+push $N6b1ff800
 add_layer {CryptoMaterials00 CryptoMaterials00.red CryptoMaterials00.green CryptoMaterials00.blue CryptoMaterials00.alpha}
 add_layer {CryptoMaterials01 CryptoMaterials01.red CryptoMaterials01.green CryptoMaterials01.blue CryptoMaterials01.alpha}
 add_layer {CryptoMaterials02 CryptoMaterials02.red CryptoMaterials02.green CryptoMaterials02.blue CryptoMaterials02.alpha}
@@ -390,7 +373,7 @@ add_layer {CryptoMaterials02 CryptoMaterials02.red CryptoMaterials02.green Crypt
   xpos 1022
   ypos -709
  }
-set N99532c00 [stack 0]
+set Ne9e70000 [stack 0]
  Dot {
   name Dot16
   xpos 912
@@ -401,7 +384,7 @@ set N99532c00 [stack 0]
   xpos 913
   ypos -603
  }
-push $N238ef400
+push $N6b1ffc00
  Dot {
   name Dot11
   xpos 738
@@ -432,7 +415,7 @@ push $N238ef400
   xpos 738
   ypos -657
  }
-push $N99532c00
+push $Ne9e70000
  Merge2 {
   inputs 2
   metainput All
@@ -457,7 +440,7 @@ push $N99532c00
   xpos 1022
   ypos -559
  }
-push $Ne6ec5800
+push $N6b1ff400
  Reformat {
   type "to box"
   box_width {{parent.delivery_format.w}}
@@ -478,18 +461,65 @@ push $Ne6ec5800
   xpos 1166
   ypos -574
  }
+ Dot {
+  name Dot32
+  xpos 1200
+  ypos -526
+ }
+set N88dfb400 [stack 0]
+ Dot {
+  name Dot33
+  xpos 1018
+  ypos -526
+ }
+add_layer {depthFiltered depthFiltered.depthFiltered}
+ Premult {
+  channels depthFiltered
+  name Premult3
+  xpos 984
+  ypos -493
+ }
+ Unpremult {
+  channels depthFiltered
+  name Unpremult1
+  xpos 984
+  ypos -456
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 depthFiltered
+  out1 depth
+  fromInput2 {{0} B}
+  mappings "1 depthFiltered.depthFiltered 0 0 depth.Z 0 0"
+  name Shuffle9
+  label "\[value in1]"
+  xpos 984
+  ypos -420
+ }
+ Remove {
+  channels depthFiltered
+  name Remove12
+  xpos 984
+  ypos -384
+ }
+ Dot {
+  name Dot34
+  xpos 1018
+  ypos -303
+ }
+push $N88dfb400
 add_layer {depth_extra depth_extra.z depth_extra.depth}
  Premult {
   channels {-depth_extra.z depth_extra.depth}
   name Premult1
   xpos 1166
-  ypos -506
+  ypos -499
  }
  Unpremult {
   channels {-depth_extra.z depth_extra.depth}
   name Unpremult3
   xpos 1166
-  ypos -470
+  ypos -463
  }
  Shuffle2 {
   fromInput1 {{0} B}
@@ -500,26 +530,33 @@ add_layer {depth_extra depth_extra.z depth_extra.depth}
   name Shuffle2
   label "\[value in1]"
   xpos 1166
-  ypos -434
+  ypos -427
  }
  Remove {
   channels depth_extra
   name Remove6
   xpos 1166
-  ypos -398
+  ypos -391
+ }
+ Switch {
+  inputs 2
+  which {{parent.CTRL_CLEANUP.zfiltered_or_extra}}
+  name Switch5
+  xpos 1166
+  ypos -306
  }
 add_layer {uv_extra uv_extra.red uv_extra.green uv_extra.blue uv_extra.x uv_extra.y uv_extra.z}
  Premult {
   channels uv_extra
   name Premult2
   xpos 1166
-  ypos -326
+  ypos -161
  }
  Unpremult {
   channels uv_extra
   name Unpremult4
   xpos 1166
-  ypos -290
+  ypos -125
  }
 add_layer {UV UV.u UV.v UV.red UV.green UV.blue UV.X UV.Y UV.Z}
  Shuffle2 {
@@ -531,30 +568,30 @@ add_layer {UV UV.u UV.v UV.red UV.green UV.blue UV.X UV.Y UV.Z}
   name Shuffle5
   label "\[value in1]"
   xpos 1166
-  ypos -254
+  ypos -89
  }
  Remove {
   channels uv_extra
   name Remove13
   xpos 1166
-  ypos -218
+  ypos -53
  }
  Dot {
   name Dot17
   xpos 1200
-  ypos -169
+  ypos 133
  }
-set Nbc52e000 [stack 0]
+set N66abd000 [stack 0]
  Dot {
   name Dot22
   xpos 1200
-  ypos 78
+  ypos 380
  }
-set Nbc52e400 [stack 0]
+set N66abd400 [stack 0]
  Dot {
   name Dot24
   xpos 1481
-  ypos 78
+  ypos 380
  }
 add_layer {basecolor basecolor.red basecolor.green basecolor.blue}
 add_layer {albedo albedo.red albedo.green albedo.blue}
@@ -567,7 +604,7 @@ add_layer {albedo albedo.red albedo.green albedo.blue}
   name Shuffle8
   label "\[value in1]"
   xpos 1447
-  ypos 144
+  ypos 446
  }
 add_layer {albedotransmitteddiffuse albedotransmitteddiffuse.red albedotransmitteddiffuse.green albedotransmitteddiffuse.blue}
  Remove {
@@ -575,31 +612,31 @@ add_layer {albedotransmitteddiffuse albedotransmitteddiffuse.red albedotransmitt
   channels2 albedotransmitteddiffuse
   name Remove11
   xpos 1447
-  ypos 194
+  ypos 496
  }
  Dot {
   name Dot23
   xpos 1481
-  ypos 423
+  ypos 725
  }
-push $Nbc52e000
+push $N66abd000
  Dot {
   name Dot18
-  xpos 841
-  ypos -169
+  xpos 950
+  ypos 133
  }
-set Nbc52f800 [stack 0]
+set Ncca56800 [stack 0]
  Dot {
   name Dot25
-  xpos 294
-  ypos -169
+  xpos 25
+  ypos 133
  }
  Dot {
   name Dot26
-  xpos 294
-  ypos -104
+  xpos 25
+  ypos 198
  }
-set Nbc448000 [stack 0]
+set Ncca57000 [stack 0]
 add_layer {mask_mouth mask_mouth.mask_mouth}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -608,19 +645,19 @@ add_layer {mask_mouth mask_mouth.mask_mouth}
   mappings "4 mask_mouth.mask_mouth 0 0 rgba.red 0 0 mask_mouth.mask_mouth 0 0 rgba.green 0 1 mask_mouth.mask_mouth 0 0 rgba.blue 0 2 mask_mouth.mask_mouth 0 0 rgba.alpha 0 3"
   name Shuffle4
   label "\[value in1]"
-  xpos 260
-  ypos -65
+  xpos -9
+  ypos 234
  }
  Dot {
   name Dot28
-  xpos 294
-  ypos 63
+  xpos 25
+  ypos 348
  }
-push $Nbc448000
+push $Ncca57000
  Dot {
   name Dot27
-  xpos 497
-  ypos -104
+  xpos 228
+  ypos 198
  }
  Cryptomatte {
   cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
@@ -628,8 +665,8 @@ push $Nbc448000
   matteList "*teeth*\n*tongue*"
   lastSelectedCryptoLayerName CryptoPrimitives
   name Cryptomatte1
-  xpos 463
-  ypos -59
+  xpos 194
+  ypos 240
  }
  Shuffle2 {
   fromInput1 {{0} B}
@@ -638,49 +675,144 @@ push $Nbc448000
   mappings "4 rgba.alpha 0 0 rgba.alpha 0 3 rgba.alpha 0 0 rgba.red 0 0 rgba.alpha 0 0 rgba.green 0 1 rgba.alpha 0 0 rgba.blue 0 2"
   name Shuffle6
   label "\[value in1]"
-  xpos 463
-  ypos -35
+  xpos 194
+  ypos 296
  }
  Merge2 {
   inputs 2
   operation disjoint-over
   name Merge4
-  xpos 463
-  ypos 60
+  xpos 194
+  ypos 345
  }
  Dot {
   name Dot29
-  xpos 497
-  ypos 243
+  xpos 228
+  ypos 553
  }
-push $Nbc52f800
+push $Ncca56800
  Dot {
   name Dot191
-  xpos 841
-  ypos -104
+  xpos 950
+  ypos 198
  }
-set Nbc474400 [stack 0]
+set Nc44d3400 [stack 0]
  Dot {
-  name Dot21
-  xpos 971
-  ypos -104
+  name Dot20
+  xpos 818
+  ypos 198
+ }
+set Nc44d3800 [stack 0]
+ Dot {
+  name Dot35
+  xpos 699
+  ypos 198
+ }
+set Nc44d3c00 [stack 0]
+ Dot {
+  name Dot36
+  xpos 570
+  ypos 198
+ }
+set Nc453ec00 [stack 0]
+ Dot {
+  name Dot39
+  xpos 477
+  ypos 198
  }
  Cryptomatte {
   cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
-  pickerAdd {1.22690165 1.13733232 0.05009730533 0.999999702 1095 429 1096 430}
-  matteList *eye*
+  pickerAdd {0.140493691 0.2478990555 0.2415962219 0 991 584 992 585}
+  matteList /assets/characters/*
+  unpremultiply true
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte3
+  xpos 443
+  ypos 333
+ }
+push $Nc453ec00
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 basecolor
+  out1 rgb
+  fromInput2 {{0} B}
+  mappings "3 basecolor.red 0 0 rgba.red 0 0 basecolor.green 0 1 rgba.green 0 1 basecolor.blue 0 2 rgba.blue 0 2"
+  name Shuffle10
+  label "\[value in1]"
+  xpos 536
+  ypos 234
+ }
+set Nc453f000 [stack 0]
+ Dot {
+  name Dot40
+  xpos 367
+  ypos 243
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  name Multiply3
+  xpos 333
+  ypos 333
+ }
+ Dot {
+  name Dot41
+  xpos 367
+  ypos 425
+ }
+push $Nc44d3c00
+ Cryptomatte {
+  cryptoLayerChoice {{2} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0.1366326213 0.1861219406 0.2444877625 0 1050 730 1051 731}
+  unpremultiply true
+  lastSelectedCryptoLayerName CryptoMaterials
+  name Cryptomatte2
+  xpos 665
+  ypos 240
+ }
+ Dot {
+  name Dot37
+  xpos 699
+  ypos 305
+ }
+push $Nc453f000
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  invert_mask true
+  name Multiply1
+  xpos 536
+  ypos 302
+ }
+ Dot {
+  name Dot38
+  xpos 570
+  ypos 390
+ }
+push $Nc44d3400
+ Dot {
+  name Dot21
+  xpos 1080
+  ypos 198
+ }
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {1.056412816 1.152605057 0.1104202271 1 1420 608 1421 609}
+  matteList "*eye*\n*teeth*\n*tongue*"
   unpremultiply true
   lastSelectedCryptoLayerName CryptoPrimitives
   name Cryptomatte11
-  xpos 937
-  ypos -62
+  xpos 1046
+  ypos 240
  }
  Dot {
   name Dot193
-  xpos 971
-  ypos 3
+  xpos 1080
+  ypos 323
  }
-push $Nbc474400
+push $Nc44d3400
  Shuffle2 {
   fromInput1 {{0} B}
   in1 albedotransmitteddiffuse
@@ -689,23 +821,48 @@ push $Nbc474400
   mappings "3 albedotransmitteddiffuse.red 0 0 rgba.red 0 0 albedotransmitteddiffuse.green 0 1 rgba.green 0 1 albedotransmitteddiffuse.blue 0 2 rgba.blue 0 2"
   name Shuffle35
   label "\[value in1]"
-  xpos 807
-  ypos -68
+  xpos 916
+  ypos 234
+ }
+ Denoise2 {
+  amount 2
+  lumablend 1
+  lockNoiseAnalysis true
+  analysisRegion {886.4000244 561.4000244 986.4000244 661.4000244}
+  analysisFrame 1001
+  needsAnalyzing false
+  profileCurve {profile {curve 0 x0.125 0 0 0 0 0 0 0 0}}
+  serializeKnob "7.723618150e-01 4.873863757e-01 5.073839426e-01
+5.443658680e-03 1.297694398e-04 9.641781799e-05
+5.443658680e-03 1.297694398e-04 9.641781799e-05
+4.294169135e-03 1.109179866e-04 9.855837561e-05
+0.000000000e+00 0.000000000e+00 0.000000000e+00
+2.272682032e-03 1.335698034e-04 6.639900676e-05
+2.272682032e-03 1.335698034e-04 6.639900676e-05
+1.407067059e-03 4.173243360e-05 2.214710912e-05
+0.000000000e+00 0.000000000e+00 0.000000000e+00
+9.310224559e-04 1.130696110e-04 5.971952851e-05
+9.310224559e-04 1.130696110e-04 5.971952851e-05
+6.735233474e-04 5.618087744e-05 2.650474380e-05
+0.000000000e+00 0.000000000e+00 0.000000000e+00
+5.932186614e-04 9.954726556e-05 5.783442248e-05
+5.932186614e-04 9.954726556e-05 5.783442248e-05
+3.671103332e-04 7.515861216e-05 4.207857273e-05
+0.000000000e+00 0.000000000e+00 0.000000000e+00 0.000000000e+00 0.000000000e+00 0.000000000e+00 0.000000000e+00 0.000000000e+00 0.000000000e+00 
+5599589742929408169"
+  name Denoise1
+  xpos 916
+  ypos 270
  }
  Multiply {
   inputs 1+1
   value 0
   invert_mask true
   name Multiply2
-  xpos 807
-  ypos -6
+  xpos 916
+  ypos 314
  }
-push $Nbc474400
- Dot {
-  name Dot20
-  xpos 709
-  ypos -104
- }
+push $Nc44d3800
 add_layer {customAlbedo customAlbedo.red customAlbedo.green customAlbedo.blue}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -715,27 +872,40 @@ add_layer {customAlbedo customAlbedo.red customAlbedo.green customAlbedo.blue}
   mappings "3 customAlbedo.red 0 0 rgba.red 0 0 customAlbedo.green 0 1 rgba.green 0 1 customAlbedo.blue 0 2 rgba.blue 0 2"
   name Shuffle36
   label "\[value in1]"
-  xpos 675
-  ypos -68
+  xpos 784
+  ypos 234
  }
  Dot {
   name Dot192
-  xpos 709
-  ypos 63
+  xpos 818
+  ypos 353
  }
  Merge2 {
   inputs 2
   operation plus
   name Merge40
-  xpos 807
-  ypos 60
+  xpos 916
+  ypos 350
+ }
+ Merge2 {
+  inputs 2
+  name Merge5
+  xpos 916
+  ypos 387
+ }
+ Merge2 {
+  inputs 2
+  operation exclusion
+  name Merge6
+  xpos 916
+  ypos 422
  }
  Dot {
   name Dot19
-  xpos 841
-  ypos 150
+  xpos 950
+  ypos 452
  }
-push $Nbc52e400
+push $N66abd400
  Shuffle2 {
   inputs 2
   fromInput1 {{1} B A}
@@ -745,14 +915,15 @@ push $Nbc52e400
   mappings "3 rgba.red 0 0 albedo.red 0 0 rgba.green 0 1 albedo.green 0 1 rgba.blue 0 2 albedo.blue 0 2"
   name Shuffle3
   xpos 1166
-  ypos 147
+  ypos 449
  }
  Remove {
   channels customAlbedo
   channels2 albedotransmitteddiffuse
+  channels3 basecolor
   name Remove9
   xpos 1166
-  ypos 185
+  ypos 487
  }
 add_layer {mouthInterior mouthInterior.red mouthInterior.green mouthInterior.blue mouthInterior.alpha}
  Shuffle2 {
@@ -764,7 +935,7 @@ add_layer {mouthInterior mouthInterior.red mouthInterior.green mouthInterior.blu
   name Shuffle7
   label "\[value in1]"
   xpos 1166
-  ypos 234
+  ypos 544
  }
 add_layer {rest rest.red rest.green rest.blue}
  Remove {
@@ -773,21 +944,21 @@ add_layer {rest rest.red rest.green rest.blue}
   channels3 basecolor
   name Remove10
   xpos 1166
-  ypos 293
+  ypos 603
  }
  Switch {
   inputs 2
   which {{!parent.CTRL_CLEANUP.characters}}
   name Switch3
   xpos 1166
-  ypos 420
+  ypos 722
  }
  Dot {
   name Dot4
   xpos 1200
-  ypos 587
+  ypos 983
  }
-push $N33246c00
+push $Ndbefec00
  Expression {
   temp_name0 security
   temp_expr0 parent.alpha_security
@@ -850,15 +1021,15 @@ push $N33246c00
    xpos 295
    ypos 462
   }
-set Nb8fff400 [stack 0]
+set Nbc1be800 [stack 0]
   Dot {
    name Dot1
    note_font_size 41
    xpos -160
    ypos 462
   }
-set Nb8fff800 [stack 0]
-push $Nb8fff400
+set Nbc1bec00 [stack 0]
+push $Nbc1be800
   Crop {
    box {{curve} {curve} {input.width} {input.height}}
    crop {{parent.blackOutside}}
@@ -868,7 +1039,7 @@ push $Nb8fff400
    addUserKnob {20 User}
    addUserKnob {22 cropToBbox l "Crop to Bounding Box" -STARTLINE T codeBBox()}
   }
-set Nb8fffc00 [stack 0]
+set Nbc1bf000 [stack 0]
   Remove {
    operation keep
    channels none
@@ -876,7 +1047,7 @@ set Nb8fffc00 [stack 0]
    xpos 120
    ypos 504
   }
-set Nc41cc000 [stack 0]
+set Nbc1bf400 [stack 0]
   Transform {
    scale {{parent.overscanPercent} {parent.overscanPercent}}
    center {{input.bbox.r/2} {input.bbox.t/2}}
@@ -885,7 +1056,7 @@ set Nc41cc000 [stack 0]
    xpos 120
    ypos 555
   }
-push $Nc41cc000
+push $Nbc1bf400
   AdjBBox {
    numpixels {{parent.overscan} {parent.overscan}}
    name AdjBBox1
@@ -911,7 +1082,7 @@ push $Nc41cc000
    ypos 647
    disable {{!parent.Crop6.intersect}}
   }
-push $Nb8fff800
+push $Nbc1bec00
   CopyBBox {
    inputs 2
    name CopyBBox1
@@ -930,7 +1101,7 @@ push $Nb8fff800
    xpos -160
    ypos 769
   }
-push $Nb8fffc00
+push $Nbc1bf000
   Switch {
    inputs 2
    which {{"overscanType == 0 ? overscan.w != 0 || overscan.h != 0 : overscanPercent.w != 1 || overscanPercent.h != 1 ? 1 : 0"}}
@@ -939,13 +1110,13 @@ push $Nb8fffc00
    xpos 261
    ypos 759
   }
-set Nb8fcaf00 [stack 0]
+set Nc7f6e300 [stack 0]
   Output {
    name Output1
    xpos 261
    ypos 921
   }
-push $Nb8fcaf00
+push $Nc7f6e300
   NoOp {
    name OutputBBox1
    xpos 378
@@ -962,13 +1133,13 @@ push $Nb8fcaf00
   xpos -698
   ypos -910
  }
-set Nc4206400 [stack 0]
+set Nbfdcd800 [stack 0]
  Dot {
   name Dot1
   xpos -876
   ypos -910
  }
-set Nc4206800 [stack 0]
+set Nbfdcdc00 [stack 0]
  Dot {
   name Dot2
   xpos -1019
@@ -994,7 +1165,7 @@ set Nc4206800 [stack 0]
   xpos -1053
   ypos -837
  }
-push $Nc4206800
+push $Nbfdcdc00
  Remove {
   operation keep
   channels CryptoMaterials00
@@ -1027,7 +1198,7 @@ push $Nc4206800
   xpos -985
   ypos -772
  }
-push $Nc4206400
+push $Nbfdcd800
  Reformat {
   type "to box"
   box_width {{parent.delivery_format.w}}
@@ -1070,18 +1241,40 @@ push $Nc4206400
   which {{parent.CTRL_CLEANUP.classicOrItm}}
   name Switch1
   xpos -732
-  ypos 584
+  ypos 980
  }
  Switch {
   inputs 2
   which {{parent.CTRL_CLEANUP.check_psd}}
   name Switch4
   xpos -732
-  ypos 652
+  ypos 1048
  }
  Output {
   name Output1
   xpos -732
-  ypos 732
+  ypos 1128
+ }
+push $Ndb51c800
+ NoOp {
+  name CTRL_CLEANUP
+  tile_color 0xff0000ff
+  note_font "Verdana Bold"
+  xpos -571
+  ypos -1481
+  addUserKnob {20 User}
+  addUserKnob {26 text01 l "" +STARTLINE T global}
+  addUserKnob {6 classicOrItm l "Classic or ITM ?" +STARTLINE}
+  classicOrItm {{"\[python 1\\ if\\ nuke.thisNode().input(0)\\ and\\ \\\"frederic_2603\\\"\\ in\\ (nuke.thisNode().input(0).metadata(\\\"input/filename\\\")\\ or\\ \\\"\\\")\\ else\\ 0]"}}
+  addUserKnob {6 check_psd l "PSD ?" +STARTLINE}
+  check_psd {{"\[python 1\\ if\\ nuke.thisNode().input(0)\\ and\\ \\\"psd\\\"\\ in\\ (nuke.thisNode().input(0).metadata(\\\"input/filereader\\\")\\ or\\ \\\"\\\")\\ else\\ 0]"}}
+  addUserKnob {26 ""}
+  addUserKnob {26 itm l "" +STARTLINE T itm}
+  addUserKnob {6 cryptoPrimvarPart l "CryptoPrimvar_Part ?" +STARTLINE}
+  cryptoPrimvarPart {{"\[python 1\\ if\\ nuke.thisNode().input(0)\\ and\\ any(c.startswith(\\\"CryptoPrimvar_part\\\")\\ for\\ c\\ in\\ nuke.thisNode().input(0).channels())\\ else\\ 0]"}}
+  addUserKnob {6 characters l "Characters ?" +STARTLINE}
+  characters {{"\[python 1\\ if\\ nuke.thisNode().input(0)\\ and\\ \\\"char\\\"\\ in\\ (nuke.thisNode().input(0).metadata(\\\"input/filename\\\")\\ or\\ \\\"\\\").lower()\\ else\\ 0]"}}
+  addUserKnob {6 zfiltered_or_extra l "ZFiltered or Extra ?" +STARTLINE}
+  zfiltered_or_extra {{"\[python 1\\ if\\ nuke.thisNode().input(0)\\ and\\ any(c.startswith(\\\"depthFiltered\\\")\\ for\\ c\\ in\\ nuke.thisNode().input(0).channels())\\ else\\ 0]"}}
  }
 end_group

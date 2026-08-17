@@ -70,7 +70,6 @@ class CustomizeUsdExportSettings:
         return subFrame
 
     def preMayaUSDExport(self, origin, options, outputPath):
-
         core = self.core
         newVal = "eulerFilter=1"
         

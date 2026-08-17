@@ -67,7 +67,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\nimport traceback\nimport PrismInit\n\n\n     \nimport anm_reference_updater\nreload(anm_reference_updater)\n\nfrom maya import OpenMayaUI\nfrom shiboken6 import wrapInstance\nfrom PySide6.QtWidgets import QWidget\nmain_window_ptr = OpenMayaUI.MQtUtil.mainWindow()\ninstance = wrapInstance(int(main_window_ptr), QWidget)\n\nwindow = anm_reference_updater.mainUI(False, PrismInit.pcore, instance)\nwindow.show()\nwindow.tabs.setCurrentIndex(1)" 
+        -command "from importlib import reload\nimport traceback\nimport PrismInit\n\n\n     \nimport anm_reference_updater\nreload(anm_reference_updater)\n\nfrom maya import OpenMayaUI\nfrom shiboken6 import wrapInstance\nfrom PySide6.QtWidgets import QWidget\nmain_window_ptr = OpenMayaUI.MQtUtil.mainWindow()\ninstance = wrapInstance(int(main_window_ptr), QWidget)\n\nwindow = anm_reference_updater.mainUI(False, PrismInit.pcore.projectPath.replace(\"\\\\\", \"/\"), instance)\nwindow.show()\nwindow.tabs.setCurrentIndex(1)" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -387,7 +387,6 @@ global proc shelf_Illogic () {
         -flipY 0
         -useAlpha 1
         -font "plainLabelFont" 
-        -imageOverlayLabel "" 
         -overlayLabelColor 0.8 0.8 0.8 
         -overlayLabelBackColor 0 0 0 0.5 
         -image "R:/pipeline/pipe/maya/shelfs/2026/ICONS/main/fix_green_usd.png" 

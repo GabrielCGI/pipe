@@ -5,12 +5,6 @@ import sys
 
 
 
-# from  USDExport_anim import CustomExportAnim
-from custom_export_UI import CustomExportUI
-from custom_preExport import CustomPreExport
-from custom_playblast import CustomPlayblast
-
-
 PRISM_SCRIPT_PATH = "R:/pipeline/pipe/prism"
 
 
@@ -19,6 +13,9 @@ class Prism_CustomStateManager_Functions(object):
     def __init__(self, core, plugin):
         self.core = core
         self.plugin = plugin
+        if self.core.appPlugin.pluginName != "Maya":
+            return
+        
         self.core.registerCallback("onStateStartup", self.onStateStartup, plugin=self, priority=40)
         self.core.registerCallback("onStateManagerShow", self.onStateManagerShow, plugin=self)
         self.core.registerCallback("onStateCreated", self.onStateCreated, plugin=self, priority=40)
@@ -32,26 +29,22 @@ class Prism_CustomStateManager_Functions(object):
 
     # ---------------- modification de l'interface des states Export et D'USD export ----------------
     def onStateCreated(self, *args, **kwargs):
-        if self.core.appPlugin.pluginName != "Maya":
-            return
+        from custom_playblast import CustomPlayblast
         ui = args[1]
         CustomPlayblast(ui.state)
         
     def onStateManagerShow(self, sm):
-        if self.core.appPlugin.pluginName != "Maya":
-            return
+        from custom_playblast import CustomPlayblast
         states = sm.states
         for state in states:
             CustomPlayblast(state)
     
     def onStateStartup(self, state):
-        if self.core.appPlugin.pluginName != "Maya":
-            return
+        from custom_export_UI import CustomExportUI
         CustomExportUI(state)
     
     def preExport(self, **kwargs):
-        if self.core.appPlugin.pluginName != "Maya":
-            return
+        from custom_preExport import CustomPreExport
         CustomPreExport(kwargs)
 
 

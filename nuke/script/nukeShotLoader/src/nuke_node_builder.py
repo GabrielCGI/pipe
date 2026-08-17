@@ -28,6 +28,18 @@ _STMAP_FRAME_RE = re.compile(
 class NukeNodeBuilder:
     """Builds Nuke nodes for shot assets."""
 
+    # Label TCL that evaluates to the version token in the Read/Camera's
+    # current `file` path — reused by every loader method so a version
+    # dropdown change reflects on the node without a resync roundtrip.
+    _VERSION_LABEL_TCL = r"[lindex [regexp -inline -all {v\d+} [value file]] end]"
+
+    def _apply_version_label(self, node, prefix):
+        """Write '<prefix>\\n<version TCL>' onto node['label']. `prefix` can
+        span multiple lines (e.g. stMap uses 'stMap\\n<clean_name>'). No-op
+        when the node has no label knob (defensive — Read/Camera3 always do)."""
+        if 'label' in node.knobs():
+            node['label'].setValue(f"{prefix}\n{self._VERSION_LABEL_TCL}")
+
     def __init__(self):
         """Initialize node builder."""
         self.positioning = PositioningManager()
@@ -191,9 +203,7 @@ class NukeNodeBuilder:
                 )
 
                 if read_node:
-                    version_tcl = r"[lindex [regexp -inline -all {v\d+} [value file]] end]"
-                    label_text = f"{plate_type}\n" + version_tcl
-                    read_node['label'].setValue(label_text)
+                    self._apply_version_label(read_node, plate_type)
                     nodes_in_group.append(read_node)
                     self.created_nodes.append(read_node)
 
@@ -248,9 +258,7 @@ class NukeNodeBuilder:
                 )
 
                 if read_node:
-                    version_tcl = r"[lindex [regexp -inline -all {v\d+} [value file]] end]"
-                    label_text = f"{render_pass}\n" + version_tcl
-                    read_node['label'].setValue(label_text)
+                    self._apply_version_label(read_node, render_pass)
                     nodes_in_group.append(read_node)
                     self.created_nodes.append(read_node)
 
@@ -319,9 +327,7 @@ class NukeNodeBuilder:
                 )
 
                 if read_node:
-                    version_tcl = r"[lindex [regexp -inline -all {v\d+} [value file]] end]"
-                    label_text = f"{render_pass}\n" + version_tcl
-                    read_node['label'].setValue(label_text)
+                    self._apply_version_label(read_node, render_pass)
                     nodes_in_group.append(read_node)
                     self.created_nodes.append(read_node)
 
@@ -387,9 +393,7 @@ class NukeNodeBuilder:
                 )
 
                 if read_node:
-                    version_tcl = r"[lindex [regexp -inline -all {v\d+} [value file]] end]"
-                    label_text = f"roto\n" + version_tcl
-                    read_node['label'].setValue(label_text)
+                    self._apply_version_label(read_node, "roto")
                     nodes_in_group.append(read_node)
                     self.created_nodes.append(read_node)
 
@@ -450,9 +454,7 @@ class NukeNodeBuilder:
             )
 
             if camera_node:
-                version_tcl = r"[lindex [regexp -inline -all {v\d+} [value file]] end]"
-                label_text = f"{cam_name}\n" + version_tcl
-                camera_node['label'].setValue(label_text)
+                self._apply_version_label(camera_node, cam_name)
                 nodes_in_group.append(camera_node)
                 self.created_nodes.append(camera_node)
 
@@ -1229,9 +1231,7 @@ class NukeNodeBuilder:
                     )
 
                     if read_node:
-                        version_tcl = r"[lindex [regexp -inline -all {v\d+} [value file]] end]"
-                        label_text = f"stMap\n{clean_name}\n" + version_tcl
-                        read_node['label'].setValue(label_text)
+                        self._apply_version_label(read_node, f"stMap\n{clean_name}")
                         nodes_in_group.append(read_node)
                         self.created_nodes.append(read_node)
 
@@ -1274,9 +1274,7 @@ class NukeNodeBuilder:
                         )
 
                         if read_node:
-                            version_tcl = r"[lindex [regexp -inline -all {v\d+} [value file]] end]"
-                            label_text = f"stMap\n{base_name}\n" + version_tcl
-                            read_node['label'].setValue(label_text)
+                            self._apply_version_label(read_node, f"stMap\n{base_name}")
                             nodes_in_group.append(read_node)
                             self.created_nodes.append(read_node)
 

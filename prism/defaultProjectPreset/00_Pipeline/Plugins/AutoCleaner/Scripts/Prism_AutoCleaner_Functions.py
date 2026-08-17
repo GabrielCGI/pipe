@@ -30,11 +30,8 @@
 #
 # You should have received a copy of the GNU Lesser General Public License
 # along with Prism.  If not, see <https://www.gnu.org/licenses/>.
-import PrismCore
-from PrismUtils.Decorators import err_catcher_plugin as err_catcher
-
-import auto_cleaner
-from auto_cleaner.entitytype import EntityType  # type: ignore  # noqa: E402
+import PrismCore  # type: ignore
+from PrismUtils.Decorators import err_catcher_plugin as err_catcher  # type: ignore
 
 
 class Prism_AutoCleaner_Functions(object):
@@ -47,6 +44,9 @@ class Prism_AutoCleaner_Functions(object):
         self.core.registerCallback("postSaveScene", self.postSaveScene, plugin=self)
 
     def postRender(self, *args, **kwargs):
+        import auto_cleaner
+        from auto_cleaner.entitytype import EntityType  # type: ignore  # noqa: E402
+
         if self.core.appPlugin.pluginName == "Nuke":
             scene_path = kwargs["scenefile"]
             reads_path = auto_cleaner.getReadPathToVersion()
@@ -63,12 +63,18 @@ class Prism_AutoCleaner_Functions(object):
             )
 
     def postExport(self, *args, **kwargs):
+        import auto_cleaner
+        from auto_cleaner.entitytype import EntityType  # type: ignore  # noqa: E402
+
         scene_path = kwargs["scenefile"]
         auto_cleaner.clean(
             scene_path=scene_path, entity_type=EntityType._PRODUCT, print_only=False
         )
 
     def postSaveScene(self, *args, **kwargs):
+        import auto_cleaner
+        from auto_cleaner.entitytype import EntityType  # type: ignore  # noqa: E402
+
         scene_path = args[1]
         auto_cleaner.clean(
             scene_path=scene_path, entity_type=EntityType._SCENEFILE, print_only=True

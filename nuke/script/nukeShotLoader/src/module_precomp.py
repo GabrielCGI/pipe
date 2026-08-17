@@ -64,6 +64,27 @@ _IGNORE_BY_CLASS = {
 
 _HASH_FRAME_RE = re.compile(r'#+')
 
+_CHANNEL_LAYER_RE = re.compile(
+    r'^([A-Za-z_]\w*)\.[A-Za-z_]\w*(?:\s+\1\.[A-Za-z_]\w*)+$'
+)
+
+def _normalize_channel_layer(s):
+    """Collapse an expanded channel list ('P.x P.y P.z P.red') back to its
+    layer name ('P'). Channel_Knob's toScript() flips between the two
+    representations based on what the upstream input reports at
+    evaluation time, and Link_Knob wrappers (used by Group/Gizmo inputs
+    like ILGC_PosProject.position and P_Noise_Advanced.in) inherit the
+    same behavior while hiding the underlying knob class from
+    isinstance() checks — so we can't filter by knob type alone.
+    Normalizing the value string catches every case: the class-based
+    skip stays as a fast path, this fold is the safety net that made
+    the Render Manager submit hash match a fresh manual mp.upstream_hash()
+    call and the farm."""
+    m = _CHANNEL_LAYER_RE.match(s)
+    if m:
+        return m.group(1)
+    return s
+
 def _normalize_file_value(s):
     """Fold '####' → '%04d' so a Read's file knob hashes identically
     whether the path was hand-authored with %04d (Prism, alt+up/down)
@@ -101,13 +122,24 @@ def _node_sig(node):
     for name, k in sorted(node.knobs().items()):
         if name in _IGNORE or name in class_ignore:
             continue
-        # Skip studio-gizmo channel-selector knobs (CHNKNB = ChannelMask,
-        # CHKNB = Channel). Their toScript() compacts/expands a channel
-        # layer to either the layer name (e.g. "P") or the explicit channel
-        # list ("P.x P.y P.z P.red") depending on what the upstream input
-        # reports at evaluation time. That representation drifts between
-        # farm and local for custom layers even when the .nk content is
-        # identical, and it broke a hash on MaskBuddy's aovSelectionCHNKNB.
+        # Skip Channel/ChannelMask knobs, whether studio-tagged via the
+        # CHNKNB/CHKNB name suffix or standard-named on a stock/gizmo
+        # node (e.g. ILGC_PosProject.position, P_Noise_Advanced.in).
+        # Their toScript() compacts/expands a channel layer to either
+        # the layer name (e.g. "P") or the explicit channel list
+        # ("P.x P.y P.z P.red") depending on what the upstream input
+        # reports at evaluation time. That representation drifts
+        # between the Render Manager submit path (which evaluates
+        # after a Prism save that perturbs the graph state) and both
+        # the farm side and a fresh manual mp.upstream_hash() call —
+        # both of which see the stable expanded form. Filtering by
+        # knob class instead of name catches every case: the earlier
+        # name-suffix rule only covered MaskBuddy's aovSelectionCHNKNB.
+        try:
+            if isinstance(k, (nuke.Channel_Knob, nuke.ChannelMask_Knob)):
+                continue
+        except Exception:
+            pass
         if name.endswith("CHNKNB") or name.endswith("CHKNB"):
             continue
         try:
@@ -117,6 +149,7 @@ def _node_sig(node):
             elif name == "curves":
                 value = _normalize_roto_curves(value)
             value = _collapse_single_key_curves(value)
+            value = _normalize_channel_layer(value)
             parts.append(name + "=" + value)
         except Exception:
             pass

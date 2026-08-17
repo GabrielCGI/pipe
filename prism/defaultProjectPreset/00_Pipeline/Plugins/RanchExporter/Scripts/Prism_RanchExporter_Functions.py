@@ -31,25 +31,25 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with Prism.  If not, see <https://www.gnu.org/licenses/>.
 
+import os
 
 from qtpy.QtCore import *
 from qtpy.QtGui import *
 from qtpy.QtWidgets import *
 
 from PrismUtils.Decorators import err_catcher_plugin as err_catcher
-import os
 
-# Complete path to the pretask script !! REPLACE IF MOVED !!
-# Not deployed yet, will be moved
+
 PREJOB_PATH = r"R:\pipeline\pipe\deadline\ranch_copy\CopyJopScripts\render_ranch_prejob.py"
 POSTJOB_PATH = r"R:\pipeline\pipe\deadline\ranch_copy\CopyJopScripts\delete_ranchjob_postjob.py"
+TRUE_VALUES = ["true", "1", "yes"]
 
 class Prism_RanchExporter_Functions(object):
     def __init__(self, core, plugin):
         self.core = core
         self.plugin = plugin
 
-        if not os.getenv("ILL_RANCHCOPY_ENABLED",False):
+        if os.getenv("ILL_RANCHCOPY_ENABLED","False").lower() not in TRUE_VALUES:
             return
 
         self.core.registerCallback("preSubmit_Deadline" , self.preSubmit_Deadline, plugin=self)

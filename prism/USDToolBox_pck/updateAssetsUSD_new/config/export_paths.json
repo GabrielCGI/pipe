@@ -1,17 +1,25 @@
 {
     "layout": [
-        "_layer_layout_layoutMaya",
-        "_layer_lay_main",
-        "_layer_mod_mayaLayout"
+        "_layer_lay_mayaLayout",
+        "_layer_lay_main"
     ],
     "setdress": [
 		"_layer_set_main"
-        
+    ],
+    "set":[
+        "_layer_set_extra",
+        "_layer_set_main"
     ],
     "animation": [
         "_layer_anm_class"
     ],
     "fx": [
         "_layer_fx_main"
+    ],
+    "shading":[
+        "_layer_shd_main"
+    ],
+    "modeling":[
+        "_layer_mod_main"
     ]
 }

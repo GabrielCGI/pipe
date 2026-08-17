@@ -1,0 +1,15 @@
+{
+    "comment": [
+        "paint_cop_recolor -- registers the stroke_recolor HDA with Houdini.",
+        "Python import needs no entry here: illogic.json already puts",
+        "R:/pipeline/pipe/houdini/scripts on PYTHONPATH, which makes",
+        "'import paint_cop_recolor' work natively.",
+        "Deploy: copy this file to R:/pipeline/pipe/houdini/packages/."
+    ],
+    "enable": true,
+    "load_package_once": true,
+    "env": [
+        { "PAINT_COP_RECOLOR": "R:/pipeline/pipe/houdini/scripts/paint_cop_recolor" },
+        { "HOUDINI_OTLSCAN_PATH": "$PAINT_COP_RECOLOR/otls;" }
+    ]
+}

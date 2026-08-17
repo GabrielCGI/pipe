@@ -6,11 +6,6 @@
  a single file. -->
 
   <shelfSet name="solaris_1" label="Solaris Geometry">
-    <memberToolshelf name="lop_oceans"/>
-    <memberToolshelf name="hairtools"/>
-    <memberToolshelf name="model"/>
-    <memberToolshelf name="simplefx"/>
-    <memberToolshelf name="labs_toolset"/>
     <memberToolshelf name="illogicLighting"/>
     <memberToolshelf name="illogicSolaris"/>
     <memberToolshelf name="illogicShading"/>
@@ -18,11 +13,7 @@
     <memberToolshelf name="illogic_cop"/>
     <memberToolshelf name="illogic_sop"/>
     <memberToolshelf name="prism"/>
-    <memberToolshelf name="particles"/>
-    <memberToolshelf name="guidemodify"/>
-    <memberToolshelf name="modify"/>
-    <memberToolshelf name="copbrushify"/>
-    <memberToolshelf name="mcp"/>
+    <memberToolshelf name="illogic_Paint"/>
   </shelfSet>
 
   <toolshelf name="illogicSolaris" label="Illogic Solaris">
@@ -31,7 +22,6 @@
     <memberTool name="copy"/>
     <memberTool name="paste"/>
     <memberTool name="update_assets_USD"/>
-    <memberTool name="update_assets_USD_NEW"/>
     <memberTool name="usd_update_check"/>
     <memberTool name="restart_houdini"/>
     <memberTool name="set_node_parameters"/>
@@ -71,16 +61,14 @@ else:
 
 """Check and update USD layers."""
 ]]></helpText>
-    <script scriptType="python"><![CDATA[import sys
+    <script scriptType="python"><![CDATA[import usd_updater
+import PrismInit
 
-MODULE_PATH = "r:/pipeline/pipe/prism"
-    
-if not MODULE_PATH in sys.path:
-        sys.path.append(MODULE_PATH)
-
-import USDToolBox_pck
-
-USDToolBox_pck.updateAssetsUSD.startUpdateAssetsUSD('houdini')]]></script>
+usd_updater.reload_modules()
+usd_updater.startUpdateAssetsUSD(
+    'houdini',
+    prism_core=PrismInit.pcore
+)]]></script>
   </tool>
 
   <tool name="paste" label="Paste" icon="hicon:/SVGIcons.index?BUTTONS_curve_mode_draw.svg">

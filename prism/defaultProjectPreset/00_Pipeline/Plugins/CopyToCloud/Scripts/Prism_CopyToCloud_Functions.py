@@ -42,10 +42,10 @@ import os
 
 
 
-file_path = os.path.abspath(__file__)
-porjet = file_path.split("\\")[1]
-LOCAL = rf"I:/{porjet}"
-CLOUD = rf"I:/{porjet}/04_Resources/googleCache"
+file_path = os.path.dirname(__file__)
+projet = file_path.split("\\")[1].lower() 
+LOCAL = f"I:/{projet}"
+CLOUD = f"I:/{projet}/04_Resources/googleCache"
 
 class Prism_CopyToCloud_Functions(object):
     def __init__(self, core, plugin):
@@ -115,6 +115,7 @@ class Prism_CopyToCloud_Functions(object):
         elif self.is_valid_cloud_path(path):
             act_local = menu.addAction("Copy to local")
             act_local.triggered.connect(lambda: self.copy_to_local(path))
+
 
     def copy_to_cloud(self, src):
         self.copy_to(src, LOCAL, CLOUD)

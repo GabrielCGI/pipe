@@ -6,7 +6,7 @@ Installation:
 2. Add this to your ~/.nuke/menu.py or init.py:
 
    import sys
-   sys.path.append("r:/devMathieu/nukeGetShotsAssets")
+   sys.path.append("r:/<path>/nukeShotLoader")
    import menu
 
 This will add "Shot Asset Loader" to the Custom menu in Nuke.
@@ -25,7 +25,7 @@ if src_dir not in sys.path:
 
 # Import the UI function
 try:
-    from src.ui_loader_simple import show_shot_asset_loader
+    from src.ui_loader_simple import show_shot_asset_loader, show_shot_render_manager
 
     # Add to Shot Loader menu (or create it if it doesn't exist)
     toolbar = nuke.menu("Nuke")
@@ -36,6 +36,12 @@ try:
         "Shot Asset Loader",
         show_shot_asset_loader,
         "Ctrl+Alt+A"  # Keyboard shortcut
+    )
+
+    custom_menu.addCommand(
+        "Shot Render Manager",
+        show_shot_render_manager,
+        "Ctrl+Alt+W"
     )
 
     print("[nukeGetShotAssets] Shot Asset Loader menu added successfully")

@@ -784,6 +784,9 @@ class MainInterface(Qt.QMainWindow):
         project_root = Path(*scene_path.parts[: production_index + 2])
         sequence = scene_path.parts[production_index + 2]
         shot = scene_path.parts[production_index + 3]
+        context = scene_path.parts[production_index + 1] #edit fred: permet de switch entre shot et assets
+        prefix = shot if context == "Assets" else f"{sequence}-{shot}" #edit fred: permet de choisir le bon nom du path pour pouvoir qu'il trouve le nom correcte de l'asset environment
+
 
         logger.debug(f"Extracted project root: {project_root}")
         logger.debug(f"Extracted sequence: {sequence}, shot: {shot}")
@@ -796,7 +799,7 @@ class MainInterface(Qt.QMainWindow):
             export_names = exports_patterns[key]
             for export_name in export_names:
                 logger.debug(f" - export name = {export_name}")
-                usd_name = f"{sequence}-{shot}_{export_name}_v*.usd*"
+                usd_name = f"{prefix}_{export_name}_v*.usd*"
                 glob_pattern = (
                     export_directory / export_name / "v*" / usd_name
                 ).as_posix()

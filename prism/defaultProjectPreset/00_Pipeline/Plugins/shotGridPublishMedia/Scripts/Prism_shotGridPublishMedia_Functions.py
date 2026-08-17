@@ -49,18 +49,6 @@ from PrismCore import PrismCore
 
 logger = logging.getLogger(__name__)
 
-DEV_LIST = [
-    'FOX-04',
-    'SPRINTER-03',
-    "FALCON-01"
-]
-ENABLE_DEBUG_MODE = False
-if ENABLE_DEBUG_MODE and socket.gethostname() in DEV_LIST:
-   DEBUG_PATH = "R:/pipeline/networkInstall/python_shares/python311_debug_pkgs/Lib/site-packages"
-   if DEBUG_PATH not in sys.path:
-       sys.path.insert(0, DEBUG_PATH)
-       
-   from debug import debug # type: ignore
    
 class Prism_shotGridPublishMedia_Functions(object):
     def __init__(self, core: PrismCore, plugin):
@@ -130,10 +118,6 @@ class Prism_shotGridPublishMedia_Functions(object):
 
     @err_catcher(name=__name__)
     def publishMedia(self, paths, entity, task, version, description="", uploadPreview=True, parent=None, origTask=None, user=None, createTask=False, department=None, playlist=None):
-        if ENABLE_DEBUG_MODE and socket.gethostname() in DEV_LIST:
-            debug.debug()
-            debug.debugpy.breakpoint()
-        
         text = "Publishing media. Please wait..."
         popup = self.core.waitPopup(self.core, text, parent=parent)
         with popup:
@@ -256,14 +240,9 @@ class Prism_shotGridPublishMedia_Functions(object):
                 self.core.popup(erStr, title="Shotgrid Publish")
                 return
 
+            previewPath = None
             if uploadPreview:
-                cleanPreview = True
-                if len(paths) == 1 and os.path.splitext(paths[0])[1] in [".mp4", ".jpg", ".png", ".avi", ".mov"]:
-                    previewPath = paths[0]
-                    cleanPreview = False
-                else:
-                    previewPath = self.prjMng.createUploadableMedia(paths, popup=popup)
-
+                previewPath = self.prjMng.createUploadableMedia(paths, popup=popup)
                 if previewPath:
                     if popup.msg:
                         popup.msg.setText("Uploading media. Please wait...")
@@ -280,18 +259,15 @@ class Prism_shotGridPublishMedia_Functions(object):
                         msg = "Uploading proxy video failed:\n\n%s" % str(e)
                         self.core.popup(msg)
 
-                    if cleanPreview:
-                        try:
-                            os.remove(previewPath)
-                        except Exception:
-                            pass
-
             if createdVersion and createdVersion.get("id"):
                 self.shotGridplugin.getMediaVersions(entity, parent=parent, allowCache=False)
 
             sgSite = self.shotGridplugin.sg.base_url
             sgSite += "/detail/Version/" + str(createdVersion["id"])
             data = {"url": sgSite, "versionName": versionName}
+
+            self.core.callback("onShotGridPublishMedia", path_to_frames=framePath, path_to_movie=previewPath, sg_version_id=createdVersion.get("id"))
+
             return data
 
     @err_catcher(name=__name__)
@@ -305,35 +281,35 @@ class Prism_shotGridPublishMedia_Functions(object):
             selectedTask, selectedStatus = kitsu_infos
             self.status = selectedStatus
             replace_version = version
-            # ------------------------------ déplacer et mettre la version exportée de Kitsu à l'endroit du publish ------------------------------
-            src = Path(path[0]) #exemple: I:\\McDonald_2511\\03_Production\\Shots\\SHOT-TEST\\fred\\Playblasts\\Anim\\v006\\SHOT-TEST-fred_Anim_v006.mp4
-            start_new_path = src.parent.parent.parent.__str__() + "\\" + selectedTask
-            file = src.parts[-1].__str__()
-            version_media = src.parts[-2].__str__()
-            task_media = src.parts[-3].__str__()
-            if selectedTask != task_media: # permet de voir si on publie dans la même tâche entre Kitsu et Prism pour éviter de réécrire une version en plus dans le même identifiant
-                new_version = None
-                if os.path.exists(start_new_path):
-                    new_version = sorted(os.listdir(start_new_path))
-                else:
-                    os.makedirs(start_new_path)
+            # # ------------------------------ déplacer et mettre la version exportée de Kitsu à l'endroit du publish ------------------------------
+            # src = Path(path[0]) #exemple: I:\\McDonald_2511\\03_Production\\Shots\\SHOT-TEST\\fred\\Playblasts\\Anim\\v006\\SHOT-TEST-fred_Anim_v006.mp4
+            # start_new_path = src.parent.parent.parent.__str__() + "\\" + selectedTask
+            # file = src.parts[-1].__str__()
+            # version_media = src.parts[-2].__str__()
+            # task_media = src.parts[-3].__str__()
+            # if selectedTask != task_media: # permet de voir si on publie dans la même tâche entre Kitsu et Prism pour éviter de réécrire une version en plus dans le même identifiant
+            #     new_version = None
+            #     if os.path.exists(start_new_path):
+            #         new_version = sorted(os.listdir(start_new_path))
+            #     else:
+            #         os.makedirs(start_new_path)
                 
-                if new_version:
-                    new_version = "v"  + str(int(new_version[-1][1:]) + 1).zfill(3)
-                else:
-                    new_version = "v001"
+            #     if new_version:
+            #         new_version = "v"  + str(int(new_version[-1][1:]) + 1).zfill(3)
+            #     else:
+            #         new_version = "v001"
 
-                os.makedirs(f"{start_new_path}\\{new_version}")
-                new_file = file.replace(version_media, new_version).replace(task_media, selectedTask)
-                dst = f"{start_new_path}\\{new_version}\\{new_file}"
-                shutil.copy2(src, dst)
+            #     os.makedirs(f"{start_new_path}\\{new_version}")
+            #     new_file = file.replace(version_media, new_version).replace(task_media, selectedTask)
+            #     dst = f"{start_new_path}\\{new_version}\\{new_file}"
+            #     shutil.copy2(src, dst)
 
-                #ramplacer les variable du début par mes variables
-                replace_version = new_version
-                path[0] = dst
-                print("src:", src)
-                print("dst:", dst)
-            # ------------------------------ déplacer et mettre la version exportée de Kitsu à l'endroit du publish ------------------------------
+            #     #ramplacer les variable du début par mes variables
+            #     replace_version = new_version
+            #     path[0] = dst
+            #     print("src:", src)
+            #     print("dst:", dst)
+            # # ------------------------------ déplacer et mettre la version exportée de Kitsu à l'endroit du publish ------------------------------
             self.prjMng.publishNonExistentMedia(path, entity, selectedTask, replace_version, description, uploadPreview, parent, task)
         
         self.prjMng.dlg_getTaskFromEnity = GetTaskDialog(self.shotGridplugin, tasks, task, parent=parent)
