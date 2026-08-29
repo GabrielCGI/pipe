@@ -193,6 +193,8 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     ilgcMenu.addCommand('ILGC_ReadCleanup', 'nuke.createNode("ILGC_ReadCleanup")')
     ilgcMenu.addCommand('ILGC_Kuwahara', 'nuke.createNode("ILGC_Kuwahara")')
     ilgcMenu.addCommand('ILGC_HexTile', 'nuke.createNode("ILGC_HexTile")')
+    ilgcMenu.addCommand('ILGC_LightLobeSplit', 'nuke.createNode("ILGC_LightLobeSplit")')
+    ilgcMenu.addCommand('ILGC_StylisedMotionBlur', 'nuke.createNode("ILGC_StylisedMotionBlur")')
     ilgcMenu.addCommand('WritePrecomp', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/WritePrecomp.nk\")')
     ilgcMenu.addCommand('WriteCompo', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/WriteCompo.nk\")')
 
@@ -208,6 +210,14 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     #riversMenu.addCommand('RIV_ZDefocus_CHILD', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_ZDefocus_CHILD.nk\")')
     #riversMenu.addCommand('RIV_FixEyeSpec', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_FixEyeSpec.nk\")')
 
+    # Fred Menu
+    fredMenu: nuke.Menu = illogicMenu.addMenu("Fred Tools")
+    fredMenu.addCommand('FRED_StylisedChar', 'nuke.createNode("FRED_StylisedChar")')
+    fredMenu.addCommand('FRED_EdgeCrush', 'nuke.createNode("FRED_EdgeCrush")')
+    fredMenu.addCommand('FRED_BringBackDetails', 'nuke.createNode("FRED_BringBackDetails")')
+    fredMenu.addCommand('FRED_MergeFlatten', 'nuke.createNode("FRED_MergeFlatten")')
+    fredMenu.addCommand('FRED_ZDefocus_MASTER', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/FRED_ZDefocus_MASTER.nk\")')
+    fredMenu.addCommand('FRED_ZDefocus_CHILDREN', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/FRED_ZDefocus_CHILDREN.nk\")')
     # Tools menus
     toolsMenu: nuke.Menu = illogicMenu.addMenu("Tools")
     toolsMenu.addCommand("Magnific upscale" , "nuke.nodePaste(\"R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/nukeToMagnific/nuke_magnific/Magnific.nk\")")

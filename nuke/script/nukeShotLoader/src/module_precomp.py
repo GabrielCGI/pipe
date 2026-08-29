@@ -36,6 +36,15 @@ _IGNORE = {"xpos", "ypos", "selected", "label", "note_font",
            # what the roto renders. Safe to drop globally: no other node
            # class uses these knob names.
            "toolbox", "gauge",
+           # Cryptomatte gizmo dynamically populates cryptoLayerChoice
+           # (an Enumeration_Knob) from the upstream Read's EXR metadata
+           # via knobChanged. In an interactive session the Read has been
+           # evaluated so the menu ends up as "{0} CryptoPrimitives
+           # CryptoMaterials"; on farm the metadata isn't loaded yet at
+           # hash time, so it's just "{0}". The real selection lives in
+           # cryptoLayer (kept in the hash), so this UI-only cache is
+           # safe to drop. lastSelectedCryptoLayerName is the same family.
+           "cryptoLayerChoice", "lastSelectedCryptoLayerName",
            "source_transform_translate", "source_transform_center",
            "source_transform_scale", "source_transform_rotate",
            "source_transform_skew", "source_transform_skewX",
@@ -93,6 +102,34 @@ def _normalize_file_value(s):
     the precomp cache when only the placeholder form changes."""
     return _HASH_FRAME_RE.sub(lambda m: "%0{}d".format(len(m.group(0))), s)
 
+_FORMAT_KNOB_NAMES = frozenset({"format", "full_format", "proxy_format"})
+
+def _normalize_format_value(s):
+    """Drop the trailing format-name token from a Format_Knob value.
+    Nuke stamps a Read's format knob with a registered format name
+    whenever a matching addFormat() (same w/h/pixel-aspect) exists at
+    evaluation time. Those addFormat() calls trickle in from gizmos as
+    the scene loads — e.g. RIV_ReadCleanup and RIV_BrushScatter both
+    hardcode 'FORMAT_DELIVERY' (2048x858) in embedded Reformat knobs,
+    which registers the name globally the first time either gizmo is
+    instantiated. Farm and local end up with a different registration
+    order, so the same 2048x858 Read serializes as
+    `2048 858 0 0 2048 858 1 ` on one machine and
+    `2048 858 0 0 2048 858 1 FORMAT_DELIVERY` on the other. Dimensions
+    drive the render; the trailing name is cosmetic. Keep the first
+    seven numeric tokens (w h x y r t pa) and drop the rest. Values
+    that don't match the seven-numeric-tokens shape (empty, '0', an
+    expression) pass through untouched."""
+    parts = s.split()
+    if len(parts) < 7:
+        return s
+    try:
+        for p in parts[:7]:
+            float(p)
+    except ValueError:
+        return s
+    return " ".join(parts[:7])
+
 _SINGLE_KEY_CURVE_RE = re.compile(r'\{curve x\d+ ([^}]+)\}')
 
 def _collapse_single_key_curves(s):
@@ -148,6 +185,8 @@ def _node_sig(node):
                 value = _normalize_file_value(value)
             elif name == "curves":
                 value = _normalize_roto_curves(value)
+            elif name in _FORMAT_KNOB_NAMES:
+                value = _normalize_format_value(value)
             value = _collapse_single_key_curves(value)
             value = _normalize_channel_layer(value)
             parts.append(name + "=" + value)

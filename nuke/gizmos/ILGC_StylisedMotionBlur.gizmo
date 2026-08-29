@@ -1,0 +1,428 @@
+#! C:/Program Files/Nuke15.1v5/nuke-15.1.5.dll -nx
+version 15.1 v5
+Gizmo {
+ inputs 4
+ tile_color 0x540054ff
+ note_font "Verdana Bold"
+ addUserKnob {20 User}
+ addUserKnob {26 text l "" +STARTLINE T "/!\\ this tool needs \"motionvectors\" pass /!\\"}
+ addUserKnob {26 ""}
+ addUserKnob {6 smudge l "Smudge Edges ?" +STARTLINE}
+ smudge true
+ addUserKnob {7 primary_distort_scale l "Primary Distort Scale"}
+ primary_distort_scale 0.04
+ addUserKnob {7 secondary_distort_scale l "Secondary Distort Scale"}
+ secondary_distort_scale 0.2
+ addUserKnob {26 ""}
+ addUserKnob {7 force_mask_mult l "Force Mask Mult"}
+ force_mask_mult 0.3
+ addUserKnob {6 invert -STARTLINE}
+}
+ Input {
+  inputs 0
+  name beauty
+  xpos -232
+  ypos 398
+ }
+ Dot {
+  name Dot11
+  xpos -198
+  ypos 519
+ }
+set Nd392d800 [stack 0]
+ Dot {
+  name Dot7
+  xpos -568
+  ypos 519
+ }
+ Dot {
+  name Dot5
+  xpos -540
+  ypos 2450
+ }
+set Nd3876c00 [stack 0]
+ Dot {
+  name Dot10
+  xpos -540
+  ypos 2537
+ }
+ Input {
+  inputs 0
+  name secondary_noise
+  xpos -766
+  ypos 1993
+  number 3
+ }
+ Input {
+  inputs 0
+  name force_mask
+  xpos -45
+  ypos 699
+  number 2
+ }
+ NoOp {
+  name AlphaCheck
+  xpos -45
+  ypos 757
+  addUserKnob {20 User}
+  addUserKnob {6 alpha +STARTLINE}
+  alpha {{"\[python \"len(\\\[n for n in nuke.channels(nuke.thisNode().input(0)) if n.find(\\\".a\\\") != -1])>0\"]"}}
+ }
+push $Nd392d800
+add_layer {motionvectors motionvectors.x motionvectors.y motionvectors.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 motionvectors
+  fromInput2 {{0} B}
+  in2 alpha
+  mappings "4 rgba.alpha 1 0 rgba.alpha 0 3 motionvectors.z 0 2 rgba.blue 0 2 motionvectors.x 0 0 rgba.red 0 0 motionvectors.y 0 1 rgba.green 0 1"
+  name Shuffle1
+  label "\[value in1]"
+  xpos -232
+  ypos 617
+ }
+ EdgeExtend {
+  detailAmount 0
+  premultiply false
+  name EdgeExtend1
+  xpos -232
+  ypos 699
+  disable {{!parent.smudge}}
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value {{parent.force_mask_mult}}
+  name Multiply1
+  xpos -232
+  ypos 757
+  disable {{!parent.AlphaCheck.alpha}}
+ }
+ Dot {
+  name Dot8
+  xpos -198
+  ypos 800
+ }
+set Nd38e3000 [stack 0]
+ Dot {
+  name Dot6
+  xpos -376
+  ypos 800
+ }
+ Merge2 {
+  inputs 2
+  operation multiply
+  Achannels rgb
+  Bchannels rgb
+  name Merge2
+  xpos -410
+  ypos 1993
+ }
+ Dot {
+  name Dot9
+  xpos -376
+  ypos 2054
+ }
+ Input {
+  inputs 0
+  name primary_noise
+  xpos -766
+  ypos 839
+  number 1
+ }
+push $Nd38e3000
+ Merge2 {
+  inputs 2
+  operation multiply
+  Achannels rgb
+  Bchannels rgb
+  name Merge1
+  xpos -232
+  ypos 839
+ }
+push $Nd392d800
+ Dot {
+  name Dot4
+  xpos 104
+  ypos 519
+ }
+ Dot {
+  name Dot3
+  xpos 104
+  ypos 935
+ }
+ Shuffle2 {
+  inputs 2
+  fromInput1 {{1} B A}
+  out1 motionvectors
+  fromInput2 {{0} B A}
+  mappings "3 rgba.red 0 0 motionvectors.x 0 0 rgba.green 0 1 motionvectors.y 0 1 rgba.blue 0 2 motionvectors.z 0 2"
+  name Shuffle2
+  label "\[value in1]"
+  xpos -232
+  ypos 926
+ }
+ Dot {
+  name Dot1
+  label PRIMARY
+  xpos -198
+  ypos 1036
+ }
+ IDistort {
+  channels rgba
+  uv motionvectors
+  uv_scale {{parent.primary_distort_scale}}
+  name IDistort2
+  xpos -232
+  ypos 1122
+ }
+ set Cd376b000 [stack 0]
+clone $Cd376b000 {
+  xpos -232
+  ypos 1146
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1170
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1194
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1218
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1242
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1266
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1290
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1314
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1338
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1362
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1386
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1410
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1434
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1458
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1482
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1506
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1530
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1554
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1578
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1602
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1626
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1650
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1674
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1698
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1722
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1746
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1770
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1794
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1818
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1842
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1866
+  selected false
+ }
+clone $Cd376b000 {
+  xpos -232
+  ypos 1890
+  selected false
+ }
+ Shuffle2 {
+  inputs 2
+  fromInput1 {{1} B A}
+  out1 motionvectors
+  fromInput2 {{0} B A}
+  mappings "3 rgba.red 0 0 motionvectors.x 0 0 rgba.green 0 1 motionvectors.y 0 1 rgba.blue 0 2 motionvectors.z 0 2"
+  name Shuffle3
+  label "\[value in1]"
+  xpos -232
+  ypos 2045
+ }
+ Dot {
+  name Dot2
+  label SECONDARY
+  xpos -198
+  ypos 2208
+ }
+ IDistort {
+  channels rgba
+  uv motionvectors
+  uv_scale {{parent.secondary_distort_scale}}
+  name IDistort1
+  xpos -232
+  ypos 2273
+ }
+ set Cd383f800 [stack 0]
+clone $Cd383f800 {
+  xpos -232
+  ypos 2297
+  selected false
+ }
+clone $Cd383f800 {
+  xpos -232
+  ypos 2321
+  selected false
+ }
+clone $Cd383f800 {
+  xpos -232
+  ypos 2345
+  selected false
+ }
+push $Nd3876c00
+ Dissolve {
+  inputs 2
+  which 1
+  name Dissolve1
+  xpos -232
+  ypos 2441
+ }
+set Nd3877000 [stack 0]
+ Shuffle2 {
+  inputs 2
+  fromInput1 {{1} B A}
+  out1 motionvectors
+  fromInput2 {{0} B A}
+  mappings "3 rgba.red 0 0 motionvectors.x 0 0 rgba.green 0 1 motionvectors.y 0 1 rgba.blue 0 2 motionvectors.z 0 2"
+  name Shuffle4
+  label "\[value in1]"
+  xpos -232
+  ypos 2528
+ }
+ Output {
+  name Output1
+  xpos -232
+  ypos 2624
+ }
+push $Nd3877000
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+ Viewer {
+  inputs 10
+  frame 1025
+  frame_range 100-100
+  fps 25
+  input_number 9
+  viewerProcess "ACES 1.0 - SDR Video (sRGB - Display)"
+  monitorOutNDISenderName "Nuke - untitled - Viewer1"
+  name Viewer1
+  xpos 97
+  ypos 2706
+ }
+end_group

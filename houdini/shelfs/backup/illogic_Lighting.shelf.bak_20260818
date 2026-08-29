@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <toolshelf name="illogicLighting" label="Illogic Lighting">
+    <memberTool name="sceneBuilder"/>
+    <memberTool name="copy_light"/>
+    <memberTool name="domelight_create"/>
+    <memberTool name="clean_light"/>
+    <memberTool name="shotBuilder"/>
+    <memberTool name="reduceTextureViewport"/>
+    <memberTool name="tool_1"/>
+    <memberTool name="batchrender"/>
+    <memberTool name="illogic_lmfix_toggle0"/>
+  </toolshelf>
+
+  <tool name="sceneBuilder" label="scene builder" icon="R:/pipeline/pipe_public/prism-scene-builder/sceneBuilder/ui/logo/logo_sceneBuilder.png">
+    <script scriptType="python"><![CDATA[import importlib
+import PrismInit
+import sys
+
+
+sys.path.insert(0, "R:/pipeline/pipe_public/prism-scene-builder")
+import sceneBuilder
+importlib.reload(sceneBuilder)
+
+prism_core = PrismInit.pcore
+path = prism_core.getCurrentFileName()
+project_path = prism_core.projectPath
+
+
+yaml_path       = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/routine/builderCore_routine.yaml"
+routine_path    = project_path + "/00_Pipeline/CustomModules/Python/sceneBuilder/templates"
+
+
+dcc ={"name": "HOUDINI", "pathSoft": "", "pathPy": ""}
+shotbuild = sceneBuilder.sceneBuilder(prism_core, yaml_path, routine_path, False)
+if kwargs["ctrlclick"]:
+    shotbuild.main(path, dcc, UI=True)
+else:
+    shotbuild.main(path, dcc, UI=False)]]></script>
+  </tool>
+
+  <tool name="copy_light" label="Copy Light" icon="hicon:/SVGIcons.index?LOP_lightlinker.svg">
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lgt_hou_shelf_snippets
+reload(lgt_hou_shelf_snippets)
+
+
+lgt_hou_shelf_snippets.copyLight()]]></script>
+  </tool>
+
+  <tool name="domelight_create" label="Dome Light Create" icon="hicon:/SVGIcons.index?BUTTONS_add_light.svg">
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lgt_hou_shelf_snippets
+reload(lgt_hou_shelf_snippets)
+
+
+lgt_hou_shelf_snippets.domeLight()]]></script>
+  </tool>
+
+  <tool name="clean_light" label="Clean Light" icon="hicon:/SVGIcons.index?BUTTONS_clear.svg">
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lgt_hou_shelf_snippets
+reload(lgt_hou_shelf_snippets)
+
+
+lgt_hou_shelf_snippets.cleanLight()]]></script>
+  </tool>
+
+  <tool name="batchrender" label="Batch Render" icon="hicon:/SVGIcons.index?BUTTONS_render.svg">
+    <script scriptType="python"><![CDATA[import batchrender
+import importlib
+importlib.reload(batchrender)
+
+batchrender.main()]]></script>
+  </tool>
+
+  <tool name="send_ranch_copy" label="Send Ranch Copy" icon="hicon:/SVGIcons.index?BUTTONS_network_distribute_vertical.svg">
+    <script scriptType="python"><![CDATA[import sendranchcopy
+import importlib
+importlib.reload(sendranchcopy)
+
+sendranchcopy.run(True)
+]]></script>
+  </tool>
+
+  <tool name="shotBuilder" label="Shot Builder" icon="hicon:/SVGIcons.index?LOP_lightfilterlibrary.svg">
+    <script scriptType="python"><![CDATA[from imp import reload
+import PrismInit
+
+import lgt_shot_builder
+reload(lgt_shot_builder)
+
+
+core = PrismInit.pcore
+entity = core.getScenefileData(core.getCurrentFileName())
+data_shots = core.entities.getShotsFromSequence(entity["sequence"])
+shots = []
+for Dshot in data_shots:
+    shots.append(Dshot["shot"])
+
+print(dir(lgt_shot_builder))
+lgt_shot_builder.shotBuilder(hou.selectedItems(), shots)]]></script>
+  </tool>
+
+  <tool name="reduceTextureViewport" label="Reduce Texture Viewport" icon="hicon:/SVGIcons.index?BUTTONS_visible.svg">
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lgt_hou_shelf_snippets
+reload(lgt_hou_shelf_snippets)
+
+
+lgt_hou_shelf_snippets.reducteTextureViewport()]]></script>
+  </tool>
+
+  <tool name="CopRopImage" label="Cop Rop Image" icon="hicon:/SVGIcons.index?SCENEGRAPH_primtype_renderproduct.svg">
+    <helpText><![CDATA[select a node first]]></helpText>
+    <script scriptType="python"><![CDATA[from importlib import reload
+import cop_hou_shelf_snippets
+reload(cop_hou_shelf_snippets)
+
+
+cop_hou_shelf_snippets.create_rop_image()
+]]></script>
+  </tool>
+
+  <tool name="tool_1" label="Clean Light Mixer" icon="hicon:/SVGIcons.index?MISC_fix_repair.svg">
+    <script scriptType="python"><![CDATA[from importlib import reload
+import lgt_hou_shelf_snippets
+reload(lgt_hou_shelf_snippets)
+
+
+lgt_hou_shelf_snippets.cleanLightMixer()]]></script>
+  </tool>
+
+  <tool name="illogic_lmfix_toggle0" label="LM Fix ON/OFF" icon="LOP_lightmixer">
+    <helpText><![CDATA[Route les moves look-through vers le Light Mixer.
+Clic = ON/OFF.]]></helpText>
+    <script scriptType="python"><![CDATA[import importlib.util
+import time
+import traceback
+
+import hou
+import loputils
+from pxr import Usd, UsdGeom
+
+if hou.getenv('ILLOGIC_LMFIX') == '1':
+    # ------------------------------------------------------------- OFF
+    hou.putenv('ILLOGIC_LMFIX', '0')
+    hou.ui.setStatusMessage(
+        'LM Fix OFF - comportement stock (creation de edit_<light>)',
+        hou.severityType.ImportantMessage)
+else:
+    # -------------------------------------------------------------- ON
+    if getattr(hou.session, 'illogic_lmfix', None) is None:
+        path = hou.findFile('scripts/scene/lop_cam_lock.py')
+        spec = importlib.util.spec_from_file_location(
+            'illogic_lmfix_override', path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        if not hasattr(mod, '_applyViewChangeToMixer'):
+            raise hou.Error(
+                "LM Fix : l'override lop_cam_lock.py n'est pas sur le "
+                "HOUDINI_PATH (resolu : " + path + ")")
+
+        orig = loputils.createEditorNode
+
+        class _ShimParmTuple(object):
+            def __init__(self, node, key):
+                self._node = node
+                self._key = key
+            def set(self, values):
+                self._node._store(self._key, values)
+            def setPending(self, values):
+                self._node._store(self._key, values)
+
+        class _ShimNode(object):
+            # Duck-type juste ce que le _applyViewChange stock utilise sur
+            # le node editeur : input(0), parm(...), parmTuple('t'/'r').
+            def __init__(self, mixer, primpath):
+                self._mixer = mixer
+                self._primpath = primpath
+                self._vals = {}
+            def input(self, idx):
+                return self._mixer.input(0)
+            def parm(self, name):
+                return None
+            def parmTuple(self, name):
+                if name in ('t', 'r'):
+                    return _ShimParmTuple(self, name)
+                return None
+            def _store(self, key, values):
+                self._vals[key] = tuple(values)
+                if 't' in self._vals and 'r' in self._vals:
+                    vals = self._vals
+                    self._vals = {}
+                    self._fire(vals)
+            def _fire(self, vals):
+                try:
+                    hou.putenv('ILLOGIC_LMFIX_BEACON',
+                               'patch session (shim) @ '
+                               + time.strftime('%H:%M:%S'))
+                    local = hou.hmath.buildTransform(
+                        {'translate': vals['t'], 'rotate': vals['r']})
+                    inputnode = self._mixer.input(0)
+                    prim = inputnode.stage().GetPrimAtPath(self._primpath)
+                    in_local = hou.Matrix4(UsdGeom.Xformable(prim)
+                        .GetLocalTransformation(Usd.TimeCode(hou.frame())))
+                    world = local * in_local
+                    mod._applyViewChangeToMixer(world, self._mixer,
+                                                self._primpath,
+                                                'Set Light to View')
+                except Exception:
+                    traceback.print_exc()
+
+        def _patched(sourcenode, primpath, classancestor, primpaths,
+                     respect_insertion_point=True, prefix='edit_', suffix='',
+                     make_editor_node_current=False):
+            # N'intercepte que si le flag est actif, pour l'appel du callback
+            # lock-to-view (fingerprint), sur une light possedee par un
+            # mixer, hors autokey.
+            try:
+                if hou.getenv('ILLOGIC_LMFIX') == '1':
+                    camlock = (respect_insertion_point is False
+                               and classancestor is None
+                               and list(primpaths) == [primpath]
+                               and prefix == 'edit_')
+                    if camlock and not hou.ui.isAutoKey():
+                        mixer = mod._findTargetMixer(sourcenode, primpath)
+                        if mixer is not None:
+                            return _ShimNode(mixer, primpath)
+            except Exception:
+                traceback.print_exc()
+            return orig(sourcenode, primpath, classancestor, primpaths,
+                        respect_insertion_point=respect_insertion_point,
+                        prefix=prefix, suffix=suffix,
+                        make_editor_node_current=make_editor_node_current)
+
+        loputils.createEditorNode = _patched
+        hou.session.illogic_lmfix = {'orig': orig}
+
+    hou.putenv('ILLOGIC_LMFIX', '1')
+    hou.ui.setStatusMessage(
+        'LM Fix ON - les moves look-through vont dans le Light Mixer',
+        hou.severityType.ImportantMessage)]]></script>
+  </tool>
+
+  <tool name="illogic_lmfix_toggle" label="LM Fix ON/OFF" icon="LOP_lightmixer">
+    <helpText><![CDATA[Route les moves look-through vers le Light Mixer.
+Clic = ON/OFF.]]></helpText>
+    <script scriptType="python"><![CDATA[import importlib.util
+import time
+import traceback
+
+import hou
+import loputils
+from pxr import Usd, UsdGeom
+
+if hou.getenv('ILLOGIC_LMFIX') == '1':
+    # ------------------------------------------------------------- OFF
+    hou.putenv('ILLOGIC_LMFIX', '0')
+    hou.ui.setStatusMessage(
+        'LM Fix OFF - comportement stock (creation de edit_<light>)',
+        hou.severityType.ImportantMessage)
+else:
+    # -------------------------------------------------------------- ON
+    if getattr(hou.session, 'illogic_lmfix', None) is None:
+        path = hou.findFile('scripts/scene/lop_cam_lock.py')
+        spec = importlib.util.spec_from_file_location(
+            'illogic_lmfix_override', path)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+        if not hasattr(mod, '_applyViewChangeToMixer'):
+            raise hou.Error(
+                "LM Fix : l'override lop_cam_lock.py n'est pas sur le "
+                "HOUDINI_PATH (resolu : " + path + ")")
+
+        orig = loputils.createEditorNode
+
+        class _ShimParmTuple(object):
+            def __init__(self, node, key):
+                self._node = node
+                self._key = key
+            def set(self, values):
+                self._node._store(self._key, values)
+            def setPending(self, values):
+                self._node._store(self._key, values)
+
+        class _ShimNode(object):
+            # Duck-type juste ce que le _applyViewChange stock utilise sur
+            # le node editeur : input(0), parm(...), parmTuple('t'/'r').
+            def __init__(self, mixer, primpath):
+                self._mixer = mixer
+                self._primpath = primpath
+                self._vals = {}
+            def input(self, idx):
+                return self._mixer.input(0)
+            def parm(self, name):
+                return None
+            def parmTuple(self, name):
+                if name in ('t', 'r'):
+                    return _ShimParmTuple(self, name)
+                return None
+            def _store(self, key, values):
+                self._vals[key] = tuple(values)
+                if 't' in self._vals and 'r' in self._vals:
+                    vals = self._vals
+                    self._vals = {}
+                    self._fire(vals)
+            def _fire(self, vals):
+                try:
+                    hou.putenv('ILLOGIC_LMFIX_BEACON',
+                               'patch session (shim) @ '
+                               + time.strftime('%H:%M:%S'))
+                    local = hou.hmath.buildTransform(
+                        {'translate': vals['t'], 'rotate': vals['r']})
+                    inputnode = self._mixer.input(0)
+                    prim = inputnode.stage().GetPrimAtPath(self._primpath)
+                    in_local = hou.Matrix4(UsdGeom.Xformable(prim)
+                        .GetLocalTransformation(Usd.TimeCode(hou.frame())))
+                    world = local * in_local
+                    mod._applyViewChangeToMixer(world, self._mixer,
+                                                self._primpath,
+                                                'Set Light to View')
+                except Exception:
+                    traceback.print_exc()
+
+        def _patched(sourcenode, primpath, classancestor, primpaths,
+                     respect_insertion_point=True, prefix='edit_', suffix='',
+                     make_editor_node_current=False):
+            # N'intercepte que si le flag est actif, pour l'appel du callback
+            # lock-to-view (fingerprint), sur une light possedee par un
+            # mixer, hors autokey.
+            try:
+                if hou.getenv('ILLOGIC_LMFIX') == '1':
+                    camlock = (respect_insertion_point is False
+                               and classancestor is None
+                               and list(primpaths) == [primpath]
+                               and prefix == 'edit_')
+                    if camlock and not hou.ui.isAutoKey():
+                        mixer = mod._findTargetMixer(sourcenode, primpath)
+                        if mixer is not None:
+                            return _ShimNode(mixer, primpath)
+            except Exception:
+                traceback.print_exc()
+            return orig(sourcenode, primpath, classancestor, primpaths,
+                        respect_insertion_point=respect_insertion_point,
+                        prefix=prefix, suffix=suffix,
+                        make_editor_node_current=make_editor_node_current)
+
+        loputils.createEditorNode = _patched
+        hou.session.illogic_lmfix = {'orig': orig}
+
+    hou.putenv('ILLOGIC_LMFIX', '1')
+    hou.ui.setStatusMessage(
+        'LM Fix ON - les moves look-through vont dans le Light Mixer',
+        hou.severityType.ImportantMessage)]]></script>
+  </tool>
+</shelfDocument>

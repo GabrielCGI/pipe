@@ -1,0 +1,1066 @@
+#! C:/Program Files/Nuke15.1v5/nuke-15.1.5.dll -nx
+version 15.1 v5
+Gizmo {
+ inputs 3
+ knobChanged "\n\nnode = nuke.thisNode()\nknob = nuke.thisKnob()\n\nif knob.name() == \"filter_autosize\" and knob.value() == 1:\n    node\['inherit_from'].setVisible(True)\n    node\['autosize_force'].setVisible(True)\nelif knob.name() == \"filter_autosize\" and knob.value() == 0:\n    node\['inherit_from'].setVisible(False)\n    node\['autosize_force'].setVisible(False)\n"
+ tile_color 0x540054ff
+ note_font "Verdana Bold"
+ addUserKnob {20 BBD_TAB l BBD}
+ addUserKnob {26 title01 l "" -STARTLINE T "Display :"}
+ addUserKnob {68 display l "" -STARTLINE M {Result "Fireflys Presence" "Radius Map" "Color Map"}}
+ addUserKnob {26 ""}
+ addUserKnob {26 title_autosize l "" +STARTLINE T "AutoSize :"}
+ addUserKnob {6 filter_autosize l "Filter AutoSize" -STARTLINE}
+ addUserKnob {1 inherit_from l "Inherit From :" +HIDDEN}
+ inherit_from FRED_StylisedChar
+ addUserKnob {7 autosize_force l "AutoSize Mult" +HIDDEN}
+ autosize_force 1
+ addUserKnob {7 near +INVISIBLE}
+ near {{"\[if \{\[exists parent.\[value inherit_from].PxF_DeepDefocus.znear]\} \{value parent.\[value inherit_from].PxF_DeepDefocus.znear\} else \{expr 0\}]"}}
+ addUserKnob {7 far +INVISIBLE}
+ far {{"\[if \{\[exists parent.\[value inherit_from].PxF_DeepDefocus.zfar]\} \{value parent.\[value inherit_from].PxF_DeepDefocus.zfar\} else \{expr 0\}]"}}
+ addUserKnob {7 near_p l near% +INVISIBLE}
+ near_p {{"\[if \{\[exists parent.\[value inherit_from].near_percentage]\} \{value parent.\[value inherit_from].near_percentage\} else \{expr 100\}]"}}
+ addUserKnob {7 far_p l far% +INVISIBLE}
+ far_p {{"\[if \{\[exists parent.\[value inherit_from].far_percentage]\} \{value parent.\[value inherit_from].far_percentage\} else \{expr 100\}]"}}
+ addUserKnob {26 ""}
+ addUserKnob {26 title09 l "" +STARTLINE T "Radius Map :"}
+ addUserKnob {7 rm_black_perimeter l "Radius Map Perimeter Black"}
+ addUserKnob {7 rm_white_perimeter l "Radius Map Perimeter White"}
+ rm_white_perimeter 0.185
+ addUserKnob {7 rm_black_albedo l "Radius Map Albedo Black"}
+ rm_black_albedo 0.625
+ addUserKnob {7 rm_white_albedo l "Radius Map Albedo White"}
+ rm_white_albedo 1
+ addUserKnob {26 ""}
+ addUserKnob {20 fireflysGroup l Fireflys n 1}
+ addUserKnob {26 title03 l "" +STARTLINE T "Firefly01 :"}
+ addUserKnob {7 f01Presence l Presence R 0 10}
+ f01Presence 10
+ addUserKnob {18 f01Gain l Gain R 0 4}
+ f01Gain 1.3
+ addUserKnob {6 f01Gain_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {26 ""}
+ addUserKnob {26 title04 l "" +STARTLINE T "Firefly02 :"}
+ addUserKnob {7 f02Presence l Presence R 0 10}
+ f02Presence 10
+ addUserKnob {18 f02Gain l Gain R 0 4}
+ f02Gain 1.15
+ addUserKnob {6 f02Gain_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {26 ""}
+ addUserKnob {26 title05 l "" +STARTLINE T "Firefly03 :"}
+ addUserKnob {7 f03Presence l Presence R 0 10}
+ f03Presence 10
+ addUserKnob {18 f03Gain l Gain R 0 4}
+ f03Gain 0.95
+ addUserKnob {6 f03Gain_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {26 ""}
+ addUserKnob {26 title06 l "" +STARTLINE T "Firefly04 :"}
+ addUserKnob {7 f04Presence l Presence R 0 10}
+ f04Presence 10
+ addUserKnob {18 f04Gain l Gain R 0 4}
+ f04Gain 0.9
+ addUserKnob {6 f04Gain_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {20 endGroup n -1}
+ addUserKnob {26 title08 l "" +STARTLINE T "Sharpen Details :"}
+ addUserKnob {7 sharpenDetails l "" -STARTLINE R 0 10}
+ sharpenDetails 1
+ addUserKnob {26 ""}
+ addUserKnob {26 title_08 l "" -STARTLINE T "Randomise :"}
+ addUserKnob {7 color_shift l "Color Shift" R -180 180}
+ addUserKnob {7 color_mix l Mix}
+ color_mix 0.0065
+ addUserKnob {26 ""}
+ addUserKnob {26 title07 l "" +STARTLINE T "Mask :"}
+ addUserKnob {6 mask_invert l invert -STARTLINE}
+}
+ BackdropNode {
+  inputs 0
+  name BackdropNode11
+  tile_color 0x443e5bff
+  label "BBD - FIREFLYS"
+  note_font "Verdana Bold"
+  note_font_size 42
+  xpos -1370
+  ypos 415
+  bookmark false
+  bdwidth 3356
+  bdheight 1051
+  z_order -4
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode1
+  tile_color 0x454131ff
+  label DISPLAY
+  note_font "Verdana Bold"
+  note_font_size 42
+  xpos -629
+  ypos 2524
+  bdwidth 935
+  bdheight 445
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode2
+  tile_color 0x5d5930ff
+  label INPUTS
+  note_font "Verdana Bold"
+  note_font_size 42
+  xpos -487
+  ypos 39
+  bookmark false
+  bdwidth 667
+  bdheight 218
+ }
+ BackdropNode {
+  inputs 0
+  name BackdropNode7
+  tile_color 0x323c45ff
+  label MASKING
+  note_font "Verdana Bold"
+  note_font_size 42
+  xpos -213
+  ypos 2154
+  bdwidth 516
+  bdheight 356
+ }
+ Input {
+  inputs 0
+  name no_filters
+  xpos -387
+  ypos 139
+  number 1
+ }
+ Dot {
+  name Dot3
+  xpos -353
+  ypos 517
+ }
+set N92ca9c00 [stack 0]
+ Dot {
+  name Dot31
+  xpos -548
+  ypos 517
+ }
+add_layer {clumpid_D clumpid_D.x clumpid_D.y clumpid_D.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 clumpid_D
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.alpha 0 3 clumpid_D.x 0 0 rgba.red 0 0 clumpid_D.y 0 1 rgba.green 0 1 clumpid_D.z 0 2 rgba.blue 0 2"
+  name Shuffle22
+  label "\[value in1]"
+  xpos -582
+  ypos 1704
+ }
+set N92d08400 [stack 0]
+push $N92d08400
+add_layer {clumpid_B clumpid_B.x clumpid_B.y clumpid_B.z}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 clumpid_B
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.alpha 0 3 clumpid_B.x 0 0 rgba.red 0 0 clumpid_B.y 0 1 rgba.green 0 1 clumpid_B.z 0 2 rgba.blue 0 2"
+  name Shuffle23
+  label "\[value in1]"
+  xpos -679
+  ypos 1704
+ }
+ Dot {
+  name Dot30
+  xpos -645
+  ypos 1791
+ }
+ Merge2 {
+  inputs 2
+  name Merge3
+  xpos -582
+  ypos 1788
+ }
+ HueShift {
+  hue_rotation {{parent.color_shift}}
+  name HueShift2
+  xpos -582
+  ypos 1838
+ }
+set N92d09400 [stack 0]
+ Dot {
+  name Dot26
+  xpos -548
+  ypos 2897
+ }
+ Input {
+  inputs 0
+  name beauty
+  xpos 0
+  ypos 139
+ }
+set N92d09c00 [stack 0]
+ Dot {
+  name Dot5
+  xpos 34
+  ypos 636
+ }
+set N92d30000 [stack 0]
+ Dot {
+  name Dot29
+  xpos 575
+  ypos 636
+ }
+ Dot {
+  name Dot4
+  xpos 575
+  ypos 722
+ }
+set N92d30800 [stack 0]
+ Dot {
+  name Dot7
+  xpos 685
+  ypos 722
+ }
+set N92d30c00 [stack 0]
+ Dot {
+  name Dot23
+  xpos 1470
+  ypos 722
+ }
+ Dot {
+  name Dot20
+  xpos 1470
+  ypos 2634
+ }
+ Dot {
+  name Dot47
+  xpos 186
+  ypos 2634
+ }
+set N92d31800 [stack 0]
+ Dot {
+  name Dot49
+  xpos 186
+  ypos 2729
+ }
+ Dot {
+  name Dot51
+  xpos -239
+  ypos 2729
+ }
+push $N92d09c00
+ PostageStamp {
+  name beauty1
+  note_font "Verdana Bold"
+  xpos 814
+  ypos 756
+  hide_input true
+ }
+ Dot {
+  name Dot21
+  xpos 848
+  ypos 801
+ }
+set N92d4c800 [stack 0]
+ Dot {
+  name Dot43
+  xpos 1026
+  ypos 801
+ }
+set N92d4cc00 [stack 0]
+ Dot {
+  name Dot32
+  xpos 1168
+  ypos 801
+ }
+set N92d4d000 [stack 0]
+add_layer {albedo albedo.red albedo.green albedo.blue}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 albedo
+  fromInput2 {{0} B}
+  mappings "4 albedo.red 0 0 rgba.red 0 0 albedo.green 0 1 rgba.green 0 1 albedo.blue 0 2 rgba.blue 0 2 black -1 -1 rgba.alpha 0 3"
+  name Shuffle2
+  label "\[value in1]"
+  xpos 1134
+  ypos 831
+ }
+ Group {
+  name LumaKeyer2
+  onCreate "n = nuke.thisNode()\nn.knob('blackpoint').setRange(0, 1)\nn.knob('whitepoint').setRange(0, 1)"
+  tile_color 0x421010ff
+  note_font "Bitstream Vera Sans Bold"
+  xpos 1134
+  ypos 893
+  addUserKnob {20 User l lumaKeyer}
+  addUserKnob {4 output M {Alpha RGBA}}
+  output RGBA
+  addUserKnob {41 blackpoint T picker.blackpoint}
+  addUserKnob {41 whitepoint T picker.whitepoint}
+  addUserKnob {6 invert +STARTLINE}
+  invert true
+  addUserKnob {4 smoothing l Smoothing: M {None Smooth Smooth0 Smooth1 ""}}
+  addUserKnob {26 ""}
+  addUserKnob {26 "" l mask T ""}
+  addUserKnob {41 maskChannelInput l "" -STARTLINE T Merge1.maskChannelInput}
+  addUserKnob {41 inject -STARTLINE T Merge1.inject}
+  addUserKnob {41 invert_mask l invert -STARTLINE T Merge1.invert_mask}
+  addUserKnob {41 fringe -STARTLINE T Merge1.fringe}
+  addUserKnob {41 mix T Merge1.mix}
+  addUserKnob {20 info}
+  addUserKnob {22 btn l DerekVFX.ca T "import os\nimport sys\n\ntry:\n    import subprocess\n    def _run(cmd, shell, wait):\n        opener = subprocess.Popen(cmd, shell=shell)\n        if wait:\n            opener.wait()\n        return opener.pid\nexcept ImportError:\n    import popen2\n    def _run(cmd, shell, wait):\n        opener = popen2.Popen3(cmd)\n        if wait:\n            opener.wait()\n        return opener.pid\n\ndef _open(url, wait=0):\n    if sys.platform == \"darwin\":\n        cmd = \[\"open\", url]\n    elif hasattr(os, \"startfile\"):\n        return os.startfile(url)\n    elif os.environ.has_key(\"KDE_FULL_SESSION\") or os.environ.has_key(\"KDE_MULTIHEAD\") or \\\n        os.environ.has_key(\"GNOME_DESKTOP_SESSION_ID\") or os.environ.has_key(\"GNOME_KEYRING_SOCKET\"):\n        cmd = \[\"xdg-open\", url]\n    else:\n        raise OSError, \"Desktop not supported.\"\n\n    return _run(cmd, 0, wait)\n\n_open('http://www.derekvfx.ca/')" +STARTLINE}
+  addUserKnob {26 versionUpdate l "" -STARTLINE T "<font color = gray> adjusted by Tony Lyons </font color = gray>"}
+ }
+  Input {
+   inputs 0
+   name Input1
+   xpos 57
+   ypos -347
+  }
+set N92d4d800 [stack 0]
+  Colorspace {
+   colorspace_out HSL
+   name Colorspace1
+   xpos -181
+   ypos -181
+  }
+set N92d4dc00 [stack 0]
+  Shuffle {
+   red blue
+   green blue
+   alpha blue
+   name Shuffle1
+   tile_color 0x3d3f8e00
+   xpos -336
+   ypos -181
+  }
+  Grade {
+   blackpoint {{rm_black_albedo}}
+   whitepoint {{rm_white_albedo}}
+   name picker
+   xpos -336
+   ypos -139
+  }
+  Input {
+   inputs 0
+   name Inputmask
+   xpos 231
+   ypos 446
+   number 1
+  }
+push $N92d4d800
+  Dot {
+   name Dot5
+   note_font_size 41
+   xpos 91
+   ypos 284
+  }
+set N92d78c00 [stack 0]
+push $N92d4dc00
+  Expression {
+   expr3 smoothstep(parent.picker.blackpoint,parent.picker.whitepoint,b)
+   name Expression1
+   xpos -181
+   ypos -138
+  }
+  Dot {
+   name Dot1
+   note_font_size 41
+   xpos -147
+   ypos -58
+  }
+set N92d79400 [stack 0]
+  ColorLookup {
+   channels {{{parent.ColorLookup_smooth.channels}}}
+   lut {master {curve L 0 C k 1 s0}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth1
+   xpos -69
+   ypos 33
+  }
+push $N92d79400
+  ColorLookup {
+   channels {{{parent.ColorLookup_smooth.channels}}}
+   lut {master {curve L 0 s0 1}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth0
+   xpos -181
+   ypos 32
+  }
+push $N92d79400
+  ColorLookup {
+   lut {master {curve L 0 s0 C k 1 s0}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth
+   xpos -293
+   ypos 32
+  }
+push $N92d79400
+  Dot {
+   name Dot2
+   note_font_size 41
+   xpos -345
+   ypos -52
+  }
+  Dot {
+   name Dot3
+   note_font_size 41
+   xpos -345
+   ypos 131
+  }
+  Switch {
+   inputs 4
+   which {{parent.smoothing}}
+   name Switch1
+   label "\[value which]"
+   xpos -181
+   ypos 121
+  }
+  Expression {
+   expr3 1-a
+   name Expression2
+   xpos -181
+   ypos 191
+   disable {{"parent.invert == 0"}}
+  }
+  Merge2 {
+   inputs 2
+   operation copy
+   Achannels {rgba.red rgba.green rgba.blue -rgba.alpha}
+   Bchannels {rgba.red rgba.green rgba.blue -rgba.alpha}
+   output {rgba.red rgba.green rgba.blue -rgba.alpha}
+   name Merge2
+   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
+   xpos -181
+   ypos 280
+  }
+  Shuffle {
+   red alpha
+   green alpha
+   blue alpha
+   name Shuffle2
+   tile_color 0xffffffff
+   xpos -181
+   ypos 328
+   disable {{!parent.output}}
+  }
+  Dot {
+   name Dot4
+   note_font_size 41
+   xpos -147
+   ypos 450
+  }
+push $N92d78c00
+  Shuffle {
+   alpha black
+   name Shuffle3
+   label "\[value in]"
+   xpos 57
+   ypos 331
+  }
+  Shuffle {
+   red black
+   green black
+   blue black
+   alpha black
+   name Shuffle4
+   label "\[value in]"
+   xpos 57
+   ypos 369
+   disable {{!parent.output}}
+  }
+  Merge2 {
+   inputs 2+1
+   operation copy
+   also_merge rgba
+   name Merge1
+   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
+   xpos 57
+   ypos 446
+  }
+  Output {
+   name Output1
+   xpos 57
+   ypos 602
+  }
+ end_group
+ Dot {
+  name Dot24
+  xpos 1168
+  ypos 960
+ }
+push $N92d4cc00
+add_layer {perimeter perimeter.perimeter}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 perimeter
+  fromInput2 {{0} B}
+  mappings "4 perimeter.perimeter 0 0 rgba.red 0 0 perimeter.perimeter 0 0 rgba.green 0 1 perimeter.perimeter 0 0 rgba.blue 0 2 perimeter.perimeter 0 0 rgba.alpha 0 3"
+  name Shuffle5
+  label "\[value in1]"
+  xpos 992
+  ypos 831
+ }
+ Keyer {
+  operation "luminance key"
+  range {{parent.rm_black_perimeter} {parent.rm_white_perimeter} 1 1}
+  name Keyer1
+  xpos 992
+  ypos 893
+ }
+ ChannelMerge {
+  inputs 2
+  operation min
+  name ChannelMerge4
+  xpos 992
+  ypos 945
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 alpha
+  fromInput2 {{0} B}
+  mappings "4 rgba.alpha 0 0 rgba.alpha 0 3 rgba.alpha 0 0 rgba.red 0 0 rgba.alpha 0 0 rgba.green 0 1 rgba.alpha 0 0 rgba.blue 0 2"
+  name Shuffle3
+  label "\[value in1]"
+  xpos 992
+  ypos 1002
+ }
+set N92de9c00 [stack 0]
+ PostageStamp {
+  name RadiusMap
+  xpos -383
+  ypos 2843
+  hide_input true
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  invert_mask true
+  name Multiply11
+  xpos -273
+  ypos 2843
+ }
+push $N92d30c00
+ Dot {
+  name Dot8
+  xpos 685
+  ypos 819
+ }
+set N92e18800 [stack 0]
+ Dot {
+  name Dot10
+  xpos 685
+  ypos 863
+ }
+set N92e18c00 [stack 0]
+ Dot {
+  name Dot9
+  xpos 685
+  ypos 905
+ }
+push $N92d4c800
+ Dot {
+  name Dot25
+  xpos 848
+  ypos 844
+ }
+set N92e19400 [stack 0]
+ Dot {
+  name Dot27
+  xpos 848
+  ypos 887
+ }
+set N92e19800 [stack 0]
+ Dot {
+  name Dot28
+  xpos 848
+  ypos 930
+ }
+set N92e19c00 [stack 0]
+add_layer {flyaways flyaways.red flyaways.green flyaways.blue flyaways.alpha}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 flyaways
+  fromInput2 {{0} B}
+  mappings "4 flyaways.alpha 0 3 rgba.alpha 0 3 flyaways.alpha 0 3 rgba.red 0 0 flyaways.alpha 0 3 rgba.green 0 1 flyaways.alpha 0 3 rgba.blue 0 2"
+  name Shuffle4
+  label "\[value in1]"
+  xpos 738
+  ypos 921
+ }
+ Multiply {
+  inputs 1+1
+  value 0
+  invert_mask true
+  name Multiply8
+  xpos 541
+  ypos 921
+ }
+ Grade {
+  channels alpha
+  multiply {{parent.f04Presence}}
+  name Grade3
+  xpos 541
+  ypos 974
+ }
+set N92e34800 [stack 0]
+push $N92e18c00
+push $N92e19800
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 flyaways
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.green 0 1 black -1 -1 rgba.red 0 0 flyaways.blue 0 2 rgba.alpha 0 3 flyaways.blue 0 2 rgba.blue 0 2"
+  name Shuffle7
+  label "\[value in1]"
+  xpos 738
+  ypos 878
+ }
+ Multiply {
+  inputs 1+1
+  value 0
+  invert_mask true
+  name Multiply7
+  xpos 541
+  ypos 878
+ }
+ Grade {
+  channels alpha
+  multiply {{parent.f03Presence}}
+  name Grade2
+  xpos 448
+  ypos 878
+ }
+ Dot {
+  name Dot15
+  xpos 409
+  ypos 887
+ }
+set N92e35800 [stack 0]
+push 0
+push $N92e18800
+push $N92e19400
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 flyaways
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.red 0 0 flyaways.green 0 1 rgba.alpha 0 3 flyaways.green 0 1 rgba.green 0 1"
+  name Shuffle6
+  label "\[value in1]"
+  xpos 738
+  ypos 835
+ }
+ Multiply {
+  inputs 1+1
+  value 0
+  invert_mask true
+  name Multiply6
+  xpos 541
+  ypos 835
+ }
+ Grade {
+  channels alpha
+  multiply {{parent.f02Presence}}
+  name Grade1
+  xpos 403
+  ypos 835
+ }
+ Dot {
+  name Dot13
+  xpos 345
+  ypos 844
+ }
+set N92e78800 [stack 0]
+push $N92d30800
+push $N92d4c800
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 flyaways
+  fromInput2 {{0} B}
+  mappings "4 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.green 0 1 flyaways.red 0 0 rgba.alpha 0 3 flyaways.red 0 0 rgba.red 0 0"
+  name Shuffle8
+  label "\[value in1]"
+  xpos 738
+  ypos 792
+ }
+ Multiply {
+  inputs 1+1
+  value 0
+  invert_mask true
+  name Multiply5
+  xpos 541
+  ypos 792
+ }
+ Grade {
+  channels alpha
+  multiply {{parent.f01Presence}}
+  name Grade35
+  xpos 337
+  ypos 792
+ }
+ Dot {
+  name Dot11
+  xpos 251
+  ypos 801
+ }
+set N92e79800 [stack 0]
+ Merge2 {
+  inputs 4+1
+  operation plus
+  name Merge2
+  xpos 135
+  ypos 980
+ }
+set N92e79c00 [stack 0]
+ PostageStamp {
+  name FireflysPresence
+  xpos -142
+  ypos 2781
+  hide_input true
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 alpha
+  fromInput2 {{0} B}
+  mappings "4 rgba.alpha 0 0 rgba.alpha 0 3 rgba.alpha 0 0 rgba.red 0 0 rgba.alpha 0 0 rgba.green 0 1 rgba.alpha 0 0 rgba.blue 0 2"
+  name Shuffle1
+  xpos -142
+  ypos 2818
+ }
+push $N92d31800
+push $N92d09c00
+ PostageStamp {
+  name beauty3
+  note_font "Verdana Bold"
+  xpos -171
+  ypos 2631
+  hide_input true
+ }
+ Input {
+  inputs 0
+  name mask
+  xpos 147
+  ypos 2332
+  number 2
+ }
+ Shuffle {
+  name FixEmpty
+  xpos 147
+  ypos 2364
+ }
+ Dot {
+  name Dot22
+  xpos 181
+  ypos 2404
+ }
+push $N92d09c00
+ PostageStamp {
+  name beauty2
+  note_font "Verdana Bold"
+  xpos -142
+  ypos 2401
+  hide_input true
+ }
+push $N92d09400
+push $N92ca9c00
+ Dot {
+  name Dot1
+  xpos 1724
+  ypos 517
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 depth
+  fromInput2 {{0} B}
+  in2 alpha
+  mappings "4 depth.Z 0 0 rgba.red 0 0 black -1 -1 rgba.blue 0 2 black -1 -1 rgba.green 0 1 rgba.alpha 1 0 rgba.alpha 0 3"
+  name Shuffle18
+  label "\[value in1]"
+  xpos 1690
+  ypos 885
+ }
+ Expression {
+  temp_name0 near
+  temp_expr0 parent.near_far.near
+  temp_name1 far
+  temp_expr1 parent.near_far.far
+  temp_name2 nearforce
+  temp_expr2 parent.near_far.near_force*0.01
+  temp_name3 farforce
+  temp_expr3 parent.near_far.far_force*0.01
+  expr0 "clamp(1 - ((r - near) / (far - near)) * (nearforce - farforce), farforce, nearforce)"
+  name Expression1
+  xpos 1690
+  ypos 921
+ }
+ Premult {
+  name Premult5
+  xpos 1690
+  ypos 945
+ }
+ Unpremult {
+  name Unpremult3
+  xpos 1690
+  ypos 969
+ }
+ Invert {
+  name Invert2
+  xpos 1690
+  ypos 993
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.red 0 0 rgba.alpha 0 3 rgba.red 0 0 rgba.blue 0 2 rgba.red 0 0 rgba.green 0 1 rgba.red 0 0 rgba.red 0 0"
+  name Shuffle9
+  label "\[value in1]"
+  xpos 1690
+  ypos 1029
+ }
+ Dot {
+  name Dot2
+  xpos 1724
+  ypos 1353
+ }
+push $N92d30000
+ Dot {
+  name Dot34
+  xpos 34
+  ypos 1017
+ }
+set N92ed7c00 [stack 0]
+ Dot {
+  name Dot38
+  xpos -92
+  ypos 1017
+ }
+ Dot {
+  name Dot292
+  xpos -92
+  ypos 1261
+ }
+set N92f04400 [stack 0]
+ Dot {
+  name Dot17
+  xpos -92
+  ypos 1353
+ }
+push $N92e19c00
+ Dot {
+  name Dot35
+  xpos 848
+  ypos 1110
+ }
+push $N92d4d000
+ Dot {
+  name Dot33
+  xpos 1320
+  ypos 801
+ }
+ Cryptomatte {
+  cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
+  pickerAdd {0 0 0 0 0 0 0 0}
+  matteList *fur*
+  lastSelectedCryptoLayerName CryptoPrimitives
+  name Cryptomatte3
+  xpos 1286
+  ypos 837
+ }
+ Dot {
+  name Dot37
+  xpos 1320
+  ypos 1056
+ }
+push $N92de9c00
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0
+  invert_mask true
+  name Multiply9
+  xpos 992
+  ypos 1053
+ }
+ Invert {
+  inputs 1+1
+  channels rgba
+  maskChannelInput -rgba.alpha
+  name Invert3
+  xpos 992
+  ypos 1107
+ }
+ Dot {
+  name Dot294
+  xpos 1026
+  ypos 1261
+ }
+push $N92f04400
+push $N92e34800
+ Dot {
+  name Dot18
+  xpos 575
+  ypos 1205
+ }
+push $N92e35800
+ Dot {
+  name Dot16
+  xpos 409
+  ypos 1162
+ }
+push $N92e78800
+ Dot {
+  name Dot14
+  xpos 345
+  ypos 1119
+ }
+push $N92e79800
+ Dot {
+  name Dot12
+  xpos 251
+  ypos 1076
+ }
+push $N92e79c00
+ Dot {
+  name Dot50
+  xpos 169
+  ypos 1038
+ }
+push $N92ca9c00
+ Log2Lin {
+  operation lin2log
+  name Log2Lin1
+  xpos -387
+  ypos 817
+ }
+ Sharpen {
+  size {{sharpenDetails}}
+  name Sharpen1
+  xpos -387
+  ypos 841
+ }
+ Log2Lin {
+  name Log2Lin2
+  xpos -387
+  ypos 877
+ }
+ Dot {
+  name Dot6
+  xpos -353
+  ypos 1038
+ }
+push $N92ed7c00
+ Merge2 {
+  inputs 2+1
+  name Merge1
+  xpos 0
+  ypos 1035
+ }
+ Grade {
+  inputs 1+1
+  white {{parent.f01Gain.r} {parent.f01Gain.g} {parent.f01Gain.b} 0}
+  name Grade31
+  xpos 0
+  ypos 1073
+ }
+ Grade {
+  inputs 1+1
+  white {{parent.f02Gain.r} {parent.f02Gain.g} {parent.f02Gain.b} 1}
+  name Grade32
+  xpos 0
+  ypos 1116
+ }
+ Grade {
+  inputs 1+1
+  white {{parent.f03Gain.r} {parent.f03Gain.g} {parent.f03Gain.b} 1}
+  name Grade33
+  xpos 0
+  ypos 1159
+ }
+ Grade {
+  inputs 1+1
+  white {{parent.f04Gain.r} {parent.f04Gain.g} {parent.f04Gain.b} 1}
+  name Grade34
+  xpos 0
+  ypos 1202
+ }
+ Dissolve {
+  inputs 2+1
+  which 1
+  name Dissolve2
+  xpos 0
+  ypos 1252
+ }
+ Dissolve {
+  inputs 2+1
+  which {{parent.autosize_force}}
+  name Dissolve4
+  xpos 0
+  ypos 1344
+  disable {{!parent.filter_autosize}}
+ }
+ Dot {
+  name Dot19
+  xpos 34
+  ypos 1661
+ }
+ Merge2 {
+  inputs 2
+  operation screen
+  mix {{parent.color_mix}}
+  name Merge5
+  xpos 0
+  ypos 1838
+ }
+ Dissolve {
+  inputs 2+1
+  which 1
+  invert_mask {{!mask_invert}}
+  name Dissolve1
+  xpos 0
+  ypos 2395
+  disable {{"\[expr \{\[exists parent.input2] ? 0 : 1\}]"}}
+ }
+ Dissolve {
+  inputs 2+1
+  which 1
+  invert_mask true
+  name Dissolve3
+  xpos 0
+  ypos 2625
+ }
+ Switch {
+  inputs 4
+  which {{display}}
+  name Switch1
+  xpos 0
+  ypos 2894
+ }
+ Output {
+  name Output1
+  xpos 0
+  ypos 3145
+ }
+ NoOp {
+  inputs 0
+  name near_far
+  xpos -191
+  ypos 140
+  addUserKnob {20 User}
+  addUserKnob {7 near R 0 2000}
+  near {{parent.near}}
+  addUserKnob {7 far R 0 5000}
+  far {{parent.far}}
+  addUserKnob {7 near_force l near% R 0 100}
+  near_force {{parent.near_p}}
+  addUserKnob {7 far_force l far% R 0 100}
+  far_force {{parent.far_p}}
+ }
+end_group

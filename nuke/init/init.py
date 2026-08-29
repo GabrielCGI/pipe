@@ -29,7 +29,7 @@ if ((not nuke.env["studio"]) or nuke.env["indie"]) and not nuke.env.get("gui"):
                     from PySide.QtCore import *
                     from PySide.QtGui import *
                     from PySide.QtWidgets import *
-        if nuke.NUKE_VERSION_MAJOR in [16]:
+        if nuke.NUKE_VERSION_MAJOR in [16, 17]:
             from PySide6.QtCore import *
             from PySide6.QtGui import *
             from PySide6.QtWidgets import *

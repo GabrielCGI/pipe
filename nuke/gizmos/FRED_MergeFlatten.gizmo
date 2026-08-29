@@ -1,0 +1,188 @@
+#! C:/Program Files/Nuke15.1v5/nuke-15.1.5.dll -nx
+version 15.1 v5
+Gizmo {
+ inputs 3
+ tile_color 0x2a3bf6ff
+ label "mix = \[value mix]"
+ note_font "Verdana Bold"
+ addUserKnob {20 User}
+ addUserKnob {7 mix}
+ addUserKnob {26 "" +STARTLINE}
+ addUserKnob {26 text l "" +STARTLINE T "Mask :"}
+ addUserKnob {6 invert -STARTLINE}
+}
+ Input {
+  inputs 0
+  name mask
+  xpos 135
+  ypos -176
+  number 2
+ }
+ Dot {
+  name Dot8
+  xpos 169
+  ypos 57
+ }
+set Nfb6aec00 [stack 0]
+ Dot {
+  name Dot9
+  xpos 169
+  ypos 81
+ }
+set Nfb6af000 [stack 0]
+ Dot {
+  name Dot10
+  xpos 169
+  ypos 105
+ }
+set Nfb6af400 [stack 0]
+ Dot {
+  name Dot11
+  xpos 169
+  ypos 129
+ }
+set Nfb6af800 [stack 0]
+ Dot {
+  name Dot12
+  xpos 169
+  ypos 153
+ }
+set Nfb6afc00 [stack 0]
+ Dot {
+  name Dot13
+  xpos 169
+  ypos 177
+ }
+set N3e4cc000 [stack 0]
+ Dot {
+  name Dot14
+  xpos 169
+  ypos 201
+ }
+ Input {
+  inputs 0
+  name A
+  xpos -115
+  ypos -32
+  number 1
+ }
+ Dot {
+  name Dot1
+  xpos -81
+  ypos 57
+ }
+set N2213fc00 [stack 0]
+ Dot {
+  name Dot2
+  xpos -81
+  ypos 81
+ }
+set Nfb622000 [stack 0]
+ Dot {
+  name Dot3
+  xpos -81
+  ypos 105
+ }
+set Nfb622400 [stack 0]
+ Dot {
+  name Dot4
+  xpos -81
+  ypos 129
+ }
+set Nfb622800 [stack 0]
+ Dot {
+  name Dot5
+  xpos -81
+  ypos 153
+ }
+set Nfb622c00 [stack 0]
+ Dot {
+  name Dot6
+  xpos -81
+  ypos 177
+ }
+set Nfb623000 [stack 0]
+ Dot {
+  name Dot7
+  xpos -81
+  ypos 201
+ }
+push $N3e4cc000
+push $Nfb623000
+push $Nfb6afc00
+push $Nfb622c00
+push $Nfb6af800
+push $Nfb622800
+push $Nfb6af400
+push $Nfb622400
+push $Nfb6af000
+push $Nfb622000
+push $Nfb6aec00
+push $N2213fc00
+ Input {
+  inputs 0
+  name B
+  xpos 0
+  ypos -32
+ }
+ Merge2 {
+  inputs 2+1
+  operation average
+  mix {{parent.mix}}
+  name Merge1
+  xpos 0
+  ypos 54
+ }
+ Merge2 {
+  inputs 2+1
+  operation average
+  mix {{parent.mix}}
+  name Merge2
+  xpos 0
+  ypos 78
+ }
+ Merge2 {
+  inputs 2+1
+  operation average
+  mix {{parent.mix}}
+  name Merge3
+  xpos 0
+  ypos 102
+ }
+ Merge2 {
+  inputs 2+1
+  operation average
+  mix {{parent.mix}}
+  name Merge4
+  xpos 0
+  ypos 126
+ }
+ Merge2 {
+  inputs 2+1
+  operation average
+  mix {{parent.mix}}
+  name Merge5
+  xpos 0
+  ypos 150
+ }
+ Merge2 {
+  inputs 2+1
+  operation average
+  mix {{parent.mix}}
+  name Merge6
+  xpos 0
+  ypos 174
+ }
+ Merge2 {
+  inputs 2+1
+  mix {{lerp(.9,0,1,1,parent.mix)}}
+  name Merge7
+  xpos 0
+  ypos 198
+ }
+ Output {
+  name Output1
+  xpos 0
+  ypos 315
+ }
+end_group

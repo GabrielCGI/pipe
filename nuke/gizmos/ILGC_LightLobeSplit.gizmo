@@ -1,0 +1,112 @@
+#! C:/Program Files/Nuke15.1v5/nuke-15.1.5.dll -nx
+version 15.1 v5
+Gizmo {
+ tile_color 0x540054ff
+ label "\[value lobe]"
+ note_font "Verdana Bold"
+ addUserKnob {20 lls_tab l "Light / Lobe split"}
+ addUserKnob {4 lobe l "output :" t "diffuse             part diffuse de la lumiere, sss inclus\nspecular            part glossy reflection seule\ndiffuse + specular  le lightgroup prive de sa transmission\nglossytransmission  la part ecartee, pour controle\nQC lobes manquants  doit etre noir. Non noir = un lobe du lightgroup\n                    n'a pas de combined declaree." M {diffuse specular "diffuse + specular" glossytransmission "QC lobes manquants"}}
+}
+ Input {
+  inputs 0
+  name beauty_lpe
+  xpos 240
+  ypos -400
+ }
+ Dot {
+  name Dot1
+  xpos 274
+  ypos -330
+ }
+set N8d162c00 [stack 0]
+ Expression {
+  expr0 max(0,r-(combineddiffuse.red+sss.red+combinedglossyreflection.red+glossytransmission.red))
+  expr1 max(0,g-(combineddiffuse.green+sss.green+combinedglossyreflection.green+glossytransmission.green))
+  expr2 max(0,b-(combineddiffuse.blue+sss.blue+combinedglossyreflection.blue+glossytransmission.blue))
+  expr3 a
+  name QC_MISSING_LOBES
+  label "max(0, key - TOTAL)"
+  xpos 480
+  ypos -260
+ }
+push $N8d162c00
+ Expression {
+  temp_name0 tr
+  temp_expr0 combineddiffuse.red+sss.red+combinedglossyreflection.red+glossytransmission.red
+  temp_name1 tg
+  temp_expr1 combineddiffuse.green+sss.green+combinedglossyreflection.green+glossytransmission.green
+  temp_name2 tb
+  temp_expr2 combineddiffuse.blue+sss.blue+combinedglossyreflection.blue+glossytransmission.blue
+  expr0 min(1,r/(tr+1e-10))*glossytransmission.red
+  expr1 min(1,g/(tg+1e-10))*glossytransmission.green
+  expr2 min(1,b/(tb+1e-10))*glossytransmission.blue
+  expr3 a
+  name TRANSMISSION_LPE
+  label "k * T"
+  xpos 360
+  ypos -260
+ }
+push $N8d162c00
+ Expression {
+  temp_name0 tr
+  temp_expr0 combineddiffuse.red+sss.red+combinedglossyreflection.red+glossytransmission.red
+  temp_name1 tg
+  temp_expr1 combineddiffuse.green+sss.green+combinedglossyreflection.green+glossytransmission.green
+  temp_name2 tb
+  temp_expr2 combineddiffuse.blue+sss.blue+combinedglossyreflection.blue+glossytransmission.blue
+  expr0 min(1,r/(tr+1e-10))*(combineddiffuse.red+sss.red+combinedglossyreflection.red)
+  expr1 min(1,g/(tg+1e-10))*(combineddiffuse.green+sss.green+combinedglossyreflection.green)
+  expr2 min(1,b/(tb+1e-10))*(combineddiffuse.blue+sss.blue+combinedglossyreflection.blue)
+  expr3 a
+  name DIFF_PLUS_SPEC_LPE
+  label "k * (D'+S)"
+  xpos 240
+  ypos -260
+ }
+push $N8d162c00
+ Expression {
+  temp_name0 tr
+  temp_expr0 combineddiffuse.red+sss.red+combinedglossyreflection.red+glossytransmission.red
+  temp_name1 tg
+  temp_expr1 combineddiffuse.green+sss.green+combinedglossyreflection.green+glossytransmission.green
+  temp_name2 tb
+  temp_expr2 combineddiffuse.blue+sss.blue+combinedglossyreflection.blue+glossytransmission.blue
+  expr0 min(1,r/(tr+1e-10))*combinedglossyreflection.red
+  expr1 min(1,g/(tg+1e-10))*combinedglossyreflection.green
+  expr2 min(1,b/(tb+1e-10))*combinedglossyreflection.blue
+  expr3 a
+  name SPECULAR_LPE
+  label "k * S"
+  xpos 120
+  ypos -260
+ }
+push $N8d162c00
+ Expression {
+  temp_name0 tr
+  temp_expr0 combineddiffuse.red+sss.red
+  temp_name1 tg
+  temp_expr1 combineddiffuse.green+sss.green
+  temp_name2 tb
+  temp_expr2 combineddiffuse.blue+sss.blue
+  expr0 min(1,r/(tr+combinedglossyreflection.red+glossytransmission.red+1e-10))*tr
+  expr1 min(1,g/(tg+combinedglossyreflection.green+glossytransmission.green+1e-10))*tg
+  expr2 min(1,b/(tb+combinedglossyreflection.blue+glossytransmission.blue+1e-10))*tb
+  expr3 a
+  name DIFFUSE_LPE
+  label "k * D'"
+  xpos 0
+  ypos -260
+ }
+ Switch {
+  inputs 5
+  which {{parent.lobe}}
+  name LOBE_SELECT
+  xpos 240
+  ypos -160
+ }
+ Output {
+  name Output1
+  xpos 240
+  ypos -60
+ }
+end_group

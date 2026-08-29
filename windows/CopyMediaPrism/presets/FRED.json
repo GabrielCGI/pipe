@@ -4,17 +4,12 @@
             "compo",
             "comp"
         ],
-        "QC": [
-            "ConfoRenderA",
-            "3dRender",
-            "rgb"
+        "LIGHTING": [
+            "Lighting"
         ],
         "ANIM": [
-            "anim",
-            "AnimBlock",
             "AnimSpline",
-            "anim_playblast",
-            "playblast"
+            "AnimBlock"
         ],
         "RLO": [
             "RoughtLayout",

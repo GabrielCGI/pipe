@@ -18,11 +18,12 @@ json_default_name = os.path.join(JSON_DIRECTORY, "department_identifiers.json")
 
 # Default content for the JSON file
 default_identifiers = {
-    "COMPOSITING": ["compo", "comp", "nuke","beauty"],
+    "COMPOSITING": ["compo", "comp", "nuke", "beauty"],
     "ANIM": ["anim", "anim_playblast"],
-    "RLO": ["RoughtLayout", "Previz", "RoughLayout_playblast"]
+    "RLO": ["RoughtLayout", "Previz", "RoughLayout_playblast"],
 }
 added_seq_log_end = []
+
 
 # Function to create or load the department identifier JSON file
 def load_or_create_department_identifiers(json_path=json_default_name):
@@ -34,24 +35,25 @@ def load_or_create_department_identifiers(json_path=json_default_name):
 
     # Create or load the JSON file
     if not os.path.exists(json_path):
-        with open(json_path, 'w') as f:
+        with open(json_path, "w") as f:
             json.dump(default_identifiers, f, indent=4)
         return default_identifiers
     else:
         try:
-            with open(json_path, 'r') as f:
+            with open(json_path, "r") as f:
                 return json.load(f)
         except json.JSONDecodeError:
             # If the JSON file is corrupted, reset to default
-            with open(json_path, 'w') as f:
+            with open(json_path, "w") as f:
                 json.dump(default_identifiers, f, indent=4)
             return default_identifiers
 
 
 # Function to save modified department identifiers
 def save_department_identifiers(data, json_path=json_default_name):
-    with open(json_path, 'w') as f:
+    with open(json_path, "w") as f:
         json.dump(data, f, indent=4)
+
 
 # Function to locate the "Shots" folder inside "03_Production"
 def find_shots_directory(project_dir, log_func=None):
@@ -64,12 +66,22 @@ def find_shots_directory(project_dir, log_func=None):
         return shots_dir
     else:
         if log_func:
-            log_func(f"'Shots' directory not found in '03_Production' at {production_dir}")
+            log_func(
+                f"'Shots' directory not found in '03_Production' at {production_dir}"
+            )
         return None
+
 
 # Function to find all media files based on department identifiers, keeping only the highest version for each identifier
 
-def find_files(source_dir, department_identifiers, exclusions=None, log_func=None, no_department=False):
+
+def find_files(
+    source_dir,
+    department_identifiers,
+    exclusions=None,
+    log_func=None,
+    no_department=False,
+):
     if exclusions is None:
         exclusions = []  # Default to an empty list if no exclusions are provided
 
@@ -77,30 +89,29 @@ def find_files(source_dir, department_identifiers, exclusions=None, log_func=Non
 
     files_dict = {}
     # Regular expression to find version numbers like _v001
-    pattern_version = re.compile(r'_v(\d+)')
+    pattern_version = re.compile(r"_v(\d+)")
 
     playblast_pattern = source_dir + "/*/*/Playblasts/**"
     renders2d_pattern = source_dir + "/*/*/Renders/2dRender/**"
     renders3d_pattern = source_dir + "/*/*/Renders/3dRender/**"
-    
+
     paths1 = glob.glob(playblast_pattern)
     paths2 = glob.glob(renders2d_pattern)
     paths3 = glob.glob(renders3d_pattern)
     paths = paths1 + paths2 + paths3
 
     for id_path in paths:
-
         # Check for excluded sequences or shots, only if exclusions are not empty
         if exclusions and any(exclusion in id_path for exclusion in exclusions):
             if log_func and debug is True:
                 log_func(f"Skipping excluded path: {id_path}")
             continue
-        
+
         id_path = Path(id_path)
         if "Playblasts" in id_path.as_posix() and len(id_path.parts) > 7:
             seq_name = id_path.parts[4]
             plan_name = id_path.parts[5]
-            identifier = id_path.parts[7].lower()  
+            identifier = id_path.parts[7].lower()
         elif "Renders" in id_path.as_posix() and len(id_path.parts) > 8:
             seq_name = id_path.parts[4]
             plan_name = id_path.parts[5]
@@ -108,49 +119,65 @@ def find_files(source_dir, department_identifiers, exclusions=None, log_func=Non
         else:
             continue
 
-
         # For each department, check if the identifier (lowercased) is in the list of identifiers (also lowercased)
         for departement, identifiers in department_identifiers.items():
-            if identifier in [i.lower() for i in identifiers]:
+            if identifier not in [i.lower() for i in identifiers]:
+                continue
                 # Look for version numbers in the filename
-                
-                versions = [v_path for v_path in  id_path.glob("*")]
-                versions.sort(reverse=True)
-                if versions:
-                    found = False
-                    for version in versions:
-                        if found:
-                            break
-                        if version.as_posix().endswith(")"):
-                            continue
-                        
-                        for v_path in version.glob("*"):
-                            match = pattern_version.search(v_path.as_posix())
-                            if match:
-                                version = int(match.group(1))
-                                if no_department:
-                                    base_name = f"{seq_name}_{plan_name}"
-                                else:
-                                    base_name = f"{seq_name}_{plan_name}_{departement}"
 
-                                # Keep only the highest version for each identifier in the department
-                                if base_name not in files_dict or (version > files_dict[base_name]['version'] and identifier == files_dict[base_name]['identifier']):
-                                    files_dict[base_name] = {
-                                        'path': v_path.as_posix(),
-                                        'version': version,
-                                        'identifier': identifier,
-                                        'sequence': seq_name,
-                                        'plan': plan_name,
-                                    }
-                                    if not no_department:
-                                        files_dict[base_name]['departement'] = departement
-                                    found = True
+            versions = [v_path for v_path in id_path.glob("*")]
+            versions.sort(reverse=True)
+            if not versions:
+                continue
+            found = False
+            for version in versions:
+                if found:
+                    break
+                if version.as_posix().endswith(")"):
+                    continue
+
+                for v_path in version.glob("*"):
+                    match = pattern_version.search(v_path.as_posix())
+                    if not match:
+                        continue
+                    version = int(match.group(1))
+                    if no_department:
+                        base_name = f"{seq_name}_{plan_name}"
+                    else:
+                        base_name = f"{seq_name}_{plan_name}_{departement}"
+
+                    # Keep only the highest version for each identifier in the department
+                    if base_name not in files_dict or (
+                        (
+                            "anim" in departement.lower()
+                            and os.path.getmtime(v_path)
+                            > files_dict[base_name]["modification_time"]
+                        )
+                        or (
+                            version > files_dict[base_name]["version"]
+                            and identifier == files_dict[base_name]["identifier"]
+                        )
+                    ):
+                        files_dict[base_name] = {
+                            "path": v_path.as_posix(),
+                            "version": version,
+                            "identifier": identifier,
+                            "sequence": seq_name,
+                            "plan": plan_name,
+                            "modification_time": os.path.getmtime(v_path),
+                        }
+                        if not no_department:
+                            files_dict[base_name]["departement"] = departement
+                        found = True
 
     if log_func and debug is True:
         for base_name, info in files_dict.items():
-            log_func(f"Found file: {base_name}, version: {info['version']}, departement: {info['departement']}")
+            log_func(
+                f"Found file: {base_name}, version: {info['version']}, departement: {info['departement']}"
+            )
 
     return files_dict
+
 
 # Function to calculate the MD5 checksum of a file
 def calculate_md5(file_path):
@@ -159,6 +186,7 @@ def calculate_md5(file_path):
         for chunk in iter(lambda: f.read(4096), b""):
             hash_md5.update(chunk)
     return hash_md5.hexdigest()
+
 
 # Fonction MD5 optimisée pour les fichiers de grande taille (hash partiel)
 def calculate_md5_fast(file_path, chunk_size=8192):
@@ -177,6 +205,7 @@ def calculate_md5_fast(file_path, chunk_size=8192):
 
     return hash_md5.hexdigest()
 
+
 # Utilisation de multithreading pour comparer les fichiers dans une séquence
 def compare_md5_in_parallel(files, directory, log_func=None):
     def compare_single_file(file_to_compare):
@@ -189,20 +218,21 @@ def compare_md5_in_parallel(files, directory, log_func=None):
 
     return md5_results
 
+
 def verify_image_sequence_integrity(files_to_copy, log_func=None):
     """
     Vérifie si la séquence d'images est complète (sans frames manquantes).
     """
     frame_numbers = []
     for file_name in files_to_copy:
-        match = re.search(r'(\d+)\.(\w+)$', file_name)  # Extraire le numéro de frame
+        match = re.search(r"(\d+)\.(\w+)$", file_name)  # Extraire le numéro de frame
         if match:
             frame_numbers.append(int(match.group(1)))
 
     # Trier les numéros de frames pour détecter les manquants
     frame_numbers.sort()
     missing_frames = []
-    
+
     if frame_numbers:
         # Vérifier les frames manquantes
         for i in range(frame_numbers[0], frame_numbers[-1]):
@@ -218,6 +248,7 @@ def verify_image_sequence_integrity(files_to_copy, log_func=None):
     else:
         return None
 
+
 def delete_image_sequence(image_sequence_folder, log_func=None):
     """
     Supprime le dossier de séquence d'images.
@@ -228,6 +259,7 @@ def delete_image_sequence(image_sequence_folder, log_func=None):
             log_func(f"- Supprimé : séquence d'images {image_sequence_folder}")
     else:
         pass
+
 
 def delete_video_file(video_file_path, log_func=None):
     """
@@ -240,18 +272,26 @@ def delete_video_file(video_file_path, log_func=None):
     else:
         pass
 
-def copy_files(source_files, dest_dir, log_func=None, enable_md5=True, update_overall_progress=None, update_file_progress=None):
-    
+
+def copy_files(
+    source_files,
+    dest_dir,
+    log_func=None,
+    enable_md5=True,
+    update_overall_progress=None,
+    update_file_progress=None,
+):
+
     total_files = len(source_files)
     files_copied = 0
 
     for base_name, info in source_files.items():
-        source_file = info['path']
-        seq_name = info['sequence']
-        plan_name = info['plan']
-        departement = info.get('departement')
+        source_file = info["path"]
+        seq_name = info["sequence"]
+        plan_name = info["plan"]
+        departement = info.get("departement")
         if departement is None:
-            departement = ''
+            departement = ""
         else:
             departement = f"_{departement}"
         extension = os.path.splitext(source_file)[1].lower()
@@ -264,10 +304,10 @@ def copy_files(source_files, dest_dir, log_func=None, enable_md5=True, update_ov
 
         log_file_path = os.path.join(sequence_folder, f"{seq_name}.log")
 
-        if extension in ['.mp4', '.mov']:
+        if extension in [".mp4", ".mov"]:
             new_filename = f"{seq_name}_{plan_name}{departement}{extension}"
             dest_file = os.path.join(sequence_folder, new_filename)
-            
+
             if os.path.exists(dest_file):
                 source_md5 = calculate_md5_fast(source_file)
                 dest_md5 = calculate_md5_fast(dest_file)
@@ -278,7 +318,9 @@ def copy_files(source_files, dest_dir, log_func=None, enable_md5=True, update_ov
                         update_overall_progress((files_copied / total_files) * 100)
                     continue
 
-            image_sequence_folder = os.path.join(sequence_folder, f"{seq_name}_{plan_name}{departement}")
+            image_sequence_folder = os.path.join(
+                sequence_folder, f"{seq_name}_{plan_name}{departement}"
+            )
             delete_image_sequence(image_sequence_folder, log_func)
 
             files_to_copy = [source_file]
@@ -291,49 +333,71 @@ def copy_files(source_files, dest_dir, log_func=None, enable_md5=True, update_ov
             shutil.copy2(source_file, dest_file)
             file_log = f"+ Updated: {new_filename} \n\tfrom {source_file}"
             log_func(file_log)
-            with open(log_file_path, 'a') as log_file:
-                log_file.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} : {file_log}\n")
+            with open(log_file_path, "a") as log_file:
+                log_file.write(
+                    f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} : {file_log}\n"
+                )
             files_copied += 1
 
             if update_overall_progress:
                 update_overall_progress((files_copied / total_files) * 100)
 
         else:
-            video_file_mp4 = os.path.join(sequence_folder, f"{seq_name}_{plan_name}{departement}.mp4")
-            video_file_mov = os.path.join(sequence_folder, f"{seq_name}_{plan_name}{departement}.mov")
+            video_file_mp4 = os.path.join(
+                sequence_folder, f"{seq_name}_{plan_name}{departement}.mp4"
+            )
+            video_file_mov = os.path.join(
+                sequence_folder, f"{seq_name}_{plan_name}{departement}.mov"
+            )
 
             delete_video_file(video_file_mp4, log_func)
             delete_video_file(video_file_mov, log_func)
 
-            image_sequence_folder = os.path.join(sequence_folder, f"{seq_name}_{plan_name}{departement}")
+            image_sequence_folder = os.path.join(
+                sequence_folder, f"{seq_name}_{plan_name}{departement}"
+            )
             os.makedirs(image_sequence_folder, exist_ok=True)
 
-            sequence_base = re.sub(r'(\.\d+)', '', os.path.splitext(os.path.basename(source_file))[0])
+            sequence_base = re.sub(
+                r"(\.\d+)", "", os.path.splitext(os.path.basename(source_file))[0]
+            )
             directory = os.path.dirname(source_file)
-            files_to_copy = [f for f in os.listdir(directory) if f.startswith(sequence_base) and f.endswith(extension)]
+            files_to_copy = [
+                f
+                for f in os.listdir(directory)
+                if f.startswith(sequence_base) and f.endswith(extension)
+            ]
 
             missing_frames = verify_image_sequence_integrity(files_to_copy, log_func)
             if missing_frames:
-                log_func(f"! Frames manquantes dans séquence {seq_name}_{plan_name}{departement}: {missing_frames}. Copie des fichiers existants uniquement.")
+                log_func(
+                    f"! Frames manquantes dans séquence {seq_name}_{plan_name}{departement}: {missing_frames}. Copie des fichiers existants uniquement."
+                )
             elif debug is True:
                 log_func("Séquence d'images complète")
 
             if enable_md5:
                 # Comparer les fichiers de la séquence avec MD5 en parallèle
-                md5_results_source = compare_md5_in_parallel(files_to_copy, directory, log_func)
+                md5_results_source = compare_md5_in_parallel(
+                    files_to_copy, directory, log_func
+                )
             else:
-                size_list = [os.path.getsize(os.path.join(directory, file)) for file in files_to_copy]
-                
+                size_list = [
+                    os.path.getsize(os.path.join(directory, file))
+                    for file in files_to_copy
+                ]
 
             # Variable pour suivre si toute la séquence est identique
             all_skipped = True
 
             for i, file_to_copy in enumerate(files_to_copy):
                 full_file_path = os.path.join(directory, file_to_copy)
-                match = re.search(r'(\d+)\.(\w+)$', file_to_copy)
+                match = re.search(r"(\d+)\.(\w+)$", file_to_copy)
                 if match:
                     frame_number = match.group(1)
-                    new_filename = f"{seq_name}_{plan_name}{departement}.{frame_number}{extension}"
+                    new_filename = (
+                        f"{seq_name}_{plan_name}{departement}.{frame_number}{extension}"
+                    )
                     dest_file = os.path.join(image_sequence_folder, new_filename)
                 else:
                     new_filename = f"{seq_name}_{plan_name}{departement}{extension}"
@@ -358,9 +422,13 @@ def copy_files(source_files, dest_dir, log_func=None, enable_md5=True, update_ov
                     update_file_progress((i + 1) / len(files_to_copy) * 100)
 
             if all_skipped:
-                log_func(f"[] Skipped (identical): Entire image sequence {seq_name}_{plan_name}{departement}")
+                log_func(
+                    f"[] Skipped (identical): Entire image sequence {seq_name}_{plan_name}{departement}"
+                )
             else:
-                log_func(f"+ Updated: Entire image sequence {seq_name}_{plan_name}{departement}")
+                log_func(
+                    f"+ Updated: Entire image sequence {seq_name}_{plan_name}{departement}"
+                )
 
             files_copied += 1
             if update_overall_progress:
@@ -368,23 +436,24 @@ def copy_files(source_files, dest_dir, log_func=None, enable_md5=True, update_ov
                 update_overall_progress(overall_progress)
 
             sequence_log = f"+ Updated: {seq_name}_{plan_name}{departement} \n\tfrom image sequence from {directory}."
-            with open(log_file_path, 'a') as log_file:
-                log_file.write(f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} : {sequence_log}\n")
+            with open(log_file_path, "a") as log_file:
+                log_file.write(
+                    f"{datetime.now().strftime('%Y-%m-%d %H:%M:%S')} : {sequence_log}\n"
+                )
 
         if update_file_progress:
             update_file_progress(0)
 
     # Update end log only
     for base_name, info in source_files.items():
-        source_file = info['path']
-        seq_name = info['sequence']
+        source_file = info["path"]
+        seq_name = info["sequence"]
 
-        
-        #parse seq_name
+        # parse seq_name
         if seq_name not in added_seq_log_end:
             sequence_folder = os.path.join(dest_dir, seq_name)
-            
+
             log_file_path = os.path.join(sequence_folder, f"{seq_name}.log")
-            with open(log_file_path, 'a') as log_file:
+            with open(log_file_path, "a") as log_file:
                 log_file.write("------------------------------\n")
             added_seq_log_end.append(seq_name)

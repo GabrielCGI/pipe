@@ -12,7 +12,7 @@
     <memberTool name="clean_light"/>
     <memberTool name="shotBuilder"/>
     <memberTool name="reduceTextureViewport"/>
-    <memberTool name="tool_1"/>
+    <memberTool name="illogic_lmfix_toggle"/>
     <memberTool name="batchrender"/>
   </toolshelf>
 
@@ -133,5 +133,30 @@ reload(lgt_hou_shelf_snippets)
 
 
 lgt_hou_shelf_snippets.cleanLightMixer()]]></script>
+  </tool>
+
+  <tool name="illogic_lmfix_toggle" label="LM Fix ON/OFF" icon="LOP_lightmixer">
+    <helpText><![CDATA[Route les moves look-through vers le Light Mixer au lieu de creer des edit_<light>. Clic = ON/OFF (etat par session, ILLOGIC_LMFIX).]]></helpText>
+    <script scriptType="python"><![CDATA[
+# LM Fix - route les moves look-through (lock to view) vers le Light Mixer
+# au lieu de creer des nodes edit_<light>. Un clic = ON, un autre = OFF
+# (etat par session/utilisateur via la variable ILLOGIC_LMFIX ; le fichier
+# partage n'est jamais modifie).
+import importlib.util
+import os
+
+import hou
+
+MODULE = 'R:/pipeline/pipe/houdini/scripts/lop_cam_lock.py'
+
+if not os.path.isfile(MODULE):
+    raise hou.Error('LM Fix : module introuvable : ' + MODULE)
+spec = importlib.util.spec_from_file_location('illogic_lmfix', MODULE)
+mod = importlib.util.module_from_spec(spec)
+spec.loader.exec_module(mod)
+if not hasattr(mod, 'toggle'):
+    raise hou.Error('LM Fix : module invalide (pas de toggle()) : ' + MODULE)
+mod.toggle()
+]]></script>
   </tool>
 </shelfDocument>
