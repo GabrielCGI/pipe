@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
+r"""
 preview.py - Detection de peremption SANS Houdini (pur Python : filesystem + texte).
 
 Idee : un container shot USD est un .usda ASCII dont les subLayers pointent des
@@ -33,7 +33,9 @@ _SUBLAYER_RE = re.compile(r"([^/@]+)/v(\d+)/")  # idem recache_cfx : parite obli
 _SUBLAYER_OPEN_RE = re.compile(r"subLayers\s*=\s*\[")
 _VDIR_RE = re.compile(r"[/\\]v(\d+)$")
 _PRODUCT_RE = re.compile(r"([^/\\]+)[/\\]v(\d+)[/\\][^/\\]+$")
-_HIP_VER_RE = re.compile(r"_v(\d+)\.hip", re.IGNORECASE)
+# version d'une scene : .hip* (inchange : pas d'ancre, comme avant) OU .ma/.mb (Maya)
+_HIP_VER_RE = re.compile(r"_v(\d+)\.(?:hip|m[ab]$)", re.IGNORECASE)
+_MAYA_EXT = (".ma", ".mb")
 
 
 def _head(path, size=131072):
@@ -208,6 +210,90 @@ def refresh_entry(entry):
     return entry
 
 
+def match_layer(layers, tracked):
+    """Entree de `tracked` dans `layers` : cle exacte, sinon match par sous-chaine
+    (le nommage varie : 'anm' / '_layer_anm_master'). None si absent."""
+    if not layers or not tracked:
+        return None
+    if tracked in layers:
+        return layers[tracked]
+    for k, v in layers.items():
+        if tracked in k or k in tracked:
+            return v
+    return None
+
+
+def combine_layers(layers, tracked, mode="or"):
+    """Etat combine de PLUSIEURS layers suivis, pour un shot.
+
+    UNE seule definition, utilisee par l'UI ET par le moteur -> ils ne peuvent pas
+    afficher un verdict et en appliquer un autre.
+
+    Un layer suivi que ce shot ne consomme pas est **ignore** (dans les DEUX modes) :
+    son absence n'est pas une information sur la peremption. Il ressort dans `ignored`
+    pour qu'on puisse le DIRE a l'utilisateur au lieu de le taire.
+
+    Logique a 3 etats (None = indecidable, ex releve manquant) :
+      - 'or'  : perime si AU MOINS UN des presents est perime
+      - 'and' : perime si TOUS les presents le sont
+    Retourne {present, ignored, consumed, latest, stale, deciding}."""
+    out = {
+        "present": [],
+        "ignored": [],
+        "consumed": None,
+        "latest": None,
+        "stale": None,
+        "deciding": None,
+    }
+    for name in tracked or []:
+        e = match_layer(layers, name)
+        # 'present' = le shot consomme ce layer ET on sait quelque chose de sa version
+        if e is None or (e.get("consumed") is None and e.get("latest") is None):
+            out["ignored"].append(name)
+        else:
+            out["present"].append((name, e))
+    if not out["present"]:
+        return out
+    flags = [e.get("stale") for _, e in out["present"]]
+    if mode == "and":
+        out["stale"] = None if any(f is None for f in flags) else all(flags)
+    else:
+        out["stale"] = (
+            True
+            if any(f is True for f in flags)
+            else (None if any(f is None for f in flags) else False)
+        )
+    # layer DECISIF : le 1er perime (celui qui explique le verdict), sinon le 1er suivi
+    name, e = next((p for p in out["present"] if p[1].get("stale")), out["present"][0])
+    out["deciding"] = name
+    out["consumed"], out["latest"] = e.get("consumed"), e.get("latest")
+    return out
+
+
+def record_products(record):
+    """{produit: version} publies au moment du cache. Un shot peut avoir PLUSIEURS
+    filecache -> `products`. On retombe sur l'ancienne forme (`product` seul) pour les
+    sidecars ecrits avant, sinon un shot deja releve perdrait son garde-fou."""
+    prods = record.get("products") if isinstance(record, dict) else None
+    if isinstance(prods, dict) and prods:
+        return prods
+    one = (record or {}).get("product")
+    return {one: (record or {}).get("product_version")} if one else {}
+
+
+def published_outside(export_dir, record):
+    """(perime?, message) : un des produits releves a-t-il ete REPUBLIE depuis notre
+    cache ? Si oui le releve n'est plus garanti -- on le DIT au lieu de mentir."""
+    for prod, pv_rec in record_products(record).items():
+        pv_now = latest_product_version(export_dir, prod) if prod else None
+        if pv_rec is not None and pv_now is not None and pv_now > pv_rec:
+            return True, (
+                "%s republie hors outil (v%03d > v%03d) : releve peut-etre perime"
+                % (prod, pv_now, pv_rec)
+            )
+    return False, ""
+
+
 def refresh_status(status, records=None):
     """Rafraichit tous les shots depuis le disque (aucun Houdini). Modifie et retourne
     la liste. C'est le 'scan en arriere-plan'.
@@ -241,19 +327,16 @@ def refresh_entry_from_record(entry, record):
             "stale": bool(lv is not None and lv > v),
         }
     entry["layers"] = layers
-    prod = record.get("product")
-    pv_rec, pv_now = (
-        record.get("product_version"),
-        (latest_product_version(export, prod) if prod else None),
-    )
+    prods = record_products(record)
+    prod = next(iter(prods), None)
+    pv_rec = prods.get(prod)
+    pv_now = latest_product_version(export, prod) if prod else None
     entry["stack_consumed"] = _vlabel(pv_rec)
     entry["stack_latest"] = _vlabel(pv_now)
-    # publie hors outil -> le releve n'est plus garanti : on le SIGNALE
-    entry["record_trust"] = (
-        "uncertain"
-        if (pv_rec is not None and pv_now is not None and pv_now > pv_rec)
-        else "verified"
-    )
+    # publie hors outil -> le releve n'est plus garanti : on le SIGNALE. On teste TOUS
+    # les produits releves (un shot peut avoir plusieurs filecache).
+    outside, _msg = published_outside(export, record)
+    entry["record_trust"] = "uncertain" if outside else "verified"
     entry["preview"] = True
     return entry
 
@@ -343,22 +426,10 @@ def record_state(export_dir, record, tracked):
                 break
     latest = latest_product_version(export_dir, tracked)
     out["consumed"], out["latest"] = consumed, latest
-    # le produit publie a-t-il bouge depuis notre cache ?
-    prod = record.get("product")
-    pv_rec = record.get("product_version")
-    pv_now = latest_product_version(export_dir, prod) if prod else None
-    if prod and pv_rec is not None and pv_now is not None and pv_now > pv_rec:
-        out["trust"] = "uncertain"
-        out["err"] = (
-            "%s republie hors outil (v%03d > v%03d) : releve peut-etre perime"
-            % (
-                prod,
-                pv_now,
-                pv_rec,
-            )
-        )
-    else:
-        out["trust"] = "verified"
+    # un des produits publies a-t-il bouge depuis notre cache ?
+    outside, msg = published_outside(export_dir, record)
+    out["trust"] = "uncertain" if outside else "verified"
+    out["err"] = msg
     if consumed is None:
         out["err"] = out["err"] or ("layer %s absent du releve" % tracked)
         return out
@@ -373,18 +444,29 @@ def record_state(export_dir, record, tracked):
 #  Fraicheur : le snapshot est-il fiable, ou quelqu'un est passe par la scene ?
 # --------------------------------------------------------------------------- #
 def hip_version(hip_path):
-    """N0 de version d'un .hip (SQ..._v027.hip -> 27), ou None."""
+    """N0 de version d'une scene (SQ..._v027.hip -> 27, ..._AnimSpline_v045.ma -> 45),
+    ou None."""
     m = _HIP_VER_RE.search(os.path.basename(hip_path or ""))
     return int(m.group(1)) if m else None
 
 
+def _scene_files(scene_path):
+    """Les scenes de la MEME famille dans le dossier de `scene_path` : .hip* pour Houdini,
+    .ma ET .mb pour Maya (une version plus recente reste une version plus recente, meme
+    si elle a ete sauvee dans l'autre format)."""
+    d = os.path.dirname(scene_path or "")
+    if os.path.splitext(scene_path or "")[1].lower() in _MAYA_EXT:
+        return glob.glob(os.path.join(d, "*.ma")) + glob.glob(os.path.join(d, "*.mb"))
+    return glob.glob(os.path.join(d, "*.hip*"))
+
+
 def latest_hip_version(hip_path):
-    """Plus grande version .hip dans le dossier de `hip_path`, ou None."""
+    """Plus grande version de scene dans le dossier de `hip_path`, ou None."""
     d = os.path.dirname(hip_path or "")
     if not d or not os.path.isdir(d):
         return None
     best = None
-    for f in glob.glob(os.path.join(d, "*.hip*")):
+    for f in _scene_files(hip_path):
         v = hip_version(f)
         if v is not None and (best is None or v > best):
             best = v
@@ -413,11 +495,11 @@ def freshness(hip_path, snap_version, snap_mtime):
 
 
 def hip_at_version(hip_path, version):
-    """Le .hip de `version` dans le meme dossier (celui du snapshot), ou ''."""
+    """La scene de `version` dans le meme dossier (celle du snapshot), ou ''."""
     d = os.path.dirname(hip_path or "")
     if not d or not os.path.isdir(d):
         return ""
-    for f in glob.glob(os.path.join(d, "*.hip*")):
+    for f in _scene_files(hip_path):
         if hip_version(f) == version:
             return f
     return ""

@@ -20,6 +20,15 @@
             "mismatch_list": [
                 "Resolution mismatch"
             ]
+        },{
+            "project_name": "frederic_2603",
+            "allowed_version": [
+                "15.1v5"
+            ],
+            "bypass_mismatch": true,
+            "mismatch_list": [
+                "Resolution mismatch"
+            ]
         }
     ]
 }

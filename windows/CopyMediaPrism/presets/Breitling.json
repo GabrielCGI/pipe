@@ -1,0 +1,22 @@
+{
+    "filters": {
+        "COMPOSITING": [
+            "compo",
+            "comp"
+        ],
+        "ANIM": [
+            "animBlock",
+            "animSpline"
+        ],
+        "RLO": [
+            "ConfoLayout",
+            "layout"
+        ],
+        "FX": [
+            "fx"
+        ]
+    },
+    "source_path": "I:/breitling_2607",
+    "dest_path": "D:/cache_resolve/breitling_2607",
+    "production": "Bretiling CNY"
+}

@@ -1,6 +1,6 @@
 [project]
 name = "lop_update_cache"
-version = "1.0.19"
+version = "1.0.24"
 description = "Add your description here"
 readme = "README.md"
 authors = [

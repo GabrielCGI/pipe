@@ -16,7 +16,6 @@ Dot {
  xpos -19
  ypos -125
 }
-set N2ac65c00 [stack 0]
 Write {
  channels all
  file "\[value renderpath]"
@@ -28,14 +27,13 @@ Write {
  create_directories true
  first 1001
  last 1100
- reading true
  checkHashOnRead false
  version 148
+ in_colorspace scene_linear
+ out_colorspace scene_linear
  ocioColorspace scene_linear
  display "sRGB - Display"
  view "ACES 1.0 - SDR Video"
- beforeRender "exec(open(r\"R:\\pipeline\\pipe\\nuke\\script\\nukeShotLoader\\src\\before_render_precomp.py\").read())"
- afterRender "exec(open(r\"R:\\pipeline\\pipe\\nuke\\script\\nukeShotLoader\\src\\after_render_precomp.py\").read())"
  name WritePrecomp1
  knobChanged "\nn=nuke.thisNode()\nn\['postage_stamp'].setValue(False)\n"
  autolabel "nuke.thisNode().name() + ('\\n' + nuke.thisNode()\['label'].evaluate() if nuke.thisNode()\['label'].evaluate() else '')"
@@ -46,20 +44,18 @@ Write {
  addUserKnob {20 tab_prism l Prism}
  addUserKnob {1 identifier l "identifier : precomp_"}
  identifier xxxx
- addUserKnob {3 versions l "version :" t "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()-1)\n"}
- addUserKnob {22 add_version l + -STARTLINE T "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()+1)\n"}
- addUserKnob {22 sub_version l - -STARTLINE T "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()-1)\n"}
- addUserKnob {22 go_to_latest l "Go To Latest Version" -STARTLINE T "import os\nimport re\nimport nuke\n\nnuke.thisNode()\['refresh'].execute()\nVERSION_RE = re.compile(r'^v(\\d+)\$', re.IGNORECASE)\n\n\ndef update_versions_knob(node=None):\n    \"\"\"Evalue le knob 'file' (expression TCL \[value renderpath]) et ajuste\n    le knob integer 'versions' :\n      - monte a la version la plus haute trouvee sur disque (v###)\n      - passe a 0 si aucun dossier de version n'existe\n    \"\"\"\n    node = node or nuke.thisNode()\n\n    file_knob = node.knob('file')\n    versions_knob = node.knob('versions')\n    if file_knob is None or versions_knob is None:\n        return\n\n    # evaluate() resout l'expression TCL et la frame courante\n    path = file_knob.evaluate()\n    if not path:\n        versions_knob.setValue(0)\n        return\n\n    path = path.replace('\\\\', '/')\n\n    # .../precomp_CHARS/v009/SQ0010-SH0040_..._v009.1001.exr\n    version_dir = os.path.dirname(path)          # .../precomp_CHARS/v009\n    parent_dir = os.path.dirname(version_dir)    # .../precomp_CHARS\n    version_name = os.path.basename(version_dir)\n\n    # Si le dossier parent du chemin n'est pas un dossier de version v###,\n    # ou que le parent n'existe pas, on ne peut rien scanner -> 0\n    if not VERSION_RE.match(version_name) or not os.path.isdir(parent_dir):\n        versions_knob.setValue(0)\n        return\n\n    # Scan des dossiers freres v### existants\n    found = \[]\n    for entry in os.listdir(parent_dir):\n        m = VERSION_RE.match(entry)\n        if m and os.path.isdir(os.path.join(parent_dir, entry)):\n            found.append(int(m.group(1)))\n\n    if not found:\n        # Aucun dossier de version n'existe (meme pas le courant)\n        versions_knob.setValue(0)\n        return\n\n    highest = max(found)\n    if int(versions_knob.value()) != highest:\n        versions_knob.setValue(highest)\n\n\nif __name__ == '__main__':\n    update_versions_knob()"}
+ addUserKnob {3 versions l "version :" t "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()-1)\n" +INVISIBLE}
+ addUserKnob {22 add_version l + -STARTLINE +INVISIBLE T "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()+1)\n"}
+ addUserKnob {22 sub_version l - -STARTLINE +INVISIBLE T "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()-1)\n"}
  addUserKnob {1 comment l "comment (optional)" +INVISIBLE}
  addUserKnob {4 location +INVISIBLE M {global}}
  addUserKnob {26 ""}
  addUserKnob {1 fileName l filepath +INVISIBLE}
  fileName I:/yuka_2604/03_Production/Shots/SQ0010/SH0010/Renders/2dRender/FAR_BG/v001/SQ0010-SH0010_FAR_BG_v001.####.exr
  addUserKnob {22 refresh l Refresh +INVISIBLE T pcore.appPlugin.getOutputPath(nuke.thisNode()) +STARTLINE}
- addUserKnob {22 startRender l Render T "n = nuke.thisNode()\nn\['refresh'].execute()\nn\['add_version'].execute()\nn\['hasher'].execute()\npcore.appPlugin.startRender(n)" +STARTLINE}
- addUserKnob {22 hasher +INVISIBLE T "import module_precomp as mp\nrp = n\['renderpath'].value()\nfolder = os.path.dirname(rp)\nos.makedirs(folder, exist_ok=True)\nmp._atomic_json(os.path.join(folder, \"cache_ref.json\"), \{\n    \"ref_hash\": mp.upstream_hash(n),\n    \"first\": int(n\['first'].value()),\n    \"last\":  int(n\['last'].value()),\n\})\n" +STARTLINE}
- addUserKnob {22 startRenderPrevVersion l "Render as previous version..." -STARTLINE +INVISIBLE T pcore.appPlugin.renderAsVersion(nuke.thisNode())}
- addUserKnob {6 submitJob l "Submit Job" -STARTLINE +INVISIBLE}
+ addUserKnob {22 startRender l Render T "from src.ui import write_render\nwrite_render.render_write(nuke.thisNode())" +STARTLINE}
+ addUserKnob {22 startRenderPrevVersion l "Render as previous version..." -STARTLINE T "from src.ui import write_render\nwrite_render.render_previous_version(nuke.thisNode())"}
+ addUserKnob {6 submitJob l "Submit Job" -STARTLINE}
  addUserKnob {26 prevFileName l "previous filepath" +INVISIBLE T "I:/frederic_2603/03_Production/Shots/SBX/mathieu/Renders/2dRender/test01/v001/SBX-mathieu_test01_v001.####. "}
  addUserKnob {22 openDir l "Open In..." +INVISIBLE T pcore.appPlugin.openInClicked(nuke.thisNode()) +STARTLINE}
  addUserKnob {22 createRead l "Create Read" -STARTLINE +INVISIBLE T pcore.appPlugin.createRead(nuke.thisNode())}
@@ -74,56 +70,51 @@ Write {
  renderpath "\[value folderpath]v\[format %03d \[value versions]]/\[lindex \[regexp -inline \{^\[^_]+\} \[file tail \[value root.name]]] 0]_precomp_\[value identifier]_v\[format %03d \[value versions]].####.exr"
  addUserKnob {1 tag +INVISIBLE}
  tag PrecompWrite
-}
-push $N2ac65c00
-Dot {
- name Dot2
- selected true
- xpos -101
- ypos -125
-}
-Dot {
- name Dot3
- selected true
- xpos -101
- ypos -62
+ addUserKnob {3 precomp_write l "" +STARTLINE +INVISIBLE}
+ precomp_write 2
+ addUserKnob {26 render_info_divider l "" +STARTLINE}
+ addUserKnob {3 render_version l version}
+ render_version {{"\[value versions]"}}
+ addUserKnob {52 render_output l filepath T "__import__('src.ui.knob_widgets', fromlist=\['OutputPath']).OutputPath(nuke.thisNode())" +STARTLINE}
+ addUserKnob {22 open_in_explorer l "Open In Explorer" T "from src.ui import write_render\nwrite_render.open_in_explorer(nuke.thisNode())" +STARTLINE}
 }
 Group {
- inputs 2
  name SW_Precomp1
  tile_color 0xaa2c2cff
  label Live
- note_font "Verdana Bold"
  selected true
  xpos -53
  ypos -71
- addUserKnob {20 switch l Switch}
- addUserKnob {3 which_custom l which}
- which_custom {{"\[python __import__('module_precomp').precomp_which(nuke.thisNode())]"}}
+ addUserKnob {20 precomp l Precomp}
+ addUserKnob {3 precomp_switch l "" +STARTLINE +INVISIBLE}
+ precomp_switch 2
+ addUserKnob {3 which t "0 = live upstream, 1 = cached render. Set by the Render Manager."}
+ addUserKnob {26 precomp_status l status T Live}
+ addUserKnob {1 cache_file l cache +DISABLED}
 }
- Input {
+ Read {
   inputs 0
-  name Input1
-  xpos -540
-  ypos -257
+  in_colorspace scene_linear
+  out_colorspace scene_linear
+  name CacheRead
+  xpos -150
+  disable true
  }
  Input {
   inputs 0
-  name Input0
-  xpos -388
-  ypos -354
-  number 1
+  name Input
+  xpos 0
  }
  Switch {
   inputs 2
-  which {{parent.which_custom}}
-  name Switch1
-  xpos -388
-  ypos -257
+  which {{parent.which}}
+  name Switch
+  xpos 0
+  ypos 100
  }
  Output {
-  name Output1
-  xpos -388
-  ypos -178
+  name Output
+  xpos 0
+  ypos 200
  }
 end_group

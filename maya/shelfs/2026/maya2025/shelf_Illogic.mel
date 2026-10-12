@@ -252,7 +252,7 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "import importlib\nimport sys\n\n\n\nMODULE_PATH = \"r:/pipeline/pipe/prism\"\nif not MODULE_PATH in sys.path:\n\tsys.path.append(MODULE_PATH)\n\n\n\nimport USDToolBox_pck\nUSDToolBox_pck.updateAssetsUSD.startUpdateAssetsUSD('maya')" 
+        -command "import usd_updater\nusd_updater.start_usd_updater('maya')" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -287,9 +287,9 @@ global proc shelf_Illogic () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\nimport usd_maya_shelf_snippets\nreload(usd_maya_shelf_snippets)\n\n\nusd_maya_shelf_snippets.updateUSD(False)" 
+        -command "from importlib import reload\nimport usd_maya_shelf_snippets\nreload(usd_maya_shelf_snippets)\n\n\nusd_maya_shelf_snippets.updateUSD(True)" 
         -sourceType "python" 
-        -doubleClickCommand "from importlib import reload\nimport usd_maya_shelf_snippets\nreload(usd_maya_shelf_snippets)\n\n\nusd_maya_shelf_snippets.updateUSD(True)" 
+        -doubleClickCommand "from importlib import reload\nimport usd_maya_shelf_snippets\nreload(usd_maya_shelf_snippets)\n\n\nusd_maya_shelf_snippets.updateUSD(False)" 
         -commandRepeatable 1
         -flat 1
     ;

@@ -108,8 +108,8 @@ Gizmo {
   note_font_size 42
   xpos -1036
   ypos 2328
-  bdwidth 1688
-  bdheight 1068
+  bdwidth 1698
+  bdheight 1120
  }
  BackdropNode {
   inputs 0
@@ -153,13 +153,13 @@ Gizmo {
   ypos 195
   number 2
  }
-set N908e9c00 [stack 0]
+set Nd3885000 [stack 0]
  Dot {
   name Dot1
   xpos 83
   ypos 259
  }
-set N9094c000 [stack 0]
+set Nd3885400 [stack 0]
  Group {
   name DeepFromDepth
   tile_color 0x66ff
@@ -351,14 +351,14 @@ set N9094c000 [stack 0]
    xpos 2930
    ypos -1885
   }
-set N9098a000 [stack 0]
+set Nd38e3400 [stack 0]
   DeepToImage2 {
    name DeepToImage7
    label static
    xpos 2710
    ypos -1703
   }
-set N9098a400 [stack 0]
+set Nd38e3800 [stack 0]
   Dot {
    name Dot1
    label static
@@ -366,7 +366,7 @@ set N9098a400 [stack 0]
    xpos 2744
    ypos 499
   }
-set N9098a800 [stack 0]
+set Nd38e3c00 [stack 0]
   Input {
    inputs 0
    name bokeh
@@ -403,7 +403,7 @@ set N9098a800 [stack 0]
    xpos 4315
    ypos -1476
   }
-set N9098bc00 [stack 0]
+set Nd3917000 [stack 0]
   Noise {
    size {{parent.noiseSize i}}
    gain {{parent.noiseGain i}}
@@ -414,7 +414,7 @@ set N9098bc00 [stack 0]
    xpos 4386
    ypos -1430
   }
-push $N9098bc00
+push $Nd3917000
   Flare {
    position {{"250 * 1"} {"250 * 1"}}
    radius {0 {"249 - (parent.ringWidth*249)"} 249}
@@ -488,7 +488,7 @@ push $N9098bc00
    xpos 4232
    ypos -1082
   }
-set N908ecd00 [stack 0]
+set Nd393fe00 [stack 0]
   Dot {
    name Dot4
    label static
@@ -496,7 +496,7 @@ set N908ecd00 [stack 0]
    xpos 4284
    ypos 764
   }
-push $N9098a000
+push $Nd38e3400
   DeepReformat {
    type scale
    scale {{"\[value parent.truescale]"}}
@@ -506,7 +506,7 @@ push $N9098a000
    xpos 2930
    ypos -1822
   }
-set N909eb000 [stack 0]
+set Nd3988400 [stack 0]
   DeepExpression {
    temp_name0 dpcheck
    temp_expr0 "deep.front < zfar"
@@ -544,8 +544,8 @@ set N909eb000 [stack 0]
    name Inpaint5
    disable {{"parent.inpaint ? 0 : 1"}}
   }
-set N90a1e400 [stack 0]
-push $N908ecd00
+set Nd3989800 [stack 0]
+push $Nd393fe00
   Reformat {
    type scale
    scale {{parent.aspect} 1}
@@ -555,8 +555,8 @@ push $N908ecd00
    xpos 4340
    ypos -675
   }
-set N90a1ec00 [stack 0]
-push $N90a1e400
+set Nd39b2000 [stack 0]
+push $Nd3989800
   ZDefocus2 {
    inputs 2
    useGPUIfAvailable {{parent.useGPU}}
@@ -593,8 +593,8 @@ push $N90a1e400
    name ColorCorrect5
    disable {{"parent.view_type == 1 ? 0 : 1"}}
   }
-set N90a52000 [stack 0]
-push $N909eb000
+set Nd39b3400 [stack 0]
+push $Nd3988400
   DeepExpression {
    temp_name0 dpcheck
    temp_expr0 "deep.front >= znear && deep.front < zfar"
@@ -632,9 +632,9 @@ push $N909eb000
    name Inpaint4
    disable {{"parent.inpaint ? 0 : 1"}}
   }
-set N90a53400 [stack 0]
-push $N90a1ec00
-push $N90a53400
+set Nd39f4800 [stack 0]
+push $Nd39b2000
+push $Nd39f4800
   ZDefocus2 {
    inputs 2
    useGPUIfAvailable {{parent.useGPU}}
@@ -671,8 +671,8 @@ push $N90a53400
    name ColorCorrect4
    disable {{"parent.view_type == 1 ? 0 : 1"}}
   }
-set N90a8e800 [stack 0]
-push $N909eb000
+set Nd39f5c00 [stack 0]
+push $Nd3988400
   DeepExpression {
    temp_name0 dpcheck
    temp_expr0 "deep.front >= znear && deep.front < zfar"
@@ -710,9 +710,9 @@ push $N909eb000
    name Inpaint3
    disable {{"parent.inpaint ? 0 : 1"}}
   }
-set N90a8fc00 [stack 0]
-push $N90a1ec00
-push $N90a8fc00
+set Nd3a37000 [stack 0]
+push $Nd39b2000
+push $Nd3a37000
   ZDefocus2 {
    inputs 2
    useGPUIfAvailable {{parent.useGPU}}
@@ -749,8 +749,8 @@ push $N90a8fc00
    name ColorCorrect3
    disable {{"parent.view_type == 1 ? 0 : 1"}}
   }
-set N90acb000 [stack 0]
-push $N909eb000
+set Nd3a6e400 [stack 0]
+push $Nd3988400
   DeepExpression {
    temp_name0 dpcheck
    temp_expr0 "deep.front >= znear && deep.front < zfar"
@@ -788,9 +788,9 @@ push $N909eb000
    name Inpaint2
    disable {{"parent.inpaint ? 0 : 1"}}
   }
-set N90b0c400 [stack 0]
-push $N90a1ec00
-push $N90b0c400
+set Nd3a6f800 [stack 0]
+push $Nd39b2000
+push $Nd3a6f800
   ZDefocus2 {
    inputs 2
    useGPUIfAvailable {{parent.useGPU}}
@@ -827,8 +827,8 @@ push $N90b0c400
    name ColorCorrect2
    disable {{"parent.view_type == 1 ? 0 : 1"}}
   }
-set N90b0d800 [stack 0]
-push $N909eb000
+set Nd3aa6c00 [stack 0]
+push $Nd3988400
   DeepExpression {
    temp_name0 dpcheck
    temp_expr0 "deep.front >= znear"
@@ -866,9 +866,9 @@ push $N909eb000
    name Inpaint1
    disable {{"parent.inpaint ? 0 : 1"}}
   }
-set N90b54c00 [stack 0]
-push $N90a1ec00
-push $N90b54c00
+set Nd3aee000 [stack 0]
+push $Nd39b2000
+push $Nd3aee000
   ZDefocus2 {
    inputs 2
    useGPUIfAvailable {{parent.useGPU}}
@@ -905,7 +905,7 @@ push $N90b54c00
    name ColorCorrect1
    disable {{"parent.view_type == 1 ? 0 : 1"}}
   }
-set N90b84000 [stack 0]
+set Nd3aef400 [stack 0]
 push 0
   Switch {
    inputs 6
@@ -915,11 +915,11 @@ push 0
    xpos 4728
    ypos 289
   }
-push $N90a52000
-push $N90a8e800
-push $N90acb000
-push $N90b0d800
-push $N90b84000
+push $Nd39b3400
+push $Nd39f5c00
+push $Nd3a6e400
+push $Nd3aa6c00
+push $Nd3aef400
   Merge2 {
    inputs 2
    operation {{parent.mergeOpIndex}}
@@ -975,7 +975,7 @@ push $N90b84000
    ypos 1172
    disable {{"\[exists parent.input2] ? 0 : 1" x1 0}}
   }
-push $N9098a800
+push $Nd38e3c00
   Dissolve {
    inputs 2
    which {{parent.mix}}
@@ -990,7 +990,7 @@ push $N9098a800
    xpos 5330
    ypos 1446
   }
-push $N909eb000
+push $Nd3988400
   DeepToImage2 {
    name DeepToImage12
    label static
@@ -1004,7 +1004,7 @@ push $N909eb000
    xpos 2854
    ypos 434
   }
-push $N9098a400
+push $Nd38e3800
   Shuffle {
    in deep
    green black
@@ -1045,13 +1045,13 @@ push $N9098a400
    disableDefocus {{"parent.view_type == 1 ? 1 : parent.disableDefocus"}}
   }
  end_group
-push $N9094c000
+push $Nd3885400
  Dot {
   name Dot59
   xpos -196
   ypos 259
  }
-set N90be3800 [stack 0]
+set Nd3b78c00 [stack 0]
  Shuffle2 {
   fromInput1 {{0} B}
   in1 depth
@@ -1094,7 +1094,7 @@ set N90be3800 [stack 0]
   xpos -196
   ypos 522
  }
-set N90c0cc00 [stack 0]
+set Nd3ba6000 [stack 0]
  PostageStamp {
   name AUTOSIZE_MAP
   note_font "Verdana Bold"
@@ -1102,7 +1102,7 @@ set N90c0cc00 [stack 0]
   ypos 4244
   hide_input true
  }
-push $N90be3800
+push $Nd3b78c00
  Dot {
   name Dot8
   xpos -334
@@ -1134,1371 +1134,43 @@ push $N90be3800
   xpos -334
   ypos 518
  }
-set N90c3a400 [stack 0]
+set Nd3ba7800 [stack 0]
  PostageStamp {
   name FUR_MASK1
   note_font "Verdana Bold"
   xpos -90
-  ypos 2992
+  ypos 3120
   hide_input true
  }
-push $N90c0cc00
+push $Nd3ba6000
  PostageStamp {
   name AUTOSIZE_MASK1
   note_font "Verdana Bold"
   xpos -90
-  ypos 2940
+  ypos 3068
   hide_input true
  }
-push $N908e9c00
+push $Nd3885000
  PostageStamp {
-  name RAW3
+  name RAW2
   note_font "Verdana Bold"
-  xpos 204
-  ypos 1557
+  xpos -241
+  ypos 2529
   hide_input true
  }
-set N90c3b000 [stack 0]
+set Nd4488800 [stack 0]
  Dot {
-  name Dot39
-  xpos 314
-  ypos 1560
+  name Dot5
+  xpos 56
+  ypos 2532
  }
- Dot {
-  name Dot40
-  xpos 314
-  ypos 1756
- }
-push $N90c3b000
- Group {
-  name EdgeFromAlpha
-  note_font Verdana
-  xpos 204
-  ypos 1591
-  mapsize {0.15 0.15}
-  addUserKnob {20 "" l Settings}
-  addUserKnob {41 from0 l "control channel" T Copy2.from0}
-  addUserKnob {41 output T ChannelMerge4.output}
-  addUserKnob {41 blackpoint T Grade1.blackpoint}
-  addUserKnob {41 whitepoint T Grade1.whitepoint}
-  addUserKnob {26 "" l "edge size"}
-  addUserKnob {41 size l inside T ErodeInside.size}
-  addUserKnob {14 ErodeOutside_size l outside R 0 100}
-  ErodeOutside_size 1
-  addUserKnob {26 "" l "edge blur"}
-  addUserKnob {41 size_3 l inside T BlurInside.size}
-  addUserKnob {41 size_1 l outside T BlurOutside.size}
- }
-  Input {
-   inputs 0
-   name Input1
-   xpos -448
-   ypos 2
-  }
-  AddChannels {
-   channels {rgba.red -rgba.green -rgba.blue rgba.alpha}
-   name AddChannels1
-   xpos -448
-   ypos 30
-  }
-set N90c5e000 [stack 0]
-push $N90c5e000
-  Copy {
-   inputs 2
-   from0 rgba.alpha
-   to0 rgba.red
-   name Copy2
-   xpos -193
-   ypos 30
-  }
-  Clamp {
-   channels {rgba.red -rgba.green -rgba.blue none}
-   name Clamp1
-   xpos -193
-   ypos 94
-  }
-  Grade {
-   channels {rgba.red -rgba.green -rgba.blue none}
-   black_clamp false
-   name Grade1
-   xpos -193
-   ypos 146
-  }
-set N90c5ec00 [stack 0]
-  Erode {
-   channels {none none none rgba.red}
-   size 1
-   name ErodeInside
-   xpos -126
-   ypos 198
-  }
-  Blur {
-   channels {rgba.red -rgba.green -rgba.blue none}
-   name BlurInside
-   xpos -126
-   ypos 250
-  }
-push $N90c5ec00
-  Erode {
-   channels {none none none rgba.red}
-   size {{-parent.ErodeOutside_size.w} {-parent.ErodeOutside_size.h}}
-   name ErodeOutside
-   xpos -264
-   ypos 199
-  }
-  Blur {
-   channels {rgba.red -rgba.green -rgba.blue none}
-   name BlurOutside
-   xpos -264
-   ypos 251
-  }
-  ChannelMerge {
-   inputs 2
-   A rgba.red
-   operation stencil
-   B rgba.red
-   name ChannelMerge4
-   xpos -191
-   ypos 308
-  }
-set N90cac000 [stack 0]
-  Dot {
-   name Dot1
-   xpos -52
-   ypos 324
-  }
-  Dot {
-   name Dot2
-   xpos -52
-   ypos 465
-  }
-push $N90c5e000
-  Dot {
-   name Dot3
-   xpos -414
-   ypos 416
-  }
-push $N90cac000
-  Copy {
-   inputs 2
-   from0 rgba.red
-   to0 rgba.red
-   name Copy1
-   xpos -191
-   ypos 407
-  }
-  Switch {
-   inputs 2
-   which {{"parent.output == 1" i}}
-   name Switch1
-   xpos -191
-   ypos 463
-  }
-  Output {
-   name Output1
-   xpos -191
-   ypos 526
-  }
- end_group
- Dot {
-  name Dot38
-  xpos 238
-  ypos 1670
- }
-push $N90c0cc00
- PostageStamp {
-  name AUTOSIZE_MASK
-  note_font "Verdana Bold"
-  xpos 160
-  ypos 1406
-  hide_input true
- }
-push $N908e9c00
- PostageStamp {
-  name RAW
-  note_font "Verdana Bold"
-  xpos -313
-  ypos 712
-  hide_input true
- }
- Dot {
-  name Dot80
-  xpos -279
-  ypos 757
- }
- Dot {
-  name Dot10
-  xpos -431
-  ypos 757
- }
-set N90cd6800 [stack 0]
- Dot {
-  name Dot27
-  xpos -562
-  ypos 757
- }
-set N90cd6c00 [stack 0]
- Dot {
-  name Dot25
-  xpos -714
-  ypos 757
- }
-set N90cd7000 [stack 0]
- Cryptomatte {
-  pickerAdd {0.1382354945 0.155127421 0.1634784788 0 826 1700 827 1701}
-  matteList tail
-  unpremultiply true
-  lastSelectedCryptoLayerName CryptoPrimvar_part
-  name Cryptomatte1
-  xpos -748
-  ypos 881
- }
-push $N90cd7000
- Dot {
-  name Dot4
-  xpos -815
-  ypos 757
- }
-set N90cd7c00 [stack 0]
-add_layer {curveu curveu.curveu}
- Shuffle2 {
-  fromInput1 {{0} B}
-  in1 curveu
-  fromInput2 {{0} B}
-  mappings "4 curveu.curveu 0 0 rgba.red 0 0 curveu.curveu 0 0 rgba.green 0 1 curveu.curveu 0 0 rgba.blue 0 2 curveu.curveu 0 0 rgba.alpha 0 3"
-  name Shuffle5
-  label "\[value in1]"
-  xpos -849
-  ypos 785
- }
- Grade {
-  channels rgba
-  blackpoint {{parent.KWH_radius_map_preserve_tip_black}}
-  whitepoint {{parent.radius_map_preserve_tip_white}}
-  name Grade1
-  xpos -849
-  ypos 840
- }
- Multiply {
-  inputs 1+1
-  channels rgba
-  value 0.5
-  name Multiply2
-  xpos -849
-  ypos 881
- }
- Dot {
-  name Dot2
-  xpos -815
-  ypos 1294
- }
-push $N90c3a400
- PostageStamp {
-  name FUR_MASK
-  note_font "Verdana Bold"
-  xpos -368
-  ypos 1254
-  hide_input true
- }
-push $N908e9c00
- PostageStamp {
-  name RAW1
-  note_font "Verdana Bold"
-  xpos -368
-  ypos 1193
-  hide_input true
- }
- Cryptomatte {
-  pickerAdd {0.09675933421 0.08762308955 0.1004923731 0 1001 450 1002 451}
-  matteList brows
-  lastSelectedCryptoLayerName CryptoPrimvar_part
-  name Cryptomatte4
-  xpos -368
-  ypos 1217
- }
-push $N90cd6c00
-add_layer {N N.x N.y N.z N.red N.green N.blue N.alpha N.X N.Y N.Z}
- Shuffle2 {
-  fromInput1 {{0} B}
-  in1 N
-  out1 rgb
-  fromInput2 {{0} B}
-  mappings "3 N.x 0 0 rgba.red 0 0 N.y 0 1 rgba.green 0 1 N.z 0 2 rgba.blue 0 2"
-  name Shuffle9
-  label "\[value in1]"
-  xpos -596
-  ypos 850
- }
- Dot {
-  name Dot28
-  xpos -562
-  ypos 1005
- }
-push $N90cd6800
-add_layer {Pref Pref.red Pref.green Pref.blue}
- Shuffle2 {
-  fromInput1 {{0} B}
-  in1 Pref
-  out1 rgb
-  fromInput2 {{0} B}
-  mappings "3 Pref.red 0 0 rgba.red 0 0 Pref.green 0 1 rgba.green 0 1 Pref.blue 0 2 rgba.blue 0 2"
-  name Shuffle16
-  label "\[value in1]"
-  xpos -465
-  ypos 850
- }
- set C90d26800 [stack 0]
- Median {
-  size {{parent.Median_MASTER.size}}
-  ignore_top_line false
-  name Median4
-  xpos -465
-  ypos 915
- }
- Read {
-  inputs 0
-  file_type exr
-  file I:/yuka_2604/04_Resources/Nuke/textures/BrushStamps_01.exr
-  format "2048 2048 0 0 2048 2048 1 square_2K"
-  origset true
-  colorspace scene_linear
-  name Read1
-  knobChanged "try:\n\tpcore.getPlugin(\"Nuke\").updateNodeUI(\"read\", nuke.toNode(nuke.thisNode().fullName().rsplit(\".\", 1)\[0]))\nexcept:\n\tpass"
-  xpos -319
-  ypos 826
-  addUserKnob {20 tab_prism l Prism}
-  addUserKnob {26 fileName l File T I:/yuka_2604/04_Resources/Nuke/textures/BrushStamps_01.exr}
-  addUserKnob {22 browse l Browse... T pcore.appPlugin.readNode_onBrowseClicked(nuke.thisNode()) +STARTLINE}
-  addUserKnob {22 openExplorer l "Open In Explorer..." -STARTLINE T pcore.appPlugin.readNode_onOpenInClicked(nuke.thisNode())}
- }
- ILGC_HexTile {
-  name ILGC_HexTile1
-  note_font "Verdana Bold"
-  xpos -319
-  ypos 946
-  upscale 2
-  size {{parent.KWH_radius_map_noise_size*.04}}
-  blend 0.1
-  rotation 180
- }
- Group {
-  name LumaKeyer1
-  onCreate "n = nuke.thisNode()\nn.knob('blackpoint').setRange(0, 1)\nn.knob('whitepoint').setRange(0, 1)"
-  tile_color 0x421010ff
-  note_font "Bitstream Vera Sans Bold"
-  xpos -319
-  ypos 996
-  addUserKnob {20 User l lumaKeyer}
-  addUserKnob {4 output M {Alpha RGBA}}
-  output RGBA
-  addUserKnob {41 blackpoint T picker.blackpoint}
-  addUserKnob {41 whitepoint T picker.whitepoint}
-  addUserKnob {6 invert +STARTLINE}
-  addUserKnob {4 smoothing l Smoothing: M {None Smooth Smooth0 Smooth1 ""}}
-  addUserKnob {26 ""}
-  addUserKnob {26 "" l mask T ""}
-  addUserKnob {41 maskChannelInput l "" -STARTLINE T Merge1.maskChannelInput}
-  addUserKnob {41 inject -STARTLINE T Merge1.inject}
-  addUserKnob {41 invert_mask l invert -STARTLINE T Merge1.invert_mask}
-  addUserKnob {41 fringe -STARTLINE T Merge1.fringe}
-  addUserKnob {41 mix T Merge1.mix}
-  addUserKnob {20 info}
-  addUserKnob {22 btn l DerekVFX.ca T "import os\nimport sys\n\ntry:\n    import subprocess\n    def _run(cmd, shell, wait):\n        opener = subprocess.Popen(cmd, shell=shell)\n        if wait:\n            opener.wait()\n        return opener.pid\nexcept ImportError:\n    import popen2\n    def _run(cmd, shell, wait):\n        opener = popen2.Popen3(cmd)\n        if wait:\n            opener.wait()\n        return opener.pid\n\ndef _open(url, wait=0):\n    if sys.platform == \"darwin\":\n        cmd = \[\"open\", url]\n    elif hasattr(os, \"startfile\"):\n        return os.startfile(url)\n    elif os.environ.has_key(\"KDE_FULL_SESSION\") or os.environ.has_key(\"KDE_MULTIHEAD\") or \\\n        os.environ.has_key(\"GNOME_DESKTOP_SESSION_ID\") or os.environ.has_key(\"GNOME_KEYRING_SOCKET\"):\n        cmd = \[\"xdg-open\", url]\n    else:\n        raise OSError, \"Desktop not supported.\"\n\n    return _run(cmd, 0, wait)\n\n_open('http://www.derekvfx.ca/')" +STARTLINE}
-  addUserKnob {26 versionUpdate l "" -STARTLINE T "<font color = gray> adjusted by Tony Lyons </font color = gray>"}
- }
-  Input {
-   inputs 0
-   name Input1
-   xpos 57
-   ypos -347
-  }
-set N90d9b000 [stack 0]
-  Colorspace {
-   colorspace_out HSL
-   name Colorspace1
-   xpos -181
-   ypos -181
-  }
-set N90d9b400 [stack 0]
-  Shuffle {
-   red blue
-   green blue
-   alpha blue
-   name Shuffle1
-   tile_color 0x3d3f8e00
-   xpos -336
-   ypos -181
-  }
-  Grade {
-   blackpoint 0.47
-   name picker
-   xpos -336
-   ypos -139
-  }
-  Input {
-   inputs 0
-   name Inputmask
-   xpos 231
-   ypos 446
-   number 1
-  }
-push $N90d9b000
-  Dot {
-   name Dot5
-   note_font_size 41
-   xpos 91
-   ypos 284
-  }
-set N90df2400 [stack 0]
-push $N90d9b400
-  Expression {
-   expr3 smoothstep(parent.picker.blackpoint,parent.picker.whitepoint,b)
-   name Expression1
-   xpos -181
-   ypos -138
-  }
-  Dot {
-   name Dot1
-   note_font_size 41
-   xpos -147
-   ypos -58
-  }
-set N90df2c00 [stack 0]
-  ColorLookup {
-   channels {{{parent.ColorLookup_smooth.channels}}}
-   lut {master {curve L 0 C k 1 s0}
-     red {}
-     green {}
-     blue {}
-     alpha {}}
-   name ColorLookup_smooth1
-   xpos -69
-   ypos 33
-  }
-push $N90df2c00
-  ColorLookup {
-   channels {{{parent.ColorLookup_smooth.channels}}}
-   lut {master {curve L 0 s0 1}
-     red {}
-     green {}
-     blue {}
-     alpha {}}
-   name ColorLookup_smooth0
-   xpos -181
-   ypos 32
-  }
-push $N90df2c00
-  ColorLookup {
-   lut {master {curve L 0 s0 C k 1 s0}
-     red {}
-     green {}
-     blue {}
-     alpha {}}
-   name ColorLookup_smooth
-   xpos -293
-   ypos 32
-  }
-push $N90df2c00
-  Dot {
-   name Dot2
-   note_font_size 41
-   xpos -345
-   ypos -52
-  }
-  Dot {
-   name Dot3
-   note_font_size 41
-   xpos -345
-   ypos 131
-  }
-  Switch {
-   inputs 4
-   which {{parent.smoothing}}
-   name Switch1
-   label "\[value which]"
-   xpos -181
-   ypos 121
-  }
-  Expression {
-   expr3 1-a
-   name Expression2
-   xpos -181
-   ypos 191
-   disable {{"parent.invert == 0"}}
-  }
-  Merge2 {
-   inputs 2
-   operation copy
-   Achannels {rgba.red rgba.green rgba.blue -rgba.alpha}
-   Bchannels {rgba.red rgba.green rgba.blue -rgba.alpha}
-   output {rgba.red rgba.green rgba.blue -rgba.alpha}
-   name Merge2
-   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
-   xpos -181
-   ypos 280
-  }
-  Shuffle {
-   red alpha
-   green alpha
-   blue alpha
-   name Shuffle2
-   tile_color 0xffffffff
-   xpos -181
-   ypos 328
-   disable {{!parent.output}}
-  }
-  Dot {
-   name Dot4
-   note_font_size 41
-   xpos -147
-   ypos 450
-  }
-push $N90df2400
-  Shuffle {
-   alpha black
-   name Shuffle3
-   label "\[value in]"
-   xpos 57
-   ypos 331
-  }
-  Shuffle {
-   red black
-   green black
-   blue black
-   alpha black
-   name Shuffle4
-   label "\[value in]"
-   xpos 57
-   ypos 369
-   disable {{!parent.output}}
-  }
-  Merge2 {
-   inputs 2+1
-   operation copy
-   also_merge rgba
-   name Merge1
-   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
-   xpos 57
-   ypos 446
-  }
-  Output {
-   name Output1
-   xpos 57
-   ypos 602
-  }
- end_group
-set N90921600 [stack 0]
-push $N90921600
-push $N90921600
- Group {
-  inputs 5
-  name TRIPLANAR1
-  xpos -465
-  ypos 1002
-  addUserKnob {20 User}
-  addUserKnob {41 size_2 l sizeX T Expression6.size}
-  addUserKnob {41 size_1 l sizeY T Expression7.size}
-  addUserKnob {41 size l sizeZ T Expression8.size}
-  addUserKnob {13 offset}
-  addUserKnob {7 rotX l "rotate X" R 0 360}
-  addUserKnob {7 rotY l "rotate Y" R 0 360}
-  addUserKnob {7 rotZ l "rotate Z" R 0 360}
-  addUserKnob {26 ""}
-  addUserKnob {41 blackpoint T Grade62.blackpoint}
-  addUserKnob {41 whitepoint T Grade62.whitepoint}
-  addUserKnob {41 gamma T Grade62.gamma}
-  addUserKnob {26 ""}
-  addUserKnob {26 Credits l "" +STARTLINE T "© v001 Perceval Schopp 2021\n"}
- }
-  Input {
-   inputs 0
-   name Normal
-   xpos -330
-   ypos -59
-   number 4
-  }
-  Expression {
-   expr0 abs(r)
-   expr1 abs(g)
-   expr2 abs(b)
-   name Expression1
-   xpos -330
-   ypos -18
-  }
-  Dot {
-   name Dot2
-   xpos -296
-   ypos 29
-  }
-set N90e5cc00 [stack 0]
-  Dot {
-   name Dot3
-   xpos -518
-   ypos 29
-  }
-set N90e5d000 [stack 0]
-  Dot {
-   name Dot4
-   xpos -867
-   ypos 29
-  }
-  Dot {
-   name Dot75
-   xpos -867
-   ypos 310
-  }
-  Input {
-   inputs 0
-   name Position
-   xpos -475
-   ypos -62
-   number 3
-  }
-  Add {
-   value {{parent.offset} {parent.offset} {parent.offset} {parent.offset}}
-   name Add1
-   xpos -475
-   ypos 58
-  }
-  Dot {
-   name Dot79
-   xpos -441
-   ypos 109
-  }
-set N90e86400 [stack 0]
-  Dot {
-   name Dot74
-   xpos -783
-   ypos 109
-  }
-  Group {
-   name Pworld_transform
-   xpos -817
-   ypos 134
-   addUserKnob {20 User}
-   addUserKnob {41 in l Position T Shuffle1.in}
-   addUserKnob {26 ""}
-   addUserKnob {41 translate T Axis1.translate}
-   addUserKnob {41 rotate T Axis1.rotate}
-   addUserKnob {41 scaling l scale T Axis1.scaling}
-   addUserKnob {41 uniform_scale l "uniform scale" T Axis1.uniform_scale}
-  }
-   Input {
-    inputs 0
-    name pworld
-    label input
-    xpos 0
-   }
-   Shuffle {
-    alpha black
-    name Shuffle1
-    label "select pworld\n"
-    xpos 0
-    ypos 50
-   }
-   Expression {
-    expr0 r-parent.Axis1.world_matrix.3
-    expr1 g-parent.Axis1.world_matrix.7
-    expr2 b-parent.Axis1.world_matrix.11
-    name Expression1
-    xpos 0
-    ypos 151
-   }
-   ColorMatrix {
-    matrix {
-        {{parent.Axis1.world_matrix.0} {parent.Axis1.world_matrix.1} {parent.Axis1.world_matrix.2}}
-        {{parent.Axis1.world_matrix.4} {parent.Axis1.world_matrix.5} {parent.Axis1.world_matrix.6}}
-        {{parent.Axis1.world_matrix.8} {parent.Axis1.world_matrix.9} {parent.Axis1.world_matrix.10}}
-      }
-    invert true
-    name ColorMatrix1
-    xpos 0
-    ypos 195
-   }
-   Output {
-    name Output1
-    xpos 0
-    ypos 300
-   }
-   Viewer {
-    frame_range 1-100
-    name Viewer1
-    xpos 0
-    ypos 326
-   }
-   Axis2 {
-    inputs 0
-    rotate {{parent.parent.rotX} 0 0}
-    name Axis1
-    xpos -150
-    ypos 171
-   }
-  end_group
-  Shuffle {
-   in rgb
-   red green
-   green blue
-   blue red2
-   alpha red2
-   name Shuffle17
-   label YZ
-   xpos -817
-   ypos 188
-  }
-  Expression {
-   expr0 r>=0?(r%size)/size:(1-(-r%size)/size)
-   expr1 g>=0?(g%size)/size:(1-(-g%size)/size)
-   expr3 abs(a)
-   name Expression6
-   xpos -817
-   ypos 265
-   addUserKnob {20 User}
-   addUserKnob {7 size R 0 300}
-   size {{KWH_radius_map_noise_size}}
-  }
-  Input {
-   inputs 0
-   name imgX
-   xpos -720
-   ypos 257
-  }
-  Dot {
-   name Dot7
-   xpos -686
-   ypos 330
-  }
-  BlinkScript {
-   inputs 2
-   recompileCount 29
-   ProgramGroup 1
-   KernelDescription "2 \"stmap\" iterate pixelWise 7a68aa278e15934f6eed8ab5e98f4a100b5f2ecefdbe100e4f0bb62a47208981 3 \"src\" Read Random \"STMap\" Read Point \"dst\" Write Point 0 0 3 \"srcconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA== \"UV\" Float 2 1 AAAAAAAAAAA= \"resolution\" Int 2 1 AAAAAAAAAAA="
-   kernelSource "\nkernel stmap : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeConstant> src; // the input image\n  Image<eRead, eAccessPoint, eEdgeClamped> STMap;\n  Image<eWrite> dst; // the output image\n\n  param:\n    // This parameter is made available to the user.\n    \n    \n\n  local:\n    // This local variable is not exposed to the user.\n    float2 UV;\n    int2 resolution;\n\n  // In define(), parameters can be given labels and default values.\n  void define() \{\n    \n  \}\n\n  // The init() function is run before any calls to process().\n  // Local variables can be initialized here.\n  void init() \{\n    \n    resolution.x = src.bounds.width();\n    resolution.y = src.bounds.height();\n\n  \}\n\n  void process(int2 pos) \{\n    \n    UV.x = STMap().x*resolution.x;\n    UV.y = STMap().y*resolution.y;\n\n    // Write the result to the output image\n    dst() = bilinear(src, UV.x, UV.y);\n\n  \}\n\};\n"
-   rebuild ""
-   specifiedFormat true
-   rebuild_finalise ""
-   name BlinkScript2
-   xpos -817
-   ypos 321
-  }
-  Copy {
-   inputs 2
-   from0 rgba.red
-   to0 rgba.alpha
-   name Copy6
-   xpos -817
-   ypos 454
-  }
-  Grade {
-   channels alpha
-   blackpoint 0.17
-   whitepoint 0.57
-   gamma 0.405
-   name Grade62
-   xpos -817
-   ypos 530
-  }
-  set C90f3c400 [stack 0]
-  Premult {
-   name Premult4
-   xpos -824
-   ypos 564
-  }
-push 0
-push $N90e5d000
-  Dot {
-   name Dot76
-   xpos -518
-   ypos 312
-  }
-push $N90e86400
-  Group {
-   name Pworld_transform1
-   xpos -475
-   ypos 132
-   addUserKnob {20 User}
-   addUserKnob {41 in l Position T Shuffle1.in}
-   addUserKnob {26 ""}
-   addUserKnob {41 translate T Axis1.translate}
-   addUserKnob {41 rotate T Axis1.rotate}
-   addUserKnob {41 scaling l scale T Axis1.scaling}
-   addUserKnob {41 uniform_scale l "uniform scale" T Axis1.uniform_scale}
-  }
-   Input {
-    inputs 0
-    name pworld
-    label input
-    xpos 0
-   }
-   Shuffle {
-    alpha black
-    name Shuffle1
-    label "select pworld\n"
-    xpos 0
-    ypos 50
-   }
-   Expression {
-    expr0 r-parent.Axis1.world_matrix.3
-    expr1 g-parent.Axis1.world_matrix.7
-    expr2 b-parent.Axis1.world_matrix.11
-    name Expression1
-    xpos 0
-    ypos 151
-   }
-   ColorMatrix {
-    matrix {
-        {{parent.Axis1.world_matrix.0} {parent.Axis1.world_matrix.1} {parent.Axis1.world_matrix.2}}
-        {{parent.Axis1.world_matrix.4} {parent.Axis1.world_matrix.5} {parent.Axis1.world_matrix.6}}
-        {{parent.Axis1.world_matrix.8} {parent.Axis1.world_matrix.9} {parent.Axis1.world_matrix.10}}
-      }
-    invert true
-    name ColorMatrix1
-    xpos 0
-    ypos 195
-   }
-   Output {
-    name Output1
-    xpos 0
-    ypos 300
-   }
-   Viewer {
-    frame_range 1-100
-    name Viewer1
-    xpos 0
-    ypos 326
-   }
-   Axis2 {
-    inputs 0
-    rotate {0 {parent.parent.rotY} 0}
-    name Axis1
-    xpos -150
-    ypos 171
-   }
-  end_group
-  Shuffle {
-   in rgb
-   green blue
-   blue green2
-   alpha green2
-   name Shuffle18
-   label XZ
-   xpos -475
-   ypos 189
-  }
-  Expression {
-   expr0 r>=0?(r%size)/size:(1-(-r%size)/size)
-   expr1 g>=0?(g%size)/size:(1-(-g%size)/size)
-   expr2 0
-   expr3 abs(a)
-   name Expression7
-   xpos -475
-   ypos 256
-   addUserKnob {20 User}
-   addUserKnob {7 size R 0 300}
-   size {{parent.Expression6.size}}
-  }
-  Input {
-   inputs 0
-   name imgY
-   xpos -381
-   ypos 261
-   number 2
-  }
-  Dot {
-   name Dot6
-   xpos -347
-   ypos 340
-  }
-  BlinkScript {
-   inputs 2
-   recompileCount 27
-   ProgramGroup 1
-   KernelDescription "2 \"stmap\" iterate pixelWise e2eb2abe0852e641515c9b135b45d5fe999c0cb063e785d3342ce194addf80f5 3 \"src\" Read Random \"STMap\" Read Point \"dst\" Write Point 0 0 3 \"srcconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA== \"UV\" Float 2 1 AAAAAAAAAAA= \"resolution\" Int 2 1 AAAAAAAAAAA="
-   kernelSource "\nkernel stmap : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeConstant> src; // the input image\n  Image<eRead, eAccessPoint, eEdgeClamped> STMap;\n  Image<eWrite> dst; // the output image\n\n  param:\n    // This parameter is made available to the user.\n    \n    \n\n  local:\n    // This local variable is not exposed to the user.\n    float2 UV;\n    int2 resolution;\n\n  // In define(), parameters can be given labels and default values.\n  void define() \{\n    \n  \}\n\n  // The init() function is run before any calls to process().\n  // Local variables can be initialized here.\n  void init() \{\n    \n    resolution.x = src.bounds.width();\n    resolution.y = src.bounds.height();\n\n  \}\n\n  void process(int2 pos) \{\n    \n    UV.x = STMap().x*resolution.x-.5f;\n    UV.y = STMap().y*resolution.y-.5f;\n\n    // Write the result to the output image\n    dst() = bilinear(src, UV.x, UV.y);\n\n  \}\n\};\n"
-   rebuild ""
-   specifiedFormat true
-   rebuild_finalise ""
-   name BlinkScript1
-   xpos -475
-   ypos 331
-  }
-  Copy {
-   inputs 2
-   from0 rgba.green
-   to0 rgba.alpha
-   name Copy7
-   xpos -475
-   ypos 415
-  }
-clone $C90f3c400 {
-   xpos -465
-   ypos 520
-   selected false
-  }
-  Premult {
-   name Premult5
-   xpos -465
-   ypos 556
-  }
-push $N90e5cc00
-  Dot {
-   name Dot78
-   xpos -292
-   ypos 286
-  }
-push $N90e86400
-  Dot {
-   name Dot77
-   xpos -174
-   ypos 109
-  }
-  Group {
-   name Pworld_transform2
-   xpos -208
-   ypos 133
-   addUserKnob {20 User}
-   addUserKnob {41 in l Position T Shuffle1.in}
-   addUserKnob {26 ""}
-   addUserKnob {41 translate T Axis1.translate}
-   addUserKnob {41 rotate T Axis1.rotate}
-   addUserKnob {41 scaling l scale T Axis1.scaling}
-   addUserKnob {41 uniform_scale l "uniform scale" T Axis1.uniform_scale}
-  }
-   Input {
-    inputs 0
-    name pworld
-    label input
-    xpos 0
-   }
-   Shuffle {
-    alpha black
-    name Shuffle1
-    label "select pworld\n"
-    xpos 0
-    ypos 50
-   }
-   Expression {
-    expr0 r-parent.Axis1.world_matrix.3
-    expr1 g-parent.Axis1.world_matrix.7
-    expr2 b-parent.Axis1.world_matrix.11
-    name Expression1
-    xpos 0
-    ypos 151
-   }
-   ColorMatrix {
-    matrix {
-        {{parent.Axis1.world_matrix.0} {parent.Axis1.world_matrix.1} {parent.Axis1.world_matrix.2}}
-        {{parent.Axis1.world_matrix.4} {parent.Axis1.world_matrix.5} {parent.Axis1.world_matrix.6}}
-        {{parent.Axis1.world_matrix.8} {parent.Axis1.world_matrix.9} {parent.Axis1.world_matrix.10}}
-      }
-    invert true
-    name ColorMatrix1
-    xpos 0
-    ypos 195
-   }
-   Output {
-    name Output1
-    xpos 0
-    ypos 300
-   }
-   Viewer {
-    frame_range 1-100
-    name Viewer1
-    xpos 0
-    ypos 326
-   }
-   Axis2 {
-    inputs 0
-    rotate {0 0 {parent.parent.rotZ}}
-    name Axis1
-    xpos -150
-    ypos 171
-   }
-  end_group
-  Shuffle {
-   in rgb
-   blue blue2
-   alpha blue2
-   name Shuffle19
-   label XY
-   xpos -208
-   ypos 193
-  }
-  Expression {
-   expr0 r>=0?(r%size)/size:(1-(-r%size)/size)
-   expr1 g>=0?(g%size)/size:(1-(-g%size)/size)
-   expr2 0
-   expr3 abs(a)
-   name Expression8
-   xpos -208
-   ypos 253
-   addUserKnob {20 User}
-   addUserKnob {7 size R 0 300}
-   size {{parent.Expression7.size}}
-  }
-  Input {
-   inputs 0
-   name imgZ
-   xpos -73
-   ypos 267
-   number 1
-  }
-  Dot {
-   name Dot5
-   xpos -39
-   ypos 333
-  }
-  BlinkScript {
-   inputs 2
-   recompileCount 28
-   ProgramGroup 1
-   KernelDescription "2 \"stmap\" iterate pixelWise e2eb2abe0852e641515c9b135b45d5fe999c0cb063e785d3342ce194addf80f5 3 \"src\" Read Random \"STMap\" Read Point \"dst\" Write Point 0 0 3 \"srcconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA== \"UV\" Float 2 1 AAAAAAAAAAA= \"resolution\" Int 2 1 AAAAAAAAAAA="
-   kernelSource "\nkernel stmap : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeConstant> src; // the input image\n  Image<eRead, eAccessPoint, eEdgeClamped> STMap;\n  Image<eWrite> dst; // the output image\n\n  param:\n    // This parameter is made available to the user.\n    \n    \n\n  local:\n    // This local variable is not exposed to the user.\n    float2 UV;\n    int2 resolution;\n\n  // In define(), parameters can be given labels and default values.\n  void define() \{\n    \n  \}\n\n  // The init() function is run before any calls to process().\n  // Local variables can be initialized here.\n  void init() \{\n    \n    resolution.x = src.bounds.width();\n    resolution.y = src.bounds.height();\n\n  \}\n\n  void process(int2 pos) \{\n    \n    UV.x = STMap().x*resolution.x-.5f;\n    UV.y = STMap().y*resolution.y-.5f;\n\n    // Write the result to the output image\n    dst() = bilinear(src, UV.x, UV.y);\n\n  \}\n\};\n"
-   rebuild ""
-   specifiedFormat true
-   rebuild_finalise ""
-   name BlinkScript3
-   xpos -208
-   ypos 324
-  }
-  Copy {
-   inputs 2
-   from0 rgba.blue
-   to0 rgba.alpha
-   name Copy8
-   xpos -208
-   ypos 413
-  }
-clone $C90f3c400 {
-   xpos -208
-   ypos 494
-   selected false
-  }
-  Merge2 {
-   inputs 3+1
-   name Merge8
-   xpos -465
-   ypos 612
-  }
-set N910ab400 [stack 0]
-  Output {
-   name Output1
-   xpos -465
-   ypos 695
-  }
-push $N910ab400
-push 0
-push 0
-push 0
-push 0
-push 0
-push 0
-push 0
-push 0
-push 0
-  Viewer {
-   inputs 10
-   frame_range 1001-1100
-   fps 25
-   input_number 9
-   name Viewer1
-   xpos -365
-   ypos 195
-  }
- end_group
- Shuffle2 {
-  fromInput1 {{0} B}
-  fromInput2 {{0} B}
-  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
-  name Shuffle10
-  label "\[value in1]"
-  xpos -465
-  ypos 1026
- }
- Grade {
-  channels rgba
-  multiply 1.1
-  gamma 2.3
-  name Grade4
-  xpos -465
-  ypos 1062
- }
- Dot {
-  name Dot29
-  xpos -431
-  ypos 1146
- }
-set N91106c00 [stack 0]
- Dot {
-  name Dot14
-  xpos -431
-  ypos 1184
- }
-push $N91106c00
-push $N90cd7c00
- Dot {
-  name Dot24
-  xpos -1000
-  ypos 757
- }
-add_layer {perimeter perimeter.perimeter}
- Shuffle2 {
-  fromInput1 {{0} B}
-  in1 perimeter
-  fromInput2 {{0} B}
-  mappings "4 perimeter.perimeter 0 0 rgba.red 0 0 perimeter.perimeter 0 0 rgba.green 0 1 perimeter.perimeter 0 0 rgba.blue 0 2 perimeter.perimeter 0 0 rgba.alpha 0 3"
-  name Shuffle25
-  label "\[value in1]"
-  xpos -1034
-  ypos 793
- }
- set C91107800 [stack 0]
- Keyer {
-  operation "luminance key"
-  range {{parent.KWH_radius_map_remap_black} {parent.KWH_radius_map_remap_white} 1 1}
-  name Keyer1
-  xpos -1034
-  ypos 881
- }
- Multiply {
-  inputs 1+1
-  channels alpha
-  value {{1-KWH_radius_map_noise_gain}}
-  name Multiply_Noise
-  xpos -1034
-  ypos 1137
- }
- Multiply {
-  inputs 1+1
-  channels alpha
-  value {{1+KWH_radius_map_noise_gain}}
-  invert_mask true
-  name Multiply_Noise1
-  xpos -1034
-  ypos 1176
- }
- Multiply {
-  inputs 1+1
-  channels alpha
-  value {{parent.kwh_eyebrows}}
-  name Multiply_Brows
-  xpos -1034
-  ypos 1212
- }
- Multiply {
-  inputs 1+1
-  channels alpha
-  value 0
-  invert_mask true
-  name Multiply_FM
-  xpos -1034
-  ypos 1249
- }
- Multiply {
-  inputs 1+1
-  channels alpha
-  value {{lerp(0,1,1,0,parent.radius_map_preserve_tip)}}
-  name Multiply_Preserve_Tip
-  xpos -1034
-  ypos 1285
- }
- Dot {
-  name Dot31
-  xpos -1000
-  ypos 1321
- }
- Input {
-  inputs 0
-  name beauty
-  xpos 349
-  ypos -224
- }
-set N9114b800 [stack 0]
- Dot {
-  name Dot55
-  xpos 383
-  ypos 259
- }
-set N9114bc00 [stack 0]
- Dot {
-  name Dot21
-  xpos 383
-  ypos 757
- }
-set N9214c000 [stack 0]
- Dot {
-  name Dot23
-  xpos 84
-  ypos 757
- }
- Copy {
-  inputs 2
-  from0 rgba.alpha
-  to0 rgba.alpha
-  name Copy4
-  xpos 50
-  ypos 1312
- }
-set N9214c800 [stack 0]
- Shuffle2 {
-  fromInput1 {{0} B}
-  in1 alpha
-  fromInput2 {{0} B}
-  mappings "4 rgba.alpha 0 0 rgba.alpha 0 3 rgba.alpha 0 0 rgba.red 0 0 rgba.alpha 0 0 rgba.green 0 1 rgba.alpha 0 0 rgba.blue 0 2"
-  name Shuffle4
-  label "\[value in1]"
-  xpos 50
-  ypos 1355
- }
- Multiply {
-  inputs 1+1
-  channels alpha
-  value 0
-  maskChannelMask rgba.red
-  invert_mask true
-  name Multiply_AS
-  xpos 50
-  ypos 1400
-  disable {{!filter_autosize}}
- }
- Dot {
-  name Dot13
-  xpos 84
-  ypos 1452
- }
-set N9214d400 [stack 0]
- Dot {
-  name Dot32
-  xpos -156
-  ypos 1452
- }
- Dot {
-  name Dot3
-  xpos -156
-  ypos 1603
- }
-set N9214dc00 [stack 0]
- Dot {
-  name Dot37
-  xpos -156
-  ypos 1637
- }
-push $N9214dc00
-push $N90c3b000
-push $N9214d400
- Dot {
-  name Dot34
-  xpos 84
-  ypos 1489
- }
-set N92172400 [stack 0]
-push $N92172400
- Blur {
-  channels rgba
-  size 10
-  name Blur1
-  xpos -70
-  ypos 1486
- }
- Unpremult {
-  name Unpremult1
-  xpos -70
-  ypos 1520
- }
- Shuffle2 {
-  fromInput1 {{0} B}
-  fromInput2 {{0} B}
-  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
-  name Shuffle15
-  label "\[value in1]"
-  xpos -70
-  ypos 1551
- }
- Keymix {
-  inputs 3
-  name Keymix1
-  xpos 50
-  ypos 1551
- }
- Dissolve {
-  inputs 2
-  channels rgba
-  which {{lerp(0,1,1,0,parent.filter_edges)}}
-  name Dissolve2
-  xpos 50
-  ypos 1600
- }
- Switch {
-  inputs 2
-  which {{!parent.KWH_filter_edges}}
-  name Switch1
-  xpos 50
-  ypos 1634
- }
- Grade {
-  inputs 1+1
-  channels rgba
-  multiply 0
-  multiply_panelDropped true
-  mix {{lerp(0,1,1,0,parent.filter_edges)}}
-  name Grade2
-  xpos 50
-  ypos 1667
- }
- Dot {
-  name Dot6
-  xpos 84
-  ypos 1726
- }
-push $N9214c000
- Unpremult {
-  name Unpremult2
-  xpos 349
-  ypos 1699
-  disable {{parent.KWH_filter_edges}}
- }
- ILGC_Kuwahara {
-  inputs 2
-  name ILGC_Kuwahara1
-  note_font "Verdana Bold"
-  xpos 349
-  ypos 1723
-  Size {{parent.KWH_size}}
- }
- Copy {
-  inputs 2
-  from0 rgba.alpha
-  to0 rgba.alpha
-  name Copy1
-  xpos 349
-  ypos 1747
-  disable {{parent.KWH_filter_edges}}
- }
- Premult {
-  name Premult1
-  xpos 349
-  ypos 1783
-  disable {{parent.KWH_filter_edges}}
- }
- Dot {
-  name Dot15
-  label KWH_OUT
-  note_font "Verdana Bold"
-  note_font_size 21
-  xpos 383
-  ypos 2177
- }
- Dot {
-  name Dot17
-  xpos 383
-  ypos 2704
- }
-set N92318000 [stack 0]
  Dot {
   name Dot11
   xpos 56
-  ypos 2704
+  ypos 2832
  }
-set N92318400 [stack 0]
+set Nd4399800 [stack 0]
+add_layer {curveu curveu.curveu}
  Shuffle2 {
   fromInput1 {{0} B}
   in1 curveu
@@ -2507,7 +1179,7 @@ set N92318400 [stack 0]
   name Shuffle27
   label "\[value in1]"
   xpos 22
-  ypos 2732
+  ypos 2860
  }
  Group {
   name LumaKeyer
@@ -2515,7 +1187,7 @@ set N92318400 [stack 0]
   tile_color 0x421010ff
   note_font "Bitstream Vera Sans Bold"
   xpos 22
-  ypos 2768
+  ypos 2896
   addUserKnob {20 User l lumaKeyer}
   addUserKnob {4 output M {Alpha RGBA}}
   output RGBA
@@ -2540,14 +1212,14 @@ set N92318400 [stack 0]
    xpos 57
    ypos -347
   }
-set N92318c00 [stack 0]
+set Nd43e6000 [stack 0]
   Colorspace {
    colorspace_out HSL
    name Colorspace1
    xpos -181
    ypos -181
   }
-set N92319000 [stack 0]
+set Nd43e6400 [stack 0]
   Shuffle {
    red blue
    green blue
@@ -2570,15 +1242,15 @@ set N92319000 [stack 0]
    ypos 446
    number 1
   }
-push $N92318c00
+push $Nd43e6000
   Dot {
    name Dot5
    note_font_size 41
    xpos 91
    ypos 284
   }
-set N9234c000 [stack 0]
-push $N92319000
+set Nd43e7400 [stack 0]
+push $Nd43e6400
   Expression {
    expr3 smoothstep(parent.picker.blackpoint,parent.picker.whitepoint,b)
    name Expression1
@@ -2591,7 +1263,7 @@ push $N92319000
    xpos -147
    ypos -58
   }
-set N9234c800 [stack 0]
+set Nd43e7c00 [stack 0]
   ColorLookup {
    channels {{{parent.ColorLookup_smooth.channels}}}
    lut {master {curve L 0 C k 1 s0}
@@ -2603,7 +1275,7 @@ set N9234c800 [stack 0]
    xpos -69
    ypos 33
   }
-push $N9234c800
+push $Nd43e7c00
   ColorLookup {
    channels {{{parent.ColorLookup_smooth.channels}}}
    lut {master {curve L 0 s0 1}
@@ -2615,7 +1287,7 @@ push $N9234c800
    xpos -181
    ypos 32
   }
-push $N9234c800
+push $Nd43e7c00
   ColorLookup {
    lut {master {curve L 0 s0 C k 1 s0}
      red {}
@@ -2626,7 +1298,7 @@ push $N9234c800
    xpos -293
    ypos 32
   }
-push $N9234c800
+push $Nd43e7c00
   Dot {
    name Dot2
    note_font_size 41
@@ -2681,7 +1353,7 @@ push $N9234c800
    xpos -147
    ypos 450
   }
-push $N9234c000
+push $Nd43e7400
   Shuffle {
    alpha black
    name Shuffle3
@@ -2718,56 +1390,55 @@ push $N9234c000
  Dot {
   name Dot12
   xpos 56
-  ypos 2896
+  ypos 3024
  }
-push $N92318400
+push $Nd4399800
  Dot {
   name Dot26
   xpos -41
-  ypos 2704
+  ypos 2832
  }
-clone $C91107800 {
+add_layer {perimeter perimeter.perimeter}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 perimeter
+  fromInput2 {{0} B}
+  mappings "4 perimeter.perimeter 0 0 rgba.red 0 0 perimeter.perimeter 0 0 rgba.green 0 1 perimeter.perimeter 0 0 rgba.blue 0 2 perimeter.perimeter 0 0 rgba.alpha 0 3"
+  name Shuffle25
+  label "\[value in1]"
   xpos -75
-  ypos 2732
-  selected false
+  ypos 2860
  }
+ set Cd41c6c00 [stack 0]
  Keyer {
   operation "luminance key"
   range {{parent.brush_mask_projection_remap_black} {parent.brush_mask_projection_remap_white} 1 1}
   name Keyer2
   xpos -75
-  ypos 2772
+  ypos 2900
  }
  Dot {
   name Dot16
   xpos -41
-  ypos 2848
+  ypos 2976
  }
-push $N908e9c00
- PostageStamp {
-  name RAW2
-  note_font "Verdana Bold"
-  xpos -241
-  ypos 2401
-  hide_input true
- }
-set N923c3400 [stack 0]
+push $Nd4488800
  Dot {
   name Dot35
   xpos -338
-  ypos 2404
+  ypos 2532
  }
-set N923c3800 [stack 0]
+set Nd4488c00 [stack 0]
  Dot {
   name Dot75
   xpos -464
-  ypos 2404
+  ypos 2532
  }
-set N923c3c00 [stack 0]
+set Nd4489000 [stack 0]
  Dot {
   name Dot76
   xpos -608
-  ypos 2404
+  ypos 2532
  }
 add_layer {furTex furTex.x furTex.y furTex.z}
  Shuffle2 {
@@ -2778,14 +1449,14 @@ add_layer {furTex furTex.x furTex.y furTex.z}
   name Shuffle11
   label "\[value in1]"
   xpos -642
-  ypos 2459
+  ypos 2587
  }
  Dot {
   name Dot77
   xpos -608
-  ypos 2569
+  ypos 2697
  }
-push $N923c3c00
+push $Nd4489000
 add_layer {furTex2 furTex2.x furTex2.y furTex2.z}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -2795,7 +1466,7 @@ add_layer {furTex2 furTex2.x furTex2.y furTex2.z}
   name Shuffle8
   label "\[value in1]"
   xpos -498
-  ypos 2459
+  ypos 2587
  }
  Blend {
   inputs 2
@@ -2804,14 +1475,15 @@ add_layer {furTex2 furTex2.x furTex2.y furTex2.z}
   weight1 {{brush_map2}}
   name Blend1
   xpos -498
-  ypos 2566
+  ypos 2694
  }
  Dot {
   name Dot74
   xpos -464
-  ypos 2710
+  ypos 2838
  }
-push $N923c3800
+push $Nd4488c00
+add_layer {N N.x N.y N.z N.red N.green N.blue N.alpha N.X N.Y N.Z}
  Shuffle2 {
   fromInput1 {{0} B}
   in1 N
@@ -2821,25 +1493,33 @@ push $N923c3800
   name Shuffle23
   label "\[value in1]"
   xpos -372
-  ypos 2460
+  ypos 2588
  }
  Dot {
   name Dot36
   xpos -338
-  ypos 2615
+  ypos 2743
  }
-push $N923c3400
-clone $C90d26800 {
+push $Nd4488800
+add_layer {Pref Pref.red Pref.green Pref.blue}
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 Pref
+  out1 rgb
+  fromInput2 {{0} B}
+  mappings "3 Pref.red 0 0 rgba.red 0 0 Pref.green 0 1 rgba.green 0 1 Pref.blue 0 2 rgba.blue 0 2"
+  name Shuffle16
+  label "\[value in1]"
   xpos -241
-  ypos 2460
-  selected false
+  ypos 2588
  }
+ set Cd3c93c00 [stack 0]
  Median {
   size {{parent.Median_MASTER.size}}
   ignore_top_line false
   name Median2
   xpos -241
-  ypos 2525
+  ypos 2653
  }
  Read {
   inputs 0
@@ -2850,7 +1530,7 @@ clone $C90d26800 {
   name Read2
   knobChanged "try:\n\tpcore.getPlugin(\"Nuke\").updateNodeUI(\"read\", nuke.toNode(nuke.thisNode().fullName().rsplit(\".\", 1)\[0]))\nexcept:\n\tpass"
   xpos -98
-  ypos 2365
+  ypos 2404
   addUserKnob {20 tab_prism l Prism}
   addUserKnob {26 fileName l File T I:/intermarche/04_Resources/Ben/BrushstrokesTextures/brushStroke01.exr}
   addUserKnob {22 browse l Browse... T pcore.appPlugin.readNode_onBrowseClicked(nuke.thisNode()) +STARTLINE}
@@ -2865,29 +1545,29 @@ add_layer {dir dir.red dir.green dir.x dir.y dir.z}
   name Shuffle3
   label "\[value in1]"
   xpos -98
-  ypos 2478
+  ypos 2606
  }
  Blur {
   size 10
   name Blur2
   xpos -98
-  ypos 2514
+  ypos 2642
  }
  Clamp {
   channels rgba
   minimum -1
   name Clamp1
   xpos -98
-  ypos 2612
+  ypos 2740
  }
-set N9240b400 [stack 0]
-push $N9240b400
-push $N9240b400
+set Nd44da800 [stack 0]
+push $Nd44da800
+push $Nd44da800
  Group {
   inputs 5
   name TRIPLANAR
   xpos -241
-  ypos 2612
+  ypos 2740
   addUserKnob {20 User}
   addUserKnob {41 size_2 l sizeX T Expression6.size}
   addUserKnob {41 size_1 l sizeY T Expression7.size}
@@ -2924,13 +1604,13 @@ push $N9240b400
    xpos -296
    ypos 29
   }
-set N92450000 [stack 0]
+set Nd44db400 [stack 0]
   Dot {
    name Dot3
    xpos -518
    ypos 29
   }
-set N92450400 [stack 0]
+set Nd44db800 [stack 0]
   Dot {
    name Dot4
    xpos -867
@@ -2959,7 +1639,7 @@ set N92450400 [stack 0]
    xpos -441
    ypos 109
   }
-set N92451800 [stack 0]
+set Nd4512c00 [stack 0]
   Dot {
    name Dot74
    xpos -783
@@ -3091,20 +1771,20 @@ set N92451800 [stack 0]
    xpos -817
    ypos 530
   }
-  set C924f9800 [stack 0]
+  set Cd45bac00 [stack 0]
   Premult {
    name Premult4
    xpos -824
    ypos 564
   }
 push 0
-push $N92450400
+push $Nd44db800
   Dot {
    name Dot76
    xpos -518
    ypos 312
   }
-push $N92451800
+push $Nd4512c00
   Group {
    name Pworld_transform1
    xpos -475
@@ -3223,7 +1903,7 @@ push $N92451800
    xpos -475
    ypos 415
   }
-clone $C924f9800 {
+clone $Cd45bac00 {
    xpos -465
    ypos 520
    selected false
@@ -3233,13 +1913,13 @@ clone $C924f9800 {
    xpos -465
    ypos 556
   }
-push $N92450000
+push $Nd44db400
   Dot {
    name Dot78
    xpos -292
    ypos 286
   }
-push $N92451800
+push $Nd4512c00
   Dot {
    name Dot77
    xpos -174
@@ -3362,7 +2042,7 @@ push $N92451800
    xpos -208
    ypos 413
   }
-clone $C924f9800 {
+clone $Cd45bac00 {
    xpos -208
    ypos 494
    selected false
@@ -3373,13 +2053,13 @@ clone $C924f9800 {
    xpos -465
    ypos 612
   }
-set N92698800 [stack 0]
+set Nd472bc00 [stack 0]
   Output {
    name Output1
    xpos -465
    ypos 695
   }
-push $N92698800
+push $Nd472bc00
 push 0
 push 0
 push 0
@@ -3404,14 +2084,14 @@ push 0
   which {{brushes_mode}}
   name Switch2
   xpos -241
-  ypos 2707
+  ypos 2835
  }
  Median {
   size {{brush_median}}
   ignore_top_line false
   name Median1
   xpos -241
-  ypos 2746
+  ypos 2874
  }
  Multiply {
   inputs 1+1
@@ -3420,7 +2100,7 @@ push 0
   invert_mask true
   name Multiply5
   xpos -241
-  ypos 2845
+  ypos 2973
  }
  Multiply {
   inputs 1+1
@@ -3428,7 +2108,7 @@ push 0
   value 0
   name Multiply7
   xpos -241
-  ypos 2893
+  ypos 3021
  }
  Multiply {
   inputs 1+1
@@ -3438,7 +2118,7 @@ push 0
   invert_mask true
   name Multiply_AS1
   xpos -241
-  ypos 2940
+  ypos 3068
   disable {{!filter_autosize}}
  }
  Multiply {
@@ -3448,14 +2128,14 @@ push 0
   invert_mask true
   name Multiply_FM1
   xpos -241
-  ypos 2992
+  ypos 3120
  }
  Multiply {
   channels rgba
   value 0
   name Multiply19
   xpos -241
-  ypos 3044
+  ypos 3172
   disable {{active_brushes}}
  }
  Dot {
@@ -3464,9 +2144,9 @@ push 0
   note_font "Verdana Bold"
   note_font_size 21
   xpos -207
-  ypos 3153
+  ypos 3281
  }
-set N9271f000 [stack 0]
+set Nd47e4400 [stack 0]
  PostageStamp {
   name BRUSHES_MAP
   note_font "Verdana Bold"
@@ -3474,7 +2154,1015 @@ set N9271f000 [stack 0]
   ypos 4206
   hide_input true
  }
-push $N9214c800
+push $Nd3885000
+ PostageStamp {
+  name RAW
+  note_font "Verdana Bold"
+  xpos -313
+  ypos 712
+  hide_input true
+ }
+ Dot {
+  name Dot80
+  xpos -279
+  ypos 757
+ }
+ Dot {
+  name Dot10
+  xpos -431
+  ypos 757
+ }
+set Nd3c3bc00 [stack 0]
+ Dot {
+  name Dot27
+  xpos -562
+  ypos 757
+ }
+set Nd3c66000 [stack 0]
+ Dot {
+  name Dot25
+  xpos -714
+  ypos 757
+ }
+set Nd3c66400 [stack 0]
+ Cryptomatte {
+  pickerAdd {0.1382354945 0.155127421 0.1634784788 0 826 1700 827 1701}
+  matteList tail
+  unpremultiply true
+  lastSelectedCryptoLayerName CryptoPrimvar_part
+  name Cryptomatte1
+  xpos -748
+  ypos 881
+ }
+push $Nd3c66400
+ Dot {
+  name Dot4
+  xpos -815
+  ypos 757
+ }
+set Nd3c67000 [stack 0]
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 curveu
+  fromInput2 {{0} B}
+  mappings "4 curveu.curveu 0 0 rgba.red 0 0 curveu.curveu 0 0 rgba.green 0 1 curveu.curveu 0 0 rgba.blue 0 2 curveu.curveu 0 0 rgba.alpha 0 3"
+  name Shuffle5
+  label "\[value in1]"
+  xpos -849
+  ypos 785
+ }
+ Grade {
+  channels rgba
+  blackpoint {{parent.KWH_radius_map_preserve_tip_black}}
+  whitepoint {{parent.radius_map_preserve_tip_white}}
+  name Grade1
+  xpos -849
+  ypos 840
+ }
+ Multiply {
+  inputs 1+1
+  channels rgba
+  value 0.5
+  name Multiply2
+  xpos -849
+  ypos 881
+ }
+ Dot {
+  name Dot2
+  xpos -815
+  ypos 1294
+ }
+push $Nd3ba7800
+ PostageStamp {
+  name FUR_MASK
+  note_font "Verdana Bold"
+  xpos -368
+  ypos 1254
+  hide_input true
+ }
+push $Nd3885000
+ PostageStamp {
+  name RAW1
+  note_font "Verdana Bold"
+  xpos -368
+  ypos 1193
+  hide_input true
+ }
+ Cryptomatte {
+  pickerAdd {0.09675933421 0.08762308955 0.1004923731 0 1001 450 1002 451}
+  matteList brows
+  lastSelectedCryptoLayerName CryptoPrimvar_part
+  name Cryptomatte4
+  xpos -368
+  ypos 1217
+ }
+push $Nd3c66000
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 N
+  out1 rgb
+  fromInput2 {{0} B}
+  mappings "3 N.x 0 0 rgba.red 0 0 N.y 0 1 rgba.green 0 1 N.z 0 2 rgba.blue 0 2"
+  name Shuffle9
+  label "\[value in1]"
+  xpos -596
+  ypos 850
+ }
+ Dot {
+  name Dot28
+  xpos -562
+  ypos 1005
+ }
+push $Nd3c3bc00
+clone $Cd3c93c00 {
+  xpos -465
+  ypos 850
+  selected false
+ }
+ Median {
+  size {{parent.Median_MASTER.size}}
+  ignore_top_line false
+  name Median4
+  xpos -465
+  ypos 915
+ }
+ Read {
+  inputs 0
+  file_type exr
+  file I:/yuka_2604/04_Resources/Nuke/textures/BrushStamps_01.exr
+  format "2048 2048 0 0 2048 2048 1 square_2K"
+  origset true
+  colorspace scene_linear
+  name Read1
+  knobChanged "try:\n\tpcore.getPlugin(\"Nuke\").updateNodeUI(\"read\", nuke.toNode(nuke.thisNode().fullName().rsplit(\".\", 1)\[0]))\nexcept:\n\tpass"
+  xpos -319
+  ypos 826
+  addUserKnob {20 tab_prism l Prism}
+  addUserKnob {26 fileName l File T I:/yuka_2604/04_Resources/Nuke/textures/BrushStamps_01.exr}
+  addUserKnob {22 browse l Browse... T pcore.appPlugin.readNode_onBrowseClicked(nuke.thisNode()) +STARTLINE}
+  addUserKnob {22 openExplorer l "Open In Explorer..." -STARTLINE T pcore.appPlugin.readNode_onOpenInClicked(nuke.thisNode())}
+ }
+ ILGC_HexTile {
+  name ILGC_HexTile1
+  note_font "Verdana Bold"
+  xpos -319
+  ypos 946
+  upscale 2
+  size {{parent.KWH_radius_map_noise_size*.04}}
+  blend 0.1
+  rotation 180
+ }
+ Group {
+  name LumaKeyer1
+  onCreate "n = nuke.thisNode()\nn.knob('blackpoint').setRange(0, 1)\nn.knob('whitepoint').setRange(0, 1)"
+  tile_color 0x421010ff
+  note_font "Bitstream Vera Sans Bold"
+  xpos -319
+  ypos 996
+  addUserKnob {20 User l lumaKeyer}
+  addUserKnob {4 output M {Alpha RGBA}}
+  output RGBA
+  addUserKnob {41 blackpoint T picker.blackpoint}
+  addUserKnob {41 whitepoint T picker.whitepoint}
+  addUserKnob {6 invert +STARTLINE}
+  addUserKnob {4 smoothing l Smoothing: M {None Smooth Smooth0 Smooth1 ""}}
+  addUserKnob {26 ""}
+  addUserKnob {26 "" l mask T ""}
+  addUserKnob {41 maskChannelInput l "" -STARTLINE T Merge1.maskChannelInput}
+  addUserKnob {41 inject -STARTLINE T Merge1.inject}
+  addUserKnob {41 invert_mask l invert -STARTLINE T Merge1.invert_mask}
+  addUserKnob {41 fringe -STARTLINE T Merge1.fringe}
+  addUserKnob {41 mix T Merge1.mix}
+  addUserKnob {20 info}
+  addUserKnob {22 btn l DerekVFX.ca T "import os\nimport sys\n\ntry:\n    import subprocess\n    def _run(cmd, shell, wait):\n        opener = subprocess.Popen(cmd, shell=shell)\n        if wait:\n            opener.wait()\n        return opener.pid\nexcept ImportError:\n    import popen2\n    def _run(cmd, shell, wait):\n        opener = popen2.Popen3(cmd)\n        if wait:\n            opener.wait()\n        return opener.pid\n\ndef _open(url, wait=0):\n    if sys.platform == \"darwin\":\n        cmd = \[\"open\", url]\n    elif hasattr(os, \"startfile\"):\n        return os.startfile(url)\n    elif os.environ.has_key(\"KDE_FULL_SESSION\") or os.environ.has_key(\"KDE_MULTIHEAD\") or \\\n        os.environ.has_key(\"GNOME_DESKTOP_SESSION_ID\") or os.environ.has_key(\"GNOME_KEYRING_SOCKET\"):\n        cmd = \[\"xdg-open\", url]\n    else:\n        raise OSError, \"Desktop not supported.\"\n\n    return _run(cmd, 0, wait)\n\n_open('http://www.derekvfx.ca/')" +STARTLINE}
+  addUserKnob {26 versionUpdate l "" -STARTLINE T "<font color = gray> adjusted by Tony Lyons </font color = gray>"}
+ }
+  Input {
+   inputs 0
+   name Input1
+   xpos 57
+   ypos -347
+  }
+set Nd3d26400 [stack 0]
+  Colorspace {
+   colorspace_out HSL
+   name Colorspace1
+   xpos -181
+   ypos -181
+  }
+set Nd3d26800 [stack 0]
+  Shuffle {
+   red blue
+   green blue
+   alpha blue
+   name Shuffle1
+   tile_color 0x3d3f8e00
+   xpos -336
+   ypos -181
+  }
+  Grade {
+   blackpoint 0.47
+   name picker
+   xpos -336
+   ypos -139
+  }
+  Input {
+   inputs 0
+   name Inputmask
+   xpos 231
+   ypos 446
+   number 1
+  }
+push $Nd3d26400
+  Dot {
+   name Dot5
+   note_font_size 41
+   xpos 91
+   ypos 284
+  }
+set Nd3d27800 [stack 0]
+push $Nd3d26800
+  Expression {
+   expr3 smoothstep(parent.picker.blackpoint,parent.picker.whitepoint,b)
+   name Expression1
+   xpos -181
+   ypos -138
+  }
+  Dot {
+   name Dot1
+   note_font_size 41
+   xpos -147
+   ypos -58
+  }
+set Nd3d7c000 [stack 0]
+  ColorLookup {
+   channels {{{parent.ColorLookup_smooth.channels}}}
+   lut {master {curve L 0 C k 1 s0}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth1
+   xpos -69
+   ypos 33
+  }
+push $Nd3d7c000
+  ColorLookup {
+   channels {{{parent.ColorLookup_smooth.channels}}}
+   lut {master {curve L 0 s0 1}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth0
+   xpos -181
+   ypos 32
+  }
+push $Nd3d7c000
+  ColorLookup {
+   lut {master {curve L 0 s0 C k 1 s0}
+     red {}
+     green {}
+     blue {}
+     alpha {}}
+   name ColorLookup_smooth
+   xpos -293
+   ypos 32
+  }
+push $Nd3d7c000
+  Dot {
+   name Dot2
+   note_font_size 41
+   xpos -345
+   ypos -52
+  }
+  Dot {
+   name Dot3
+   note_font_size 41
+   xpos -345
+   ypos 131
+  }
+  Switch {
+   inputs 4
+   which {{parent.smoothing}}
+   name Switch1
+   label "\[value which]"
+   xpos -181
+   ypos 121
+  }
+  Expression {
+   expr3 1-a
+   name Expression2
+   xpos -181
+   ypos 191
+   disable {{"parent.invert == 0"}}
+  }
+  Merge2 {
+   inputs 2
+   operation copy
+   Achannels {rgba.red rgba.green rgba.blue -rgba.alpha}
+   Bchannels {rgba.red rgba.green rgba.blue -rgba.alpha}
+   output {rgba.red rgba.green rgba.blue -rgba.alpha}
+   name Merge2
+   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
+   xpos -181
+   ypos 280
+  }
+  Shuffle {
+   red alpha
+   green alpha
+   blue alpha
+   name Shuffle2
+   tile_color 0xffffffff
+   xpos -181
+   ypos 328
+   disable {{!parent.output}}
+  }
+  Dot {
+   name Dot4
+   note_font_size 41
+   xpos -147
+   ypos 450
+  }
+push $Nd3d27800
+  Shuffle {
+   alpha black
+   name Shuffle3
+   label "\[value in]"
+   xpos 57
+   ypos 331
+  }
+  Shuffle {
+   red black
+   green black
+   blue black
+   alpha black
+   name Shuffle4
+   label "\[value in]"
+   xpos 57
+   ypos 369
+   disable {{!parent.output}}
+  }
+  Merge2 {
+   inputs 2+1
+   operation copy
+   also_merge rgba
+   name Merge1
+   label "\[ expr \{ \[value mix] == 1 ? \" \" : \[concat Mix: \[value mix]] \}]"
+   xpos 57
+   ypos 446
+  }
+  Output {
+   name Output1
+   xpos 57
+   ypos 602
+  }
+ end_group
+set Nd33fa680 [stack 0]
+push $Nd33fa680
+push $Nd33fa680
+ Group {
+  inputs 5
+  name TRIPLANAR1
+  xpos -465
+  ypos 1002
+  addUserKnob {20 User}
+  addUserKnob {41 size_2 l sizeX T Expression6.size}
+  addUserKnob {41 size_1 l sizeY T Expression7.size}
+  addUserKnob {41 size l sizeZ T Expression8.size}
+  addUserKnob {13 offset}
+  addUserKnob {7 rotX l "rotate X" R 0 360}
+  addUserKnob {7 rotY l "rotate Y" R 0 360}
+  addUserKnob {7 rotZ l "rotate Z" R 0 360}
+  addUserKnob {26 ""}
+  addUserKnob {41 blackpoint T Grade62.blackpoint}
+  addUserKnob {41 whitepoint T Grade62.whitepoint}
+  addUserKnob {41 gamma T Grade62.gamma}
+  addUserKnob {26 ""}
+  addUserKnob {26 Credits l "" +STARTLINE T "© v001 Perceval Schopp 2021\n"}
+ }
+  Input {
+   inputs 0
+   name Normal
+   xpos -330
+   ypos -59
+   number 4
+  }
+  Expression {
+   expr0 abs(r)
+   expr1 abs(g)
+   expr2 abs(b)
+   name Expression1
+   xpos -330
+   ypos -18
+  }
+  Dot {
+   name Dot2
+   xpos -296
+   ypos 29
+  }
+set Nd3dfa000 [stack 0]
+  Dot {
+   name Dot3
+   xpos -518
+   ypos 29
+  }
+set Nd3dfa400 [stack 0]
+  Dot {
+   name Dot4
+   xpos -867
+   ypos 29
+  }
+  Dot {
+   name Dot75
+   xpos -867
+   ypos 310
+  }
+  Input {
+   inputs 0
+   name Position
+   xpos -475
+   ypos -62
+   number 3
+  }
+  Add {
+   value {{parent.offset} {parent.offset} {parent.offset} {parent.offset}}
+   name Add1
+   xpos -475
+   ypos 58
+  }
+  Dot {
+   name Dot79
+   xpos -441
+   ypos 109
+  }
+set Nd3dfb800 [stack 0]
+  Dot {
+   name Dot74
+   xpos -783
+   ypos 109
+  }
+  Group {
+   name Pworld_transform
+   xpos -817
+   ypos 134
+   addUserKnob {20 User}
+   addUserKnob {41 in l Position T Shuffle1.in}
+   addUserKnob {26 ""}
+   addUserKnob {41 translate T Axis1.translate}
+   addUserKnob {41 rotate T Axis1.rotate}
+   addUserKnob {41 scaling l scale T Axis1.scaling}
+   addUserKnob {41 uniform_scale l "uniform scale" T Axis1.uniform_scale}
+  }
+   Input {
+    inputs 0
+    name pworld
+    label input
+    xpos 0
+   }
+   Shuffle {
+    alpha black
+    name Shuffle1
+    label "select pworld\n"
+    xpos 0
+    ypos 50
+   }
+   Expression {
+    expr0 r-parent.Axis1.world_matrix.3
+    expr1 g-parent.Axis1.world_matrix.7
+    expr2 b-parent.Axis1.world_matrix.11
+    name Expression1
+    xpos 0
+    ypos 151
+   }
+   ColorMatrix {
+    matrix {
+        {{parent.Axis1.world_matrix.0} {parent.Axis1.world_matrix.1} {parent.Axis1.world_matrix.2}}
+        {{parent.Axis1.world_matrix.4} {parent.Axis1.world_matrix.5} {parent.Axis1.world_matrix.6}}
+        {{parent.Axis1.world_matrix.8} {parent.Axis1.world_matrix.9} {parent.Axis1.world_matrix.10}}
+      }
+    invert true
+    name ColorMatrix1
+    xpos 0
+    ypos 195
+   }
+   Output {
+    name Output1
+    xpos 0
+    ypos 300
+   }
+   Viewer {
+    frame_range 1-100
+    name Viewer1
+    xpos 0
+    ypos 326
+   }
+   Axis2 {
+    inputs 0
+    rotate {{parent.parent.rotX} 0 0}
+    name Axis1
+    xpos -150
+    ypos 171
+   }
+  end_group
+  Shuffle {
+   in rgb
+   red green
+   green blue
+   blue red2
+   alpha red2
+   name Shuffle17
+   label YZ
+   xpos -817
+   ypos 188
+  }
+  Expression {
+   expr0 r>=0?(r%size)/size:(1-(-r%size)/size)
+   expr1 g>=0?(g%size)/size:(1-(-g%size)/size)
+   expr3 abs(a)
+   name Expression6
+   xpos -817
+   ypos 265
+   addUserKnob {20 User}
+   addUserKnob {7 size R 0 300}
+   size {{KWH_radius_map_noise_size}}
+  }
+  Input {
+   inputs 0
+   name imgX
+   xpos -720
+   ypos 257
+  }
+  Dot {
+   name Dot7
+   xpos -686
+   ypos 330
+  }
+  BlinkScript {
+   inputs 2
+   recompileCount 29
+   ProgramGroup 1
+   KernelDescription "2 \"stmap\" iterate pixelWise 7a68aa278e15934f6eed8ab5e98f4a100b5f2ecefdbe100e4f0bb62a47208981 3 \"src\" Read Random \"STMap\" Read Point \"dst\" Write Point 0 0 3 \"srcconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA== \"UV\" Float 2 1 AAAAAAAAAAA= \"resolution\" Int 2 1 AAAAAAAAAAA="
+   kernelSource "\nkernel stmap : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeConstant> src; // the input image\n  Image<eRead, eAccessPoint, eEdgeClamped> STMap;\n  Image<eWrite> dst; // the output image\n\n  param:\n    // This parameter is made available to the user.\n    \n    \n\n  local:\n    // This local variable is not exposed to the user.\n    float2 UV;\n    int2 resolution;\n\n  // In define(), parameters can be given labels and default values.\n  void define() \{\n    \n  \}\n\n  // The init() function is run before any calls to process().\n  // Local variables can be initialized here.\n  void init() \{\n    \n    resolution.x = src.bounds.width();\n    resolution.y = src.bounds.height();\n\n  \}\n\n  void process(int2 pos) \{\n    \n    UV.x = STMap().x*resolution.x;\n    UV.y = STMap().y*resolution.y;\n\n    // Write the result to the output image\n    dst() = bilinear(src, UV.x, UV.y);\n\n  \}\n\};\n"
+   rebuild ""
+   specifiedFormat true
+   rebuild_finalise ""
+   name BlinkScript2
+   xpos -817
+   ypos 321
+  }
+  Copy {
+   inputs 2
+   from0 rgba.red
+   to0 rgba.alpha
+   name Copy6
+   xpos -817
+   ypos 454
+  }
+  Grade {
+   channels alpha
+   blackpoint 0.17
+   whitepoint 0.57
+   gamma 0.405
+   name Grade62
+   xpos -817
+   ypos 530
+  }
+  set Cd3e9b800 [stack 0]
+  Premult {
+   name Premult4
+   xpos -824
+   ypos 564
+  }
+push 0
+push $Nd3dfa400
+  Dot {
+   name Dot76
+   xpos -518
+   ypos 312
+  }
+push $Nd3dfb800
+  Group {
+   name Pworld_transform1
+   xpos -475
+   ypos 132
+   addUserKnob {20 User}
+   addUserKnob {41 in l Position T Shuffle1.in}
+   addUserKnob {26 ""}
+   addUserKnob {41 translate T Axis1.translate}
+   addUserKnob {41 rotate T Axis1.rotate}
+   addUserKnob {41 scaling l scale T Axis1.scaling}
+   addUserKnob {41 uniform_scale l "uniform scale" T Axis1.uniform_scale}
+  }
+   Input {
+    inputs 0
+    name pworld
+    label input
+    xpos 0
+   }
+   Shuffle {
+    alpha black
+    name Shuffle1
+    label "select pworld\n"
+    xpos 0
+    ypos 50
+   }
+   Expression {
+    expr0 r-parent.Axis1.world_matrix.3
+    expr1 g-parent.Axis1.world_matrix.7
+    expr2 b-parent.Axis1.world_matrix.11
+    name Expression1
+    xpos 0
+    ypos 151
+   }
+   ColorMatrix {
+    matrix {
+        {{parent.Axis1.world_matrix.0} {parent.Axis1.world_matrix.1} {parent.Axis1.world_matrix.2}}
+        {{parent.Axis1.world_matrix.4} {parent.Axis1.world_matrix.5} {parent.Axis1.world_matrix.6}}
+        {{parent.Axis1.world_matrix.8} {parent.Axis1.world_matrix.9} {parent.Axis1.world_matrix.10}}
+      }
+    invert true
+    name ColorMatrix1
+    xpos 0
+    ypos 195
+   }
+   Output {
+    name Output1
+    xpos 0
+    ypos 300
+   }
+   Viewer {
+    frame_range 1-100
+    name Viewer1
+    xpos 0
+    ypos 326
+   }
+   Axis2 {
+    inputs 0
+    rotate {0 {parent.parent.rotY} 0}
+    name Axis1
+    xpos -150
+    ypos 171
+   }
+  end_group
+  Shuffle {
+   in rgb
+   green blue
+   blue green2
+   alpha green2
+   name Shuffle18
+   label XZ
+   xpos -475
+   ypos 189
+  }
+  Expression {
+   expr0 r>=0?(r%size)/size:(1-(-r%size)/size)
+   expr1 g>=0?(g%size)/size:(1-(-g%size)/size)
+   expr2 0
+   expr3 abs(a)
+   name Expression7
+   xpos -475
+   ypos 256
+   addUserKnob {20 User}
+   addUserKnob {7 size R 0 300}
+   size {{parent.Expression6.size}}
+  }
+  Input {
+   inputs 0
+   name imgY
+   xpos -381
+   ypos 261
+   number 2
+  }
+  Dot {
+   name Dot6
+   xpos -347
+   ypos 340
+  }
+  BlinkScript {
+   inputs 2
+   recompileCount 27
+   ProgramGroup 1
+   KernelDescription "2 \"stmap\" iterate pixelWise e2eb2abe0852e641515c9b135b45d5fe999c0cb063e785d3342ce194addf80f5 3 \"src\" Read Random \"STMap\" Read Point \"dst\" Write Point 0 0 3 \"srcconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA== \"UV\" Float 2 1 AAAAAAAAAAA= \"resolution\" Int 2 1 AAAAAAAAAAA="
+   kernelSource "\nkernel stmap : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeConstant> src; // the input image\n  Image<eRead, eAccessPoint, eEdgeClamped> STMap;\n  Image<eWrite> dst; // the output image\n\n  param:\n    // This parameter is made available to the user.\n    \n    \n\n  local:\n    // This local variable is not exposed to the user.\n    float2 UV;\n    int2 resolution;\n\n  // In define(), parameters can be given labels and default values.\n  void define() \{\n    \n  \}\n\n  // The init() function is run before any calls to process().\n  // Local variables can be initialized here.\n  void init() \{\n    \n    resolution.x = src.bounds.width();\n    resolution.y = src.bounds.height();\n\n  \}\n\n  void process(int2 pos) \{\n    \n    UV.x = STMap().x*resolution.x-.5f;\n    UV.y = STMap().y*resolution.y-.5f;\n\n    // Write the result to the output image\n    dst() = bilinear(src, UV.x, UV.y);\n\n  \}\n\};\n"
+   rebuild ""
+   specifiedFormat true
+   rebuild_finalise ""
+   name BlinkScript1
+   xpos -475
+   ypos 331
+  }
+  Copy {
+   inputs 2
+   from0 rgba.green
+   to0 rgba.alpha
+   name Copy7
+   xpos -475
+   ypos 415
+  }
+clone $Cd3e9b800 {
+   xpos -465
+   ypos 520
+   selected false
+  }
+  Premult {
+   name Premult5
+   xpos -465
+   ypos 556
+  }
+push $Nd3dfa000
+  Dot {
+   name Dot78
+   xpos -292
+   ypos 286
+  }
+push $Nd3dfb800
+  Dot {
+   name Dot77
+   xpos -174
+   ypos 109
+  }
+  Group {
+   name Pworld_transform2
+   xpos -208
+   ypos 133
+   addUserKnob {20 User}
+   addUserKnob {41 in l Position T Shuffle1.in}
+   addUserKnob {26 ""}
+   addUserKnob {41 translate T Axis1.translate}
+   addUserKnob {41 rotate T Axis1.rotate}
+   addUserKnob {41 scaling l scale T Axis1.scaling}
+   addUserKnob {41 uniform_scale l "uniform scale" T Axis1.uniform_scale}
+  }
+   Input {
+    inputs 0
+    name pworld
+    label input
+    xpos 0
+   }
+   Shuffle {
+    alpha black
+    name Shuffle1
+    label "select pworld\n"
+    xpos 0
+    ypos 50
+   }
+   Expression {
+    expr0 r-parent.Axis1.world_matrix.3
+    expr1 g-parent.Axis1.world_matrix.7
+    expr2 b-parent.Axis1.world_matrix.11
+    name Expression1
+    xpos 0
+    ypos 151
+   }
+   ColorMatrix {
+    matrix {
+        {{parent.Axis1.world_matrix.0} {parent.Axis1.world_matrix.1} {parent.Axis1.world_matrix.2}}
+        {{parent.Axis1.world_matrix.4} {parent.Axis1.world_matrix.5} {parent.Axis1.world_matrix.6}}
+        {{parent.Axis1.world_matrix.8} {parent.Axis1.world_matrix.9} {parent.Axis1.world_matrix.10}}
+      }
+    invert true
+    name ColorMatrix1
+    xpos 0
+    ypos 195
+   }
+   Output {
+    name Output1
+    xpos 0
+    ypos 300
+   }
+   Viewer {
+    frame_range 1-100
+    name Viewer1
+    xpos 0
+    ypos 326
+   }
+   Axis2 {
+    inputs 0
+    rotate {0 0 {parent.parent.rotZ}}
+    name Axis1
+    xpos -150
+    ypos 171
+   }
+  end_group
+  Shuffle {
+   in rgb
+   blue blue2
+   alpha blue2
+   name Shuffle19
+   label XY
+   xpos -208
+   ypos 193
+  }
+  Expression {
+   expr0 r>=0?(r%size)/size:(1-(-r%size)/size)
+   expr1 g>=0?(g%size)/size:(1-(-g%size)/size)
+   expr2 0
+   expr3 abs(a)
+   name Expression8
+   xpos -208
+   ypos 253
+   addUserKnob {20 User}
+   addUserKnob {7 size R 0 300}
+   size {{parent.Expression7.size}}
+  }
+  Input {
+   inputs 0
+   name imgZ
+   xpos -73
+   ypos 267
+   number 1
+  }
+  Dot {
+   name Dot5
+   xpos -39
+   ypos 333
+  }
+  BlinkScript {
+   inputs 2
+   recompileCount 28
+   ProgramGroup 1
+   KernelDescription "2 \"stmap\" iterate pixelWise e2eb2abe0852e641515c9b135b45d5fe999c0cb063e785d3342ce194addf80f5 3 \"src\" Read Random \"STMap\" Read Point \"dst\" Write Point 0 0 3 \"srcconstEdgeColor\" Float 4 1 AAAAAAAAAAAAAAAAAAAAAA== \"UV\" Float 2 1 AAAAAAAAAAA= \"resolution\" Int 2 1 AAAAAAAAAAA="
+   kernelSource "\nkernel stmap : ImageComputationKernel<ePixelWise>\n\{\n  Image<eRead, eAccessRandom, eEdgeConstant> src; // the input image\n  Image<eRead, eAccessPoint, eEdgeClamped> STMap;\n  Image<eWrite> dst; // the output image\n\n  param:\n    // This parameter is made available to the user.\n    \n    \n\n  local:\n    // This local variable is not exposed to the user.\n    float2 UV;\n    int2 resolution;\n\n  // In define(), parameters can be given labels and default values.\n  void define() \{\n    \n  \}\n\n  // The init() function is run before any calls to process().\n  // Local variables can be initialized here.\n  void init() \{\n    \n    resolution.x = src.bounds.width();\n    resolution.y = src.bounds.height();\n\n  \}\n\n  void process(int2 pos) \{\n    \n    UV.x = STMap().x*resolution.x-.5f;\n    UV.y = STMap().y*resolution.y-.5f;\n\n    // Write the result to the output image\n    dst() = bilinear(src, UV.x, UV.y);\n\n  \}\n\};\n"
+   rebuild ""
+   specifiedFormat true
+   rebuild_finalise ""
+   name BlinkScript3
+   xpos -208
+   ypos 324
+  }
+  Copy {
+   inputs 2
+   from0 rgba.blue
+   to0 rgba.alpha
+   name Copy8
+   xpos -208
+   ypos 413
+  }
+clone $Cd3e9b800 {
+   xpos -208
+   ypos 494
+   selected false
+  }
+  Merge2 {
+   inputs 3+1
+   name Merge8
+   xpos -465
+   ypos 612
+  }
+set Nd4140800 [stack 0]
+  Output {
+   name Output1
+   xpos -465
+   ypos 695
+  }
+push $Nd4140800
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+  Viewer {
+   inputs 10
+   frame_range 1001-1100
+   fps 25
+   input_number 9
+   name Viewer1
+   xpos -365
+   ypos 195
+  }
+ end_group
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
+  name Shuffle10
+  label "\[value in1]"
+  xpos -465
+  ypos 1026
+ }
+ Grade {
+  channels rgba
+  multiply 1.1
+  gamma 2.3
+  name Grade4
+  xpos -465
+  ypos 1062
+ }
+ Dot {
+  name Dot29
+  xpos -431
+  ypos 1146
+ }
+set Nd41c6000 [stack 0]
+ Dot {
+  name Dot14
+  xpos -431
+  ypos 1184
+ }
+push $Nd41c6000
+push $Nd3c67000
+ Dot {
+  name Dot24
+  xpos -1000
+  ypos 757
+ }
+clone $Cd41c6c00 {
+  xpos -1034
+  ypos 793
+  selected false
+ }
+ Keyer {
+  operation "luminance key"
+  range {{parent.KWH_radius_map_remap_black} {parent.KWH_radius_map_remap_white} 1 1}
+  name Keyer1
+  xpos -1034
+  ypos 881
+ }
+ Multiply {
+  inputs 1+1
+  channels alpha
+  value {{1-KWH_radius_map_noise_gain}}
+  name Multiply_Noise
+  xpos -1034
+  ypos 1137
+ }
+ Multiply {
+  inputs 1+1
+  channels alpha
+  value {{1+KWH_radius_map_noise_gain}}
+  invert_mask true
+  name Multiply_Noise1
+  xpos -1034
+  ypos 1176
+ }
+ Multiply {
+  inputs 1+1
+  channels alpha
+  value {{parent.kwh_eyebrows}}
+  name Multiply_Brows
+  xpos -1034
+  ypos 1212
+ }
+ Multiply {
+  inputs 1+1
+  channels alpha
+  value 0
+  invert_mask true
+  name Multiply_FM
+  xpos -1034
+  ypos 1249
+ }
+ Multiply {
+  inputs 1+1
+  channels alpha
+  value {{lerp(0,1,1,0,parent.radius_map_preserve_tip)}}
+  name Multiply_Preserve_Tip
+  xpos -1034
+  ypos 1285
+ }
+ Dot {
+  name Dot31
+  xpos -1000
+  ypos 1321
+ }
+ Input {
+  inputs 0
+  name beauty
+  xpos 349
+  ypos -224
+ }
+set Nd41f8c00 [stack 0]
+ Dot {
+  name Dot55
+  xpos 383
+  ypos 259
+ }
+set Nd41f9000 [stack 0]
+ Dot {
+  name Dot21
+  xpos 383
+  ypos 757
+ }
+set Nd41f9400 [stack 0]
+ Dot {
+  name Dot23
+  xpos 84
+  ypos 757
+ }
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name Copy4
+  xpos 50
+  ypos 1312
+ }
+set Nd41f9c00 [stack 0]
  PostageStamp {
   name KWH_RM
   note_font "Verdana Bold"
@@ -3509,14 +3197,14 @@ push $N9214c800
   xpos 530
   ypos 3721
  }
-set N92752800 [stack 0]
+set Nd47e5c00 [stack 0]
  Dot {
   name Dot66
   xpos 530
   ypos 3768
  }
-push $N92752800
-push $N9114b800
+push $Nd47e5c00
+push $Nd41f8c00
  PostageStamp {
   name beauty1
   note_font "Verdana Bold"
@@ -3524,8 +3212,319 @@ push $N9114b800
   ypos 3718
   hide_input true
  }
-push $N9271f000
-push $N92318000
+push $Nd47e4400
+push $Nd3885000
+ PostageStamp {
+  name RAW3
+  note_font "Verdana Bold"
+  xpos 204
+  ypos 1557
+  hide_input true
+ }
+set Nd3bc8400 [stack 0]
+ Dot {
+  name Dot39
+  xpos 314
+  ypos 1560
+ }
+ Dot {
+  name Dot40
+  xpos 314
+  ypos 1756
+ }
+push $Nd3bc8400
+ Group {
+  name EdgeFromAlpha
+  note_font Verdana
+  xpos 204
+  ypos 1591
+  mapsize {0.15 0.15}
+  addUserKnob {20 "" l Settings}
+  addUserKnob {41 from0 l "control channel" T Copy2.from0}
+  addUserKnob {41 output T ChannelMerge4.output}
+  addUserKnob {41 blackpoint T Grade1.blackpoint}
+  addUserKnob {41 whitepoint T Grade1.whitepoint}
+  addUserKnob {26 "" l "edge size"}
+  addUserKnob {41 size l inside T ErodeInside.size}
+  addUserKnob {14 ErodeOutside_size l outside R 0 100}
+  ErodeOutside_size 1
+  addUserKnob {26 "" l "edge blur"}
+  addUserKnob {41 size_3 l inside T BlurInside.size}
+  addUserKnob {41 size_1 l outside T BlurOutside.size}
+ }
+  Input {
+   inputs 0
+   name Input1
+   xpos -448
+   ypos 2
+  }
+  AddChannels {
+   channels {rgba.red -rgba.green -rgba.blue rgba.alpha}
+   name AddChannels1
+   xpos -448
+   ypos 30
+  }
+set Nd3bc9400 [stack 0]
+push $Nd3bc9400
+  Copy {
+   inputs 2
+   from0 rgba.alpha
+   to0 rgba.red
+   name Copy2
+   xpos -193
+   ypos 30
+  }
+  Clamp {
+   channels {rgba.red -rgba.green -rgba.blue none}
+   name Clamp1
+   xpos -193
+   ypos 94
+  }
+  Grade {
+   channels {rgba.red -rgba.green -rgba.blue none}
+   black_clamp false
+   name Grade1
+   xpos -193
+   ypos 146
+  }
+set Nd3bfc000 [stack 0]
+  Erode {
+   channels {none none none rgba.red}
+   size 1
+   name ErodeInside
+   xpos -126
+   ypos 198
+  }
+  Blur {
+   channels {rgba.red -rgba.green -rgba.blue none}
+   name BlurInside
+   xpos -126
+   ypos 250
+  }
+push $Nd3bfc000
+  Erode {
+   channels {none none none rgba.red}
+   size {{-parent.ErodeOutside_size.w} {-parent.ErodeOutside_size.h}}
+   name ErodeOutside
+   xpos -264
+   ypos 199
+  }
+  Blur {
+   channels {rgba.red -rgba.green -rgba.blue none}
+   name BlurOutside
+   xpos -264
+   ypos 251
+  }
+  ChannelMerge {
+   inputs 2
+   A rgba.red
+   operation stencil
+   B rgba.red
+   name ChannelMerge4
+   xpos -191
+   ypos 308
+  }
+set Nd3bfd400 [stack 0]
+  Dot {
+   name Dot1
+   xpos -52
+   ypos 324
+  }
+  Dot {
+   name Dot2
+   xpos -52
+   ypos 465
+  }
+push $Nd3bc9400
+  Dot {
+   name Dot3
+   xpos -414
+   ypos 416
+  }
+push $Nd3bfd400
+  Copy {
+   inputs 2
+   from0 rgba.red
+   to0 rgba.red
+   name Copy1
+   xpos -191
+   ypos 407
+  }
+  Switch {
+   inputs 2
+   which {{"parent.output == 1" i}}
+   name Switch1
+   xpos -191
+   ypos 463
+  }
+  Output {
+   name Output1
+   xpos -191
+   ypos 526
+  }
+ end_group
+ Dot {
+  name Dot38
+  xpos 238
+  ypos 1670
+ }
+push $Nd3ba6000
+ PostageStamp {
+  name AUTOSIZE_MASK
+  note_font "Verdana Bold"
+  xpos 160
+  ypos 1406
+  hide_input true
+ }
+push $Nd41f9c00
+ Shuffle2 {
+  fromInput1 {{0} B}
+  in1 alpha
+  fromInput2 {{0} B}
+  mappings "4 rgba.alpha 0 0 rgba.alpha 0 3 rgba.alpha 0 0 rgba.red 0 0 rgba.alpha 0 0 rgba.green 0 1 rgba.alpha 0 0 rgba.blue 0 2"
+  name Shuffle4
+  label "\[value in1]"
+  xpos 50
+  ypos 1355
+ }
+ Multiply {
+  inputs 1+1
+  channels alpha
+  value 0
+  maskChannelMask rgba.red
+  invert_mask true
+  name Multiply_AS
+  xpos 50
+  ypos 1400
+  disable {{!filter_autosize}}
+ }
+ Dot {
+  name Dot13
+  xpos 84
+  ypos 1452
+ }
+set Nd421c800 [stack 0]
+ Dot {
+  name Dot32
+  xpos -156
+  ypos 1452
+ }
+ Dot {
+  name Dot3
+  xpos -156
+  ypos 1603
+ }
+set Nd421d000 [stack 0]
+ Dot {
+  name Dot37
+  xpos -156
+  ypos 1637
+ }
+push $Nd421d000
+push $Nd3bc8400
+push $Nd421c800
+ Dot {
+  name Dot34
+  xpos 84
+  ypos 1489
+ }
+set Nd421d800 [stack 0]
+push $Nd421d800
+ Blur {
+  channels rgba
+  size 10
+  name Blur1
+  xpos -70
+  ypos 1486
+ }
+ Unpremult {
+  name Unpremult1
+  xpos -70
+  ypos 1520
+ }
+ Shuffle2 {
+  fromInput1 {{0} B}
+  fromInput2 {{0} B}
+  mappings "4 rgba.red 0 0 rgba.red 0 0 rgba.green 0 1 rgba.green 0 1 rgba.blue 0 2 rgba.blue 0 2 rgba.red 0 0 rgba.alpha 0 3"
+  name Shuffle15
+  label "\[value in1]"
+  xpos -70
+  ypos 1551
+ }
+ Keymix {
+  inputs 3
+  name Keymix1
+  xpos 50
+  ypos 1551
+ }
+ Dissolve {
+  inputs 2
+  channels rgba
+  which {{lerp(0,1,1,0,parent.filter_edges)}}
+  name Dissolve2
+  xpos 50
+  ypos 1600
+ }
+ Switch {
+  inputs 2
+  which {{!parent.KWH_filter_edges}}
+  name Switch1
+  xpos 50
+  ypos 1634
+ }
+ Grade {
+  inputs 1+1
+  channels rgba
+  multiply 0
+  multiply_panelDropped true
+  mix {{lerp(0,1,1,0,parent.filter_edges)}}
+  name Grade2
+  xpos 50
+  ypos 1667
+ }
+ Dot {
+  name Dot6
+  xpos 84
+  ypos 1726
+ }
+push $Nd41f9400
+ Unpremult {
+  name Unpremult2
+  xpos 349
+  ypos 1699
+  disable {{parent.KWH_filter_edges}}
+ }
+ ILGC_Kuwahara {
+  inputs 2
+  name ILGC_Kuwahara1
+  note_font "Verdana Bold"
+  xpos 349
+  ypos 1723
+  Size {{parent.KWH_size}}
+ }
+ Copy {
+  inputs 2
+  from0 rgba.alpha
+  to0 rgba.alpha
+  name Copy1
+  xpos 349
+  ypos 1747
+  disable {{parent.KWH_filter_edges}}
+ }
+ Premult {
+  name Premult1
+  xpos 349
+  ypos 1783
+  disable {{parent.KWH_filter_edges}}
+ }
+ Dot {
+  name Dot15
+  label KWH_OUT
+  note_font "Verdana Bold"
+  note_font_size 21
+  xpos 383
+  ypos 2177
+ }
 add_layer {disto01 disto01.x disto01.y disto01.z disto01.u disto01.v}
  Shuffle2 {
   inputs 2
@@ -3536,25 +3535,25 @@ add_layer {disto01 disto01.x disto01.y disto01.z disto01.u disto01.v}
   name Shuffle26
   label "\[value in1]"
   xpos 349
-  ypos 3144
+  ypos 3272
  }
  Dot {
   name Dot18
   xpos 383
-  ypos 3201
+  ypos 3329
  }
-set N92753800 [stack 0]
+set Nd4810c00 [stack 0]
  Dot {
   name Dot19
   xpos 299
-  ypos 3201
+  ypos 3329
  }
  Dot {
   name Dot20
   xpos 299
-  ypos 3257
+  ypos 3385
  }
-push $N92753800
+push $Nd4810c00
  IDistort {
   channels rgba
   uv disto01
@@ -3562,7 +3561,7 @@ push $N92753800
   invert_mask true
   name IDistort1
   xpos 349
-  ypos 3224
+  ypos 3352
  }
  Shuffle2 {
   inputs 2
@@ -3574,7 +3573,7 @@ push $N92753800
   name Shuffle6
   label "\[value in1]"
   xpos 349
-  ypos 3248
+  ypos 3376
  }
  IDistort {
   channels rgba
@@ -3583,7 +3582,7 @@ push $N92753800
   invert_mask true
   name IDistort2
   xpos 349
-  ypos 3288
+  ypos 3416
  }
  Dissolve {
   inputs 2+1
@@ -3639,13 +3638,13 @@ push $N92753800
   addUserKnob {7 far_force l far% R 0 100}
   far_force {{far_percentage}}
  }
-push $N9114bc00
+push $Nd41f9000
  Dot {
   name Dot41
   xpos 562
   ypos 259
  }
-set N927a6400 [stack 0]
+set Nd482f800 [stack 0]
  Dot {
   name Dot33
   xpos 697
@@ -3658,8 +3657,8 @@ set N927a6400 [stack 0]
   xpos 663
   ypos 403
  }
-push $N927a6400
-clone $C90d26800 {
+push $Nd482f800
+clone $Cd3c93c00 {
   xpos 528
   ypos 402
   selected false

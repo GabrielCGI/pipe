@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<shelfDocument>
+  <!-- This file contains definitions of shelves, toolbars, and tools.
+ It should not be hand-edited when it is being used by the application.
+ Note, that two definitions of the same element are not allowed in
+ a single file. -->
+
+  <toolshelf name="illogic_beta" label="Illogic Beta">
+    <memberTool name="usd_updater_ill_beta"/>
+    <memberTool name="check_import_nodes"/>
+  </toolshelf>
+
+  <tool name="usd_updater_ill_beta" label="USD Updater" icon="hicon:/SVGIcons.index?NETVIEW_lop_info.svg">
+    <script scriptType="python"><![CDATA[import usd_updater
+
+usd_updater.start_usd_updater(
+    'houdini',
+    []
+)]]></script>
+  </tool>
+
+  <tool name="check_import_nodes" label="Check USD Update" icon="hicon:/SVGIcons.index?NETVIEW_reload_needsupdate.svg">
+    <script scriptType="python"><![CDATA[import usd_updater
+
+usd_updater.check_houdini_imports_updates()]]></script>
+  </tool>
+</shelfDocument>

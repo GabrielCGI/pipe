@@ -12,11 +12,13 @@ Write {
  first 1001
  last 1100
  checkHashOnRead false
+ in_colorspace scene_linear
+ out_colorspace scene_linear
  ocioColorspace scene_linear
  display "sRGB - Display"
  view "ACES 1.0 - SDR Video"
  beforeRender "try: pcore.appPlugin.getOutputPath(nuke.thisNode(), render=True)\nexcept: pass"
- afterRender "exec(open(r\"R:\\pipeline\\pipe\\nuke\\script\\nukeShotLoader\\src\\after_compo_render_diagnostic.py\").read())"
+ afterRender "try: pcore.appPlugin.finishedRendering(nuke.thisNode())\nexcept: pass"
  name WriteCompo
  knobChanged "\nn=nuke.thisNode()\nk=nuke.thisKnob()\n\nif k.name() == \"name\" and n.name() != 'WriteCompo':\n    k.setValue('WriteCompo')\nif k.name() == \"identifier\" and k.value() != \"Compo\":\n    k.setValue('Compo')\n"
  selected true
@@ -25,25 +27,30 @@ Write {
  addUserKnob {20 tab_prism l Prism}
  addUserKnob {1 identifier}
  identifier Compo
- addUserKnob {1 comment l "comment (optional)"}
- addUserKnob {4 location M {global}}
- addUserKnob {26 ""}
- addUserKnob {1 fileName l filepath}
+ addUserKnob {1 comment l "comment (optional)" +INVISIBLE}
+ addUserKnob {4 location +INVISIBLE M {global}}
+ addUserKnob {26 "" +INVISIBLE}
+ addUserKnob {1 fileName l filepath +INVISIBLE}
  fileName I:/yuka_2604/03_Production/Shots/SQ0010/SH0070/Renders/2dRender/Compo/v036/SQ0010-SH0070_Compo_v036.####.exr
- addUserKnob {22 refresh l Refresh T pcore.appPlugin.getOutputPath(nuke.thisNode()) +STARTLINE}
+ addUserKnob {22 refresh l Refresh +INVISIBLE T pcore.appPlugin.getOutputPath(nuke.thisNode()) +STARTLINE}
  addUserKnob {26 ""}
- addUserKnob {22 startRender l Render -STARTLINE T pcore.appPlugin.startRender(nuke.thisNode())}
- addUserKnob {22 startRenderPrevVersion l "Render as previous version..." -STARTLINE T pcore.appPlugin.renderAsVersion(nuke.thisNode())}
+ addUserKnob {22 startRender l Render -STARTLINE T "from src.ui import write_render\nwrite_render.render_write(nuke.thisNode())"}
+ addUserKnob {22 startRenderPrevVersion l "Render as previous version..." -STARTLINE T "from src.ui import write_render\nwrite_render.render_previous_version(nuke.thisNode())"}
  addUserKnob {6 submitJob l "Submit Job" -STARTLINE}
  submitJob true
- addUserKnob {26 prevFileName l "previous filepath" T -}
- addUserKnob {22 openDir l "Open In..." T pcore.appPlugin.openInClicked(nuke.thisNode()) +STARTLINE}
- addUserKnob {22 createRead l "Create Read" -STARTLINE T pcore.appPlugin.createRead(nuke.thisNode())}
- addUserKnob {26 media_conversion_divider l "" +STARTLINE}
- addUserKnob {6 media_conversion_use l "media conversion" +STARTLINE}
- addUserKnob {4 media_conversion_preset l preset M {jpg "mov (prores)" "mp4 (burn-in)" "mp4 (slate + burn-in)" mp4 png slate "Illogic - mp4 to Shotgrid - ACEScg to Rec.709" "Illogic - mp4 with burnin - ACEScg to sRGB" "Illogic - mp4 with burnin - ACEScg to REC709.json" "Illogic - proRes with burnin - ACEScg to REC709" "Illogic - mp4 with burnin - Crop to 1.77 - ACEScg to REC709" mp4_discord "Illogic - mp4 with burnin" "illogic - mp4 data burnin - anim"}}
- addUserKnob {22 media_conversion_refresh l refresh -STARTLINE T "pcore.getPlugin(\"MediaExtension\").nuke_onMediaConversionRefresh()"}
- addUserKnob {22 media_conversion_edit l edit... -STARTLINE T "pcore.getPlugin(\"MediaExtension\").onEditMediaConversionClicked()"}
- addUserKnob {26 project_management_divider l "" +STARTLINE}
- addUserKnob {6 project_management_publish l "publish to Shotgrid" +STARTLINE}
+ addUserKnob {26 prevFileName l "previous filepath" +INVISIBLE T -}
+ addUserKnob {22 openDir l "Open In..." +INVISIBLE T pcore.appPlugin.openInClicked(nuke.thisNode()) +STARTLINE}
+ addUserKnob {22 createRead l "Create Read" -STARTLINE +INVISIBLE T pcore.appPlugin.createRead(nuke.thisNode())}
+ addUserKnob {26 media_conversion_divider l "" +STARTLINE +INVISIBLE}
+ addUserKnob {6 media_conversion_use l "media conversion" +INVISIBLE +STARTLINE}
+ addUserKnob {4 media_conversion_preset l preset +INVISIBLE M {jpg "mov (prores)" "mp4 (burn-in)" "mp4 (slate + burn-in)" mp4 png slate "Illogic - mp4 to Shotgrid - ACEScg to Rec.709" "Illogic - mp4 with burnin - ACEScg to sRGB" "Illogic - mp4 with burnin - ACEScg to REC709.json" "Illogic - proRes with burnin - ACEScg to REC709" "Illogic - mp4 with burnin - Crop to 1.77 - ACEScg to REC709" mp4_discord "Illogic - mp4 with burnin" "illogic - mp4 data burnin - anim"}}
+ addUserKnob {22 media_conversion_refresh l refresh -STARTLINE +INVISIBLE T "pcore.getPlugin(\"MediaExtension\").nuke_onMediaConversionRefresh()"}
+ addUserKnob {22 media_conversion_edit l edit... -STARTLINE +INVISIBLE T "pcore.getPlugin(\"MediaExtension\").onEditMediaConversionClicked()"}
+ addUserKnob {26 project_management_divider l "" +STARTLINE +INVISIBLE}
+ addUserKnob {6 project_management_publish l "publish to Shotgrid" +INVISIBLE +STARTLINE}
+ addUserKnob {26 render_info_divider l "" +STARTLINE}
+ addUserKnob {3 render_version l version}
+ render_version {{"\[scan \[lindex \[concat \[regexp -inline \{\[0-9]+\$\} \[file tail \[file dirname \[value fileName]]]] 0] 0] %d]"}}
+ addUserKnob {52 render_output l filepath T "__import__('src.ui.knob_widgets', fromlist=\['OutputPath']).OutputPath(nuke.thisNode())" +STARTLINE}
+ addUserKnob {22 open_in_explorer l "Open In Explorer" T "from src.ui import write_render\nwrite_render.open_in_explorer(nuke.thisNode())" +STARTLINE}
 }

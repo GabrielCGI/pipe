@@ -29,3 +29,6 @@ windows/temperature_alert/.venv/*
 /nuke/plugins
 /deadline/exr_analyzer
 /deadline/blatted_retasker
+/testNewPipe
+/prism/old_plugin_prism
+/nuke/_releases

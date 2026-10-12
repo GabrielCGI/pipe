@@ -367,7 +367,7 @@ global proc shelf_IllogicAnim () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "\n# -----------------------------------\n# Studio Library\n# www.studiolibrary.com\n# -----------------------------------\n\nimport os\nimport sys\n    \nif not os.path.exists(r'R:\\pipeline\\networkInstall\\studiolibrary-2.16.0\\src'):\n    raise IOError(r'The source path \"R:\\pipeline\\networkInstall\\studiolibrary-2.16.0\\src\" does not exist!')\n    \nif r'R:\\pipeline\\networkInstall\\studiolibrary-2.16.0\\src' not in sys.path:\n    sys.path.insert(0, r'R:\\pipeline\\networkInstall\\studiolibrary-2.16.0\\src')\n    \nimport studiolibrary\nstudiolibrary.main()\n" 
+        -command "\n# -----------------------------------\n# Studio Library\n# www.studiolibrary.com\n# -----------------------------------\n\nimport os\nimport sys\n    \nif not os.path.exists(r'R:\\pipeline\\networkInstall\\studiolibrary-2.21.7\\src'):\n    raise IOError(r'The source path \"R:\\pipeline\\networkInstall\\studiolibrary-2.21.7\\src\" does not exist!')\n    \nif r'R:\\pipeline\\networkInstall\\studiolibrary-2.21.7\\src' not in sys.path:\n    sys.path.insert(0, r'R:\\pipeline\\networkInstall\\studiolibrary-2.21.7\\src')\n    \nimport studiolibrary\nstudiolibrary.main()\n" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1
@@ -537,7 +537,7 @@ global proc shelf_IllogicAnim () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "import sys\nmyPath = r\"R:\\pipeline\\networkInstall\\animBot\\animBot_2_5_1_Ongoing\"\nif myPath not in sys.path: sys.path.insert(0, myPath)\nimport animBot\nanimBot.toggle()" 
+        -command "import sys\nmyPath = r\"R:\\pipeline\\networkInstall\\animBot\\animBot_2_9_2\"\nif myPath not in sys.path: sys.path.insert(0, myPath)\nimport animBot\nanimBot.toggle()" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

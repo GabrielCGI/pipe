@@ -63,25 +63,25 @@ Gizmo {
   xpos -732
   ypos -1481
  }
-set Ndb51c800 [stack 0]
+set Nd4083800 [stack 0]
  ViewMetaData {
   name ViewMetaData1
   xpos -732
   ypos -1537
  }
-push $Ndb51c800
+push $Nd4083800
  Dot {
   name Dot8
   xpos -698
   ypos -1388
  }
-set Ndbefec00 [stack 0]
+set N89c06c00 [stack 0]
  Dot {
   name Dot30
   xpos -283
   ypos -1388
  }
-set Ndbeff000 [stack 0]
+set N89c06800 [stack 0]
  OCIODisplay {
   colorspace scene_linear
   display "sRGB - Display"
@@ -96,7 +96,7 @@ set Ndbeff000 [stack 0]
   xpos -283
   ypos 1051
  }
-push $Ndbeff000
+push $N89c06800
  Dot {
   name Dot9
   xpos 1200
@@ -164,15 +164,15 @@ push $Ndbeff000
    xpos 295
    ypos 462
   }
-set Nab43e000 [stack 0]
+set N898b0c00 [stack 0]
   Dot {
    name Dot1
    note_font_size 41
    xpos -160
    ypos 462
   }
-set Nab43e400 [stack 0]
-push $Nab43e000
+set N898b0000 [stack 0]
+push $N898b0c00
   Crop {
    box {{curve} {curve} {input.width} {input.height}}
    crop {{parent.blackOutside}}
@@ -182,7 +182,7 @@ push $Nab43e000
    addUserKnob {20 User}
    addUserKnob {22 cropToBbox l "Crop to Bounding Box" -STARTLINE T codeBBox()}
   }
-set Nab43e800 [stack 0]
+set N898b0400 [stack 0]
   Remove {
    operation keep
    channels none
@@ -190,7 +190,7 @@ set Nab43e800 [stack 0]
    xpos 120
    ypos 504
   }
-set Nab43ec00 [stack 0]
+set N898b0800 [stack 0]
   Transform {
    scale {{parent.overscanPercent} {parent.overscanPercent}}
    center {{input.bbox.r/2} {input.bbox.t/2}}
@@ -199,7 +199,7 @@ set Nab43ec00 [stack 0]
    xpos 120
    ypos 555
   }
-push $Nab43ec00
+push $N898b0800
   AdjBBox {
    numpixels {{parent.overscan} {parent.overscan}}
    name AdjBBox1
@@ -225,7 +225,7 @@ push $Nab43ec00
    ypos 647
    disable {{!parent.Crop6.intersect}}
   }
-push $Nab43e400
+push $N898b0000
   CopyBBox {
    inputs 2
    name CopyBBox1
@@ -244,7 +244,7 @@ push $Nab43e400
    xpos -160
    ypos 769
   }
-push $Nab43e800
+push $N898b0400
   Switch {
    inputs 2
    which {{"overscanType == 0 ? overscan.w != 0 || overscan.h != 0 : overscanPercent.w != 1 || overscanPercent.h != 1 ? 1 : 0"}}
@@ -253,13 +253,13 @@ push $Nab43e800
    xpos 261
    ypos 759
   }
-set Nffd92500 [stack 0]
+set N19554800 [stack 0]
   Output {
    name Output1
    xpos 261
    ypos 921
   }
-push $Nffd92500
+push $N19554800
   NoOp {
    name OutputBBox1
    xpos 378
@@ -290,19 +290,19 @@ add_layer {CryptoPrimvar_part02 CryptoPrimvar_part02.red CryptoPrimvar_part02.gr
   xpos 1200
   ypos -908
  }
-set N6b1ff400 [stack 0]
+set N8749f800 [stack 0]
  Dot {
   name Dot6
   xpos 1022
   ypos -908
  }
-set N6b1ff800 [stack 0]
+set N8749fc00 [stack 0]
  Dot {
   name Dot7
   xpos 879
   ypos -908
  }
-set N6b1ffc00 [stack 0]
+set N89b44c00 [stack 0]
 add_layer {CryptoPrimitives CryptoPrimitives.red CryptoPrimitives.green CryptoPrimitives.blue}
 add_layer {CryptoPrimitives00 CryptoPrimitives00.red CryptoPrimitives00.green CryptoPrimitives00.blue CryptoPrimitives00.alpha}
 add_layer {CryptoPrimitives01 CryptoPrimitives01.red CryptoPrimitives01.green CryptoPrimitives01.blue CryptoPrimitives01.alpha}
@@ -332,7 +332,7 @@ add_layer {CryptoPrimitives02 CryptoPrimitives02.red CryptoPrimitives02.green Cr
   xpos 879
   ypos -761
  }
-push $N6b1ff800
+push $N8749fc00
 add_layer {CryptoMaterials00 CryptoMaterials00.red CryptoMaterials00.green CryptoMaterials00.blue CryptoMaterials00.alpha}
 add_layer {CryptoMaterials01 CryptoMaterials01.red CryptoMaterials01.green CryptoMaterials01.blue CryptoMaterials01.alpha}
 add_layer {CryptoMaterials02 CryptoMaterials02.red CryptoMaterials02.green CryptoMaterials02.blue CryptoMaterials02.alpha}
@@ -373,7 +373,7 @@ add_layer {CryptoMaterials02 CryptoMaterials02.red CryptoMaterials02.green Crypt
   xpos 1022
   ypos -709
  }
-set Ne9e70000 [stack 0]
+set N89df9400 [stack 0]
  Dot {
   name Dot16
   xpos 912
@@ -384,7 +384,7 @@ set Ne9e70000 [stack 0]
   xpos 913
   ypos -603
  }
-push $N6b1ffc00
+push $N89b44c00
  Dot {
   name Dot11
   xpos 738
@@ -415,7 +415,7 @@ push $N6b1ffc00
   xpos 738
   ypos -657
  }
-push $Ne9e70000
+push $N89df9400
  Merge2 {
   inputs 2
   metainput All
@@ -440,7 +440,7 @@ push $Ne9e70000
   xpos 1022
   ypos -559
  }
-push $N6b1ff400
+push $N8749f800
  Reformat {
   type "to box"
   box_width {{parent.delivery_format.w}}
@@ -466,7 +466,7 @@ push $N6b1ff400
   xpos 1200
   ypos -526
  }
-set N88dfb400 [stack 0]
+set N87497000 [stack 0]
  Dot {
   name Dot33
   xpos 1018
@@ -507,7 +507,7 @@ add_layer {depthFiltered depthFiltered.depthFiltered}
   xpos 1018
   ypos -303
  }
-push $N88dfb400
+push $N87497000
 add_layer {depth_extra depth_extra.z depth_extra.depth}
  Premult {
   channels {-depth_extra.z depth_extra.depth}
@@ -581,13 +581,13 @@ add_layer {UV UV.u UV.v UV.red UV.green UV.blue UV.X UV.Y UV.Z}
   xpos 1200
   ypos 133
  }
-set N66abd000 [stack 0]
+set N77d98c00 [stack 0]
  Dot {
   name Dot22
   xpos 1200
   ypos 380
  }
-set N66abd400 [stack 0]
+set N77d99000 [stack 0]
  Dot {
   name Dot24
   xpos 1481
@@ -619,13 +619,13 @@ add_layer {albedotransmitteddiffuse albedotransmitteddiffuse.red albedotransmitt
   xpos 1481
   ypos 725
  }
-push $N66abd000
+push $N77d98c00
  Dot {
   name Dot18
   xpos 950
   ypos 133
  }
-set Ncca56800 [stack 0]
+set N77dbc400 [stack 0]
  Dot {
   name Dot25
   xpos 25
@@ -636,7 +636,7 @@ set Ncca56800 [stack 0]
   xpos 25
   ypos 198
  }
-set Ncca57000 [stack 0]
+set N77dbcc00 [stack 0]
 add_layer {mask_mouth mask_mouth.mask_mouth}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -653,7 +653,7 @@ add_layer {mask_mouth mask_mouth.mask_mouth}
   xpos 25
   ypos 348
  }
-push $Ncca57000
+push $N77dbcc00
  Dot {
   name Dot27
   xpos 228
@@ -690,31 +690,31 @@ push $Ncca57000
   xpos 228
   ypos 553
  }
-push $Ncca56800
+push $N77dbc400
  Dot {
   name Dot191
   xpos 950
   ypos 198
  }
-set Nc44d3400 [stack 0]
+set N77dd7000 [stack 0]
  Dot {
   name Dot20
   xpos 818
   ypos 198
  }
-set Nc44d3800 [stack 0]
+set N77dd7400 [stack 0]
  Dot {
   name Dot35
   xpos 699
   ypos 198
  }
-set Nc44d3c00 [stack 0]
+set N77dd7800 [stack 0]
  Dot {
   name Dot36
   xpos 570
   ypos 198
  }
-set Nc453ec00 [stack 0]
+set N77dd7c00 [stack 0]
  Dot {
   name Dot39
   xpos 477
@@ -730,7 +730,7 @@ set Nc453ec00 [stack 0]
   xpos 443
   ypos 333
  }
-push $Nc453ec00
+push $N77dd7c00
  Shuffle2 {
   fromInput1 {{0} B}
   in1 basecolor
@@ -742,7 +742,7 @@ push $Nc453ec00
   xpos 536
   ypos 234
  }
-set Nc453f000 [stack 0]
+set N77dfcc00 [stack 0]
  Dot {
   name Dot40
   xpos 367
@@ -761,7 +761,7 @@ set Nc453f000 [stack 0]
   xpos 367
   ypos 425
  }
-push $Nc44d3c00
+push $N77dd7800
  Cryptomatte {
   cryptoLayerChoice {{2} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
   pickerAdd {0.1366326213 0.1861219406 0.2444877625 0 1050 730 1051 731}
@@ -776,7 +776,7 @@ push $Nc44d3c00
   xpos 699
   ypos 305
  }
-push $Nc453f000
+push $N77dfcc00
  Multiply {
   inputs 1+1
   channels rgba
@@ -791,7 +791,7 @@ push $Nc453f000
   xpos 570
   ypos 390
  }
-push $Nc44d3400
+push $N77dd7000
  Dot {
   name Dot21
   xpos 1080
@@ -800,7 +800,8 @@ push $Nc44d3400
  Cryptomatte {
   cryptoLayerChoice {{1} CryptoPrimvar_part CryptoPrimitives CryptoMaterials}
   pickerAdd {1.056412816 1.152605057 0.1104202271 1 1420 608 1421 609}
-  matteList "*eye*\n*teeth*\n*tongue*"
+  pickerRemove {1.156741858 1.072574973 0.2285354882 0.9529411197 1437 590 1438 591}
+  matteList "*eye*\n*teeth*\n*tongue*\n-*eyebrows*"
   unpremultiply true
   lastSelectedCryptoLayerName CryptoPrimitives
   name Cryptomatte11
@@ -812,7 +813,7 @@ push $Nc44d3400
   xpos 1080
   ypos 323
  }
-push $Nc44d3400
+push $N77dd7000
  Shuffle2 {
   fromInput1 {{0} B}
   in1 albedotransmitteddiffuse
@@ -862,7 +863,7 @@ push $Nc44d3400
   xpos 916
   ypos 314
  }
-push $Nc44d3800
+push $N77dd7400
 add_layer {customAlbedo customAlbedo.red customAlbedo.green customAlbedo.blue}
  Shuffle2 {
   fromInput1 {{0} B}
@@ -905,7 +906,7 @@ add_layer {customAlbedo customAlbedo.red customAlbedo.green customAlbedo.blue}
   xpos 950
   ypos 452
  }
-push $N66abd400
+push $N77d99000
  Shuffle2 {
   inputs 2
   fromInput1 {{1} B A}
@@ -953,12 +954,13 @@ add_layer {rest rest.red rest.green rest.blue}
   xpos 1166
   ypos 722
  }
+set N8747ea00 [stack 0]
  Dot {
   name Dot4
   xpos 1200
   ypos 983
  }
-push $Ndbefec00
+push $N89c06c00
  Expression {
   temp_name0 security
   temp_expr0 parent.alpha_security
@@ -1021,15 +1023,15 @@ push $Ndbefec00
    xpos 295
    ypos 462
   }
-set Nbc1be800 [stack 0]
+set N77ec0400 [stack 0]
   Dot {
    name Dot1
    note_font_size 41
    xpos -160
    ypos 462
   }
-set Nbc1bec00 [stack 0]
-push $Nbc1be800
+set N77ec0800 [stack 0]
+push $N77ec0400
   Crop {
    box {{curve} {curve} {input.width} {input.height}}
    crop {{parent.blackOutside}}
@@ -1039,7 +1041,7 @@ push $Nbc1be800
    addUserKnob {20 User}
    addUserKnob {22 cropToBbox l "Crop to Bounding Box" -STARTLINE T codeBBox()}
   }
-set Nbc1bf000 [stack 0]
+set N77ec0c00 [stack 0]
   Remove {
    operation keep
    channels none
@@ -1047,7 +1049,7 @@ set Nbc1bf000 [stack 0]
    xpos 120
    ypos 504
   }
-set Nbc1bf400 [stack 0]
+set N77ec1000 [stack 0]
   Transform {
    scale {{parent.overscanPercent} {parent.overscanPercent}}
    center {{input.bbox.r/2} {input.bbox.t/2}}
@@ -1056,7 +1058,7 @@ set Nbc1bf400 [stack 0]
    xpos 120
    ypos 555
   }
-push $Nbc1bf400
+push $N77ec1000
   AdjBBox {
    numpixels {{parent.overscan} {parent.overscan}}
    name AdjBBox1
@@ -1082,7 +1084,7 @@ push $Nbc1bf400
    ypos 647
    disable {{!parent.Crop6.intersect}}
   }
-push $Nbc1bec00
+push $N77ec0800
   CopyBBox {
    inputs 2
    name CopyBBox1
@@ -1101,7 +1103,7 @@ push $Nbc1bec00
    xpos -160
    ypos 769
   }
-push $Nbc1bf000
+push $N77ec0c00
   Switch {
    inputs 2
    which {{"overscanType == 0 ? overscan.w != 0 || overscan.h != 0 : overscanPercent.w != 1 || overscanPercent.h != 1 ? 1 : 0"}}
@@ -1110,13 +1112,13 @@ push $Nbc1bf000
    xpos 261
    ypos 759
   }
-set Nc7f6e300 [stack 0]
+set N8748d200 [stack 0]
   Output {
    name Output1
    xpos 261
    ypos 921
   }
-push $Nc7f6e300
+push $N8748d200
   NoOp {
    name OutputBBox1
    xpos 378
@@ -1133,13 +1135,13 @@ push $Nc7f6e300
   xpos -698
   ypos -910
  }
-set Nbfdcd800 [stack 0]
+set N77ef1400 [stack 0]
  Dot {
   name Dot1
   xpos -876
   ypos -910
  }
-set Nbfdcdc00 [stack 0]
+set N77ef1800 [stack 0]
  Dot {
   name Dot2
   xpos -1019
@@ -1165,7 +1167,7 @@ set Nbfdcdc00 [stack 0]
   xpos -1053
   ypos -837
  }
-push $Nbfdcdc00
+push $N77ef1800
  Remove {
   operation keep
   channels CryptoMaterials00
@@ -1198,7 +1200,7 @@ push $Nbfdcdc00
   xpos -985
   ypos -772
  }
-push $Nbfdcd800
+push $N77ef1400
  Reformat {
   type "to box"
   box_width {{parent.delivery_format.w}}
@@ -1255,7 +1257,7 @@ push $Nbfdcd800
   xpos -732
   ypos 1128
  }
-push $Ndb51c800
+push $Nd4083800
  NoOp {
   name CTRL_CLEANUP
   tile_color 0xff0000ff
@@ -1276,5 +1278,29 @@ push $Ndb51c800
   characters {{"\[python 1\\ if\\ nuke.thisNode().input(0)\\ and\\ \\\"char\\\"\\ in\\ (nuke.thisNode().input(0).metadata(\\\"input/filename\\\")\\ or\\ \\\"\\\").lower()\\ else\\ 0]"}}
   addUserKnob {6 zfiltered_or_extra l "ZFiltered or Extra ?" +STARTLINE}
   zfiltered_or_extra {{"\[python 1\\ if\\ nuke.thisNode().input(0)\\ and\\ any(c.startswith(\\\"depthFiltered\\\")\\ for\\ c\\ in\\ nuke.thisNode().input(0).channels())\\ else\\ 0]"}}
+ }
+push $N8747ea00
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+ Viewer {
+  inputs 10
+  frame_range 1001-1076
+  fps 25
+  input_number 9
+  colour_sample_bbox {0.2761989236 0.1056838334 0.2770870328 0.1065719351}
+  samplepoints {{0.2761989236 0.1056838334}
+    }
+  viewerProcess "ACES 1.0 - SDR Video (sRGB - Display)"
+  monitorOutNDISenderName "Nuke - SQ0090-SH0330_Compo_v007 - Viewer1"
+  name Viewer1
+  xpos 1026
+  ypos 422
  }
 end_group

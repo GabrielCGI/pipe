@@ -117,6 +117,24 @@ def _span(t0):
     return "%.1fs [%.1fs -> %.1fs]" % (now - t0, t0 - _START, now - _START)
 
 
+def prism_integration_versions(integration=None):
+    """{(3, 11), (3, 10), ...} : versions de python pour lesquelles Prism fournit une
+    integration Houdini (dossiers `python<X.Y>libs`). C'est ce qui decide si un Houdini
+    donne est utilisable : Houdini 22.0.368 tourne en python 3.13, que Prism 2.0.18 ne
+    fournit pas -> PrismInit ne peut pas se charger."""
+    root = integration or DEFAULT_PRISM_INTEGRATION
+    out = set()
+    try:
+        names = os.listdir(root)
+    except Exception:
+        return out
+    for d in names:
+        m = re.match(r"^python(\d+)\.(\d+)libs$", d)
+        if m:
+            out.add((int(m.group(1)), int(m.group(2))))
+    return out
+
+
 # --------------------------------------------------------------------------- #
 #  Bootstrap Prism en headless
 # --------------------------------------------------------------------------- #
@@ -128,27 +146,73 @@ def bootstrap_prism():
     except ImportError:
         # hython nu : on ajoute nous-memes le dossier d'integration correspondant
         # a la version de python de hython (Houdini 21 -> python3.11libs, etc.)
-        pyver = "python%d.%dlibs" % (sys.version_info.major, sys.version_info.minor)
-        cand = os.path.join(DEFAULT_PRISM_INTEGRATION, pyver)
-        if not os.path.isdir(cand):
-            # fallback : prendre le dossier pythonX.Ylibs le plus proche dispo
-            libs = [
-                d
-                for d in os.listdir(DEFAULT_PRISM_INTEGRATION)
-                if d.startswith("python") and d.endswith("libs")
-            ]
-            libs.sort()
-            if libs:
-                cand = os.path.join(DEFAULT_PRISM_INTEGRATION, libs[-1])
+        want = sys.version_info[:2]
+        avail = prism_integration_versions()
+        cand = os.path.join(DEFAULT_PRISM_INTEGRATION, "python%d.%dlibs" % want)
+        if want not in avail:
+            # Prism ne fournit rien pour ce python -> le plus proche EN DESSOUS.
+            # /!\ tri NUMERIQUE : un tri lexical rend 'python3.9libs' > 'python3.11libs'
+            # et on chargeait alors l'integration 3.9 (PySide2) -> ModuleNotFoundError.
+            below = [v for v in avail if v <= want]
+            pick = max(below) if below else (max(avail) if avail else None)
+            if pick is None:
+                raise RuntimeError(
+                    "Aucune integration Houdini dans %s" % DEFAULT_PRISM_INTEGRATION
+                )
+            log(
+                "ATTENTION: Prism n'a pas d'integration pour python %d.%d "
+                "(dispo: %s) -> essai avec python%d.%dlibs. Utilise un Houdini dont le "
+                "python est supporte (ex 21.0.729 = python 3.11)."
+                % (
+                    want[0],
+                    want[1],
+                    ", ".join("%d.%d" % v for v in sorted(avail)),
+                    pick[0],
+                    pick[1],
+                )
+            )
+            cand = os.path.join(DEFAULT_PRISM_INTEGRATION, "python%d.%dlibs" % pick)
         if cand not in sys.path:
             sys.path.append(cand)
-        import PrismInit
+        try:
+            import PrismInit
+        except Exception as e:
+            raise RuntimeError(
+                "Integration Prism illisible depuis %s : %s. "
+                "hython tourne en python %d.%d ; Prism 2.0.18 fournit %s. "
+                "Lance l'outil avec un Houdini dont le python est supporte "
+                "(21.0.729 = python 3.11)."
+                % (
+                    cand,
+                    e,
+                    want[0],
+                    want[1],
+                    ", ".join("%d.%d" % v for v in sorted(avail)) or "rien",
+                )
+            )
 
     # 2) reutiliser le pcore global si pythonrc l'a deja cree ; sinon le creer
     pcore = getattr(PrismInit, "pcore", None)
     if pcore is None:
         os.environ.setdefault("PRISM_ROOT", DEFAULT_PRISM_APP)
-        pcore = PrismInit.prismInit()
+        try:
+            pcore = PrismInit.prismInit()
+        except Exception as e:
+            # message actionnable plutot qu'un traceback nu : la cause la plus courante
+            # est un Houdini dont le python n'a pas d'integration Prism.
+            raise RuntimeError(
+                "PrismInit a echoue (%s: %s). hython tourne en python %d.%d ; "
+                "Prism 2.0.18 fournit %s. Lance l'outil avec un Houdini supporte "
+                "(21.0.729 = python 3.11)."
+                % (
+                    type(e).__name__,
+                    e,
+                    sys.version_info[0],
+                    sys.version_info[1],
+                    ", ".join("%d.%d" % v for v in sorted(prism_integration_versions()))
+                    or "rien",
+                )
+            )
 
     if pcore is None:
         raise RuntimeError(
@@ -265,6 +329,36 @@ def inspect_node(hou, node, label):
 # --------------------------------------------------------------------------- #
 #  Detection par layer + traitement d'un item (cache apparie a son import)
 # --------------------------------------------------------------------------- #
+def tracked_layers(cfg):
+    """Liste des layers suivis (toujours au moins un). Accepte l'ancienne forme
+    `tracked_layer` (str) : les sidecars et les appels existants restent valides."""
+    lst = [x for x in (cfg.get("tracked_layers") or []) if x]
+    if not lst:
+        one = cfg.get("tracked_layer")
+        lst = [one] if one else []
+    return lst or ["_layer_anm_master"]
+
+
+def apply_tracked(st, tracked, mode):
+    """Pose le verdict du shot (consumed/latest/stale/ignored/deciding) a partir de
+    st['layers'], via preview.combine_layers -- MEME regle que l'UI.
+
+    Un layer suivi que ce shot ne consomme pas est ignore ; si AUCUN ne l'est, on ne
+    conclut pas (stale=None) et on dit pourquoi."""
+    c = preview.combine_layers(st["layers"], tracked, mode)
+    st["consumed"], st["latest"], st["stale"] = c["consumed"], c["latest"], c["stale"]
+    st["ignored"], st["deciding"] = c["ignored"], c["deciding"]
+    if not c["present"] and not st["err"]:
+        have = ", ".join(sorted(st["layers"])) or "aucun"
+        st["err"] = (
+            "layer %s non consomme par cet import (contient: %s)" % (tracked[0], have)
+            if len(tracked) == 1
+            else "aucun des layers suivis (%s) n'est consomme par cet import "
+            "(contient: %s)" % (", ".join(tracked), have)
+        )
+    return c
+
+
 def compute_state(pcore, imp, cfg, shot=None):
     """Detection par LAYER, AGNOSTIQUE a ce que l'import pointe (cf stack_layers) :
       - import du CONTAINER du shot -> compare le TOKEN du layer tracke (defaut anim)
@@ -277,7 +371,9 @@ def compute_state(pcore, imp, cfg, shot=None):
     Retourne un dict: cur, newp, consumed/latest (int version du layer),
     stack_consumed/stack_latest (str 'vNNN' du container USD), stale (bool|None), err."""
     path_parm = cfg.get("import_path_parm", "filepath")
-    tracked = cfg.get("tracked_layer", "_layer_anm_master")
+    tracked_list = tracked_layers(cfg)
+    tracked = tracked_list[0]  # nom unique, pour les messages et les replis
+    mode = cfg.get("tracked_mode") or "or"
     st = {
         "cur": None,
         "newp": None,
@@ -287,6 +383,8 @@ def compute_state(pcore, imp, cfg, shot=None):
         "stack_latest": None,
         "stale": None,
         "layers": {},
+        "ignored": [],  # layers suivis que CE shot ne consomme pas -> ignores
+        "deciding": None,  # layer qui explique le verdict (le 1er perime)
         "err": "",
         "trust": "",  # verified / uncertain / none (fiabilite du releve de cache)
     }
@@ -334,12 +432,6 @@ def compute_state(pcore, imp, cfg, shot=None):
     if rec:
         export = preview.export_dir_of(cur)
         rs = preview.record_state(export, rec, tracked)
-        st["consumed"], st["latest"], st["stale"] = (
-            rs["consumed"],
-            rs["latest"],
-            rs["stale"],
-        )
-        st["err"] = rs["err"]
         st["trust"] = rs["trust"]
         # layers : le releve (consomme au cache) vs le disque (dernier publie)
         for name, v in (rec.get("layers") or {}).items():
@@ -349,6 +441,12 @@ def compute_state(pcore, imp, cfg, shot=None):
                 "latest": lv,
                 "stale": bool(lv is not None and lv > v),
             }
+        c = apply_tracked(st, tracked_list, mode)
+        if not c["present"] and len(tracked_list) == 1 and rs["err"]:
+            st["err"] = rs["err"]  # message precis du releve ('absent du releve')
+        if rs["trust"] == "uncertain" and rs["err"]:
+            # la fiabilite du releve prime : on le DIT meme si le verdict tient
+            st["err"] = " | ".join(x for x in (rs["err"], st["err"]) if x)
         return st
 
     # --- 2) usd_layer_stack SANS releve : on ne peut rien affirmer -----------------
@@ -376,26 +474,11 @@ def compute_state(pcore, imp, cfg, shot=None):
         st["layers"][name] = {
             "consumed": c,
             "latest": lv,
-            "stale": bool(c is not None and lv is not None and lv > c),
+            # /!\ None (indecidable), PAS False : une version qu'on n'a pas su resoudre
+            # ne veut pas dire "rien n'a bouge" -- ce serait un faux "a jour".
+            "stale": (lv > c) if (c is not None and lv is not None) else None,
         }
-    # layer tracke : cle exacte, sinon match par sous-chaine
-    ld = st["layers"].get(tracked)
-    if ld is None:
-        for k in st["layers"]:
-            if tracked in k or k in tracked:
-                ld = st["layers"][k]
-                break
-    if ld is None or ld["consumed"] is None or ld["latest"] is None:
-        have = ", ".join(sorted(consumed_map)) or "aucun"
-        st["err"] = "layer %s non consomme par cet import (contient: %s)" % (
-            tracked,
-            have,
-        )
-        if ld is not None:
-            st["consumed"], st["latest"] = ld["consumed"], ld["latest"]
-    else:
-        st["consumed"], st["latest"] = ld["consumed"], ld["latest"]
-        st["stale"] = ld["latest"] > ld["consumed"]
+    apply_tracked(st, tracked_list, mode)
     return st
 
 
@@ -449,7 +532,16 @@ def process_item(hou, pcore, item, cfg, apply_changes, force):
         "ITEM %s  (shot %s, ancre=%s)"
         % (item["id"], item["shot"], item.get("anchor", "cache"))
     )
-    if cache is not None:
+    caches = item.get("caches") or ([cache] if cache is not None else [])
+    caches = select_caches(item, caches, cfg)
+    if len(caches) > 1:
+        log(
+            "  caches : %d nodes -> %s"
+            % (len(caches), ", ".join(c.name() for c in caches))
+        )
+        for c in caches:
+            log("     %s  [%s]" % (c.path(), c.type().name()))
+    elif cache is not None:
         log("  cache  : %s  [%s]" % (cache.path(), cache.type().name()))
     else:
         # scene de rendu sans filecache (ex Confo) : rien a re-cacher, on bumpe l'import
@@ -485,9 +577,10 @@ def process_item(hou, pcore, item, cfg, apply_changes, force):
     # chaine SOP a re-simuler (setups FX) : plan de l'UI, sinon toute la chaine
     sop_nodes = resolve_sop_plan(hou, item, cfg)
     is_fx = item.get("fx_sopcreate") is not None
-    # FX dont la sim est INATTEIGNABLE (HDA locked) : le moteur ne decouvre AUCUN cache
-    # SOP (fx_chain vide) alors qu'il y a bien un sopcreate.
-    locked = is_fx and not item.get("fx_chain")
+    # Sim INATTEIGNABLE = on ne voit RIEN dans le reseau du sopcreate (cf fx_opaque).
+    # /!\\ Surtout PAS "aucun cache SOP trouve" : un setup procedural ou un layer 'still'
+    # n'a simplement rien a re-simuler, et se faisait refuser le re-cache a tort.
+    locked = is_fx and bool(item.get("fx_opaque"))
     if sop_nodes:
         log(
             "  chaine SOP a re-simuler (%d): %s"
@@ -495,10 +588,11 @@ def process_item(hou, pcore, item, cfg, apply_changes, force):
         )
     elif locked:
         log(
-            "  setup FX : sim INATTEIGNABLE (HDA locked) -> impossible de re-simuler ici"
+            "  setup FX : reseau de sim ILLISIBLE (HDA locked) -> impossible de "
+            "re-simuler ici"
         )
     elif is_fx:
-        log("  setup FX : 0 cache SOP re-simule (decoche) -> republish seul")
+        log("  setup FX : aucun cache SOP a re-simuler -> republish seul")
 
     # --- DRY-RUN : on s'arrete la ---
     if not apply_changes:
@@ -562,43 +656,61 @@ def process_item(hou, pcore, item, cfg, apply_changes, force):
                 rep["msg"] = "SOP %s erreurs: %s" % (sc.name(), " | ".join(serrs))
                 log("  => ECHEC SOP: %s" % rep["msg"])
                 return rep
-        if cache is None:
+        if not caches:
             # scene de rendu SANS filecache : le livrable est le render, l'import bumpe
             # suffit. Le submit se fait dans la 2e passe (apres le save).
             rep["ok"] = True
             rep["applied"] = True
             rep["msg"] = "import bumpe (pas de cache dans cette scene)"
             log("  => OK (pas de cache a executer)")
-            rep["record"] = build_cache_record(imp, None)
+            rep["record"] = build_cache_record(imp, None, pcore)
             return rep
-        log("  execute lop_filecache ...")
-        _t = time.perf_counter()
-        res = execute_cache(pcore, cache)
-        span = _span(_t)
-        errs = node_errors(cache)
-        if errs:
-            rep["msg"] = "publish KO: %s" % " | ".join(errs)
-            log("  => ECHEC publish: %s" % rep["msg"])
-            return rep  # applied reste False -> pas de version-up sur echec
+        # un shot peut avoir PLUSIEURS filecache (produits differents) -> tous, dans
+        # l'ordre. Un echec sur l'un arrete l'item : pas de version-up sur un livrable
+        # incomplet.
+        results = []
+        for i, c in enumerate(caches):
+            log(
+                "  [%d/%d] execute lop_filecache %s ..."
+                % (i + 1, len(caches), c.name())
+            )
+            _t = time.perf_counter()
+            res = execute_cache(pcore, c)
+            span = _span(_t)
+            errs = node_errors(c)
+            if errs:
+                rep["msg"] = "publish KO (%s): %s" % (c.name(), " | ".join(errs))
+                log("  => ECHEC publish: %s" % rep["msg"])
+                return rep  # applied reste False -> pas de version-up sur echec
+            log("  => OK (%s, re-cache %s)" % (res, span))
+            results.append(res)
         rep["ok"] = True
         rep["applied"] = True
-        rep["msg"] = "re-cache OK (%d SOP + lop ; %s)" % (len(sop_nodes), res)
-        log("  => OK (%s, re-cache %s)" % (res, span))
+        rep["msg"] = "re-cache OK (%d SOP + %d lop ; %s)" % (
+            len(sop_nodes),
+            len(caches),
+            " | ".join(results),
+        )
         # RELEVE : ce que ce cache a REELLEMENT consomme + ce qu'il a publie.
         # C'est la source de verite de la peremption (independante du type de node,
         # cf preview.record_state). Renvoye a l'UI, qui l'ecrit dans le sidecar.
-        rep["record"] = build_cache_record(imp, cache)
+        rep["record"] = build_cache_record(imp, caches, pcore)
         if rep["record"]:
             log(
-                "  releve : %s -> publie %s v%03d"
+                "  releve : %s -> publie %s"
                 % (
                     ", ".join(
                         "%s v%03d" % (k, v)
                         for k, v in sorted((rep["record"].get("layers") or {}).items())
                     )
                     or "(aucun layer)",
-                    rep["record"].get("product"),
-                    rep["record"].get("product_version") or 0,
+                    ", ".join(
+                        "%s v%03d" % (k, v or 0)
+                        for k, v in sorted(
+                            (rep["record"].get("products") or {}).items()
+                        )
+                    )
+                    or "(aucun produit)",
                 )
             )
     except Exception as e:
@@ -609,14 +721,44 @@ def process_item(hou, pcore, item, cfg, apply_changes, force):
     return rep
 
 
-def cache_product(cache):
-    """Produit publie par un lop_filecache : '_layer_<department>_master'.
+def cache_output(pcore, cache):
+    """(produit, version) REELLEMENT publies par un lop_filecache, lus sur son CHEMIN
+    DE SORTIE resolu (`usdExport ... getOutputName()`), pas sur un parm.
+
+    /!\\ Le parm `department` ne suffit PAS : sur frederic_2603, deux caches affichent
+    tous les deux department='fx' (donc '_layer_fx_master' par deduction) alors qu'ils
+    publient en realite `_layer_fx_snow_still` et `_layer_fx_snow_sim`. Deduire le
+    produit du departement ecrivait donc un produit INEXISTANT dans le releve, ce qui
+    neutralisait silencieusement le garde-fou "cache refait hors outil".
+    (None, None) si Prism ne resout pas -- l'appelant retombe sur le departement."""
+    if cache is None or pcore is None:
+        return None, None
+    try:
+        usd = pcore.getPlugin("USD")
+        ue = getattr(getattr(usd, "api", None), "usdExport", None)
+        st = ue.getStateFromNode({"node": cache}) if ue else None
+        out = st.ui.getOutputName() if st is not None else None
+    except Exception:
+        return None, None
+    path = out[0] if isinstance(out, (tuple, list)) and out else out
+    if not isinstance(path, str) or not path:
+        return None, None
+    _root, name, ver = preview.split_product(path)
+    return (name, ver) if name and ver >= 0 else (None, None)
+
+
+def cache_product(cache, pcore=None):
+    """Produit publie par un lop_filecache. Chemin de sortie resolu d'abord (verite),
+    sinon deduction '_layer_<department>_master'.
 
     /!\\ `department` est un parm MENU : eval() rend l'INDEX (5), pas le texte -- on
     ecrivait '_layer_5_master' dans les releves (vu en vrai dans un sidecar), ce qui
     tuait silencieusement le garde-fou "cache hors outil". Il faut evalAsString().
     `backupDepartment` (chaine simple) sert de repli, et on REFUSE une valeur numerique
     plutot que de fabriquer un nom de produit faux."""
+    prod, _ = cache_output(pcore, cache)
+    if prod:
+        return prod
     for pname in ("department", "backupDepartment"):
         p = cache.parm(pname) if cache is not None else None
         if p is None:
@@ -631,13 +773,23 @@ def cache_product(cache):
     return None
 
 
-def build_cache_record(imp, cache):
-    """Releve d'un cache qui vient de reussir : ce qu'il a CONSOMME et ce qu'il a
-    PUBLIE. C'est ce releve (et pas l'etat de la scene) qui dira plus tard si le shot
-    est perime -- indispensable avec usd_layer_stack, qui se resout toujours au latest.
-    La version du produit publie sert a reperer un cache refait HORS outil."""
+def build_cache_record(imp, caches, pcore=None):
+    """Releve des caches qui viennent de reussir : ce qu'ils ont CONSOMME et ce qu'ils
+    ont PUBLIE. C'est ce releve (et pas l'etat de la scene) qui dira plus tard si le
+    shot est perime -- indispensable avec usd_layer_stack, qui se resout toujours au
+    latest. Les versions des produits publies reperent un cache refait HORS outil.
+
+    `caches` : un node, une liste de nodes, ou None. Un shot peut avoir PLUSIEURS
+    filecache (vu sur frederic_2603 : _layer_fx_snow_still ET _layer_fx_snow_sim) ->
+    on releve TOUS les produits (`products`), pas seulement le premier. `product` /
+    `product_version` restent ecrits (le 1er) : un sidecar ecrit par cette version
+    reste lisible par une version anterieure de l'outil."""
     if imp is None:
         return None
+    if caches is None:
+        caches = []
+    elif not isinstance(caches, (list, tuple)):
+        caches = [caches]
     layers = import_layers(imp)
     src = (
         (layer_stack_resolved(imp) or [None])[0]
@@ -645,16 +797,41 @@ def build_cache_record(imp, cache):
         else parm_val(imp, "filepath")
     )
     export = preview.export_dir_of(src)
-    product = cache_product(cache) if cache is not None else None
+    products = {}
+    for c in caches:
+        name, ver = cache_output(pcore, c)
+        if not name:
+            name = cache_product(c, pcore)
+            ver = (
+                preview.latest_product_version(export, name)
+                if (export and name)
+                else None
+            )
+        if name:
+            products[name] = ver
+    first = next(iter(products), None)
     return {
         "layers": layers,
-        "product": product,
-        "product_version": preview.latest_product_version(export, product)
-        if (export and product)
-        else None,
+        "products": products,
+        "product": first,
+        "product_version": products.get(first),
         "export": export,
         "at": time.time(),
     }
+
+
+def select_caches(item, caches, cfg):
+    """Filtre les caches d'un item par le plan de l'UI (cfg['cache_plan']).
+
+    /!\\ Une entree ABSENTE veut dire "tous" (appel direct en ligne de commande, ou
+    ancienne UI) ; une liste VIDE veut dire "aucun" (l'artiste a tout decoche : on bumpe
+    l'import et on rend, sans recacher). Confondre les deux ferait cacher ce qu'il a
+    explicitement exclu."""
+    plan = cfg.get("cache_plan") or {}
+    if item.get("id") not in plan:
+        return caches
+    keep = set(plan.get(item["id"]) or [])
+    return [c for c in caches if c.path() in keep]
 
 
 def harvest_records(items, reports, cfg):
@@ -869,9 +1046,15 @@ def is_layer_stack(node):
 
 
 def layer_stack_shot(node):
-    """'SEQ/SHOT' d'un usd_layer_stack (parms explicites). None en mode asset."""
+    """Entite d'un usd_layer_stack, depuis ses parms : 'SEQ/SHOT' en mode shot, le NOM
+    DE L'ASSET en mode asset.
+
+    Le nom d'asset nu est ce que renvoie deja `shot_from_cache_output` (repli
+    `ent.get('asset')` de Prism) -> les deux sources s'accordent, l'appariement par
+    entite et les releves marchent pareil des deux cotes. /!\\ Ne pas confondre avec la
+    scene RANGEE sous /Assets : elle, peut tres bien porter des entites 'shot'."""
     if (parm_val(node, "mode") or "shot") != "shot":
-        return None
+        return (parm_val(node, "asset") or "").strip() or None
     seq = (parm_val(node, "sequence") or "").strip()
     shot = (parm_val(node, "shot") or "").strip()
     return ("%s/%s" % (seq, shot)) if seq and shot else None
@@ -957,16 +1140,22 @@ def _import_has_layer(info, tracked):
     return any(tracked in k or k in tracked for k in lm)
 
 
-def import_for_shot(imports, shot, tracked):
+def import_for_shot(imports, shot, tracked, exported=None):
     """Retrouve l'import qui importe `shot` (appariement PAR CONTENU, sans nom ni cablage).
-    Departage: si plusieurs imports pour le meme shot, on prefere celui qui porte le
-    layer tracke (ex: l'import qui a l'anim, pas un vieux doublon sans anim).
+    Departage, dans l'ordre :
+      1) les imports REELLEMENT en amont d'un export de la scene (`exported`) -- sur une
+         scene FX, 76 des 77 imports sont des cameras qui n'alimentent rien : les garder
+         comme candidats, c'est risquer d'apparier le cache a une camera ;
+      2) puis celui qui porte le layer tracke (l'import qui a l'anim, pas un doublon).
     Retourne (node|None, ambiguous_bool)."""
     if not shot or shot == "?":
         return None, False
     cands = [im for im in imports if im["shot"] == shot]
     if not cands:
         return None, False
+    if exported:
+        used = [im for im in cands if im["node"].path() in exported]
+        cands = used or cands  # aucun cable -> on garde tout plutot que rien
     if len(cands) == 1:
         return cands[0]["node"], False
     withlayer = [im for im in cands if _import_has_layer(im, tracked)]
@@ -1045,6 +1234,50 @@ def fx_chain_for_cache(cache):
     """(sopcreate|None, [caches SOP ordonnes]) pour un lop_filecache donne."""
     cont = fx_sopcreate_for(cache)
     return cont, fx_sop_chain(cont)
+
+
+def fx_opaque(sopcreate):
+    """Le reseau du sopcreate est-il ILLISIBLE (on ne voit aucun node dedans) ?
+
+    /!\\ C'est LA seule bonne definition de "sim inatteignable". On la deduisait avant de
+    l'absence de filecache SOP -- ce qui confond deux choses tres differentes :
+      - on ne voit pas dedans           -> on ne peut RIEN affirmer, on s'abstient ;
+      - on voit dedans et il n'y a AUCUN cache -> il n'y a simplement rien a re-simuler
+        (setup procedural, layer "still"...) -> il faut recacher normalement.
+    Sur frederic_2603, `_OUT_still` expose 12 nodes sans aucun cache : la 2e situation.
+    Et `isLockedHDA` ne discrimine pas : les deux sopcreate de cette scene le sont, l'un
+    expose 380 nodes et 3 filecaches."""
+    if sopcreate is None:
+        return False
+    try:
+        return not sopcreate.allSubChildren()
+    except Exception:
+        return True  # illisible -> on s'abstient
+
+
+def fx_chain_for_caches(caches):
+    """(sopcreate|None, [caches SOP ordonnes], opaque) pour TOUS les caches d'un item.
+
+    Un item peut porter plusieurs lop_filecache : ne regarder que le premier faisait
+    rater la chaine SOP des autres (vu sur frederic_2603 : le 1er cache n'a aucun cache
+    SOP, le 2e en a 3 -- l'item etait declare 'sim inatteignable' a cause du 1er)."""
+    cont, chain, seen = None, [], set()
+    conts = []
+    for c in caches or []:
+        sc = fx_sopcreate_for(c)
+        if sc is None:
+            continue
+        if cont is None:
+            cont = sc
+        if sc.path() not in {x.path() for x in conts}:
+            conts.append(sc)
+        for n in fx_sop_chain(sc):
+            if n.path() not in seen:
+                seen.add(n.path())
+                chain.append(n)
+    # opaque seulement si AUCUN des sopcreate n'est lisible
+    opaque = bool(conts) and all(fx_opaque(sc) for sc in conts)
+    return cont, chain, opaque
 
 
 def shot_label(pcore, imp, cfg):
@@ -1137,7 +1370,7 @@ def pair_import(hou, pcore, cfg, anchor, shot, imports, tracked, extra=None):
                 len(withlayer or pool) > 1,
                 "topologie+shot" if same else "topologie-ambigu",
             )
-    imp, ambig = import_for_shot(imports, shot, tracked)
+    imp, ambig = import_for_shot(imports, shot, tracked, cfg.get("exported_imports"))
     return imp, ambig, ("shot" if imp is not None else None)
 
 
@@ -1165,12 +1398,23 @@ def discover_pairs(hou, pcore, cfg):
     renders = collect_renders(hou, cfg)  # LOP_Render (vide sur une scene cfx/fx)
     caches = [n for n in root.allSubChildren() if cache_type in n.type().name().lower()]
 
+    # imports REELLEMENT en amont d'un export (cache ou render) : sert a departager le
+    # repli par shot. Sur la scene FX de frederic_2603, 1 import sur 77 est concerne --
+    # les 76 autres sont des stacks camera qui n'alimentent aucun export.
+    exported = set()
+    for anchor in caches + [r["node"] for r in renders]:
+        for u in upstream_import(hou, anchor, cfg):
+            exported.add(u.path())
+    cfg["exported_imports"] = exported
+
     # index des caches par shot (leur sortie Prism, pas leur nom)
     cache_by_shot = {}
     for c in caches:
         cache_by_shot.setdefault(shot_from_cache_output(pcore, c) or "?", []).append(c)
 
-    def build(anchor, shot, cache, rnodes, kind):
+    def build(anchor, shot, cnodes, rnodes, kind):
+        cnodes = [c for c in (cnodes or []) if c is not None]
+        cache = cnodes[0] if cnodes else None
         imp, ambig, method = pair_import(
             hou, pcore, cfg, anchor, shot, imports, tracked, extra=cache
         )
@@ -1195,20 +1439,24 @@ def discover_pairs(hou, pcore, cfg):
                 warns.append(
                     "nom import '%s' != %s importe" % (imp.name(), shot_imp or shot)
                 )
-        # chaine de caches SOP a re-simuler (setups FX) ; [] sans cache ou en cfx direct
-        sopcreate, sop_chain = (
-            fx_chain_for_cache(cache) if cache is not None else (None, [])
-        )
+        # chaine de caches SOP a re-simuler (setups FX) ; [] sans cache ou en cfx direct.
+        # Sur TOUS les caches de l'item, pas seulement le premier.
+        sopcreate, sop_chain, opaque = fx_chain_for_caches(cnodes)
         items.append(
             {
                 "id": anchor.name(),
                 "anchor": kind,  # "render" | "cache"
-                "cache": cache,  # peut etre None (scene de rendu sans filecache)
+                "cache": cache,  # 1er cache (compat) ; peut etre None
+                "caches": cnodes,  # TOUS les caches du shot : un shot peut en avoir
+                # plusieurs, publiant des produits DIFFERENTS (verifie sur
+                # frederic_2603 : _layer_fx_snow_still ET _layer_fx_snow_sim). On n'en
+                # attachait qu'un -> l'autre n'etait jamais re-cache.
                 "import": imp,
                 "shot": shot,
                 "pair_method": method,
                 "fx_sopcreate": sopcreate,
                 "fx_chain": sop_chain,
+                "fx_opaque": opaque,  # reseau de sim illisible -> on ne peut rien affirmer
                 "renders": rnodes,
                 "warn": "  |  ".join(warns),
                 "note": "  |  ".join(notes),
@@ -1227,15 +1475,15 @@ def discover_pairs(hou, pcore, cfg):
     for key, rnodes in by_shot.items():
         shot = next((r.get("shot") for r in renders if r["node"] is rnodes[0]), None)
         shot = shot or "?"
-        cache = (cache_by_shot.get(shot) or [None])[0] if shot != "?" else None
-        build(rnodes[0], shot, cache, rnodes, "render")
+        cnodes = cache_by_shot.get(shot) or [] if shot != "?" else []
+        build(rnodes[0], shot, cnodes, rnodes, "render")
 
     # --- 2) caches dont le shot n'est PAS rendu ici -> ancre cache (cfx/fx) ---------
     for shot, cnodes in cache_by_shot.items():
         if shot in rendered_shots:
             continue  # deja couvert par l'item render de ce shot
         for c in cnodes:
-            build(c, shot, c, renders_for_shot(renders, shot), "cache")
+            build(c, shot, [c], renders_for_shot(renders, shot), "cache")
 
     items.sort(key=lambda it: it["id"])
     return items
@@ -1374,7 +1622,7 @@ def _serialize_renders(item):
     return out
 
 
-def submit_render(pcore, node):
+def submit_render(pcore, node, comment=None):
     """Soumet un prism::LOP_Render a la FERME Deadline, EN HEADLESS.
 
     Pourquoi pas le bouton 'execute' : `lopRender.executePressed` ouvre (submitJob on)
@@ -1458,9 +1706,12 @@ def submit_render(pcore, node):
     # NB: ne PAS appeler state.text() -- un state Prism herite de QTreeWidgetItem dont
     # text(col) exige un argument (plantait le submit AVANT tout publish).
     log("    submit(headless) : farm=%s  gb_submit=%s" % (picked, gb.isChecked()))
+    # commentaire EXPLICITE : sans lui, publish() prend e_comment.text() du State Manager,
+    # vide en headless -> le versioninfo du render avait "comment": "" (vu sur SH0060).
     result = sm.publish(
         executeState=True,
         states=[state],
+        comment=comment,
         successPopup=False,
         saveScene=False,
         incrementScene=False,
@@ -1539,7 +1790,7 @@ def submit_renders(hou, pcore, items, reports, cfg):
                 continue
             try:
                 _t = time.perf_counter()
-                res = submit_render(pcore, nd)
+                res = submit_render(pcore, nd, cfg.get("render_comment"))
                 span = _span(_t)
                 errs = node_errors(nd)
                 if errs:
@@ -1560,16 +1811,33 @@ def submit_renders(hou, pcore, items, reports, cfg):
 
 def status_item(hou, pcore, item, cfg):
     """Etat read-only d'un item pour l'UI (JSON). Ne modifie rien."""
-    tracked = cfg.get("tracked_layer", "_layer_anm_master")
+    tracked_list = tracked_layers(cfg)
+    tracked = tracked_list[0]
     cont = item.get("fx_sopcreate")
     d = {
         "id": item["id"],
         "shot": item["shot"],
         "cache_node": item["cache"].path() if item.get("cache") is not None else None,
+        # TOUS les caches du shot (il peut y en avoir plusieurs, cf discover_pairs), avec
+        # le produit que chacun publie : c'est ce que l'artiste doit voir pour choisir,
+        # bien plus parlant qu'un nom de node ('lop_filecache3').
+        "caches": [
+            {
+                "path": c.path(),
+                "name": c.name(),
+                "product": cache_product(c, pcore) or "",
+            }
+            for c in (item.get("caches") or [])
+        ],
         "anchor": item.get("anchor", "cache"),
         "import_node": item["import"].path() if item["import"] else None,
+        # type de l'import : un prism::LOP_Import EPINGLE son chemin, un usd_layer_stack se
+        # re-resout au latest -> seul le premier garde l'ancienne stack si on ne sauve pas
+        "import_type": item["import"].type().name() if item["import"] else None,
         "pair_method": item.get("pair_method"),
         "tracked_layer": tracked,
+        "tracked_layers": tracked_list,
+        "tracked_mode": cfg.get("tracked_mode") or "or",
         "fx_sopcreate": cont.path() if cont is not None else None,
         "fx_chain": _serialize_fx_chain(item),
         "renders": _serialize_renders(item),
@@ -1612,11 +1880,23 @@ def status_item(hou, pcore, item, cfg):
     d["trust"] = st.get(
         "trust", ""
     )  # verified / uncertain / none (fiabilite du releve)
+    d["ignored_layers"] = st.get("ignored") or []  # suivis mais non consommes ici
+    d["deciding_layer"] = st.get("deciding")
     if st.get("trust") == "none" and st["stale"] is None:
         # aucun releve : on ne PEUT pas conclure (et on ne fait pas semblant)
         d["state"] = "no_record"
     elif st["consumed"] is None and st["latest"] is None:
-        d["state"] = "no_layer" if (st["err"] and tracked in st["err"]) else "error"
+        # 'n/a' (le shot ne lit pas ce(s) layer(s)) plutot que 'error' : les messages
+        # viennent soit du releve ('absent du releve'), soit de l'import ('non consomme')
+        benign = ("non consomme", "absent du releve", "aucun des layers suivis")
+        d["state"] = (
+            "no_layer"
+            if (st["err"] and any(b in st["err"] for b in benign))
+            else "error"
+        )
+    elif st["stale"] is None:
+        # version non resolue : indecidable -> 'n/a', surtout pas 'up to date'
+        d["state"] = "no_layer"
     elif st["stale"]:
         d["state"] = "outdated"
     else:
@@ -1661,8 +1941,15 @@ def main():
     )
     parser.add_argument(
         "--tracked-layer",
+        action="append",
         default=None,
-        help="layer dont on suit la version (defaut _layer_anm_master)",
+        help="layer dont on suit la version (repetable : plusieurs layers suivis)",
+    )
+    parser.add_argument(
+        "--tracked-mode",
+        choices=("or", "and"),
+        default="or",
+        help="plusieurs layers : 'or' = perime si UN bouge, 'and' = si TOUS ont bouge",
     )
     parser.add_argument(
         "--no-save",
@@ -1704,6 +1991,14 @@ def main():
         "re-simuler par shot (coches dans l'UE). Absent -> toute la chaine decouverte.",
     )
     parser.add_argument(
+        "--cache-plan",
+        default=None,
+        help="json {item_id: [chemins lop_filecache a executer]} = quels caches USD "
+        "executer par item (coches dans l'UI). Absent -> tous. Une liste VIDE veut dire "
+        "'aucun cache' (bump import + render seuls) : ce n'est PAS la meme chose qu'une "
+        "entree absente.",
+    )
+    parser.add_argument(
         "--render-node-type",
         default=None,
         help="type du node render lighting (defaut prism::LOP_Render)",
@@ -1732,7 +2027,11 @@ def main():
         "import_node_type": args.import_node_type,
         "render_node_type": args.render_node_type,
         "import_path_parm": args.import_path_parm,
-        "tracked_layer": args.tracked_layer,
+        # --tracked-layer est repetable -> liste ; on garde aussi la forme simple pour
+        # tout ce qui n'a besoin que d'UN nom (messages, cle de repli).
+        "tracked_layer": (args.tracked_layer or [None])[0],
+        "tracked_layers": args.tracked_layer,
+        "tracked_mode": args.tracked_mode,
     }
     for k, v in overrides.items():
         if v:
@@ -1747,6 +2046,13 @@ def main():
                 cfg["fx_plan"] = json.load(f)
         except Exception as e:
             log("fx-plan illisible (%s) -> chaine complete par defaut" % e)
+    # plan CACHE (quels lop_filecache executer par item) : json optionnel
+    if args.cache_plan:
+        try:
+            with open(args.cache_plan, "r", encoding="utf-8") as f:
+                cfg["cache_plan"] = json.load(f)
+        except Exception as e:
+            log("cache-plan illisible (%s) -> tous les caches par defaut" % e)
     # plan RENDER (quels LOP_Render soumettre a la ferme par shot) : json optionnel
     if args.render_plan:
         try:
@@ -1754,6 +2060,12 @@ def main():
                 cfg["render_plan"] = json.load(f)
         except Exception as e:
             log("render-plan illisible (%s) -> aucun render soumis" % e)
+    # commentaire des renders soumis. Scene NON sauvee -> on le DIT dans le render : son
+    # sourceScene pointera une scene qui ne contient pas l'update (l'image, elle, est
+    # juste : le submitter exporte l'USD depuis la session vivante).
+    cfg["render_comment"] = cfg.get("save_comment", "auto update - lop_update_cache")
+    if args.no_save:
+        cfg["render_comment"] += " (scene not saved)"
 
     import hou
 
@@ -1928,6 +2240,11 @@ def main():
                 "SAVE KO (les caches sont ecrits quand meme):\n%s"
                 % traceback.format_exc()
             )
+    elif args.apply and n_applied:
+        # choix EXPLICITE de l'utilisateur ("Leave untouched") : on ne cree pas de
+        # version dans la chaine d'un autre (un lighter qui sauve par-dessus sa vNNN
+        # tomberait le lendemain sur NOTRE vNNN+1, sans son travail).
+        log("Scene NON sauvee (choix 'Leave untouched') : caches publies, .hip intact.")
 
     # --- submit renders (lighting) : APRES le save -> la ferme rend la scene bumpee ---
     if args.apply and (cfg.get("render_plan") or {}):

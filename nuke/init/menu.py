@@ -195,6 +195,11 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
     ilgcMenu.addCommand('ILGC_HexTile', 'nuke.createNode("ILGC_HexTile")')
     ilgcMenu.addCommand('ILGC_LightLobeSplit', 'nuke.createNode("ILGC_LightLobeSplit")')
     ilgcMenu.addCommand('ILGC_StylisedMotionBlur', 'nuke.createNode("ILGC_StylisedMotionBlur")')
+    ilgcMenu.addCommand('ILGC_AOVGrade', 'nuke.createNode("ILGC_AOVGrade")')
+    ## edit 2026.09.28 (YYYY.MM.DD) : ILGC_PuppetWarp (plugin C++ compile pour Nuke 15.1,
+    ## plugins/custom_illogic/nuke_15 : ILGC_PuppetWarp.dll + ilgc_puppet_table.py)
+    if nuke.NUKE_VERSION_MAJOR == 15:
+        ilgcMenu.addCommand('ILGC_PuppetWarp', 'nuke.createNode("ILGC_PuppetWarp")')
     ilgcMenu.addCommand('WritePrecomp', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/WritePrecomp.nk\")')
     ilgcMenu.addCommand('WriteCompo', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/WriteCompo.nk\")')
 
@@ -323,8 +328,18 @@ elif nuke.NUKE_VERSION_MAJOR>=13:
         "Copernicus Bridge",
         "import comp_copernicus_bridge; comp_copernicus_bridge.create_node()")
     
-    #ADDED on 26.07.20 by Ben
+    # Register the Thinkbox / Submit Nuke To Deadline menu but hide it from
+    # the menubar. The command still exists and can be invoked either via
+    # `DeadlineNukeClient.main()` directly, or via
+    # `nuke.menu("Nuke").findItem("Thinkbox/Submit Nuke To Deadline").invoke()`.
     import DeadlineNukeClient
     menubar = nuke.menu("Nuke")
     tbmenu = menubar.addMenu("&Thinkbox")
     tbmenu.addCommand("Submit Nuke To Deadline", DeadlineNukeClient.main, "")
+    try:
+        tbmenu.action().setVisible(False)
+    except AttributeError:
+        # Older Nuke where nuke.Menu has no .action() — try via MenuItem lookup.
+        item = menubar.findItem("&Thinkbox") or menubar.findItem("Thinkbox")
+        if item is not None:
+            item.setVisible(False)

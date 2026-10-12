@@ -224,4 +224,10 @@ nuke.pluginAddPath(r"R:/pipeline/pipe/nuke/script/dmpExrLayerBuilder")
 
 ## edit 2026.06.06 (YY.MM.DD)
 ##  DMP TOolKit Added
-nuke.pluginAddPath(r"R:/pipeline/pipe/nuke/script/nukeDmpToolKit") 
+nuke.pluginAddPath(r"R:/pipeline/pipe/nuke/script/nukeDmpToolKit")
+
+## edit 2026.09.16  (YY.MM.DD)
+##  set some node default configs
+
+##  Merge Nodes default
+nuke.knobDefault("Merge2.bbox", "3")

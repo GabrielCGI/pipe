@@ -14,6 +14,13 @@
     <memberToolshelf name="illogic_sop"/>
     <memberToolshelf name="prism"/>
     <memberToolshelf name="illogic_Paint"/>
+    <memberToolshelf name="illogic_beta"/>
+    <memberToolshelf name="hairtools"/>
+    <memberToolshelf name="groomtools"/>
+    <memberToolshelf name="houdiniengine"/>
+    <memberToolshelf name="maestro"/>
+    <memberToolshelf name="shelf_cfx_test"/>
+    <memberToolshelf name="everything_assets"/>
   </shelfSet>
 
   <toolshelf name="illogicSolaris" label="Illogic Solaris">
@@ -62,12 +69,10 @@ else:
 """Check and update USD layers."""
 ]]></helpText>
     <script scriptType="python"><![CDATA[import usd_updater
-import PrismInit
 
-usd_updater.reload_modules()
-usd_updater.startUpdateAssetsUSD(
+usd_updater.start_usd_updater(
     'houdini',
-    prism_core=PrismInit.pcore
+    []
 )]]></script>
   </tool>
 
@@ -150,19 +155,9 @@ UD.checkHoudiniImportsUpdates()]]></script>
 
 """Flag import node when there is new USD updates."""
 ]]></helpText>
-    <script scriptType="python"><![CDATA[import sys
-import importlib
+    <script scriptType="python"><![CDATA[import usd_updater
 
-MODULE_PATH = "r:/pipeline/pipe/prism"
-    
-if not MODULE_PATH in sys.path:
-    sys.path.insert(0, MODULE_PATH)
-
-import USDToolBox_pck.updateAssetsUSD as UD
-importlib.reload(UD)
-
-UD.reload_modules()
-UD.checkHoudiniImportsUpdates()]]></script>
+usd_updater.check_houdini_imports_updates()]]></script>
   </tool>
 
   <tool name="update_assets_USD_NEW" label="Update Assets USD (New)" icon="hicon:/SVGIcons.index?NETVIEW_lop_info.svg">

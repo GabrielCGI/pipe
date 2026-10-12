@@ -3,6 +3,7 @@
         "COMPOSITING": [
             "compo",
             "comp",
+            "compo_reframe",
             "nuke",
             "beauty"
         ],
@@ -18,9 +19,6 @@
             "layout",
             "Previz",
             "RoughLayout_playblast"
-        ],
-        "FX": [
-            "fx"
         ]
     },
     "source_path": "I:/yuka_2604",

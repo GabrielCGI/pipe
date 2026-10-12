@@ -196,21 +196,28 @@ class LPEDesigner(QtWidgets.QWidget):
     # =========================
 
     def build_event_block(self):
-        events = []
-
+        # axe 1 : type d'evenement
+        types = []
         if self.cb_reflect.isChecked():
-            events.append("R")
+            types.append("R")
         if self.cb_transmit.isChecked():
-            events.append("T")
+            types.append("T")
+
+        # axe 2 : type de scatter
+        scatters = []
         if self.cb_diffuse.isChecked():
-            events.append("D")
+            scatters.append("D")
         if self.cb_glossy.isChecked():
-            events.append("G")
+            scatters.append("G")
 
-        if not events:
-            return ""
+        # un seul coche -> la lettre ; zero ou plusieurs -> joker
+        t = types[0] if len(types) == 1 else "."
+        s = scatters[0] if len(scatters) == 1 else "."
 
-        block = "<" + "".join(events) + ">"
+        tag = self.tag_input.text().strip()
+        tagpart = "'%s'" % tag if tag else ""
+
+        block = "<%s%s%s>" % (t, s, tagpart)
 
         rep_mode = self.rep_combo.currentIndex()
         if rep_mode == 1:
@@ -221,29 +228,19 @@ class LPEDesigner(QtWidgets.QWidget):
         return block
 
     def generate_lpe(self):
+        lpe = "C" + self.build_event_block()
 
-        lpe = "C"
-        lpe += self.build_event_block()
+        after_mode = self.after_combo.currentIndex()
+        if after_mode == 1:
+            lpe += ".*"
+        elif after_mode == 2:
+            lpe += ".+"
 
-        tag = self.tag_input.text().strip()
-        if tag:
-            lpe += f"'{tag}'"
-
-            # After tag combo (EXCLUSIF)
-            after_mode = self.after_combo.currentIndex()
-            if after_mode == 1:  # Allow after tag (.*)
-                lpe += ".*"
-            elif after_mode == 2:  # Require after tag (.+)
-                lpe += ".+"
-
-        # Ajoute le L final si coché
         if self.end_light.isChecked():
-            lpe += "L"
-    
-        # Affiche dans le champ output
+            lpe += "[LO]"
+
         self.lpe_output.setText(lpe)
-        
-        # Auto-apply si activé
+
         if self.cb_auto_apply.isChecked():
             self.apply_to_node(lpe)
 

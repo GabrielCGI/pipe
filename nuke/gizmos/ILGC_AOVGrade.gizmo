@@ -1,0 +1,366 @@
+#! C:/Program Files/Nuke15.1v5/nuke-15.1.5.dll -nx
+version 15.1 v5
+add_layer {C_L_key C_L_key.red C_L_key.green C_L_key.blue C_L_key.alpha}
+Gizmo {
+ inputs 2
+ knobChanged "\nnode = nuke.thisNode()\nknob = nuke.thisKnob()\n\nWATCHED_KNOBS = \{\n    \"saturation_before\",\n    \"colour\",\n    \"intensity\",\n    \"exposure\",\n    \"contrast\",\n    \"gamma\",\n    \"offset\",\n    \"saturation_after\",\n\}\n\n# Pas besoin de recalculer pour tous les autres knobs\nif knob.name() in WATCHED_KNOBS:\n\n    def different(knob_name, default, eps=1e-6):\n        k = node\[knob_name]\n\n        # Knob pilote par une expression ou une animation : modifie, sans l'evaluer.\n        # Au chargement d'un .nk le node cible peut ne pas encore exister : evaluer\n        # l'expression leve une erreur qui interrompt la lecture du script.\n        if k.hasExpression() or k.isAnimated():\n            return True\n\n        # Multi-value knobs: colour, contrast, gamma, offset...\n        if k.arraySize() > 1:\n            values = \[k.value(i) for i in range(k.arraySize())]\n\n            if isinstance(default, (tuple, list)):\n                defaults = default\n            else:\n                defaults = \[default] * len(values)\n\n            return any(\n                abs(value - default_value) > eps\n                for value, default_value in zip(values, defaults)\n            )\n\n        return abs(k.value() - default) > eps\n\n    modified = (\n        different(\"saturation_before\", 1.0)\n        or different(\"colour\", 1.0)\n        or different(\"intensity\", 1.0)\n        or different(\"exposure\", 0.0)\n        or different(\"contrast\", 1.0)\n        or different(\"gamma\", 1.0)\n        or different(\"offset\", 0.0)\n        or different(\"saturation_after\", 1.0)\n    )\n\n    if modified:\n        node\[\"tile_color\"].setValue(0x3A9E54FF)  # green\n    else:\n        node\[\"tile_color\"].setValue(0xFF7F00FF)  # original orange\n\n"
+ tile_color 0xff7f00ff
+ label "\[value lobe2]_\[value aov]"
+ note_font "Verdana Bold"
+ addUserKnob {20 settings l Settings:}
+ addUserKnob {26 text l "" +STARTLINE T "1. Select the AOV to Grade:\n"}
+ addUserKnob {68 lobe2 l "Lobe :" M {diffuse specular "" ""}}
+ addUserKnob {41 aov l AOV: T AOV_Shuffle.in}
+ addUserKnob {26 text_2 l "" +STARTLINE T " "}
+ addUserKnob {6 premult_workflow l "Use Unpremult/Premult workflow?" t "When enabled, this will unpremult the incoming beauty and the chosen AOV before applying the grade. It will then premult it back to normal after grading." +STARTLINE}
+ premult_workflow true
+ addUserKnob {6 checkAov l "Check AOV" -STARTLINE}
+ addUserKnob {26 ""}
+ addUserKnob {26 text_1 l "" +STARTLINE T "2. Adjust the AOV:\n"}
+ addUserKnob {7 saturation_before l "Saturation Before:" t "This is the saturation of the selected AOV before the colour adjustments are applied. Lowering this will give you a more \"true colour\" when grading." R 0 3}
+ saturation_before 1
+ addUserKnob {26 ""}
+ addUserKnob {18 colour l Colour: t "Colour of the AOV"}
+ colour {1 1 1}
+ addUserKnob {6 colour_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {6 color_rgb_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {7 intensity l Intensity: t "Colour Intensity" R 0 10}
+ intensity 1
+ addUserKnob {7 exposure l Exposure: t "Exposure (In Stops)" R -5 5}
+ addUserKnob {41 contrast l "Contrast :" T ColorCorrect1.contrast}
+ addUserKnob {41 gamma l "Gamma :" T ColorCorrect1.gamma}
+ addUserKnob {41 offset l "Offset :" T ColorCorrect1.offset}
+ addUserKnob {26 ""}
+ addUserKnob {7 saturation_after l "Saturation After:" t "This is the saturation of the selected AOV after the colour adjustments are applied." R 0 3}
+ saturation_after 1
+ addUserKnob {6 gamma_panelDropped l "panel dropped state" +HIDDEN +STARTLINE}
+ addUserKnob {6 color_rgb_1_panelDropped l "panel dropped state" -STARTLINE +HIDDEN}
+ addUserKnob {26 ""}
+}
+ BackdropNode {
+  inputs 0
+  name BackdropNode1
+  tile_color 0x23712eff
+  label "Grade the AOV"
+  note_font_size 30
+  xpos 408
+  ypos 77
+  bdwidth 288
+  bdheight 439
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote3
+  label "The AOV is adjusted and plussed\nback into the beauty."
+  note_font_size 15
+  xpos 50
+  ypos 402
+ }
+ Input {
+  inputs 0
+  name Mask
+  xpos 802
+  ypos 124
+  number 1
+ }
+push 0
+ Switch {
+  inputs 2
+  which {{"\[exists parent.input1]"}}
+  name MaskVis
+  xpos 802
+  ypos 195
+ }
+ Dot {
+  name Dot10
+  xpos 836
+  ypos 292
+ }
+set Nc21eb000 [stack 0]
+ Dot {
+  name Dot8
+  xpos 836
+  ypos 315
+ }
+set Nc21eb400 [stack 0]
+ Dot {
+  name Dot9
+  xpos 836
+  ypos 339
+ }
+set Nc21eb800 [stack 0]
+ Dot {
+  name Dot11
+  xpos 836
+  ypos 363
+ }
+set Nc21ebc00 [stack 0]
+ Dot {
+  name Dot7
+  xpos 836
+  ypos 387
+ }
+push $Nc21ebc00
+push $Nc21eb800
+push $Nc21eb400
+push $Nc21eb000
+ Input {
+  inputs 0
+  name Render
+  xpos -221
+  ypos -349
+ }
+ Dot {
+  name Dot1
+  xpos -187
+  ypos -251
+ }
+set Nc4298000 [stack 0]
+ Shuffle {
+  in C_L_key
+  out rgb
+  name AOV_Shuffle
+  knobChanged "knob = nuke.thisKnob()\nif knob.name() == \"in\":\n    aov_shuffle = nuke.toNode(\"AOV_Shuffle\")\n    aov = aov_shuffle.knob(\"in\").value()\n    aov_copy = nuke.toNode(\"AOV_Apply\")\n    aov_copy.knob(\"channels\").setValue(aov)\n"
+  label "<b>\[value in]</b>"
+  xpos 133
+  ypos -266
+ }
+set Nc4298400 [stack 0]
+ Dot {
+  name Dot16
+  xpos 339
+  ypos -252
+ }
+ ILGC_LightLobeSplit {
+  name ILGC_LightLobeSplit1
+  label "\[value lobe]"
+  note_font "Verdana Bold"
+  xpos 305
+  ypos -221
+  lobe specular
+ }
+ Dot {
+  name Dot17
+  xpos 339
+  ypos -150
+ }
+push $Nc4298400
+ ILGC_LightLobeSplit {
+  name ILGC_LightLobeSplit
+  label "\[value lobe]"
+  note_font "Verdana Bold"
+  xpos 133
+  ypos -220
+ }
+ Switch {
+  inputs 2
+  which {{lobe2}}
+  name Switch2
+  xpos 133
+  ypos -153
+ }
+ Unpremult {
+  name Unpremult2
+  xpos 133
+  ypos -44
+  disable {{!parent.premult_workflow}}
+ }
+ Dot {
+  name Dot4
+  xpos 167
+  ypos 183
+ }
+set Nc4292000 [stack 0]
+ Dot {
+  name Dot3
+  xpos 527
+  ypos 183
+ }
+ Saturation {
+  inputs 1+1
+  saturation {{parent.saturation_before}}
+  name Saturation_Before
+  xpos 493
+  ypos 288
+ }
+ Grade {
+  inputs 1+1
+  white {{parent.colour.r} {parent.colour.g} {parent.colour.b} 1}
+  multiply {{parent.intensity}}
+  name Grade1
+  xpos 493
+  ypos 312
+ }
+ EXPTool {
+  inputs 1+1
+  mode Stops
+  gang false
+  red {{parent.exposure}}
+  green {{parent.exposure}}
+  blue {{parent.exposure}}
+  name Exposure1
+  xpos 493
+  ypos 336
+ }
+ ColorCorrect {
+  inputs 1+1
+  name ColorCorrect1
+  xpos 493
+  ypos 360
+ }
+ Saturation {
+  inputs 1+1
+  saturation {{parent.saturation_after}}
+  name Saturation_After
+  xpos 493
+  ypos 384
+ }
+ Dot {
+  name Dot6
+  xpos 527
+  ypos 471
+ }
+set Nc4291c00 [stack 0]
+ Dot {
+  name Dot18
+  xpos 779
+  ypos 471
+ }
+ Dot {
+  name Dot19
+  xpos 779
+  ypos 878
+ }
+push $Nc4291c00
+ Shuffle {
+  in rgb
+  out {{{parent.AOV_Shuffle.in}}}
+  name Shuffle_To_AOV
+  label "<b>\[value out]</b>"
+  xpos 493
+  ypos 642
+ }
+ Premult {
+  name Premult1
+  xpos 493
+  ypos 701
+  disable {{!parent.premult_workflow}}
+ }
+ Dot {
+  name Dot5
+  xpos 527
+  ypos 763
+ }
+push $Nc4291c00
+push $Nc4292000
+push $Nc4298000
+ Unpremult {
+  name Unpremult1
+  xpos -221
+  ypos -44
+  disable {{!parent.premult_workflow}}
+ }
+ Dot {
+  name Dot2
+  xpos -187
+  ypos 244
+ }
+ Merge2 {
+  inputs 2
+  operation from
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Merge1
+  xpos 133
+  ypos 241
+ }
+ Merge2 {
+  inputs 2
+  operation plus
+  Achannels rgb
+  Bchannels rgb
+  output rgb
+  name Merge2
+  xpos 133
+  ypos 467
+ }
+ Copy {
+  inputs 2
+  channels C_L_key
+  name AOV_Apply
+  xpos 133
+  ypos 748
+ }
+ Premult {
+  name Premult2
+  xpos 133
+  ypos 827
+  disable {{!parent.premult_workflow}}
+ }
+set N613b2800 [stack 0]
+ Switch {
+  inputs 2
+  which {{checkAov}}
+  name Switch3
+  xpos 133
+  ypos 875
+ }
+ Output {
+  name Output1
+  xpos 133
+  ypos 914
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote5
+  label "To make sure we keep AOV math correct\nwe need to replace the adjusted AOV.\n(This is set via the knobChanged python code)"
+  note_font_size 15
+  xpos 6
+  ypos 642
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote1
+  label "Mask will automatically turn on\nor off depending if mask is plugged in."
+  note_font_size 15
+  xpos 711
+  ypos 59
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote4
+  label "Push RGB back into the chosen AOV.\n(This is knob linked)"
+  note_font_size 15
+  xpos 404
+  ypos 567
+ }
+ StickyNote {
+  inputs 0
+  name StickyNote2
+  label "There is a \"knobChanged\" python code\non this Shuffle knob. It is linked to the \"AOV_Apply\""
+  note_font_size 15
+  xpos -6
+  ypos -317
+ }
+push $N613b2800
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push 0
+push $Nc4298400
+ Viewer {
+  inputs 10
+  frame_range 1001-1102
+  fps 25
+  input_number 9
+  monitorOutNDISenderName "Nuke - emptySceneNuke_FRED_COMPO_aovGrade - Viewer1"
+  name Viewer1
+  xpos -482
+  ypos 553
+ }
+end_group

@@ -33,9 +33,11 @@
 
 import os
 from pathlib import Path
+import sys
 
 from PrismUtils.Decorators import err_catcher_plugin as err_catcher
 from PrismCore import PrismCore
+
 
 class Prism_pipe_plugins_loader_Functions(object):
     def __init__(self, core: PrismCore, plugin):
@@ -55,13 +57,33 @@ class Prism_pipe_plugins_loader_Functions(object):
     def on_project_changed(self, *args, **kwargs):
         prism_job = os.getenv("PRISM_JOB")
         if not prism_job:
-            return
-        plugin_base_directory = Path(prism_job) / ".pipelines_deploy" / "prism" / "plugins"
+            prism_job = Path(self.core.projectPath).as_posix()
+            os.environ["PRISM_JOB"] = prism_job
+        general_script_directory = (
+            Path(prism_job) / ".pipelines_deploy" / "general" / "scripts"
+        )
+        if (
+            general_script_directory.exists()
+            and general_script_directory.as_posix() not in sys.path
+        ):
+            sys.path.insert(0, general_script_directory.as_posix())
+        general_script_beta_directory = (
+            Path(prism_job) / ".pipelines_deploy" / "general" / "scripts_beta"
+        )
+        if (
+            general_script_beta_directory.exists()
+            and general_script_beta_directory.as_posix() not in sys.path
+            and os.getenv("ILL_BETA_MODE")
+        ):
+            sys.path.insert(0, general_script_beta_directory.as_posix())
+        plugin_base_directory = (
+            Path(prism_job) / ".pipelines_deploy" / "prism" / "plugins"
+        )
         if not plugin_base_directory.exists():
             return
         plugins_dir = [
-            p for p in plugin_base_directory.iterdir()
+            p
+            for p in plugin_base_directory.iterdir()
             if p.is_dir() and not p.name.endswith("dist-info")
         ]
         self.core.plugins.loadPlugins(pluginPaths=plugins_dir)
-

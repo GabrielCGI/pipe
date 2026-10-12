@@ -467,9 +467,8 @@ class CopyApp:
 
     def start_preview_mode_thread(self):
         """Start the file copy operation in a separate thread."""
-        self.preview_mode()
-        # preview_thread = threading.Thread(target=self.preview_mode)
-        # preview_thread.start()
+        preview_thread = threading.Thread(target=self.preview_mode)
+        preview_thread.start()
 
     def preview_mode(self):
         self.preview_button["state"] = "disable"

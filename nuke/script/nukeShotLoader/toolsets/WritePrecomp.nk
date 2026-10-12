@@ -1,0 +1,120 @@
+set cut_paste_input [stack 0]
+version 15.1 v5
+push $cut_paste_input
+Remove {
+ operation keep
+ channels rgba
+ channels2 depth
+ name Remove1
+ selected true
+ xpos -53
+ ypos -149
+}
+Dot {
+ name Dot1
+ selected true
+ xpos -19
+ ypos -125
+}
+Write {
+ channels all
+ file "\[value renderpath]"
+ file_type exr
+ dw_compression_level 85
+ interleave channels
+ first_part rgba
+ raw true
+ create_directories true
+ first 1001
+ last 1100
+ checkHashOnRead false
+ version 148
+ in_colorspace scene_linear
+ out_colorspace scene_linear
+ ocioColorspace scene_linear
+ display "sRGB - Display"
+ view "ACES 1.0 - SDR Video"
+ name WritePrecomp1
+ knobChanged "\nn=nuke.thisNode()\nn\['postage_stamp'].setValue(False)\n"
+ autolabel "nuke.thisNode().name() + ('\\n' + nuke.thisNode()\['label'].evaluate() if nuke.thisNode()\['label'].evaluate() else '')"
+ label "\[lindex \[regexp -inline \{^\[^_]+\} \[file tail \[value root.name]]] 0]_precomp_\[value identifier]_v\[format %03d \[value versions]].####.exr"
+ selected true
+ xpos -53
+ ypos -107
+ addUserKnob {20 tab_prism l Prism}
+ addUserKnob {1 identifier l "identifier : precomp_"}
+ identifier xxxx
+ addUserKnob {3 versions l "version :" t "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()-1)\n" +INVISIBLE}
+ addUserKnob {22 add_version l + -STARTLINE +INVISIBLE T "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()+1)\n"}
+ addUserKnob {22 sub_version l - -STARTLINE +INVISIBLE T "n=nuke.thisNode()\nk=n.knob('versions')\nk.setValue(k.value()-1)\n"}
+ addUserKnob {1 comment l "comment (optional)" +INVISIBLE}
+ addUserKnob {4 location +INVISIBLE M {global}}
+ addUserKnob {26 ""}
+ addUserKnob {1 fileName l filepath +INVISIBLE}
+ fileName I:/yuka_2604/03_Production/Shots/SQ0010/SH0010/Renders/2dRender/FAR_BG/v001/SQ0010-SH0010_FAR_BG_v001.####.exr
+ addUserKnob {22 refresh l Refresh +INVISIBLE T pcore.appPlugin.getOutputPath(nuke.thisNode()) +STARTLINE}
+ addUserKnob {22 startRender l Render T "from src.ui import write_render\nwrite_render.render_write(nuke.thisNode())" +STARTLINE}
+ addUserKnob {22 startRenderPrevVersion l "Render as previous version..." -STARTLINE T "from src.ui import write_render\nwrite_render.render_previous_version(nuke.thisNode())"}
+ addUserKnob {6 submitJob l "Submit Job" -STARTLINE}
+ addUserKnob {26 prevFileName l "previous filepath" +INVISIBLE T "I:/frederic_2603/03_Production/Shots/SBX/mathieu/Renders/2dRender/test01/v001/SBX-mathieu_test01_v001.####. "}
+ addUserKnob {22 openDir l "Open In..." +INVISIBLE T pcore.appPlugin.openInClicked(nuke.thisNode()) +STARTLINE}
+ addUserKnob {22 createRead l "Create Read" -STARTLINE +INVISIBLE T pcore.appPlugin.createRead(nuke.thisNode())}
+ addUserKnob {6 media_conversion_use l "media conversion" +INVISIBLE +STARTLINE}
+ addUserKnob {4 media_conversion_preset l preset +INVISIBLE M {jpg "mov (prores)" "mp4 (burn-in)" "mp4 (slate + burn-in)" mp4 png slate "Illogic - mp4 to Shotgrid - ACEScg to Rec.709" "Illogic - mp4 with burnin - ACEScg to sRGB" "Illogic - mp4 with burnin - ACEScg to REC709.json" "Illogic - proRes with burnin - ACEScg to REC709" "Illogic - mp4 with burnin - Crop to 1.77 - ACEScg to REC709" mp4_discord "Illogic - mp4 with burnin" "illogic - mp4 data burnin - anim"}}
+ addUserKnob {22 media_conversion_refresh l refresh -STARTLINE +INVISIBLE T "pcore.getPlugin(\"MediaExtension\").nuke_onMediaConversionRefresh()"}
+ addUserKnob {22 media_conversion_edit l edit... -STARTLINE +INVISIBLE T "pcore.getPlugin(\"MediaExtension\").onEditMediaConversionClicked()"}
+ addUserKnob {6 project_management_publish l "publish to Shotgrid" +INVISIBLE +STARTLINE}
+ addUserKnob {1 folderpath l "folderpath :" +INVISIBLE}
+ folderpath "\[lindex \[regexp -inline \{^.*?/Shots/\} \[value fileName]] 0]\[join \[lrange \[regexp -inline \{^(\[^-]+)-(\[^_]+)\} \[file tail \[value root.name]]] 1 2] /]/Renders/2dRender/precomp_\[value identifier]/"
+ addUserKnob {1 renderpath l "renderpath :" +INVISIBLE}
+ renderpath "\[value folderpath]v\[format %03d \[value versions]]/\[lindex \[regexp -inline \{^\[^_]+\} \[file tail \[value root.name]]] 0]_precomp_\[value identifier]_v\[format %03d \[value versions]].####.exr"
+ addUserKnob {1 tag +INVISIBLE}
+ tag PrecompWrite
+ addUserKnob {3 precomp_write l "" +STARTLINE +INVISIBLE}
+ precomp_write 2
+ addUserKnob {26 render_info_divider l "" +STARTLINE}
+ addUserKnob {3 render_version l version}
+ render_version {{"\[value versions]"}}
+ addUserKnob {52 render_output l filepath T "__import__('src.ui.knob_widgets', fromlist=\['OutputPath']).OutputPath(nuke.thisNode())" +STARTLINE}
+ addUserKnob {22 open_in_explorer l "Open In Explorer" T "from src.ui import write_render\nwrite_render.open_in_explorer(nuke.thisNode())" +STARTLINE}
+}
+Group {
+ name SW_Precomp1
+ tile_color 0xaa2c2cff
+ label Live
+ selected true
+ xpos -53
+ ypos -71
+ addUserKnob {20 precomp l Precomp}
+ addUserKnob {3 precomp_switch l "" +STARTLINE +INVISIBLE}
+ precomp_switch 2
+ addUserKnob {3 which t "0 = live upstream, 1 = cached render. Set by the Render Manager."}
+ addUserKnob {26 precomp_status l status T Live}
+ addUserKnob {1 cache_file l cache +DISABLED}
+}
+ Read {
+  inputs 0
+  in_colorspace scene_linear
+  out_colorspace scene_linear
+  name CacheRead
+  xpos -150
+  disable true
+ }
+ Input {
+  inputs 0
+  name Input
+  xpos 0
+ }
+ Switch {
+  inputs 2
+  which {{parent.which}}
+  name Switch
+  xpos 0
+  ypos 100
+ }
+ Output {
+  name Output
+  xpos 0
+  ypos 200
+ }
+end_group

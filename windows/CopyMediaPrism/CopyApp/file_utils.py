@@ -24,6 +24,8 @@ default_identifiers = {
 }
 added_seq_log_end = []
 
+PATTERN_VERSION = re.compile(r"_v(\d+)")
+
 
 # Function to create or load the department identifier JSON file
 def load_or_create_department_identifiers(json_path=json_default_name):
@@ -88,8 +90,46 @@ def find_files(
     exclusions.append("_thumbs")
 
     files_dict = {}
+
+    def _find_files_helper(
+        pattern, seq_name, plan_name, departement, identifier, version, no_department
+    ):
+        for v_path in version.glob(pattern):
+            match = PATTERN_VERSION.search(v_path.as_posix())
+            if not match:
+                continue
+            version = int(match.group(1))
+            if no_department:
+                base_name = f"{seq_name}_{plan_name}"
+            else:
+                base_name = f"{seq_name}_{plan_name}_{departement}"
+
+            # Keep only the highest version for each identifier in the department
+            if base_name not in files_dict or (
+                (
+                    "anim" in departement.lower()
+                    and os.path.getmtime(v_path)
+                    > files_dict[base_name]["modification_time"]
+                )
+                or (
+                    version > files_dict[base_name]["version"]
+                    and identifier == files_dict[base_name]["identifier"]
+                )
+            ):
+                files_dict[base_name] = {
+                    "path": v_path.as_posix(),
+                    "version": version,
+                    "identifier": identifier,
+                    "sequence": seq_name,
+                    "plan": plan_name,
+                    "modification_time": os.path.getmtime(v_path),
+                }
+                if not no_department:
+                    files_dict[base_name]["departement"] = departement
+                return True
+        return False
+
     # Regular expression to find version numbers like _v001
-    pattern_version = re.compile(r"_v(\d+)")
 
     playblast_pattern = source_dir + "/*/*/Playblasts/**"
     renders2d_pattern = source_dir + "/*/*/Renders/2dRender/**"
@@ -136,39 +176,25 @@ def find_files(
                 if version.as_posix().endswith(")"):
                     continue
 
-                for v_path in version.glob("*"):
-                    match = pattern_version.search(v_path.as_posix())
-                    if not match:
-                        continue
-                    version = int(match.group(1))
-                    if no_department:
-                        base_name = f"{seq_name}_{plan_name}"
-                    else:
-                        base_name = f"{seq_name}_{plan_name}_{departement}"
-
-                    # Keep only the highest version for each identifier in the department
-                    if base_name not in files_dict or (
-                        (
-                            "anim" in departement.lower()
-                            and os.path.getmtime(v_path)
-                            > files_dict[base_name]["modification_time"]
-                        )
-                        or (
-                            version > files_dict[base_name]["version"]
-                            and identifier == files_dict[base_name]["identifier"]
-                        )
-                    ):
-                        files_dict[base_name] = {
-                            "path": v_path.as_posix(),
-                            "version": version,
-                            "identifier": identifier,
-                            "sequence": seq_name,
-                            "plan": plan_name,
-                            "modification_time": os.path.getmtime(v_path),
-                        }
-                        if not no_department:
-                            files_dict[base_name]["departement"] = departement
-                        found = True
+                found = _find_files_helper(
+                    "*",
+                    seq_name,
+                    plan_name,
+                    departement,
+                    identifier,
+                    version,
+                    no_department,
+                )
+                if not found:
+                    found = _find_files_helper(
+                        "*/*",
+                        seq_name,
+                        plan_name,
+                        departement,
+                        identifier,
+                        version,
+                        no_department,
+                    )
 
     if log_func and debug is True:
         for base_name, info in files_dict.items():

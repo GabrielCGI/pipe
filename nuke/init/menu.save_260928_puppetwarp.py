@@ -1,0 +1,341 @@
+#
+#
+#  Copyright (c) 2014, 2015, 2016, 2017 Psyop Media Company, LLC
+#  See license.txt
+#
+# Pablo Edit 251105
+
+# coding: utf-8
+import sys
+import nuke
+import nukescripts
+import os.path
+
+print('Version 251105')
+
+if nuke.NUKE_VERSION_MAJOR==12:
+    print("Loading Nuke Menu as version 12...")
+    ### -------------------------------------------------------------------------------------------
+    ### ----------------------------------     Nuke 12      ---------------------------------------
+    ### -------------------------------------------------------------------------------------------
+
+    print('Version 13')
+
+    from nukescripts import panels
+    import LayerShuffler
+    from auto_comp.AutoComp import AutoComp
+    # from auto_compV2.AutoComp import AutoComp 
+    import auto_compV2.AutoComp as auto_comp_v2
+    from nuke_scanner.NukeScanner import NukeScanner
+    from nuke_scanner import select_unconnected_read
+    from nuke_scanner import nuke_delete
+    import nuke_scanner_old.NukeScanner as NukeScannerOld
+    import nuke_scanner_old.nuke_delete as nuke_delete_old
+
+    from crypto import crypto_extract
+
+    import cryptomatte_utilities
+    import MultiChannelCombine
+    import nukeReadLoader
+    import noice_aov_print
+    import DeadlineNukeClient
+
+    panels.registerWidgetAsPanel("LayerShuffler.LayerShuffler", "Layer Shuffler", "LayerShufflerPanelId")
+    panels.registerWidgetAsPanel("AutoComp", 'AutoComp', 'illogic_studios.auto_comp')
+    panels.registerWidgetAsPanel("auto_comp_v2.AutoComp", 'AutoComp V2', 'illogic_studios.autocompV2')
+
+    cryptomatte_utilities.setup_cryptomatte_ui()
+    collectMenu = nuke.menu("Nodes").addMenu("Collect_Files")
+    collectMenu.addCommand('Collect Files', 'collectFiles.collectFiles()')
+    collectMenu.addCommand('Help', 'collectFiles.myBlog()')
+
+    illogicMenu = nuke.menu("Nodes").addMenu("bloom","bloom.png")
+    illogicMenu.addCommand("Delete unused render", "NukeScanner().run()")
+    illogicMenu.addCommand("Delete unused render (OLD)", "NukeScannerOld.NukeScanner().run()")
+    illogicMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
+    illogicMenu.addCommand("Truly Delete unused render (OLD)", "nuke_delete_old.run()")
+    illogicMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
+    illogicMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
+    illogicMenu.addCommand("Localization policy on", "set_localization_policy_on()")
+
+    toolbar = nuke.toolbar("Nodes")
+    toolbar.addMenu("VideoCopilot", icon="VideoCopilot.png")
+    toolbar.addCommand( "VideoCopilot/OpticalFlares", "nuke.createNode('OpticalFlares')", icon="OpticalFlares.png")
+
+
+    menubar = nuke.menu("Nuke")
+    tbmenu = menubar.addMenu("&Thinkbox")
+    tbmenu.addCommand("Submit Nuke To Deadline", DeadlineNukeClient.main, "")
+
+    toolbar = nuke.toolbar("Nodes")
+    toolbar.addMenu("VideoCopilot", icon="VideoCopilot.png")
+    toolbar.addCommand( "VideoCopilot/OpticalFlares", "nuke.createNode('OpticalFlares')", icon="OpticalFlares.png")
+
+    # DAMIAN BINDER TOOLS
+    toolbar = nuke.toolbar("Nodes")
+    m = toolbar.addMenu("DamianBinder", icon="DamianBinderNukeLogo.png")
+    m.addCommand("HeatWave", "nuke.createNode(\"HeatWave\")", icon="HeatWave_Icon.png")# >>>PrismStart
+
+    def set_localization_policy_on():
+        for node in nuke.allNodes('Read'):
+            # Check if the localizationPolicy knob exists
+            if 'localizationPolicy' in node.knobs():
+                node['localizationPolicy'].setValue('on')
+
+    def create_write_local():
+        write_node = nuke.createNode('Write')
+
+        # Create custom name with increment : WriteLocal1, WriteLocal2 ...
+        base_name = "WriteLocal"
+        i = 1
+        while nuke.exists(base_name + str(i)):
+            i += 1
+
+        # Set parameters
+        write_node['name'].setValue(base_name + str(i))
+        write_node['tile_color'].setValue(0xFFF380FF)
+
+        # Calling functions from "Custom writer script"
+        write_node['beforeRender'].setValue('custom_writer.run_before()')
+        write_node['beforeFrameRender'].setValue('custom_writer.run_before_each_frame()')
+        write_node['afterFrameRender'].setValue('custom_writer.run_after_each_frame()')
+        write_node['afterRender'].setValue('custom_writer.run_after()')
+
+    nuke.menu('Nodes').addCommand('Image/WriteLocal', 'create_write_local()')
+
+    # === Select all Write nodes (Nuke 12) ===
+    def select_all_writes():
+        # deselect everything first
+        for n in nuke.allNodes():
+            n.setSelected(False)
+        # select all Write nodes
+        for w in nuke.allNodes('Write'):
+            w.setSelected(True)
+
+    # Ajoute la commande dans le menu Nuke (avec raccourci Ctrl+Alt+W)
+    nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, 'ctrl+alt+w')
+    # Si tu preferes SANS raccourci : remplace la ligne ci-dessus par :
+    # nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, '')
+
+    print("End loading Nuke Menu as version 12...")
+
+elif nuke.NUKE_VERSION_MAJOR>=13:
+    print("Loading Nuke MENU as version 13+ ...")
+
+    # ### -------------------------------------------------------------------------------------------
+    # ### ----------------------------------     Nuke 15+      --------------------------------------
+    # ### -------------------------------------------------------------------------------------------
+
+
+    from crypto import crypto_extract
+    import auto_comp as auto_comp
+    from nuke_scanner.NukeScanner import NukeScanner
+    import nuke_scannerv2.NukeScanner as NukeScannerV2
+    from nuke_scanner import select_unconnected_read
+    from nuke_scanner import nuke_delete
+    from nukescripts import panels
+    import importCamFromMetadata
+    import cleanexternalreads
+    import VCA_cryptoExtractor
+    import ilcg_scripts
+
+    import stamps
+    # >>>PrismStart
+    if ((not nuke.env["studio"]) or nuke.env["indie"]) and nuke.env.get("gui"):
+        if "pcore" in locals():
+            nuke.message("Prism is loaded multiple times. This can cause unexpected errors. Please clean this file from all Prism related content:\n\n%s\n\nYou can add a new Prism integration through the Prism Settings dialog" % __file__)
+        elif sys.version[0] == "2":
+            nuke.message("Prism supports only Python 3 versions of Nuke.\nPython 3 is the default in Nuke 13 and later.")
+        else:
+            import os
+            import sys
+
+            prismRoot = os.getenv("PRISM_ROOT")
+
+            if not prismRoot:
+                prismRoot = "C:/ILLOGIC_APP/Prism/2.0.16/app"
+
+            scriptDir = os.path.join(prismRoot, "Scripts")
+
+            if scriptDir not in sys.path:
+                sys.path.insert(0, scriptDir)
+
+            import PrismCore
+
+            pcore = PrismCore.PrismCore(app="Nuke")
+    # <<<PrismEnd
+    auto_comp.pcore = pcore
+
+    # ------ Panels Registration ------
+
+    # auto comp panel
+    panels.registerWidgetAsPanel("auto_comp.main(False)", 'AutoComp', 'illogic_studios.autocomp')
+
+    # ------ Custom Menu ------ 
+
+    # Optical Flare Menu
+    toolbar: nuke.ToolBar = nuke.toolbar("Nodes")
+    toolbar.addMenu("VideoCopilot", icon="VideoCopilot.png")
+    toolbar.addCommand( "VideoCopilot/OpticalFlares", "nuke.createNode('OpticalFlares')", icon="OpticalFlares.png")
+
+    # Illogic Frog (TODO Faire du menage)
+    illogicMenu: nuke.Menu = nuke.menu("Nodes").addMenu("bloom", icon="bloom.png")
+    illogicMenu.addCommand("VCA Cryptomatte Extractor", "VCA_cryptoExtractor.create_cryptomatte_nodes()")
+    illogicMenu.addCommand("Extract crypto as mask", "crypto_extract.run()", "Ctrl+Shift+E")
+
+    # Scripts menus
+    ilgcMenu: nuke.Menu = illogicMenu.addMenu("ILGC Suite")
+    ilgcMenu.addCommand('ILGC_PosProject', 'nuke.createNode("ILGC_PosProject")')
+    ilgcSubTracker: nuke.Menu = ilgcMenu.addMenu("ILGC_OFTracker")
+    ilgcSubTracker.addCommand('ILGC_OFTracker', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/ILGC_OFTracker.nk\")')
+    ilgcSubTracker.addCommand("Retrack Every Nodes", "ilcg_scripts.retrack_every_nodes()")
+    ilgcSubTracker.addCommand("Retrack Selected Nodes", "ilcg_scripts.retrack_selected_nodes()")
+    ilgcMenu.addCommand('ILGC_ReadCleanup', 'nuke.createNode("ILGC_ReadCleanup")')
+    ilgcMenu.addCommand('ILGC_Kuwahara', 'nuke.createNode("ILGC_Kuwahara")')
+    ilgcMenu.addCommand('ILGC_HexTile', 'nuke.createNode("ILGC_HexTile")')
+    ilgcMenu.addCommand('ILGC_LightLobeSplit', 'nuke.createNode("ILGC_LightLobeSplit")')
+    ilgcMenu.addCommand('ILGC_StylisedMotionBlur', 'nuke.createNode("ILGC_StylisedMotionBlur")')
+    ilgcMenu.addCommand('ILGC_AOVGrade', 'nuke.createNode("ILGC_AOVGrade")')
+    ilgcMenu.addCommand('WritePrecomp', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/WritePrecomp.nk\")')
+    ilgcMenu.addCommand('WriteCompo', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/WriteCompo.nk\")')
+
+    # Rivers menus
+    #riversMenu: nuke.Menu = illogicMenu.addMenu("Rivers Tools")
+    #riversMenu.addCommand('RIV_BringBackDetails', 'nuke.createNode("RIV_BringBackDetails")')
+    #riversMenu.addCommand('RIV_EdgeCrushChar', 'nuke.createNode("RIV_EdgeCrushChar")')
+    #riversMenu.addCommand('RIV_Kuwahara', 'nuke.createNode("RIV_Kuwahara")')
+    #riversMenu.addCommand('RIV_ReadCleanup', 'nuke.createNode("RIV_ReadCleanup")')
+    #riversMenu.addCommand('RIV_StylisedChar', 'nuke.createNode("RIV_StylisedChar")')
+    #riversMenu.addCommand('RIV_ZDefocus', 'nuke.createNode("RIV_ZDefocus")')
+    #riversMenu.addCommand('RIV_BrushScatter', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_BrushScatter.nk\")')
+    #riversMenu.addCommand('RIV_ZDefocus_CHILD', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_ZDefocus_CHILD.nk\")')
+    #riversMenu.addCommand('RIV_FixEyeSpec', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/RIV_FixEyeSpec.nk\")')
+
+    # Fred Menu
+    fredMenu: nuke.Menu = illogicMenu.addMenu("Fred Tools")
+    fredMenu.addCommand('FRED_StylisedChar', 'nuke.createNode("FRED_StylisedChar")')
+    fredMenu.addCommand('FRED_EdgeCrush', 'nuke.createNode("FRED_EdgeCrush")')
+    fredMenu.addCommand('FRED_BringBackDetails', 'nuke.createNode("FRED_BringBackDetails")')
+    fredMenu.addCommand('FRED_MergeFlatten', 'nuke.createNode("FRED_MergeFlatten")')
+    fredMenu.addCommand('FRED_ZDefocus_MASTER', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/FRED_ZDefocus_MASTER.nk\")')
+    fredMenu.addCommand('FRED_ZDefocus_CHILDREN', 'nuke.nodePaste(\"R:/pipeline/pipe/nuke/gizmos/FRED_ZDefocus_CHILDREN.nk\")')
+    # Tools menus
+    toolsMenu: nuke.Menu = illogicMenu.addMenu("Tools")
+    toolsMenu.addCommand("Magnific upscale" , "nuke.nodePaste(\"R:/pipeline/networkInstall/Nuke/nuke15+_configs/plugins/nukeToMagnific/nuke_magnific/Magnific.nk\")")
+    toolsMenu.addCommand("Anim Buddy", "nuke.createNode(\"AnimVuddy\")") # >>> Add Anim Buddy tool
+    toolsMenu.addCommand("Card Buddy", "nuke.createNode(\"CardBuddy\")") # >>> Add Card Buddy tool
+    toolsMenu.addCommand("DepthBuddy", "nuke.createNode(\"DepthBuddy\")") # >>> Add Depth Buddy tool
+    toolsMenu.addCommand("Flare Market", "nuke.createNode(\"FlareMarket\")") # >>> Add Flare Market tool
+    toolsMenu.addCommand("Mask Buddy", "nuke.createNode(\"MaskBuddy\")") # >>> Add Mask Buddy tool
+    toolsMenu.addCommand("Projection Buddy", "nuke.createNode(\"ProjectionBuddy\")") # >>> Add Projection Buddy tool
+    toolsMenu.addCommand("Reflection Buddy", "nuke.createNode(\"ReflectionBuddy\")") # >>> Add Reflecrion Buddy tool
+    toolsMenu.addCommand("aeRefractor", "nuke.createNode(\"aeRefracTHOR\")",  icon="aeRefracTHOR.png")
+    toolsMenu.addCommand("Import Cam from Metadata", "importCamFromMetadata.main()")
+
+    # Gizmos menus
+    nodesMenu: nuke.Menu = illogicMenu.addMenu("Nodes")
+    nodesMenu.addCommand('expoglow', 'nuke.createNode("expoglow")')
+    nodesMenu.addCommand('exponential glow', "nuke.createNode(\"exponentialGlow\")")
+
+    cleanMenu: nuke.Menu = illogicMenu.addMenu("Cleanup")
+    cleanMenu.addCommand("Delete unused render", "NukeScanner().run()")
+    cleanMenu.addCommand("Delete unused render (new)", "NukeScannerV2.NukeScanner().run()")
+    cleanMenu.addCommand("Truly Delete unused render", "nuke_delete.run()")
+    cleanMenu.addCommand("Select unused read nodes", "select_unconnected_read.run()")
+    cleanMenu.addCommand("Clean external reads", "cleanexternalreads.main(debug_mode=True)")
+    
+    ### edit folder path here ###
+    DVPath = "R:/pipeline/networkInstall/Nuke/nuke15+_configs/gizmos/Deep2VP_v40/asGroup/"
+
+    ### MJTLab - Deep2VP v4.0 ###
+    DVPFam = {"general" : ["Deep2VP","DVPToImage","DVPortal","DVPColorCorrect"] , 
+            "matte" : ["DVPmatte","DVPattern","DVProjection"] , 
+            "lighting" : ["DVPsetLight","DVPscene","DVPrelight","DVPrelightPT","DVPfresnel"] , 
+            "shader" : ["DVP_Shader","DVP_ToonShader"]
+            }   
+    ### hard code. Don't change it ###
+    toolbar = nuke.toolbar("Nodes")
+    DVP = toolbar.addMenu("Deep2VP", icon="Deep2VP.png")
+    for key,value in DVPFam.items() :
+        for item in value :
+            if key == "general" :
+                DVP.addCommand( "{0}".format(item), "nuke.nodePaste(\"{0}{1}.nk\")".format(DVPath,item), icon="{0}.png".format(item) )
+            else:
+                DVP.addCommand( "{0}/{1}".format(key,item), "nuke.nodePaste(\"{0}{1}/{2}.nk\")".format(DVPath,key,item), icon="{0}.png".format(item) )
+    ### end here ###
+    
+    ### Add callback to prevent loading script with wrong nuke version
+    import versioncheck
+    try:
+        versioncheck.load_versioncheck_callback()
+        print("Load version check callback")
+    except Exception as e:
+        print(f"Failed to load version check callback:\n{e}")
+
+    # === Select all Write nodes (Nuke 13+) ===
+    def select_all_writes():
+        # deselect everything first
+        for n in nuke.allNodes():
+            n.setSelected(False)
+        # select all Write nodes
+        for w in nuke.allNodes('Write'):
+            w.setSelected(True)
+
+    # Ajoute la commande dans le menu Nuke (avec raccourci Ctrl+Alt+W)
+    # nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, 'ctrl+alt+w')
+    # Si tu preferes SANS raccourci : remplace la ligne ci-dessus par :
+    # nuke.menu('Nuke').addCommand('Select/Select all Write nodes', select_all_writes, '')
+
+    print("End loading Nuke MENU as version 13+ ...")
+    if nuke.NUKE_VERSION_MAJOR<=14:
+        print("skip hack ocio")
+        custom_config_path = "R:/pipeline/networkInstall/OpenColorIO-Configs/cg-config-v1.0.0_aces-v1.3_ocio-v2.0.ocio"
+        os.environ["OCIO"] = custom_config_path
+        print("FORCE OCIO IN INIT.PY TO: %s"%(custom_config_path))
+
+        # Set the OCIO config to 'custom' mode
+        nuke.root()['OCIO_config'].setValue('custom')
+        # Set the path to the custom config
+        nuke.root()['customOCIOConfigPath'].setValue(custom_config_path)
+        print("End OCIO FIX ...")
+
+    # Nuke Ref Install
+    import nuke_ref
+    nuke_ref.install()
+
+    #menus added the 26.06.06 by Mat A.
+    # R:\pipeline\pipe\nuke\script\nukeDmpToolKit
+    import main
+
+    #R:\pipeline\pipe\nuke\script\dmpExrLayerBuilder
+    import export_layers
+
+    nuke.menu('Nuke').addCommand('DMP Tools/ProjIT',main.run, '')
+    nuke.menu('Nuke').addCommand('DMP Tools/exrLayerBuilderNode',export_layers.run, '')
+
+    #ADDED on 26.07.02 by Gab
+    try:
+        import comp_copernicus_bridge
+    except Exception as _e:
+        nuke.tprint("CopernicusBridge load error: {}".format(_e))
+
+    _m = nuke.menu("Nodes").addMenu("Copernicus", icon="")
+    _m.addCommand(
+        "Copernicus Bridge",
+        "import comp_copernicus_bridge; comp_copernicus_bridge.create_node()")
+    
+    # Register the Thinkbox / Submit Nuke To Deadline menu but hide it from
+    # the menubar. The command still exists and can be invoked either via
+    # `DeadlineNukeClient.main()` directly, or via
+    # `nuke.menu("Nuke").findItem("Thinkbox/Submit Nuke To Deadline").invoke()`.
+    import DeadlineNukeClient
+    menubar = nuke.menu("Nuke")
+    tbmenu = menubar.addMenu("&Thinkbox")
+    tbmenu.addCommand("Submit Nuke To Deadline", DeadlineNukeClient.main, "")
+    try:
+        tbmenu.action().setVisible(False)
+    except AttributeError:
+        # Older Nuke where nuke.Menu has no .action() — try via MenuItem lookup.
+        item = menubar.findItem("&Thinkbox") or menubar.findItem("Thinkbox")
+        if item is not None:
+            item.setVisible(False)

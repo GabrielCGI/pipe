@@ -1,53 +1,38 @@
+"""Registers the "Shot Loader" menu in Nuke.
+
+Loaded automatically once this folder is on the plugin path:
+    nuke.pluginAddPath(r"R:/pipeline/pipe/nuke/script/nukeShotLoader")
 """
-Nuke Menu Integration for Shot Asset Loader
 
-Installation:
-1. Copy the entire nukeGetShotAssets folder to a location accessible by Nuke
-2. Add this to your ~/.nuke/menu.py or init.py:
-
-   import sys
-   sys.path.append("r:/<path>/nukeShotLoader")
-   import menu
-
-This will add "Shot Asset Loader" to the Custom menu in Nuke.
-"""
+import os
+import sys
+import traceback
 
 import nuke
-import sys
-import os
 
-# Add src to path
-current_dir = os.path.dirname(__file__)
-src_dir = os.path.join(current_dir, "src")
+# v1 precomp scripts import `module_precomp` flat, so src/ must be importable.
+_SRC = os.path.join(os.path.dirname(os.path.abspath(__file__)), "src")
+if _SRC not in sys.path:
+    sys.path.insert(0, _SRC)
 
-if src_dir not in sys.path:
-    sys.path.insert(0, src_dir)
-
-# Import the UI function
 try:
-    from src.ui_loader_simple import show_shot_asset_loader, show_shot_render_manager
+    from src.precomp import commands, watcher
+    from src.ui.main_window import show_shot_asset_loader, show_shot_render_manager
 
-    # Add to Shot Loader menu (or create it if it doesn't exist)
-    toolbar = nuke.menu("Nuke")
-    custom_menu = toolbar.addMenu("Shot Loader")
-
-    # Add the Shot Asset Loader menu item
-    custom_menu.addCommand(
-        "Shot Asset Loader",
-        show_shot_asset_loader,
-        "Ctrl+Alt+A"  # Keyboard shortcut
-    )
-
-    custom_menu.addCommand(
-        "Shot Render Manager",
-        show_shot_render_manager,
-        "Ctrl+Alt+W"
-    )
-
-    print("[nukeGetShotAssets] Shot Asset Loader menu added successfully")
-
+    _menu = nuke.menu("Nuke").addMenu("Shot Loader")
+    _menu.addCommand("Shot Asset Loader", show_shot_asset_loader, "Ctrl+Alt+A")
+    _menu.addCommand("Shot Render Manager", show_shot_render_manager, "Ctrl+Alt+W")
+    _menu.addSeparator()
+    _menu.addCommand("Precomp/Insert Precomp", commands.insert_precomp)
+    _menu.addCommand("Precomp/Insert Compo Write", commands.insert_compo_write)
+    _menu.addCommand("Precomp/Refresh Precomps", commands.refresh, "Ctrl+Alt+R")
+    _menu.addCommand("Precomp/Upgrade Precomps", commands.upgrade)
+    watcher.install()
+    # Prism tab of the Compo / Precomp Writes of each script opened -> the Shot Loader's.
+    nuke.addOnScriptLoad(commands.upgrade_prism_tabs)
+    nuke.addKnobChanged(commands.lock_version_display, nodeClass="Write")
+    print("[nukeShotLoader] Shot Loader menu added")
 except Exception as e:
     nuke.message(f"Error loading Shot Asset Loader menu: {e}")
-    print(f"[nukeGetShotAssets] Error: {e}")
-    import traceback
+    print(f"[nukeShotLoader] Error: {e}")
     traceback.print_exc()

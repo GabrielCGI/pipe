@@ -101,7 +101,7 @@ global proc shelf_IllogicMTLayout () {
         -style "iconOnly" 
         -marginWidth 0
         -marginHeight 1
-        -command "from importlib import reload\nimport layoutTools\nreload(layoutTools)\n\n\nlayoutTools.splitShots()" 
+        -command "import PrismInit\n\nfrom importlib import reload\nimport lay_maya_shelf_snippets\nreload(lay_maya_shelf_snippets)\n\n\nlay_maya_shelf_snippets.splitShots(PrismInit.pcore.projectPath.replace(\"\\\\\", \"/\"))" 
         -sourceType "python" 
         -commandRepeatable 1
         -flat 1

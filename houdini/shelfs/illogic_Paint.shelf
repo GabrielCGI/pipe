@@ -11,8 +11,8 @@
     <memberTool name="quick_null"/>
     <memberTool name="copbrushify_qol"/>
     <memberTool name="compo_background"/>
-    <memberTool name="PaintToolImport"/>
     <memberTool name="browser"/>
+    <memberTool name="cache_manager"/>
   </toolshelf>
 
   <tool name="copstartsample_toggle" label="Sample Canvas" icon="COP2_color">
@@ -594,5 +594,18 @@ from paint_cop_recolor import recolor
 importlib.reload(recolor)
 recolor.sample_hotkey_install()   # 'I' over the viewport toggles result-mode
 hou.ui.setStatusMessage("Sample-at-start: " + recolor.start_sample_toggle('result'))]]></script>
+  </tool>
+
+  <tool name="cache_manager" label="cache_manager" icon="hicon:/SVGIcons.index?APEX_math.svg">
+    <script scriptType="python"><![CDATA[import sys, importlib
+
+path = "R:/pipeline/pipe/houdini/scripts/paint_cop_recolor"
+if path not in sys.path:
+    sys.path.insert(0, path)
+
+import paint_cache_export
+importlib.reload(paint_cache_export)
+
+paint_cache_export.show()]]></script>
   </tool>
 </shelfDocument>

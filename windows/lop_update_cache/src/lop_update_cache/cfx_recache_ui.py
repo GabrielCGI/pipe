@@ -8,6 +8,11 @@ dropdown filled from the project's pipeline.json, and other settings are
 persisted via QSettings. This UI does NOT load Houdini itself: it runs
 recache_cfx.py through hython as a subprocess (QProcess) to read shot state
 (--status) and re-cache the selection (--apply).
+
+A Maya scene (.ma) switches the window to RIG mode: the table lists the rigs the
+scene references (read from the .ma text, instant, no Maya), and the update runs
+recache_maya.py through mayapy: swap the ticked rigs -> refuse if animation was lost
+-> version-up (or leave the scene untouched) -> run the ticked Prism exports.
 """
 
 import os
@@ -34,10 +39,26 @@ except ImportError:
     from PySide2.QtCore import Qt, QProcess, QProcessEnvironment, QSettings
     from PySide2.QtCore import QThread, QTimer, Signal
 
-from lop_update_cache import preview
+from lop_update_cache import maya_refs, preview
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 ENGINE = os.path.join(HERE, "recache_cfx.py")
+ENGINE_MAYA = os.path.join(HERE, "recache_maya.py")
+
+# Type de scene : decide du moteur (hython / mayapy) et de ce que montre la fenetre.
+HOUDINI_EXT = (".hip", ".hipnc", ".hiplc")
+MAYA_EXT = (".ma", ".mb")  # .mb = binaire : illisible sans Maya, jamais propose
+PICKER_EXT = HOUDINI_EXT + (".ma",)
+
+
+def scene_kind(path):
+    """'houdini' | 'maya' | '' selon l'extension de la scene."""
+    ext = os.path.splitext(path or "")[1].lower()
+    if ext in HOUDINI_EXT:
+        return "houdini"
+    if ext in MAYA_EXT:
+        return "maya"
+    return ""
 
 
 def _read_version():
@@ -75,17 +96,39 @@ STATUS_END = "<<<STATUS_JSON<<<"
 # l'UI qui les ecrit dans le sidecar -> un seul ecrivain de ce fichier.
 RECORDS_START = ">>>CACHE_RECORDS>>>"
 RECORDS_END = "<<<CACHE_RECORDS<<<"
+# verdict du moteur Maya (cf recache_maya.emit_result)
+MAYA_RESULT_START = ">>>MAYA_RESULT>>>"
+MAYA_RESULT_END = "<<<MAYA_RESULT<<<"
+MAYA_COMMENT = "auto update - lop_update_cache"
 
 DEFAULT_SETTINGS = {
-    "hython": r"C:\Program Files\Side Effects Software\Houdini 21.0.596\bin\hython.exe",
+    "hython": r"C:\Program Files\Side Effects Software\Houdini 21.0.729\bin\hython.exe",
+    "mayapy": r"C:\Program Files\Autodesk\Maya2025\bin\mayapy.exe",
     "stage_root": "/stage",
     "import_pattern": "{shot}",
     "cache_pattern": "cache_{shot}",
     "import_node_type": "prism::LOP_Import",
     "import_path_parm": "filepath",
-    "tracked_layer": "_layer_anm_master",
+    "tracked_layer": "_layer_anm_master",  # forme historique (1 layer), encore lue
+    "tracked_layers": ["_layer_anm_master"],  # forme courante : plusieurs layers suivis
+    "tracked_mode": "or",  # 'or' = un seul suffit ; 'and' = il faut qu'ils aient TOUS bouge
+    # sauvegarde de la scene apres l'update : 'version_up' (defaut = comportement historique)
+    # ou 'leave'. PAR UTILISATEUR (QSettings), JAMAIS dans le sidecar partage : sinon le
+    # choix de l'un s'imposerait au suivant qui ouvre la scene.
+    "save_mode": "version_up",
     "projects_root": "I:/",  # ou scanner les projets Prism (dossiers avec 00_Pipeline)
 }
+
+
+def as_layer_list(v):
+    """Normalise une valeur de settings en liste de layers. QSettings ne rend pas
+    fidelement une liste (str si 1 element) -> on accepte str, liste, None."""
+    if isinstance(v, str):
+        return [x.strip() for x in v.split(",") if x.strip()]
+    if isinstance(v, (list, tuple)):
+        return [str(x).strip() for x in v if str(x).strip()]
+    return []
+
 
 # env vars posees par le shelf tool Houdini pour auto-detecter le contexte courant
 ENV_PROJECT = "LOP_UPDATE_CACHE_PROJECT"  # chemin du pipeline.json du projet courant
@@ -98,12 +141,14 @@ SETTING_TO_FLAG = {
     "cache_pattern": "--cache-pattern",
     "import_node_type": "--import-node-type",
     "import_path_parm": "--import-path-parm",
-    "tracked_layer": "--tracked-layer",
+    # tracked layer(s) : PAS ici -- le flag est repetable, cf _engine_args
 }
 
 SETTING_HELP = {
     "hython": "Path to hython.exe used to run the engine.\n"
     "Auto-detected from your Houdini installs if left at a missing path.",
+    "mayapy": "Path to mayapy.exe used to update the rigs of a Maya scene (.ma).\n"
+    "Auto-detected from your Maya installs if left at a missing path.",
     "project_override": "Prism project.\n"
     "'(auto-detect)' = the project passed by Houdini when launched from the shelf, "
     "or derived by walking up from the .hip to a 00_Pipeline/pipeline.json.\n"
@@ -131,6 +176,27 @@ STATE_TEXT = {
 # Le bouton d'action ne fait plus que "recacher" : cfx/fx = re-cache, lighting = re-cache
 # + re-render sur la ferme. D'ou un libelle neutre.
 APPLY_LABEL = "Update selected shots"
+APPLY_LABEL_MAYA = "Update selected rigs"
+
+# Mode de sauvegarde de la scene apres l'update (choisi PAR RUN, memorise PAR UTILISATEUR)
+SAVE_VERSION_UP = "version_up"  # caches publies + version-up Prism de la scene
+SAVE_LEAVE = "leave"  # caches publies, scene NON ecrite (--no-save)
+SAVE_MODE_TEXT = {
+    SAVE_VERSION_UP: "Publishes the caches and saves a new scene version.",
+    SAVE_LEAVE: "Publishes the caches only. The scene file is not written, "
+    "so nobody's version chain changes.",
+}
+# meme choix pour une scene Maya, mais ce qui est publie, ce sont ses EXPORTS
+SAVE_MODE_TEXT_MAYA = {
+    SAVE_VERSION_UP: "Updates the rigs, saves a new scene version, then runs the "
+    "ticked exports.",
+    SAVE_LEAVE: "Updates the rigs and runs the ticked exports. The scene file is not "
+    "written, so nobody's version chain changes.",
+}
+SAVE_LEAVE_DRY_RUN = (
+    "No export ticked: dry run. The rigs are swapped in memory and checked for lost "
+    "animation, nothing is written."
+)
 
 # Animation "ca calcule" : sablier braille (police mono, largeur constante).
 SPINNER = "⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏"
@@ -142,6 +208,18 @@ _BUF_KEEP = 4 * 1024 * 1024
 # Ce que raconte le moteur -> phase lisible affichee EN BAS pendant le run.
 # (motif dans la ligne de log, libelle) ; 1er match gagne, ordre = du + precis au + large.
 PHASES = [
+    # moteur Maya (recache_maya.py) -- avant les motifs Houdini : "Scene chargee dans
+    # Maya" contient "Scene chargee", le plus precis doit gagner
+    ("Demarrage de Prism dans Maya", "Starting Maya + Prism…"),
+    (
+        "Chargement de la scene dans Maya",
+        "Loading the scene and its rigs in Maya (long)…",
+    ),
+    ("Scene chargee dans Maya", "Scene loaded — swapping the rigs…"),
+    ("Swap des rigs", "Swapping the rigs…"),
+    ("Verification de l'animation", "Checking that no animation was lost…"),
+    ("Version-up de la scene", "Saving the new scene version (Prism)…"),
+    ("Export Prism", "Exporting (Prism)…"),
     ("Rafraichissement de l'etat", "Refreshing the state of every shot (long)…"),
     ("Etat rafraichi", "State refreshed — finishing…"),
     ("SUBMIT RENDERS", "Submitting to the farm (Deadline)…"),
@@ -166,9 +244,44 @@ def _fmt_elapsed(sec):
     return "%dh %02dm" % (sec // 3600, (sec % 3600) // 60)
 
 
+PRISM_INTEGRATION = r"C:\ILLOGIC_APP\Prism\2.0.18\plugins\Houdini\Integration"
+
+
+def hython_python_version(hython_path):
+    """(major, minor) du python embarque, lu SANS lancer Houdini : la dll
+    `<HFS>/bin/python3XX.dll`. /!\ le dossier `python3XX` de l'install MENT
+    (Houdini 22.0.368 a un dossier 'python310' et tourne en python 3.13)."""
+    for dll in glob.glob(os.path.join(os.path.dirname(hython_path), "python3*.dll")):
+        m = re.search(r"python(\d)(\d+)\.dll$", os.path.basename(dll).lower())
+        if m:
+            return (int(m.group(1)), int(m.group(2)))
+    return None
+
+
+def prism_python_versions(integration=None):
+    """Versions de python pour lesquelles Prism fournit une integration Houdini."""
+    out = set()
+    try:
+        names = os.listdir(integration or PRISM_INTEGRATION)
+    except Exception:
+        return out
+    for d in names:
+        m = re.match(r"^python(\d+)\.(\d+)libs$", d)
+        if m:
+            out.add((int(m.group(1)), int(m.group(2))))
+    return out
+
+
 def detect_hython(configured):
-    """Return the configured hython if it exists, else the newest installed one.
-    'Newest' = tri NUMERIQUE de la version (pas lexical : 21.0.100 > 21.0.99)."""
+    """Le hython configure s'il existe, sinon le plus recent QUE PRISM SAIT CHARGER.
+
+    /!\ "le plus recent" tout court ne suffit pas : Houdini 22.0.368 tourne en python
+    3.13, pour lequel Prism 2.0.18 n'a pas d'integration -> PrismInit plante
+    (ModuleNotFoundError PySide2). Quand un poste desinstalle sa version de reference,
+    on tombait dessus en silence. On ne retient donc que les installs dont le python
+    embarque a une integration Prism ; a defaut (Prism introuvable) on garde l'ancien
+    comportement plutot que de ne rien proposer.
+    'Plus recent' = tri NUMERIQUE de la version (pas lexical : 21.0.100 > 21.0.99)."""
     if configured and os.path.exists(configured):
         return configured
     found = glob.glob(
@@ -181,7 +294,25 @@ def detect_hython(configured):
         m = re.search(r"Houdini ([\d.]+)", p)
         return tuple(int(x) for x in m.group(1).split(".")) if m else ()
 
-    return max(found, key=_vkey)
+    ok = prism_python_versions()
+    usable = [p for p in found if hython_python_version(p) in ok] if ok else []
+    return max(usable or found, key=_vkey)
+
+
+def detect_mayapy(configured):
+    """Le mayapy configure s'il existe, sinon celui du Maya le plus recent installe
+    (tri numerique de l'annee : Maya2025 > Maya2024)."""
+    if configured and os.path.exists(configured):
+        return configured
+    found = glob.glob(r"C:\Program Files\Autodesk\Maya*\bin\mayapy.exe")
+    if not found:
+        return configured or ""
+
+    def _ykey(p):
+        m = re.search(r"Maya(\d+)", p)
+        return int(m.group(1)) if m else 0
+
+    return max(found, key=_ykey)
 
 
 def derive_project(hip):
@@ -299,6 +430,14 @@ class SettingsDialog(QtWidgets.QDialog):
         row.addWidget(b_hy)
         self._add_row(form, "hython:", row, SETTING_HELP["hython"])
 
+        self.ed_mayapy = QtWidgets.QLineEdit(values.get("mayapy", ""))
+        b_my = QtWidgets.QPushButton("...")
+        b_my.clicked.connect(self._pick_mayapy)
+        row_my = QtWidgets.QHBoxLayout()
+        row_my.addWidget(self.ed_mayapy)
+        row_my.addWidget(b_my)
+        self._add_row(form, "mayapy:", row_my, SETTING_HELP["mayapy"])
+
         form.addRow(QtWidgets.QLabel("<b>Advanced</b> (node convention)"))
         self.ed_stage = QtWidgets.QLineEdit(values.get("stage_root", ""))
         self.ed_imp_pat = QtWidgets.QLineEdit(values.get("import_pattern", ""))
@@ -369,9 +508,17 @@ class SettingsDialog(QtWidgets.QDialog):
         if p:
             self.ed_hython.setText(p)
 
+    def _pick_mayapy(self):
+        p, _ = QtWidgets.QFileDialog.getOpenFileName(
+            self, "mayapy.exe", "", "mayapy (mayapy.exe)"
+        )
+        if p:
+            self.ed_mayapy.setText(p)
+
     def values(self):
         return {
             "hython": self.ed_hython.text().strip(),
+            "mayapy": self.ed_mayapy.text().strip(),
             "stage_root": self.ed_stage.text().strip() or "/stage",
             "import_pattern": self.ed_imp_pat.text().strip() or "{shot}",
             "cache_pattern": self.ed_cache_pat.text().strip() or "cache_{shot}",
@@ -380,12 +527,91 @@ class SettingsDialog(QtWidgets.QDialog):
         }
 
 
+class LayerFilterDialog(QtWidgets.QDialog):
+    """ "Advanced sorting" : suivre PLUSIEURS layers a la fois, en ANY (OU) ou ALL (ET).
+
+    Le cas courant (un seul layer) reste dans le dropdown de la fenetre : ce dialogue
+    n'existe que pour le cas avance, il ne doit donc rien encombrer par defaut."""
+
+    def __init__(self, parent, departments, selected, mode):
+        super().__init__(parent)
+        self.setWindowTitle("Advanced sorting - tracked layers")
+        self.resize(420, 520)
+        sel = set(selected or [])
+        v = QtWidgets.QVBoxLayout(self)
+        v.addWidget(
+            QtWidgets.QLabel(
+                "A shot is OUTDATED when the ticked layers moved. "
+                "A layer this shot doesn't consume is ignored for that shot."
+            )
+        )
+        row = QtWidgets.QHBoxLayout()
+        self.rb_or = QtWidgets.QRadioButton("ANY of them  (OR)")
+        self.rb_and = QtWidgets.QRadioButton("ALL of them  (AND)")
+        self.rb_or.setToolTip("Outdated as soon as ONE of the ticked layers moved.")
+        self.rb_and.setToolTip("Outdated only when they ALL moved.")
+        (self.rb_and if mode == "and" else self.rb_or).setChecked(True)
+        row.addWidget(self.rb_or)
+        row.addWidget(self.rb_and)
+        row.addStretch(1)
+        v.addLayout(row)
+        self.listw = QtWidgets.QListWidget()
+        for name, layer in departments or []:
+            ready = "(" in name or name == STACK_LABEL
+            it = QtWidgets.QListWidgetItem(
+                name if ready else "%s  (%s)" % (name, layer)
+            )
+            it.setData(Qt.UserRole, layer)
+            it.setFlags(it.flags() | Qt.ItemIsUserCheckable)
+            it.setCheckState(Qt.Checked if layer in sel else Qt.Unchecked)
+            self.listw.addItem(it)
+        v.addWidget(self.listw, 1)
+        btns = QtWidgets.QHBoxLayout()
+        b_all = QtWidgets.QPushButton("All")
+        b_none = QtWidgets.QPushButton("None")
+        b_all.clicked.connect(lambda: self._set_all(True))
+        b_none.clicked.connect(lambda: self._set_all(False))
+        btns.addWidget(b_all)
+        btns.addWidget(b_none)
+        btns.addStretch(1)
+        v.addLayout(btns)
+        bb = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+        )
+        bb.accepted.connect(self.accept)
+        bb.rejected.connect(self.reject)
+        v.addWidget(bb)
+
+    def _set_all(self, on):
+        for i in range(self.listw.count()):
+            self.listw.item(i).setCheckState(Qt.Checked if on else Qt.Unchecked)
+
+    def result_layers(self):
+        return [
+            self.listw.item(i).data(Qt.UserRole)
+            for i in range(self.listw.count())
+            if self.listw.item(i).checkState() == Qt.Checked
+        ]
+
+    def result_mode(self):
+        return "and" if self.rb_and.isChecked() else "or"
+
+
 class ProjectPicker(QtWidgets.QDialog):
     """Light project scene picker: cascading Sequence -> Shot -> Department -> Task
     -> Scenefile, built by listing the Prism project folders (no Prism dependency).
-    Returns the picked .hip path."""
+    Lists Houdini (.hip*) AND Maya (.ma) scenes. Returns the picked scene path."""
 
-    LEVELS = ["Sequence", "Shot", "Department", "Task", "Scenefile"]
+    # Meme forme d'arborescence des deux cotes, seuls les LIBELLES changent :
+    #   Shots/<SEQ>/<SHOT>/Scenefiles/<dept>/<task>/*.hip
+    #   Assets/<categorie>/<asset>/Scenefiles/<dept>/<task>/*.hip
+    # Une scene rangee sous Assets peut tres bien cacher de VRAIS shots (verifie sur
+    # frederic_2603 : Assets/FX/snowSetup, 77 imports tous en mode 'shot').
+    LEVELS_BY_KIND = {
+        "Shots": ["Sequence", "Shot", "Department", "Task", "Scenefile"],
+        "Assets": ["Category", "Asset", "Department", "Task", "Scenefile"],
+    }
+    KINDS = ("Shots", "Assets")
 
     # Colonnes a largeur PROPORTIONNELLE au contenu, pas 5 colonnes egales : les noms
     # de scene sont 3x plus longs que les autres niveaux et se faisaient tronquer.
@@ -393,22 +619,54 @@ class ProjectPicker(QtWidgets.QDialog):
     #   Sequence 96 px | Shot 171 | Department 95 | Task 112 | Scenefile 329
     # Elargir la fenetre ne suffit PAS : a colonnes egales il faudrait 1645 px de large
     # pour que Scenefile tienne, alors que le total reellement necessaire est ~830 px.
-    STRETCH = {"Sequence": 2, "Shot": 3, "Department": 2, "Task": 2, "Scenefile": 6}
+    STRETCH = {
+        "Sequence": 2,
+        "Shot": 3,
+        "Category": 2,
+        "Asset": 3,
+        "Department": 2,
+        "Task": 2,
+        "Scenefile": 6,
+    }
 
-    def __init__(self, parent, shots_root, current=""):
+    @property
+    def LEVELS(self):
+        return self.LEVELS_BY_KIND[self.kind]
+
+    def __init__(self, parent, roots, current=""):
         super().__init__(parent)
         self.setWindowTitle("Open scene from project")
         self.resize(1034, 550)
-        self.shots_root = shots_root
+        # `roots` : {"Shots": chemin, "Assets": chemin}. Un str = ancienne forme (Shots).
+        if isinstance(roots, str):
+            roots = {"Shots": roots}
+        self.roots = {k: v for k, v in (roots or {}).items() if v and os.path.isdir(v)}
+        self.kind = (
+            "Shots" if self.roots.get("Shots") else next(iter(self.roots), "Shots")
+        )
+        self.shots_root = self.roots.get("Shots", "")  # compat appelants existants
         self._path = ""
         v = QtWidgets.QVBoxLayout(self)
-        self.lbl_root = QtWidgets.QLabel(shots_root)
-        v.addWidget(self.lbl_root)
+        head = QtWidgets.QHBoxLayout()
+        self.radios = {}
+        for kind in self.KINDS:
+            rb = QtWidgets.QRadioButton(kind)
+            rb.setEnabled(kind in self.roots)
+            rb.setChecked(kind == self.kind)
+            rb.toggled.connect(lambda on, k=kind: self._set_kind(k) if on else None)
+            head.addWidget(rb)
+            self.radios[kind] = rb
+        self.lbl_root = QtWidgets.QLabel(self.roots.get(self.kind, ""))
+        head.addWidget(self.lbl_root, 1)
+        v.addLayout(head)
         cols = QtWidgets.QHBoxLayout()
         self.lists = []
+        self.level_labels = []
         for name in self.LEVELS:
             box = QtWidgets.QVBoxLayout()
-            box.addWidget(QtWidgets.QLabel(name))
+            lbl = QtWidgets.QLabel(name)
+            box.addWidget(lbl)
+            self.level_labels.append(lbl)
             lw = QtWidgets.QListWidget()
             lw.currentItemChanged.connect(self._on_select)
             box.addWidget(lw)
@@ -423,15 +681,31 @@ class ProjectPicker(QtWidgets.QDialog):
         self.bb.accepted.connect(self.accept)
         self.bb.rejected.connect(self.reject)
         v.addWidget(self.bb)
-        self._fill(0, shots_root)
+        self._fill(0, self.roots.get(self.kind, ""))
         self._preselect(current)
-        if self.lists[0].count() == 0:
-            self.lbl_root.setText(
-                "%s\n⚠ No sequences here - is this really the project's Shots "
-                "folder? (Cancel and pick the folder that contains 03_Production)"
-                % shots_root
-            )
-            self.lbl_root.setStyleSheet("color: %s;" % theme_colors(self)["orange"])
+        self._warn_if_empty()
+
+    def _warn_if_empty(self):
+        if self.lists[0].count():
+            return
+        self.lbl_root.setText(
+            "%s\n⚠ Nothing here - is this really the project's %s folder? "
+            "(Cancel and pick the folder that contains 03_Production)"
+            % (self.roots.get(self.kind, ""), self.kind)
+        )
+        self.lbl_root.setStyleSheet("color: %s;" % theme_colors(self)["orange"])
+
+    def _set_kind(self, kind):
+        """Bascule Shots <-> Assets : memes colonnes, autres libelles et autre racine."""
+        if kind not in self.roots or kind == self.kind:
+            return
+        self.kind = kind
+        for lbl, name in zip(self.level_labels, self.LEVELS):
+            lbl.setText(name)
+        self.lbl_root.setStyleSheet("")
+        self.lbl_root.setText(self.roots[kind])
+        self._fill(0, self.roots[kind])
+        self._warn_if_empty()
 
     def selected_path(self):
         return self._path
@@ -449,17 +723,20 @@ class ProjectPicker(QtWidgets.QDialog):
         except Exception:
             return []
         if files:
-            hips = [
-                n for n in names if n.lower().endswith((".hip", ".hipnc", ".hiplc"))
-            ]
-            hips.sort(key=self._vkey, reverse=True)
-            return [(n, os.path.join(base, n)) for n in hips]
+            # .hip* ET .ma : une scene d'anim Maya se met a jour depuis la meme fenetre
+            # (le .mb, binaire, n'est pas lisible sans Maya -> pas propose)
+            scenes = [n for n in names if n.lower().endswith(PICKER_EXT)]
+            scenes.sort(key=self._vkey, reverse=True)
+            return [(n, os.path.join(base, n)) for n in scenes]
         out = []
         for n in sorted(names):
             # Prism range les scenes de SEQUENCE sous un "shot" special nomme _sequence
             # (ex SQ0010/_sequence/Scenefiles/Lighting/...) -> il faut le MONTRER, sinon
             # les scenes lighting de sequence sont inatteignables. On continue de cacher
             # les autres _*/.* (thumbnails, archives, dossiers techniques).
+            # '@asset_path@' & co : gabarits Prism, pas des entites -> masques
+            if n.startswith("@") and n.endswith("@"):
+                continue
             if n.startswith(".") or (n.startswith("_") and n != "_sequence"):
                 continue
             full = os.path.join(base, n)
@@ -503,10 +780,19 @@ class ProjectPicker(QtWidgets.QDialog):
         if not current:
             return
         p = current.replace("\\", "/")
-        m = re.search(r"/Shots/([^/]+)/([^/]+)/Scenefiles/([^/]+)/([^/]+)/", p + "/")
+        m = re.search(
+            r"/(Shots|Assets)/([^/]+)/([^/]+)/Scenefiles/([^/]+)/([^/]+)/", p + "/"
+        )
         if not m:
             return
-        for level, name in enumerate(list(m.groups()) + [os.path.basename(current)]):
+        kind = m.group(1)
+        if kind != self.kind:  # la scene courante est de l'autre cote -> on bascule
+            if kind not in self.roots:
+                return
+            self.radios[kind].setChecked(True)  # declenche _set_kind
+        for level, name in enumerate(
+            list(m.groups()[1:]) + [os.path.basename(current)]
+        ):
             lw = self.lists[level]
             for i in range(lw.count()):
                 if lw.item(i).text() == name:
@@ -592,6 +878,79 @@ class FxChainDialog(QtWidgets.QDialog):
         return self.cb_apply_all.isChecked()
 
 
+class CachePickerDialog(QtWidgets.QDialog):
+    """Choix des lop_filecache a executer pour un shot. Un shot peut en avoir PLUSIEURS,
+    publiant des produits differents (verifie : `_layer_fx_snow_still` ET
+    `_layer_fx_snow_sim` sur le meme shot). On les identifie par leur PRODUIT, pas par
+    leur nom de node : 'lop_filecache3' ne dit rien, '_layer_fx_snow_sim' si.
+    Tout decocher = pas de re-cache (l'import est quand meme bumpe, le render soumis).
+    'Apply to all shots' propage PAR PRODUIT (les noms de node different d'un shot a
+    l'autre, les produits non). Retourne les CHEMINS coches."""
+
+    def __init__(self, parent, shot, caches, checked_paths):
+        super().__init__(parent)
+        self.setWindowTitle("Caches to re-cache - %s" % shot)
+        self.resize(620, 380)
+        v = QtWidgets.QVBoxLayout(self)
+        v.addWidget(
+            QtWidgets.QLabel(
+                "Tick the USD caches to re-cache for this shot. Default = all of them. "
+                "Unticking all = no re-cache (the import is still bumped, and the "
+                "render still submitted)."
+            )
+        )
+        self.listw = QtWidgets.QListWidget()
+        for c in caches:  # [{path, name, product}]
+            prod = c.get("product") or "(product unknown)"
+            it = QtWidgets.QListWidgetItem("%s     [%s]" % (prod, c.get("name") or ""))
+            it.setToolTip(c.get("path") or "")
+            it.setData(Qt.UserRole, c.get("path"))
+            it.setFlags(it.flags() | Qt.ItemIsUserCheckable)
+            it.setCheckState(
+                Qt.Checked
+                if c.get("path") in (checked_paths or set())
+                else Qt.Unchecked
+            )
+            self.listw.addItem(it)
+        v.addWidget(self.listw, 1)
+
+        row = QtWidgets.QHBoxLayout()
+        b_all = QtWidgets.QPushButton("Check all")
+        b_all.clicked.connect(lambda: self._set_all(True))
+        b_none = QtWidgets.QPushButton("Uncheck all")
+        b_none.clicked.connect(lambda: self._set_all(False))
+        row.addWidget(b_all)
+        row.addWidget(b_none)
+        row.addStretch(1)
+        self.cb_apply_all = QtWidgets.QCheckBox("Apply this selection to all shots")
+        self.cb_apply_all.setToolTip(
+            "On OK, copy this selection (by PRODUCT) to every other shot."
+        )
+        row.addWidget(self.cb_apply_all)
+        v.addLayout(row)
+
+        bb = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+        )
+        bb.accepted.connect(self.accept)
+        bb.rejected.connect(self.reject)
+        v.addWidget(bb)
+
+    def _set_all(self, on):
+        for i in range(self.listw.count()):
+            self.listw.item(i).setCheckState(Qt.Checked if on else Qt.Unchecked)
+
+    def checked_paths(self):
+        return [
+            self.listw.item(i).data(Qt.UserRole)
+            for i in range(self.listw.count())
+            if self.listw.item(i).checkState() == Qt.Checked
+        ]
+
+    def apply_to_all(self):
+        return self.cb_apply_all.isChecked()
+
+
 class RenderPickerDialog(QtWidgets.QDialog):
     """Choix des LAYERS (executions) a rendre pour un shot lighting. Une scene lighting a
     UN prism::LOP_Render par shot, dont le multiparm 'executions' liste des layers
@@ -662,6 +1021,79 @@ class RenderPickerDialog(QtWidgets.QDialog):
 
     def apply_to_all(self):
         return self.cb_apply_all.isChecked()
+
+
+class ExportPickerDialog(QtWidgets.QDialog):
+    """Choix des exports Prism a lancer APRES la mise a jour des rigs d'une scene Maya.
+    Un export = un state du State Manager de la scene, identifie par son produit
+    (`_layer_anm_main`) plutot que par son nom de state. Defaut = les states coches dans
+    le State Manager de la scene (comme les renders : defaut = Enabled sur le node).
+    Tout decocher = pas d'export (mise a jour + sauvegarde seules). Retourne les uuids."""
+
+    def __init__(self, parent, scene_name, exports, checked_uuids):
+        super().__init__(parent)
+        self.setWindowTitle("Exports after the update - %s" % scene_name)
+        self.resize(620, 360)
+        v = QtWidgets.QVBoxLayout(self)
+        v.addWidget(
+            QtWidgets.QLabel(
+                "Tick the Prism exports to run once the rigs are updated (and the scene "
+                "saved).\nDefault = the states ticked in the scene's State Manager. "
+                "Unticking all = no export."
+            )
+        )
+        self.listw = QtWidgets.QListWidget()
+        for e in exports:  # [{uuid, name, product, enabled, output_type, latest}]
+            tags = []
+            if e.get("latest"):
+                tags.append("last %s" % e["latest"])
+            if not e.get("enabled"):
+                tags.append("unticked in the scene")
+            it = QtWidgets.QListWidgetItem(
+                "%s   →  %s %s%s"
+                % (
+                    e.get("name") or "?",
+                    e.get("product") or "(product unknown)",
+                    e.get("output_type") or "",
+                    ("   (%s)" % ", ".join(tags)) if tags else "",
+                )
+            )
+            it.setToolTip("%s state  ·  uuid %s" % (e.get("stateclass"), e.get("uuid")))
+            it.setData(Qt.UserRole, e.get("uuid"))
+            it.setFlags(it.flags() | Qt.ItemIsUserCheckable)
+            it.setCheckState(
+                Qt.Checked
+                if e.get("uuid") in (checked_uuids or set())
+                else Qt.Unchecked
+            )
+            self.listw.addItem(it)
+        v.addWidget(self.listw, 1)
+        row = QtWidgets.QHBoxLayout()
+        b_all = QtWidgets.QPushButton("Check all")
+        b_all.clicked.connect(lambda: self._set_all(True))
+        b_none = QtWidgets.QPushButton("Uncheck all")
+        b_none.clicked.connect(lambda: self._set_all(False))
+        row.addWidget(b_all)
+        row.addWidget(b_none)
+        row.addStretch(1)
+        v.addLayout(row)
+        bb = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+        )
+        bb.accepted.connect(self.accept)
+        bb.rejected.connect(self.reject)
+        v.addWidget(bb)
+
+    def _set_all(self, on):
+        for i in range(self.listw.count()):
+            self.listw.item(i).setCheckState(Qt.Checked if on else Qt.Unchecked)
+
+    def checked_uuids(self):
+        return [
+            self.listw.item(i).data(Qt.UserRole)
+            for i in range(self.listw.count())
+            if self.listw.item(i).checkState() == Qt.Checked
+        ]
 
 
 class CheckDragTableWidget(QtWidgets.QTableWidget):
@@ -752,11 +1184,21 @@ class Main(QtWidgets.QMainWindow):
         self._populating = False
         self._fx_selection = {}  # shot -> [checked SOP cache rels] (cache in-memory)
         self._render_selection = {}  # shot -> [checked render paths] (cache in-memory)
+        self._cache_selection = {}  # shot -> [chemins de caches coches]
         self._fx_store = (
             None  # json partage a cote du hip (lazy) : snapshot + selections
         )
         self._scan = None  # _ScanWorker en cours (preview disque en tache de fond)
         self._previewed = None  # hip deja preview (evite les re-preview au keystroke)
+        # --- scene Maya (mode RIGS) ---
+        self._kind = None  # 'houdini' | 'maya' | '' : type de la scene du champ
+        self._maya_rigs = []  # rig_status de la scene .ma (une ligne par asset)
+        self._maya_exports = []  # states d'export Prism de la scene .ma
+        self._maya_read = (
+            None  # (chemin, mtime) deja lu -> pas de relecture au keystroke
+        )
+        self._export_selection = None  # uuids coches (None = defaut de la scene)
+        self._run_scene = ""  # scene du run Maya en cours (le champ peut bouger)
         # feedback "ca tourne" : phase courante + chrono + spinner (tick toutes les 200ms)
         self._phase = ""
         self._t0 = None
@@ -774,7 +1216,13 @@ class Main(QtWidgets.QMainWindow):
         self.cfg = {}
         for k, dv in DEFAULT_SETTINGS.items():
             self.cfg[k] = self.settings.value(k, dv)
+        # QSettings ne restitue pas fidelement une liste -> on renormalise, avec repli
+        # sur l'ancienne cle mono-layer pour ne rien perdre d'une config existante.
+        self.cfg["tracked_layers"] = as_layer_list(
+            self.cfg.get("tracked_layers")
+        ) or as_layer_list(self.cfg.get("tracked_layer"))
         self.cfg["hython"] = detect_hython(self.cfg.get("hython"))
+        self.cfg["mayapy"] = detect_mayapy(self.cfg.get("mayapy"))
         self.cfg["project_override"] = self.settings.value("project_override", "")
         self.last_hip = self.settings.value("last_hip", "")
         # lance depuis Houdini : pre-remplir la scene courante si rien de memorise
@@ -785,7 +1233,10 @@ class Main(QtWidgets.QMainWindow):
 
     def _save_settings(self):
         for k in list(DEFAULT_SETTINGS.keys()) + ["project_override"]:
-            self.settings.setValue(k, self.cfg.get(k, ""))
+            v = self.cfg.get(k, "")
+            if k == "tracked_layers":  # liste -> chaine (QSettings, cf as_layer_list)
+                v = ",".join(as_layer_list(v))
+            self.settings.setValue(k, v)
         self.settings.setValue("last_hip", self.ed_hip.text().strip())
 
     # ------------------------------------------------------------------ UI
@@ -814,19 +1265,29 @@ class Main(QtWidgets.QMainWindow):
 
         # --- scene row ---
         bar = QtWidgets.QHBoxLayout()
-        bar.addWidget(QtWidgets.QLabel("Scene (.hip):"))
+        bar.addWidget(QtWidgets.QLabel("Scene:"))
         self.ed_hip = QtWidgets.QLineEdit(self.last_hip)
-        self.ed_hip.setToolTip("The cfx .hip scene to inspect / re-cache from.")
+        self.ed_hip.setToolTip(
+            "The scene to update: a Houdini .hip (caches / renders) or a Maya .ma "
+            "(rigs + exports)."
+        )
         self.ed_hip.textChanged.connect(self._on_hip_changed)
         bar.addWidget(self.ed_hip, 1)
+        # la scene OUVERTE dans Houdini (passee par le shelf au lancement), en un clic :
+        # le champ, lui, reprend la derniere scene memorisee
+        self.b_from_scene = QtWidgets.QPushButton("From scene")
+        self.b_from_scene.clicked.connect(self._use_houdini_scene)
+        bar.addWidget(self.b_from_scene)
+        self._refresh_from_scene_button()
         b_proj = QtWidgets.QPushButton("Choose scene...")
         b_proj.setToolTip(
-            "Pick a scene from the selected Prism project (seq / shot / dept / task)."
+            "Pick a scene (.hip or .ma) from the selected Prism project "
+            "(seq / shot / dept / task)."
         )
         b_proj.clicked.connect(self._choose_scene)
         bar.addWidget(b_proj)
         b_hip = QtWidgets.QPushButton("Browse...")
-        b_hip.setToolTip("Pick a .hip anywhere on the filesystem.")
+        b_hip.setToolTip("Pick a .hip or a .ma anywhere on the filesystem.")
         b_hip.clicked.connect(self._pick_hip)
         bar.addWidget(b_hip)
         b_set = QtWidgets.QPushButton("Settings...")
@@ -837,15 +1298,33 @@ class Main(QtWidgets.QMainWindow):
 
         # --- layer + actions row ---
         top = QtWidgets.QHBoxLayout()
-        top.addWidget(QtWidgets.QLabel("Tracked layer:"))
+        self.lbl_layer = QtWidgets.QLabel("Tracked layer:")
+        top.addWidget(self.lbl_layer)
+        # Cas courant = UN layer, dans un simple dropdown (lisible d'un coup d'oeil).
+        # Le multi-layer + OU/ET vit derriere la roue crantee : puissant sans encombrer.
         self.combo_layer = QtWidgets.QComboBox()
+        self.combo_layer.setMinimumWidth(240)
         self.combo_layer.setToolTip(
             "The USD layer whose version decides if a shot is outdated.\n"
-            "Filled from the project's departments (pipeline.json)."
+            "Filled from the layers this scene really consumes.\n"
+            "Use the gear to track SEVERAL layers at once (ANY / ALL)."
         )
-        self.combo_layer.setMinimumWidth(220)
         self.combo_layer.currentIndexChanged.connect(self._on_layer_changed)
         top.addWidget(self.combo_layer)
+        self.b_layer_adv = QtWidgets.QToolButton()
+        self.b_layer_adv.setText("⚙")
+        self.b_layer_adv.setToolTip(
+            "Advanced sorting: track SEVERAL layers at once.\n"
+            "ANY = outdated as soon as one of them moved.\n"
+            "ALL = outdated only when they all moved.\n"
+            "A layer a shot doesn't consume is ignored for that shot."
+        )
+        self.b_layer_adv.clicked.connect(self._open_layer_filter)
+        top.addWidget(self.b_layer_adv)
+        # message discret : ce qui a ete ignore, et pourquoi (jamais tu, jamais bruyant)
+        self.lbl_ignored = QtWidgets.QLabel("")
+        self.lbl_ignored.setStyleSheet("color: %s;" % theme_colors(self)["gray"])
+        top.addWidget(self.lbl_ignored)
         self.b_reload = QtWidgets.QPushButton("Reload (fast)")
         self.b_reload.setToolTip(
             "Re-check the version gaps by reading the DISK only (no Houdini, instant).\n"
@@ -892,12 +1371,60 @@ class Main(QtWidgets.QMainWindow):
         top_lay.setContentsMargins(0, 0, 0, 0)
         top_lay.addWidget(self.table, 1)
 
+        # --- MODE DE SAUVEGARDE de la scene : une decision PAR RUN, a cote du bouton ---
+        # Pas dans les Settings : on doit la voir au moment de cliquer. "Leave untouched"
+        # evite de creer une vNNN+1 dans la chaine d'un autre (un lighter qui sauve
+        # par-dessus sa version tomberait le lendemain sur la notre, sans son travail).
+        save_row = QtWidgets.QHBoxLayout()
+        save_row.addStretch(1)
+        save_row.addWidget(QtWidgets.QLabel("Scene:"))
+        self.save_group = QtWidgets.QButtonGroup(self)
+        self.save_group.setExclusive(True)
+        self.b_save_ver = QtWidgets.QPushButton("Version-up")
+        self.b_save_keep = QtWidgets.QPushButton("Leave untouched")
+        for b, mode, tip in (
+            (
+                self.b_save_ver,
+                SAVE_VERSION_UP,
+                "Publish the caches AND save a new scene version.\n"
+                "Use it when nobody else is working in this scene.",
+            ),
+            (
+                self.b_save_keep,
+                SAVE_LEAVE,
+                "Publish the caches only. The scene file is NOT written, so nobody's\n"
+                "version chain changes. Renders are still submitted, with a comment\n"
+                "saying the scene was not saved.",
+            ),
+        ):
+            b.setCheckable(True)
+            b.setToolTip(tip)
+            b.setProperty("save_mode", mode)
+            self.save_group.addButton(b)
+            save_row.addWidget(b)
+        self.save_group.buttonClicked.connect(self._on_save_mode_changed)
+        # scene Maya : QUELS exports lancer apres la mise a jour (defaut = ceux coches
+        # dans le State Manager de la scene). Invisible pour une scene Houdini.
+        save_row.addSpacing(18)
+        self.lbl_exports = QtWidgets.QLabel("Exports:")
+        save_row.addWidget(self.lbl_exports)
+        self.b_exports = QtWidgets.QPushButton("")
+        self.b_exports.clicked.connect(self._open_exports_dialog)
+        save_row.addWidget(self.b_exports)
+        save_row.addStretch(1)
+        top_lay.addLayout(save_row)
+        self.lbl_save_mode = QtWidgets.QLabel("")
+        self.lbl_save_mode.setAlignment(Qt.AlignCenter)
+        self.lbl_save_mode.setStyleSheet("color: %s;" % theme_colors(self)["gray"])
+        top_lay.addWidget(self.lbl_save_mode)
+        self._apply_save_mode(self.cfg.get("save_mode", SAVE_VERSION_UP))
+
         act = QtWidgets.QHBoxLayout()
         act.addStretch(1)
         self.b_apply = QtWidgets.QPushButton(APPLY_LABEL)
         self.b_apply.setToolTip(
-            "For each ticked shot: bump the import to the latest version, re-cache,\n"
-            "then version-up the scene in Prism.\n"
+            "For each ticked shot: bump the import to the latest version and re-cache.\n"
+            "The scene is then version-upped OR left untouched (see 'Scene' above).\n"
             "Lighting shots also get RE-RENDERED on the farm (their ticked layers)."
         )
         bf = self.b_apply.font()
@@ -943,11 +1470,12 @@ class Main(QtWidgets.QMainWindow):
 
     def _set_headers(self):
         layer = self._layer_display_name()
-        labels = ["Shot", layer, "State", "SOP caches", "Renders", "Cache node"]
+        labels = ["Shot", layer, "State", "SOP caches", "Renders", "Caches"]
         tips = [
             "Prism shot (sequence/shot), resolved from the cache output",
-            "Tracked-layer version: consumed -> latest (drives OUTDATED). "
-            "Pick '%s' in the dropdown to follow the shot container." % STACK_LABEL,
+            "Tracked layer(s): consumed -> latest (drives OUTDATED). With several "
+            "layers the cell shows how many are stale; hover for the detail. "
+            "Pick '%s' to follow the shot container." % STACK_LABEL,
             "OUTDATED / up to date / n/a / ERROR",
             "FX only: SOP caches re-simulated before publish (checked/total). "
             "Click to choose which caches to re-sim. Blank = cfx (no SOP chain).",
@@ -955,7 +1483,9 @@ class Main(QtWidgets.QMainWindow):
             "shot is ticked (checked/total). Ticking the shot = re-cache THEN render "
             "these layers. Click to choose which layers; default = enabled on the node. "
             "Blank = no render node on this shot.",
-            "The prism::lop_filecache node that will be re-cached",
+            "USD caches (prism::lop_filecache) re-cached when the shot is ticked "
+            "(checked/total). Click to choose which ones -- a shot can have "
+            "several, publishing different products. Unticking all = no re-cache.",
         ]
         self.table.setHorizontalHeaderLabels(labels)
         for i, tip in enumerate(tips):
@@ -965,19 +1495,54 @@ class Main(QtWidgets.QMainWindow):
     def _pick_hip(self):
         start = os.path.dirname(self.ed_hip.text()) or ""
         p, _ = QtWidgets.QFileDialog.getOpenFileName(
-            self, "cfx scene (.hip)", start, "Houdini (*.hip *.hipnc *.hiplc)"
+            self,
+            "Scene (.hip / .ma)",
+            start,
+            "Scenes (*.hip *.hipnc *.hiplc *.ma);;Houdini (*.hip *.hipnc *.hiplc);;"
+            "Maya ASCII (*.ma)",
         )
         if p:
             self.ed_hip.setText(p)
 
+    # ------------------------------------------------ "From scene" (Houdini)
     @staticmethod
-    def _is_prism_shots(shots):
-        """Vrai 'Shots' Prism : dossier nomme 'Shots' dont le parent est '03_Production',
-        OU dont le projet (parent du parent) contient 00_Pipeline/pipeline.json. Evite de
-        detourner un dossier 'Shots' quelconque (ex archive) -> picker peuple mais faux."""
-        if not shots or not os.path.isdir(shots) or os.path.basename(shots) != "Shots":
+    def _houdini_scene():
+        """La scene ouverte dans Houdini quand le shelf a lance l'outil (env posee par
+        houdini_shelf_tool.py), '' si l'outil n'a pas ete lance depuis Houdini."""
+        p = os.environ.get(ENV_HIP, "")
+        return p if p and os.path.isfile(p) else ""
+
+    def _refresh_from_scene_button(self):
+        hip = self._houdini_scene()
+        self.b_from_scene.setEnabled(bool(hip))
+        self.b_from_scene.setToolTip(
+            (
+                "Use the scene open in Houdini:\n%s\n(the one open when this window was "
+                "launched from the shelf)" % hip
+            )
+            if hip
+            else "Launch the tool from the Houdini shelf to use the scene you have open."
+        )
+
+    def _use_houdini_scene(self):
+        hip = self._houdini_scene()
+        if not hip:
+            self._refresh_from_scene_button()
+            return
+        self.ed_hip.setText(hip)
+        self.status.showMessage("Scene set from Houdini: %s" % os.path.basename(hip))
+
+    ENTITY_DIRS = ("Shots", "Assets")
+
+    @staticmethod
+    def _is_prism_shots(d, kinds=ENTITY_DIRS):
+        """Vraie racine d'entites Prism : dossier 'Shots' ou 'Assets' dont le parent est
+        '03_Production', OU dont le projet (parent du parent) contient
+        00_Pipeline/pipeline.json. Evite de detourner un dossier homonyme (ex archive)
+        -> picker peuple mais faux."""
+        if not d or not os.path.isdir(d) or os.path.basename(d) not in kinds:
             return False
-        parent = os.path.dirname(shots)
+        parent = os.path.dirname(d)
         if os.path.basename(parent) == "03_Production":
             return True
         proj = os.path.dirname(parent)
@@ -985,17 +1550,31 @@ class Main(QtWidgets.QMainWindow):
 
     @staticmethod
     def _find_shots_up(path):
-        """Remonte depuis `path` jusqu'au 1er dossier 'Shots' qui est un VRAI Shots Prism
-        (voir _is_prism_shots). '' si aucun (un 'Shots' non-Prism ne compte pas)."""
+        """Remonte depuis `path` jusqu'a la 1ere racine d'entites Prism ('Shots' OU
+        'Assets' : une scene multi-shots peut etre rangee sous Assets). '' si aucune."""
         p = path
         while p:
-            if os.path.basename(p) == "Shots" and Main._is_prism_shots(p):
+            if os.path.basename(p) in Main.ENTITY_DIRS and Main._is_prism_shots(p):
                 return p
             nxt = os.path.dirname(p)
             if nxt == p:
                 return ""
             p = nxt
         return ""
+
+    def _entity_roots(self):
+        """{'Shots': chemin, 'Assets': chemin} du projet courant (les deux existent
+        rarement a moitie, mais on ne propose que ce qui existe)."""
+        base = self._shots_root()
+        if not base:
+            return {}
+        prod = os.path.dirname(base)  # .../03_Production
+        out = {}
+        for kind in self.ENTITY_DIRS:
+            d = os.path.join(prod, kind)
+            if os.path.isdir(d):
+                out[kind] = d
+        return out
 
     @staticmethod
     def _resolve_shots_root(d):
@@ -1006,10 +1585,10 @@ class Main(QtWidgets.QMainWindow):
             return ""
         if Main._is_prism_shots(d):
             return d
-        for sub in (
-            os.path.join(d, "03_Production", "Shots"),
-            os.path.join(d, "Shots"),
-        ):
+        subs = []
+        for kind in Main.ENTITY_DIRS:
+            subs += [os.path.join(d, "03_Production", kind), os.path.join(d, kind)]
+        for sub in subs:
             if Main._is_prism_shots(sub):
                 return sub
         return Main._find_shots_up(d)
@@ -1045,7 +1624,10 @@ class Main(QtWidgets.QMainWindow):
             )
             return
         self.settings.setValue("shots_root", root)
-        dlg = ProjectPicker(self, root, current=self.ed_hip.text().strip())
+        # Shots ET Assets : une scene multi-shots peut etre rangee cote Assets
+        dlg = ProjectPicker(
+            self, self._entity_roots() or root, current=self.ed_hip.text().strip()
+        )
         ok = dlg.exec() if hasattr(dlg, "exec") else dlg.exec_()
         if ok and dlg.selected_path():
             self.ed_hip.setText(dlg.selected_path())
@@ -1113,6 +1695,8 @@ class Main(QtWidgets.QMainWindow):
         self._fx_store = None
         self._fx_selection = {}
         self._render_selection = {}
+        self._cache_selection = {}
+        self._export_selection = None
         prj = self._project()
         auto = not (
             self.cfg.get("project_override", "")
@@ -1128,8 +1712,251 @@ class Main(QtWidgets.QMainWindow):
             self.lbl_project.setText("no project selected/detected")
             self.lbl_project.setStyleSheet("color: %s;" % c["orange"])
             self.lbl_project.setToolTip("")
+        self._apply_kind(scene_kind(self.ed_hip.text().strip()))
+        if self._kind == "maya":
+            self._read_maya_scene()  # lecture texte du .ma : instantane, sans Maya
+            return
         self._refresh_layers()
         self._maybe_preview()  # affichage instantane depuis le json si dispo
+
+    # ------------------------------------------------ type de scene (Houdini / Maya)
+    def _is_maya(self):
+        return self._kind == "maya"
+
+    def _apply_kind(self, kind):
+        """Adapte la fenetre au type de scene. Houdini : shots / layers suivis / caches /
+        renders (inchange). Maya : une ligne par RIG reference + les exports de la scene.
+        On masque ce qui n'a pas de sens plutot que de le griser : rien a comprendre."""
+        kind = kind or "houdini"  # champ vide / en cours de saisie -> vue historique
+        if kind == self._kind:
+            return
+        changed = self._kind is not None
+        self._kind = kind
+        maya = kind == "maya"
+        for w in (self.lbl_layer, self.combo_layer, self.b_layer_adv, self.lbl_ignored):
+            w.setVisible(not maya)
+        self.b_load.setVisible(not maya)  # une scene Maya se lit en texte : instantane
+        self.lbl_exports.setVisible(maya)
+        self.b_exports.setVisible(maya)
+        self.b_reload.setToolTip(
+            "Re-read the rigs of the .ma and the latest published versions "
+            "(no Maya, instant)."
+            if maya
+            else "Re-check the version gaps by reading the DISK only (no Houdini, "
+            "instant).\nUses the last known state of the scene's nodes + scans the "
+            "latest versions.\nDoesn't see node changes made in Houdini since -> use "
+            "'Load Scene (slow)'."
+        )
+        self.b_check.setToolTip(
+            "Tick every rig flagged OUTDATED."
+            if maya
+            else "Tick every shot flagged OUTDATED."
+        )
+        self.b_apply.setToolTip(
+            "For each ticked rig: swap its references to the latest version, check that "
+            "no animation was lost,\nthen version-up the scene OR leave it untouched "
+            "(see 'Scene' above), then run the ticked exports."
+            if maya
+            else "For each ticked shot: bump the import to the latest version and "
+            "re-cache.\nThe scene is then version-upped OR left untouched (see 'Scene' "
+            "above).\nLighting shots also get RE-RENDERED on the farm (their ticked "
+            "layers)."
+        )
+        if changed:  # les lignes de l'autre type de scene ne veulent plus rien dire
+            self._data = []
+            self._maya_rigs = []
+            self._maya_exports = []
+            self._maya_read = None
+            self._previewed = None
+            self._populating = True
+            try:
+                self.table.setRowCount(0)
+            finally:
+                self._populating = False
+            self._set_badge("")
+        if maya:
+            self.table.setColumnCount(4)
+            self._set_headers_maya()
+        else:
+            self.table.setColumnCount(6)
+            self._set_headers()
+        self._apply_save_mode(self._save_mode())  # le texte de consequence change
+        self._update_apply_count()
+
+    def _set_headers_maya(self):
+        labels = ["Rig", "Version", "State", "References"]
+        tips = [
+            "Asset whose rig the scene references (category/asset). Tick it to update.",
+            "Rig version used by the scene -> latest published version.",
+            "OUTDATED when a newer rig version is published.",
+            "How many times the scene references this rig (namespaces in the tooltip). "
+            "They are all swapped together.",
+        ]
+        self.table.setHorizontalHeaderLabels(labels)
+        for i, tip in enumerate(tips):
+            self.table.horizontalHeaderItem(i).setToolTip(tip)
+
+    def _read_maya_scene(self, preserve=False, force=False):
+        """Rigs + exports de la scene .ma, lus dans le TEXTE du fichier (tete du .ma) :
+        instantane, sans Maya ni licence. Les dernieres versions viennent du disque."""
+        scene = self.ed_hip.text().strip()
+        if not os.path.isfile(scene):
+            return
+        try:
+            key = (scene, os.path.getmtime(scene))
+        except Exception:
+            key = (scene, None)
+        if key == self._maya_read and not force:
+            return
+        self._maya_read = key
+        if not maya_refs.is_ascii_maya(scene):
+            self._maya_rigs, self._maya_exports = [], []
+            self._populate_maya([], preserve)
+            self.status.showMessage(
+                "This Maya scene isn't ASCII (.mb?): its rigs can't be read without Maya."
+            )
+            return
+        QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)
+        try:
+            rigs = maya_refs.rig_status(scene)
+            exports = maya_refs.scene_exports(scene)
+        finally:
+            QtWidgets.QApplication.restoreOverrideCursor()
+        self._maya_rigs, self._maya_exports = rigs, exports
+        self._populate_maya(rigs, preserve)
+        self._set_badge("maya")
+        n_out = sum(1 for r in rigs if r.get("stale"))
+        self.status.showMessage(
+            "%d rig(s)  -  %d outdated  -  %d export state(s)  (read from the .ma, "
+            "no Maya)." % (len(rigs), n_out, len(exports))
+            if rigs
+            else "No Prism rig reference found in this scene."
+        )
+
+    def _populate_maya(self, rigs, preserve=False):
+        """Une ligne par rig. Meme regle de cases que les shots : cochee si OUTDATED, sauf
+        `preserve` (re-lecture de la meme scene) ou on garde la selection de l'artiste."""
+        prev = {}
+        if preserve:
+            for r in range(self.table.rowCount()):
+                it = self.table.item(r, 0)
+                if it is not None:
+                    prev[it.data(Qt.UserRole)] = it.checkState() == Qt.Checked
+        self._populating = True
+        try:
+            self._set_headers_maya()
+            self.table.setRowCount(0)
+            col = theme_colors(self)
+            for d in rigs:
+                r = self.table.rowCount()
+                self.table.insertRow(r)
+                stale = bool(d.get("stale"))
+                missing = d.get("missing") or []
+                it0 = QtWidgets.QTableWidgetItem(
+                    (d.get("asset") or d.get("id", "")) + ("  ⚠" if missing else "")
+                )
+                it0.setData(Qt.UserRole, d.get("id", ""))
+                it0.setFlags(it0.flags() | Qt.ItemIsUserCheckable)
+                was = prev.get(d.get("id", ""))
+                ticked = stale if was is None else was
+                it0.setCheckState(Qt.Checked if ticked else Qt.Unchecked)
+                it0.setToolTip(
+                    "%s  (%s)\n%s"
+                    % (
+                        d.get("asset"),
+                        d.get("product"),
+                        (d.get("refs") or [{}])[0].get("path", ""),
+                    )
+                )
+                self.table.setItem(r, 0, it0)
+                if d.get("latest") is None:
+                    state = "? (no published version found)"
+                else:
+                    state = STATE_TEXT["outdated" if stale else "uptodate"]
+                if missing:  # la version utilisee a ete supprimee du disque
+                    state += " · file missing"
+                namespaces = [
+                    x.get("ns") or x.get("refnode") or "?" for x in d.get("refs") or []
+                ]
+                vals = [
+                    self._pair(d.get("version"), d.get("latest")),
+                    state,
+                    "%d" % (d.get("n_refs") or len(namespaces)),
+                ]
+                for c, v in enumerate(vals, start=1):
+                    cell = QtWidgets.QTableWidgetItem(str(v))
+                    if c == 2 and missing:
+                        cell.setToolTip(
+                            "The rig version this scene references no longer exists on "
+                            "disk:\n%s\nMaya opens the scene with an empty reference; "
+                            "updating to the latest version repairs it."
+                            % "\n".join(missing)
+                        )
+                    if c == 3:
+                        cell.setToolTip("\n".join(namespaces))
+                    self.table.setItem(r, c, cell)
+                if stale:
+                    for c in range(self.table.columnCount()):
+                        self.table.item(r, c).setBackground(col["bg_outdated"])
+            self.table.resizeColumnsToContents()
+        finally:
+            self._populating = False
+        self._update_exports_button()
+        self._update_apply_count()
+
+    # ------------------------------------------------ exports d'une scene Maya
+    def _export_sel(self):
+        """uuids des exports a lancer. Source = json partage a cote de la scene (choix
+        explicite de l'artiste), sinon les states coches dans le State Manager de la
+        scene. Un uuid qui n'existe plus dans la scene est ignore."""
+        known = [e["uuid"] for e in self._maya_exports]
+        if self._export_selection is None:
+            self._ensure_store()
+            saved = self._fx_store.get("export_states")
+            if isinstance(saved, list):
+                self._export_selection = [u for u in known if u in set(saved)]
+            else:
+                self._export_selection = [
+                    e["uuid"] for e in self._maya_exports if e.get("enabled")
+                ]
+        keep = set(self._export_selection)
+        return [u for u in known if u in keep]
+
+    def _update_exports_button(self):
+        exports = self._maya_exports
+        sel = set(self._export_sel()) if exports else set()
+        if not exports:
+            self.b_exports.setText("none in this scene")
+            self.b_exports.setEnabled(False)
+            self.b_exports.setToolTip("This scene has no Prism export state.")
+        else:
+            self.b_exports.setEnabled(self.proc is None)
+            self.b_exports.setText("%d/%d  ▸" % (len(sel), len(exports)))
+            self.b_exports.setToolTip(
+                "Prism exports run after the update (click to choose):\n"
+                + "\n".join(
+                    "%s %s  →  %s"
+                    % ("x" if e["uuid"] in sel else " ", e["name"], e["product"] or "?")
+                    for e in exports
+                )
+            )
+        self._apply_save_mode(self._save_mode())  # 'dry run' depend des exports coches
+
+    def _open_exports_dialog(self):
+        if not self._maya_exports:
+            return
+        name = os.path.basename(self.ed_hip.text().strip())
+        dlg = ExportPickerDialog(
+            self, name, self._maya_exports, set(self._export_sel())
+        )
+        ok = dlg.exec() if hasattr(dlg, "exec") else dlg.exec_()
+        if not ok:
+            return
+        self._export_selection = dlg.checked_uuids()
+        self._ensure_store()
+        self._fx_store["export_states"] = list(self._export_selection)
+        self._save_hip_store()  # partage : le prochain qui ouvre la scene a le meme choix
+        self._update_exports_button()
 
     def _layers_in_data(self):
         """[(libelle, cle)] des layers REELLEMENT presents dans la scene chargee (union
@@ -1154,75 +1981,190 @@ class Main(QtWidgets.QMainWindow):
             out.append(("%s  (%s)" % (pretty.capitalize(), n), n))
         return out
 
-    def _refresh_layers(self):
-        """Remplit le dropdown depuis les layers de la scene chargee ; a defaut (aucune
-        scene chargee encore) depuis pipeline.json, pour avoir quelque chose a proposer."""
-        depts = self._layers_in_data() or read_departments(self._project())
-        self._departments = depts
-        cur = self.cfg.get("tracked_layer", "_layer_anm_master")
-        self.combo_layer.blockSignals(True)
-        self.combo_layer.clear()
-        idx = 0
-        if depts:
-            for i, (name, layer) in enumerate(depts):
-                # les libelles de _layers_in_data sont deja finis ; seuls ceux de
-                # read_departments (repli sans scene chargee) sont a decorer
-                ready = "(" in name or name == STACK_LABEL
-                self.combo_layer.addItem(
-                    name if ready else "%s  (%s)" % (name, layer), layer
-                )
-                if layer == cur:
-                    idx = i
-        else:
-            self.combo_layer.addItem(cur, cur)
-        self.combo_layer.setCurrentIndex(idx)
-        self.combo_layer.blockSignals(False)
-        # keep cfg consistent with what's shown
-        data = self.combo_layer.currentData()
-        if data:
-            self.cfg["tracked_layer"] = data
-        self._set_headers()
+    # ------------------------------------------------ layers suivis (multi + OU/ET)
+    def _tracked(self):
+        """Layers suivis. Toujours au moins un : une liste vide ne voudrait rien dire
+        (on ne saurait plus sur quoi juger la peremption)."""
+        lst = as_layer_list(self.cfg.get("tracked_layers"))
+        return (
+            lst or as_layer_list(self.cfg.get("tracked_layer")) or ["_layer_anm_master"]
+        )
 
-    def _on_layer_changed(self):
-        layer = self.combo_layer.currentData()
-        if layer:
-            self.cfg["tracked_layer"] = layer
-            self._save_settings()
-            # partage le layer tracke pour CETTE scene (json a cote du hip)
-            if self._hip_sidecar_path():
-                self._save_hip_store()
-            self._set_headers()
-            # the engine sends ALL layers -> re-render instantly, no scene reload
-            if self._data:
-                self._populate(self._data, preserve=True)
-                self.status.showMessage(
-                    "Layer switched to %s (no reload needed)."
-                    % self._layer_display_name()
-                )
+    def _layer_mode(self):
+        return "and" if self.cfg.get("tracked_mode") == "and" else "or"
 
-    def _apply_saved_layer(self):
-        """Applique le layer tracke du json partage (si present et connu du combo),
-        sans recharger la scene ni re-populer (fait juste apres)."""
-        self._ensure_store()
-        layer = self._fx_store.get("tracked_layer", "")
-        if not layer or layer == self.cfg.get("tracked_layer"):
-            return
-        i = self.combo_layer.findData(layer)
-        self.combo_layer.blockSignals(True)
-        if i >= 0:
-            self.combo_layer.setCurrentIndex(i)
-        self.combo_layer.blockSignals(False)
-        self.cfg["tracked_layer"] = layer
-        self._set_headers()
-
-    def _layer_display_name(self):
-        layer = self.cfg.get("tracked_layer", "_layer_anm_master")
+    def _pretty_layer(self, layer):
         if layer == STACK_LAYER:
             return STACK_LABEL
         for name, lay in self._departments:
             if lay == layer:
                 return name.split("  (")[0]
         return layer.replace("_layer_", "").replace("_master", "") or "Layer"
+
+    def _refresh_layers(self):
+        """Remplit le dropdown depuis les layers que la scene consomme REELLEMENT.
+
+        /!\ On ne retombe PLUS sur `usd.departmentOrder` de pipeline.json : il liste
+        41 departements sur yuka_2604 (deux generations de nommage cote a cote, plus
+        des collisions de casse fx/FX, cfx/CFX), alors qu'une stack de shot en compte 2
+        a 8. Le dropdown en devenait illisible. Sans scene chargee, on n'affiche que le
+        layer memorise -- ce qui est propose EXISTE."""
+        depts = self._layers_in_data()
+        if not depts:
+            depts = [(self._pretty_layer(x), x) for x in self._tracked()]
+        self._departments = depts
+        sel = self._tracked()
+        self.combo_layer.blockSignals(True)
+        self.combo_layer.clear()
+        # plusieurs layers suivis (roue crantee) -> une entree de synthese en tete :
+        # le dropdown ne peut pas mentir en n'en montrant qu'un.
+        if len(sel) > 1:
+            self.combo_layer.addItem(self._layer_display_name(), None)
+        idx = 0
+        for name, layer in depts:
+            ready = "(" in name or name == STACK_LABEL
+            self.combo_layer.addItem(
+                name if ready else "%s  (%s)" % (name, layer), layer
+            )
+            if len(sel) == 1 and layer == sel[0]:
+                idx = self.combo_layer.count() - 1
+        self.combo_layer.setCurrentIndex(idx)
+        self.combo_layer.blockSignals(False)
+        self._set_headers()
+
+    # ------------------------------------------------ sauvegarde de la scene (par run)
+    def _save_mode(self):
+        return (
+            SAVE_LEAVE if self.cfg.get("save_mode") == SAVE_LEAVE else SAVE_VERSION_UP
+        )
+
+    def _apply_save_mode(self, mode):
+        """Coche le bon bouton et met la ligne de consequence a jour. La consequence est
+        affichee AVANT le clic : on doit savoir ce qui va arriver a la scene."""
+        mode = SAVE_LEAVE if mode == SAVE_LEAVE else SAVE_VERSION_UP
+        self.cfg["save_mode"] = mode
+        (self.b_save_keep if mode == SAVE_LEAVE else self.b_save_ver).setChecked(True)
+        self.lbl_save_mode.setText(self._save_mode_text(mode))
+
+    def _save_mode_text(self, mode):
+        """Ligne de consequence sous le switch, selon le type de scene. Maya + 'Leave
+        untouched' sans aucun export = rien n'est ecrit : on le dit (dry run)."""
+        if not self._is_maya():
+            return SAVE_MODE_TEXT[mode]
+        if mode == SAVE_LEAVE and self._maya_exports and not self._export_sel():
+            return SAVE_LEAVE_DRY_RUN
+        return SAVE_MODE_TEXT_MAYA[mode]
+
+    def _save_mode_summary(self, ids, has_renders):
+        """Ce qui VA et ne va PAS arriver a la scene, pour la confirmation. Les
+        consequences d'un 'Leave untouched' sont dites, pas devinees apres coup."""
+        if self._save_mode() == SAVE_VERSION_UP:
+            return "Scene: a NEW version will be saved (version-up)."
+        lines = [
+            "Scene: LEFT UNTOUCHED - the .hip is not written, nobody's versions change."
+        ]
+        if has_renders:
+            lines.append(
+                "Renders: submitted with the comment '(scene not saved)' - their source "
+                "scene won't contain this update."
+            )
+        idset = set(ids)
+        pinned = [
+            d.get("shot", "?")
+            for d in self._data
+            if d.get("id") in idset
+            and "lop_import" in (d.get("import_type") or "").lower()
+        ]
+        if pinned:
+            lines.append(
+                "Pinned imports (%d shot(s): %s): their scene keeps the OLD USD path. "
+                "The published cache is up to date, but a manual re-cache from that "
+                "scene would go back to the old stack."
+                % (
+                    len(pinned),
+                    ", ".join(pinned[:4]) + ("..." if len(pinned) > 4 else ""),
+                )
+            )
+        return "\n".join(lines)
+
+    def _on_save_mode_changed(self, button):
+        self._apply_save_mode(button.property("save_mode"))
+        self._save_settings()  # memorise PAR UTILISATEUR (QSettings), pas dans le sidecar
+
+    def _on_layer_changed(self):
+        """Choix dans le dropdown = UN layer suivi (on retombe du multi vers le simple)."""
+        layer = self.combo_layer.currentData()
+        if not layer or [layer] == self._tracked():
+            return
+        self.cfg["tracked_layers"] = [layer]
+        self.cfg["tracked_layer"] = layer
+        self._commit_layers(
+            "Tracked: %s (no reload needed)." % self._layer_display_name()
+        )
+
+    def _open_layer_filter(self):
+        """Roue crantee : suivre PLUSIEURS layers, en ANY (OU) ou ALL (ET)."""
+        if not self._departments:
+            self._refresh_layers()
+        dlg = LayerFilterDialog(
+            self, self._departments, self._tracked(), self._layer_mode()
+        )
+        ok = dlg.exec() if hasattr(dlg, "exec") else dlg.exec_()
+        if not ok:
+            return
+        sel, mode = dlg.result_layers(), dlg.result_mode()
+        if not sel:  # garde-fou : sans layer suivi, plus rien n'est jugeable
+            self.status.showMessage("Keep at least one tracked layer.")
+            return
+        if sel == self._tracked() and mode == self._layer_mode():
+            return
+        self.cfg["tracked_layers"] = sel
+        self.cfg["tracked_layer"] = sel[0]  # forme historique, gardee a jour
+        self.cfg["tracked_mode"] = mode
+        self._commit_layers(
+            "Tracked: %s (no reload needed)." % self._layer_display_name()
+        )
+
+    def _commit_layers(self, msg):
+        """Applique un changement de layers/mode : settings, json partage, re-rendu.
+        Le moteur envoie TOUS les layers -> recalcul instantane, sans recharger."""
+        self._save_settings()
+        if self._hip_sidecar_path():
+            self._save_hip_store()
+        self._refresh_layers()
+        if self._data:
+            self._populate(self._data, preserve=True)
+        self.status.showMessage(msg)
+
+    def _apply_saved_layer(self):
+        """Applique les layers suivis du json partage (forme liste, ou l'ancienne forme
+        mono-layer), sans recharger la scene ni re-populer (fait juste apres)."""
+        self._ensure_store()
+        saved = as_layer_list(self._fx_store.get("tracked_layers")) or as_layer_list(
+            self._fx_store.get("tracked_layer")
+        )
+        mode = self._fx_store.get("tracked_mode") or self._layer_mode()
+        if not saved or (saved == self._tracked() and mode == self._layer_mode()):
+            return
+        self.cfg["tracked_layers"] = saved
+        self.cfg["tracked_layer"] = saved[0]
+        self.cfg["tracked_mode"] = "and" if mode == "and" else "or"
+        self._refresh_layers()
+
+    def _layer_display_name(self):
+        """Libelle court des layers suivis (bouton + entete de colonne). Le separateur
+        DIT le mode : ' / ' pour OU, ' & ' pour ET -- pas besoin d'un 2e widget."""
+        sel = self._tracked()
+        names = [self._pretty_layer(x) for x in sel]
+        if len(names) == 1:
+            return names[0]
+        joined = (" & " if self._layer_mode() == "and" else " / ").join(names)
+        if len(joined) <= 34:
+            return joined
+        return "%d layers (%s)" % (
+            len(names),
+            "ALL" if self._layer_mode() == "and" else "ANY",
+        )
 
     def _open_settings(self):
         dlg = SettingsDialog(self, dict(self.cfg))
@@ -1233,6 +2175,7 @@ class Main(QtWidgets.QMainWindow):
         if ok:
             self.cfg.update(dlg.values())
             self.cfg["hython"] = detect_hython(self.cfg.get("hython"))
+            self.cfg["mayapy"] = detect_mayapy(self.cfg.get("mayapy"))
             self._save_settings()
             self._on_hip_changed()
 
@@ -1243,8 +2186,12 @@ class Main(QtWidgets.QMainWindow):
         self.settings.sync()
         self._fx_selection = {}
         self._render_selection = {}
+        self._cache_selection = {}
         self._fx_store = None  # le json partage (a cote du hip) N'est PAS efface
         self._data = []
+        self._maya_rigs, self._maya_exports = [], []
+        self._maya_read = None
+        self._export_selection = None
         self.table.setRowCount(0)
         self._load_settings()  # QSettings vide -> defauts (+ env Houdini si present)
         self.ed_hip.blockSignals(True)
@@ -1262,6 +2209,10 @@ class Main(QtWidgets.QMainWindow):
             b.setEnabled(not on)
         self.table.setEnabled(not on)
         self.combo_layer.setEnabled(not on)
+        self.b_layer_adv.setEnabled(not on)
+        self.b_save_ver.setEnabled(not on)  # le mode ne change pas en cours de run
+        self.b_save_keep.setEnabled(not on)
+        self.b_exports.setEnabled(not on and bool(self._maya_exports))
         if msg:
             self.status.showMessage(msg)
 
@@ -1321,6 +2272,12 @@ class Main(QtWidgets.QMainWindow):
         ]
         for key, flag in SETTING_TO_FLAG.items():
             args += [flag, str(self.cfg.get(key, ""))]
+        # layers suivis : un --tracked-layer PAR layer + le mode, pour que le
+        # moteur juge EXACTEMENT comme le tableau (surtout le statut re-emis
+        # apres un apply, sinon la table changerait de sens juste apres).
+        for lay in self._tracked():
+            args += ["--tracked-layer", lay]
+        args += ["--tracked-mode", self._layer_mode()]
         return args
 
     @staticmethod
@@ -1407,6 +2364,83 @@ class Main(QtWidgets.QMainWindow):
         self._busy(True)
         self._start_ticker("Starting Houdini…")
 
+    # ---------------------------------------------------------- moteur Maya
+    def _maya_env(self):
+        """Environnement de mayapy : celui du poste, SANS ce qui vient de Houdini (l'UI est
+        lancee depuis le shelf Houdini : son PYTHONPATH/PATH pointent le python et
+        l'integration Prism de Houdini, qui masqueraient ceux de Maya -- meme python
+        3.11 des deux cotes) ni du venv de l'UI. Le PYTHONPATH studio de Maya vient de
+        Maya.env (MAYA_ENV_DIR), que mayapy relit lui-meme (verifie)."""
+        env = QProcessEnvironment.systemEnvironment()
+        venv = os.path.normcase(os.path.abspath(sys.prefix))
+
+        def _foreign(entry):
+            e = os.path.normcase(os.path.abspath(entry))
+            return (
+                self._houdini_build(entry) is not None  # une install Houdini
+                or "\\plugins\\houdini" in e  # integration Prism Houdini
+                or e.startswith(venv)  # le venv de l'UI
+            )
+
+        for var in ("PATH", "PYTHONPATH"):
+            val = env.value(var, "")
+            if val:
+                kept = [p for p in val.split(os.pathsep) if p and not _foreign(p)]
+                env.insert(var, os.pathsep.join(kept))
+        for var in (
+            "PYTHONHOME",
+            "VIRTUAL_ENV",
+            "QT_PLUGIN_PATH",
+            "QT_QPA_PLATFORM_PLUGIN_PATH",
+            "QML2_IMPORT_PATH",
+        ):
+            env.remove(var)
+        env.insert(
+            "PYTHONIOENCODING", "utf-8"
+        )  # logs Prism accentues : pas de crash cp1252
+        env.insert("PYTHONUNBUFFERED", "1")  # le log arrive en direct, pas a la fin
+        return env
+
+    def _start_maya(self, extra_args):
+        """Lance recache_maya.py dans mayapy (update -> verif -> save -> exports)."""
+        if self.proc is not None:
+            return
+        mp = self.cfg.get("mayapy", "")
+        scene = self.ed_hip.text().strip()
+        if not mp or not os.path.exists(mp):
+            QtWidgets.QMessageBox.warning(
+                self, "mayapy", "mayapy not found (see Settings):\n%s" % mp
+            )
+            return
+        if not scene or not os.path.isfile(scene):
+            QtWidgets.QMessageBox.warning(self, "Scene", "No .ma found:\n%s" % scene)
+            return
+        if not self._project():
+            QtWidgets.QMessageBox.warning(
+                self, "Project", "Prism project not found from this scene."
+            )
+            return
+        self._save_settings()
+        self._buf = ""
+        self._linebuf = ""
+        self._in_status = False
+        self._mode = "maya_apply"
+        self._run_scene = scene
+        args = [ENGINE_MAYA, "--scene", scene, "--project", self._project()]
+        args += extra_args
+        self.log.appendPlainText("\n$ %s %s\n" % (mp, " ".join(args)))
+        self.proc = QProcess(self)
+        self.proc.setProcessEnvironment(self._maya_env())
+        self.proc.setProcessChannelMode(QProcess.MergedChannels)
+        self.proc.readyReadStandardOutput.connect(self._on_out)
+        self.proc.finished.connect(self._on_finished)
+        self.proc.start(mp, args)
+        self.progress.setRange(0, 0)
+        self.progress.show()
+        self._prog_shot = ""
+        self._busy(True)
+        self._start_ticker("Starting Maya…")
+
     def _on_out(self):
         data = bytes(self.proc.readAllStandardOutput()).decode("utf-8", "replace")
         # canal COMPLET (parsing des marqueurs) -- NE PAS filtrer ici.
@@ -1419,11 +2453,19 @@ class Main(QtWidgets.QMainWindow):
         if len(self._buf) > _BUF_MAX:
             self._buf = self._buf[-_BUF_KEEP:]
         # progress markers emitted by the engine during apply
+        unit = "rig" if self._mode == "maya_apply" else "shot"
         for m in re.finditer(r">>>PROGRESS>>>(\d+)/(\d+)<<<", data):
             cur, total = int(m.group(1)), int(m.group(2))
             self.progress.setRange(0, total)
             self.progress.setValue(cur)
-            self._prog_shot = "shot %d / %d" % (cur, total)
+            self._prog_shot = "%s %d / %d" % (unit, cur, total)
+            self.progress.setFormat(self._prog_shot)
+        # Maya : exports lances apres la mise a jour des rigs
+        for m in re.finditer(r">>>EXPORTPROGRESS>>>(\d+)/(\d+)<<<", data):
+            cur, total = int(m.group(1)), int(m.group(2))
+            self.progress.setRange(0, total)
+            self.progress.setValue(cur)
+            self._prog_shot = "export %d / %d" % (cur, total)
             self.progress.setFormat(self._prog_shot)
         # FX sub-progress : SOP caches re-simulated within the current shot
         for m in re.finditer(r">>>SUBPROGRESS>>>(\d+)/(\d+)<<<", data):
@@ -1454,6 +2496,10 @@ class Main(QtWidgets.QMainWindow):
             if STATUS_END in s or RECORDS_END in s:
                 self._in_status = False
                 continue
+            if (
+                MAYA_RESULT_START in s
+            ):  # verdict json (une ligne) : lu a la fin, pas affiche
+                continue
             if self._in_status or s.startswith(">>>"):
                 continue  # bloc data ou marqueur (PROGRESS/SUBPROGRESS/SAVED_SCENE)
             out.append(line)
@@ -1468,6 +2514,9 @@ class Main(QtWidgets.QMainWindow):
         self._stop_ticker()
         self.progress.hide()
         self._busy(False)
+        if mode == "maya_apply":
+            self._on_maya_finished(code, took)
+            return
         if mode == "apply":
             self._store_cache_records()
             self._pick_saved_scene()
@@ -1523,6 +2572,143 @@ class Main(QtWidgets.QMainWindow):
             self.ed_hip.blockSignals(False)
             self._save_settings()
             self.log.appendPlainText("\n[UI] scene updated to: %s" % newp)
+            return newp
+        return None
+
+    # ------------------------------------------------------ fin d'un run Maya
+    def _maya_result(self):
+        """Verdict json du moteur Maya, ou None si le process est mort sans le donner."""
+        a = self._buf.rfind(MAYA_RESULT_START)
+        if a == -1:
+            return None
+        b = self._buf.find(MAYA_RESULT_END, a)
+        if b == -1:
+            return None
+        try:
+            res = json.loads(self._buf[a + len(MAYA_RESULT_START) : b])
+        except Exception:
+            return None
+        return res if isinstance(res, dict) else None
+
+    @staticmethod
+    def _maya_summary(res, code, took):
+        """(ok, message) lisible d'un run Maya. Le VERDICT du moteur fait foi, pas le code
+        de sortie ; sans verdict, le process est mort en route (crash Maya)."""
+        if res is None:
+            return False, (
+                "✗ Maya stopped before the end (exit %s, %s) — treat this scene as NOT "
+                "updated; see the log." % (code, took)
+            )
+        verdict = res.get("verdict")
+        rigs = res.get("rigs") or []
+        exports = res.get("exports") or []
+        saved = res.get("saved")
+        if saved:
+            saved_txt = "scene saved as %s" % os.path.basename(saved)
+        else:
+            saved_txt = "scene not saved" if rigs else "scene unchanged"
+        exp_ok = [
+            "%s %s" % (e.get("product") or e.get("name"), e.get("to"))
+            for e in exports
+            if e.get("ok")
+        ]
+        exp_ko = [e.get("name") or e.get("uuid") for e in exports if not e.get("ok")]
+        if verdict == "refused_lost_anim":
+            # QUEL rig perd de l'anim : l'artiste peut le decocher et relancer le reste
+            losers = [
+                "%s (%d)" % ((r.get("id") or "?").split("|")[0], r["lost"])
+                for r in rigs
+                if (r.get("lost") or 0) > 0
+            ]
+            return False, (
+                "✗ Refused: the new rig(s) lose %d animation edit(s)%s. Nothing was saved "
+                "or exported — untick %s and retry, or check it in Maya."
+                % (
+                    res.get("lost") or 0,
+                    (" — " + ", ".join(losers)) if losers else "",
+                    "those rigs" if len(losers) > 1 else "that rig",
+                )
+            )
+        if verdict == "refused_swap_errors":
+            return False, (
+                "✗ Refused: some references could not be swapped (see the log). "
+                "Nothing was saved or exported."
+            )
+        if verdict == "save_failed":
+            return False, (
+                "✗ The new scene version could not be saved (Prism). "
+                "Nothing was exported."
+            )
+        if verdict == "nothing_to_do":
+            return True, (
+                "Nothing to do: none of the ticked rigs is outdated and no export was "
+                "ticked."
+            )
+        if verdict == "dry_run":
+            return True, (
+                "✓ Dry run OK in %s: %d rig(s) swapped without losing animation. Nothing "
+                "was written." % (took, len(rigs))
+            )
+        if verdict in ("ok", "export_failed"):
+            parts = [
+                "%d rig(s) updated" % len(rigs) if rigs else "rigs unchanged",
+                saved_txt,
+            ]
+            if exp_ok:
+                parts.append("exported: " + ", ".join(exp_ok))
+            if exp_ko:
+                parts.append("FAILED export(s): " + ", ".join(exp_ko))
+            # un export rate a pu laisser un dossier vNNN casse, qui passe pour le dernier
+            broken = [
+                "/".join(e["broken_version"].rstrip("/").split("/")[-2:])
+                for e in exports
+                if e.get("broken_version")
+            ]
+            if broken:
+                parts.append(
+                    "BROKEN version left on disk, delete it: " + ", ".join(broken)
+                )
+            if res.get("warnings"):  # ex. scene ouverte avec des references manquantes
+                parts.append("%d warning(s), see the log" % len(res["warnings"]))
+            ok = verdict == "ok"
+            return ok, "%s %s (%s)." % ("✓" if ok else "⚠", " · ".join(parts), took)
+        errors = "; ".join(res.get("errors") or []) or verdict or "?"
+        return False, "✗ Update failed (%s): %s" % (took, errors)
+
+    def _on_maya_finished(self, code, took):
+        res = self._maya_result()
+        run_scene, self._run_scene = self._run_scene, ""
+        # version-up -> le champ suit la nouvelle version
+        newp = self._pick_saved_scene()
+        ok, msg = self._maya_summary(res, code, took)
+        for w in (res or {}).get("warnings") or []:
+            self.log.appendPlainText("[UI] warning: %s" % w)
+        for e in (res or {}).get("exports") or []:
+            self.log.appendPlainText(
+                "[UI] export %-24s %s  %s"
+                % (
+                    e.get("name") or e.get("uuid"),
+                    "OK " if e.get("ok") else "KO ",
+                    ("%s -> %s" % (e.get("from") or "-", e.get("to")))
+                    if e.get("ok")
+                    else (e.get("error") or ""),
+                )
+            )
+            # sanity check studio joue en batch : ce qui a echoue, meme accepte (warnings)
+            for c in e.get("sanity") or []:
+                self.log.appendPlainText(
+                    "[UI]     sanity check %s: %s" % (c.get("severity"), c.get("label"))
+                )
+        self.log.appendPlainText(
+            "[UI] ===== MAYA UPDATE %s (exit %s, %s) ====="
+            % ("FINISHED" if ok else "FAILED", code, took)
+        )
+        self.log.appendPlainText("[UI] " + msg)
+        # la table reflete la scene sur disque : la nouvelle version, ou la meme
+        cur = self.ed_hip.text().strip()
+        if newp or os.path.normcase(cur) == os.path.normcase(run_scene):
+            self._read_maya_scene(preserve=not newp, force=True)
+        self.status.showMessage(msg)
 
     # --------------------------------------------------------------- status
     def _parse_status(self, silent=False):
@@ -1569,6 +2755,80 @@ class Main(QtWidgets.QMainWindow):
                 "%d shots  -  %d outdated  -  %d error." % (len(data), n_out, n_err)
             )
 
+    def _layer_cell(self, d, ld):
+        """(texte, tooltip) de la colonne des layers suivis.
+
+        1 layer  -> 'v012 -> v014' (inchange).
+        N layers -> 'k/n stale', et le detail par layer va dans le tooltip : la colonne
+        reste courte, l'info reste accessible."""
+        c = self._combined(d)
+        tips = []
+        for name, e in c["present"]:
+            tips.append(
+                "%s : %s%s"
+                % (
+                    self._pretty_layer(name),
+                    self._pair(e.get("consumed"), e.get("latest")),
+                    "   OUTDATED" if e.get("stale") else "",
+                )
+            )
+        for name in c["ignored"]:
+            tips.append(
+                "%s : not consumed by this shot -> ignored" % self._pretty_layer(name)
+            )
+        tip = "\n".join(tips)
+        if len(c["present"]) <= 1:
+            return (
+                self._pair(
+                    ld.get("consumed") or d.get("consumed_version"),
+                    ld.get("latest") or d.get("latest_version"),
+                ),
+                tip,
+            )
+        n_stale = sum(1 for _, e in c["present"] if e.get("stale"))
+        return "%d/%d stale" % (n_stale, len(c["present"])), tip
+
+    def _caches_for(self, d):
+        """[{path, name, product}] des lop_filecache du shot. Retombe sur l'ancien
+        `cache_node` seul pour un snapshot ecrit par une version anterieure."""
+        caches = d.get("caches")
+        if caches:
+            return caches
+        one = d.get("cache_node")
+        return [{"path": one, "name": one.split("/")[-1], "product": ""}] if one else []
+
+    def _cache_summary(self, d):
+        """Cellule 'Caches' : 'coches/total ▸', comme les colonnes SOP et Renders.
+        Cliquable pour choisir QUELS caches executer."""
+        caches = self._caches_for(d)
+        if not caches:
+            return ""
+        sel = self._cache_sel_for(d)
+        n = sum(1 for c in caches if c.get("path") in sel)
+        return "%d/%d  ▸" % (n, len(caches))
+
+    def _update_ignored_note(self, data):
+        """Message DISCRET (gris, a cote du bouton) : quels layers suivis ont ete
+        ignores, et sur combien de shots. Vide s'il n'y a rien a signaler."""
+        counts = {}
+        for d in data or []:
+            for name in self._combined(d)["ignored"]:
+                counts[name] = counts.get(name, 0) + 1
+        if not counts:
+            self.lbl_ignored.setText("")
+            self.lbl_ignored.setToolTip("")
+            return
+        parts = [
+            "%s (%d shot%s)" % (self._pretty_layer(n), k, "s" if k > 1 else "")
+            for n, k in sorted(counts.items(), key=lambda x: -x[1])
+        ]
+        self.lbl_ignored.setText("· ignored: " + ", ".join(parts))
+        self.lbl_ignored.setToolTip(
+            "These tracked layers aren't consumed by those shots, so they can't say "
+            "anything about staleness there.\nThose shots are judged on the remaining "
+            "tracked layers (both in ANY and ALL mode)."
+        )
+
     def _pair(self, a, b):
         if not a and not b:
             return ""
@@ -1576,19 +2836,26 @@ class Main(QtWidgets.QMainWindow):
             return a or b or ""
         return "%s -> %s" % (a or "?", b or "?")
 
+    def _combined(self, d):
+        """Verdict multi-layers de ce shot. MEME fonction que le moteur
+        (preview.combine_layers) -> l'UI ne peut pas afficher autre chose que ce qui
+        sera applique."""
+        return preview.combine_layers(
+            d.get("layers") or {}, self._tracked(), self._layer_mode()
+        )
+
     def _layer_entry(self, d):
-        """Per-shot data of the currently selected layer (exact key, else substring)."""
-        layers = d.get("layers") or {}
-        layer = self.cfg.get("tracked_layer", "")
-        if layer in layers:
-            return layers[layer]
-        for k, v in layers.items():
-            if layer in k or k in layer:
-                return v
-        return None
+        """Donnees du layer DECISIF pour ce shot (celui qui explique le verdict)."""
+        c = self._combined(d)
+        if not c["present"]:
+            return None
+        for name, e in c["present"]:
+            if name == c["deciding"]:
+                return e
+        return c["present"][0][1]
 
     def _row_state(self, d):
-        """State of a row for the selected layer, computed client-side."""
+        """State of a row for the selected layers, computed client-side."""
         if not d.get("import_node"):
             return "no_import"
         if d.get("state") == "error":
@@ -1596,10 +2863,13 @@ class Main(QtWidgets.QMainWindow):
         layers = d.get("layers")
         if not layers:  # old payload without per-layer data
             return d.get("state", "error")
-        ld = self._layer_entry(d)
-        if ld is None or (ld.get("consumed") is None and ld.get("latest") is None):
+        if d.get("state") == "no_record":
+            # le moteur n'a PAS pu conclure (aucun releve) : ne pas repeindre en vert
+            return "no_record"
+        c = self._combined(d)
+        if not c["present"] or c["stale"] is None:
             return "no_layer"
-        return "outdated" if ld.get("stale") else "uptodate"
+        return "outdated" if c["stale"] else "uptodate"
 
     def _populate(self, data, preserve=False):
         """Remplit la table. `preserve=True` = on garde les cases COCHEES a l'identique.
@@ -1647,18 +2917,33 @@ class Main(QtWidgets.QMainWindow):
                     it0.setToolTip(tip)
                 self.table.setItem(r, 0, it0)
 
+                layer_txt, layer_tip = self._layer_cell(d, ld)
                 vals = [
-                    self._pair(
-                        ld.get("consumed") or d.get("consumed_version"),
-                        ld.get("latest") or d.get("latest_version"),
-                    ),
+                    layer_txt,
                     STATE_TEXT.get(state, state),
                     self._sop_summary(d),
                     self._render_summary(d),
-                    d.get("cache_node") or "",
+                    self._cache_summary(d),
                 ]
                 for c, v in enumerate(vals, start=1):
                     cell = QtWidgets.QTableWidgetItem(str(v))
+                    if c == 1 and layer_tip:  # detail par layer + ce qui est ignore
+                        cell.setToolTip(layer_tip)
+                    if c == 5 and self._caches_for(d):  # Caches cell -> clickable
+                        sel = self._cache_sel_for(d)
+                        cell.setToolTip(
+                            "Click to choose which USD caches to re-cache.\n"
+                            + "\n".join(
+                                "%s %s   [%s]"
+                                % (
+                                    "x" if c2.get("path") in sel else " ",
+                                    c2.get("product") or "?",
+                                    c2.get("name") or "",
+                                )
+                                for c2 in self._caches_for(d)
+                            )
+                        )
+                        cell.setForeground(QtGui.QColor(col["sop"]))
                     if c == 3 and d.get("fx_chain"):  # SOP caches cell -> clickable
                         cell.setToolTip("Click to choose which SOP caches to re-sim.")
                         cell.setForeground(QtGui.QColor(col["sop"]))
@@ -1682,6 +2967,7 @@ class Main(QtWidgets.QMainWindow):
             self.table.resizeColumnsToContents()
         finally:
             self._populating = False
+        self._update_ignored_note(data)
         self._update_apply_count()
 
     # ------------------------------------------------------- FX SOP cache chain
@@ -1738,11 +3024,17 @@ class Main(QtWidgets.QMainWindow):
 
     _STORE_DEFAULTS = {
         "fx_unselected": {},
+        "cache_unselected": {},  # caches DECOCHES par shot (cf _cache_sel_for)
         "render_layers": {},  # layers a rendre par shot (override ; defaut = Enabled node)
         # releve par shot de ce que le dernier cache a consomme/publie -> SOURCE DE
         # VERITE de la peremption, agnostique au type de node d'import
         "cached": {},
-        "tracked_layer": "",
+        "tracked_layer": "",  # forme historique (relue, tenue a jour)
+        "tracked_layers": [],  # layers suivis pour CETTE scene
+        "tracked_mode": "or",  # or = un seul suffit | and = tous
+        # scene Maya : uuids des states d'export a lancer (None = ceux coches dans la
+        # scene). Stocke le CHOIX, pas un defaut : un state ajoute plus tard reste decoche
+        "export_states": None,
         "status": [],  # snapshot du dernier status -> preview instantane sans Houdini
         "scene_version": None,  # version du .hip snapshote (fraicheur)
         "scene_mtime": None,  # mtime de ce .hip
@@ -1777,7 +3069,14 @@ class Main(QtWidgets.QMainWindow):
         if not p:
             return
         self._ensure_store()
-        self._fx_store["tracked_layer"] = self.cfg.get("tracked_layer", "")
+        # on ecrit LES DEUX formes : une version plus ancienne de l'outil
+        # ouvrant le meme json partage retombe sur ses pieds.
+        # (scene Maya : pas de layers suivis, on n'ecrit pas un reglage qui n'existe pas)
+        if not self._is_maya():
+            sel = self._tracked()
+            self._fx_store["tracked_layers"] = sel
+            self._fx_store["tracked_layer"] = sel[0]
+            self._fx_store["tracked_mode"] = self._layer_mode()
         try:
             with open(p, "w", encoding="utf-8") as f:
                 json.dump(self._fx_store, f, indent=2)
@@ -1809,6 +3108,7 @@ class Main(QtWidgets.QMainWindow):
             "preview-uncertain": ("preview · uncertain — reload to confirm", "orange"),
             "preview-obsolete": ("preview · newer scene exists — Load Scene", "red"),
             "preview-unknown": ("preview (cache)", "gray"),
+            "maya": ("read from the .ma (no Maya)", "green"),
         }.get(kind, ("", "gray"))
         self.lbl_mode.setText(txt)
         self.lbl_mode.setStyleSheet("color: %s; font-weight: bold;" % c[key])
@@ -1861,6 +3161,44 @@ class Main(QtWidgets.QMainWindow):
         path = preview.hip_at_version(hip, latest)
         return (path, latest) if path else None
 
+    def _newer_scene_text(self, cur_v, latest):
+        """Texte du garde-fou, SELON le mode de sauvegarde. Le risque n'est pas le meme :
+        - Version-up : on publie vLATEST+1 depuis vCUR -> le travail v(CUR+1)..vLATEST
+          disparait de la nouvelle version ;
+        - Leave untouched : AUCUNE version n'est creee (le message disait "publish v176",
+          faux), mais les caches sont construits depuis le setup de vCUR -> ce qui a
+          change dans v(CUR+1)..vLATEST n'y sera pas."""
+        head = "A newer version of this scene exists: <b>v%03d</b>.<br><br>" % latest
+        span = (
+            ("v%03d" % latest)
+            if cur_v + 1 == latest
+            else ("v%03d…v%03d" % (cur_v + 1, latest))
+        )
+        if (
+            self._is_maya()
+        ):  # meme risque, mais ce qui part en aval, ce sont les EXPORTS
+            if self._save_mode() == SAVE_LEAVE:
+                return head + (
+                    "The scene won't be saved, but the exports will be made from "
+                    "<b>v%03d</b>: whatever was animated in %s <b>won't be in them</b>."
+                    % (cur_v, span)
+                )
+            return head + (
+                "You are about to update the rigs of <b>v%03d</b> and publish v%03d — "
+                "everything animated in %s would be <b>ignored</b>."
+                % (cur_v, latest + 1, span)
+            )
+        if self._save_mode() == SAVE_LEAVE:
+            return head + (
+                "The scene won't be saved, but the caches will be built from "
+                "<b>v%03d</b>: whatever changed in %s (cache setup, FX, lights…) "
+                "<b>won't be in them</b>." % (cur_v, span)
+            )
+        return head + (
+            "You are about to update from <b>v%03d</b> and publish v%03d — everything "
+            "saved in %s would be <b>ignored</b>." % (cur_v, latest + 1, span)
+        )
+
     def _guard_newer_scene(self):
         """AVANT un apply : si une version plus recente existe, le moteur chargerait
         l'ANCIENNE scene (--hip = le champ) puis version-uperait par-dessus -> le travail
@@ -1874,16 +3212,15 @@ class Main(QtWidgets.QMainWindow):
         box = QtWidgets.QMessageBox(self)
         box.setIcon(QtWidgets.QMessageBox.Warning)
         box.setWindowTitle("A newer scene exists")
-        box.setText(
-            "A newer version of this scene exists: <b>v%03d</b>.<br><br>"
-            "You are about to update from <b>v%03d</b> and publish v%03d — everything "
-            "saved in v%03d…v%03d would be <b>ignored</b>."
-            % (latest, cur_v, latest + 1, cur_v + 1, latest)
-        )
+        box.setText(self._newer_scene_text(cur_v, latest))
         box.setInformativeText("What do you want to do?")
-        b_latest = box.addButton("Use latest (v%03d)" % latest, box.AcceptRole)
-        b_anyway = box.addButton("Continue anyway", box.DestructiveRole)
-        b_cancel = box.addButton("Cancel", box.RejectRole)
+        # /!\ enum SCOPE (ButtonRole.X), jamais `box.AcceptRole` : PySide6 6.5 (hython)
+        # tolere le nom court sur une instance, 6.11 (l'UI, via uv) leve AttributeError.
+        # Les tests tournaient sous hython -> le crash n'apparaissait qu'en vrai.
+        role = QtWidgets.QMessageBox.ButtonRole
+        b_latest = box.addButton("Use latest (v%03d)" % latest, role.AcceptRole)
+        b_anyway = box.addButton("Continue anyway", role.DestructiveRole)
+        b_cancel = box.addButton("Cancel", role.RejectRole)
         box.setDefaultButton(b_latest)
         box.exec() if hasattr(box, "exec") else box.exec_()
         clicked = box.clickedButton()
@@ -1914,7 +3251,12 @@ class Main(QtWidgets.QMainWindow):
             return
         hip = self.ed_hip.text().strip()
         if not hip or not os.path.isfile(hip):
-            QtWidgets.QMessageBox.warning(self, "Scene", "No .hip found:\n%s" % hip)
+            QtWidgets.QMessageBox.warning(self, "Scene", "No scene found:\n%s" % hip)
+            return
+        if (
+            self._is_maya()
+        ):  # re-lecture du .ma + des versions publiees, selection gardee
+            self._read_maya_scene(preserve=True, force=True)
             return
         self._ensure_store()
         if not self._fx_store.get("status"):
@@ -1999,8 +3341,30 @@ class Main(QtWidgets.QMainWindow):
         if flush:
             self._save_hip_store()
 
+    def _cache_sel_for(self, d):
+        """Set des CHEMINS de caches coches pour ce shot. Source = json partage, ou on
+        stocke les DECOCHES (`cache_unselected`) : un cache ajoute plus tard au setup est
+        donc coche par defaut, comme pour la chaine SOP. Defaut = tout coche."""
+        self._ensure_store()
+        shot = d.get("shot", "")
+        all_paths = [c.get("path") for c in self._caches_for(d)]
+        if shot not in self._cache_selection:
+            off = set(self._fx_store.get("cache_unselected", {}).get(shot, []))
+            self._cache_selection[shot] = [p for p in all_paths if p not in off]
+        return set(self._cache_selection[shot])
+
+    def _save_cache_sel(self, shot, checked_paths, all_paths, flush=True):
+        self._ensure_store()
+        checked = set(checked_paths)
+        self._cache_selection[shot] = [p for p in all_paths if p in checked]
+        self._fx_store.setdefault("cache_unselected", {})[shot] = [
+            p for p in all_paths if p not in checked
+        ]
+        if flush:
+            self._save_hip_store()
+
     def _on_cell_clicked(self, row, col):
-        if col not in (3, 4):
+        if self._is_maya() or col not in (3, 4, 5):
             return
         ident = self.table.item(row, 0).data(Qt.UserRole)
         d = next((x for x in self._data if x.get("id") == ident), None)
@@ -2010,6 +3374,56 @@ class Main(QtWidgets.QMainWindow):
             self._open_fx_dialog(d)
         elif col == 4 and self._render_layers_for(d):
             self._open_render_dialog(d)
+        elif col == 5 and self._caches_for(d):
+            self._open_cache_dialog(d)
+
+    def _open_cache_dialog(self, d):
+        shot = d.get("shot", "")
+        caches = self._caches_for(d)
+        dlg = CachePickerDialog(self, shot, caches, self._cache_sel_for(d))
+        ok = dlg.exec() if hasattr(dlg, "exec") else dlg.exec_()
+        if not ok:
+            return
+        all_paths = [c.get("path") for c in caches]
+        self._save_cache_sel(shot, dlg.checked_paths(), all_paths)
+        if dlg.apply_to_all():
+            keep_products = {
+                c.get("product")
+                for c in caches
+                if c.get("path") in set(dlg.checked_paths())
+            }
+            self._apply_cache_sel_to_all(keep_products)
+        self._populate(self._data, preserve=True)  # refresh the summary cell
+
+    def _apply_cache_sel_to_all(self, keep_products):
+        """Propage la selection a TOUS les shots, PAR PRODUIT : les chemins de node
+        different d'un shot a l'autre, les produits publies non."""
+        for d in self._data:
+            caches = self._caches_for(d)
+            if not caches:
+                continue
+            all_paths = [c.get("path") for c in caches]
+            keep = [c["path"] for c in caches if c.get("product") in keep_products]
+            self._save_cache_sel(d.get("shot", ""), keep, all_paths, flush=False)
+        self._save_hip_store()
+
+    def _build_cache_plan(self, ids):
+        """{item_id: [chemins de caches a executer]} pour les items COCHES.
+
+        /!\\ On ecrit TOUJOURS une entree pour un item coche qui a des caches, meme si la
+        liste est vide : cote moteur, entree absente = "tous", liste vide = "aucun".
+        Sans ca, tout decocher recacherait tout."""
+        plan = {}
+        idset = set(ids)
+        for d in self._data:
+            if d.get("id") not in idset:
+                continue
+            caches = self._caches_for(d)
+            if not caches:
+                continue
+            sel = self._cache_sel_for(d)
+            plan[d["id"]] = [c["path"] for c in caches if c.get("path") in sel]
+        return plan
 
     def _open_render_dialog(self, d):
         shot = d.get("shot", "")
@@ -2104,7 +3518,8 @@ class Main(QtWidgets.QMainWindow):
 
     def _check_outdated(self):
         for r in range(self.table.rowCount()):
-            outdated = self.table.item(r, 2).text() == "OUTDATED"
+            # startswith : un rig Maya peut etre "OUTDATED · file missing"
+            outdated = self.table.item(r, 2).text().startswith("OUTDATED")
             self.table.item(r, 0).setCheckState(
                 Qt.Checked if outdated else Qt.Unchecked
             )
@@ -2115,7 +3530,8 @@ class Main(QtWidgets.QMainWindow):
         if self._populating:
             return
         n = len(self._selected()[0])
-        self.b_apply.setText("%s (%d)" % (APPLY_LABEL, n) if n else APPLY_LABEL)
+        label = APPLY_LABEL_MAYA if self._is_maya() else APPLY_LABEL
+        self.b_apply.setText("%s (%d)" % (label, n) if n else label)
 
     def _selected(self):
         """Return (ids, labels) of the ticked rows."""
@@ -2129,12 +3545,101 @@ class Main(QtWidgets.QMainWindow):
 
     # -------------------------------------------------------------- actions
     def load_scene(self):
+        if self._is_maya():  # rien a charger dans Maya pour LIRE une scene .ma
+            self._read_maya_scene(force=True)
+            return
         self._start("status", ["--status"])
+
+    def _maya_update_summary(self, ids):
+        """Texte de confirmation d'un update Maya : ce qui va arriver aux rigs, a la scene
+        et aux exports -- dit AVANT, pas decouvert apres."""
+        idset = set(ids)
+        rigs = [r for r in self._maya_rigs if r.get("id") in idset]
+        stale = [r for r in rigs if r.get("stale")]
+        lines = []
+        for r in rigs:
+            lines.append(
+                "  • %s   %s%s"
+                % (
+                    r.get("asset"),
+                    self._pair(r.get("version"), r.get("latest")),
+                    "" if r.get("stale") else "   (up to date: nothing to swap)",
+                )
+            )
+        sel = set(self._export_sel())
+        exports = [e for e in self._maya_exports if e["uuid"] in sel]
+        exp_txt = (
+            ", ".join("%s (%s)" % (e["name"], e["product"] or "?") for e in exports)
+            if exports
+            else "none"
+        )
+        if not stale:
+            scene_txt = "Scene: unchanged (no outdated rig ticked), not saved."
+        elif self._save_mode() == SAVE_VERSION_UP:
+            scene_txt = "Scene: a NEW version will be saved (version-up)."
+        elif exports:
+            scene_txt = (
+                "Scene: LEFT UNTOUCHED - the .ma is not written. The exports get the "
+                "comment '(scene not saved)': their source scene won't contain this update."
+            )
+        else:
+            scene_txt = (
+                "Scene: LEFT UNTOUCHED and no export: DRY RUN, nothing is written."
+            )
+        return "\n".join(
+            lines
+            + [
+                "",
+                scene_txt,
+                "Exports after the update: %s." % exp_txt,
+                "",
+                "Safety: if the new rigs lose animation (failed reference edits), the "
+                "update is refused - nothing is saved or exported.",
+                "Maya runs in the background (loading the scene takes a while).",
+            ]
+        )
+
+    def _recache_maya(self, ids):
+        """Update d'une scene Maya : rigs coches -> verif -> sauvegarde -> exports."""
+        idset = set(ids)
+        stale = [r for r in self._maya_rigs if r.get("id") in idset and r.get("stale")]
+        uuids = self._export_sel()
+        if not stale and not uuids:
+            QtWidgets.QMessageBox.information(
+                self,
+                "Nothing to do",
+                "None of the ticked rigs is outdated, and no export is ticked.",
+            )
+            return
+        if not self._guard_newer_scene():
+            return
+        msg = "Update %d rig(s) in %s?\n\n%s" % (
+            len(stale),
+            os.path.basename(self.ed_hip.text().strip()),
+            self._maya_update_summary(ids),
+        )
+        yes = QtWidgets.QMessageBox.StandardButton.Yes
+        if QtWidgets.QMessageBox.question(self, "Confirm update", msg) != yes:
+            return
+        extra = ["--apply", "--rigs"] + [r["id"] for r in stale]
+        if uuids:
+            extra += ["--export"] + uuids
+        if self._save_mode() == SAVE_LEAVE:
+            extra.append("--no-save")
+        extra += ["--comment", MAYA_COMMENT]
+        self._start_maya(extra)
 
     def recache_selected(self):
         ids, labels = self._selected()
         if not ids:
-            QtWidgets.QMessageBox.information(self, "Selection", "No shot ticked.")
+            QtWidgets.QMessageBox.information(
+                self,
+                "Selection",
+                "No rig ticked." if self._is_maya() else "No shot ticked.",
+            )
+            return
+        if self._is_maya():
+            self._recache_maya(ids)
             return
         # garde-fou AVANT tout : ne pas updater depuis une scene perimee (sinon le
         # version-up ecraserait le travail fait entre-temps)
@@ -2143,11 +3648,19 @@ class Main(QtWidgets.QMainWindow):
         # FX: quels caches SOP re-simuler par shot (coches dans l'UI) -> plan json
         plan = self._build_fx_plan(ids)
         n_sop = sum(len(v) for v in plan.values())
+        # quels lop_filecache executer par item (coches dans l'UI) -> plan json
+        cplan = self._build_cache_plan(ids)
+        n_cache_off = sum(1 for v in cplan.values() if not v)
         # Lighting: quels shots re-rendre a la ferme + leurs layers -> plan json
         rplan = self._build_render_plan(ids)
         n_render_shots = len(rplan)
         n_jobs = sum(len(v) for v in rplan.values())
         extra_msg = ""
+        if n_cache_off:
+            extra_msg += (
+                "\n(%d shot(s) with NO cache ticked: the import is bumped and the "
+                "render submitted, but nothing is re-cached.)" % n_cache_off
+            )
         if plan:
             extra_msg += (
                 "\n(FX: %d SOP cache(s) will be re-simulated first — this can "
@@ -2159,10 +3672,11 @@ class Main(QtWidgets.QMainWindow):
                 "%d job(s)) with their selected layers, after the re-cache.)"
                 % (n_render_shots, n_jobs)
             )
-        msg = (
-            "Update %d shot(s)?\n"
-            "This publishes a NEW version and version-ups the scene:\n\n%s%s"
-            % (len(ids), ", ".join(labels), extra_msg)
+        msg = "Update %d shot(s)?\n\n%s\n\n%s%s" % (
+            len(ids),
+            ", ".join(labels),
+            self._save_mode_summary(ids, bool(rplan)),
+            extra_msg,
         )
         yes = QtWidgets.QMessageBox.StandardButton.Yes
         if QtWidgets.QMessageBox.question(self, "Confirm update", msg) != yes:
@@ -2170,6 +3684,8 @@ class Main(QtWidgets.QMainWindow):
         # cocher = intention explicite -> on cache TOUS les shots coches, meme ceux
         # deja a jour (--force ; sinon le moteur skippe les non-perimes).
         extra = ["--apply", "--force", "--shots"] + ids
+        if self._save_mode() == SAVE_LEAVE:
+            extra.append("--no-save")  # scene intacte : aucune version dans la chaine
         if plan:
             pf = os.path.join(tempfile.gettempdir(), "lop_update_cache_fx_plan.json")
             try:
@@ -2178,6 +3694,14 @@ class Main(QtWidgets.QMainWindow):
                 extra += ["--fx-plan", pf]
             except Exception as ex:
                 self.log.appendPlainText("\n[UI] fx-plan write failed: %s" % ex)
+        if cplan:
+            cf = os.path.join(tempfile.gettempdir(), "lop_update_cache_cache_plan.json")
+            try:
+                with open(cf, "w", encoding="utf-8") as fh:
+                    json.dump(cplan, fh)
+                extra += ["--cache-plan", cf]
+            except Exception as ex:
+                self.log.appendPlainText("\n[UI] cache-plan write failed: %s" % ex)
         if rplan:
             rf = os.path.join(
                 tempfile.gettempdir(), "lop_update_cache_render_plan.json"

@@ -16,6 +16,9 @@
             "layout",
             "ConfoLayout",
             "RoughLayout_playblast"
+        ],
+        "FX": [
+            "fx"
         ]
     },
     "source_path": "I:/frederic_2603",
