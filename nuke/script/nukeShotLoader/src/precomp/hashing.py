@@ -48,6 +48,15 @@ IGNORED_KNOBS = frozenset({
 _ROTO_UI = frozenset({"center", "rotate", "scale", "skew", "skewX", "skewY", "skew_order",
                       "translate", "transform_matrix", "stereo_offset"})
 _IGNORE_BY_CLASS = {"Roto": _ROTO_UI, "RotoPaint": _ROTO_UI}
+# Colorspace knobs Nuke 15 derives from `colorspace` / `raw` (both hashed),
+# and only in the GUI, whenever it gets to the node: a fresh load leaves them
+# at scene_linear, a session that viewed the Read has its transform there.
+# Hashed, they made a render's hash depend on the session it was submitted
+# from (cache Live again after a reopen, SQ0010-SH0010). Pinned to their
+# fresh-load value, not ignored: hashes computed before stay as they were.
+_DERIVED_COLORSPACE = {"in_colorspace": "scene_linear", "out_colorspace": "scene_linear"}
+_PINNED_BY_CLASS = {"Read": _DERIVED_COLORSPACE,
+                    "Write": dict(_DERIVED_COLORSPACE, ocioColorspace="scene_linear")}
 
 _SKIP_KNOB_TYPES = tuple(getattr(nuke, name) for name in (
     "Tab_Knob", "Text_Knob", "PyScript_Knob", "PyCustom_Knob", "Help_Knob",
@@ -240,9 +249,13 @@ class ContentHasher:
             return cached
         cls = node.Class()
         class_ignore = _IGNORE_BY_CLASS.get(cls, ())
+        class_pinned = _PINNED_BY_CLASS.get(cls, {})
         parts, expression_texts = [cls], []
         for name, knob in sorted(node.knobs().items()):
             if name in IGNORED_KNOBS or name in class_ignore or isinstance(knob, _SKIP_KNOB_TYPES):
+                continue
+            if name in class_pinned:
+                parts.append(f"{name}={class_pinned[name]}")
                 continue
             try:
                 value = knob.toScript()

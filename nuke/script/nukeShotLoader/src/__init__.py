@@ -17,4 +17,4 @@ level is importable by name by every tool of the pipeline.
 Kept free of imports so importing a sub-package never drags Qt in.
 """
 
-__version__ = "2.2.3"
+__version__ = "2.3.0"

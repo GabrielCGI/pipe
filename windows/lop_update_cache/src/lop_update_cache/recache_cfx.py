@@ -40,11 +40,12 @@ import argparse
 # Le moteur tourne soit comme package, soit comme SCRIPT ISOLE (hython <path>/
 # recache_cfx.py -> sys.path[0] = le dossier du module) : on couvre les deux.
 try:
-    from lop_update_cache import preview
+    from lop_update_cache import headless_guard, preview
 except ImportError:  # pragma: no cover (depend du mode de lancement)
     _HERE = os.path.dirname(os.path.abspath(__file__))
     if _HERE not in sys.path:
         sys.path.insert(0, _HERE)
+    import headless_guard
     import preview
 
 # horloge relative au demarrage du process -> chaque ligne de log est horodatee (+Xs)
@@ -348,6 +349,7 @@ def apply_tracked(st, tracked, mode):
     c = preview.combine_layers(st["layers"], tracked, mode)
     st["consumed"], st["latest"], st["stale"] = c["consumed"], c["latest"], c["stale"]
     st["ignored"], st["deciding"] = c["ignored"], c["deciding"]
+    st["pinned"] = c["pinned"]  # suivis, epingles ET en retard (pas perimes)
     if not c["present"] and not st["err"]:
         have = ", ".join(sorted(st["layers"])) or "aucun"
         st["err"] = (
@@ -395,6 +397,8 @@ def compute_state(pcore, imp, cfg, shot=None):
     # deja au dernier shot USD" sans jamais bumper -> le shot restait a v061 alors que
     # v063 existait. Bug signale en prod (scene Confo).
     is_ls = imp is not None and is_layer_stack(imp)
+    # lignes epinglees du usd_layer_stack : pas perimees meme en retard (cf mark_pins)
+    st["pins"] = layer_stack_pins(imp) if is_ls else {}
     cur = (
         (layer_stack_resolved(imp) or [None])[0]
         if is_ls
@@ -441,6 +445,7 @@ def compute_state(pcore, imp, cfg, shot=None):
                 "latest": lv,
                 "stale": bool(lv is not None and lv > v),
             }
+        preview.mark_pins(st["layers"], st["pins"])
         c = apply_tracked(st, tracked_list, mode)
         if not c["present"] and len(tracked_list) == 1 and rs["err"]:
             st["err"] = rs["err"]  # message precis du releve ('absent du releve')
@@ -451,8 +456,15 @@ def compute_state(pcore, imp, cfg, shot=None):
 
     # --- 2) usd_layer_stack SANS releve : on ne peut rien affirmer -----------------
     if is_ls:
+        export = preview.export_dir_of(cur) if st["pins"] else None
         for name, v in node_layers.items():
-            st["layers"][name] = {"consumed": v, "latest": v, "stale": False}
+            lv = v
+            if export and preview.layer_dept(name) in st["pins"]:
+                # epingle : le node ne dit pas le latest -> le disque, pour l'afficher
+                lv = preview.latest_product_version(export, name)
+                lv = v if lv is None else lv
+            st["layers"][name] = {"consumed": v, "latest": lv, "stale": lv > v}
+        preview.mark_pins(st["layers"], st["pins"])
         st["trust"] = "none"
         st["err"] = (
             "pas de releve pour ce shot : usd_layer_stack se resout toujours au dernier "
@@ -617,10 +629,21 @@ def process_item(hou, pcore, item, cfg, apply_changes, force):
     if st["stale"] is not True and not force:
         rep["ok"] = True
         rep["msg"] = (
-            "pas de nouvelle %s (skip ; --force pour recacher quand meme)" % tracked
+            "%s epingle (%s) : pas perime, depingler dans Houdini pour avancer"
+            % (", ".join(st["pinned"]), _pins_text(st["pins"]))
+            if st.get("pinned")
+            else "pas de nouvelle %s (skip ; --force pour recacher quand meme)"
+            % tracked
         )
-        log("  => SKIP")
+        log("  => SKIP (%s)" % rep["msg"])
         return rep
+    if st.get("pins"):
+        # re-cache force sur un shot epingle : le pin est un choix de l'artiste, on ne
+        # le retire pas -> le cache garde ces versions, on le dit
+        log(
+            "  pins du usd_layer_stack GARDES (%s) : le cache utilise ces versions"
+            % _pins_text(st["pins"])
+        )
 
     # --- APPLY : bump import -> (FX) re-sim chaine SOP dans l'ordre -> re-cache lop ---
     try:
@@ -629,10 +652,15 @@ def process_item(hou, pcore, item, cfg, apply_changes, force):
             # rien a epingler : on le force juste a re-resoudre (des publishs ont pu
             # arriver depuis le chargement de la scene)
             bump_import(pcore, imp, cfg.get("import_path_parm", "filepath"), None)
+            pins = layer_stack_pins(imp)
             log(
-                "  layer_stack : reload -> %s"
-                % ", ".join(
-                    "%s v%03d" % (k, v) for k, v in sorted(import_layers(imp).items())
+                "  layer_stack : reload -> %s%s"
+                % (
+                    ", ".join(
+                        "%s v%03d" % (k, v)
+                        for k, v in sorted(import_layers(imp).items())
+                    ),
+                    ("  (epingles, gardes : %s)" % _pins_text(pins)) if pins else "",
                 )
             )
         elif newp and newp != st["cur"]:
@@ -675,9 +703,16 @@ def process_item(hou, pcore, item, cfg, apply_changes, force):
                 % (i + 1, len(caches), c.name())
             )
             _t = time.perf_counter()
+            n_dialogs = len(headless_guard.DIALOGS)
             res = execute_cache(pcore, c)
             span = _span(_t)
             errs = node_errors(c)
+            # un sanity check studio refuse (hook prePublish) annule le publish SANS
+            # erreur sur le node : sans ce test, un cache non ecrit passait pour OK
+            errs += [
+                headless_guard.describe(d)
+                for d in headless_guard.refused_since(n_dialogs)
+            ]
             if errs:
                 rep["msg"] = "publish KO (%s): %s" % (c.name(), " | ".join(errs))
                 log("  => ECHEC publish: %s" % rep["msg"])
@@ -1031,12 +1066,16 @@ def upstream_import(hou, node, cfg, cap=20000):
 #   - illogic::usd_layer_stack::1.0 (HDA maison, remplace le precedent : plus rapide) :
 #     shot explicite (`sequence`/`shot`), multiparm `department#`/`version#`, et un parm
 #     `resolved` (chemins resolus, 1 par ligne).
-#     /!\ Ce node N'EPINGLE RIEN : son OnLoaded appelle update() -> il se resout TOUJOURS
-#     vers la derniere version publiee au chargement de la scene, et `version#` est une
-#     LECTURE (update() y ecrit le resultat), pas un reglage. Donc "bumper" = presser
-#     `reload`, et comparer "ce que l'import pointe" vs "le latest" ne veut plus rien
-#     dire apres un load : c'est toujours egal. La peremption se lit ailleurs (cf le
-#     releve fait au moment du cache).
+#     /!\ Son OnLoaded appelle rescan() -> update() : il se resout vers la derniere
+#     version publiee au chargement de la scene, et `version#` est une LECTURE (update()
+#     y ecrit le resultat), pas un reglage. Donc "bumper" = presser `reload` (= rescan),
+#     et comparer "ce que l'import pointe" vs "le latest" ne veut plus rien dire apres
+#     un load : c'est toujours egal. La peremption se lit ailleurs (cf le releve fait au
+#     moment du cache).
+#     /!\ SAUF les lignes EPINGLEES (2.1+, parm `pin#` = 'vNNN' au lieu de 'latest') :
+#     rescan les laisse sur leur version (verifie dans le PythonModule de la 2.2 en
+#     prod). Un layer epingle en retard n'est pas perime pour l'outil (choix de
+#     l'artiste, cf preview.mark_pins) et l'outil ne depingle JAMAIS.
 # --------------------------------------------------------------------------- #
 LAYER_STACK_TYPE = "illogic::usd_layer_stack"
 
@@ -1058,6 +1097,36 @@ def layer_stack_shot(node):
     seq = (parm_val(node, "sequence") or "").strip()
     shot = (parm_val(node, "shot") or "").strip()
     return ("%s/%s" % (seq, shot)) if seq and shot else None
+
+
+def layer_stack_pins(node):
+    """{departement: pin} des lignes ACTIVES figees du usd_layer_stack. {} pour un node
+    sans pins (1.0, 2.0) ou si tout suit 'latest'. Une ligne decochee ne charge rien :
+    son pin ne compte pas.
+      - 2.1+ : pin de LIGNE (`pin#` = 'vNNN') -> 'vNNN' ;
+      - 2.5+ : `shotversion` = 'vNNN' fige TOUTES les lignes sans pin propre sur les
+        versions du container Export/USD/vNNN du shot -> 'shot vNNN'. Le pin de ligne
+        reste prioritaire (comme dans le HDA, `_row_version`)."""
+    if node is None or not is_layer_stack(node):
+        return {}
+    shotver = (parm_val(node, "shotversion") or "").strip()
+    shotver = "" if shotver in ("", "latest") else shotver
+    out = {}
+    cnt = parm_val(node, "sublayers") or 0
+    for i in range(1, int(cnt) + 1):
+        dept = (parm_val(node, "department%d" % i) or "").strip().lower()
+        if not dept or not parm_val(node, "enable%d" % i):
+            continue
+        pin = (parm_val(node, "pin%d" % i) or "").strip()  # None : HDA sans pin#
+        if pin and pin != "latest":
+            out[dept] = pin
+        elif shotver:
+            out[dept] = "shot %s" % shotver
+    return out
+
+
+def _pins_text(pins):
+    return ", ".join("%s %s" % (d, v) for d, v in sorted((pins or {}).items()))
 
 
 def layer_stack_resolved(node):
@@ -1607,55 +1676,321 @@ def set_render_executions(node, enabled_layers):
     return n_on, len(execs)
 
 
-def _serialize_renders(item):
-    """Nodes render de l'item + leurs executions (layers cochables), en JSON pour l'UI."""
+def _serialize_renders(item, pcore=None):
+    """Nodes render de l'item + leurs executions (layers cochables) + leurs reglages
+    ferme actuels (ceux que la fenetre de submit Prism montrerait), en JSON pour l'UI."""
     out = []
     for nd in item.get("renders", []) or []:
-        out.append(
-            {
-                "name": nd.name(),
-                "path": nd.path(),
-                "type": nd.type().name(),
-                "executions": read_render_executions(nd),
-            }
-        )
+        d = {
+            "name": nd.name(),
+            "path": nd.path(),
+            "type": nd.type().name(),
+            "executions": read_render_executions(nd),
+        }
+        if pcore is not None:
+            try:
+                d["farm"] = read_farm_settings(render_state(pcore, nd).ui)
+            except Exception as e:  # jamais bloquant pour le status
+                d["farm_error"] = "%s: %s" % (type(e).__name__, e)
+        out.append(d)
     return out
 
 
-def submit_render(pcore, node, comment=None):
+# --------------------------------------------------------------------------- #
+#  Reglages ferme (Deadline) d'un LOP_Render
+# --------------------------------------------------------------------------- #
+# Tout ce que Deadline recoit (frames, prio, chunk, pool, group, machine limit, job haute
+# prio...) est LU sur les widgets du state Prism au moment du publish
+# (Prism_Deadline_Functions.sm_render_submitJob). La fenetre de submit GUI ne fait rien
+# d'autre que montrer ces widgets a l'artiste : les regler ici = ce qu'il ferait a la
+# main. Verifie par dry-run (envoi a Deadline intercepte) : prio, frames, chunk, machine
+# limit et split du job haute prio arrivent tels quels dans les jobs.
+# Une cle ABSENTE d'un override garde la valeur de la scene (chaque node a les siennes :
+# prio 65 / 60 selon le shot sur beaverDam).
+
+
+class FarmSettingError(Exception):
+    """Reglage ferme impossible a appliquer : on REFUSE le submit plutot que d'envoyer
+    autre chose que ce que l'utilisateur a demande."""
+
+
+def render_state(pcore, node):
+    """State Prism d'un prism::LOP_Render (celui que montre la fenetre de submit)."""
+    usd = pcore.getPlugin("USD") if pcore is not None else None
+    lr = getattr(getattr(usd, "api", None), "lopRender", None) if usd else None
+    if lr is None or not hasattr(lr, "getStateFromNode"):
+        raise RuntimeError("render %s : API lopRender indisponible" % node.path())
+    state = lr.getStateFromNode({"node": node})
+    if getattr(state, "ui", None) is None:
+        raise RuntimeError("render %s : state sans ui" % node.path())
+    return state
+
+
+def _combo_items(cb):
+    return [cb.itemText(i) for i in range(cb.count())] if cb is not None else []
+
+
+def resolve_frame_tokens(expr, first, last):
+    """'{first},{middle},{last}' / '{first}-{last}x10' -> expression Prism concrete pour la
+    plage first..last DE CE SHOT. middle = celui du job haute prio de Prism (milieu de la
+    liste des frames). Une expression sans token est rendue telle quelle."""
+    frames = list(range(int(first), int(last) + 1)) or [int(first)]
+    middle = frames[int((len(frames) - 1) / 2)]
+    return (expr or "").format(first=frames[0], middle=middle, last=frames[-1])
+
+
+def read_farm_settings(ui):
+    """Reglages ferme ACTUELS d'un state LOP render (+ les choix possibles)."""
+
+    def val(name, kind):
+        w = getattr(ui, name, None)
+        if w is None:
+            return None
+        if kind == "spin":
+            return w.value()
+        if kind == "check":
+            return bool(w.isChecked())
+        if kind == "combo":
+            return w.currentText()
+        return w.text()
+
+    rt = val("cb_rangeType", "combo") or ""
+    first = last = None
+    try:
+        fr = ui.getFrameRange(rt) if rt else None
+        if fr and rt == "Expression":
+            first, last = int(min(fr)), int(max(fr))
+        elif fr:
+            first = int(fr[0])
+            last = first if rt == "Single Frame" else int(fr[1])
+    except Exception:
+        pass
+    hp = getattr(ui, "gb_prioJob", None)
+    return {
+        "range_type": rt,
+        "first": first,
+        "last": last,
+        "expression": val("le_frameExpression", "text") or "",
+        "priority": val("sp_rjPrio", "spin"),
+        "chunk": val("sp_rjFramesPerTask", "spin"),
+        "timeout": val("sp_rjTimeout", "spin"),
+        "suspended": val("chb_rjSuspended", "check"),
+        "concurrent": val("sp_dlConcurrentTasks", "spin"),
+        "machine_limit": val("sp_machineLimit", "spin"),
+        "pool_preset": val("cb_dlPreset", "combo"),
+        "pool": val("cb_dlPool", "combo"),
+        "secondary_pool": val("cb_sndPool", "combo"),
+        "group": val("cb_dlGroup", "combo"),
+        "pools": _combo_items(getattr(ui, "cb_dlPool", None)),
+        "groups": _combo_items(getattr(ui, "cb_dlGroup", None)),
+        "high_prio": {
+            "enabled": bool(hp is not None and hp.isChecked()),
+            "priority": val("sp_highPrio", "spin"),
+            "frames": val("e_highPrioFrames", "text") or "",
+        },
+        # le job de rendu husk prend son groupe dans l'env du projet s'il y est
+        # (pipeline.json frederic : PRISM_HUSK_DEADLINE_GROUP=husk_grp, vu sur un job GUI)
+        "husk_group_env": os.environ.get("PRISM_HUSK_DEADLINE_GROUP") or "",
+    }
+
+
+def apply_farm_settings(ui, ov, core=None):
+    """Applique les overrides `ov` sur le state (cles absentes = valeur de la scene).
+    Retourne la liste lisible de ce qui a ete regle. FarmSettingError si une valeur est
+    impossible (pool inconnu, prio hors bornes...) : l'appelant ne soumet rien."""
+    if not ov:
+        return []
+    done = []
+
+    def widget(name, label):
+        w = getattr(ui, name, None)
+        if w is None:
+            raise FarmSettingError("%s : reglage absent de ce render" % label)
+        return w
+
+    def spin(name, value, label):
+        w = widget(name, label)
+        v = int(value)
+        if v < w.minimum() or v > w.maximum():
+            raise FarmSettingError(
+                "%s %s hors bornes [%s..%s]" % (label, v, w.minimum(), w.maximum())
+            )
+        w.setValue(v)
+        done.append("%s=%s" % (label, v))
+
+    def combo(name, value, label):
+        w = widget(name, label)
+        idx = w.findText(value)
+        if idx < 0:
+            raise FarmSettingError(
+                "%s '%s' inconnu de Deadline (choix : %s)"
+                % (label, value, ", ".join(_combo_items(w)))
+            )
+        w.setCurrentIndex(idx)
+        done.append("%s=%s" % (label, value))
+
+    # --- frames ---
+    fr = ov.get("frames") or {}
+    mode = fr.get("mode")
+    if mode == "range":
+        a, b = int(fr["start"]), int(fr["end"])
+        if a > b:
+            raise FarmSettingError("frames : debut %s > fin %s" % (a, b))
+        combo("cb_rangeType", "Custom", "type de plage")
+        done.pop()
+        spin("sp_rangeStart", a, "debut")
+        spin("sp_rangeEnd", b, "fin")
+        done[-2:] = ["frames=%s-%s" % (a, b)]
+    elif mode == "expression":
+        cur = read_farm_settings(ui)
+        if cur["first"] is None:
+            raise FarmSettingError("frames : plage du shot illisible")
+        try:
+            expr = resolve_frame_tokens(fr.get("expr") or "", cur["first"], cur["last"])
+        except (KeyError, IndexError, ValueError) as e:
+            raise FarmSettingError("frames : expression invalide (%s)" % e)
+        if core is not None:
+            try:
+                resolved = core.resolveFrameExpression(expr)
+            except Exception:
+                resolved = None
+            if not resolved:
+                raise FarmSettingError("frames : expression illisible '%s'" % expr)
+        combo("cb_rangeType", "Expression", "type de plage")
+        done.pop()
+        widget("le_frameExpression", "expression").setText(expr)
+        done.append("frames=%s" % expr)
+    elif mode:
+        raise FarmSettingError("frames : mode inconnu '%s'" % mode)
+
+    for name, key, label in (
+        ("sp_rjPrio", "priority", "priority"),
+        ("sp_rjFramesPerTask", "chunk", "frames/task"),
+        ("sp_rjTimeout", "timeout", "timeout"),
+        ("sp_dlConcurrentTasks", "concurrent", "concurrent tasks"),
+        ("sp_machineLimit", "machine_limit", "machine limit"),
+    ):
+        if ov.get(key) is not None:
+            spin(name, ov[key], label)
+    for name, key, label in (
+        ("cb_dlPool", "pool", "pool"),
+        ("cb_sndPool", "secondary_pool", "secondary pool"),
+        ("cb_dlGroup", "group", "group"),
+    ):
+        if ov.get(key):
+            combo(name, ov[key], label)
+    if ov.get("suspended") is not None:
+        widget("chb_rjSuspended", "suspended").setChecked(bool(ov["suspended"]))
+        done.append("suspended=%s" % bool(ov["suspended"]))
+    hp = ov.get("high_prio") or {}
+    if hp:
+        gb = widget("gb_prioJob", "job haute prio")
+        if hp.get("enabled") is not None:
+            gb.setChecked(bool(hp["enabled"]))
+            done.append("high prio job=%s" % ("on" if hp["enabled"] else "off"))
+        if hp.get("priority") is not None:
+            spin("sp_highPrio", hp["priority"], "high prio")
+        if hp.get("frames"):
+            widget("e_highPrioFrames", "frames haute prio").setText(hp["frames"])
+            done.append("high prio frames=%s" % hp["frames"])
+    return done
+
+
+def farm_summary(ui):
+    """Une ligne : ce que Deadline va recevoir pour ce render (apres overrides)."""
+    s = read_farm_settings(ui)
+    if s["range_type"] == "Expression":
+        frames = s["expression"]
+    else:
+        frames = "%s-%s (%s)" % (s["first"], s["last"], s["range_type"])
+    hp = s["high_prio"]
+    husk = s["husk_group_env"]
+    parts = [
+        "frames %s" % frames,
+        "prio %s" % s["priority"],
+        "%s frame(s)/task" % s["chunk"],
+        "pool %s" % s["pool"],
+        "group %s%s"
+        % (s["group"], " (job husk : %s via le projet)" % husk if husk else ""),
+        "machine limit %s" % s["machine_limit"],
+    ]
+    if s["suspended"]:
+        parts.append("SUSPENDED")
+    parts.append(
+        "job haute prio %s sur %s" % (hp["priority"], hp["frames"])
+        if hp["enabled"]
+        else "pas de job haute prio"
+    )
+    return " | ".join(parts)
+
+
+def prerender_gui_effects(pcore, node):
+    """Parite GUI du hook projet `preRender` : sa branche GUI pose ILLOGIC_TEMP_NODE (layers
+    -> shot/OPTI des executions actives) ; sans interface (hou.isUIAvailable() faux) il
+    sort AVANT. On rejoue cet effet avec SA fonction `catchInfo` (le code du projet, pas
+    une copie) -> meme valeur qu'un submit GUI. Rien si le hook ou la fonction n'existe
+    pas. (Aujourd'hui seul Hooks/old/preSubmit_Deadline.py la lisait : desactive.)"""
+    try:
+        hook_dir = pcore.projects.getHookFolder()
+        if not os.path.isfile(os.path.join(hook_dir, "preRender.py")):
+            return None
+        if hook_dir not in sys.path:
+            sys.path.append(hook_dir)
+        # meme import que Prism (Callbacks.callHook : __import__(hookName))
+        hook = sys.modules.get("preRender") or __import__("preRender")
+        catch = getattr(hook, "catchInfo", None)
+        if catch is None or node.type().name() != "prism::LOP_Render::1.0":
+            return None
+        val = str(catch(node))
+        os.environ["ILLOGIC_TEMP_NODE"] = val
+        return val
+    except Exception as e:
+        log("    (parite preRender : %s)" % e)
+        return None
+
+
+def submit_render(pcore, node, comment=None, farm=None):
     """Soumet un prism::LOP_Render a la FERME Deadline, EN HEADLESS.
 
     Pourquoi pas le bouton 'execute' : `lopRender.executePressed` ouvre (submitJob on)
     le dialogue Farm_Submitter, qui ne s'`.show()` pas en headless -> AUCUN job (verifie :
     un apply reel a logue '1 OK' sans creer de job). On replique donc ce que fait le
-    bouton OK du dialogue, `Farm_Submitter.submit()` (source Prism), SANS UI :
+    bouton Submit du dialogue, `Farm_Submitter.submit()` (source Prism), SANS UI :
         state = lopRender.getStateFromNode(node)
         state.ui.gb_submit.setChecked(True)        # <- FARM (False = render local)
-        sm.publish(executeState=True, states=[state], ...)
+        sm.publish(executeState=True, states=[state], sanityChecks=<parm du node>, ...)
     C'est `gb_submit` (pas le bouton) qui decide farm-vs-local -> on le coche EXPLICITEMENT
     et on REFUSE si on ne peut pas (pas de submitter farm / pas de gb_submit / pas de SM)
-    -> jamais de render local par megarde. Logue le detail pour diagnostic."""
-    usd = pcore.getPlugin("USD") if pcore is not None else None
-    lr = getattr(getattr(usd, "api", None), "lopRender", None) if usd else None
-    if lr is None or not hasattr(lr, "getStateFromNode"):
-        raise RuntimeError("render %s : API lopRender indisponible" % node.path())
+    -> jamais de render local par megarde.
+
+    `farm` = overrides des reglages ferme (cf apply_farm_settings) : poses sur les MEMES
+    widgets que l'artiste regle dans la fenetre de submit.
+
+    Parite avec un submit GUI (audit 16/10) : memes callbacks/hooks (sm.publish les
+    declenche), plus ce que la GUI fait et que le headless sautait :
+      - sanityChecks : celui du NODE (Farm_Submitter lit le parm), plus force a False ;
+      - le node est SELECTIONNE (le check studio TileFramePerTask ne regarde que la
+        selection : sans ca il ne verifiait rien) ;
+      - la branche GUI du hook preRender (prerender_gui_effects) ;
+      - un sanity check studio en ERROR refuse le submit (la GUI grise 'Publish
+        anyways') au lieu de geler hython (headless_guard)."""
+    # Farm_Submitter.submit lit sanityChecks sur le node : on le lit AVANT d'y toucher
+    p_sanity = node.parm("sanityChecks")
+    sanity = bool(p_sanity.eval()) if p_sanity is not None else True
 
     # le node reflete l'intention 'submit' + rien qui sauve le hip / popupe en headless
+    # (la scene est deja sauvee par l'outil, et saveScene/incrementScene sont aussi
+    # passes a False au publish)
     set_parm(node, "submitJob", 1)
     for pn, val in (
         ("saveScene", 0),
         ("incrementScene", 0),
         ("showSuccessPopup", 0),
-        ("sanityChecks", 0),
     ):
         set_parm(node, pn, val)
 
-    state = lr.getStateFromNode({"node": node})
-    ui = getattr(state, "ui", None)
-    if ui is None:
-        raise RuntimeError(
-            "render %s : state sans ui -> submit impossible" % node.path()
-        )
+    state = render_state(pcore, node)
+    ui = state.ui
 
     # 1) le switch FARM : gb_submit (comme Farm_Submitter.submit)
     gb = getattr(ui, "gb_submit", None)
@@ -1690,7 +2025,13 @@ def submit_render(pcore, node, comment=None):
             % node.path()
         )
 
-    # 3) State Manager (headless : create=True au besoin)
+    # 3) reglages ferme demandes (APRES le choix du manager : il recree ses widgets)
+    applied = apply_farm_settings(ui, farm, core=pcore)
+    if applied:
+        log("    reglages ferme demandes : %s" % ", ".join(applied))
+    log("    job(s) Deadline : %s" % farm_summary(ui))
+
+    # 4) State Manager (headless : create=True au besoin)
     sm = pcore.getStateManager()
     if sm is None and hasattr(pcore, "getStateManager"):
         try:
@@ -1703,11 +2044,24 @@ def submit_render(pcore, node, comment=None):
             % node.path()
         )
 
+    # 5) parite GUI : node selectionne + effets GUI du hook preRender
+    try:
+        node.setSelected(True, clear_all_selected=True)
+    except Exception:
+        pass
+    temp_node = prerender_gui_effects(pcore, node)
+    if temp_node is not None:
+        log("    hook preRender (branche GUI) : ILLOGIC_TEMP_NODE=%s" % temp_node)
+
     # NB: ne PAS appeler state.text() -- un state Prism herite de QTreeWidgetItem dont
     # text(col) exige un argument (plantait le submit AVANT tout publish).
-    log("    submit(headless) : farm=%s  gb_submit=%s" % (picked, gb.isChecked()))
+    log(
+        "    submit(headless) : farm=%s  gb_submit=%s  sanityChecks=%s"
+        % (picked, gb.isChecked(), sanity)
+    )
     # commentaire EXPLICITE : sans lui, publish() prend e_comment.text() du State Manager,
     # vide en headless -> le versioninfo du render avait "comment": "" (vu sur SH0060).
+    n_dialogs = len(headless_guard.DIALOGS)
     result = sm.publish(
         executeState=True,
         states=[state],
@@ -1715,9 +2069,27 @@ def submit_render(pcore, node, comment=None):
         successPopup=False,
         saveScene=False,
         incrementScene=False,
-        sanityChecks=False,
+        sanityChecks=sanity,
         versionWarning=False,
     )
+    refused = headless_guard.refused_since(n_dialogs)
+    if refused:
+        raise RuntimeError(
+            "submit refuse : %s"
+            % " ; ".join(headless_guard.describe(d) for d in refused)
+        )
+    if result is None:
+        # publish() sort SANS rien executer quand un hook prePublish annule
+        raise RuntimeError("submit annule avant l'envoi (hook prePublish)")
+    if result is False:
+        infos = []
+        for r in getattr(sm, "publishResult", None) or []:
+            res = r.get("result") if isinstance(r, dict) else None
+            infos.append(str(res[0]) if res else "erreur inconnue")
+        raise RuntimeError(
+            "Prism signale des erreurs pendant le submit (%s) : verifier les jobs dans "
+            "Deadline" % (" | ".join(infos) or "voir le log au-dessus")
+        )
     return "sm.publish(gb_submit=True -> %s) -> %r" % (picked, result)
 
 
@@ -1764,9 +2136,20 @@ def submit_renders(hou, pcore, items, reports, cfg):
     shot dont le re-cache a echoue (donnee cassee) ni un render dont AUCUN layer n'est
     coche (rien a rendre)."""
     plan = cfg.get("render_plan") or {}
+    # reglages ferme demandes depuis l'UI : les memes pour tous les renders soumis ("*")
+    farm = (cfg.get("farm_plan") or {}).get("*") or None
     rep_by_id = {r.get("id"): r for r in reports}
     log("-" * 70)
     log("SUBMIT RENDERS (ferme Deadline)")
+    if farm:
+        log("Reglages ferme demandes : %s" % json.dumps(farm, sort_keys=True))
+    if not os.environ.get("PRISM_LAUNCH_ENV"):
+        # un submit GUI copie dans le job l'env du profil du launcher Prism (OCIO...) :
+        # ici il n'arrive que si l'outil a ete lance depuis le shelf Houdini
+        log(
+            "ATTENTION : PRISM_LAUNCH_ENV absent (outil lance hors de Houdini ?) -> les "
+            "jobs n'auront pas l'environnement du profil launcher (OCIO...)."
+        )
     n_ok = n_ko = 0
     for it in items:
         entries = _plan_entries(plan, it["id"])
@@ -1790,7 +2173,8 @@ def submit_renders(hou, pcore, items, reports, cfg):
                 continue
             try:
                 _t = time.perf_counter()
-                res = submit_render(pcore, nd, cfg.get("render_comment"))
+                log("  render %s [%s]" % (nd.name(), it["shot"]))
+                res = submit_render(pcore, nd, cfg.get("render_comment"), farm=farm)
                 span = _span(_t)
                 errs = node_errors(nd)
                 if errs:
@@ -1802,8 +2186,11 @@ def submit_renders(hou, pcore, items, reports, cfg):
                         % (nd.name(), it["shot"], span, res)
                     )
                     n_ok += 1
+            except FarmSettingError as ex:
+                log("  SUBMIT REFUSE %s (reglages ferme) : %s" % (nd.name(), ex))
+                n_ko += 1
             except Exception as ex:
-                log("  SUBMIT EXCEPTION %s: %s" % (entry["node"], ex))
+                log("  SUBMIT KO %s: %s" % (entry["node"], ex))
                 n_ko += 1
     log("Renders soumis: %d OK, %d KO" % (n_ok, n_ko))
     return n_ok, n_ko
@@ -1840,7 +2227,7 @@ def status_item(hou, pcore, item, cfg):
         "tracked_mode": cfg.get("tracked_mode") or "or",
         "fx_sopcreate": cont.path() if cont is not None else None,
         "fx_chain": _serialize_fx_chain(item),
-        "renders": _serialize_renders(item),
+        "renders": _serialize_renders(item, pcore),
         "consumed_version": None,
         "latest_version": None,
         "stack_consumed": None,
@@ -1872,6 +2259,12 @@ def status_item(hou, pcore, item, cfg):
             else None,
             "latest": ("v%03d" % ld["latest"]) if ld["latest"] is not None else None,
             "stale": ld["stale"],
+            # epingle dans le usd_layer_stack (cf preview.mark_pins)
+            **(
+                {"pinned": ld["pinned"], "pinned_behind": bool(ld.get("pinned_behind"))}
+                if ld.get("pinned")
+                else {}
+            ),
         }
         for name, ld in (st.get("layers") or {}).items()
     }
@@ -1882,6 +2275,10 @@ def status_item(hou, pcore, item, cfg):
     )  # verified / uncertain / none (fiabilite du releve)
     d["ignored_layers"] = st.get("ignored") or []  # suivis mais non consommes ici
     d["deciding_layer"] = st.get("deciding")
+    # pins du usd_layer_stack : gardes dans le snapshot -> le preview (disque seul, qui
+    # ne voit pas le node) continue de les appliquer
+    d["pins"] = st.get("pins") or {}
+    d["pinned_layers"] = st.get("pinned") or []
     if st.get("trust") == "none" and st["stale"] is None:
         # aucun releve : on ne PEUT pas conclure (et on ne fait pas semblant)
         d["state"] = "no_record"
@@ -1899,6 +2296,8 @@ def status_item(hou, pcore, item, cfg):
         d["state"] = "no_layer"
     elif st["stale"]:
         d["state"] = "outdated"
+    elif st.get("pinned"):
+        d["state"] = "pinned"  # en retard, mais epingle par l'artiste : pas perime
     else:
         d["state"] = "uptodate"
     return d
@@ -2009,6 +2408,13 @@ def main():
         help="(Lighting) json {cache_id: [chemins LOP_Render a soumettre]} = quels "
         "renders soumettre a la ferme par shot (coches dans l'UI). Absent -> aucun.",
     )
+    parser.add_argument(
+        "--farm-plan",
+        default=None,
+        help="(Lighting) json {'*': {reglages ferme}} = overrides appliques a chaque render "
+        "soumis (frames, priority, chunk, pool, group, machine_limit, suspended, "
+        "high_prio...). Cle absente = valeur de la scene. Cf apply_farm_settings.",
+    )
     # tolere un '--' de separation eventuel passe par hython
     argv = [a for a in sys.argv[1:] if a != "--"]
     args = parser.parse_args(argv)
@@ -2060,6 +2466,15 @@ def main():
                 cfg["render_plan"] = json.load(f)
         except Exception as e:
             log("render-plan illisible (%s) -> aucun render soumis" % e)
+    # reglages ferme : json optionnel. Illisible = on ne soumet PAS avec d'autres
+    # reglages que ceux demandes -> on vide le render-plan.
+    if args.farm_plan:
+        try:
+            with open(args.farm_plan, "r", encoding="utf-8") as f:
+                cfg["farm_plan"] = json.load(f)
+        except Exception as e:
+            log("farm-plan illisible (%s) -> AUCUN render soumis" % e)
+            cfg["render_plan"] = {}
     # commentaire des renders soumis. Scene NON sauvee -> on le DIT dans le render : son
     # sourceScene pointera une scene qui ne contient pas l'update (l'image, elle, est
     # juste : le submitter exporte l'USD depuis la session vivante).
@@ -2182,6 +2597,11 @@ def main():
                 inspect_node(hou, it["import"], "IMPORT %s" % it["id"])
             inspect_node(hou, it["cache"], "CACHE %s" % it["id"])
         sys.exit(0)
+
+    if args.apply:
+        # aucune fenetre modale ne doit geler hython (sanity_check studio du hook
+        # prePublish, popups Prism...) : reponse automatique comme en GUI, logguee
+        headless_guard.install(log)
 
     reports = []
     for i, it in enumerate(items):

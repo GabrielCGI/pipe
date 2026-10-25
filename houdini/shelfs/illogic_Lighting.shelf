@@ -74,7 +74,7 @@ lgt_hou_shelf_snippets.cleanLight()]]></script>
     <script scriptType="python"><![CDATA[import batchrender
 import importlib
 importlib.reload(batchrender)
-
+print(batchrender)
 batchrender.main()]]></script>
   </tool>
 

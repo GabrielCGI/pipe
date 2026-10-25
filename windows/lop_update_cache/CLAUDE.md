@@ -14,10 +14,15 @@ ouvrir la GUI Houdini**. Auteur direction : Thomas (TD FX). Claude code.
   `PrismInit.prismInit()` (headless : `changeProject(pipeline.json)` obligatoire).
 - **preview** `src/lop_update_cache/preview.py` — pur Python (0 Houdini) : détection de
   péremption par lecture disque (voir plus bas).
+- **headless_guard** `src/lop_update_cache/headless_guard.py` — pur Qt : aucune fenêtre
+  modale ne peut geler hython (sanity check studio…), cf « Parité avec un submit GUI ».
+  Le moteur Maya garde sa propre copie (`recache_maya.install_headless_dialog_guard`).
 - Lancé depuis Houdini par un **shelf tool** (`houdini_shelf_tool.py`) qui passe le projet
   courant (`pcore.prismIni`) + la scène via env `LOP_UPDATE_CACHE_PROJECT` / `_HIP`.
   Bouton **From scene** = remet dans le champ la scène `_HIP` (celle ouverte dans Houdini
   **au lancement** ; le champ, lui, reprend la dernière scène mémorisée). Pas de shelf Maya.
+- **Choix de la scène** : panneau de gauche **toujours ouvert** (`SceneBrowser`), qui a
+  remplacé le dialogue `Choose scene...` (`ProjectPicker`, supprimé). Cf section dédiée.
 - **Moteur Maya** `src/lop_update_cache/recache_maya.py` — tourne DANS **mayapy**. Une
   scène `.ma` dans le champ bascule la fenêtre en **mode RIGS** (cf section Maya).
   `maya_refs.py` = lecture texte du `.ma` (références + states Prism), 0 Maya.
@@ -78,9 +83,10 @@ alors trouvé dans les deux cas, sans rien savoir du container.
 
 ### Péremption par RELEVÉ DE CACHE (source de vérité, agnostique au type de node)
 Le node maison `illogic::usd_layer_stack` (parms `sequence`/`shot`/`resolved`,
-multiparm `version#` en **lecture seule**) se re-résout **toujours au dernier publish**
-(`OnLoaded` → `update()`). Lui demander « quelle version pointes-tu ? » après un load
-répond donc toujours « la dernière » : la question n'a plus de sens.
+multiparm `version#` en **lecture seule**) se re-résout **au dernier publish** à chaque
+load (`OnLoaded` → `rescan()` → `update()`), **sauf les lignes épinglées** (2.1+, cf
+« Pins » plus bas). Lui demander « quelle version pointes-tu ? » après un load répond
+donc « la dernière » : la question n'a plus de sens.
 → **Au moment du cache** on relève ce qui a réellement été consommé, et on compare ce
 relevé au disque (`preview.record_state`). Marche pour les **deux** générations de node.
 - Relevé (sidecar, clé `cached[<shot>]`) : `{layers: {produit: version}, product,
@@ -104,6 +110,30 @@ relevé au disque (`preview.record_state`). Marche pour les **deux** génératio
   `cam` retire son chemin) et un département décoché a son `version#` **vide** → notre
   lecture principale (`resolved`) *et* le repli multiparm sont justes tous les deux, il
   n'y a rien à filtrer. `parts#` est resté vide dans toutes les configs testées.
+
+### Pins du usd_layer_stack (2.1+) — état « pinned »
+Depuis la 2.1, une ligne peut être **épinglée** (`pin#` = `vNNN` au lieu de `latest`).
+Vérifié dans le PythonModule de la **2.2 de prod** : `OnLoaded` et le bouton `reload`
+appellent `rescan()` → `update()`, qui **garde** la version épinglée. Avant le correctif
+(16/10, A/B sur le moteur déployé) : anm épinglé v017, latest v019 → **OUTDATED pour
+toujours**, l'update re-cachait en v017, et le log disait « reload » sans rien dire du pin.
+- `layer_stack_pins(node)` → `{dept: pin}` des lignes **actives** figées (une ligne
+  décochée ne charge rien : son pin ne compte pas ; HDA sans `pin#` → `{}`). Deux
+  sources : le pin de ligne (`vNNN`) et, en **2.5+** (pas encore publiée au 16/10), le
+  parm `shotversion` = `vNNN` qui fige toutes les lignes sans pin propre sur les
+  versions du container `Export/USD/vNNN` → `shot vNNN` (pin de ligne prioritaire,
+  comme dans le HDA). Testé sur la 2.5 de `dist/` : shot v132 → anm v018, latest v019.
+- `preview.mark_pins(layers, pins)` (pur, partagé moteur / preview / UI) : le pin porte sur
+  la **ligne** = tout le département (`_layer_anm_*` : le master ET les éléments qu'il
+  référence). Layer épinglé en retard → `pinned_behind=True`, `stale=False`.
+  `combine_layers` remonte `pinned` → état **`pinned`** (ni OUTDATED ni coché par défaut).
+  En OU, un AUTRE layer suivi périmé rend quand même le shot OUTDATED.
+- Statut : `pins` + `pinned_layers` par item. Le **preview** (disque seul, ne voit pas le
+  node) réapplique les `pins` du snapshot → un Reload rapide ne perd pas l'état.
+- Sans relevé : `no_record` comme avant, mais le latest disque des layers épinglés est lu
+  pour l'afficher (« v017 (pinned, latest v019) »).
+- **L'outil ne dépingle JAMAIS** (choix de l'artiste) : un update forcé garde le pin, le dit
+  dans le log (« pins … GARDES ») et dans la confirmation (« PINNED layers kept »).
 
 ### Plusieurs layers suivis (OU / ET)
 UI : le cas courant (UN layer) est un simple **dropdown** ; le multi-layer vit derriere
@@ -147,9 +177,10 @@ l'**entité cachée**.
 - Le moteur n'avait donc **rien** à changer : entités = shots, tout le reste suit.
   Vérifié en `--status` sur cette scène (1 item, `SQ0020/SH0050`, ancré render, apparié
   par topologie).
-- Le seul blocage était le **picker**, qui ne parcourait que `Shots/` → bascule
-  **Shots / Assets** (mêmes colonnes, libellés `Category`/`Asset`), et il s'ouvre du bon
-  côté quand la scène courante est un asset. Les gabarits Prism `@...@` sont masqués.
+- Le seul blocage était le **picker** (aujourd'hui le panneau de gauche), qui ne
+  parcourait que `Shots/` → bascule **Shots / Assets** (même arbre, libellés
+  `Category`/`Asset`), et il se place du bon côté quand la scène courante est un asset.
+  Les gabarits Prism `@...@` sont masqués.
 - `_find_shots_up` reconnaît les deux racines : sans ça, un projet ne se déduit pas d'une
   scène rangée sous Assets.
 - `layer_stack_shot` en `mode='asset'` renvoie le **nom d'asset nu**, comme le repli
@@ -270,10 +301,76 @@ XPU → **Deadline**). L'outil peut, après le bump import + re-cache du Lightin
   `render_layers[shot] = [layers cochés]` (override ; défaut = Enabled node). "Apply to
   all shots" propage **par nom de layer** (communs aux shots).
 
+### Réglages ferme (frames, prio, chunk, pool…) — bouton **Farm ▸**
+Demandé par Thomas (16/10). Deadline reçoit ce que portent les **widgets du state** Prism
+au moment du publish (`Prism_Deadline_Functions.sm_render_submitJob`) : la fenêtre de
+submit GUI ne fait que les montrer. L'outil pose donc les MÊMES widgets avant le submit.
+- Réglables : frames (`Custom` début-fin, ou `Expression` avec tokens `{first} {middle}
+  {last}` résolus sur la plage de **chaque** shot → `{first}-{last}x10` a un sens pour
+  toute la scène), `sp_rjPrio`, `sp_rjFramesPerTask`, `sp_rjTimeout`,
+  `sp_dlConcurrentTasks`, `sp_machineLimit`, `cb_dlPool`/`cb_sndPool`/`cb_dlGroup`,
+  `chb_rjSuspended`, job haute prio (`gb_prioJob`, `sp_highPrio`, `e_highPrioFrames`).
+- **Override, pas remplacement** : clé absente = valeur de la scène (chaque node a la
+  sienne : prio 65 / 60 sur beaverDam). `--farm-plan` json `{"*": {...}}`, appliqué à
+  chaque render soumis ; **en mémoire seulement** dans l'UI (oublié au changement de
+  scène), jamais dans le sidecar : la prio se décide au moment d'envoyer.
+- Valeur impossible (pool/group absent de Deadline, prio hors bornes, expression
+  illisible) → `FarmSettingError` → le render n'est **pas** soumis (jamais d'envoi avec
+  d'autres réglages que ceux demandés). farm-plan illisible → aucun render soumis.
+- `--status` émet `renders[].farm` (valeurs actuelles + listes pools/groups) : le
+  dialogue affiche « scene: … » à côté de chaque champ. Coût non mesurable (state déjà
+  construit à l'ouverture de la scène).
+- ⚠️ Le job **husk** de rendu prend son groupe dans l'env projet
+  (`PRISM_HUSK_DEADLINE_GROUP=husk_grp` dans pipeline.json frederic, vu sur un job GUI) :
+  le Group choisi s'applique aux autres jobs (cleanup…). Dit dans le dialogue.
+- **Vérifié par dry-run** (vrai submitter Prism, sortie en dossier temporaire, envoi à
+  Deadline intercepté au niveau `CallDeadlineCommand` → callbacks `preSubmit_Deadline`
+  studio exécutés, aucun job) : prio 88/95, frames 1001-1020 avec split du job haute prio
+  (1001,1020 / 1002..1019), chunk 2, machine limit 4, pool, Suspended → tels quels dans
+  les jobs. Limite : le callback USD compilé `sm_render_getDeadlineParams` (conversion
+  husk) était débranché pendant ce test (code opaque, risque d'écriture en prod) → job
+  de type Houdini, comme les jobs GUI yuka. Test de bout en bout réel : à faire dans un
+  bac à sable.
+
+### Parité avec un submit GUI (audit du 16/10)
+Le bouton Submit (`Farm_Submitter.submit`, source Prism lisible) = `sm.publish` avec les
+parms du node. Tout ce qui tourne dans un submit GUI passe par `sm.publish` → **mêmes
+callbacks/hooks** en headless. Vérifié dans le hython de l'outil : plugins studio chargés
+(`husk_extra_settings` : script husk du studio monkeypatché + tuiles/autocrop ;
+`variable_deadline` : OPTI / limites de textures Karma ; `ranch_exporter` : pre/post-job
+ranch si `ILL_RANCHCOPY_ENABLED` ; `auto_cleaner` ; `clear_comment`), env projet appliquée
+au `changeProject` (`ILL_RANCHCOPY_ENABLED=1`, `PRISM_HUSK_DEADLINE_GROUP`, OCIO…). Écarts
+trouvés et corrigés :
+- `sanityChecks` était **forcé à False** → maintenant celui du **node** (comme la GUI).
+  Sans interface, les checks Prism intégrés ne font que logguer (`runSantityChecks`
+  renvoie True) : pas de blocage possible.
+- Le check studio `TileFramePerTask` ne regarde que `hou.selectedNodes()` → en headless
+  il ne vérifiait **rien**. Le node est maintenant **sélectionné** avant le publish.
+- Hook projet `preRender` : sa branche GUI pose `ILLOGIC_TEMP_NODE` puis… sort si
+  `not hou.isUIAvailable()`. Rejoué par `prerender_gui_effects` avec **sa** fonction
+  `catchInfo` (même module que Prism). Lu seulement par `Hooks/old/preSubmit_Deadline.py`
+  (désactivé) : parité de principe.
+- 🔴 **Sanity check studio en headless = gel** : le hook `prePublish` lance
+  `sanity_check.main` à CHAQUE publish (cache ou render) ; un check en échec →
+  `MainDialog.exec()` → hython bloqué à vie. `headless_guard.install()` (module partagé,
+  pur Qt) répond comme la GUI : **ERROR → refus** (« Publish anyways » grisé), warnings
+  seuls → on publie, tout est loggué. **Reproduit en vrai** : tuiles + 2 frames/task →
+  `Tile Frame Per Task` ERROR → refusé, nommé, sans gel. Un refus annule le publish SANS
+  erreur sur le node : `submit_render` et `process_item` le détectent
+  (`headless_guard.refused_since`) → KO explicite (avant : un cache non écrit = « OK »).
+- `sm.publish` renvoie `None` si un hook prePublish annule, `False` si erreurs → KO.
+- `PRISM_LAUNCH_ENV` (env du profil launcher Prism, copiée dans les jobs : OCIO,
+  limites Karma…) n'existe que si l'outil vient du **shelf Houdini** (le shelf passe
+  `os.environ`). Lancé ailleurs → avertissement dans la confirmation et le log.
+- Restent **volontairement** différents : `saveScene`/`incrementScene` (l'outil gère la
+  sauvegarde lui-même, avant le submit), le commentaire (celui de l'outil, pas le parm
+  `comment` du node), `useVersion` (« next » ; le module LOP render n'a pas
+  `getWriteVersionFromNode`, tous les nodes vus sont en `autoVersion`).
+
 ## Maya : mise à jour des rigs + exports (mode RIGS)
 Séquence validée avec Thomas : **update → vérifier → incrémenter → exporter**.
-- **Picker** : liste `.hip*` ET `.ma` (le `.mb`, binaire, n'est jamais proposé : illisible
-  sans Maya). `scene_kind()` (extension) décide du mode : Houdini = vue historique
+- **Panneau de scènes** : liste `.hip*` ET `.ma` (le `.mb`, binaire, n'est jamais proposé :
+  illisible sans Maya). `scene_kind()` (extension) décide du mode : Houdini = vue historique
   inchangée ; Maya = colonnes `Rig | Version | State | References`, layers suivis et
   `Load Scene` masqués, bouton **Exports n/m ▸** à côté du switch de sauvegarde.
 - **Lecture sans Maya, instantanée** : les `file -r` ET `fileInfo "PrismStates"` (json
@@ -310,6 +407,70 @@ Séquence validée avec Thomas : **update → vérifier → incrémenter → exp
   est lancée depuis le shelf Houdini, même python 3.11 des deux côtés), `PYTHONHOME`,
   `QT_PLUGIN_PATH` ; `PYTHONIOENCODING=utf-8`, `PYTHONUNBUFFERED=1`.
 
+## Panneau de scènes (gauche, toujours ouvert)
+Demandé par Thomas (idée reprise du batch publisher de Quentin : l'arbre des shots
+toujours visible) → plus besoin d'ouvrir `Choose scene...`.
+- **3 colonnes côte à côte** (demande de Thomas, pas de département « en bas ») :
+  `Sequence / Shot` | `Department` | `Task`. Au-dessus : `Shots`/`Assets`, filtre sur
+  `séquence/shot` (`SH0125`, `SQ0020/SH01` ; Entrée = ouvre le seul résultat), ⟳ = relire
+  le disque.
+  - Col. 1 : arbre des entités (`Shots` : séquence > shot, `_sequence` compris ;
+    `Assets` : catégorie > asset). Aucun asset imbriqué sur yuka/frederic (vérifié).
+  - Col. 2 : les départements du shot **qui ont au moins une scène** (un shot vide affiche
+    `no .hip / .ma scene`, non cliquable). Changer de département ne charge rien.
+  - Col. 3 : **une ligne par tâche = sa dernière version** ; déplier pour les anciennes,
+    affichées `vNNN` (nom complet si le fichier n'est pas de la même famille). Les tâches
+    **sans scène** sont masquées (Prism en crée à la pelle : 14 sur 17 pour yuka
+    SQ0020/SH0125).
+  - Département montré à l'ouverture d'un shot : celui de la scène chargée, sinon le
+    dernier choisi, sinon le seul.
+- **Tailles par défaut** : fenêtre = 1560×900 + 20 % = **1872×1080, bornée à 95 % de
+  l'écran** (sinon elle passe sous la barre des tâches d'un écran 1080p) ; panneau
+  **580 px** (colonnes 210 | 150 | 200), borné 420..1100.
+- **Tout est relu sur le disque à la volée**, sans cache : mesuré 0,05 s pour les 29
+  séquences / 180 shots de frederic_2603, 0,08 s pour les 73 scènes d'un shot yuka.
+- Un clic sur une tâche/version **charge la scène** (= le champ Scene, puis
+  `_on_hip_changed` comme avant). Le **couple département/tâche est retenu** : cliquer un
+  autre shot charge directement la même tâche s'il l'a → revue d'une séquence en un clic
+  par shot. S'il ne l'a pas : rien n'est chargé (le département retenu reste affiché).
+- Sens inverse : `_sync_browser` (appelé par `_on_hip_changed`) montre la scène du champ
+  (Browse, From scene, version-up) **sans rien recharger**. Une version absente de la liste
+  (version-up tout juste écrite) force une relecture du dossier.
+- Le panneau est **désactivé pendant un run** (`_busy`) : changer de scène en plein run
+  mélangerait sidecar / scène sauvée.
+- ⚠️ Clic sur une séquence = déplie/replie. Qt n'émet pas toujours le même nombre de
+  `itemClicked` sur un double-clic → `expandsOnDoubleClick` coupé + 2e clic dans
+  l'intervalle de double-clic ignoré (`_toggle_group`). Vérifié avec la vraie séquence
+  Windows (press, release, DblClick, release) : **`QTest.mouseDClick` n'envoie QUE le
+  DblClick**, il ne reproduit pas un vrai double-clic.
+- QSettings (par utilisateur) : `browser_width` (largeur du panneau), `shots_root` (dernier
+  projet vu, dernier recours de `_shots_root`).
+
+## Presets de scène (partagés par projet)
+Demandé par Thomas : enregistrer une scène sous un nom (« cfx brush ») que **tout le
+monde** sur le projet charge en un clic, sans savoir où elle est rangée.
+- Bouton **★ Presets (n)** à côté du champ Scene : un clic sur un preset met sa scène dans
+  le champ (puis `_on_hip_changed` comme d'habitude, le panneau suit). Dans le même menu :
+  `Save current scene as preset...` et `Delete preset ▸` (confirmation).
+- Stockage : `<projet>/00_Pipeline/Configs/lop_update_cache_presets.json`, à côté des
+  configs projet de Prism (`launcher.json`, `omits.json`). Les artistes écrivent déjà dans
+  `00_Pipeline` (leurs `ErrorLog_*.txt`). ⚠️ **Pas** `00_Pipeline/PresetScenes` : ce sont
+  les gabarits de scène de Prism, il les proposerait à la création d'une scène.
+- Un preset stocke la **famille** de la scène (dossier de tâche relatif au projet +
+  `scene_family` = nom sans version ni extension), pas un fichier → il suit les
+  version-ups et ouvre toujours la **dernière** version. Scène disparue (renommée,
+  déplacée) → message clair, champ inchangé.
+- Menu **relu à chaque ouverture** (un preset d'un collègue apparaît sans relancer). Le
+  compteur du bouton n'est relu qu'au changement de projet : `_on_hip_changed` tourne à
+  chaque frappe. Écriture : relecture juste avant + fichier temporaire + `os.replace`
+  → deux enregistrements simultanés ne s'écrasent pas.
+- Nom unique (casse ignorée) : même nom = confirmation, le preset garde sa place.
+- ⚠️ Sous-menu `Delete preset` créé **une fois** et ré-attaché à chaque ouverture : un
+  `addMenu(titre)` par ouverture empile des QMenu (`clear()` ne les détruit pas) et
+  PySide 6.11 finit par renvoyer un wrapper « already deleted » (reproduit).
+- `scene_family` reprend **à l'identique** l'ancienne logique de `_scene_key` (clé des
+  sidecars).
+
 ## Preview sans Houdini (le gros gain de temps)
 - Le sidecar json (voir Persistance) stocke le dernier `status` vérifié + `import_path` par
   shot + `scene_version`/`scene_mtime`. À l'ouverture d'une scène : **affichage instantané**
@@ -336,6 +497,8 @@ Séquence validée avec Thomas : **update → vérifier → incrémenter → exp
   projet) N'efface PAS ce json. Même règle pour un `.ma` : `<scene>.lopcache.json` à côté.
 - Projet : dropdown dans la fenêtre principale (`(auto-detect)` = env Houdini / dérivé du
   .hip ; sinon projets sous `I:/` avec `00_Pipeline/pipeline.json`).
+- **Partagé, par projet** : les presets de scène,
+  `<projet>/00_Pipeline/Configs/lop_update_cache_presets.json` (cf section Presets).
 
 ## ⚠️ Landmines
 - 🔴 **Un save Maya headless RÉÉCRIT les USD publiés** si on ne fait rien. mayapy ne lit

@@ -15,6 +15,7 @@ from ..core.coverage import FrameCoverage
 from ..core.versions import extract_version_from_path, version_int
 from .qt import QtCore, QtWidgets
 from ..scene import asset_nodes
+from ..scene import cameras as camera_files
 from ..scene import utils as scene
 from ..scene.node_builder import NukeNodeBuilder
 from ..scene.stamps import anchor_title, reconnect_postage_stamps
@@ -47,6 +48,15 @@ def _package_key(entry):
 def _row_package_key(item):
     return (item.asset_type, item.asset_name, item.foreign_sequence, item.foreign_shot,
             item.dup_index, item.versions[0] if item.asset_type == "Roto" else "")
+
+
+def _update_line(item):
+    """'v004 → v005' in the update confirmation; a camera out of sync with
+    its file is baked again from its own version."""
+    target = item.update_target_version or item.versions[-1]
+    if item.camera_mismatch and target == item.loaded_version:
+        return f"{target} baked again (its knobs aren't the file's camera)"
+    return f"{item.loaded_version} → {target}"
 
 
 def _folder_signature(folder):
@@ -246,6 +256,7 @@ class LoaderTab(QtWidgets.QWidget):
             status.apply_manual_selection(item)
         if manual:
             updates_found = sum(1 for it in self.items if it.loaded_nodes and it.has_update)
+        updates_found += sum(self._flag_stale_camera(item) for item in self.items)
 
         for item in self.items:
             if item.is_frozen and item.loaded_node is not None:
@@ -341,6 +352,32 @@ class LoaderTab(QtWidgets.QWidget):
                               status.StatusColor.UPDATE_PARTIAL)
             return 1
         return found
+
+    @staticmethod
+    def _flag_stale_camera(item) -> int:
+        """An up-to-date camera whose knobs hold another camera than its file
+        (Nuke loads the file only once the panel exists, see scene/cameras.py):
+        offered as an update to the same version, which bakes the file.
+        Returns 1 when flagged."""
+        previous, item.camera_mismatch = item.camera_mismatch, None
+        if (item.asset_type != "Camera" or item.has_update or len(item.loaded_nodes) != 1
+                or item.loaded_version in (None, "v000")):
+            return 0
+        try:
+            report = camera_files.out_of_sync(item.loaded_node)
+        except Exception as e:   # never break the status refresh
+            print(f"[ShotAssetLoader] {item.label()}: camera not compared with its file ({e})")
+            return 0
+        if report is None:
+            return 0
+        item.camera_mismatch = str(report)
+        item.has_update = True
+        item.update_target_version = item.loaded_version
+        status.set_status(item, f"Out of sync with {item.loaded_version} (holds {report.held or 'another camera'})",
+                          status.StatusColor.UPDATE_PARTIAL)
+        if item.camera_mismatch != previous:
+            print(f"[ShotAssetLoader] {item.label()}: {report} — Update bakes the file's camera")
+        return 1
 
     def _sync_nodes(self, changed_folders):
         """Mirror each row's status onto its nodes (outside the undo history)
@@ -515,6 +552,7 @@ class LoaderTab(QtWidgets.QWidget):
         status_cell = w.read_only_item(item.status_text)
         if item.status_color:
             w.set_background(status_cell, item.status_color)
+        status_cell.setToolTip(item.camera_mismatch or "")
         table.setItem(row, COL_STATUS, status_cell)
 
         freeze = w.icon_button("freezeButton", (22, 22), lambda _=False, it=item: self._toggle_freeze(it))
@@ -543,6 +581,7 @@ class LoaderTab(QtWidgets.QWidget):
         if cell is not None:
             cell.setText(item.status_text)
             w.set_background(cell, item.status_color)
+            cell.setToolTip(item.camera_mismatch or "")
 
     def _paint_freeze_cell(self, row, item):
         cell = self.table.cellWidget(row, COL_FREEZE)
@@ -974,8 +1013,7 @@ class LoaderTab(QtWidgets.QWidget):
         if not updatable:
             QtWidgets.QMessageBox.information(self, "No Updates", f"No {scope} assets have updates available")
             return False
-        changes = [f"  {it.label()}: {it.loaded_version} → {it.update_target_version or it.versions[-1]}"
-                   for it in updatable[:12]]
+        changes = [f"  {it.label()}: {_update_line(it)}" for it in updatable[:12]]
         if len(updatable) > 12:
             changes.append(f"  ... and {len(updatable) - 12} more")
         reply = QtWidgets.QMessageBox.question(

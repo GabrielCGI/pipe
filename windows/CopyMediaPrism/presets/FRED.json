@@ -4,9 +4,6 @@
             "compo",
             "comp"
         ],
-        "LIGHTING": [
-            "Lighting"
-        ],
         "ANIM": [
             "AnimSpline",
             "AnimBlock"

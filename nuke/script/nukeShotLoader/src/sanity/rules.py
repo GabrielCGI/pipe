@@ -17,6 +17,7 @@ import nuke
 
 from ..core.config import Config
 from ..precomp.hashing import ContentHasher
+from ..scene import cameras
 
 Progress = Optional[Callable[[int, int, str], None]]   # (done, total, what)
 
@@ -167,7 +168,52 @@ def _same_file(source, target) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# 2. Uppercase identifiers in Expression / DeepExpression
+# 2. Cameras holding another camera than their file
+# ---------------------------------------------------------------------------
+
+class StaleCameras(Rule):
+    title = "Cameras out of sync with their file"
+    fix_label = "Fix: bake the file's camera"
+    fix_help = ("A camera with 'read from file' renders from its knobs, in the viewer and on the farm. Nuke copies "
+                "the file into them only when the camera's properties panel exists: after a version change they "
+                "can keep an older camera (or the scene preset's) until the panel gets opened — the camera then "
+                "changes and every cache downstream goes Live. Fix bakes the file's camera into the knobs "
+                "('read from file' off): the render uses it, and opening the panel no longer changes anything. "
+                "The precomps downstream are rendered again once.")
+
+    def check(self, context, progress=None):
+        candidates = [node for node in context.nodes if cameras.read_file(node)]
+        issues = []
+        for index, node in enumerate(candidates):
+            if progress:
+                progress(index, len(candidates), f"Cameras: {node.name()}  ({index + 1}/{len(candidates)})")
+            report = cameras.out_of_sync(node)
+            if report is not None:
+                issues.append(Issue(node, str(report), report.path))
+        return issues
+
+    def fix(self, issues, context, progress=None):
+        failures = []
+        for index, issue in enumerate(issues):
+            camera = issue.node
+            if progress:
+                progress(index, len(issues), f"Baking {camera.name()}  ({index + 1}/{len(issues)})")
+            try:
+                try:
+                    cameras.bake_file(camera, issue.data)
+                except cameras.NotBakeable as reason:   # Nuke's own import, GUI only
+                    if not cameras.load_file(camera):
+                        failures.append(f"{camera.fullName()}: not baked ({reason}), and Nuke loads camera "
+                                        "files in the GUI only")
+                        continue
+                print(f"[sanity] {camera.fullName()}: camera of {os.path.basename(issue.data)} now in its knobs")
+            except Exception as e:
+                failures.append(f"{camera.fullName()}: {type(e).__name__}: {e}")
+        return failures
+
+
+# ---------------------------------------------------------------------------
+# 3. Uppercase identifiers in Expression / DeepExpression
 # ---------------------------------------------------------------------------
 # Nuke resolves an uppercase channel letter inconsistently: on the first
 # evaluation after a script load `B` reads depth.Z and `A` reads 0, so the
@@ -259,7 +305,7 @@ class UppercaseExpressions(Rule):
 
 
 # ---------------------------------------------------------------------------
-# 3. Knob expressions in error
+# 4. Knob expressions in error
 # ---------------------------------------------------------------------------
 # An expression Nuke cannot evaluate (node or knob renamed / deleted, typo)
 # silently returns 0, in the viewer as on the farm. Nuke has no API telling
@@ -445,7 +491,7 @@ class ExpressionErrors(Rule):
 
 
 # ---------------------------------------------------------------------------
-# 4. Bounding box of the rendered Writes
+# 5. Bounding box of the rendered Writes
 # ---------------------------------------------------------------------------
 
 _SLOW_MEASURE_SECONDS = 1.0
@@ -538,4 +584,4 @@ class OversizedBoundingBox(Rule):
         return failures
 
 
-RULES = (OffNetworkPaths(), UppercaseExpressions(), ExpressionErrors(), OversizedBoundingBox())
+RULES = (OffNetworkPaths(), StaleCameras(), UppercaseExpressions(), ExpressionErrors(), OversizedBoundingBox())

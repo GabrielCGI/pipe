@@ -1,9 +1,9 @@
 {
-  "id": "006_20261008-182929_2.2.3",
-  "version": "2.2.3",
-  "fingerprint": "eea42d18fca992cb6943d318cf0867bcac81c34d",
-  "archived": "2026-10-08T18:29:30",
+  "id": "008_20261015-191243_2.3.0",
+  "version": "2.3.0",
+  "fingerprint": "5fdc926c53fe3da5a8356509a7e64ea7b13e7b23",
+  "archived": "2026-10-15T19:12:44",
   "by": "b.mourgues@WOLF-07",
   "note": "deployed from R:\\devBen\\nukeShotLoader",
-  "previous": "005_20261007-144727_2.2.2"
+  "previous": "007_20261015-135806_2.2.4"
 }

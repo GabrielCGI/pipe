@@ -9,6 +9,9 @@ persisted via QSettings. This UI does NOT load Houdini itself: it runs
 recache_cfx.py through hython as a subprocess (QProcess) to read shot state
 (--status) and re-cache the selection (--apply).
 
+The scene is picked in the left panel, always open (SceneBrowser), in 3 columns:
+Sequence/Shot | Department | Task (one row per task = its latest version).
+
 A Maya scene (.ma) switches the window to RIG mode: the table lists the rigs the
 scene references (read from the .ma text, instant, no Maya), and the update runs
 recache_maya.py through mayapy: swap the ticked rigs -> refuse if animation was lost
@@ -49,6 +52,15 @@ ENGINE_MAYA = os.path.join(HERE, "recache_maya.py")
 HOUDINI_EXT = (".hip", ".hipnc", ".hiplc")
 MAYA_EXT = (".ma", ".mb")  # .mb = binaire : illisible sans Maya, jamais propose
 PICKER_EXT = HOUDINI_EXT + (".ma",)
+
+
+def rig_label(rig_id):
+    """Libelle d'un rig depuis son id 'asset|produit'. Le produit n'est montre que s'il
+    n'est pas le 'Rigging' standard : un asset peut avoir un rig PAR VARIANT
+    (Props/cutlery : Rigging ET Rigging_forkA, vu sur frederic_2603) -> sans le produit,
+    deux lignes identiques."""
+    asset, _, product = (rig_id or "?").partition("|")
+    return asset if product in ("", "Rigging") else "%s · %s" % (asset, product)
 
 
 def scene_kind(path):
@@ -170,6 +182,9 @@ STATE_TEXT = {
     "no_import": "n/a (no import)",
     # jamais caché par l'outil -> aucun relevé, donc rien à affirmer (cf preview.record_state)
     "no_record": "? (never cached here)",
+    # en retard MAIS epingle dans le usd_layer_stack : choix de l'artiste, l'outil ne
+    # depingle pas (cf preview.mark_pins)
+    "pinned": "pinned",
     "error": "ERROR",
 }
 
@@ -597,207 +612,650 @@ class LayerFilterDialog(QtWidgets.QDialog):
         return "and" if self.rb_and.isChecked() else "or"
 
 
-class ProjectPicker(QtWidgets.QDialog):
-    """Light project scene picker: cascading Sequence -> Shot -> Department -> Task
-    -> Scenefile, built by listing the Prism project folders (no Prism dependency).
-    Lists Houdini (.hip*) AND Maya (.ma) scenes. Returns the picked scene path."""
+# --------------------------------------------------------------------------- #
+#  Panneau de scenes (a gauche, toujours ouvert)
+# --------------------------------------------------------------------------- #
+# Meme forme d'arborescence des deux cotes, seuls les LIBELLES changent :
+#   Shots/<SEQ>/<SHOT>/Scenefiles/<dept>/<task>/*.hip
+#   Assets/<categorie>/<asset>/Scenefiles/<dept>/<task>/*.hip
+# Une scene rangee sous Assets peut tres bien cacher de VRAIS shots (verifie sur
+# frederic_2603 : Assets/FX/snowSetup, 77 imports tous en mode 'shot'). Aucun asset
+# imbrique (categorie/sous-categorie/asset) sur yuka_2604 ni frederic_2603 (verifie).
+SCENE_PATH_RE = re.compile(
+    r"/(Shots|Assets)/([^/]+)/([^/]+)/Scenefiles/([^/]+)/([^/]+)/[^/]+$"
+)
 
-    # Meme forme d'arborescence des deux cotes, seuls les LIBELLES changent :
-    #   Shots/<SEQ>/<SHOT>/Scenefiles/<dept>/<task>/*.hip
-    #   Assets/<categorie>/<asset>/Scenefiles/<dept>/<task>/*.hip
-    # Une scene rangee sous Assets peut tres bien cacher de VRAIS shots (verifie sur
-    # frederic_2603 : Assets/FX/snowSetup, 77 imports tous en mode 'shot').
-    LEVELS_BY_KIND = {
-        "Shots": ["Sequence", "Shot", "Department", "Task", "Scenefile"],
-        "Assets": ["Category", "Asset", "Department", "Task", "Scenefile"],
-    }
+
+def _norm_path(p):
+    """Chemin comparable (casse + separateurs) : le champ melange / et \\."""
+    return os.path.normcase(os.path.normpath(p)) if p else ""
+
+
+def scene_version(name):
+    """Version d'un nom de scene (..._v012.hip -> 12 ; -1 si aucune) : tri des
+    versions, la plus recente d'abord."""
+    m = re.search(r"_v(\d+)\.[^.]+$", name) or re.search(r"v(\d+)", name)
+    return int(m.group(1)) if m else -1
+
+
+def list_entity_dirs(base):
+    """[(nom, chemin)] des sous-dossiers a montrer, tries. Prism range les scenes de
+    SEQUENCE sous un "shot" special nomme _sequence (ex SQ0010/_sequence/Scenefiles/
+    Lighting/...) -> il faut le MONTRER, sinon les scenes lighting de sequence sont
+    inatteignables. On cache les autres _*/.* (thumbnails, archives, dossiers
+    techniques) et les gabarits Prism '@asset_path@' & co (pas des entites)."""
+    if not base or not os.path.isdir(base):
+        return []
+    try:
+        names = os.listdir(base)
+    except Exception:
+        return []
+    out = []
+    for n in sorted(names):
+        if n.startswith("@") and n.endswith("@"):
+            continue
+        if n.startswith(".") or (n.startswith("_") and n != "_sequence"):
+            continue
+        full = os.path.join(base, n)
+        if os.path.isdir(full):
+            out.append((n, full))
+    return out
+
+
+def list_task_scenes(entity_dir):
+    """[(dept, task, [scenes, la plus recente d'abord])] sous <entite>/Scenefiles/,
+    pour les SEULES taches qui ont une scene .hip* / .ma : Prism cree des dossiers de
+    tache vides a la pelle (14 sur 17 pour yuka SQ0020/SH0125). Le .mb, binaire,
+    n'est pas lisible sans Maya -> jamais propose."""
+    out = []
+    for dept, dept_dir in list_entity_dirs(os.path.join(entity_dir, "Scenefiles")):
+        for task, task_dir in list_entity_dirs(dept_dir):
+            try:
+                names = [
+                    n for n in os.listdir(task_dir) if n.lower().endswith(PICKER_EXT)
+                ]
+            except Exception:
+                continue
+            if names:
+                names.sort(key=scene_version, reverse=True)
+                out.append((dept, task, [os.path.join(task_dir, n) for n in names]))
+    return out
+
+
+def _version_label(name, latest):
+    """Libelle d'une version dans la colonne Task : 'v012' si le fichier est de la
+    meme famille que la derniere version (meme nom au numero pres), sinon le nom
+    complet (un fichier au nom different dans le dossier de tache ne doit pas se
+    faire passer pour une simple version)."""
+    stem = re.compile(r"_v\d+(\.[^.]+)$")
+    m = re.search(r"_(v\d+)\.[^.]+$", name)
+    if m and stem.sub(r"\1", name) == stem.sub(r"\1", latest):
+        return m.group(1)
+    return name
+
+
+class SceneBrowser(QtWidgets.QWidget):
+    """Panneau de gauche TOUJOURS OUVERT, en 3 colonnes : Sequence/Shot | Department
+    | Task (remplace l'ancien 'Choose scene...'). L'arbre des entites (Shots :
+    sequence > shot ; Assets : categorie > asset), puis les departements du shot qui
+    ont des scenes, puis leurs taches : UNE ligne par tache = sa derniere version
+    (deplier pour les anciennes). Un clic sur une tache / version charge la scene.
+
+    Le departement/tache choisi est RETENU : cliquer un autre shot charge directement
+    la meme tache s'il l'a -> on passe les shots d'une sequence en revue en un clic
+    chacun. Tout est relu sur le disque a la volee (mesure : 0,05 s pour les 29
+    sequences / 180 shots de frederic_2603, 0,08 s pour les 73 scenes d'un shot)."""
+
+    sceneChosen = Signal(str)  # scene cliquee -> la fenetre la charge
+
     KINDS = ("Shots", "Assets")
+    HEADERS = {"Shots": "Sequence / Shot", "Assets": "Category / Asset"}
+    ROLE_TASK = Qt.UserRole + 1  # nom de la tache d'une ligne de la colonne Task
+    COLUMN_SIZES = (210, 150, 200)  # Sequence/Shot | Department | Task (px)
 
-    # Colonnes a largeur PROPORTIONNELLE au contenu, pas 5 colonnes egales : les noms
-    # de scene sont 3x plus longs que les autres niveaux et se faisaient tronquer.
-    # Mesure sur yuka_2604 (1249 scenes, police du dialogue), largeur mini utile :
-    #   Sequence 96 px | Shot 171 | Department 95 | Task 112 | Scenefile 329
-    # Elargir la fenetre ne suffit PAS : a colonnes egales il faudrait 1645 px de large
-    # pour que Scenefile tienne, alors que le total reellement necessaire est ~830 px.
-    STRETCH = {
-        "Sequence": 2,
-        "Shot": 3,
-        "Category": 2,
-        "Asset": 3,
-        "Department": 2,
-        "Task": 2,
-        "Scenefile": 6,
-    }
-
-    @property
-    def LEVELS(self):
-        return self.LEVELS_BY_KIND[self.kind]
-
-    def __init__(self, parent, roots, current=""):
+    def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowTitle("Open scene from project")
-        self.resize(1034, 550)
-        # `roots` : {"Shots": chemin, "Assets": chemin}. Un str = ancienne forme (Shots).
-        if isinstance(roots, str):
-            roots = {"Shots": roots}
-        self.roots = {k: v for k, v in (roots or {}).items() if v and os.path.isdir(v)}
-        self.kind = (
-            "Shots" if self.roots.get("Shots") else next(iter(self.roots), "Shots")
-        )
-        self.shots_root = self.roots.get("Shots", "")  # compat appelants existants
-        self._path = ""
+        self.roots = {}
+        self.kind = "Shots"
+        self._entity = ""  # entite dont les colonnes Department / Task sont remplies
+        self._tasks = {}  # {dept: [(tache, [scenes, plus recente d'abord])]}
+        self._dept = ""  # departement dont les taches sont listees
+        self._sticky = ("", "")  # (dept, tache) du dernier choix, suivi de shot en shot
+        self._current = ""  # scene chargee dans la fenetre
+        self._filtering = False
+        self._last_toggle = None  # (item, instant) : un double-clic = UN seul toggle
+
         v = QtWidgets.QVBoxLayout(self)
+        v.setContentsMargins(0, 0, 0, 0)
+
         head = QtWidgets.QHBoxLayout()
-        self.radios = {}
+        self.kind_group = QtWidgets.QButtonGroup(self)
+        self.kind_group.setExclusive(True)
+        self.kind_buttons = {}
         for kind in self.KINDS:
-            rb = QtWidgets.QRadioButton(kind)
-            rb.setEnabled(kind in self.roots)
-            rb.setChecked(kind == self.kind)
-            rb.toggled.connect(lambda on, k=kind: self._set_kind(k) if on else None)
-            head.addWidget(rb)
-            self.radios[kind] = rb
-        self.lbl_root = QtWidgets.QLabel(self.roots.get(self.kind, ""))
-        head.addWidget(self.lbl_root, 1)
+            b = QtWidgets.QPushButton(kind)
+            b.setCheckable(True)
+            self.kind_group.addButton(b)
+            self.kind_buttons[kind] = b
+            head.addWidget(b)
+        self.kind_group.buttonClicked.connect(self._on_kind_clicked)
         v.addLayout(head)
-        cols = QtWidgets.QHBoxLayout()
-        self.lists = []
-        self.level_labels = []
-        for name in self.LEVELS:
-            box = QtWidgets.QVBoxLayout()
-            lbl = QtWidgets.QLabel(name)
-            box.addWidget(lbl)
-            self.level_labels.append(lbl)
-            lw = QtWidgets.QListWidget()
-            lw.currentItemChanged.connect(self._on_select)
-            box.addWidget(lw)
-            cols.addLayout(box, self.STRETCH.get(name, 2))
-            self.lists.append(lw)
-        self.lists[-1].itemDoubleClicked.connect(lambda *_: self.accept())
-        v.addLayout(cols)
-        self.bb = QtWidgets.QDialogButtonBox(
-            QtWidgets.QDialogButtonBox.Open | QtWidgets.QDialogButtonBox.Cancel
-        )
-        self.bb.button(QtWidgets.QDialogButtonBox.Open).setEnabled(False)
-        self.bb.accepted.connect(self.accept)
-        self.bb.rejected.connect(self.reject)
-        v.addWidget(self.bb)
-        self._fill(0, self.roots.get(self.kind, ""))
-        self._preselect(current)
-        self._warn_if_empty()
 
-    def _warn_if_empty(self):
-        if self.lists[0].count():
+        frow = QtWidgets.QHBoxLayout()
+        self.ed_filter = QtWidgets.QLineEdit()
+        self.ed_filter.setPlaceholderText("Filter (e.g. SH0125)")
+        self.ed_filter.setClearButtonEnabled(True)
+        self.ed_filter.setToolTip(
+            "Show only the sequences / shots whose name contains this text\n"
+            "(e.g. SH0125, SQ0020 or SQ0020/SH01). Enter = open the only match."
+        )
+        self.ed_filter.textChanged.connect(self._apply_filter)
+        self.ed_filter.returnPressed.connect(self._open_single_match)
+        frow.addWidget(self.ed_filter, 1)
+        self.b_refresh = QtWidgets.QToolButton()
+        self.b_refresh.setText("⟳")
+        self.b_refresh.setToolTip("Re-read the project folders (new shots / scenes).")
+        self.b_refresh.clicked.connect(self.refresh)
+        frow.addWidget(self.b_refresh)
+        v.addLayout(frow)
+
+        # colonne 1 : entites
+        self.tree = QtWidgets.QTreeWidget()
+        self.tree.setUniformRowHeights(True)
+        # un clic deplie une sequence (cf _toggle_group) : le double-clic natif la
+        # replierait aussitot
+        self.tree.setExpandsOnDoubleClick(False)
+        self.tree.currentItemChanged.connect(self._on_entity_current)
+        self.tree.itemClicked.connect(self._on_entity_clicked)
+        self.tree.itemActivated.connect(self._on_entity_activated)
+
+        # colonne 2 : departements (ceux qui ont au moins une scene)
+        self.depts = QtWidgets.QTreeWidget()
+        self.depts.setHeaderLabels(["Department"])
+        self.depts.setRootIsDecorated(False)
+        self.depts.setUniformRowHeights(True)
+        self.depts.currentItemChanged.connect(self._on_dept_current)
+
+        # colonne 3 : taches du departement (derniere version) + versions en enfants
+        self.scenes = QtWidgets.QTreeWidget()
+        self.scenes.setColumnCount(2)
+        self.scenes.setHeaderLabels(["Task", "Version"])
+        self.scenes.setUniformRowHeights(True)
+        hdr = self.scenes.header()
+        hdr.setStretchLastSection(False)
+        hdr.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
+        hdr.setSectionResizeMode(1, QtWidgets.QHeaderView.ResizeToContents)
+        self.scenes.itemClicked.connect(self._on_scene_clicked)
+        self.scenes.itemActivated.connect(self._on_scene_clicked)
+
+        cols = QtWidgets.QSplitter(Qt.Horizontal)
+        for i, w in enumerate((self.tree, self.depts, self.scenes)):
+            cols.addWidget(w)
+            cols.setStretchFactor(i, (4, 3, 4)[i])
+        cols.setChildrenCollapsible(False)
+        cols.setSizes(list(self.COLUMN_SIZES))
+        v.addWidget(cols, 1)
+
+        self.lbl_warn = QtWidgets.QLabel("")
+        self.lbl_warn.setWordWrap(True)
+        self.lbl_warn.setStyleSheet("color: %s;" % theme_colors(self)["orange"])
+        self.lbl_warn.hide()
+        v.addWidget(self.lbl_warn)
+        self._set_kind("Shots", force=True)
+
+    # ------------------------------------------------ projet / Shots-Assets
+    def set_roots(self, roots):
+        """Racines {'Shots': chemin, 'Assets': chemin} du projet courant. Appele a
+        chaque changement de scene : ne relit le disque que si elles ont change."""
+        roots = {k: v for k, v in (roots or {}).items() if v and os.path.isdir(v)}
+        if roots == self.roots:
             return
-        self.lbl_root.setText(
-            "%s\n⚠ Nothing here - is this really the project's %s folder? "
-            "(Cancel and pick the folder that contains 03_Production)"
-            % (self.roots.get(self.kind, ""), self.kind)
-        )
-        self.lbl_root.setStyleSheet("color: %s;" % theme_colors(self)["orange"])
+        self.roots = roots
+        for kind, b in self.kind_buttons.items():
+            b.setEnabled(kind in roots)
+            b.setToolTip(roots.get(kind) or "No %s folder in this project." % kind)
+        kind = self.kind
+        if kind not in roots:
+            kind = next((k for k in self.KINDS if k in roots), kind)
+        self._set_kind(kind, force=True)
+        self._reveal(self._current)
 
-    def _set_kind(self, kind):
-        """Bascule Shots <-> Assets : memes colonnes, autres libelles et autre racine."""
-        if kind not in self.roots or kind == self.kind:
+    def _on_kind_clicked(self, button):
+        self._set_kind(button.text())
+        self._reveal(self._current, switch_kind=False)
+
+    def _set_kind(self, kind, force=False):
+        """Bascule Shots <-> Assets : meme arbre, autre racine, autres libelles."""
+        if kind == self.kind and not force:
             return
         self.kind = kind
-        for lbl, name in zip(self.level_labels, self.LEVELS):
-            lbl.setText(name)
-        self.lbl_root.setStyleSheet("")
-        self.lbl_root.setText(self.roots[kind])
-        self._fill(0, self.roots[kind])
+        self.kind_buttons[kind].setChecked(True)
+        self.tree.setHeaderLabels([self.HEADERS[kind]])
+        self._fill_tree()
+        self._show_scenes("")
+        self._apply_filter()
         self._warn_if_empty()
 
-    def selected_path(self):
-        return self._path
-
-    @staticmethod
-    def _vkey(name):
-        m = re.search(r"v(\d+)", name)
-        return int(m.group(1)) if m else -1
-
-    def _entries(self, base, files):
-        if not base or not os.path.isdir(base):
-            return []
+    def _fill_tree(self):
+        self.tree.blockSignals(True)
         try:
-            names = os.listdir(base)
-        except Exception:
-            return []
-        if files:
-            # .hip* ET .ma : une scene d'anim Maya se met a jour depuis la meme fenetre
-            # (le .mb, binaire, n'est pas lisible sans Maya -> pas propose)
-            scenes = [n for n in names if n.lower().endswith(PICKER_EXT)]
-            scenes.sort(key=self._vkey, reverse=True)
-            return [(n, os.path.join(base, n)) for n in scenes]
-        out = []
-        for n in sorted(names):
-            # Prism range les scenes de SEQUENCE sous un "shot" special nomme _sequence
-            # (ex SQ0010/_sequence/Scenefiles/Lighting/...) -> il faut le MONTRER, sinon
-            # les scenes lighting de sequence sont inatteignables. On continue de cacher
-            # les autres _*/.* (thumbnails, archives, dossiers techniques).
-            # '@asset_path@' & co : gabarits Prism, pas des entites -> masques
-            if n.startswith("@") and n.endswith("@"):
+            self.tree.clear()
+            for top, top_dir in list_entity_dirs(self.roots.get(self.kind, "")):
+                it = QtWidgets.QTreeWidgetItem(self.tree, [top])
+                it.setFlags(Qt.ItemIsEnabled)  # un groupe (sequence), pas une entite
+                for name, full in list_entity_dirs(top_dir):
+                    ch = QtWidgets.QTreeWidgetItem(it, [name])
+                    ch.setData(0, Qt.UserRole, full)
+                    ch.setToolTip(0, full)
+        finally:
+            self.tree.blockSignals(False)
+
+    def _warn_if_empty(self):
+        if not self.roots:
+            msg = (
+                "No project selected/detected: pick one in 'Project' above, "
+                "or 'Browse...' a scene."
+            )
+        elif not self.tree.topLevelItemCount():
+            msg = "⚠ Nothing in %s" % self.roots.get(self.kind, "")
+        else:
+            msg = ""
+        self.lbl_warn.setText(msg)
+        self.lbl_warn.setVisible(bool(msg))
+
+    def refresh(self):
+        """Bouton ⟳ : relit le disque (nouveaux shots / scenes), selection gardee."""
+        shown = self._entity
+        self._fill_tree()
+        self._apply_filter()
+        self._warn_if_empty()
+        self._entity = ""  # force la relecture des scenes
+        if not self._reveal(self._current, switch_kind=False):
+            item = self._find_entity_item(shown)
+            if item is not None:
+                self._select_entity_item(item)
+                self._show_scenes(shown)
+
+    # ------------------------------------------------------------- filtre
+    def _apply_filter(self, *_):
+        """Filtre sur 'sequence/shot' (insensible a la casse) : 'SH0125', 'SQ0020'
+        ou 'SQ0020/SH01'. Une sequence qui correspond montre tous ses shots."""
+        txt = self.ed_filter.text().strip().lower().replace("\\", "/")
+        for i in range(self.tree.topLevelItemCount()):
+            top = self.tree.topLevelItem(i)
+            shown = 0
+            for j in range(top.childCount()):
+                ch = top.child(j)
+                hit = not txt or txt in ("%s/%s" % (top.text(0), ch.text(0))).lower()
+                ch.setHidden(not hit)
+                shown += hit
+            top.setHidden(bool(txt) and not shown)
+            if txt:
+                top.setExpanded(bool(shown))
+        if not txt and self._filtering:  # filtre efface : on replie sauf la selection
+            self.tree.collapseAll()
+            cur = self.tree.currentItem()
+            if cur is not None and cur.parent() is not None:
+                cur.parent().setExpanded(True)
+                self.tree.scrollToItem(cur)
+        self._filtering = bool(txt)
+
+    def _open_single_match(self):
+        """Entree dans le filtre : s'il ne reste qu'UN shot visible, on l'ouvre."""
+        hits = []
+        for i in range(self.tree.topLevelItemCount()):
+            top = self.tree.topLevelItem(i)
+            if top.isHidden():
                 continue
-            if n.startswith(".") or (n.startswith("_") and n != "_sequence"):
-                continue
-            full = os.path.join(base, n)
-            if os.path.isdir(full):
-                out.append((n, full))
-        return out
+            for j in range(top.childCount()):
+                if not top.child(j).isHidden():
+                    hits.append(top.child(j))
+        if len(hits) == 1:
+            self._select_entity_item(hits[0])
+            self._open_entity(hits[0])
 
-    def _fill(self, level, base):
-        is_files = level == len(self.LEVELS) - 1
-        lw = self.lists[level]
-        lw.blockSignals(True)
-        lw.clear()
-        for down in self.lists[level + 1 :]:
-            down.clear()
-        for name, full in self._entries(base, is_files):
-            it = QtWidgets.QListWidgetItem(name)
-            it.setData(Qt.UserRole, full)
-            it.setToolTip(name)  # filet de securite si un nom deborde quand meme
-            lw.addItem(it)
-        lw.blockSignals(False)
-        self._path = ""
-        self.bb.button(QtWidgets.QDialogButtonBox.Open).setEnabled(False)
+    # ------------------------------------------------ colonne 1 : entites
+    def _find_entity_item(self, entity):
+        want = _norm_path(entity)
+        if not want:
+            return None
+        for i in range(self.tree.topLevelItemCount()):
+            top = self.tree.topLevelItem(i)
+            for j in range(top.childCount()):
+                if _norm_path(top.child(j).data(0, Qt.UserRole)) == want:
+                    return top.child(j)
+        return None
 
-    def _on_select(self, cur, _prev=None):
-        if cur is None:
-            return
-        lw = self.sender()
-        level = self.lists.index(lw)
-        full = cur.data(Qt.UserRole)
-        if level == len(self.LEVELS) - 1:
-            self._path = full
-            self.bb.button(QtWidgets.QDialogButtonBox.Open).setEnabled(True)
-            return
-        nxt = level + 1
-        base = full
-        if self.LEVELS[nxt] == "Department":
-            base = os.path.join(full, "Scenefiles")
-        self._fill(nxt, base)
+    def _select_entity_item(self, item):
+        self.tree.blockSignals(True)  # l'appelant remplit lui-meme les colonnes
+        try:
+            if item.parent() is not None:
+                item.parent().setExpanded(True)
+            self.tree.setCurrentItem(item)
+        finally:
+            self.tree.blockSignals(False)
+        self.tree.scrollToItem(item)
 
-    def _preselect(self, current):
-        if not current:
+    def _on_entity_current(self, cur, _prev=None):
+        """Souris OU clavier : remplit Department / Task (rien n'est charge)."""
+        entity = cur.data(0, Qt.UserRole) if cur is not None else ""
+        if entity:
+            self._show_scenes(entity)
+
+    def _on_entity_clicked(self, item, _col=0):
+        """Clic sur un shot : on l'ouvre. Clic sur une sequence : deplie / replie."""
+        if item is None:
             return
-        p = current.replace("\\", "/")
-        m = re.search(
-            r"/(Shots|Assets)/([^/]+)/([^/]+)/Scenefiles/([^/]+)/([^/]+)/", p + "/"
-        )
-        if not m:
+        if item.data(0, Qt.UserRole):
+            self._open_entity(item)
+        else:
+            self._toggle_group(item)
+
+    def _on_entity_activated(self, item, _col=0):
+        """Double-clic / Entree sur un shot = un clic. Rien sur une sequence : le clic
+        l'a deja depliee (et les fleches du clavier deplient aussi)."""
+        if item is not None and item.data(0, Qt.UserRole):
+            self._open_entity(item)
+
+    def _toggle_group(self, item):
+        """Un double-clic envoie DEUX clics sur certaines versions de Qt : le second,
+        dans l'intervalle de double-clic, est ignore -> toujours un seul toggle."""
+        now = time.monotonic()
+        last = self._last_toggle
+        delay = QtWidgets.QApplication.doubleClickInterval() / 1000.0
+        if last and last[0] is item and now - last[1] < delay:
             return
-        kind = m.group(1)
-        if kind != self.kind:  # la scene courante est de l'autre cote -> on bascule
-            if kind not in self.roots:
+        self._last_toggle = (item, now)
+        item.setExpanded(not item.isExpanded())
+
+    def _open_entity(self, item):
+        """Les colonnes du shot, et la MEME tache que le choix precedent si ce shot
+        l'a : on passe les shots d'une sequence en revue en un clic chacun."""
+        self._show_scenes(item.data(0, Qt.UserRole))
+        dept, task = self._sticky
+        row = self._task_row(task) if dept and self._dept == dept else None
+        if row is not None:
+            self._choose(row.data(0, Qt.UserRole))
+
+    # ------------------------------------- colonnes 2 et 3 : dept / taches
+    def _show_scenes(self, entity_dir, force=False):
+        """Relit les scenes de l'entite et remplit la colonne Department. Departement
+        affiche : celui de la scene chargee, sinon le dernier choisi, sinon le seul."""
+        if entity_dir == self._entity and not force:
+            return
+        self._entity = entity_dir
+        self._tasks = {}
+        self._dept = ""
+        self.depts.blockSignals(True)
+        try:
+            self.depts.clear()
+            self.scenes.clear()
+            if not entity_dir:
                 return
-            self.radios[kind].setChecked(True)  # declenche _set_kind
-        for level, name in enumerate(
-            list(m.groups()[1:]) + [os.path.basename(current)]
-        ):
-            lw = self.lists[level]
-            for i in range(lw.count()):
-                if lw.item(i).text() == name:
-                    lw.setCurrentRow(i)
-                    break
+            QtWidgets.QApplication.setOverrideCursor(Qt.WaitCursor)
+            try:
+                listed = list_task_scenes(entity_dir)
+            finally:
+                QtWidgets.QApplication.restoreOverrideCursor()
+            for dept, task, files in listed:
+                self._tasks.setdefault(dept, []).append((task, files))
+            if not self._tasks:
+                it = QtWidgets.QTreeWidgetItem(self.depts, ["no .hip / .ma scene"])
+                it.setFlags(Qt.NoItemFlags)
+                return
+            for dept, tasks in self._tasks.items():
+                it = QtWidgets.QTreeWidgetItem(self.depts, [dept])
+                it.setData(0, Qt.UserRole, dept)
+                it.setToolTip(0, ", ".join(t for t, _ in tasks))
+        finally:
+            self.depts.blockSignals(False)
+        dept = self._dept_of_current()
+        if not dept and self._sticky[0] in self._tasks:
+            dept = self._sticky[0]
+        if not dept and len(self._tasks) == 1:
+            dept = next(iter(self._tasks))
+        if dept:
+            self._select_dept(dept)
+
+    def _dept_of_current(self):
+        """Departement de la scene chargee si elle appartient a l'entite affichee."""
+        m = SCENE_PATH_RE.search((self._current or "").replace("\\", "/"))
+        if not m or not self._entity:
+            return ""
+        entity = self._current
+        for _ in range(4):  # <entite>/Scenefiles/<dept>/<tache>/<scene>
+            entity = os.path.dirname(entity)
+        return m.group(4) if _norm_path(entity) == _norm_path(self._entity) else ""
+
+    def _select_dept(self, dept):
+        for i in range(self.depts.topLevelItemCount()):
+            it = self.depts.topLevelItem(i)
+            if it.data(0, Qt.UserRole) == dept:
+                self.depts.blockSignals(True)
+                try:
+                    self.depts.setCurrentItem(it)
+                finally:
+                    self.depts.blockSignals(False)
+                break
+        self._show_tasks(dept)
+
+    def _on_dept_current(self, cur, _prev=None):
+        """Souris OU clavier sur un departement : ses taches (rien n'est charge)."""
+        dept = cur.data(0, Qt.UserRole) if cur is not None else ""
+        if dept:
+            self._show_tasks(dept)
+
+    def _show_tasks(self, dept):
+        """Colonne Task : une ligne par tache = sa derniere version, les versions en
+        enfants (plus recente d'abord)."""
+        self._dept = dept
+        self.scenes.clear()
+        for task, files in self._tasks.get(dept, []):
+            latest = os.path.basename(files[0])
+            row = QtWidgets.QTreeWidgetItem(
+                self.scenes, [task, _version_label(latest, latest)]
+            )
+            row.setData(0, Qt.UserRole, files[0])
+            row.setData(0, self.ROLE_TASK, task)
+            tip = (
+                "%s\nClick = load this latest version. Unfold for older ones." % latest
+            )
+            row.setToolTip(0, tip)
+            row.setToolTip(1, tip)
+            for f in files:
+                ch = QtWidgets.QTreeWidgetItem(
+                    row, [_version_label(os.path.basename(f), latest)]
+                )
+                ch.setData(0, Qt.UserRole, f)
+                ch.setToolTip(0, f)
+        self._mark_current()
+
+    def _task_row(self, task):
+        if not task:
+            return None
+        for i in range(self.scenes.topLevelItemCount()):
+            row = self.scenes.topLevelItem(i)
+            if row.data(0, self.ROLE_TASK) == task:
+                return row
+        return None
+
+    def _mark_current(self):
+        """Selectionne la scene chargee dans la fenetre : la ligne de sa tache si c'est
+        la derniere version, sinon la version exacte (tache depliee). True si trouvee."""
+        want = _norm_path(self._current)
+        self.scenes.clearSelection()
+        if not want:
+            return False
+        for i in range(self.scenes.topLevelItemCount()):
+            row = self.scenes.topLevelItem(i)
+            for j in range(row.childCount()):
+                if _norm_path(row.child(j).data(0, Qt.UserRole)) != want:
+                    continue
+                target = row if j == 0 else row.child(j)
+                if j:
+                    row.setExpanded(True)
+                self.scenes.setCurrentItem(target)
+                self.scenes.scrollToItem(target)
+                return True
+        return False
+
+    def _on_scene_clicked(self, item, _col=0):
+        """Clic sur une tache = sa derniere version ; sur une version = celle-la."""
+        path = item.data(0, Qt.UserRole) if item is not None else ""
+        if not path:
+            return
+        row = item.parent() or item
+        self._sticky = (self._dept, row.data(0, self.ROLE_TASK) or "")
+        self._choose(path)
+
+    def _choose(self, path):
+        """La scene part dans la fenetre, une seule fois (un double-clic = 2 clics)."""
+        if _norm_path(path) != _norm_path(self._current):
+            self._current = path
+            self.sceneChosen.emit(path)
+        self._mark_current()
+
+    # ------------------------------------------ la fenetre a change de scene
+    def select_path(self, path):
+        """La fenetre a charge `path` (champ Scene, Browse, From scene, version-up) :
+        le panneau le montre, SANS rien recharger."""
+        if _norm_path(path) == _norm_path(self._current):
+            return
+        self._current = path or ""
+        if not self._reveal(self._current):
+            self._mark_current()  # scene hors projet : plus rien de selectionne
+
+    def _reveal(self, path, switch_kind=True):
+        """Selectionne l'entite, le departement et la tache de `path` s'il est range
+        dans le projet courant. False sinon (scene hors projet, ou de l'autre cote
+        Shots/Assets quand `switch_kind` est faux)."""
+        m = SCENE_PATH_RE.search((path or "").replace("\\", "/"))
+        if not m or m.group(1) not in self.roots:
+            return False
+        kind, dept, task = m.group(1), m.group(4), m.group(5)
+        entity = os.path.join(self.roots[kind], m.group(2), m.group(3))
+        if not _norm_path(path).startswith(_norm_path(entity) + os.sep):
+            return False  # memes noms de dossiers, mais un autre projet
+        if kind != self.kind:
+            if not switch_kind:
+                return False
+            self._set_kind(kind)
+        item = self._find_entity_item(entity)
+        if item is not None:
+            self._select_entity_item(item)
+        self._sticky = (dept, task)
+        for force in (False, True):  # 2e passe : scene toute neuve (version-up), relire
+            self._show_scenes(entity, force=force)
+            if self._dept != dept:
+                self._select_dept(dept)
+            if self._mark_current():
+                break
+        return True
+
+
+# --------------------------------------------------------------------------- #
+#  Presets de scene (partages par projet)
+# --------------------------------------------------------------------------- #
+# Un preset = un NOM ("cfx brush") -> une scene du projet, que tout le monde charge en
+# un clic sans savoir ou elle est rangee. On stocke la FAMILLE de la scene (dossier de
+# tache + nom sans version), pas un fichier : le preset suit les version-ups et ouvre
+# toujours la DERNIERE version. Un json par projet, avec les autres configs projet de
+# Prism (launcher.json, omits.json) :
+#   <projet>/00_Pipeline/Configs/lop_update_cache_presets.json
+# Surtout PAS 00_Pipeline/PresetScenes : c'est le dossier des gabarits de scene de
+# Prism, il les proposerait a la creation d'une scene.
+PRESETS_FILE = "lop_update_cache_presets.json"
+
+
+def scene_family(path):
+    """Nom de scene sans version ni extension (SQ0020-SH0090_FX_v024.hip ->
+    SQ0020-SH0090_FX) : cle des sidecars ET des presets, stable aux version-ups."""
+    base = os.path.splitext(os.path.basename(path or ""))[0]
+    return re.sub(r"_v\d+", "", base) or base
+
+
+def presets_path(project_cfg):
+    """<projet>/00_Pipeline/Configs/<PRESETS_FILE> depuis le pipeline.json."""
+    if not project_cfg:
+        return ""
+    return os.path.join(os.path.dirname(project_cfg), "Configs", PRESETS_FILE)
+
+
+def read_presets(project_cfg):
+    """Presets du projet [{name, path, scene, created_by, created_at}], dans l'ordre
+    d'enregistrement. [] si aucun fichier ou fichier illisible."""
+    p = presets_path(project_cfg)
+    if not p or not os.path.isfile(p):
+        return []
+    try:
+        with open(p, encoding="utf-8") as f:
+            data = json.load(f)
+    except Exception:
+        return []
+    entries = data.get("presets") if isinstance(data, dict) else None
+    return [
+        e
+        for e in entries or []
+        if isinstance(e, dict) and e.get("name") and e.get("path") and e.get("scene")
+    ]
+
+
+def write_presets(project_cfg, presets):
+    """Ecrit la liste via un fichier temporaire + remplacement : jamais de json a
+    moitie ecrit, meme si deux personnes enregistrent en meme temps."""
+    p = presets_path(project_cfg)
+    os.makedirs(os.path.dirname(p), exist_ok=True)
+    tmp = "%s.%d.tmp" % (p, os.getpid())
+    with open(tmp, "w", encoding="utf-8") as f:
+        json.dump({"version": 1, "presets": presets}, f, indent=2)
+    os.replace(tmp, p)
+
+
+def make_preset(project_cfg, name, scene, user):
+    """Preset pointant la famille de `scene`, qui doit etre DANS le projet
+    (ValueError sinon : un chemin relatif hors projet ne voudrait rien dire)."""
+    root = os.path.dirname(os.path.dirname(project_cfg))
+    try:
+        rel = os.path.relpath(os.path.dirname(os.path.abspath(scene)), root)
+    except ValueError:  # autre lecteur
+        rel = ".."
+    if rel == "." or rel.startswith(".."):
+        raise ValueError("the scene is not inside the project %s" % root)
+    return {
+        "name": name,
+        "path": rel.replace("\\", "/"),
+        "scene": scene_family(scene),
+        "created_by": user,
+        "created_at": time.strftime("%Y-%m-%d %H:%M"),
+    }
+
+
+def preset_task_dir(project_cfg, preset):
+    root = os.path.dirname(os.path.dirname(project_cfg))
+    return os.path.join(root, *preset["path"].split("/"))
+
+
+def preset_scene(project_cfg, preset):
+    """DERNIERE version de la scene du preset ('' si elle n'existe plus : renommee,
+    deplacee, supprimee)."""
+    task_dir = preset_task_dir(project_cfg, preset)
+    try:
+        names = [
+            n
+            for n in os.listdir(task_dir)
+            if n.lower().endswith(PICKER_EXT) and scene_family(n) == preset["scene"]
+        ]
+    except OSError:
+        return ""
+    return os.path.join(task_dir, max(names, key=scene_version)) if names else ""
+
+
+def preset_where(preset):
+    """'Shots/MASTER/MT0010 · CFX/CFX' : ou vit la scene, pour l'infobulle."""
+    path = preset["path"]
+    if path.startswith("03_Production/"):
+        path = path[len("03_Production/") :]
+    return path.replace("/Scenefiles/", " · ")
 
 
 class FxChainDialog(QtWidgets.QDialog):
@@ -1096,6 +1554,460 @@ class ExportPickerDialog(QtWidgets.QDialog):
         ]
 
 
+# --------------------------------------------------------------------------- #
+#  Reglages ferme (Deadline) des renders
+# --------------------------------------------------------------------------- #
+# Les MEMES champs que la fenetre de submit Prism d'un LOP_Render ; l'outil les pose sur
+# le state avant le submit (recache_cfx.apply_farm_settings, --farm-plan). Un champ non
+# coche garde la valeur de la scene (chaque render a les siennes).
+FRAME_PRESETS = (
+    "{first}, {middle}, {last}",
+    "{first}-{last}x10",
+    "{first}-{last}x5",
+    "{first}",
+    "{last}",
+)
+_FRAME_EXPR_RE = re.compile(r"^[\d\s,x:-]+$")
+
+
+def check_frame_expression(expr):
+    """Message d'erreur si l'expression de frames est inutilisable, sinon ''. Tokens
+    {first} {middle} {last} = la plage de CHAQUE shot (resolus par le moteur)."""
+    if not (expr or "").strip():
+        return "empty frame expression"
+    try:
+        concrete = expr.format(first=1001, middle=1050, last=1100)
+    except (KeyError, IndexError, ValueError) as e:
+        return "unknown token in '%s' (%s) - use {first} {middle} {last}" % (expr, e)
+    if not _FRAME_EXPR_RE.match(concrete):
+        return "invalid frame expression '%s' (e.g. 1001-1100x10, 1001,1050)" % expr
+    return ""
+
+
+def farm_values(data):
+    """Reglages ferme des renders de la scene (status JSON) -> [dict par render]."""
+    out = []
+    for d in data or []:
+        for r in d.get("renders") or []:
+            if isinstance(r.get("farm"), dict):
+                out.append(r["farm"])
+    return out
+
+
+def has_renders(data):
+    return any(d.get("renders") for d in data or [])
+
+
+def pins_text(pins):
+    """{'anm': 'v018'} -> 'anm v018' (lignes epinglees d'un usd_layer_stack)."""
+    return ", ".join("%s %s" % (d, v) for d, v in sorted((pins or {}).items()))
+
+
+def scene_value_text(farms, key, sub=None):
+    """'65' si tous les renders ont la meme valeur, '60-65' / 'a, b' sinon."""
+    vals = []
+    for f in farms:
+        v = f.get(key)
+        if sub is not None and isinstance(v, dict):
+            v = v.get(sub)
+        if v is not None and v not in vals:
+            vals.append(v)
+    if not vals:
+        return "?"
+    if len(vals) == 1:
+        v = vals[0]
+        return ("on" if v else "off") if isinstance(v, bool) else str(v)
+    if all(isinstance(v, int) and not isinstance(v, bool) for v in vals):
+        return "%s-%s (per render)" % (min(vals), max(vals))
+    if all(isinstance(v, bool) for v in vals):
+        return "on for some renders, off for others"
+    return ", ".join(str(v) for v in vals[:4]) + (" ..." if len(vals) > 4 else "")
+
+
+def scene_frames_text(farms):
+    ranges = sorted(
+        {
+            (f["first"], f["last"])
+            for f in farms
+            if f.get("first") is not None and f.get("last") is not None
+        }
+    )
+    if not ranges:
+        return "?"
+    if len(ranges) == 1:
+        return "%s-%s" % ranges[0]
+    return "%s-%s ... %s-%s (each shot its own range)" % (ranges[0] + ranges[-1])
+
+
+def farm_overrides_text(ov):
+    """Resume lisible des overrides (bouton, confirmation). '' = reglages de la scene."""
+    if not ov:
+        return ""
+    parts = []
+    fr = ov.get("frames") or {}
+    if fr.get("mode") == "range":
+        parts.append("frames %s-%s" % (fr.get("start"), fr.get("end")))
+    elif fr.get("mode") == "expression":
+        parts.append("frames %s" % fr.get("expr"))
+    for key, label in (
+        ("priority", "priority %s"),
+        ("chunk", "%s frame(s)/task"),
+        ("machine_limit", "machine limit %s"),
+        ("timeout", "timeout %s min"),
+        ("concurrent", "%s concurrent task(s)"),
+        ("pool", "pool %s"),
+        ("secondary_pool", "secondary pool %s"),
+        ("group", "group %s"),
+    ):
+        if ov.get(key) not in (None, ""):
+            parts.append(label % ov[key])
+    if ov.get("suspended") is not None:
+        parts.append("submitted SUSPENDED" if ov["suspended"] else "not suspended")
+    hp = ov.get("high_prio") or {}
+    if hp:
+        if hp.get("enabled") is False:
+            parts.append("no high-prio job")
+        else:
+            parts.append(
+                "high-prio job %s on %s" % (hp.get("priority"), hp.get("frames"))
+            )
+    return ", ".join(parts)
+
+
+class FarmSettingsDialog(QtWidgets.QDialog):
+    """Reglages ferme des renders soumis par cet update : frames, priorite, chunk, pool,
+    group, machine limit, suspended, job haute prio. Chaque ligne a une case 'override' :
+    decochee = la valeur de la scene (affichee a droite), pour chaque render."""
+
+    def __init__(self, parent, farms, overrides):
+        super().__init__(parent)
+        self.setWindowTitle("Farm settings - renders of this update")
+        self.resize(760, 560)
+        self.farms = farms or []
+        ov = overrides or {}
+        first = self.farms[0] if self.farms else {}
+        v = QtWidgets.QVBoxLayout(self)
+        intro = QtWidgets.QLabel(
+            "Same settings as the Prism submit window of a LOP Render. Tick a setting to "
+            "override it for EVERY render of this update; unticked = each render keeps "
+            "its own value from the scene (shown on the right)."
+        )
+        intro.setWordWrap(True)
+        v.addWidget(intro)
+        if not self.farms:
+            warn = QtWidgets.QLabel(
+                "⚠ The scene's current values are unknown (cached state from an older "
+                "version of the tool): run 'Load Scene (slow)' to read them."
+            )
+            warn.setWordWrap(True)
+            warn.setStyleSheet("color: %s;" % theme_colors(self)["orange"])
+            v.addWidget(warn)
+        grid = QtWidgets.QGridLayout()
+        grid.setColumnStretch(1, 1)
+        v.addLayout(grid)
+        self.rows = {}  # cle -> (case override, [editeurs])
+        gray = theme_colors(self)["gray"]
+
+        def add(key, label, editors, scene_txt, tip=""):
+            r = grid.rowCount()
+            chk = QtWidgets.QCheckBox(label)
+            chk.setToolTip(tip)
+            box = QtWidgets.QHBoxLayout()
+            for e in editors:
+                box.addWidget(e)
+            box.addStretch(1)
+            hint = QtWidgets.QLabel("scene: %s" % scene_txt)
+            hint.setStyleSheet("color: %s;" % gray)
+            hint.setToolTip(tip)
+            grid.addWidget(chk, r, 0)
+            grid.addLayout(box, r, 1)
+            grid.addWidget(hint, r, 2)
+            chk.toggled.connect(lambda on, es=editors: [e.setEnabled(on) for e in es])
+            self.rows[key] = (chk, editors)
+            return chk
+
+        def spin(lo, hi, value):
+            s = QtWidgets.QSpinBox()
+            s.setRange(lo, hi)
+            s.setValue(int(value if value is not None else lo))
+            return s
+
+        # --- frames ---
+        fr = ov.get("frames") or {}
+        self.cb_frames = QtWidgets.QComboBox()
+        self.cb_frames.addItems(["Range", "Expression"])
+        self.sp_start = spin(0, 99999, fr.get("start", first.get("first") or 1001))
+        self.sp_end = spin(0, 99999, fr.get("end", first.get("last") or 1100))
+        self.ed_expr = QtWidgets.QLineEdit(fr.get("expr") or FRAME_PRESETS[0])
+        self.ed_expr.setMinimumWidth(200)
+        self.ed_expr.setToolTip(
+            "{first} {middle} {last} = the frame range of EACH shot.\n"
+            "e.g. {first}-{last}x10 = every 10th frame, {first}, {middle}, {last} = 3 "
+            "frames per shot. Plain frames work too: 1001-1050, 1001,1020."
+        )
+        self.b_expr = QtWidgets.QToolButton()
+        self.b_expr.setText("▾")
+        self.b_expr.setToolTip("Presets")
+        menu = QtWidgets.QMenu(self.b_expr)
+        for p in FRAME_PRESETS:
+            menu.addAction(p).triggered.connect(
+                lambda _=False, p=p: self.ed_expr.setText(p)
+            )
+        self.b_expr.setMenu(menu)
+        self.b_expr.setPopupMode(QtWidgets.QToolButton.InstantPopup)
+        self.lbl_to = QtWidgets.QLabel("to")
+        if fr.get("mode") == "expression":
+            self.cb_frames.setCurrentIndex(1)
+        self.cb_frames.currentIndexChanged.connect(self._sync_frames)
+        add(
+            "frames",
+            "Frames",
+            [
+                self.cb_frames,
+                self.sp_start,
+                self.lbl_to,
+                self.sp_end,
+                self.ed_expr,
+                self.b_expr,
+            ],
+            scene_frames_text(self.farms),
+            "Range = the same frames for every shot. Expression = tokens resolved per "
+            "shot.",
+        )
+        # --- reglages du job ---
+        self.sp_prio = spin(0, 100, ov.get("priority", first.get("priority") or 50))
+        add(
+            "priority",
+            "Priority",
+            [self.sp_prio],
+            scene_value_text(self.farms, "priority"),
+        )
+        self.sp_chunk = spin(1, 9999, ov.get("chunk", first.get("chunk") or 1))
+        add(
+            "chunk",
+            "Frames per task",
+            [self.sp_chunk],
+            scene_value_text(self.farms, "chunk"),
+            "Tile renders need 1 frame per task (studio sanity check TileFramePerTask).",
+        )
+        self.sp_machines = spin(
+            0, 99999, ov.get("machine_limit", first.get("machine_limit") or 0)
+        )
+        add(
+            "machine_limit",
+            "Machine limit",
+            [self.sp_machines],
+            scene_value_text(self.farms, "machine_limit"),
+            "0 = no limit.",
+        )
+        self.sp_timeout = spin(1, 9999, ov.get("timeout", first.get("timeout") or 180))
+        add(
+            "timeout",
+            "Task timeout (min)",
+            [self.sp_timeout],
+            scene_value_text(self.farms, "timeout"),
+        )
+        self.sp_concurrent = spin(
+            1, 99, ov.get("concurrent", first.get("concurrent") or 1)
+        )
+        add(
+            "concurrent",
+            "Concurrent tasks",
+            [self.sp_concurrent],
+            scene_value_text(self.farms, "concurrent"),
+        )
+
+        def choices(key, single):
+            items = []
+            for f in self.farms:
+                for x in f.get(key) or []:
+                    if x not in items:
+                        items.append(x)
+            cur = ov.get(single) or first.get(single)
+            if cur and cur not in items:
+                items.append(cur)
+            cb = QtWidgets.QComboBox()
+            cb.addItems(items)
+            if cur:
+                cb.setCurrentText(cur)
+            return cb
+
+        self.cb_pool = choices("pools", "pool")
+        add("pool", "Pool", [self.cb_pool], scene_value_text(self.farms, "pool"))
+        self.cb_pool2 = choices("pools", "secondary_pool")
+        add(
+            "secondary_pool",
+            "Secondary pool",
+            [self.cb_pool2],
+            scene_value_text(self.farms, "secondary_pool"),
+        )
+        self.cb_group = choices("groups", "group")
+        husk = next(
+            (f.get("husk_group_env") for f in self.farms if f.get("husk_group_env")), ""
+        )
+        add(
+            "group",
+            "Group",
+            [self.cb_group],
+            scene_value_text(self.farms, "group")
+            + (" (husk render job: %s, set by the project)" % husk if husk else ""),
+            (
+                "The project forces the group of the husk RENDER job (%s, "
+                "PRISM_HUSK_DEADLINE_GROUP): this group applies to the other jobs."
+                % husk
+            )
+            if husk
+            else "",
+        )
+        self.cb_susp = QtWidgets.QComboBox()
+        self.cb_susp.addItems(["No", "Yes"])
+        self.cb_susp.setCurrentIndex(
+            1 if ov.get("suspended", first.get("suspended")) else 0
+        )
+        add(
+            "suspended",
+            "Submit suspended",
+            [self.cb_susp],
+            scene_value_text(self.farms, "suspended"),
+            "Yes = the jobs wait in Deadline until someone resumes them.",
+        )
+        hp = ov.get("high_prio") or {}
+        fhp = first.get("high_prio") or {}
+        self.cb_hp = QtWidgets.QComboBox()
+        self.cb_hp.addItems(["Off", "On"])
+        self.cb_hp.setCurrentIndex(1 if hp.get("enabled", fhp.get("enabled")) else 0)
+        self.sp_hp = spin(0, 100, hp.get("priority", fhp.get("priority") or 70))
+        self.ed_hp = QtWidgets.QLineEdit(
+            hp.get("frames") or fhp.get("frames") or FRAME_PRESETS[0]
+        )
+        self.ed_hp.setMinimumWidth(170)
+        self.ed_hp.setToolTip(
+            "Frames rendered first in a separate high-priority job ({first} {middle} "
+            "{last} of the job's frames)."
+        )
+        hp_txt = scene_value_text(self.farms, "high_prio", "enabled")
+        if hp_txt == "on":
+            hp_txt = "on, priority %s on %s" % (
+                scene_value_text(self.farms, "high_prio", "priority"),
+                scene_value_text(self.farms, "high_prio", "frames"),
+            )
+        add(
+            "high_prio",
+            "High-prio job",
+            [self.cb_hp, QtWidgets.QLabel("priority"), self.sp_hp, self.ed_hp],
+            hp_txt,
+            "Prism's 'Submit High Prio Job': the chosen frames go first, at their own "
+            "priority; the rest follows in the normal job.",
+        )
+        # etat initial des cases : coche = override deja demande
+        for key, (chk, editors) in self.rows.items():
+            on = key in ov
+            chk.setChecked(on)
+            for e in editors:
+                e.setEnabled(on)
+        self._sync_frames()
+
+        self.lbl_error = QtWidgets.QLabel("")
+        self.lbl_error.setStyleSheet("color: %s;" % theme_colors(self)["red"])
+        v.addWidget(self.lbl_error)
+        v.addStretch(1)
+        row = QtWidgets.QHBoxLayout()
+        b_reset = QtWidgets.QPushButton("Use the scene's settings")
+        b_reset.setToolTip("Untick everything: each render keeps its own settings.")
+        b_reset.clicked.connect(
+            lambda: [c.setChecked(False) for c, _ in self.rows.values()]
+        )
+        row.addWidget(b_reset)
+        row.addStretch(1)
+        v.addLayout(row)
+        bb = QtWidgets.QDialogButtonBox(
+            QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel
+        )
+        bb.accepted.connect(self._accept)
+        bb.rejected.connect(self.reject)
+        v.addWidget(bb)
+
+    def _sync_frames(self, *_):
+        expr = self.cb_frames.currentIndex() == 1
+        for w in (self.sp_start, self.lbl_to, self.sp_end):
+            w.setVisible(not expr)
+        for w in (self.ed_expr, self.b_expr):
+            w.setVisible(expr)
+
+    def overrides(self):
+        """Les reglages coches -> dict pour --farm-plan (cles absentes = scene)."""
+        on = {k for k, (chk, _) in self.rows.items() if chk.isChecked()}
+        ov = {}
+        if "frames" in on:
+            if self.cb_frames.currentIndex() == 1:
+                ov["frames"] = {
+                    "mode": "expression",
+                    "expr": self.ed_expr.text().strip(),
+                }
+            else:
+                ov["frames"] = {
+                    "mode": "range",
+                    "start": self.sp_start.value(),
+                    "end": self.sp_end.value(),
+                }
+        for key, w in (
+            ("priority", self.sp_prio),
+            ("chunk", self.sp_chunk),
+            ("machine_limit", self.sp_machines),
+            ("timeout", self.sp_timeout),
+            ("concurrent", self.sp_concurrent),
+        ):
+            if key in on:
+                ov[key] = w.value()
+        for key, w in (
+            ("pool", self.cb_pool),
+            ("secondary_pool", self.cb_pool2),
+            ("group", self.cb_group),
+        ):
+            if key in on and w.currentText():
+                ov[key] = w.currentText()
+        if "suspended" in on:
+            ov["suspended"] = self.cb_susp.currentIndex() == 1
+        if "high_prio" in on:
+            enabled = self.cb_hp.currentIndex() == 1
+            ov["high_prio"] = (
+                {
+                    "enabled": True,
+                    "priority": self.sp_hp.value(),
+                    "frames": self.ed_hp.text().strip(),
+                }
+                if enabled
+                else {"enabled": False}
+            )
+        return ov
+
+    def validation_error(self):
+        ov = self.overrides()
+        fr = ov.get("frames") or {}
+        if fr.get("mode") == "range" and fr["start"] > fr["end"]:
+            return "Frames: the start (%s) is after the end (%s)." % (
+                fr["start"],
+                fr["end"],
+            )
+        if fr.get("mode") == "expression":
+            err = check_frame_expression(fr["expr"])
+            if err:
+                return "Frames: %s." % err
+        hp = ov.get("high_prio") or {}
+        if hp.get("enabled"):
+            err = check_frame_expression(hp.get("frames"))
+            if err:
+                return "High-prio job: %s." % err
+        return ""
+
+    def _accept(self):
+        err = self.validation_error()
+        if err:
+            self.lbl_error.setText(err)
+            return
+        self.accept()
+
+
 class CheckDragTableWidget(QtWidgets.QTableWidget):
     """Table ou un clic-glisse sur la colonne des cases (col 0) 'peint' les cases : la
     1ere case cliquee bascule, et toutes les cases survolees pendant le drag prennent LE
@@ -1173,7 +2085,15 @@ class Main(QtWidgets.QMainWindow):
             icon = r"R:\devToto\shelf\icons\cache_updater.png"
         if os.path.exists(icon):
             self.setWindowIcon(QtGui.QIcon(icon))
-        self.resize(1240, 900)
+        # 1560x900 + 20 % (panneau de scenes en 3 colonnes), borne a l'ecran : plus
+        # grande que l'ecran, la fenetre passerait sous la barre des taches
+        w, h = 1872, 1080
+        scr = self.screen() or QtGui.QGuiApplication.primaryScreen()
+        if scr is not None:
+            avail = scr.availableGeometry()
+            w = min(w, int(avail.width() * 0.95))
+            h = min(h, int(avail.height() * 0.95))
+        self.resize(w, h)
         self.proc = None
         self._buf = ""  # canal COMPLET (parsing STATUS_JSON / SAVED_SCENE)
         self._linebuf = ""  # lignes partielles pour le filtre du log humain
@@ -1198,6 +2118,10 @@ class Main(QtWidgets.QMainWindow):
             None  # (chemin, mtime) deja lu -> pas de relecture au keystroke
         )
         self._export_selection = None  # uuids coches (None = defaut de la scene)
+        # reglages ferme demandes pour les renders de CET update (overrides, {} = ceux
+        # de la scene). En memoire seulement : la prio se decide au moment d'envoyer.
+        self._farm_overrides = {}
+        self._farm_for = None  # cle de la scene pour laquelle ils ont ete choisis
         self._run_scene = ""  # scene du run Maya en cours (le champ peut bouger)
         # feedback "ca tourne" : phase courante + chrono + spinner (tick toutes les 200ms)
         self._phase = ""
@@ -1263,6 +2187,11 @@ class Main(QtWidgets.QMainWindow):
         prow.addWidget(self.lbl_project, 1)
         lay.addLayout(prow)
 
+        # --- zone de travail, a droite du panneau de scenes (monte plus bas) ---
+        work = QtWidgets.QWidget()
+        wlay = QtWidgets.QVBoxLayout(work)
+        wlay.setContentsMargins(0, 0, 0, 0)
+
         # --- scene row ---
         bar = QtWidgets.QHBoxLayout()
         bar.addWidget(QtWidgets.QLabel("Scene:"))
@@ -1273,19 +2202,25 @@ class Main(QtWidgets.QMainWindow):
         )
         self.ed_hip.textChanged.connect(self._on_hip_changed)
         bar.addWidget(self.ed_hip, 1)
+        # presets PARTAGES par projet ("cfx brush" -> derniere version de la scene, sans
+        # savoir ou elle est) : menu relu a chaque ouverture (cf read_presets)
+        self._presets_prj = None  # projet dont le compte de presets est affiche
+        self.b_presets = QtWidgets.QPushButton("★ Presets")
+        self.presets_menu = QtWidgets.QMenu(self.b_presets)
+        self.presets_menu.setToolTipsVisible(True)
+        self.presets_menu.aboutToShow.connect(self._fill_presets_menu)
+        # sous-menu cree UNE fois et re-rattache a chaque ouverture : un addMenu(titre)
+        # par ouverture empile des QMenu (clear() ne les detruit pas) et PySide finit
+        # par renvoyer un wrapper deja detruit (vu en test)
+        self.presets_delete_menu = QtWidgets.QMenu("Delete preset", self.presets_menu)
+        self.b_presets.setMenu(self.presets_menu)
+        bar.addWidget(self.b_presets)
         # la scene OUVERTE dans Houdini (passee par le shelf au lancement), en un clic :
         # le champ, lui, reprend la derniere scene memorisee
         self.b_from_scene = QtWidgets.QPushButton("From scene")
         self.b_from_scene.clicked.connect(self._use_houdini_scene)
         bar.addWidget(self.b_from_scene)
         self._refresh_from_scene_button()
-        b_proj = QtWidgets.QPushButton("Choose scene...")
-        b_proj.setToolTip(
-            "Pick a scene (.hip or .ma) from the selected Prism project "
-            "(seq / shot / dept / task)."
-        )
-        b_proj.clicked.connect(self._choose_scene)
-        bar.addWidget(b_proj)
         b_hip = QtWidgets.QPushButton("Browse...")
         b_hip.setToolTip("Pick a .hip or a .ma anywhere on the filesystem.")
         b_hip.clicked.connect(self._pick_hip)
@@ -1294,7 +2229,7 @@ class Main(QtWidgets.QMainWindow):
         b_set.setToolTip("hython path, node convention, reset (persisted).")
         b_set.clicked.connect(self._open_settings)
         bar.addWidget(b_set)
-        lay.addLayout(bar)
+        wlay.addLayout(bar)
 
         # --- layer + actions row ---
         top = QtWidgets.QHBoxLayout()
@@ -1355,7 +2290,7 @@ class Main(QtWidgets.QMainWindow):
         )
         top.addWidget(self.lbl_mode)
         top.addStretch(1)
-        lay.addLayout(top)
+        wlay.addLayout(top)
 
         # --- table (clic-glisse pour cocher/decocher plusieurs shots) ---
         self.table = CheckDragTableWidget(0, 6)
@@ -1411,6 +2346,13 @@ class Main(QtWidgets.QMainWindow):
         self.b_exports = QtWidgets.QPushButton("")
         self.b_exports.clicked.connect(self._open_exports_dialog)
         save_row.addWidget(self.b_exports)
+        # scene Houdini avec des LOP_Render : reglages ferme des renders soumis (frames,
+        # prio, chunk, pool...). Invisible sans render.
+        self.lbl_farm = QtWidgets.QLabel("Farm:")
+        save_row.addWidget(self.lbl_farm)
+        self.b_farm = QtWidgets.QPushButton("")
+        self.b_farm.clicked.connect(self._open_farm_dialog)
+        save_row.addWidget(self.b_farm)
         save_row.addStretch(1)
         top_lay.addLayout(save_row)
         self.lbl_save_mode = QtWidgets.QLabel("")
@@ -1448,13 +2390,30 @@ class Main(QtWidgets.QMainWindow):
         self.log.setFont(f)
         self.log.setLineWrapMode(QtWidgets.QPlainTextEdit.NoWrap)
 
+        wlay.addWidget(top_w, 1)
+
+        # --- panneau de scenes a gauche, TOUJOURS ouvert (remplace 'Choose scene...') ---
+        self.browser = SceneBrowser()
+        self.browser.setMinimumWidth(360)  # 3 colonnes lisibles
+        self.browser.sceneChosen.connect(self._on_browser_scene)
+        self.hsplit = QtWidgets.QSplitter(Qt.Horizontal)
+        self.hsplit.addWidget(self.browser)
+        self.hsplit.addWidget(work)
+        self.hsplit.setChildrenCollapsible(False)
+        # la fenetre s'agrandit -> c'est la table qui en profite, pas le panneau
+        self.hsplit.setStretchFactor(0, 0)
+        self.hsplit.setStretchFactor(1, 1)
+        bw = self._browser_width()
+        self.hsplit.setSizes([bw, max(600, self.width() - bw)])
+        self.hsplit.splitterMoved.connect(self._on_hsplit_moved)
+
         self.split = QtWidgets.QSplitter(Qt.Vertical)
-        self.split.addWidget(top_w)
+        self.split.addWidget(self.hsplit)
         self.split.addWidget(self.log)
         self.split.setChildrenCollapsible(False)
         self.split.setStretchFactor(0, 3)
         self.split.setStretchFactor(1, 2)
-        self.split.setSizes([520, 340])
+        self.split.setSizes([580, 300])
         lay.addWidget(self.split, 1)
 
         self.status = self.statusBar()
@@ -1464,8 +2423,8 @@ class Main(QtWidgets.QMainWindow):
         self.progress.hide()
         self.status.addPermanentWidget(self.progress)
         self.status.showMessage(
-            "Ready. Pick a .hip, then 'Load Scene (slow)' — or 'Reload (fast)' if it "
-            "was already loaded once."
+            "Ready. Pick a scene on the left, then 'Load Scene (slow)' — or "
+            "'Reload (fast)' if it was already loaded once."
         )
 
     def _set_headers(self):
@@ -1610,27 +2569,198 @@ class Main(QtWidgets.QMainWindow):
         stored = self.settings.value("shots_root", "")
         return stored if self._is_prism_shots(stored) else ""
 
-    def _choose_scene(self):
-        """Choisit une scene DANS le projet Prism selectionne (cascade seq/shot/dept/
-        task). N'ouvre JAMAIS l'explorateur Windows (c'est le role de 'Browse...') :
-        si aucun projet n'est selectionne/detecte, on le dit clairement."""
-        root = self._shots_root()
-        if not root or not os.path.isdir(root):
-            QtWidgets.QMessageBox.information(
+    # ------------------------------------------ panneau de scenes (gauche)
+    def _on_browser_scene(self, path):
+        """Clic sur une scene du panneau : elle va dans le champ, comme avec 'Browse...'
+        (tout le reste suit via _on_hip_changed)."""
+        if path and path != self.ed_hip.text().strip():
+            self.ed_hip.setText(path)
+
+    def _sync_browser(self):
+        """Le panneau suit le projet et la scene du champ, sans rien recharger. Shots
+        ET Assets : une scene multi-shots peut etre rangee cote Assets."""
+        roots = self._entity_roots()
+        # dernier recours de _shots_root (aucun projet ni scene) : le dernier projet vu
+        shots = roots.get("Shots") or roots.get("Assets")
+        if shots and shots != self.settings.value("shots_root", ""):
+            self.settings.setValue("shots_root", shots)
+        self.browser.set_roots(roots)
+        self.browser.select_path(self.ed_hip.text().strip())
+
+    def _browser_width(self):
+        """Largeur du panneau memorisee (par utilisateur), bornee. Defaut = les 3
+        colonnes (Sequence/Shot | Department | Task) lisibles sans les elargir."""
+        try:
+            w = int(self.settings.value("browser_width", 580))
+        except (TypeError, ValueError):
+            w = 580
+        return max(420, min(w, 1100))
+
+    def _on_hsplit_moved(self, *_):
+        self.settings.setValue("browser_width", self.hsplit.sizes()[0])
+
+    # --------------------------------------- presets de scene (par projet)
+    def _refresh_presets_button(self, prj, presets=None):
+        """Nombre de presets dans le bouton. Le json n'est relu que si le projet a
+        change : _on_hip_changed tourne a chaque frappe dans le champ."""
+        if presets is None:
+            if prj == self._presets_prj:
+                return
+            presets = read_presets(prj) if prj else []
+        self._presets_prj = prj
+        n = len(presets)
+        self.b_presets.setText("★ Presets (%d)" % n if n else "★ Presets")
+        self.b_presets.setToolTip(
+            "Scenes saved for everyone on %s: one click loads their LATEST version.\n"
+            "'Save current scene as preset...' adds the scene of the field."
+            % project_name_of(prj)
+            if prj
+            else "Pick a project first: presets are shared per project."
+        )
+
+    def _fill_presets_menu(self):
+        """Relu a CHAQUE ouverture : un preset enregistre par un collegue apparait tout
+        de suite, sans relancer l'outil."""
+        m = self.presets_menu
+        m.clear()
+        prj = self._project()
+        if not prj:
+            m.addAction("No project selected/detected").setEnabled(False)
+            return
+        presets = read_presets(prj)
+        self._refresh_presets_button(prj, presets)
+        if not presets:
+            m.addAction("No preset on %s yet" % project_name_of(prj)).setEnabled(False)
+        for p in presets:
+            a = m.addAction(p["name"])
+            a.setToolTip(
+                "%s  ·  %s (latest version)\nsaved by %s, %s"
+                % (
+                    preset_where(p),
+                    p["scene"],
+                    p.get("created_by") or "?",
+                    p.get("created_at") or "?",
+                )
+            )
+            a.triggered.connect(lambda _=False, p=p: self._load_preset(p))
+        m.addSeparator()
+        save = m.addAction("Save current scene as preset...")
+        save.setEnabled(self._preset_candidate() is not None)
+        save.triggered.connect(self._save_preset)
+        if presets:
+            dm = self.presets_delete_menu
+            dm.clear()
+            for p in presets:
+                a = dm.addAction(p["name"])
+                a.triggered.connect(lambda _=False, p=p: self._delete_preset(p))
+            m.addMenu(dm)
+
+    def _preset_candidate(self):
+        """(projet, scene) si le champ montre une scene DU projet courant, sinon None."""
+        prj = self._project()
+        scene = self.ed_hip.text().strip()
+        if (
+            not prj
+            or not os.path.isfile(scene)
+            or not scene.lower().endswith(PICKER_EXT)
+        ):
+            return None
+        try:
+            make_preset(prj, "", scene, "")
+        except ValueError:
+            return None
+        return prj, scene
+
+    def _load_preset(self, preset):
+        """La DERNIERE version de la scene du preset va dans le champ ; le reste suit
+        comme pour un clic dans le panneau."""
+        prj = self._project()
+        scene = preset_scene(prj, preset) if prj else ""
+        if not scene:
+            QtWidgets.QMessageBox.warning(
                 self,
-                "No project",
-                "No project selected/detected.\n\nPick a project in the 'Project' "
-                "dropdown at the top first — or use 'Browse...' to open a .hip directly.",
+                "Preset",
+                "Preset '%s': no '%s' scene left in\n%s\n\nIt was probably renamed or "
+                "moved: delete the preset and save it again."
+                % (
+                    preset["name"],
+                    preset["scene"],
+                    preset_task_dir(prj, preset) if prj else "?",
+                ),
             )
             return
-        self.settings.setValue("shots_root", root)
-        # Shots ET Assets : une scene multi-shots peut etre rangee cote Assets
-        dlg = ProjectPicker(
-            self, self._entity_roots() or root, current=self.ed_hip.text().strip()
+        self.ed_hip.setText(scene)
+
+    def _save_preset(self):
+        cand = self._preset_candidate()
+        if cand is None:
+            QtWidgets.QMessageBox.information(
+                self, "Preset", "Pick a scene of the project first (left panel)."
+            )
+            return
+        prj, scene = cand
+        name, ok = QtWidgets.QInputDialog.getText(
+            self,
+            "Save scene preset",
+            "Preset name, shared with everyone on %s.\n"
+            "It always opens the LATEST version of %s."
+            % (project_name_of(prj), scene_family(scene)),
+            text=scene_family(scene),
         )
-        ok = dlg.exec() if hasattr(dlg, "exec") else dlg.exec_()
-        if ok and dlg.selected_path():
-            self.ed_hip.setText(dlg.selected_path())
+        name = (name or "").strip()
+        if not ok or not name:
+            return
+        # relu juste avant d'ecrire : un collegue a pu en ajouter un entre-temps
+        presets = read_presets(prj)
+        new = make_preset(prj, name, scene, os.environ.get("USERNAME") or "?")
+        same = [i for i, p in enumerate(presets) if p["name"].lower() == name.lower()]
+        if same:
+            yes = QtWidgets.QMessageBox.StandardButton.Yes
+            msg = "A preset '%s' already exists on %s. Replace it?" % (
+                presets[same[0]]["name"],
+                project_name_of(prj),
+            )
+            if QtWidgets.QMessageBox.question(self, "Preset", msg) != yes:
+                return
+            presets[same[0]] = new  # garde sa place dans le menu
+        else:
+            presets.append(new)
+        if self._write_presets(prj, presets):
+            self.status.showMessage(
+                "Preset '%s' saved for everyone on %s." % (name, project_name_of(prj))
+            )
+
+    def _delete_preset(self, preset):
+        prj = self._project()
+        if not prj:
+            return
+        yes = QtWidgets.QMessageBox.StandardButton.Yes
+        msg = (
+            "Delete the preset '%s' for everyone on %s?\n(the scene is not touched)"
+            % (
+                preset["name"],
+                project_name_of(prj),
+            )
+        )
+        if QtWidgets.QMessageBox.question(self, "Preset", msg) != yes:
+            return
+        name = preset["name"].lower()
+        presets = [p for p in read_presets(prj) if p["name"].lower() != name]
+        if self._write_presets(prj, presets):
+            self.status.showMessage("Preset '%s' deleted." % preset["name"])
+
+    def _write_presets(self, prj, presets):
+        try:
+            write_presets(prj, presets)
+        except Exception as ex:
+            QtWidgets.QMessageBox.warning(
+                self,
+                "Preset",
+                "Couldn't write the presets:\n%s\n\n%s" % (presets_path(prj), ex),
+            )
+            return False
+        self._refresh_presets_button(prj, presets)
+        return True
 
     # ------------------------------------------------------ project selector
     def _fill_projects_combo(self):
@@ -1697,7 +2827,10 @@ class Main(QtWidgets.QMainWindow):
         self._render_selection = {}
         self._cache_selection = {}
         self._export_selection = None
+        if self._farm_overrides and self._farm_for != self._scene_key():
+            self._farm_overrides = {}  # reglages ferme decides pour une AUTRE scene
         prj = self._project()
+        self._refresh_presets_button(prj)
         auto = not (
             self.cfg.get("project_override", "")
             and os.path.isfile(self.cfg["project_override"])
@@ -1712,6 +2845,7 @@ class Main(QtWidgets.QMainWindow):
             self.lbl_project.setText("no project selected/detected")
             self.lbl_project.setStyleSheet("color: %s;" % c["orange"])
             self.lbl_project.setToolTip("")
+        self._sync_browser()
         self._apply_kind(scene_kind(self.ed_hip.text().strip()))
         if self._kind == "maya":
             self._read_maya_scene()  # lecture texte du .ma : instantane, sans Maya
@@ -1781,6 +2915,7 @@ class Main(QtWidgets.QMainWindow):
             self.table.setColumnCount(6)
             self._set_headers()
         self._apply_save_mode(self._save_mode())  # le texte de consequence change
+        self._update_farm_button()
         self._update_apply_count()
 
     def _set_headers_maya(self):
@@ -1853,7 +2988,7 @@ class Main(QtWidgets.QMainWindow):
                 stale = bool(d.get("stale"))
                 missing = d.get("missing") or []
                 it0 = QtWidgets.QTableWidgetItem(
-                    (d.get("asset") or d.get("id", "")) + ("  ⚠" if missing else "")
+                    rig_label(d.get("id", "")) + ("  ⚠" if missing else "")
                 )
                 it0.setData(Qt.UserRole, d.get("id", ""))
                 it0.setFlags(it0.flags() | Qt.ItemIsUserCheckable)
@@ -2213,6 +3348,11 @@ class Main(QtWidgets.QMainWindow):
         self.b_save_ver.setEnabled(not on)  # le mode ne change pas en cours de run
         self.b_save_keep.setEnabled(not on)
         self.b_exports.setEnabled(not on and bool(self._maya_exports))
+        self.b_farm.setEnabled(not on)
+        # changer de scene en plein run melangerait les resultats (sidecar, scene
+        # sauvee) : le panneau et les presets se figent avec le reste
+        self.browser.setEnabled(not on)
+        self.b_presets.setEnabled(not on)
         if msg:
             self.status.showMessage(msg)
 
@@ -2616,7 +3756,7 @@ class Main(QtWidgets.QMainWindow):
         if verdict == "refused_lost_anim":
             # QUEL rig perd de l'anim : l'artiste peut le decocher et relancer le reste
             losers = [
-                "%s (%d)" % ((r.get("id") or "?").split("|")[0], r["lost"])
+                "%s (%d)" % (rig_label(r.get("id")), r["lost"])
                 for r in rigs
                 if (r.get("lost") or 0) > 0
             ]
@@ -2769,7 +3909,13 @@ class Main(QtWidgets.QMainWindow):
                 % (
                     self._pretty_layer(name),
                     self._pair(e.get("consumed"), e.get("latest")),
-                    "   OUTDATED" if e.get("stale") else "",
+                    "   OUTDATED"
+                    if e.get("stale")
+                    else (
+                        "   PINNED %s in the USD Layer Stack" % e["pinned"]
+                        if e.get("pinned")
+                        else ""
+                    ),
                 )
             )
         for name in c["ignored"]:
@@ -2778,13 +3924,21 @@ class Main(QtWidgets.QMainWindow):
             )
         tip = "\n".join(tips)
         if len(c["present"]) <= 1:
-            return (
-                self._pair(
-                    ld.get("consumed") or d.get("consumed_version"),
-                    ld.get("latest") or d.get("latest_version"),
-                ),
-                tip,
-            )
+            consumed = ld.get("consumed") or d.get("consumed_version")
+            latest = ld.get("latest") or d.get("latest_version")
+            if ld.get("pinned"):
+                # 'v018 (pinned, latest v020)' : le retard se voit, mais il est voulu
+                return (
+                    "%s (pinned%s)"
+                    % (
+                        consumed or ld["pinned"],
+                        (", latest %s" % latest)
+                        if ld.get("pinned_behind") and latest
+                        else "",
+                    ),
+                    tip,
+                )
+            return self._pair(consumed, latest), tip
         n_stale = sum(1 for _, e in c["present"] if e.get("stale"))
         return "%d/%d stale" % (n_stale, len(c["present"])), tip
 
@@ -2869,7 +4023,9 @@ class Main(QtWidgets.QMainWindow):
         c = self._combined(d)
         if not c["present"] or c["stale"] is None:
             return "no_layer"
-        return "outdated" if c["stale"] else "uptodate"
+        if c["stale"]:
+            return "outdated"
+        return "pinned" if c["pinned"] else "uptodate"
 
     def _populate(self, data, preserve=False):
         """Remplit la table. `preserve=True` = on garde les cases COCHEES a l'identique.
@@ -2929,6 +4085,14 @@ class Main(QtWidgets.QMainWindow):
                     cell = QtWidgets.QTableWidgetItem(str(v))
                     if c == 1 and layer_tip:  # detail par layer + ce qui est ignore
                         cell.setToolTip(layer_tip)
+                    if c == 2 and state == "pinned":
+                        cell.setToolTip(
+                            "Pinned in the USD Layer Stack (%s): a newer version exists, "
+                            "but the pin is the artist's choice.\nThe tool never "
+                            "unpins: a re-cache keeps the pinned version. Unpin it in "
+                            "Houdini to move to the latest." % pins_text(d.get("pins"))
+                        )
+                        cell.setForeground(QtGui.QColor(col["sop"]))
                     if c == 5 and self._caches_for(d):  # Caches cell -> clickable
                         sel = self._cache_sel_for(d)
                         cell.setToolTip(
@@ -2968,7 +4132,38 @@ class Main(QtWidgets.QMainWindow):
         finally:
             self._populating = False
         self._update_ignored_note(data)
+        self._update_farm_button()
         self._update_apply_count()
+
+    # --------------------------------------------- reglages ferme des renders
+    def _update_farm_button(self):
+        """Bouton 'Farm' : visible pour une scene Houdini qui a des LOP_Render ; dit si
+        les renders partent avec les reglages de la scene ou avec des overrides."""
+        show = (not self._is_maya()) and has_renders(self._data)
+        self.lbl_farm.setVisible(show)
+        self.b_farm.setVisible(show)
+        if not show:
+            return
+        txt = farm_overrides_text(self._farm_overrides)
+        self.b_farm.setText(
+            ("%d override(s)  ▸" % len(self._farm_overrides))
+            if txt
+            else "scene settings  ▸"
+        )
+        self.b_farm.setToolTip(
+            "Farm settings of the renders submitted by this update:\n"
+            + (txt if txt else "each render keeps its own settings from the scene")
+            + "\n(click to change: frames, priority, frames per task, pool, group...)"
+        )
+
+    def _open_farm_dialog(self):
+        dlg = FarmSettingsDialog(self, farm_values(self._data), self._farm_overrides)
+        ok = dlg.exec() if hasattr(dlg, "exec") else dlg.exec_()
+        if not ok:
+            return
+        self._farm_overrides = dlg.overrides()
+        self._farm_for = self._scene_key()
+        self._update_farm_button()
 
     # ------------------------------------------------------- FX SOP cache chain
     def _sop_summary(self, d):
@@ -3009,8 +4204,7 @@ class Main(QtWidgets.QMainWindow):
     def _scene_key(self):
         """Cle scene (basename sans extension ni version) : la selection suit les
         version-ups (SQ0020-SH0090_FX_v024.hip -> SQ0020-SH0090_FX)."""
-        base = os.path.splitext(os.path.basename(self.ed_hip.text().strip()))[0]
-        return re.sub(r"_v\d+", "", base) or base
+        return scene_family(self.ed_hip.text().strip())
 
     # --- persistance PARTAGEE : un json a cote du hip -> memes params pour tous ---
     def _hip_sidecar_path(self):
@@ -3561,7 +4755,7 @@ class Main(QtWidgets.QMainWindow):
             lines.append(
                 "  • %s   %s%s"
                 % (
-                    r.get("asset"),
+                    rig_label(r.get("id")),
                     self._pair(r.get("version"), r.get("latest")),
                     "" if r.get("stale") else "   (up to date: nothing to swap)",
                 )
@@ -3656,6 +4850,21 @@ class Main(QtWidgets.QMainWindow):
         n_render_shots = len(rplan)
         n_jobs = sum(len(v) for v in rplan.values())
         extra_msg = ""
+        idset = set(ids)
+        pinned = [
+            "%s (%s)" % (d.get("shot", "?"), pins_text(d.get("pins")))
+            for d in self._data
+            if d.get("id") in idset and d.get("pins")
+        ]
+        if pinned:
+            # le pin est un choix de l'artiste : l'outil ne le retire pas -> on DIT que
+            # le cache gardera ces versions, pour ne pas croire a une mise a jour
+            extra_msg += (
+                "\n(PINNED layers kept: %s. The re-cache uses the pinned versions; "
+                "unpin them in Houdini to move to the latest.)"
+                % ", ".join(pinned[:4])
+                + (" ..." if len(pinned) > 4 else "")
+            )
         if n_cache_off:
             extra_msg += (
                 "\n(%d shot(s) with NO cache ticked: the import is bumped and the "
@@ -3672,6 +4881,18 @@ class Main(QtWidgets.QMainWindow):
                 "%d job(s)) with their selected layers, after the re-cache.)"
                 % (n_render_shots, n_jobs)
             )
+            farm_txt = farm_overrides_text(self._farm_overrides)
+            extra_msg += "\nFarm: %s." % (
+                farm_txt or "each render keeps its own settings from the scene"
+            )
+            if not os.environ.get("PRISM_LAUNCH_ENV"):
+                # un submit GUI copie dans les jobs l'env du profil du launcher Prism
+                # (OCIO...) : il n'arrive ici que si l'outil vient du shelf Houdini
+                extra_msg += (
+                    "\n⚠ Tool not launched from Houdini: the farm jobs won't get the "
+                    "environment of your Prism launcher profile (OCIO...). Prefer the "
+                    "Houdini shelf button."
+                )
         msg = "Update %d shot(s)?\n\n%s\n\n%s%s" % (
             len(ids),
             ", ".join(labels),
@@ -3712,6 +4933,19 @@ class Main(QtWidgets.QMainWindow):
                 extra += ["--render-plan", rf]
             except Exception as ex:
                 self.log.appendPlainText("\n[UI] render-plan write failed: %s" % ex)
+        if rplan and self._farm_overrides:
+            ff = os.path.join(tempfile.gettempdir(), "lop_update_cache_farm_plan.json")
+            try:
+                with open(ff, "w", encoding="utf-8") as fh:
+                    json.dump({"*": self._farm_overrides}, fh)
+                extra += ["--farm-plan", ff]
+            except Exception as ex:
+                # pas de reglages demandes = on ne soumet PAS avec ceux de la scene
+                # en silence : on s'arrete
+                QtWidgets.QMessageBox.warning(
+                    self, "Farm settings", "Couldn't write the farm settings:\n%s" % ex
+                )
+                return
         self._start("apply", extra)
 
 

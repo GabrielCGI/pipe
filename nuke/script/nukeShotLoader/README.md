@@ -44,6 +44,12 @@ qui lit soit le live, soit un rendu précédent de cette Write (le cache).
   d'expressions, internes des groupes). Noms, positions, Dots et stamps n'y entrent pas.
   Les liens écrits `parent.Node.knob` / `root.Node.knob` sont suivis comme `Node.knob`
   (ex. une caméra d'overscan qui suit la caméra du shot).
+- Le hash ne doit dépendre que du script : `in_colorspace` / `out_colorspace` (et
+  `ocioColorspace` des Writes), que Nuke 15 dérive de `colorspace` / `raw` dans la GUI
+  seulement — quand il calcule le Read —, sont figés à leur valeur au chargement
+  (`scene_linear`). Avant (≤ 2.2.3) une précomp rendue depuis une session qui avait affiché
+  ses Reads repassait Live à la réouverture (SQ0010-SH0010, 15/10). Vérifié : mêmes hashes
+  qu'avant au chargement, et identiques entre terminal et GUI après calcul de tous les arbres.
 - Après une modification en amont, le watcher repasse le switch en live (debounce 400 ms).
   Ces changements automatiques restent hors de l'historique d'undo.
 
@@ -162,6 +168,7 @@ revérifiées sans dialog, qui ne revient que si l'une d'elles échoue encore.
 | règle | détecte | fix |
 |-------|---------|-----|
 | Fichiers hors réseau | nodes qui lisent un fichier (Read, DeepRead, caméra, géo…) hors de `I:/`, `R:/`, `B:/` (`Config.NETWORK_ROOTS`) | copie dans `<shot>/Renders/fromLocal/<node>/` puis repath |
+| Caméras désynchronisées | caméra à *read from file* dont les knobs (ce que rendent le viewer et la farm) ne sont pas la caméra de son fichier USD : restée sur une version précédente, ou sur celle du preset de scène | bake de la caméra du fichier dans les knobs (*read from file* décoché) ; les précomps en aval repassent Live une fois |
 | Majuscules dans les Expression | identifiants en majuscules dans les Expression / DeepExpression (`B`, `A`… lus de travers par Nuke sur la première frame de chaque tâche farm) | passage en minuscules ; références de nodes et de knobs, variables temporaires, fonctions et TCL intacts |
 | Expressions de knob en erreur | expression que Nuke ne peut pas évaluer (node ou knob renommé / supprimé, `parent.` inexistant, faute de syntaxe, TCL en erreur) : elle vaut 0 sans rien dire, dans le viewer comme sur la farm | expression retirée (*No animation*) : le knob garde ce 0 |
 | Bounding box | bbox en entrée d'une Write rendue dépassant le format de plus de 20 % (`Config.BBOX_TOLERANCE`) | Crop au format inséré avant la Write |
@@ -216,9 +223,30 @@ l'import Nuke, pour la même orientation.
 Ce que le bake ne reproduit pas est refusé, node intact, et confié à l'import de Nuke
 (panneau ouvert le temps du chargement, sans popup) : formats autres qu'USD, stage Z-up,
 transformation avec shear ou miroir, lens shift, caméra orthographique, plusieurs caméras
-sans sélection. Une caméra déjà figée dans un script existant n'est pas détectée (le
-Loader la voit à jour) : la repasser par un Update, ou ouvrir ses propriétés et presser
-*Reload*.
+sans sélection.
+
+Caméras figées des scripts existants (chargées avant la 2.2.0, ou à la main) : rien ne les
+montre jusqu'au jour où leur panneau est ouvert — il suffit de l'ouvrir pour que Nuke
+importe le fichier ; la caméra change alors et toutes les précomps en aval repassent Live
+(SQ0030-SH0130 le 15/10 : `CAM_SHOT` sur la v004 contenait les courbes de la v002 depuis le
+31/08 ; ouvrir son panneau a fait passer les 6 précomps en Live, à raison). `out_of_sync()`
+compare la caméra des knobs à celle de son fichier, frame par frame, avec la tolérance du
+bake : transformation locale calculée par Nuke (`matrix` : un Axis parent n'y change rien),
+puis focal, apertures, near / far, focus, f-stop. Il dit où elles divergent et quelle version
+du fichier les knobs contiennent (les autres dossiers `v###`, du plus récent au plus ancien).
+Réponse en cache tant que le fichier et ces knobs ne changent pas (le Loader la redemande à
+chaque refresh) ; un fichier que le bake ne lit pas (Z-up…) n'est pas jugé.
+
+- Loader : une caméra à jour mais désynchronisée passe en *Out of sync with v004 (holds
+  v002)* (le détail dans l'infobulle du statut, `» to update` sur le node) ; Update la bake
+  depuis sa propre version.
+- Sanity check : règle *Cameras out of sync with their file*, fix = bake.
+
+Relevé du 15/10 sur frederic_2603 (dernière compo de chaque shot) : 50 caméras à *read from
+file*, 8 désynchronisées, toutes en amont de la WriteCompo — SQ0020-SH0080 (contient la
+v006, fichier v007), SQ0040-SH0190 (v004 / v005, écart sur la frame 1000 seulement), et six
+shots qui contiennent la caméra du preset `00_Pipeline/PresetScenes/nuke/emptySceneNuke_FRED_COMPO*.nk`
+(celle d'un autre shot) : SH0340, SH0350, SH0360, SH0405, SH0460, SH0570.
 
 **Versions** : un rendu va toujours dans la version qui suit le plus haut dossier
 `v###` existant, quelle que soit la valeur du knob `version` de la Write : pas de trou
@@ -304,8 +332,8 @@ Non, rien n'est rendu ; Oui, conversion du script puis rendu.
 |----------|---------|-------|
 | `static` | tous les modules compilent | < 1 s |
 | `release` | `release.py` sur une copie sandbox du pipeline (vrai v1 + templates) : simulation sans effet, deploy, re-deploy sans changement, rollback depuis le share à l'identique (fichiers + templates), retour en avant, historique | ~4 s |
-| `camera` | caméras USD (générées par le test) bakées dans les knobs d'une Camera3 sur Nuke réel : valeurs du fichier, transformation recalculée par Nuke, rotations au-delà de 180° et au gimbal, plages de frames, fichiers refusés (node intact), repli sur l'import Nuke | ~2 s |
-| `sanity` | règles du sanity check sur Nuke réel : détection, copie + repath, minuscules, expressions en erreur (et expressions valides non signalées), Crop, bbox lue sur les knobs == bbox mesurée par Nuke | ~2 s |
+| `camera` | caméras USD (générées par le test) bakées dans les knobs d'une Camera3 sur Nuke réel : valeurs du fichier, transformation recalculée par Nuke, rotations au-delà de 180° et au gimbal, plages de frames, fichiers refusés (node intact), repli sur l'import Nuke ; caméras désynchronisées de leur fichier (autre version, preset, lens seul, Axis parent, cache, fichiers non jugés) | ~2 s |
+| `sanity` | règles du sanity check sur Nuke réel : détection, copie + repath, caméra désynchronisée + bake, minuscules, expressions en erreur (et expressions valides non signalées), Crop, bbox lue sur les knobs == bbox mesurée par Nuke | ~2 s |
 | `core`   | Python pur : fichier de prefs partagé (jamais réécrit s'il est illisible), écritures JSON atomiques avec nouvelles tentatives, manifests et numéros de version, couverture de frames | ~3 s |
 | `engine` | moteur précomp sur Nuke réel : upgrade v1, stabilité du hash entre sessions, soumission annulée / refusée / envoyée (faux submitter Deadline), rendu, cache == live, invalidation sélective, templates | ~1 min 40 |
 | `farm`   | simulation Deadline dans l'environnement pipeline : un process Nuke par job, scène copiée comme le path mapping, `-t` + `nuke.execute` en stdin (batch mode) et `-x`, jobs enchaînés par render_order, logs scannés avec les motifs d'erreur du plugin Deadline ; preuves par falsification que les jobs dépendants lisent les caches ; scripts v1 rendus après déploiement | ~2 min 30 |

@@ -36,6 +36,44 @@ _PRODUCT_RE = re.compile(r"([^/\\]+)[/\\]v(\d+)[/\\][^/\\]+$")
 # version d'une scene : .hip* (inchange : pas d'ancre, comme avant) OU .ma/.mb (Maya)
 _HIP_VER_RE = re.compile(r"_v(\d+)\.(?:hip|m[ab]$)", re.IGNORECASE)
 _MAYA_EXT = (".ma", ".mb")
+# departement d'un produit layer : _layer_<dept>_<element> (meme regle que le HDA
+# usd_layer_stack, `_PRODUCT_RE` de son PythonModule)
+_LAYER_DEPT_RE = re.compile(r"^_layer_([^_]+)_.+$", re.IGNORECASE)
+
+
+# --------------------------------------------------------------------------- #
+#  Pins du HDA usd_layer_stack (2.1+)
+#
+#  Une ligne du HDA peut etre EPINGLEE sur une version (`pin#` = 'v018' au lieu de
+#  'latest'). Son rescan (OnLoaded, bouton Reload) laisse alors cette ligne sur sa
+#  version : c'est un choix de l'artiste. Un layer epingle en retard n'est donc PAS
+#  perime pour l'outil -- le re-cacher redonnerait la meme version, et le shot resterait
+#  'OUTDATED' pour toujours. Il a son propre etat ('pinned'), l'outil ne depingle jamais.
+#  Le pin porte sur la LIGNE (un departement) : il fige le master ET les elements qu'il
+#  reference (_layer_anm_master v018 -> son _layer_anm_main est celui de la v018).
+# --------------------------------------------------------------------------- #
+def layer_dept(name):
+    """'_layer_anm_master' -> 'anm' ; None si le nom n'est pas un layer de departement."""
+    m = _LAYER_DEPT_RE.match(name or "")
+    return m.group(1).lower() if m else None
+
+
+def mark_pins(layers, pins):
+    """Marque les layers des departements epingles (`pins` = {dept: 'vNNN'}).
+    Un layer epingle : e['pinned'] = 'vNNN' ; s'il est en retard sur le disque,
+    e['pinned_behind'] = True et e['stale'] = False (pas perime : choix de l'artiste).
+    Modifie et retourne `layers`."""
+    if not layers or not pins:
+        return layers
+    for name, e in layers.items():
+        pin = pins.get(layer_dept(name) or "")
+        if not pin or not isinstance(e, dict):
+            continue
+        e["pinned"] = pin
+        if e.get("stale"):
+            e["stale"] = False
+            e["pinned_behind"] = True
+    return layers
 
 
 def _head(path, size=131072):
@@ -200,7 +238,7 @@ def refresh_entry(entry):
             "latest": _vlabel(lv),
             "stale": bool(c is not None and lv is not None and lv > c),
         }
-    entry["layers"] = layers
+    entry["layers"] = mark_pins(layers, entry.get("pins"))
     m = _VDIR_RE.search(os.path.dirname(imp))
     entry["stack_consumed"] = (
         _vlabel(int(m.group(1))) if m else entry.get("stack_consumed")
@@ -236,10 +274,13 @@ def combine_layers(layers, tracked, mode="or"):
     Logique a 3 etats (None = indecidable, ex releve manquant) :
       - 'or'  : perime si AU MOINS UN des presents est perime
       - 'and' : perime si TOUS les presents le sont
-    Retourne {present, ignored, consumed, latest, stale, deciding}."""
+    Un layer EPINGLE en retard (cf mark_pins) n'est pas perime : il ressort dans
+    `pinned` pour que le shot puisse l'afficher.
+    Retourne {present, ignored, pinned, consumed, latest, stale, deciding}."""
     out = {
         "present": [],
         "ignored": [],
+        "pinned": [],
         "consumed": None,
         "latest": None,
         "stale": None,
@@ -254,6 +295,7 @@ def combine_layers(layers, tracked, mode="or"):
             out["present"].append((name, e))
     if not out["present"]:
         return out
+    out["pinned"] = [name for name, e in out["present"] if e.get("pinned_behind")]
     flags = [e.get("stale") for _, e in out["present"]]
     if mode == "and":
         out["stale"] = None if any(f is None for f in flags) else all(flags)
@@ -326,7 +368,9 @@ def refresh_entry_from_record(entry, record):
             "latest": _vlabel(lv),
             "stale": bool(lv is not None and lv > v),
         }
-    entry["layers"] = layers
+    # pins : releves sur le node au dernier Load Scene (snapshot) -- le disque seul ne
+    # peut pas les voir
+    entry["layers"] = mark_pins(layers, entry.get("pins"))
     prods = record_products(record)
     prod = next(iter(prods), None)
     pv_rec = prods.get(prod)

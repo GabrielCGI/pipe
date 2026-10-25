@@ -21,6 +21,7 @@
     <memberToolshelf name="maestro"/>
     <memberToolshelf name="shelf_cfx_test"/>
     <memberToolshelf name="everything_assets"/>
+    <memberToolshelf name="model"/>
   </shelfSet>
 
   <toolshelf name="illogicSolaris" label="Illogic Solaris">

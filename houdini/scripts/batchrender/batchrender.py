@@ -464,7 +464,19 @@ class BatchSelector(QtWidgets.QDialog):
             n for n in node.inputs() if n.type().name() == "editcontextoptions"
         ]
         if not len(edit_context_option):
-            return
+            merges = [
+                n for n in node.inputs() if n.type().name() == "merge"
+            ]
+            if not len(merges):
+                return
+            
+            edit_context_option = []
+            for merge in merges:
+                edit_context_option += [
+                    n for n in merge.inputs() if n.type().name() == "editcontextoptions"
+                ]
+            if not len(edit_context_option):
+                return
         edit_context_option: hou.LopNode = edit_context_option[0]
         for i in range(1, edit_context_option.parm("optioncount").eval() + 1):
             name_context = edit_context_option.parm(f"optionname{i}")

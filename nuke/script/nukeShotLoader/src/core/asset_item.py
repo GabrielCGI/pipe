@@ -57,6 +57,7 @@ class AssetItem:
         self.has_update = False
         self.update_target_version = None
         self.has_duplicates = False          # several loader Reads match this asset
+        self.camera_mismatch = None          # camera whose knobs aren't its file's camera (str)
         self.status_text = "Not loaded"
         self.status_color = None
 

@@ -17,15 +17,26 @@ So the Shot Loader does not rely on that import:
                   Nuke's own evaluation of the knobs before it returns.
     load_file()   Nuke's import, with the panel opened for it: only for
                   files bake_file() declines (NotBakeable).
+
+Cameras loaded before that (Shot Loader <= 2.1, or by hand) can still hold
+an older version's camera, or the one of the scene preset they were created
+from. Nothing shows it until the panel gets opened, which loads the file:
+the camera changes and every cache downstream goes Live.
+
+    out_of_sync() a camera with `read from file` whose knobs hold another
+                  camera than its file: where they part, and which version
+                  of the file they hold (sanity check, Loader status)
 """
 
 import math
 import os
 import re
+from dataclasses import dataclass
 from typing import List, Optional, Tuple
 
 import nuke
 
+from ..core.versions import version_int
 from .utils import silent_popups
 
 _USD_EXTENSIONS = (".usd", ".usda", ".usdc", ".usdz")
@@ -237,6 +248,173 @@ def _verify(camera, frames, matrices):
                 if abs(got - expected) > 1e-3 + 1e-5 * abs(expected):
                     raise NotBakeable(f"knobs don't reproduce the file's transform at frame {frame} "
                                       f"({got:.6f} for {expected:.6f})")
+
+
+# ---------------------------------------------------------------------------
+# A camera reading its file: do its knobs hold that file's camera?
+# ---------------------------------------------------------------------------
+
+_CAMERA_CLASSES = ("Camera", "Camera2", "Camera3", "Camera4")
+_TRANSLATION = (3, 7, 11)       # `matrix` knob fields (row * 4 + column) of the translation
+_VERSION_DIR_RE = re.compile(r"^v\d{3,4}$", re.IGNORECASE)
+# Knobs the comparison reads: a change of any of them invalidates a cached answer.
+_COMPARED = _TRANSFORM + ("rot_order", "xform_order", "useMatrix", "matrix", "scene_graph") + tuple(
+    name for name, _ in _LENS)
+_sync_cache = {}
+
+
+def _tolerance(expected: float) -> float:
+    return 1e-3 + 1e-5 * abs(expected)      # same as _verify()
+
+
+@dataclass
+class Mismatch:
+    """Where the knobs and the file part: the first frame that differs
+    (`detail`) and the span of the frames that do."""
+    detail: str
+    first: int
+    last: int
+    frames: int
+    total: int
+
+    def __str__(self):
+        if self.total > 1 and self.frames == self.total:
+            return f"{self.detail} (every frame)"
+        if self.frames == 1:
+            return self.detail
+        if self.frames == self.last - self.first + 1:
+            return f"{self.detail} (frames {self.first}-{self.last})"
+        return f"{self.detail} ({self.frames} frames between {self.first} and {self.last})"
+
+
+@dataclass
+class OutOfSync:
+    path: str
+    mismatch: Mismatch
+    held: Optional[str]     # version folder whose camera the knobs hold, None: none of them
+
+    def __str__(self):
+        holds = (f"the knobs hold {self.held}'s camera" if self.held
+                 else "the knobs hold none of its versions' camera")
+        return f"not the camera of {os.path.basename(self.path)}: {self.mismatch}; {holds}"
+
+
+def read_file(camera) -> Optional[str]:
+    """USD file a camera node loads into its knobs (`read from file` on),
+    None for anything else."""
+    try:
+        if camera.Class() not in _CAMERA_CLASSES:
+            return None
+        gate = camera.knob("read_from_file")
+        if gate is None or not gate.value() or camera.knob("file") is None:
+            return None
+        path = nuke.filename(camera) or camera["file"].value()
+    except Exception:
+        return None
+    path = (path or "").replace("\\", "/")
+    return path if path.lower().endswith(_USD_EXTENSIONS) else None
+
+
+def file_mismatch(camera, path: str) -> Optional[Mismatch]:
+    """How the camera held in the knobs differs from the camera of `path`,
+    None when they are the same. Compared on every frame of the file, with
+    bake_file()'s tolerance: the transform Nuke evaluates from the knobs
+    (local `matrix`: a parent Axis is not the file's business), then the
+    lens. Raises NotBakeable for a file not read the way bake_file reads it."""
+    frames, matrices, lenses = _read_usd(path.replace("\\", "/"), _selected_prims(camera))
+    local = camera["matrix"]
+    found, first, last, count = None, None, None, 0
+    for index, matrix in enumerate(matrices):
+        frame = frames[index] if frames else int(nuke.frame())
+        detail = _frame_difference(camera, local, frame, matrix, lenses[index])
+        if detail is None:
+            continue
+        count += 1
+        last = frame
+        if found is None:
+            found, first = detail, frame
+    if found is None:
+        return None
+    return Mismatch(found, first, last, count, len(matrices))
+
+
+def _frame_difference(camera, local, frame, matrix, lens) -> Optional[str]:
+    """What differs on one frame: position, then orientation / scale, then
+    the lens knobs. None when nothing does."""
+    got = [local.getValueAt(frame, index) for index in range(16)]
+    expected = [matrix[index % 4][index // 4] for index in range(16)]   # USD rows <-> knob columns
+    if any(abs(got[i] - expected[i]) > _tolerance(expected[i]) for i in _TRANSLATION):
+        offset = math.sqrt(sum((got[i] - expected[i]) ** 2 for i in _TRANSLATION))
+        return f"position off by {offset:.4g} at frame {frame}"
+    if any(abs(g - e) > _tolerance(e) for g, e in zip(got, expected)):
+        return f"orientation differs at frame {frame}"
+    for name, read in _LENS:
+        value, wanted = camera[name].getValueAt(frame), read(lens)
+        if abs(value - wanted) > _tolerance(wanted):
+            return f"{name} {value:.4g} instead of {wanted:.4g} at frame {frame}"
+    return None
+
+
+def held_version(camera, path: str) -> Optional[str]:
+    """Version folder next to the one of `path` ('v002') whose camera the
+    knobs hold, newest first; None when they hold none of them."""
+    folder = os.path.dirname(path.replace("\\", "/"))
+    parent, current = os.path.dirname(folder), os.path.basename(folder)
+    if not _VERSION_DIR_RE.match(current):
+        return None
+    try:
+        names = sorted((n for n in os.listdir(parent) if _VERSION_DIR_RE.match(n) and n != current),
+                       key=version_int, reverse=True)
+    except OSError:
+        return None
+    for name in names:
+        candidate = _usd_file(os.path.join(parent, name))
+        if candidate is None:
+            continue
+        try:
+            if file_mismatch(camera, candidate) is None:
+                return name
+        except NotBakeable:
+            continue
+    return None
+
+
+def _usd_file(folder: str) -> Optional[str]:
+    try:
+        names = sorted(n for n in os.listdir(folder) if n.lower().endswith(_USD_EXTENSIONS))
+    except OSError:
+        return None
+    return os.path.join(folder, names[0]).replace("\\", "/") if names else None
+
+
+def out_of_sync(camera) -> Optional[OutOfSync]:
+    """A camera with `read from file` whose knobs hold another camera than
+    its file — what Nuke would load over them the first time the camera's
+    properties panel exists. None when they agree, and for files that can't
+    be compared (not USD, unreadable, outside what bake_file reads). Cached
+    on the node, the file and the compared knobs: the Loader asks on every
+    refresh."""
+    path = read_file(camera)
+    if path is None:
+        return None
+    try:
+        stat = os.stat(path)
+        knobs = "\n".join(camera[name].toScript() for name in _COMPARED if camera.knob(name) is not None)
+        key = (camera.fullName(), path, stat.st_mtime, stat.st_size, hash(knobs))
+    except Exception:
+        return None
+    if key in _sync_cache:
+        return _sync_cache[key]
+    try:
+        mismatch = file_mismatch(camera, path)
+        result = None if mismatch is None else OutOfSync(path, mismatch, held_version(camera, path))
+    except NotBakeable as reason:
+        print(f"[cameras] {camera.name()}: not compared with {os.path.basename(path)} ({reason})")
+        result = None
+    if len(_sync_cache) > 64:
+        _sync_cache.clear()
+    _sync_cache[key] = result
+    return result
 
 
 def _snapshot(camera) -> dict:

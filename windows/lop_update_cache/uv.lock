@@ -4,7 +4,7 @@ requires-python = ">=3.11"
 
 [[package]]
 name = "lop-update-cache"
-version = "1.0.24"
+version = "1.0.26"
 source = { editable = "." }
 dependencies = [
     { name = "pyside6" },
